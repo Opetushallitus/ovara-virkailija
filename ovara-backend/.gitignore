@@ -33,5 +33,3 @@ build/
 .vscode/
 
 .mise.toml
-
-local-dev.properties
