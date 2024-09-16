@@ -2,6 +2,7 @@ package fi.oph.ovara.backend.repository
 
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import fi.oph.ovara.backend.domain.Toteutus
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
@@ -15,16 +16,19 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 @Component
-case class OvaraDatabase(environment: Environment) {
+class OvaraDatabase(environment: Environment) {
+  @Value("${spring.datasource.url}")
+  val url2: String = null
 
-  //@Value("${spring.datasource.url}")
-  var url: String = environment.getProperty("spring.datasource.url")
+/*  @Value("${spring.datasource.url}")
+  val url: String = null*/
+  val url: String = environment.getProperty("spring.datasource.url")
 
   //@Value("${spring.datasource.username")
-  var username: String = environment.getProperty("spring.datasource.username")
+  val username: String = environment.getProperty("spring.datasource.username")
 
   //@Value("${spring.datasource.password}")
-  var password: String = environment.getProperty("spring.datasource.password")
+  val password: String = environment.getProperty("spring.datasource.password")
 
   private def hikariConfig: HikariConfig = {
     val config = new HikariConfig()
@@ -52,7 +56,7 @@ case class OvaraDatabase(environment: Environment) {
   ))
 
   def selectWithOid() = {
-    sql"""select * from pub.pub_dim_toteutus where oid = '1.2.246.562.17.00000000000000003709'""".as[Toteutus]
+    sql"""select * from pub.pub_dim_toteutus where toteutus_oid = '1.2.246.562.17.00000000000000003709'""".as[Toteutus]
   }
 
   def run(): Vector[Toteutus] = {

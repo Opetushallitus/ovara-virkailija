@@ -8,13 +8,13 @@ import org.springframework.http.ResponseEntity
 import org.assertj.core.api.Assertions.assertThat
 
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT) class HelloControllerITest {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT) class OvaraBackendApplicationITests {
   @Autowired private val template: TestRestTemplate = null
 
   @Test
   @throws[Exception]
-  def getHello(): Unit = {
-    val response: ResponseEntity[String] = template.getForEntity("/", classOf[String])
-    assertThat(response.getBody).isEqualTo("Greetings from Spring Boot!")
+  def getResponseFromHealthcheck(): Unit = {
+    val response: ResponseEntity[String] = template.getForEntity("/api/ping", classOf[String])
+    assertThat(response.getBody).isEqualTo("Ovara application is running!")
   }
 }

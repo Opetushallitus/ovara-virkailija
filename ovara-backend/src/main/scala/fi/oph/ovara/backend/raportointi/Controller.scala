@@ -7,19 +7,18 @@ import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, Rest
 import java.util.Properties
 
 @RestController
-@RequestMapping("/")
+@RequestMapping(path = Array("api"))
 class Controller {
   @Autowired
+  val db: OvaraDatabase = null
 
-  @GetMapping("/")
-  def index = "Greetings from index!"
+  @GetMapping(path = Array("ping"))
+  def ping = "Ovara application is running!"
 
-  //Health check api
-  @GetMapping(path = Array("/hello"))
-  def hello: String = {
-    "Hello World."
+  @GetMapping(path = Array("/koulutukset-toteutukset-hakukohteet"))
+  def toteutus = {
+    println("!!!!")
+    println(db.url)
+    println("!!!!")
   }
-
-  //@GetMapping(path = Array("/korkeakoulujen-koulutukset-ja-toteutukset"))
-  //val toteutukset = OvaraDatabase
 }
