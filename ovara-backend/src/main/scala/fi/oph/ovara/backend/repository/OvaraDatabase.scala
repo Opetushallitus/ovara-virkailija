@@ -1,14 +1,11 @@
 package fi.oph.ovara.backend.repository
 
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
-import fi.oph.ovara.backend.domain.Toteutus
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
-import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
-import slick.jdbc.GetResult
+import slick.dbio.DBIO
 import slick.jdbc.JdbcBackend.Database
-import slick.jdbc.PostgresProfile.api.*
 import slick.util.AsyncExecutor
 
 import java.util.concurrent.TimeUnit
@@ -16,20 +13,9 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 @Component
-class OvaraDatabase(environment: Environment) {
-  @Value("${spring.datasource.url}")
-  val url2: String = null
-
-/*  @Value("${spring.datasource.url}")
-  val url: String = null*/
-  val url: String = environment.getProperty("spring.datasource.url")
-
-  //@Value("${spring.datasource.username")
-  val username: String = environment.getProperty("spring.datasource.username")
-
-  //@Value("${spring.datasource.password}")
-  val password: String = environment.getProperty("spring.datasource.password")
-
+class OvaraDatabase(@Value("${spring.datasource.url}") url: String,
+                    @Value("${spring.datasource.username}") username: String,
+                    @Value("${spring.datasource.password}") password: String) {
   private def hikariConfig: HikariConfig = {
     val config = new HikariConfig()
     config.setJdbcUrl(url)
@@ -51,18 +37,10 @@ class OvaraDatabase(environment: Environment) {
     )
   }
 
-  implicit val getToteutusResult: GetResult[Toteutus] = GetResult(r => Toteutus(
-    oid = r.nextString()
-  ))
-
-  def selectWithOid() = {
-    sql"""select * from pub.pub_dim_toteutus where toteutus_oid = '1.2.246.562.17.00000000000000003709'""".as[Toteutus]
-  }
-
-  def run(): Vector[Toteutus] = {
+  def run[R](operations: DBIO[R]) = {
     println("RUN")
     Await.result(
-      db.run(selectWithOid()),
+      db.run(operations),
       Duration(100, TimeUnit.SECONDS)
     )
   }

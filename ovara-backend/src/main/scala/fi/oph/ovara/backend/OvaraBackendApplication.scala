@@ -1,13 +1,10 @@
 package fi.oph.ovara.backend;
 
-import fi.oph.ovara.backend.domain.Toteutus
 import fi.oph.ovara.backend.repository.OvaraDatabase
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.{ApplicationArguments, ApplicationRunner, CommandLineRunner, SpringApplication}
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.context.ApplicationContext
+import org.springframework.boot.{ApplicationArguments, ApplicationRunner, SpringApplication}
 import org.springframework.context.annotation.Bean
-import org.springframework.core.env.Environment
 
 
 object OvaraBackendApplication {
@@ -22,11 +19,8 @@ class OvaraBackendApplication {
   val db: OvaraDatabase = null
 
   @Bean
-  def applicationRunner(environment: Environment) =
+  def applicationRunner() =
     new ApplicationRunner:
       override def run(args: ApplicationArguments): Unit =
         println("STARTING APPLICATION RUNNER")
-        println(db)
-        println(db.url)
-        println(db.url2)
 }

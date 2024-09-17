@@ -1,14 +1,13 @@
 package fi.oph.ovara.backend.raportointi
 
 import fi.oph.ovara.backend.repository.OvaraDatabase
+import fi.oph.ovara.backend.service.CommonService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RestController}
-
-import java.util.Properties
+import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
 
 @RestController
 @RequestMapping(path = Array("api"))
-class Controller {
+class Controller(commonService: CommonService) {
   @Autowired
   val db: OvaraDatabase = null
 
@@ -16,9 +15,8 @@ class Controller {
   def ping = "Ovara application is running!"
 
   @GetMapping(path = Array("/koulutukset-toteutukset-hakukohteet"))
-  def toteutus = {
-    println("!!!!")
-    println(db.url)
-    println("!!!!")
-  }
+  def getKoulutuksetToteutuksetHakukohteet(@RequestParam oid: String) =
+    val res = commonService.getToteutus(oid)
+    println(res)
+    res
 }
