@@ -1,0 +1,19 @@
+remote-ip := "10.20.89.144"
+
+_default:
+    just --list --unsorted
+
+mfa-pallero-bastion:
+    ssh pallero-bastion
+
+connect-to-remote-db:
+    sshuttle -l 0.0.0.0 -r pallero-bastion {{remote-ip}}/32
+
+dump-remote-db:
+    docker run --rm -it -v "$(pwd)":/work -w /work postgres pg_dump -h {{remote-ip}} -p 5432 -U app -Fc ovara -n pub -n int -f ovara.dump
+
+start-postgresql:
+    docker compose up
+
+restore-dump:
+    docker run --network container:ovara-postgres --rm -i -v "$(pwd)":/work -w /work postgres pg_restore -h localhost -p 5432 -U app -d ovara < ovara.dump

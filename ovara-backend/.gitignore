@@ -35,3 +35,5 @@ build/
 .mise.toml
 
 application-dev.properties
+
+ovara.dump

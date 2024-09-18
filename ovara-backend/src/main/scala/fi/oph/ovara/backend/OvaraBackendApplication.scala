@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.{ApplicationArguments, ApplicationRunner, SpringApplication}
 import org.springframework.context.annotation.Bean
 
-
 object OvaraBackendApplication {
     def main(args: Array[String]): Unit = {
       SpringApplication.run(classOf[OvaraBackendApplication], args*)
