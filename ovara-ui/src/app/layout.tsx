@@ -6,8 +6,8 @@ import { getLocale, getMessages } from 'next-intl/server';
 import { type OphLanguage } from '@opetushallitus/oph-design-system';
 
 export const metadata: Metadata = {
-  title: "Opiskelijavalinnan raportointi",
-  description: "Opiskelijavalinnan raportointikäyttöliittymä",
+  title: 'Opiskelijavalinnan raportointi',
+  description: 'Opiskelijavalinnan raportointikäyttöliittymä',
 };
 
 export default async function RootLayout({
@@ -31,4 +31,4 @@ export default async function RootLayout({
       </body>
     </html>
   );
-} 
+}

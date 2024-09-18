@@ -1,5 +1,5 @@
-import { OphButton, OphTypography } from "@opetushallitus/oph-design-system";
-import {useTranslations} from 'next-intl';
+import { OphButton, OphTypography } from '@opetushallitus/oph-design-system';
+import { useTranslations } from 'next-intl';
 
 export default function Home() {
   const t = useTranslations('Home');
