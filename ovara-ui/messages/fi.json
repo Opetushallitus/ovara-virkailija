@@ -1,5 +1,6 @@
 {
-  "Home": {
-    "title": "Opiskelijavalinnan raportointi"
+  "Header": {
+    "home": "Opiskelijavalinnan raportointi",
+    "opo-raportti": "OPO-raportti"
   }
 }
