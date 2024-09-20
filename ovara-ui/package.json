@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "touch .env.development.local && NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" node --env-file=.env.development --env-file=.env.development.local dev-server.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prepare": "cd .. && husky ovara-ui/.husky"
+    "prepare": "cd .. && husky ovara-ui/.husky",
+    "create-dev-certs": "mkdir -p certificates && cd certificates && mkcert localhost && mkcert -install"
   },
   "dependencies": {
     "@emotion/cache": "^11.13.1",
@@ -17,8 +18,9 @@
     "@mui/material": "^5.16.7",
     "@mui/material-nextjs": "^5.16.6",
     "@opetushallitus/oph-design-system": "github:opetushallitus/oph-design-system",
-    "next": "^14.2.12",
+    "next": "^14.2.13",
     "next-intl": "^3.19.1",
+    "oph-urls-js": "Opetushallitus/oph-urls-js#master",
     "react": "^18",
     "react-dom": "^18"
   },
@@ -30,6 +32,7 @@
     "eslint-config-next": "14.2.9",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "http-proxy-middleware": "^3.0.2",
     "husky": "^9.1.6",
     "lint-staged": "^15.2.10",
     "postcss": "^8",

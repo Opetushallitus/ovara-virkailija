@@ -4,6 +4,8 @@ import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { type OphLanguage } from '@opetushallitus/oph-design-system';
+import Script from 'next/script';
+import { configuration } from './lib/configuration';
 
 export const metadata: Metadata = {
   title: 'Opiskelijavalinnan raportointi',
@@ -20,6 +22,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale}>
+      <Script src={configuration.raamitUrl} />
       <body>
         <AppRouterCacheProvider>
           <NextIntlClientProvider messages={messages}>
