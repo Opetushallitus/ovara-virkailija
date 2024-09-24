@@ -18,11 +18,14 @@
     "@mui/material": "^5.16.7",
     "@mui/material-nextjs": "^5.16.6",
     "@opetushallitus/oph-design-system": "github:opetushallitus/oph-design-system",
+    "@tanstack/react-query": "^5.56.2",
+    "@tanstack/react-query-devtools": "^5.56.2",
     "next": "^14.2.13",
     "next-intl": "^3.19.1",
     "oph-urls-js": "Opetushallitus/oph-urls-js#master",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "remeda": "^2.14.0"
   },
   "devDependencies": {
     "@types/node": "^20",
