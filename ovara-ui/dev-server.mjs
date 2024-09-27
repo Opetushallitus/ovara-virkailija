@@ -9,6 +9,7 @@ const basePath = nextConfig.basePath;
 const port = parseInt(process.env.PORT, 10) || 3405;
 
 const virkailijaOrigin = process.env.VIRKAILIJA_URL;
+const ovaraBackendOrigin = process.env.OVARA_BACKEND;
 const isProd = process.env.NODE_ENV === 'production';
 
 const app = next({
@@ -21,16 +22,17 @@ const app = next({
 
 const handle = app.getRequestHandler();
 
-const proxy = createProxyMiddleware({
-  autoRewrite: true,
-  headers: {
-    'Access-Control-Allow-Origin': virkailijaOrigin,
-  },
-  changeOrigin: true,
-  cookieDomainRewrite: 'localhost',
-  secure: false,
-  target: virkailijaOrigin,
-});
+const proxy = (origin) =>
+  createProxyMiddleware({
+    autoRewrite: true,
+    headers: {
+      'Access-Control-Allow-Origin': origin,
+    },
+    changeOrigin: true,
+    cookieDomainRewrite: 'localhost',
+    secure: false,
+    target: origin,
+  });
 
 const httpsOptions = {
   key: fs.readFileSync('./certificates/localhost-key.pem'),
@@ -47,7 +49,11 @@ app.prepare().then(() => {
     } else if (pathname.startsWith(basePath)) {
       handle(req, res, parsedUrl);
     } else {
-      proxy(req, res);
+      const targetOrigin =
+        ovaraBackendOrigin && pathname.startsWith('/ovara-backend')
+          ? ovaraBackendOrigin
+          : virkailijaOrigin;
+      proxy(targetOrigin)(req, res);
     }
   })
     .listen(port, () => {

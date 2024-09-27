@@ -17,4 +17,5 @@ export const configuration = {
   kooditUrl: `${DOMAIN}/koodisto-service/rest/codeelement/codes/`,
   asiointiKieliUrl: `${DOMAIN}/oppijanumerorekisteri-service/henkilo/current/asiointiKieli`,
   ohjausparametritUrl: `${DOMAIN}/ohjausparametrit-service/api/v1/rest/parametri`,
+  ovaraBackendPing: `${DOMAIN}/ovara-backend/api/ping`,
 } as const;
