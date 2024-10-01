@@ -34,6 +34,9 @@ const proxy = (origin) =>
     target: origin,
   });
 
+const ovaraBackendProxy = proxy(ovaraBackendOrigin);
+const virkailijaProxy = proxy(virkailijaOrigin);
+
 const httpsOptions = {
   key: fs.readFileSync('./certificates/localhost-key.pem'),
   cert: fs.readFileSync('./certificates/localhost.pem'),
@@ -49,11 +52,11 @@ app.prepare().then(() => {
     } else if (pathname.startsWith(basePath)) {
       handle(req, res, parsedUrl);
     } else {
-      const targetOrigin =
-        ovaraBackendOrigin && pathname.startsWith('/ovara-backend')
-          ? ovaraBackendOrigin
-          : virkailijaOrigin;
-      proxy(targetOrigin)(req, res);
+      if (ovaraBackendOrigin && pathname.startsWith('/ovara-backend')) {
+        ovaraBackendProxy(req, res);
+      } else {
+        virkailijaProxy(req, res);
+      }
     }
   })
     .listen(port, () => {
