@@ -26,7 +26,7 @@ const proxy = (origin) =>
   createProxyMiddleware({
     autoRewrite: true,
     headers: {
-      'Access-Control-Allow-Origin': origin,
+      'Access-Control-Allow-Origin': '*',
     },
     changeOrigin: true,
     cookieDomainRewrite: 'localhost',

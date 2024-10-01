@@ -22,8 +22,8 @@ class OvaraBackendApplication {
   def applicationRunner(): ApplicationRunner =
     new ApplicationRunner:
       override def run(args: ApplicationArguments): Unit =
-        println("STARTING APPLICATION RUNNER")
- 
+        println("STARTED OVARA APPLICATION RUNNER")
+
   @Profile(Array("dev"))
   @Bean
   def corsConfigurer(): WebMvcConfigurer = new WebMvcConfigurer {

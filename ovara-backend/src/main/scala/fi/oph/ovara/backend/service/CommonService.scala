@@ -14,4 +14,3 @@ class CommonService {
     db.run(CommonRepository().selectWithOid(oid))
   }
 }
-

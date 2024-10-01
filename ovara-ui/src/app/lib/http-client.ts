@@ -87,7 +87,9 @@ const responseToData = async <Result = unknown>(res: Response) => {
   }
 };
 
-const LOGIN_MAP = [] as const;
+const LOGIN_MAP = [
+  { urlIncludes: '/ovara-backend', loginUrl: configuration.ovaraBackendLogin },
+] as const;
 
 const makeRequest = async <Result>(request: Request) => {
   const originalRequest = request.clone();

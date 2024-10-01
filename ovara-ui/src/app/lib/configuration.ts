@@ -12,6 +12,7 @@ export const isTesting = process.env.TEST === 'true';
 export const configuration = {
   raamitUrl: `${DOMAIN}/virkailija-raamit/apply-raamit.js`,
   loginUrl: `${DOMAIN}/cas/login`,
+  ovaraBackendLogin: `${DOMAIN}/ovara-backend/auth`,
   sessionCookie: process.env.SESSION_COOKIE || 'JSESSIONID',
   kayttoikeusUrl: `${DOMAIN}/kayttooikeus-service/henkilo/current/omattiedot`,
   kooditUrl: `${DOMAIN}/koodisto-service/rest/codeelement/codes/`,
