@@ -1,7 +1,8 @@
 package fi.oph.ovara.backend.security
 
+import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl
 import org.apereo.cas.client.validation.{Cas20ServiceTicketValidator, TicketValidator}
-import org.springframework.beans.factory.annotation.{Autowired, Value}
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.{Bean, Configuration}
 import org.springframework.core.env.Environment
 import org.springframework.security.authentication.AuthenticationManager
@@ -11,7 +12,6 @@ import org.springframework.security.cas.web.{CasAuthenticationEntryPoint, CasAut
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.core.userdetails.User
 import org.springframework.security.web.SecurityFilterChain
 
 @Configuration
@@ -47,13 +47,7 @@ class SecurityConfig  {
   @Bean
   def casAuthenticationProvider(serviceProperties: ServiceProperties, ticketValidator: TicketValidator): CasAuthenticationProvider = {
     val casAuthenticationProvider = CasAuthenticationProvider()
-    casAuthenticationProvider.setUserDetailsService((username) =>
-      User.builder()
-        .username(username)
-        .password("passvord")
-        .authorities(Array[String]()*)
-        .build()
-    )
+    casAuthenticationProvider.setAuthenticationUserDetailsService(new OphUserDetailsServiceImpl())
     casAuthenticationProvider.setServiceProperties(serviceProperties)
     casAuthenticationProvider.setTicketValidator(ticketValidator)
     casAuthenticationProvider.setKey("ovara-backend")

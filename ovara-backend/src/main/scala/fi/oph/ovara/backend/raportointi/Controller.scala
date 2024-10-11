@@ -6,7 +6,7 @@ import fi.oph.ovara.backend.service.CommonService
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
+import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RestController}
 import org.springframework.web.servlet.view.RedirectView
 
 @RestController
@@ -22,24 +22,14 @@ class Controller(commonService: CommonService) {
 
   @GetMapping(path = Array("ping"))
   def ping = "Ovara application is running!"
-  
+
   @GetMapping(path = Array("user"))
-  def user(@AuthenticationPrincipal userDetails: UserDetails): UserResponse = UserResponse(
-      user = if (userDetails == null) {
-        null
-      } else {
-        UserResponseUser(
-          username = userDetails.getUsername
-        )
-      }
+  def user(@AuthenticationPrincipal userDetails: UserDetails): UserResponse = {
+    UserResponse(
+      user = if (userDetails == null) null else UserResponseUser(userOid = userDetails.getUsername)
     )
+  }
 
   @GetMapping(path = Array("login"))
   def login = RedirectView(ovaraUiUrl)
-
-  @GetMapping(path = Array("/koulutukset-toteutukset-hakukohteet"))
-  def getKoulutuksetToteutuksetHakukohteet(@RequestParam oid: String) =
-    val res = commonService.getToteutus(oid)
-    println(res)
-    res
 }
