@@ -1,0 +1,2 @@
+cd ovara-ui
+./node_modules/.bin/lint-staged

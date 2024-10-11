@@ -1,0 +1,45 @@
+{
+  "name": "ovara-ui",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "touch .env.development.local && NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" node --env-file=.env.development --env-file=.env.development.local dev-server.mjs",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prepare": "cd .. && husky ovara-ui/.husky",
+    "create-dev-certs": "mkdir -p certificates && cd certificates && mkcert localhost && mkcert -install"
+  },
+  "dependencies": {
+    "@emotion/cache": "^11.13.1",
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^6.1.1",
+    "@mui/material": "^6.1.1",
+    "@mui/material-nextjs": "^6.1.1",
+    "@opetushallitus/oph-design-system": "github:opetushallitus/oph-design-system#v0.1.2",
+    "@tanstack/react-query": "^5.56.2",
+    "@tanstack/react-query-devtools": "^5.56.2",
+    "next": "^14.2.13",
+    "next-intl": "^3.19.1",
+    "oph-urls-js": "Opetushallitus/oph-urls-js#master",
+    "react": "^18",
+    "react-dom": "^18",
+    "remeda": "^2.14.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.9",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "http-proxy-middleware": "^3.0.2",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "postcss": "^8",
+    "prettier": "3.3.3",
+    "typescript": "^5"
+  }
+}
