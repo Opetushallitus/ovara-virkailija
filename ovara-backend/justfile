@@ -12,6 +12,9 @@ connect-to-remote-db:
 dump-remote-db:
     docker run --rm -it -v "$(pwd)":/work -w /work postgres pg_dump -h {{remote-ip}} -p 5432 -U app -Fc ovara -n pub -n int -f ovara.dump
 
+watch-dump-progress:
+    watch -n 1 du -h ovara.dump
+
 start-postgresql:
     docker compose up
 
