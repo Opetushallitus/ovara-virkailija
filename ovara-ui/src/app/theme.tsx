@@ -1,51 +1,46 @@
 'use client';
+import * as React from 'react';
+import { MUI_NEXTJS_OVERRIDES } from '@opetushallitus/oph-design-system/next/theme';
+import { createStyled } from '@mui/system';
+import { deepmerge } from '@mui/utils';
+
+import { createOphTheme } from '@opetushallitus/oph-design-system/theme';
+
 import { ophColors } from '@opetushallitus/oph-design-system';
-import { styled as muiStyled } from '@mui/material/styles';
-import {
-  CheckBoxOutlined,
-  IndeterminateCheckBoxOutlined,
-} from '@mui/icons-material';
 
-export { ophColors } from '@opetushallitus/oph-design-system';
+export { ophColors };
 
-const withTransientProps = (propName: string) => !propName.startsWith('$');
+export const DEFAULT_BOX_BORDER = `2px solid ${ophColors.grey100}`;
 
-export const styled: typeof muiStyled = (
-  tag: Parameters<typeof muiStyled>[0],
-  options: Parameters<typeof muiStyled>[1] = {},
-) => {
-  return muiStyled(tag, {
-    shouldForwardProp: withTransientProps,
-    ...options,
-  });
-};
-
-export const THEME_OVERRIDES = {
-  components: {
-    MuiInputBase: {
-      styleOverrides: {
-        root: {
-          borderColor: ophColors.grey800,
-          borderRadius: '2px',
-          height: '48px',
+const theme = createOphTheme({
+  variant: 'oph',
+  overrides: deepmerge(MUI_NEXTJS_OVERRIDES, {
+    components: {
+      MuiButtonBase: {
+        defaultProps: {
+          disableRipple: true,
         },
       },
     },
-    MuiLink: {
-      styleOverrides: {
-        root: {
-          textDecoration: 'none',
-          '&:hover, &:focus': {
-            textDecoration: 'underline',
-          },
-        },
-      },
-    },
-    MuiCheckbox: {
-      defaultProps: {
-        checkedIcon: <CheckBoxOutlined />,
-        indeterminateIcon: <IndeterminateCheckBoxOutlined />,
-      },
-    },
-  },
-};
+  }),
+});
+
+// MUI:sta (Emotionista) puuttuu styled-componentsin .attrs
+// Tällä voi asettaa oletus-propsit ilman, että tarvii luoda välikomponenttia
+export function withDefaultProps<P>(
+  Component: React.ComponentType<P>,
+  defaultProps: Partial<P>,
+  displayName = 'ComponentWithDefaultProps',
+) {
+  const ComponentWithDefaultProps = React.forwardRef<
+    React.ComponentRef<React.ComponentType<P>>,
+    P
+  >((props, ref) => <Component {...defaultProps} {...props} ref={ref} />);
+
+  ComponentWithDefaultProps.displayName = displayName;
+  return ComponentWithDefaultProps;
+}
+
+export const styled = createStyled({ defaultTheme: theme });
+
+export default theme;

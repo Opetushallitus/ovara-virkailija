@@ -15,7 +15,7 @@ export default function HomeLayout({
   const isHome = currentRoute == '/';
   const headerTranslationKey = isHome
     ? 'home'
-    : currentRoute.match(/[a-z]+-?[a-z]*/gm)?.[0];
+    : currentRoute.match(/[a-z]+-?[a-z]*?/gm)?.join('.');
   return (
     <PageLayout
       header={<Header isHome={isHome} title={t(headerTranslationKey)} />}

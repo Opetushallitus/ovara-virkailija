@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 
 import { OphButton, OphTypography } from '@opetushallitus/oph-design-system';
 import { getPing } from '../lib/ovara-backend';
+import { MainContainer } from '../components/main-container';
+import { ListTable } from '../components/table/table';
+import { TOISEN_ASTEEN_RAPORTIT } from '@/app/lib/constants';
 
 type User = {
   userOid: string;
@@ -11,6 +14,14 @@ type User = {
 
 type UserResponse = {
   user: User;
+};
+
+type RaporttiList = {
+  raportit: Array<string>;
+};
+
+const RaporttiLinksList = ({ raportit }: RaporttiList) => {
+  return <ListTable list={raportit} />;
 };
 
 export default function Home() {
@@ -42,12 +53,11 @@ export default function Home() {
   }, []);
 
   return (
-    <div>
-      <main>
-        {user ? <p>Welcome, {user.userOid}!</p> : null}
-        <OphTypography>{message}</OphTypography>
-        <OphButton onClick={onGetPing}>HAE</OphButton>
-      </main>
-    </div>
+    <MainContainer>
+      {user ? <p>Welcome, {user.userOid}!</p> : null}
+      <OphTypography>{message}</OphTypography>
+      <OphButton onClick={onGetPing}>HAE</OphButton>
+      <RaporttiLinksList raportit={TOISEN_ASTEEN_RAPORTIT} />
+    </MainContainer>
   );
 }
