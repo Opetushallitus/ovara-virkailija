@@ -3,8 +3,10 @@ package fi.oph.ovara.backend.security
 import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl
 import org.apereo.cas.client.validation.{Cas20ServiceTicketValidator, TicketValidator}
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.{Bean, Configuration}
+import org.springframework.context.annotation.{Bean, Configuration, Profile}
+import org.springframework.core.annotation.Order
 import org.springframework.core.env.Environment
+import org.springframework.http.HttpStatus
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.cas.ServiceProperties
 import org.springframework.security.cas.authentication.CasAuthenticationProvider
@@ -13,6 +15,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.HttpStatusEntryPoint
 
 @Configuration
 @EnableWebSecurity
@@ -75,13 +78,22 @@ class SecurityConfig  {
     http
       .authorizeHttpRequests(authorizeHttpRequests =>
         authorizeHttpRequests
-          .requestMatchers("/api/user").permitAll()
           .requestMatchers("/api/**").authenticated()
           .anyRequest().permitAll()
       )
       .exceptionHandling(exceptionHandling =>
-        exceptionHandling.authenticationEntryPoint(casAuthenticationEntryPoint)
+        exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
       )
+      .build()
+  }
+
+  @Bean
+  @Order(1)
+  def casLoginFilterChain(http: HttpSecurity, casAuthenticationEntryPoint: CasAuthenticationEntryPoint): SecurityFilterChain = {
+    http
+      .securityMatcher("/api/login")
+      .authorizeHttpRequests(requests => requests.anyRequest.fullyAuthenticated)
+      .exceptionHandling(c => c.authenticationEntryPoint(casAuthenticationEntryPoint))
       .build()
   }
 }

@@ -1,20 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { OphButton, OphTypography } from '@opetushallitus/oph-design-system';
 import { getPing } from '../lib/ovara-backend';
 import { MainContainer } from '../components/main-container';
 import { ListTable } from '../components/table/table';
 import { TOISEN_ASTEEN_RAPORTIT } from '@/app/lib/constants';
-
-type User = {
-  userOid: string;
-};
-
-type UserResponse = {
-  user: User;
-};
+import { useFetchUser } from '@/app/hooks/useFetchUser';
 
 type RaporttiList = {
   raportit: Array<string>;
@@ -26,7 +19,6 @@ const RaporttiLinksList = ({ raportit }: RaporttiList) => {
 
 export default function Home() {
   const [message, setMessage] = useState('testi');
-  const [user, setUser] = useState<User | null>(null);
 
   const onGetPing = async () => {
     try {
@@ -37,20 +29,7 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    async function ensureLoggedIn() {
-      const response = await fetch('/ovara-backend/api/user', {
-        credentials: 'include',
-      });
-      const { user }: UserResponse = await response.json();
-      const isLoggedIn = user !== null;
-      if (!isLoggedIn) {
-        location.assign('/ovara-backend/api/login');
-      }
-      setUser(user);
-    }
-    ensureLoggedIn();
-  }, []);
+  const user = useFetchUser();
 
   return (
     <MainContainer>
