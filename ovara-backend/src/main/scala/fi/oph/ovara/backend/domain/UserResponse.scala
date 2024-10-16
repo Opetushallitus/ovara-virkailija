@@ -1,6 +1,11 @@
 package fi.oph.ovara.backend.domain
 
+import org.springframework.security.core.GrantedAuthority
+
+import java.util
 import scala.beans.BeanProperty
 
-case class UserResponseUser(@BeanProperty userOid: String)
-case class UserResponse(@BeanProperty user: UserResponseUser)
+case class User(@BeanProperty userOid: String,
+                @BeanProperty authorities: util.Collection[? <: GrantedAuthority])
+
+case class UserResponse(@BeanProperty user: User)
