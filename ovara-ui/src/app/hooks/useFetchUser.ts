@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { apiFetch } from '@/app/(root)/api';
+import { apiFetch } from '@/app/lib/ovara-backend/api';
 
 type User = {
   userOid: string;
