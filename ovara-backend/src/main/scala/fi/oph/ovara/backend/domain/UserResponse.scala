@@ -6,6 +6,6 @@ import java.util
 import scala.beans.BeanProperty
 
 case class User(@BeanProperty userOid: String,
-                @BeanProperty authorities: List[? <: GrantedAuthority])
+                @BeanProperty authorities: List[String])
 
 case class UserResponse(@BeanProperty user: User)

@@ -1,4 +1,1 @@
-export const TOISEN_ASTEEN_RAPORTIT = [
-  'oporaportti',
-  'koulutukset-toteutukset-hakukohteet',
-];
+export const TOISEN_ASTEEN_RAPORTIT = ['koulutukset-toteutukset-hakukohteet'];

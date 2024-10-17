@@ -1,5 +1,7 @@
 package fi.oph.ovara.backend.raportointi
 
+import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.{User, UserResponse}
 import fi.oph.ovara.backend.repository.OvaraDatabase
 import fi.oph.ovara.backend.service.CommonService
@@ -13,27 +15,32 @@ import org.springframework.web.servlet.view.RedirectView
 @RestController
 @RequestMapping(path = Array("api"))
 class Controller(commonService: CommonService) {
-  
+
   @Autowired
   val db: OvaraDatabase = null
 
   @Value("${ovara.ui.url}")
   val ovaraUiUrl: String = null
-  
+
 
   @GetMapping(path = Array("ping"))
   def ping = "Ovara application is running!"
 
   @GetMapping(path = Array("user"))
-  def user(@AuthenticationPrincipal userDetails: UserDetails): UserResponse = {
+  def user(@AuthenticationPrincipal userDetails: UserDetails): String = {
+    val mapper = new ObjectMapper()
+    mapper.registerModule(DefaultScalaModule)
+    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    mapper.configure(SerializationFeature.INDENT_OUTPUT, true)
 
-    UserResponse(
-      user = if (userDetails == null)
-        null
-      else User(
-        userOid = userDetails.getUsername,
-        authorities = AuthoritiesUtil.getRaportointiAuthorities(userDetails.getAuthorities))
-    )
+    mapper.writeValueAsString(
+      UserResponse(
+        user = if (userDetails == null)
+          null
+        else User(
+          userOid = userDetails.getUsername,
+          authorities = AuthoritiesUtil.getRaportointiAuthorities(userDetails.getAuthorities))
+      ))
   }
 
   @GetMapping(path = Array("login"))

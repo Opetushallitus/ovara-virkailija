@@ -119,6 +119,10 @@
             <artifactId>spring-security-cas</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-scala_3</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest_3</artifactId>
             <version>${scalatest.version}</version>

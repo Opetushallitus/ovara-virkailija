@@ -29,9 +29,9 @@ class AuthoritiesUtilSpec extends AnyFlatSpec {
       SimpleGrantedAuthority("ROLE_APP_RAPORTOINTI_KK")
     ).asJava
     assert(AuthoritiesUtil.getRaportointiAuthorities(allAuthorities) == List(
-      SimpleGrantedAuthority("ROLE_APP_RAPORTOINTI_1.2.246.562.10.00000000001"),
-      SimpleGrantedAuthority("ROLE_APP_RAPORTOINTI_OPO"),
-      SimpleGrantedAuthority("ROLE_APP_RAPORTOINTI_KK"),
+      "ROLE_APP_RAPORTOINTI_1.2.246.562.10.00000000001",
+      "ROLE_APP_RAPORTOINTI_OPO",
+      "ROLE_APP_RAPORTOINTI_KK",
     ))
   }
 }

@@ -3,6 +3,7 @@ import { apiFetch } from '@/app/lib/ovara-backend/api';
 
 type User = {
   userOid: string;
+  authorities: Array<string>;
 };
 
 type UserResponse = {
