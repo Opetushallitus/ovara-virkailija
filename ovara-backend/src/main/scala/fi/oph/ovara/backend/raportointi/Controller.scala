@@ -3,6 +3,7 @@ package fi.oph.ovara.backend.raportointi
 import fi.oph.ovara.backend.domain.{User, UserResponse}
 import fi.oph.ovara.backend.repository.OvaraDatabase
 import fi.oph.ovara.backend.service.CommonService
+import fi.oph.ovara.backend.utils.AuthoritiesUtil
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
@@ -26,13 +27,12 @@ class Controller(commonService: CommonService) {
   @GetMapping(path = Array("user"))
   def user(@AuthenticationPrincipal userDetails: UserDetails): UserResponse = {
 
-    println(userDetails.getAuthorities)
     UserResponse(
       user = if (userDetails == null)
         null
       else User(
         userOid = userDetails.getUsername,
-        authorities = userDetails.getAuthorities)
+        authorities = AuthoritiesUtil.getRaportointiAuthorities(userDetails.getAuthorities))
     )
   }
 
