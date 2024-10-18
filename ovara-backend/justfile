@@ -6,6 +6,11 @@ _default:
 mfa-pallero-bastion:
     ssh pallero-bastion
 
+ssh-to-remote-db-in-pallero:
+    ssh -N -L 5433:rds-privatelink.ovara.testiopintopolku.fi:5432 pallero-bastion
+
+
+# DB DUMP FOR LOCAL POSTGRES
 connect-to-remote-db:
     sshuttle -l 0.0.0.0 -r pallero-bastion {{remote-ip}}/32
 
