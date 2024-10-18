@@ -10,7 +10,7 @@ import { usePathname } from 'next/navigation';
 const DEFAULT_BOX_BORDER = `2px solid ${ophColors.grey100}`;
 
 export default function Header() {
-  const t = useTranslations('Header');
+  const t = useTranslations('header');
   const currentRoute = usePathname();
   const isHome = currentRoute == '/';
   const headerTranslationKey = isHome

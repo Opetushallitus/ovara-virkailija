@@ -3,7 +3,7 @@ import Grid from '@mui/material/Grid2';
 import { useTranslations } from 'next-intl';
 
 export default function Custom404() {
-  const tranlateError = useTranslations('Error');
+  const tranlateError = useTranslations('error');
   const tranlateYleinen = useTranslations('yleinen');
   return (
     <main>

@@ -1,9 +1,9 @@
 {
-  "Header": {
+  "header": {
     "home": "Opiskelijavalinnan raportointi",
     "oporaportti": "OPO-raportti"
   },
-  "Error": {
+  "error": {
     "palvelin": "Palvelinpyyntö epäonnistui!",
     "virhekoodi": "Virhekoodi: ",
     "uudelleenyritys": "Yritä uudelleen",
@@ -13,7 +13,7 @@
       "teksti": "Linkki on virheellinen tai vanhentunut."
     }
   },
-  "Raporttilista": {
+  "raporttilista": {
     "title": "Raportti",
     "oporaportti": "OPO-raportti",
     "koulutukset-toteutukset-hakukohteet": "Koulutukset, toteutukset ja hakukohteet"

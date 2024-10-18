@@ -71,7 +71,7 @@ const TableWrapper = styled(Box)(({ theme }) => ({
 }));
 
 export const ListTable = ({ list, ...props }: ListTableProps) => {
-  const t = useTranslations('Raporttilista');
+  const t = useTranslations('raporttilista');
 
   return (
     <TableWrapper>
