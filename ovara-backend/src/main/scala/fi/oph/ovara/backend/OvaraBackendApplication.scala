@@ -1,7 +1,5 @@
 package fi.oph.ovara.backend;
 
-import fi.oph.ovara.backend.repository.OvaraDatabase
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.{ApplicationArguments, ApplicationRunner, SpringApplication}
 import org.springframework.context.annotation.{Bean, Profile}
@@ -15,8 +13,6 @@ object OvaraBackendApplication {
 
 @SpringBootApplication
 class OvaraBackendApplication {
-  @Autowired
-  val db: OvaraDatabase = null
 
   @Bean
   def applicationRunner(): ApplicationRunner =

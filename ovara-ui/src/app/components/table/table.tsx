@@ -53,7 +53,6 @@ interface ListTableProps extends React.ComponentProps<typeof StyledTable> {
 }
 
 const StyledHeaderCell = styled(TableCell)({
-  padding: '0.2rem 0.1rem 0.2rem 0.4rem',
   textAlign: 'left',
   'button:focus': {
     color: ophColors.blue2,

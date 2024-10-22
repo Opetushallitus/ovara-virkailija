@@ -1,7 +1,8 @@
 {
   "header": {
     "home": "Opiskelijavalinnan raportointi",
-    "oporaportti": "OPO-raportti"
+    "oporaportti": "OPO-raportti",
+    "koulutukset-toteutukset-hakukohteet": "Koulutukset, toteutukset ja hakukohteet"
   },
   "error": {
     "palvelin": "Palvelinpyyntö epäonnistui!",
@@ -19,6 +20,14 @@
     "koulutukset-toteutukset-hakukohteet": "Koulutukset, toteutukset ja hakukohteet"
   },
   "yleinen": {
-    "palaa-etusivulle": "Palaa etusivulle"
+    "palaa-etusivulle": "Palaa etusivulle",
+    "pakolliset-kentat": "Tähdellä merkityt kentät ovat pakollisia.",
+    "kevat": "kevät",
+    "syksy": "syksy",
+    "valitse": "Valitse...",
+    "valitsevaihtoehto": "Valitse vaihtoehdoista"
+  },
+  "raportti": {
+    "alkamiskausi": "Koulutus alkaa"
   }
 }

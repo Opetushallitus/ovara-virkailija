@@ -44,4 +44,7 @@ class Controller(commonService: CommonService) {
 
   @GetMapping(path = Array("csrf"))
   def csrf(csrfToken: CsrfToken): String = mapper.writeValueAsString(csrfToken)
+
+  @GetMapping(path = Array("alkamisvuodet"))
+  def alkamisvuodet: String = mapper.writeValueAsString(commonService.getAlkamisvuodet)
 }
