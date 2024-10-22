@@ -15,7 +15,7 @@ export default function Header() {
   const isHome = currentRoute == '/';
   const headerTranslationKey = isHome
     ? 'home'
-    : currentRoute.match(/[a-z]+-?[a-z]*?/gm)?.join('.');
+    : currentRoute.match(/([a-z]+-?)+/gm)?.join('.');
   return (
     <header
       style={{

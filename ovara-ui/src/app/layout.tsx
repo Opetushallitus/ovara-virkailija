@@ -6,6 +6,7 @@ import { getLocale, getMessages } from 'next-intl/server';
 import { type OphLanguage } from '@opetushallitus/oph-design-system';
 import Script from 'next/script';
 import { configuration } from './lib/configuration';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
 export const metadata: Metadata = {
   title: 'Opiskelijavalinnan raportointi',
@@ -27,7 +28,7 @@ export default async function RootLayout({
         <AppRouterCacheProvider>
           <NextIntlClientProvider messages={messages}>
             <OphNextJsThemeProvider variant="oph" lang={locale}>
-              {children}
+              <NuqsAdapter>{children}</NuqsAdapter>
             </OphNextJsThemeProvider>
           </NextIntlClientProvider>
         </AppRouterCacheProvider>

@@ -6,11 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class CommonService {
+class CommonService(commonRepository: CommonRepository) {
   @Autowired
-    val db: OvaraDatabase = null
+  val db: OvaraDatabase = null
 
   def getToteutus(oid: String): Vector[Toteutus] = {
-    db.run(CommonRepository().selectWithOid(oid))
+    db.run(commonRepository.selectWithOid(oid))
+  }
+
+  def getAlkamisvuodet: Vector[String] = {
+    db.run(commonRepository.selectDistinctAlkamisvuodet())
   }
 }
