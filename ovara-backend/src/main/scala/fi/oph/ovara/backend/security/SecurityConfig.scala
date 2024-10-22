@@ -4,7 +4,7 @@ import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl
 import org.apereo.cas.client.session.SingleSignOutFilter
 import org.apereo.cas.client.validation.{Cas20ServiceTicketValidator, TicketValidator}
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.{Bean, Configuration, Profile}
+import org.springframework.context.annotation.{Bean, Configuration}
 import org.springframework.core.annotation.Order
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
@@ -76,7 +76,6 @@ class SecurityConfig  {
 
     http
       .securityMatcher("/auth/login")
-      .csrf(csrf => csrf.disable)
       .addFilter(casAuthenticationFilter)
       .addFilterBefore(singleSignOutFilter, classOf[CasAuthenticationFilter])
       .build()
@@ -95,6 +94,18 @@ class SecurityConfig  {
 
   @Bean
   @Order(1)
+  def csrfFilterChain(http: HttpSecurity): SecurityFilterChain = {
+    http
+      .securityMatcher("/api/csrf")
+      .authorizeHttpRequests(requests => requests.anyRequest.permitAll)
+      .exceptionHandling(exceptionHandling =>
+        exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+      )
+      .build()
+  }
+
+  @Bean
+  @Order(2)
   def apiLoginFilterChain(http: HttpSecurity, casAuthenticationEntryPoint: CasAuthenticationEntryPoint): SecurityFilterChain = {
     http
       .securityMatcher("/api/login")
