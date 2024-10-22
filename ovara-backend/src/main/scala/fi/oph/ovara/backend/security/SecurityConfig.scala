@@ -1,6 +1,7 @@
 package fi.oph.ovara.backend.security
 
 import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl
+import org.apereo.cas.client.session.SingleSignOutFilter
 import org.apereo.cas.client.validation.{Cas20ServiceTicketValidator, TicketValidator}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.{Bean, Configuration, Profile}
@@ -65,22 +66,27 @@ class SecurityConfig  {
   }
 
   @Bean
-  def casAuthenticationFilter(authenticationManager: AuthenticationManager, serviceProperties: ServiceProperties): CasAuthenticationFilter = {
+  def casFilterChain(http: HttpSecurity, authenticationManager: AuthenticationManager, serviceProperties: ServiceProperties): SecurityFilterChain = {
     val casAuthenticationFilter = CasAuthenticationFilter()
     casAuthenticationFilter.setAuthenticationManager(authenticationManager)
     casAuthenticationFilter.setServiceProperties(serviceProperties)
     casAuthenticationFilter.setFilterProcessesUrl("/auth/login")
-    casAuthenticationFilter
+
+    val singleSignOutFilter = new SingleSignOutFilter()
+
+    http
+      .securityMatcher("/auth/login")
+      .csrf(csrf => csrf.disable)
+      .addFilter(casAuthenticationFilter)
+      .addFilterBefore(singleSignOutFilter, classOf[CasAuthenticationFilter])
+      .build()
   }
 
   @Bean
-  def filterChain(http: HttpSecurity, casAuthenticationEntryPoint: CasAuthenticationEntryPoint): SecurityFilterChain = {
+  def apiDefaultFilterChain(http: HttpSecurity): SecurityFilterChain = {
     http
-      .authorizeHttpRequests(authorizeHttpRequests =>
-        authorizeHttpRequests
-          .requestMatchers("/api/**").authenticated()
-          .anyRequest().permitAll()
-      )
+      .securityMatcher("/api/**")
+      .authorizeHttpRequests(requests => requests.anyRequest.fullyAuthenticated)
       .exceptionHandling(exceptionHandling =>
         exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
       )
@@ -89,7 +95,7 @@ class SecurityConfig  {
 
   @Bean
   @Order(1)
-  def casLoginFilterChain(http: HttpSecurity, casAuthenticationEntryPoint: CasAuthenticationEntryPoint): SecurityFilterChain = {
+  def apiLoginFilterChain(http: HttpSecurity, casAuthenticationEntryPoint: CasAuthenticationEntryPoint): SecurityFilterChain = {
     http
       .securityMatcher("/api/login")
       .authorizeHttpRequests(requests => requests.anyRequest.fullyAuthenticated)
