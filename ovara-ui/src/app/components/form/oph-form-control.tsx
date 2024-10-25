@@ -59,3 +59,9 @@ export const OvaraFormControl = ({
     </FormControl>
   );
 };
+
+export const OvaraFormControl = styled(OphFormControl)({
+  flexDirection: 'row',
+  paddingTop: '1rem',
+  width: '100%',
+});

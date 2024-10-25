@@ -7,6 +7,7 @@ import { type OphLanguage } from '@opetushallitus/oph-design-system';
 import Script from 'next/script';
 import { configuration } from './lib/configuration';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
+import { THEME_OVERRIDES } from '@/app/theme';
 
 export const metadata: Metadata = {
   title: 'Opiskelijavalinnan raportointi',
@@ -27,7 +28,11 @@ export default async function RootLayout({
       <body>
         <AppRouterCacheProvider>
           <NextIntlClientProvider messages={messages}>
-            <OphNextJsThemeProvider variant="oph" lang={locale}>
+            <OphNextJsThemeProvider
+              variant="oph"
+              overrides={THEME_OVERRIDES}
+              lang={locale}
+            >
               <NuqsAdapter>{children}</NuqsAdapter>
             </OphNextJsThemeProvider>
           </NextIntlClientProvider>

@@ -1,14 +1,16 @@
 'use client';
 import { useMemo } from 'react';
-import { Typography, SelectChangeEvent } from '@mui/material';
+import { Typography } from '@mui/material';
 import { MainContainer } from '@/app/components/main-container';
 import { useTranslations } from 'next-intl';
 
 import { useFetchAlkamisvuodet } from '@/app/hooks/useFetchAlkamisvuodet';
 import { getSortedKoulutuksenAlkamisKaudet } from '@/app/lib/utils';
 import { OvaraFormControl } from '@/app/components/form/oph-form-control';
-import { MultiSelect } from '@/app/components/multiselect';
+import { MultiComboBox } from '@/app/components/multicombobox';
 import { useSearchParams } from '@/app/hooks/useSearchParams';
+import { isEmpty } from 'remeda';
+import { OphMultiComboBoxOption } from '@/app/components/multiselect';
 
 export default function KoulutuksetToteutuksetHakukohteet() {
   const t = useTranslations();
@@ -18,10 +20,15 @@ export default function KoulutuksetToteutuksetHakukohteet() {
     [alkamisvuodet],
   );
 
-  const { selectedAlkamiskaudet, setSelectedAlkamiskaudet } = useSearchParams();
+  const { setSelectedAlkamiskaudet } = useSearchParams();
 
-  const changeAlkamiskaudet = (e: SelectChangeEvent) => {
-    setSelectedAlkamiskaudet(e.target.value);
+  const changeAlkamiskaudet = (
+    _: React.SyntheticEvent,
+    value: Array<OphMultiComboBoxOption>,
+  ) => {
+    return setSelectedAlkamiskaudet(
+      isEmpty(value) ? null : value?.map((v) => v.value),
+    );
   };
 
   return (
@@ -30,19 +37,16 @@ export default function KoulutuksetToteutuksetHakukohteet() {
       <OvaraFormControl
         label={`${t('raportti.alkamiskausi')} *`}
         sx={{ textAlign: 'left', flex: '1 0 180px' }}
-        renderInput={({ labelId }) => (
-          <MultiSelect
-            sx={{ width: '100%' }}
-            labelId={labelId}
-            value={selectedAlkamiskaudet ?? []}
-            onChange={changeAlkamiskaudet}
+        renderInput={() => (
+          <MultiComboBox
+            id={'alkamiskaudet'}
             options={sortedAlkamiskaudet?.map((kausi) => {
               return {
                 value: kausi.value,
                 label: `${kausi.alkamisvuosi} ${t(kausi.alkamiskausinimi)}`,
               };
             })}
-            clearable
+            onChange={changeAlkamiskaudet}
           />
         )}
       />

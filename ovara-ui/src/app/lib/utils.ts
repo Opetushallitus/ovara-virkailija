@@ -10,7 +10,9 @@ export type KoulutuksenAlkaminen = {
 export const getSortedKoulutuksenAlkamisKaudet = (
   alkamisvuodet: Array<string> | null,
 ): KoulutuksenAlkaminen[] => {
-  const alkamisvuodetInts = alkamisvuodet?.map((vuosi) => parseInt(vuosi));
+  const alkamisvuodetInts = alkamisvuodet
+    ? alkamisvuodet.map((vuosi) => parseInt(vuosi))
+    : [];
 
   if (alkamisvuodetInts) {
     return sort(alkamisvuodetInts, (a, b) => b - a).flatMap((alkamisvuosi) => {
