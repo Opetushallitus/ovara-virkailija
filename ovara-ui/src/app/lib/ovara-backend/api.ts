@@ -2,7 +2,7 @@ let _csrfToken: string;
 
 async function csrfToken() {
   if (!_csrfToken) {
-    const response = await fetch('ovara-backend/api/csrf', {
+    const response = await fetch('/ovara-backend/api/csrf', {
       credentials: 'include',
     });
 
