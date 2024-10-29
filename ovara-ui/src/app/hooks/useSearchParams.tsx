@@ -12,8 +12,15 @@ export const useSearchParams = () => {
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
+  const [selectedHaut, setSelectedHaut] = useQueryState(
+    'haku',
+    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
   return {
     selectedAlkamiskaudet,
     setSelectedAlkamiskaudet,
+    selectedHaut,
+    setSelectedHaut,
   };
 };

@@ -47,4 +47,7 @@ class Controller(commonService: CommonService) {
 
   @GetMapping(path = Array("alkamisvuodet"))
   def alkamisvuodet: String = mapper.writeValueAsString(commonService.getAlkamisvuodet)
+
+  @GetMapping(path = Array("haut"))
+  def haut: String = mapper.writeValueAsString(commonService.getHaut)
 }

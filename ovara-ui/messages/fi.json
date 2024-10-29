@@ -29,6 +29,7 @@
     "valitsevaihtoehto": "Valitse vaihtoehdoista"
   },
   "raportti": {
-    "alkamiskausi": "Koulutus alkaa"
+    "alkamiskausi": "Koulutus alkaa",
+    "haku": "Haku"
   }
 }

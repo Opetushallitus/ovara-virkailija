@@ -1,4 +1,3 @@
 package fi.oph.ovara.backend.domain
 
-case class Toteutus(oid: String
-                   )
+case class Toteutus(oid: String)
