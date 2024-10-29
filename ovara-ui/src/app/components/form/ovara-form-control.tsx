@@ -24,7 +24,7 @@ export const OvaraFormControl = ({
   renderInput: (props: { labelId: string }) => React.ReactNode;
 }) => {
   const id = useId();
-  const labelId = `OphFormControl-${id}-label`;
+  const labelId = `OvaraFormControl-${id}-label`;
   return (
     <FormControl
       {...props}
@@ -59,9 +59,3 @@ export const OvaraFormControl = ({
     </FormControl>
   );
 };
-
-export const OvaraFormControl = styled(OphFormControl)({
-  flexDirection: 'row',
-  paddingTop: '1rem',
-  width: '100%',
-});

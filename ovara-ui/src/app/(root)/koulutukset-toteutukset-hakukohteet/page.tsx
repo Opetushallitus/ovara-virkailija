@@ -6,11 +6,13 @@ import { useTranslations } from 'next-intl';
 
 import { useFetchAlkamisvuodet } from '@/app/hooks/useFetchAlkamisvuodet';
 import { getSortedKoulutuksenAlkamisKaudet } from '@/app/lib/utils';
-import { OvaraFormControl } from '@/app/components/form/oph-form-control';
-import { MultiComboBox } from '@/app/components/multicombobox';
+import { OvaraFormControl } from '@/app/components/form/ovara-form-control';
+import {
+  MultiComboBox,
+  OphMultiComboBoxOption,
+} from '@/app/components/multicombobox';
 import { useSearchParams } from '@/app/hooks/useSearchParams';
 import { isEmpty } from 'remeda';
-import { OphMultiComboBoxOption } from '@/app/components/multiselect';
 
 export default function KoulutuksetToteutuksetHakukohteet() {
   const t = useTranslations();
