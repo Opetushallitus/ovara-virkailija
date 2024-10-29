@@ -43,9 +43,12 @@ export default function KoulutuksetToteutuksetHakukohteet() {
           <MultiComboBox
             id={'alkamiskaudet'}
             options={sortedAlkamiskaudet?.map((kausi) => {
+              const alkamiskaudenNimi = `${t(kausi.alkamiskausinimi)}`;
               return {
                 value: kausi.value,
-                label: `${kausi.alkamisvuosi} ${t(kausi.alkamiskausinimi)}`,
+                label: kausi.alkamisvuosi
+                  ? `${kausi.alkamisvuosi} ${alkamiskaudenNimi}`
+                  : `${alkamiskaudenNimi}`,
               };
             })}
             onChange={changeAlkamiskaudet}

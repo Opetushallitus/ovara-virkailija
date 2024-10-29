@@ -2,7 +2,6 @@ import { sort } from 'remeda';
 
 export type KoulutuksenAlkaminen = {
   alkamisvuosi: number;
-  alkamiskausikoodiuri: string;
   alkamiskausinimi: string;
   value: string;
 };
@@ -15,22 +14,30 @@ export const getSortedKoulutuksenAlkamisKaudet = (
     : [];
 
   if (alkamisvuodetInts) {
-    return sort(alkamisvuodetInts, (a, b) => b - a).flatMap((alkamisvuosi) => {
+    const sortedAlkamiskaudet = sort(
+      alkamisvuodetInts,
+      (a, b) => b - a,
+    ).flatMap((alkamisvuosi) => {
       return [
         {
           alkamisvuosi: alkamisvuosi,
-          alkamiskausikoodiuri: 'kausi_k',
           alkamiskausinimi: 'yleinen.kevat',
           value: `${alkamisvuosi}_kevat`,
         },
         {
           alkamisvuosi: alkamisvuosi,
-          alkamiskausikoodiuri: 'kausi_s',
           alkamiskausinimi: 'yleinen.syksy',
           value: `${alkamisvuosi}_syksy`,
         },
       ];
     });
+
+    sortedAlkamiskaudet.unshift({
+      alkamiskausinimi: 'yleinen.henkilokohtainen_suunnitelma',
+      value: 'henkilokohtainen_suunnitelma',
+    });
+
+    return sortedAlkamiskaudet;
   }
 
   return [];
