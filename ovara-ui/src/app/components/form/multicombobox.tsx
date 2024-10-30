@@ -15,7 +15,7 @@ type MultiComboBoxProps = {
   ) => void;
   id: string;
   label: string;
-  required: boolean;
+  required?: boolean;
 };
 
 export const MultiComboBox = ({
@@ -29,7 +29,6 @@ export const MultiComboBox = ({
   return (
     <OvaraFormControl
       label={required ? `${label} *` : label}
-      sx={{ textAlign: 'left', flex: '1 0 180px' }}
       renderInput={() => (
         <Autocomplete<OphMultiComboBoxOption, true, true, false>
           multiple

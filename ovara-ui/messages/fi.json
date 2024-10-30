@@ -26,10 +26,18 @@
     "kevat": "kevät",
     "syksy": "syksy",
     "valitse": "Valitse...",
-    "valitsevaihtoehto": "Valitse vaihtoehdoista"
+    "valitsevaihtoehto": "Valitse vaihtoehdoista",
+    "tila": {
+      "julkaistu": "Julkaistu",
+      "luonnos": "Luonnos",
+      "arkistoitu": "Arkistoitu"
+    }
   },
   "raportti": {
     "alkamiskausi": "Koulutus alkaa",
-    "haku": "Haku"
+    "haku": "Haku",
+    "koulutuksen-tila": "Koulutuksen tila",
+    "toteutuksen-tila": "Toteutuksen tila",
+    "hakukohteen-tila": "Hakukohteen tila"
   }
 }

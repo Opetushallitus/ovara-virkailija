@@ -17,10 +17,31 @@ export const useSearchParams = () => {
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
+  const [selectedKoulutuksenTila, setSelectedKoulutuksenTila] = useQueryState(
+    'koulutuksen-tila',
+    DEFAULT_NUQS_OPTIONS,
+  );
+
+  const [selectedToteutuksenTila, setSelectedToteutuksenTila] = useQueryState(
+    'toteutuksen-tila',
+    DEFAULT_NUQS_OPTIONS,
+  );
+
+  const [selectedHakukohteenTila, setSelectedHakukohteenTila] = useQueryState(
+    'hakukohteen-tila',
+    DEFAULT_NUQS_OPTIONS,
+  );
+
   return {
     selectedAlkamiskaudet,
     setSelectedAlkamiskaudet,
     selectedHaut,
     setSelectedHaut,
+    selectedKoulutuksenTila,
+    setSelectedKoulutuksenTila,
+    selectedToteutuksenTila,
+    setSelectedToteutuksenTila,
+    selectedHakukohteenTila,
+    setSelectedHakukohteenTila,
   };
 };

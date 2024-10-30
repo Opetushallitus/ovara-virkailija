@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { type useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useFetchAlkamisvuodet } from '@/app/hooks/useFetchAlkamisvuodet';
 import { getSortedKoulutuksenAlkamisKaudet } from '@/app/lib/utils';
 import {
@@ -26,6 +26,7 @@ export const KoulutuksenAlkaminen = ({ t }: { t: typeof useTranslations }) => {
       isEmpty(value) ? null : value?.map((v) => v.value),
     );
   };
+
   return (
     <MultiComboBox
       id={'alkamiskaudet'}
