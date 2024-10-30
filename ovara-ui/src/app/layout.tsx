@@ -8,6 +8,7 @@ import Script from 'next/script';
 import { configuration } from './lib/configuration';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { THEME_OVERRIDES } from '@/app/theme';
+import { AuthorizedUserProvider } from './contexts/AuthorizedUserProvider';
 
 export const metadata: Metadata = {
   title: 'Opiskelijavalinnan raportointi',
@@ -33,7 +34,9 @@ export default async function RootLayout({
               overrides={THEME_OVERRIDES}
               lang={locale}
             >
-              <NuqsAdapter>{children}</NuqsAdapter>
+              <AuthorizedUserProvider>
+                <NuqsAdapter>{children}</NuqsAdapter>
+              </AuthorizedUserProvider>
             </OphNextJsThemeProvider>
           </NextIntlClientProvider>
         </AppRouterCacheProvider>

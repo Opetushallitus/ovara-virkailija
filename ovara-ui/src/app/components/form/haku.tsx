@@ -8,7 +8,7 @@ import { useSearchParams } from '@/app/hooks/useSearchParams';
 import { isEmpty } from 'remeda';
 
 export const Haku = ({ t }: { t: typeof useTranslations }) => {
-  // TODO: Lisätään lokalisointi
+  // TODO: Lisää lokalisointi
   const locale = 'fi';
   const haut = useFetchHaut() || [];
 
