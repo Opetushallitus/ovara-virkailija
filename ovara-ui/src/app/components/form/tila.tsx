@@ -15,7 +15,8 @@ const tilat = (t: typeof useTranslations) => {
 
 export const KoulutuksenTila = () => {
   const t = useTranslations();
-  const { setSelectedKoulutuksenTila } = useSearchParams();
+  const { selectedKoulutuksenTila, setSelectedKoulutuksenTila } =
+    useSearchParams();
 
   const changeTila = (e: SelectChangeEvent) => {
     return setSelectedKoulutuksenTila(e.target.value);
@@ -27,6 +28,7 @@ export const KoulutuksenTila = () => {
     <LocalizedSelect
       id={id}
       label={t(`raportti.${id}`)}
+      value={selectedKoulutuksenTila}
       options={tilat(t)}
       onChange={changeTila}
     />
@@ -35,7 +37,8 @@ export const KoulutuksenTila = () => {
 
 export const ToteutuksenTila = () => {
   const t = useTranslations();
-  const { setSelectedToteutuksenTila } = useSearchParams();
+  const { selectedToteutuksenTila, setSelectedToteutuksenTila } =
+    useSearchParams();
 
   const changeTila = (e: SelectChangeEvent) => {
     return setSelectedToteutuksenTila(e.target.value);
@@ -47,6 +50,7 @@ export const ToteutuksenTila = () => {
     <LocalizedSelect
       id={id}
       label={t(`raportti.${id}`)}
+      value={selectedToteutuksenTila}
       options={tilat(t)}
       onChange={changeTila}
     />
@@ -55,7 +59,8 @@ export const ToteutuksenTila = () => {
 
 export const HakukohteenTila = () => {
   const t = useTranslations();
-  const { setSelectedHakukohteenTila } = useSearchParams();
+  const { selectedHakukohteenTila, setSelectedHakukohteenTila } =
+    useSearchParams();
 
   const changeTila = (e: SelectChangeEvent) => {
     return setSelectedHakukohteenTila(e.target.value);
@@ -67,6 +72,7 @@ export const HakukohteenTila = () => {
     <LocalizedSelect
       id={id}
       label={t(`raportti.${id}`)}
+      value={selectedHakukohteenTila}
       options={tilat(t)}
       onChange={changeTila}
     />

@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { Autocomplete, Chip, TextField } from '@mui/material';
 import { OvaraFormControl } from '@/app/components/form/ovara-form-control';
+import { find } from 'remeda';
 
 export type SelectOption = {
   label: string;
@@ -12,7 +13,7 @@ type MultiComboBoxProps = {
   onChange: (e: React.SyntheticEvent, value: Array<SelectOption>) => void;
   id: string;
   label: string;
-  value: Array<string>;
+  value: Array<string> | undefined;
   required?: boolean;
 };
 
@@ -21,9 +22,17 @@ export const MultiComboBox = ({
   onChange,
   id,
   label,
+  value,
   required,
 }: MultiComboBoxProps) => {
   const t = useTranslations();
+
+  const getValueFromOptions = (value: Array<string>) => {
+    return value?.map((v) => {
+      return find(options, (o) => o.value === v);
+    });
+  };
+
   return (
     <OvaraFormControl
       label={required ? `${label} *` : label}
@@ -33,6 +42,7 @@ export const MultiComboBox = ({
           id={id}
           sx={{ width: '100%' }}
           onChange={onChange}
+          value={value ? getValueFromOptions(value) : []}
           options={options}
           filterSelectedOptions
           isOptionEqualToValue={(option, selected) =>

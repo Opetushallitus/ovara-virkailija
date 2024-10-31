@@ -25,6 +25,7 @@ export const LocalizedSelect = (props: LocalizedSelectProps) => {
           sx={{ width: '100%' }}
           inputProps={{ 'aria-label': t('yleinen.valitsevaihtoehto') }}
           placeholder={t('yleinen.valitse')}
+          clearable
           {...props}
         />
       )}

@@ -21,6 +21,7 @@ export const Haku = () => {
   ) => {
     return setSelectedHaut(isEmpty(value) ? null : value?.map((v) => v.value));
   };
+
   return (
     <MultiComboBox
       id={'haku'}
