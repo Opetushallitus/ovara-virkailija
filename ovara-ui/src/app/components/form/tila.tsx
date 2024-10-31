@@ -1,9 +1,10 @@
-import { useTranslations } from 'next-intl';
 import { useSearchParams } from '@/app/hooks/useSearchParams';
 import { LocalizedSelect } from './localized-select';
 import { TILAT } from '@/app/lib/constants';
+import { SelectChangeEvent } from '@mui/material';
+import { useTranslations } from 'next-intl';
 
-const tilat = (t) => {
+const tilat = (t: typeof useTranslations) => {
   return TILAT.map((tila) => {
     return {
       value: tila,
@@ -12,10 +13,11 @@ const tilat = (t) => {
   });
 };
 
-export const KoulutuksenTila = ({ t }: { t: typeof useTranslations }) => {
+export const KoulutuksenTila = () => {
+  const t = useTranslations();
   const { setSelectedKoulutuksenTila } = useSearchParams();
 
-  const changeTila = (e: React.SyntheticEvent) => {
+  const changeTila = (e: SelectChangeEvent) => {
     return setSelectedKoulutuksenTila(e.target.value);
   };
 
@@ -31,10 +33,11 @@ export const KoulutuksenTila = ({ t }: { t: typeof useTranslations }) => {
   );
 };
 
-export const ToteutuksenTila = ({ t }: { t: typeof useTranslations }) => {
+export const ToteutuksenTila = () => {
+  const t = useTranslations();
   const { setSelectedToteutuksenTila } = useSearchParams();
 
-  const changeTila = (e: React.SyntheticEvent) => {
+  const changeTila = (e: SelectChangeEvent) => {
     return setSelectedToteutuksenTila(e.target.value);
   };
 
@@ -50,10 +53,11 @@ export const ToteutuksenTila = ({ t }: { t: typeof useTranslations }) => {
   );
 };
 
-export const HakukohteenTila = ({ t }: { t: typeof useTranslations }) => {
+export const HakukohteenTila = () => {
+  const t = useTranslations();
   const { setSelectedHakukohteenTila } = useSearchParams();
 
-  const changeTila = (e: React.SyntheticEvent) => {
+  const changeTila = (e: SelectChangeEvent) => {
     return setSelectedHakukohteenTila(e.target.value);
   };
 

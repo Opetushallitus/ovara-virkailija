@@ -1,9 +1,9 @@
 import { sort } from 'remeda';
 
 export type KoulutuksenAlkaminen = {
-  alkamisvuosi: number;
   alkamiskausinimi: string;
   value: string;
+  alkamisvuosi?: number | undefined;
 };
 
 export const getSortedKoulutuksenAlkamisKaudet = (
@@ -33,6 +33,7 @@ export const getSortedKoulutuksenAlkamisKaudet = (
     });
 
     sortedAlkamiskaudet.unshift({
+      alkamisvuosi: undefined,
       alkamiskausinimi: 'yleinen.henkilokohtainen_suunnitelma',
       value: 'henkilokohtainen_suunnitelma',
     });

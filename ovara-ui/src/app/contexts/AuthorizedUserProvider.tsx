@@ -1,10 +1,15 @@
 'use client';
-import { useContext, createContext } from 'react';
+import { useContext, createContext, ReactNode } from 'react';
 import { useFetchUser } from '@/app/hooks/useFetchUser';
 
-const AuthorizedUserContext = createContext();
+type User = {
+  userOid: string;
+  authorities: Array<string>;
+};
 
-export function AuthorizedUserProvider({ children }) {
+const AuthorizedUserContext = createContext<User | null>(null);
+
+export function AuthorizedUserProvider({ children }: { children: ReactNode }) {
   const user = useFetchUser();
 
   return (

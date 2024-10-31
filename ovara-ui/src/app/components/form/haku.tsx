@@ -1,22 +1,23 @@
-import { type useTranslations } from 'next-intl';
 import { useFetchHaut } from '@/app/hooks/useFetchHaut';
 import {
   MultiComboBox,
-  OphMultiComboBoxOption,
+  SelectOption,
 } from '@/app/components/form/multicombobox';
 import { useSearchParams } from '@/app/hooks/useSearchParams';
 import { isEmpty } from 'remeda';
+import { useTranslations } from 'next-intl';
 
-export const Haku = ({ t }: { t: typeof useTranslations }) => {
+export const Haku = () => {
+  const t = useTranslations();
   // TODO: Lisää lokalisointi
   const locale = 'fi';
   const haut = useFetchHaut() || [];
 
-  const { setSelectedHaut } = useSearchParams();
+  const { selectedHaut, setSelectedHaut } = useSearchParams();
 
   const changeAlkamiskaudet = (
     _: React.SyntheticEvent,
-    value: Array<OphMultiComboBoxOption>,
+    value: Array<SelectOption>,
   ) => {
     return setSelectedHaut(isEmpty(value) ? null : value?.map((v) => v.value));
   };
@@ -24,10 +25,11 @@ export const Haku = ({ t }: { t: typeof useTranslations }) => {
     <MultiComboBox
       id={'haku'}
       label={`${t('raportti.haku')}`}
+      value={selectedHaut ?? []}
       options={haut?.map((haku) => {
         return {
           value: haku.haku_oid,
-          label: haku.haku_nimi[locale],
+          label: haku.haku_nimi[locale] || '',
         };
       })}
       onChange={changeAlkamiskaudet}

@@ -16,11 +16,11 @@ export default function KoulutuksetToteutuksetHakukohteet() {
   return (
     <MainContainer>
       <Typography>{t('yleinen.pakolliset-kentat')}</Typography>
-      <KoulutuksenAlkaminen t={t} />
-      <Haku t={t} />
-      <KoulutuksenTila t={t} />
-      <ToteutuksenTila t={t} />
-      <HakukohteenTila t={t} />
+      <KoulutuksenAlkaminen />
+      <Haku />
+      <KoulutuksenTila />
+      <ToteutuksenTila />
+      <HakukohteenTila />
     </MainContainer>
   );
 }

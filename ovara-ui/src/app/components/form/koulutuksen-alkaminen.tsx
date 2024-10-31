@@ -4,23 +4,24 @@ import { useFetchAlkamisvuodet } from '@/app/hooks/useFetchAlkamisvuodet';
 import { getSortedKoulutuksenAlkamisKaudet } from '@/app/lib/utils';
 import {
   MultiComboBox,
-  OphMultiComboBoxOption,
+  SelectOption,
 } from '@/app/components/form/multicombobox';
 import { useSearchParams } from '@/app/hooks/useSearchParams';
 import { isEmpty } from 'remeda';
 
-export const KoulutuksenAlkaminen = ({ t }: { t: typeof useTranslations }) => {
+export const KoulutuksenAlkaminen = () => {
+  const t = useTranslations();
   const alkamisvuodet = useFetchAlkamisvuodet();
   const sortedAlkamiskaudet = useMemo(
     () => getSortedKoulutuksenAlkamisKaudet(alkamisvuodet),
     [alkamisvuodet],
   );
 
-  const { setSelectedAlkamiskaudet } = useSearchParams();
+  const { selectedAlkamiskaudet, setSelectedAlkamiskaudet } = useSearchParams();
 
   const changeAlkamiskaudet = (
     _: React.SyntheticEvent,
-    value: Array<OphMultiComboBoxOption>,
+    value: Array<SelectOption>,
   ) => {
     return setSelectedAlkamiskaudet(
       isEmpty(value) ? null : value?.map((v) => v.value),
@@ -31,6 +32,7 @@ export const KoulutuksenAlkaminen = ({ t }: { t: typeof useTranslations }) => {
     <MultiComboBox
       id={'alkamiskaudet'}
       label={`${t('raportti.alkamiskausi')}`}
+      value={selectedAlkamiskaudet ?? []}
       options={sortedAlkamiskaudet?.map((kausi) => {
         const alkamiskaudenNimi = `${t(kausi.alkamiskausinimi)}`;
         return {

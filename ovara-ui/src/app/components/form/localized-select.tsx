@@ -2,10 +2,18 @@
 import { OphSelect } from '@opetushallitus/oph-design-system';
 import { useTranslations } from 'next-intl';
 import { OvaraFormControl } from './ovara-form-control';
+import { SelectOption } from './multicombobox';
+import { SelectChangeEvent } from '@mui/material';
 
-export const LocalizedSelect = (
-  props: React.ComponentProps<typeof OphSelect>,
-) => {
+type LocalizedSelectProps = {
+  id: string;
+  label: string;
+  options: Array<SelectOption>;
+  onChange: (e: SelectChangeEvent) => void;
+  required?: boolean;
+};
+
+export const LocalizedSelect = (props: LocalizedSelectProps) => {
   const t = useTranslations();
   const { required, label } = props;
 
