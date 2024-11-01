@@ -30,7 +30,6 @@ export const THEME_OVERRIDES: ThemeOptions = {
         root: {
           borderColor: ophColors.grey800,
           borderRadius: '2px',
-          height: '48px',
         },
       },
     },
