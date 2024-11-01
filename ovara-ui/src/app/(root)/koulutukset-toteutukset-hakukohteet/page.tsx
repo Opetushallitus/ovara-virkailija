@@ -10,6 +10,7 @@ import {
   KoulutuksenTila,
   ToteutuksenTila,
 } from '@/app/components/form/tila';
+import { Valintakoe } from '@/app/components/form/valintakoe';
 
 export default function KoulutuksetToteutuksetHakukohteet() {
   const t = useTranslations();
@@ -21,6 +22,7 @@ export default function KoulutuksetToteutuksetHakukohteet() {
       <KoulutuksenTila />
       <ToteutuksenTila />
       <HakukohteenTila />
+      <Valintakoe />
     </MainContainer>
   );
 }

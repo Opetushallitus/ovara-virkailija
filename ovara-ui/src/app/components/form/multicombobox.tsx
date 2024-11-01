@@ -40,7 +40,7 @@ export const MultiComboBox = ({
         <Autocomplete<SelectOption, true, true, false>
           multiple
           id={id}
-          sx={{ width: '100%' }}
+          sx={{ width: '100%', overflow: 'hidden' }}
           onChange={onChange}
           value={value ? getValueFromOptions(value) : []}
           options={options}
