@@ -1,5 +1,10 @@
 'use client';
-import { parseAsArrayOf, parseAsString, useQueryState } from 'nuqs';
+import {
+  parseAsArrayOf,
+  parseAsBoolean,
+  parseAsString,
+  useQueryState,
+} from 'nuqs';
 
 export const DEFAULT_NUQS_OPTIONS = {
   history: 'push',
@@ -32,6 +37,11 @@ export const useSearchParams = () => {
     DEFAULT_NUQS_OPTIONS,
   );
 
+  const [selectedValintakoe, setSelectedValintakoe] = useQueryState(
+    'valintakoe',
+    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
   return {
     selectedAlkamiskaudet,
     setSelectedAlkamiskaudet,
@@ -43,5 +53,7 @@ export const useSearchParams = () => {
     setSelectedToteutuksenTila,
     selectedHakukohteenTila,
     setSelectedHakukohteenTila,
+    selectedValintakoe,
+    setSelectedValintakoe,
   };
 };

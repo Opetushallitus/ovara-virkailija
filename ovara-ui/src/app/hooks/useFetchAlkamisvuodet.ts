@@ -9,8 +9,12 @@ export function useFetchAlkamisvuodet() {
   useEffect(() => {
     async function fetchAlkamisvuodet() {
       const response = await apiFetch('alkamisvuodet');
-      const alkamisvuodet = await response.json();
-      setAlkamisvuodet(alkamisvuodet);
+      if (response.status === 200) {
+        const alkamisvuodet = await response.json();
+        setAlkamisvuodet(alkamisvuodet);
+      } else {
+        setAlkamisvuodet(null);
+      }
     }
 
     fetchAlkamisvuodet();

@@ -38,6 +38,12 @@
     "haku": "Haku",
     "koulutuksen-tila": "Koulutuksen tila",
     "toteutuksen-tila": "Toteutuksen tila",
-    "hakukohteen-tila": "Hakukohteen tila"
+    "hakukohteen-tila": "Hakukohteen tila",
+    "valintakoe": "Valintakoe",
+    "radio-group": {
+      "neutral": "Ei merkitystä",
+      "yes": "Kyllä",
+      "no": "Ei"
+    }
   }
 }

@@ -13,8 +13,12 @@ export function useFetchHaut() {
   useEffect(() => {
     async function fetchHaut() {
       const response = await apiFetch('haut');
-      const haut = await response.json();
-      setHaut(haut);
+      if (response.status === 200) {
+        const haut = await response.json();
+        setHaut(haut);
+      } else {
+        setHaut(null);
+      }
     }
 
     fetchHaut();

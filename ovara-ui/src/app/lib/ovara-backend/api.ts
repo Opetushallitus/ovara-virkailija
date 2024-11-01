@@ -28,5 +28,6 @@ export async function apiFetch(
   if (response.status === 401) {
     location.assign('/ovara-backend/api/login');
   }
+
   return response;
 }
