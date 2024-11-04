@@ -8,11 +8,14 @@ import scala.util.matching.Regex
 
 object AuthoritiesUtil {
   def getRaportointiAuthorities(allAuthorities: util.Collection[? <: GrantedAuthority]): List[String] = {
-
-    println(allAuthorities)
-    val raportointiAuthoritiesRegex: Regex = """ROLE_APP_RAPORTOINTI""".r
+    val raportointiAuthoritiesRegex: Regex = """ROLE_APP_RAPORTOINTI.*""".r
     allAuthorities.asScala.toList
-      .filter(role => raportointiAuthoritiesRegex.findFirstIn(role.getAuthority).isDefined)
-      .map(_.getAuthority)
+      .flatMap(role => raportointiAuthoritiesRegex.findFirstIn(role.getAuthority))
+  }
+
+  def getRaportointiOrganisaatiot(authorities: util.Collection[? <: GrantedAuthority]): List[String] = {
+    val raportointiAuthorities = getRaportointiAuthorities(authorities)
+    val raportointiOrganisaatiotRegex: Regex = """([0-9]\.?)+""".r
+    raportointiAuthorities.flatMap(role => raportointiOrganisaatiotRegex.findFirstIn(role))
   }
 }
