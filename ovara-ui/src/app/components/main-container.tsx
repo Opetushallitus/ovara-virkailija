@@ -1,5 +1,5 @@
 'use client';
-import { styled } from '@mui/material/styles';
+import { styled } from '@mui/material';
 import { Box, BoxProps } from '@mui/material';
 import { ophColors, withDefaultProps, DEFAULT_BOX_BORDER } from '../theme';
 

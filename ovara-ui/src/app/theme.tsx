@@ -43,53 +43,16 @@ export const THEME_OVERRIDES: ThemeOptions = {
         },
       },
     },
-    MuiDialog: {
-      defaultProps: {
-        fullWidth: true,
-      },
-      styleOverrides: {
-        paper: ({ theme }) => ({
-          minHeight: '200px',
-          borderTop: `4px solid ${ophColors.cyan1}`,
-          borderRadius: '2px',
-          boxShadow: '2px 2px 8px 0px rgba(0,0,0,0.17)',
-          padding: theme.spacing(3),
-        }),
-      },
-    },
-    MuiDialogTitle: {
-      defaultProps: {
-        variant: 'h2',
-      },
-      styleOverrides: {
-        root: ({ theme }) => ({
-          padding: theme.spacing(0, 0, 2, 0),
-        }),
-      },
-    },
-    MuiDialogContent: {
-      styleOverrides: {
-        root: {
-          padding: 0,
-        },
-      },
-    },
-    MuiDialogActions: {
-      styleOverrides: {
-        root: ({ theme }) => ({
-          padding: theme.spacing(2, 0, 0, 0),
-        }),
-      },
-    },
-    MuiCircularProgress: {
-      defaultProps: {
-        size: 50,
-        thickness: 4.5,
-      },
-    },
     MuiChip: {
       styleOverrides: {
         root: { borderRadius: 'unset', fontSize: '1rem' },
+      },
+    },
+    MuiDivider: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          margin: theme.spacing(3, 0, 3, 0),
+        }),
       },
     },
   },

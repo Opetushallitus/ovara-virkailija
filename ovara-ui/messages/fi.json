@@ -44,6 +44,8 @@
       "neutral": "Ei merkitystä",
       "yes": "Kyllä",
       "no": "Ei"
-    }
+    },
+    "tyhjenna-hakuehdot": "Tyhjennä hakuehdot",
+    "muodosta-raportti": "Muodosta raportti (.xlsx)"
   }
 }

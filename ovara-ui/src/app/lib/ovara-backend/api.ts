@@ -22,6 +22,7 @@ export async function apiFetch(
     headers: {
       ...options?.headers,
       'X-CSRF-TOKEN': await csrfToken(),
+      cache: 'force-cache',
     },
   });
 
