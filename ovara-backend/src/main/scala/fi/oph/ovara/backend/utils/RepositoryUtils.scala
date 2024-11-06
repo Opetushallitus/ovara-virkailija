@@ -33,4 +33,8 @@ object RepositoryUtils {
         s"${if hasMoreThanOne(alkamiskaudet) then ")" else ""}"
     }
   }
+
+  def makeListOfValuesQueryStr(values: List[String]): String = {
+      s"${values.map(s => s"'$s'").mkString(", ")}"
+  }
 }

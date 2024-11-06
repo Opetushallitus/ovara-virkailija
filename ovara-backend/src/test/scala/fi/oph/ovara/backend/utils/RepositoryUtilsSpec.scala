@@ -59,4 +59,14 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
   it should "return empty string when there are no alkamiskaudet specified" in {
     assert(RepositoryUtils.makeAlkamiskaudetQueryStr("AND", List("t", "hk"), List()) == "")
   }
+
+  "makeListOfValuesQueryStr" should "return a list of values concatenated together as a string separated by a comma'" in {
+    assert(RepositoryUtils.makeListOfValuesQueryStr(
+      List("1.2.246.562.10.81934895871", "1.2.246.562.10.752369", "1.2.246.562.10.5132568"))
+      == "'1.2.246.562.10.81934895871', '1.2.246.562.10.752369', '1.2.246.562.10.5132568'")
+  }
+
+  it should "return a string of one value without separating comma at the end" in {
+    assert(RepositoryUtils.makeListOfValuesQueryStr(List("1.2.246.562.10.81934895871")) == "'1.2.246.562.10.81934895871'")
+  }
 }
