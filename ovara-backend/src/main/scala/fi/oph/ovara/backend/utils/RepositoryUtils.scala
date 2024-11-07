@@ -43,4 +43,10 @@ object RepositoryUtils {
       case Some(v) => s"$operator $fieldName = '$v'"
       case None => ""
   }
+  
+  def makeEqualsQueryStrOfOptionalBoolean(operator: String, fieldName: String, value: Option[Boolean]): String = {
+    value match
+      case Some(v) => s"$operator $fieldName = $v"
+      case None => ""
+  }
 }

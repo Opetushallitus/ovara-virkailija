@@ -61,20 +61,61 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
   }
 
   "makeListOfValuesQueryStr" should "return a list of values concatenated together as a string separated by a comma'" in {
-    assert(RepositoryUtils.makeListOfValuesQueryStr(
-      List("1.2.246.562.10.81934895871", "1.2.246.562.10.752369", "1.2.246.562.10.5132568"))
-      == "'1.2.246.562.10.81934895871', '1.2.246.562.10.752369', '1.2.246.562.10.5132568'")
+    assert(
+      RepositoryUtils.makeListOfValuesQueryStr(
+        List("1.2.246.562.10.81934895871", "1.2.246.562.10.752369", "1.2.246.562.10.5132568")
+      )
+        == "'1.2.246.562.10.81934895871', '1.2.246.562.10.752369', '1.2.246.562.10.5132568'"
+    )
   }
 
   it should "return a string of one value without separating comma at the end" in {
-    assert(RepositoryUtils.makeListOfValuesQueryStr(List("1.2.246.562.10.81934895871")) == "'1.2.246.562.10.81934895871'")
+    assert(
+      RepositoryUtils.makeListOfValuesQueryStr(List("1.2.246.562.10.81934895871")) == "'1.2.246.562.10.81934895871'"
+    )
   }
 
   "makeEqualsQueryStrOfOptional" should "return koulutuksen tila as a query string" in {
-    assert(RepositoryUtils.makeEqualsQueryStrOfOptional(operator = "AND", fieldName = "k.tila", value = Some("julkaistu")) == "AND k.tila = 'julkaistu'")
+    assert(
+      RepositoryUtils.makeEqualsQueryStrOfOptional(
+        operator = "AND",
+        fieldName = "k.tila",
+        value = Some("julkaistu")
+      ) == "AND k.tila = 'julkaistu'"
+    )
   }
 
   it should "return empty string as a query string when value is None" in {
     assert(RepositoryUtils.makeEqualsQueryStrOfOptional(operator = "AND", fieldName = "k.tila", value = None) == "")
+  }
+
+  "makeEqualsQueryStrOfOptionalBoolean" should "return query str with '= true' when valintakoe selection is true" in {
+    assert(
+      RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean(
+        operator = "AND",
+        fieldName = "hk.on_valintakoe",
+        value = Some(true)
+      ) == "AND hk.on_valintakoe = true"
+    )
+  }
+
+  it should "return query str with '= false' when valintakoe selection is true" in {
+    assert(
+      RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean(
+        operator = "AND",
+        fieldName = "hk.on_valintakoe",
+        value = Some(false)
+      ) == "AND hk.on_valintakoe = false"
+    )
+  }
+
+  it should "return empty query str when valintakoe selection is not defined" in {
+    assert(
+      RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean(
+        operator = "AND",
+        fieldName = "hk.on_valintakoe",
+        value = None
+      ) == ""
+    )
   }
 }
