@@ -37,4 +37,10 @@ object RepositoryUtils {
   def makeListOfValuesQueryStr(values: List[String]): String = {
       s"${values.map(s => s"'$s'").mkString(", ")}"
   }
+
+  def makeEqualsQueryStrOfOptional(operator: String, fieldName: String, value: Option[String]): String = {
+    value match
+      case Some(v) => s"$operator $fieldName = '$v'"
+      case None => ""
+  }
 }

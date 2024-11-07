@@ -69,4 +69,12 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
   it should "return a string of one value without separating comma at the end" in {
     assert(RepositoryUtils.makeListOfValuesQueryStr(List("1.2.246.562.10.81934895871")) == "'1.2.246.562.10.81934895871'")
   }
+
+  "makeEqualsQueryStrOfOptional" should "return koulutuksen tila as a query string" in {
+    assert(RepositoryUtils.makeEqualsQueryStrOfOptional(operator = "AND", fieldName = "k.tila", value = Some("julkaistu")) == "AND k.tila = 'julkaistu'")
+  }
+
+  it should "return empty string as a query string when value is None" in {
+    assert(RepositoryUtils.makeEqualsQueryStrOfOptional(operator = "AND", fieldName = "k.tila", value = None) == "")
+  }
 }
