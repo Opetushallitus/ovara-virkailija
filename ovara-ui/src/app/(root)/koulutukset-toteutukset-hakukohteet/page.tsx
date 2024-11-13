@@ -13,18 +13,14 @@ import {
 import { Valintakoe } from '@/app/components/form/valintakoe';
 import { FormButtons } from '@/app/components/form/form-buttons';
 import { Divider, styled } from '@mui/material';
-import { apiFetch } from '@/app/lib/ovara-backend/api';
 import { useSearchParams } from 'next/navigation';
+import { configuration } from '@/app/lib/configuration';
 
-export const FormBox = styled('form')(({ theme }) => ({
+const FormBox = styled('form')(({ theme }) => ({
   border: `1px solid ${ophColors.grey100}`,
   padding: theme.spacing(2.5),
   width: '100%',
 }));
-
-const getRaporttiWithSearchParams = (queryParams) => {
-  apiFetch('koulutukset-toteutukset-hakukohteet?' + queryParams);
-};
 
 export default function KoulutuksetToteutuksetHakukohteet() {
   const t = useTranslations();
@@ -34,12 +30,7 @@ export default function KoulutuksetToteutuksetHakukohteet() {
 
   return (
     <MainContainer>
-      <FormBox
-        onSubmit={(e) => {
-          getRaporttiWithSearchParams(queryParams);
-          e.preventDefault();
-        }}
-      >
+      <FormBox>
         <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
         <KoulutuksenAlkaminen />
         <Haku />
@@ -48,7 +39,13 @@ export default function KoulutuksetToteutuksetHakukohteet() {
         <HakukohteenTila />
         <Valintakoe />
         <Divider />
-        <FormButtons disabled={!alkamiskausi || !haku} />
+        <FormButtons
+          disabled={!alkamiskausi || !haku}
+          excelDownloadUrl={
+            `${configuration.ovaraBackendApiUrl}/koulutukset-toteutukset-hakukohteet?` +
+            queryParams
+          }
+        />
       </FormBox>
     </MainContainer>
   );

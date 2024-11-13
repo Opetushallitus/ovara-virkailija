@@ -22,8 +22,8 @@ class KoulutuksetToteutuksetHakukohteetRepository extends Extractors {
     val alkamiskaudet               = RepositoryUtils.extractAlkamisvuosiAndKausi(alkamiskausi)
     val raportointiorganisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(raportointiorganisaatiot)
 
-    sql"""select hk.hakukohde_oid,
-                 hk.hakukohde_nimi,
+    sql"""select hk.hakukohde_nimi,
+                 hk.hakukohde_oid,
                  k.tila as koulutuksen_tila,
                  t.tila as toteutuksen_tila,
                  hk.tila as hakukohteen_tila,

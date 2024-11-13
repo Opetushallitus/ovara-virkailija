@@ -5,7 +5,10 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.{User, UserResponse}
 import fi.oph.ovara.backend.service.{CommonService, KoulutuksetToteutuksetHakukohteetService}
 import fi.oph.ovara.backend.utils.AuthoritiesUtil
+import jakarta.servlet.http.HttpServletResponse
+import org.apache.commons.io.output.ByteArrayOutputStream
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpHeaders
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.web.csrf.CsrfToken
@@ -67,13 +70,14 @@ class Controller(
       @RequestParam("koulutuksenTila", required = false) koulutuksenTila: String,
       @RequestParam("toteutuksenTila", required = false) toteutuksenTila: String,
       @RequestParam("hakukohteenTila", required = false) hakukohteenTila: String,
-      @RequestParam("valintakoe", required = false) valintakoe: Boolean
-  ): String = {
+      @RequestParam("valintakoe", required = false) valintakoe: Boolean,
+      response: HttpServletResponse
+  ) = {
     val maybeKoulutuksenTila = Option(koulutuksenTila)
     val maybeToteutuksenTila = Option(toteutuksenTila)
     val maybeHakukohteenTila = Option(hakukohteenTila)
     val maybeValintakoe      = Option(valintakoe)
-    val res = koulutuksetToteutuksetHakukohteetService.
+    val wb = koulutuksetToteutuksetHakukohteetService.
       get(
       alkamiskausi.asScala.toList,
       haku.asScala.toList,
@@ -82,7 +86,11 @@ class Controller(
       maybeHakukohteenTila,
       maybeValintakoe
     )
-    println(res)
-    mapper.writeValueAsString(Vector())
+    val out = response.getOutputStream
+    response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"koulutukset-toteutukset-hakukohteet.xlsx\"")
+    wb.write(out)
+    out.close()
+    wb.close()
   }
 }

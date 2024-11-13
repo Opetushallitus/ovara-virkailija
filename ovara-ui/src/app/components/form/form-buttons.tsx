@@ -3,14 +3,24 @@ import { OphButton } from '@opetushallitus/oph-design-system';
 import { Box, Stack } from '@mui/material';
 import { useSearchParams } from '@/app/hooks/useSearchParams';
 
-export const FormButtons = ({ disabled }: { disabled: boolean }) => {
+export const FormButtons = ({
+  disabled,
+  excelDownloadUrl,
+}: {
+  disabled: boolean;
+  excelDownloadUrl: string;
+}) => {
   const t = useTranslations();
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'end' }}>
       <Stack direction="row" spacing={2}>
         <TyhjennaHakuehdotButton t={t} />
-        <MuodostaExcelButton t={t} disabled={disabled} />
+        <MuodostaExcelButton
+          t={t}
+          disabled={disabled}
+          excelDownloadUrl={excelDownloadUrl}
+        />
       </Stack>
     </Box>
   );
@@ -49,12 +59,20 @@ export const TyhjennaHakuehdotButton = ({
 export const MuodostaExcelButton = ({
   t,
   disabled,
+  excelDownloadUrl,
 }: {
   t: typeof useTranslations;
   disabled: boolean;
+  excelDownloadUrl: string;
 }) => {
   return (
-    <OphButton variant="contained" type="submit" disabled={disabled}>
+    <OphButton
+      variant="contained"
+      type="submit"
+      disabled={disabled}
+      href={excelDownloadUrl}
+      download
+    >
       {t('raportti.muodosta-raportti')}
     </OphButton>
   );

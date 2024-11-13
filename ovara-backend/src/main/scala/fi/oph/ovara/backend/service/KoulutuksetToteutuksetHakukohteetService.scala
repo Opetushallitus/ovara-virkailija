@@ -1,8 +1,8 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.KoulutuksetToteutuksetHakukohteetResult
 import fi.oph.ovara.backend.repository.{KoulutuksetToteutuksetHakukohteetRepository, OvaraDatabase}
-import fi.oph.ovara.backend.utils.AuthoritiesUtil
+import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter, KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES}
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
@@ -14,7 +14,7 @@ class KoulutuksetToteutuksetHakukohteetService(
 
   @Autowired
   val db: OvaraDatabase = null
-
+  
   def get(
       alkamiskausi: List[String],
       haku: List[String],
@@ -22,11 +22,11 @@ class KoulutuksetToteutuksetHakukohteetService(
       toteutuksenTila: Option[String],
       hakukohteenTila: Option[String],
       valintakoe: Option[Boolean]
-  ): Vector[KoulutuksetToteutuksetHakukohteetResult] = {
+  ): XSSFWorkbook = {
     val authentication           = SecurityContextHolder.getContext.getAuthentication
     val authorities              = authentication.getAuthorities
     val raportointiOrganisaatiot = AuthoritiesUtil.getRaportointiOrganisaatiot(authorities)
-    db.run(
+    val res = db.run(
       koulutuksetToteutuksetHakukohteetRepository.selectWithParams(
         raportointiOrganisaatiot,
         alkamiskausi,
@@ -37,5 +37,7 @@ class KoulutuksetToteutuksetHakukohteetService(
         valintakoe
       )
     )
+    
+    ExcelWriter.writeRaportti(res, KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES)
   }
 }

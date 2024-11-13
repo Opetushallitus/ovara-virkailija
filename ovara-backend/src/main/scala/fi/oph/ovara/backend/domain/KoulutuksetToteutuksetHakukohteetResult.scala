@@ -1,11 +1,11 @@
 package fi.oph.ovara.backend.domain
 
 case class KoulutuksetToteutuksetHakukohteetResult(
-    hakukohdeOid: String,
     hakukohdeNimi: Kielistetty,
-    koulutuksenTila: Option[String],
-    toteutuksenTila: Option[String],
-    hakukohteenTila: Option[String],
-    aloituspaikat: Option[Int],
-    onValintakoe: Option[Boolean]
+    hakukohdeOid: String,
+    koulutuksenTila: Option[String] = None,
+    toteutuksenTila: Option[String] = None,
+    hakukohteenTila: Option[String] = None,
+    aloituspaikat: Option[Int] = None,
+    onValintakoe: Option[Boolean] = None
 )

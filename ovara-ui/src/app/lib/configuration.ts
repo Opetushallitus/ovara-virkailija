@@ -1,7 +1,8 @@
 export const DOMAIN =
   process.env.APP_URL ?? process.env.VIRKAILIJA_URL ?? 'https://localhost:3405';
 
-export const OVARA_BACKEND_DOMAIN = process.env.OVARA_BACKEND;
+export const OVARA_BACKEND_DOMAIN =
+  process.env.OVARA_BACKEND ?? 'http://localhost:8080';
 
 export const isLocalhost = DOMAIN.includes('localhost');
 
