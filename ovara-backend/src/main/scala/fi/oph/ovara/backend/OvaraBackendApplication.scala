@@ -1,5 +1,6 @@
 package fi.oph.ovara.backend;
 
+import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.{ApplicationArguments, ApplicationRunner, SpringApplication}
 import org.springframework.context.annotation.{Bean, Profile}
@@ -14,11 +15,11 @@ object OvaraBackendApplication {
 @SpringBootApplication
 class OvaraBackendApplication {
 
+  val LOG = LoggerFactory.getLogger(classOf[OvaraBackendApplication]);
+
   @Bean
   def applicationRunner(): ApplicationRunner =
-    new ApplicationRunner:
-      override def run(args: ApplicationArguments): Unit =
-        println("STARTED OVARA APPLICATION RUNNER")
+    (args: ApplicationArguments) => LOG.info("STARTED OVARA APPLICATION RUNNER")
 
   @Profile(Array("dev"))
   @Bean

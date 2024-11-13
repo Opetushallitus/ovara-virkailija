@@ -6,7 +6,7 @@ import fi.oph.ovara.backend.domain.{User, UserResponse}
 import fi.oph.ovara.backend.service.{CommonService, KoulutuksetToteutuksetHakukohteetService}
 import fi.oph.ovara.backend.utils.AuthoritiesUtil
 import jakarta.servlet.http.HttpServletResponse
-import org.apache.commons.io.output.ByteArrayOutputStream
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -23,6 +23,7 @@ class Controller(
     commonService: CommonService,
     koulutuksetToteutuksetHakukohteetService: KoulutuksetToteutuksetHakukohteetService
 ) {
+  val LOG = LoggerFactory.getLogger(classOf[Controller]);
 
   @Value("${ovara.ui.url}")
   val ovaraUiUrl: String = null
@@ -86,11 +87,18 @@ class Controller(
       maybeHakukohteenTila,
       maybeValintakoe
     )
-    val out = response.getOutputStream
-    response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"koulutukset-toteutukset-hakukohteet.xlsx\"")
-    wb.write(out)
-    out.close()
-    wb.close()
+    try {
+      LOG.info(s"Sending excel with the response")
+      val out = response.getOutputStream
+      response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"koulutukset-toteutukset-hakukohteet.xlsx\"")
+      wb.write(out)
+      out.close()
+      wb.close()
+    } catch {
+      case e: Exception =>
+        LOG.error(s"Error sending excel: ${e.getMessage}")
+        response.sendError(500)
+    }
   }
 }
