@@ -6,7 +6,7 @@ import fi.oph.ovara.backend.domain.{User, UserResponse}
 import fi.oph.ovara.backend.service.{CommonService, KoulutuksetToteutuksetHakukohteetService}
 import fi.oph.ovara.backend.utils.AuthoritiesUtil
 import jakarta.servlet.http.HttpServletResponse
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -15,6 +15,8 @@ import org.springframework.security.web.csrf.CsrfToken
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
 import org.springframework.web.servlet.view.RedirectView
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import scala.jdk.CollectionConverters.*
 
 @RestController
@@ -23,7 +25,7 @@ class Controller(
     commonService: CommonService,
     koulutuksetToteutuksetHakukohteetService: KoulutuksetToteutuksetHakukohteetService
 ) {
-  val LOG = LoggerFactory.getLogger(classOf[Controller]);
+  val LOG: Logger = LoggerFactory.getLogger(classOf[Controller]);
 
   @Value("${ovara.ui.url}")
   val ovaraUiUrl: String = null
@@ -73,7 +75,7 @@ class Controller(
       @RequestParam("hakukohteenTila", required = false) hakukohteenTila: String,
       @RequestParam("valintakoe", required = false) valintakoe: Boolean,
       response: HttpServletResponse
-  ) = {
+  ): Unit = {
     val maybeKoulutuksenTila = Option(koulutuksenTila)
     val maybeToteutuksenTila = Option(toteutuksenTila)
     val maybeHakukohteenTila = Option(hakukohteenTila)
@@ -88,10 +90,12 @@ class Controller(
       maybeValintakoe
     )
     try {
-      LOG.info(s"Sending excel with the response")
+      LOG.info(s"Sending excel in the response")
+      val date: LocalDateTime = LocalDateTime.now().withNano(0)
+      val dateTimeStr = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
       val out = response.getOutputStream
       response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"koulutukset-toteutukset-hakukohteet.xlsx\"")
+      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, s"attachment; filename=\"koulutukset-toteutukset-hakukohteet-$dateTimeStr.xlsx\"")
       wb.write(out)
       out.close()
       wb.close()
