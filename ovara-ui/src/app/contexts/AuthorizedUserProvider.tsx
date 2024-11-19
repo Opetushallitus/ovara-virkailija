@@ -1,11 +1,7 @@
 'use client';
 import { useContext, createContext, ReactNode } from 'react';
 import { useFetchUser } from '@/app/hooks/useFetchUser';
-
-type User = {
-  userOid: string;
-  authorities: Array<string>;
-};
+import { User } from '@/app/lib/types/common';
 
 const AuthorizedUserContext = createContext<User | null>(null);
 

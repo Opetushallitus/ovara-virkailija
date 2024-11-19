@@ -1,4 +1,5 @@
 import { sort } from 'remeda';
+import { set } from 'lodash';
 
 export type KoulutuksenAlkaminen = {
   alkamiskausinimi: string;
@@ -43,3 +44,14 @@ export const getSortedKoulutuksenAlkamisKaudet = (
 
   return [];
 };
+
+// next-intl ei salli pisteitä avaimissa
+// ks. https://github.com/amannn/next-intl/discussions/148#discussioncomment-4274218
+export function removeDotsFromTranslations(
+  translations: { [s: string]: string } | ArrayLike<string>,
+) {
+  return Object.entries(translations).reduce(
+    (acc, [key, value]) => set(acc, key, value),
+    {},
+  );
+}

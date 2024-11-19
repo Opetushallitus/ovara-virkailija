@@ -1,12 +1,8 @@
 import { useEffect, useState } from 'react';
 import { apiFetch } from '@/app/lib/ovara-backend/api';
+import { User } from '@/app/lib/types/common';
 
-type User = {
-  userOid: string;
-  authorities: Array<string>;
-};
-
-type UserResponse = {
+export type UserResponse = {
   user: User;
 };
 

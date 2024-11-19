@@ -14,6 +14,6 @@ export const isTesting = process.env.TEST === 'true';
 
 export const configuration = {
   raamitUrl: `${DOMAIN}/virkailija-raamit/apply-raamit.js`,
-  asiointiKieliUrl: `${DOMAIN}/oppijanumerorekisteri-service/henkilo/current/asiointiKieli`,
   ovaraBackendApiUrl: `${OVARA_BACKEND_DOMAIN}/ovara-backend/api`,
+  virkailijaUrl: DOMAIN,
 } as const;
