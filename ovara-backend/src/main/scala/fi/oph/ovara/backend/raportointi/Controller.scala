@@ -3,13 +3,14 @@ package fi.oph.ovara.backend.raportointi
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.{User, UserResponse}
-import fi.oph.ovara.backend.service.{CommonService, KoulutuksetToteutuksetHakukohteetService}
+import fi.oph.ovara.backend.service.{CommonService, KoulutuksetToteutuksetHakukohteetService, OnrService}
 import fi.oph.ovara.backend.utils.AuthoritiesUtil
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
+import org.springframework.http.{HttpHeaders, MediaType}
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.web.csrf.CsrfToken
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
@@ -22,6 +23,7 @@ import scala.jdk.CollectionConverters.*
 @RestController
 @RequestMapping(path = Array("api"))
 class Controller(
+    onrService: OnrService,
     commonService: CommonService,
     koulutuksetToteutuksetHakukohteetService: KoulutuksetToteutuksetHakukohteetService
 ) {
@@ -46,9 +48,14 @@ class Controller(
           if (userDetails == null)
             null
           else
+            val asiointikieli = onrService.getAsiointikieli(userDetails.getUsername) match
+              case Left(e) => None
+              case Right(v) => Some(v)
+
             User(
               userOid = userDetails.getUsername,
-              authorities = AuthoritiesUtil.getRaportointiAuthorities(userDetails.getAuthorities)
+              authorities = AuthoritiesUtil.getRaportointiAuthorities(userDetails.getAuthorities),
+              asiointikieli = asiointikieli
             )
       )
     )

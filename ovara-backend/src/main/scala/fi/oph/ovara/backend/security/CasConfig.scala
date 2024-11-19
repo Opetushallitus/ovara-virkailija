@@ -1,6 +1,8 @@
 package fi.oph.ovara.backend.security
 
+import fi.oph.ovara.backend.OvaraBackendApplication.CALLER_ID
 import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl
+import fi.vm.sade.javautils.nio.cas.{CasClient, CasClientBuilder, CasConfig}
 import org.apereo.cas.client.session.SingleSignOutFilter
 import org.apereo.cas.client.validation.{Cas20ServiceTicketValidator, TicketValidator}
 import org.springframework.beans.factory.annotation.Value
@@ -20,12 +22,34 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfig  {
+class CasConfig  {
   @Value("${cas.url}")
   val cas_url: String = null
 
   @Value("${ovara.backend.url}")
   val ovara_backend_url: String = null
+
+  @Value("${opintopolku.virkailija.domain}")
+  val opintopolku_virkailija_domain: String = null
+
+  @Value("${ovara-backend.cas.username}")
+  val cas_username: String = null
+
+  @Value("${ovara-backend.cas.password}")
+  val cas_password: String = null
+
+  @Bean
+  def createCasClient(): CasClient = CasClientBuilder.build(CasConfig.CasConfigBuilder(
+    cas_username,
+    cas_password,
+    s"$opintopolku_virkailija_domain/cas",
+    s"$opintopolku_virkailija_domain/oppijanumerorekisteri-service",
+    CALLER_ID,
+    CALLER_ID,
+    "/j_spring_cas_security_check",
+
+  ).setJsessionName("JSESSIONID").build()
+  )
 
   @Bean
   def serviceProperties(): ServiceProperties = {
