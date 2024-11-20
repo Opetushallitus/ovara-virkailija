@@ -5,12 +5,12 @@ import {
 } from './utils';
 
 describe('getSortedKoulutuksenAlkamiskaudet', () => {
-  test('should return array with henkilokohtainen_suunnitelma if alkamisvuodet is undefined', () => {
+  test('should return array with henkilokohtainen-suunnitelma if alkamisvuodet is undefined', () => {
     const alkamisvuodet = null;
     expect(getSortedKoulutuksenAlkamisKaudet(alkamisvuodet)).toEqual([
       {
-        alkamiskausinimi: 'yleinen.henkilokohtainen_suunnitelma',
         value: 'henkilokohtainen_suunnitelma',
+        alkamiskausinimi: 'yleinen.henkilokohtainen-suunnitelma',
       },
     ]);
   });
@@ -19,8 +19,8 @@ describe('getSortedKoulutuksenAlkamiskaudet', () => {
     const alkamisvuodet = ['2024', '2021', '2022'];
     const result = [
       {
-        alkamiskausinimi: 'yleinen.henkilokohtainen_suunnitelma',
         value: 'henkilokohtainen_suunnitelma',
+        alkamiskausinimi: 'yleinen.henkilokohtainen-suunnitelma',
       },
       {
         alkamisvuosi: 2024,

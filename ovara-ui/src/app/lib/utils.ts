@@ -35,8 +35,8 @@ export const getSortedKoulutuksenAlkamisKaudet = (
 
     sortedAlkamiskaudet.unshift({
       alkamisvuosi: undefined,
-      alkamiskausinimi: 'yleinen.henkilokohtainen_suunnitelma',
       value: 'henkilokohtainen_suunnitelma',
+      alkamiskausinimi: 'yleinen.henkilokohtainen-suunnitelma',
     });
 
     return sortedAlkamiskaudet;
