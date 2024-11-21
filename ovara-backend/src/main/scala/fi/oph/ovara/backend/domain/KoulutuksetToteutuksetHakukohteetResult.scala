@@ -7,5 +7,7 @@ case class KoulutuksetToteutuksetHakukohteetResult(
     toteutuksenTila: Option[String] = None,
     hakukohteenTila: Option[String] = None,
     aloituspaikat: Option[Int] = None,
-    onValintakoe: Option[Boolean] = None
+    onValintakoe: Option[Boolean] = None,
+    voiSuorittaaKaksoistutkinnon: Option[Boolean] = None,
+    jarjestaaUrheilijanAmmKoulutusta: Option[Boolean] = None
 )
