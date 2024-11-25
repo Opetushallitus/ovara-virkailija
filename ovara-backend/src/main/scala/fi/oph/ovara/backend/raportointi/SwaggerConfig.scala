@@ -1,8 +1,28 @@
 package fi.oph.ovara.backend.raportointi
 
-import org.springframework.context.annotation.Bean
-import org.springframework.web.servlet.config.annotation.EnableWebMvc
+import io.swagger.v3.oas.models.{Components, OpenAPI}
+import io.swagger.v3.oas.models.info.Info
+import org.springdoc.core.models.GroupedOpenApi
+import org.springframework.context.annotation.{Bean, Configuration}
 
-@EnableWebMvc
+@Configuration
 class SwaggerConfig {
+
+  @Bean
+  def publicApi(): GroupedOpenApi = {
+    GroupedOpenApi.builder()
+      .group("ovara-apis")
+      .pathsToMatch("/**")
+      .build()
+  }
+
+  @Bean
+  def ovaraOpenApi(): OpenAPI = {
+    OpenAPI()
+      .info(Info().title("Ovara API").version("1"))
+      .components(
+        Components()
+      )
+  }
+
 }

@@ -137,4 +137,19 @@ class CasConfig  {
       .exceptionHandling(c => c.authenticationEntryPoint(casAuthenticationEntryPoint))
       .build()
   }
+
+  @Bean
+  def swaggerFilterChain(http: HttpSecurity): SecurityFilterChain = {
+    val SWAGGER_WHITELIST = List(
+      "/swagger-resources",
+      "/swagger-resources/**",
+      "/swagger-ui.html",
+      "/swagger-ui/**"
+    )
+
+    http
+    .securityMatcher(SWAGGER_WHITELIST*)
+      .authorizeHttpRequests(requests => requests.anyRequest().permitAll())
+      .build()
+  }
 }
