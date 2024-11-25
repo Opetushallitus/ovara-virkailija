@@ -24,8 +24,15 @@ const LocalizationContent = ({
 }) => {
   const locale = lng ?? 'fi';
   const messages = useFetchTranslations(locale) as IntlMessages;
+
+  const timeZone = 'Europe/Helsinki';
+
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <NextIntlClientProvider
+      locale={locale}
+      messages={messages}
+      timeZone={timeZone}
+    >
       {children}
     </NextIntlClientProvider>
   );
