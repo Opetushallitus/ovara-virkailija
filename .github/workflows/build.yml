@@ -73,11 +73,8 @@ jobs:
           export ARTIFACT_NAME="ovara-backend"
           export BASE_IMAGE="baseimage-fatjar-openjdk21:master"
           source ci-tools/common/setup-tools.sh
-          printf "HELLO\n"
-          ls ovara-backend
-          env
           mv ovara-backend/target/ovara-backend-*.jar $DOCKER_BUILD_DIR/artifact/${ARTIFACT_NAME}.jar
-          cp -vr ovara-backend/src/main/resources/application.properties $DOCKER_BUILD_DIR/config/
+          cp -vr ovara-backend/src/main/resources/oph-configuration/application.properties.template $DOCKER_BUILD_DIR/config/oph-configuration/application.properties.template
           ./ci-tools/common/pull-image.sh
           ./ci-tools/github-build/build-fatjar.sh $ARTIFACT_NAME
           ./ci-tools/github-build/upload-image.sh $ARTIFACT_NAME
