@@ -1,6 +1,3 @@
-spring.application.name=ovara-backend
-server.servlet.context-path=/ovara-backend
-
 # ENVIRONMENT SPECIFIC CONFIG
 # DB CONNECTION
 spring.datasource.url={{host_postgresql_ovara}}
@@ -9,8 +6,9 @@ spring.datasource.password={{ovara_backend_postgresql_password}}
 
 # CAS
 opintopolku.virkailija.domain={{host_virkailija}}
-ovara.backend.url=https://${opintopolku.virkailija.domain}/ovara-backend
-ovara.ui.url=https://${opintopolku.virkailija.domain}/raportointi
-cas.url=https://${opintopolku.virkailija.domain}/cas
+opintopolku.virkailija.url=https://${opintopolku.virkailija.domain}
+ovara.backend.url=${opintopolku.virkailija.url}/ovara-backend
+ovara.ui.url=${opintopolku.virkailija.url}/raportointi
+cas.url=${opintopolku.virkailija.url}/cas
 ovara-backend.cas.username={{ovara_backend_cas_username}}
 ovara-backend.cas.password={{ovara_backend_cas_password}}
