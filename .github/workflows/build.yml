@@ -75,6 +75,8 @@ jobs:
           source ci-tools/common/setup-tools.sh
           mv ovara-backend/target/ovara-backend-*.jar $DOCKER_BUILD_DIR/artifact/${ARTIFACT_NAME}.jar
           cp -vr ovara-backend/src/main/resources/oph-configuration $DOCKER_BUILD_DIR/config/oph-configuration/
+          ls $DOCKER_BUILD_DIR/config/oph-configuration/
+          cat $DOCKER_BUILD_DIR/config/oph-configuration/application.properties.template
           ./ci-tools/common/pull-image.sh
           ./ci-tools/github-build/build-fatjar.sh $ARTIFACT_NAME
           ./ci-tools/github-build/upload-image.sh $ARTIFACT_NAME
