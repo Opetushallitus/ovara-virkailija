@@ -29,7 +29,7 @@ class CasConfig  {
   @Value("${ovara.backend.url}")
   val ovara_backend_url: String = null
 
-  @Value("${opintopolku.virkailija.domain}")
+  @Value("${opintopolku.virkailija.url}")
   val opintopolku_virkailija_domain: String = null
 
   @Value("${ovara-backend.cas.username}")
