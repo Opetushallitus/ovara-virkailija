@@ -22,7 +22,7 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint
 
 @Configuration
 @EnableWebSecurity
-class CasConfig  {
+class SecurityConfig  {
   @Value("${cas.url}")
   val cas_url: String = null
 
@@ -113,6 +113,16 @@ class CasConfig  {
       .exceptionHandling(exceptionHandling =>
         exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
       )
+      .build()
+  }
+
+  @Bean
+  @Order(3)
+  def healthcheckFilterChain(http: HttpSecurity): SecurityFilterChain = {
+    http
+      .securityMatcher("/api/healthcheck")
+      .authorizeHttpRequests(requests => requests.anyRequest.permitAll)
+      .csrf(c => c.disable)
       .build()
   }
 
