@@ -7,7 +7,8 @@ on:
       - '**.md'
 
 jobs:
-  build:
+  # BACKEND
+  build-backend:
     runs-on: ubuntu-latest
 
     steps:
@@ -47,8 +48,8 @@ jobs:
           cd ovara-backend
           mvn clean package -B -DskipTests
 
-  deploy-container:
-    needs: build
+  deploy-backend-container:
+    needs: build-backend
     runs-on: ubuntu-latest
 
     steps:
@@ -78,3 +79,70 @@ jobs:
           ./ci-tools/common/pull-image.sh
           ./ci-tools/github-build/build-fatjar.sh $ARTIFACT_NAME
           ./ci-tools/github-build/upload-image.sh $ARTIFACT_NAME
+
+  # UI
+  lint:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: |
+          cd ovara-ui
+          npm ci
+      - name: Run lint
+        run: |
+          cd ovara-ui
+          # npm run typecheck
+          npm run lint
+
+  test:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: |
+          cd ovara-ui
+          npm ci
+      - name: Run unit tests
+        run: |
+          cd ovara-ui
+          npm test
+
+  deploy-ui-zip:
+    needs: [lint, test]
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: |
+          cd ovara-ui
+          npm ci --no-audit --prefer-offline
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OPH_UTILITY_ROLE_ARN }}
+          role-session-name: ovara-ui-deploy-zip
+          aws-region: eu-west-1
+      - name: Deploy zip to s3
+        env:
+          bucket: ${{ secrets.BUCKET_NAME }}
+        run: |
+          cd ovara-ui
+          SKIP_TYPECHECK=true npm run build
+          zip -r ga-${{github.run_number}}.zip .next/*.* .next/BUILD_ID .next/static .next/standalone public
+          aws s3 cp --no-progress ga-${{github.run_number}}.zip s3://"$bucket"/ga-${{github.run_number}}.zip
