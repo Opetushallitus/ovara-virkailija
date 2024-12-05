@@ -1,13 +1,14 @@
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 import { OphNextJsThemeProvider } from '@opetushallitus/oph-design-system/next/theme';
 import type { Metadata } from 'next';
-import { NextIntlClientProvider } from 'next-intl';
-import { getLocale, getMessages } from 'next-intl/server';
-import { type OphLanguage } from '@opetushallitus/oph-design-system';
 import Script from 'next/script';
 import { configuration } from './lib/configuration';
-import PermissionProvider from './components/permission-provider';
-import ReactQueryClientProvider from './components/react-query-client-provider';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
+import { THEME_OVERRIDES } from '@/app/theme';
+import { AuthorizedUserProvider } from './contexts/AuthorizedUserProvider';
+import LocalizationProvider from './components/localization-provider';
+import { getLocale } from 'next-intl/server';
+import { LanguageCode } from './lib/types/common';
 
 export const metadata: Metadata = {
   title: 'Opiskelijavalinnan raportointi',
@@ -19,23 +20,20 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = (await getLocale()) as OphLanguage;
-  const messages = await getMessages();
+  const locale = (await getLocale()) as LanguageCode;
 
   return (
     <html lang={locale}>
       <Script src={configuration.raamitUrl} />
       <body>
         <AppRouterCacheProvider>
-          <NextIntlClientProvider messages={messages}>
-            <ReactQueryClientProvider>
-              <PermissionProvider>
-                <OphNextJsThemeProvider variant="oph" lang={locale}>
-                  {children}
-                </OphNextJsThemeProvider>
-              </PermissionProvider>
-            </ReactQueryClientProvider>
-          </NextIntlClientProvider>
+          <OphNextJsThemeProvider variant="oph" overrides={THEME_OVERRIDES}>
+            <AuthorizedUserProvider>
+              <LocalizationProvider>
+                <NuqsAdapter>{children}</NuqsAdapter>
+              </LocalizationProvider>
+            </AuthorizedUserProvider>
+          </OphNextJsThemeProvider>
         </AppRouterCacheProvider>
       </body>
     </html>

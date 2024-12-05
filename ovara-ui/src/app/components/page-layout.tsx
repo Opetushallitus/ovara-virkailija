@@ -1,13 +1,6 @@
 import { Box } from '@mui/material';
-import { PageContent } from './page-content';
 
-export const PageLayout = ({
-  header,
-  children,
-}: {
-  header: React.ReactNode;
-  children: React.ReactNode;
-}) => {
+export const PageLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <Box
       width="100%"
@@ -16,8 +9,7 @@ export const PageLayout = ({
       rowGap={4}
       alignItems="stretch"
     >
-      {header}
-      <PageContent>{children}</PageContent>
+      {children}
     </Box>
   );
 };

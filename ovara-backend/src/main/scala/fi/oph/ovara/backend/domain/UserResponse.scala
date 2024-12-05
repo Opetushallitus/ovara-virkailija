@@ -2,5 +2,8 @@ package fi.oph.ovara.backend.domain
 
 import scala.beans.BeanProperty
 
-case class UserResponseUser(@BeanProperty userOid: String)
-case class UserResponse(@BeanProperty user: UserResponseUser)
+case class User(@BeanProperty userOid: String,
+                @BeanProperty authorities: List[String],
+                @BeanProperty asiointikieli: Option[String] = None)
+
+case class UserResponse(@BeanProperty user: User)

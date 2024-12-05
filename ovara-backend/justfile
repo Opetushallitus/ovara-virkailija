@@ -3,14 +3,20 @@ remote-ip := "10.20.89.144"
 _default:
     just --list --unsorted
 
-mfa-pallero-bastion:
-    ssh pallero-bastion
+ssh-to-remote-db-in-pallero:
+    ssh -N -L 5433:rds-privatelink.ovara.testiopintopolku.fi:5432 pallero-bastion
+
+
 
 connect-to-remote-db:
     sshuttle -l 0.0.0.0 -r pallero-bastion {{remote-ip}}/32
 
+# DB DUMP FOR LOCAL POSTGRES
 dump-remote-db:
     docker run --rm -it -v "$(pwd)":/work -w /work postgres pg_dump -h {{remote-ip}} -p 5432 -U app -Fc ovara -n pub -n int -f ovara.dump
+
+watch-dump-progress:
+    watch -n 1 du -h ovara.dump
 
 start-postgresql:
     docker compose up

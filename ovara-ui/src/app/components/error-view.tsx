@@ -13,7 +13,7 @@ export function ErrorView({
     console.error(error);
   });
 
-  const t = useTranslations('Error');
+  const t = useTranslations('error');
 
   if (error instanceof FetchError) {
     return (

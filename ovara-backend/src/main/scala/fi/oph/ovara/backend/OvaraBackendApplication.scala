@@ -1,28 +1,27 @@
 package fi.oph.ovara.backend;
 
-import fi.oph.ovara.backend.repository.OvaraDatabase
-import org.springframework.beans.factory.annotation.Autowired
+import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.{ApplicationArguments, ApplicationRunner, SpringApplication}
 import org.springframework.context.annotation.{Bean, Profile}
 import org.springframework.web.servlet.config.annotation.{CorsRegistry, WebMvcConfigurer}
 
 object OvaraBackendApplication {
-    def main(args: Array[String]): Unit = {
-      SpringApplication.run(classOf[OvaraBackendApplication], args*)
-    }
+  val CALLER_ID = "1.2.246.562.10.00000000001.ovara-virkailija"
+  
+  def main(args: Array[String]): Unit = {
+    SpringApplication.run(classOf[OvaraBackendApplication], args *)
+  }
 }
 
 @SpringBootApplication
 class OvaraBackendApplication {
-  @Autowired
-  val db: OvaraDatabase = null
+
+  val LOG: Logger = LoggerFactory.getLogger(classOf[OvaraBackendApplication])
 
   @Bean
   def applicationRunner(): ApplicationRunner =
-    new ApplicationRunner:
-      override def run(args: ApplicationArguments): Unit =
-        println("STARTED OVARA APPLICATION RUNNER")
+    (args: ApplicationArguments) => LOG.info("STARTED OVARA APPLICATION RUNNER")
 
   @Profile(Array("dev"))
   @Bean

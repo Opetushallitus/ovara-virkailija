@@ -1,6 +1,7 @@
 package fi.oph.ovara.backend.repository
 
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Component
@@ -16,6 +17,9 @@ import scala.concurrent.duration.Duration
 class OvaraDatabase(@Value("${spring.datasource.url}") url: String,
                     @Value("${spring.datasource.username}") username: String,
                     @Value("${spring.datasource.password}") password: String) {
+
+  val LOG = LoggerFactory.getLogger(classOf[OvaraDatabase]);
+
   private def hikariConfig: HikariConfig = {
     val config = new HikariConfig()
     config.setJdbcUrl(url)
@@ -38,7 +42,8 @@ class OvaraDatabase(@Value("${spring.datasource.url}") url: String,
   }
 
   def run[R](operations: DBIO[R]) = {
-    println("RUN")
+    LOG.info("Running db query.")
+
     Await.result(
       db.run(operations),
       Duration(100, TimeUnit.SECONDS)

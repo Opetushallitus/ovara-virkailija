@@ -1,12 +1,51 @@
 {
-  "Header": {
+  "header": {
     "home": "Opiskelijavalinnan raportointi",
-    "opo-raportti": "OPO-raportti"
+    "oporaportti": "OPO-raportti",
+    "koulutukset-toteutukset-hakukohteet": "Koulutukset, toteutukset ja hakukohteet"
   },
-  "Error": {
+  "error": {
     "palvelin": "Palvelinpyyntö epäonnistui!",
     "virhekoodi": "Virhekoodi: ",
     "uudelleenyritys": "Yritä uudelleen",
-    "tuntematon": "Jokin meni vikaan"
+    "tuntematon": "Jokin meni vikaan",
+    "404": {
+      "otsikko": "Sivua ei löytynyt",
+      "teksti": "Linkki on virheellinen tai vanhentunut."
+    }
+  },
+  "raporttilista": {
+    "title": "Raportti",
+    "oporaportti": "OPO-raportti",
+    "koulutukset-toteutukset-hakukohteet": "Koulutukset, toteutukset ja hakukohteet"
+  },
+  "yleinen": {
+    "henkilokohtainen-suunnitelma": "Henkilökohtainen suunnitelma",
+    "palaa-etusivulle": "Palaa etusivulle",
+    "pakolliset-kentat": "Tähdellä merkityt kentät ovat pakollisia.",
+    "kevat": "kevät",
+    "syksy": "syksy",
+    "valitse": "Valitse...",
+    "valitsevaihtoehto": "Valitse vaihtoehdoista",
+    "tila": {
+      "julkaistu": "Julkaistu",
+      "luonnos": "Luonnos",
+      "arkistoitu": "Arkistoitu"
+    }
+  },
+  "raportti": {
+    "alkamiskausi": "Koulutus alkaa",
+    "haku": "Haku",
+    "koulutuksen-tila": "Koulutuksen tila",
+    "toteutuksen-tila": "Toteutuksen tila",
+    "hakukohteen-tila": "Hakukohteen tila",
+    "valintakoe": "Valintakoe",
+    "radio-group": {
+      "neutral": "Ei merkitystä",
+      "yes": "Kyllä",
+      "no": "Ei"
+    },
+    "tyhjenna-hakuehdot": "Tyhjennä hakuehdot",
+    "muodosta-raportti": "Muodosta raportti (.xlsx)"
   }
 }

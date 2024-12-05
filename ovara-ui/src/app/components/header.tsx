@@ -5,14 +5,17 @@ import { Typography } from '@mui/material';
 import { PageContent } from './page-content';
 import { OphButton } from '@opetushallitus/oph-design-system';
 
+import { useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
 const DEFAULT_BOX_BORDER = `2px solid ${ophColors.grey100}`;
 
-export type HeaderProps = {
-  title?: React.ReactNode;
-  isHome?: boolean;
-};
-
-export default function Header({ title, isHome = false }: HeaderProps) {
+export default function Header() {
+  const t = useTranslations('header');
+  const currentRoute = usePathname();
+  const isHome = currentRoute == '/';
+  const headerTranslationKey = isHome
+    ? 'home'
+    : currentRoute.match(/([a-z]+-?)+/gm)?.join('.');
   return (
     <header
       style={{
@@ -39,7 +42,7 @@ export default function Header({ title, isHome = false }: HeaderProps) {
         )}
         <Typography variant="h1">
           {isHome ? '' : '> '}
-          {title}
+          {t(headerTranslationKey)}
         </Typography>
       </PageContent>
     </header>

@@ -1,10 +1,15 @@
 package fi.oph.ovara.backend.security
 
+import fi.oph.ovara.backend.OvaraBackendApplication.CALLER_ID
 import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl
+import fi.vm.sade.javautils.nio.cas.{CasClient, CasClientBuilder, CasConfig}
+import org.apereo.cas.client.session.SingleSignOutFilter
 import org.apereo.cas.client.validation.{Cas20ServiceTicketValidator, TicketValidator}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.{Bean, Configuration}
+import org.springframework.core.annotation.Order
 import org.springframework.core.env.Environment
+import org.springframework.http.HttpStatus
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.cas.ServiceProperties
 import org.springframework.security.cas.authentication.CasAuthenticationProvider
@@ -13,15 +18,38 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.HttpStatusEntryPoint
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfig  {
+class CasConfig  {
   @Value("${cas.url}")
   val cas_url: String = null
 
   @Value("${ovara.backend.url}")
   val ovara_backend_url: String = null
+
+  @Value("${opintopolku.virkailija.domain}")
+  val opintopolku_virkailija_domain: String = null
+
+  @Value("${ovara-backend.cas.username}")
+  val cas_username: String = null
+
+  @Value("${ovara-backend.cas.password}")
+  val cas_password: String = null
+
+  @Bean
+  def createCasClient(): CasClient = CasClientBuilder.build(CasConfig.CasConfigBuilder(
+    cas_username,
+    cas_password,
+    s"$opintopolku_virkailija_domain/cas",
+    s"$opintopolku_virkailija_domain/oppijanumerorekisteri-service",
+    CALLER_ID,
+    CALLER_ID,
+    "/j_spring_cas_security_check",
+
+  ).setJsessionName("JSESSIONID").build()
+  )
 
   @Bean
   def serviceProperties(): ServiceProperties = {
@@ -62,26 +90,66 @@ class SecurityConfig  {
   }
 
   @Bean
-  def casAuthenticationFilter(authenticationManager: AuthenticationManager, serviceProperties: ServiceProperties): CasAuthenticationFilter = {
+  def casFilterChain(http: HttpSecurity, authenticationManager: AuthenticationManager, serviceProperties: ServiceProperties): SecurityFilterChain = {
     val casAuthenticationFilter = CasAuthenticationFilter()
     casAuthenticationFilter.setAuthenticationManager(authenticationManager)
     casAuthenticationFilter.setServiceProperties(serviceProperties)
     casAuthenticationFilter.setFilterProcessesUrl("/auth/login")
-    casAuthenticationFilter
+
+    val singleSignOutFilter = new SingleSignOutFilter()
+
+    http
+      .securityMatcher("/auth/login")
+      .addFilter(casAuthenticationFilter)
+      .addFilterBefore(singleSignOutFilter, classOf[CasAuthenticationFilter])
+      .build()
   }
 
   @Bean
-  def filterChain(http: HttpSecurity, casAuthenticationEntryPoint: CasAuthenticationEntryPoint): SecurityFilterChain = {
+  def apiDefaultFilterChain(http: HttpSecurity): SecurityFilterChain = {
     http
-      .authorizeHttpRequests(authorizeHttpRequests =>
-        authorizeHttpRequests
-          .requestMatchers("/api/user").permitAll()
-          .requestMatchers("/api/**").authenticated()
-          .anyRequest().permitAll()
-      )
+      .securityMatcher("/api/**")
+      .authorizeHttpRequests(requests => requests.anyRequest.fullyAuthenticated)
       .exceptionHandling(exceptionHandling =>
-        exceptionHandling.authenticationEntryPoint(casAuthenticationEntryPoint)
+        exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
       )
+      .build()
+  }
+
+  @Bean
+  @Order(1)
+  def csrfFilterChain(http: HttpSecurity): SecurityFilterChain = {
+    http
+      .securityMatcher("/api/csrf")
+      .authorizeHttpRequests(requests => requests.anyRequest.permitAll)
+      .exceptionHandling(exceptionHandling =>
+        exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+      )
+      .build()
+  }
+
+  @Bean
+  @Order(2)
+  def apiLoginFilterChain(http: HttpSecurity, casAuthenticationEntryPoint: CasAuthenticationEntryPoint): SecurityFilterChain = {
+    http
+      .securityMatcher("/api/login")
+      .authorizeHttpRequests(requests => requests.anyRequest.fullyAuthenticated)
+      .exceptionHandling(c => c.authenticationEntryPoint(casAuthenticationEntryPoint))
+      .build()
+  }
+
+  @Bean
+  def swaggerFilterChain(http: HttpSecurity): SecurityFilterChain = {
+    val SWAGGER_WHITELIST = List(
+      "/swagger-resources",
+      "/swagger-resources/**",
+      "/swagger-ui.html",
+      "/swagger-ui/**"
+    )
+
+    http
+    .securityMatcher(SWAGGER_WHITELIST*)
+      .authorizeHttpRequests(requests => requests.anyRequest().permitAll())
       .build()
   }
 }
