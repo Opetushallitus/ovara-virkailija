@@ -37,26 +37,27 @@ class AuthoritiesUtilSpec extends AnyFlatSpec {
   }
 
   "getRaportointiOrganisaatiot" should "return one organisaatio for user" in {
-    val allAuthorities: java.util.Collection[SimpleGrantedAuthority] = List(
-      SimpleGrantedAuthority("ROLE_APP_SUORITUSREKISTERI_CRUD_1.2.246.562.10.654321"),
-      SimpleGrantedAuthority("ROLE_APP_RAPORTOINTI_1.2.246.562.10.654321"),
-      SimpleGrantedAuthority("ROLE_APP_RAPORTOINTI_OPO"),
-      SimpleGrantedAuthority("ROLE_APP_KOUTA"),
-      SimpleGrantedAuthority("ROLE_APP_RAPORTOINTI_KK")
-    ).asJava
+    val allAuthorities = List(
+      "ROLE_APP_SUORITUSREKISTERI_CRUD_1.2.246.562.10.654321",
+      "ROLE_APP_RAPORTOINTI_1.2.246.562.10.654321",
+      "ROLE_APP_RAPORTOINTI_OPO",
+      "ROLE_APP_KOUTA",
+      "ROLE_APP_RAPORTOINTI_KK"
+    )
     assert(AuthoritiesUtil.getRaportointiOrganisaatiot(allAuthorities) == List("1.2.246.562.10.654321"))
   }
 
   it should "return all organisaatiot the user has raportointi rights for" in {
-    val allAuthorities: java.util.Collection[SimpleGrantedAuthority] = List(
-      SimpleGrantedAuthority("ROLE_APP_SUORITUSREKISTERI_CRUD_1.2.246.562.10.654321"),
-      SimpleGrantedAuthority("ROLE_APP_RAPORTOINTI_1.2.246.562.10.789101112"),
-      SimpleGrantedAuthority("ROLE_APP_RAPORTOINTI_OPO"),
-      SimpleGrantedAuthority("ROLE_APP_KOUTA"),
-      SimpleGrantedAuthority("ROLE_APP_RAPORTOINTI_1.2.246.562.10.654321"),
-      SimpleGrantedAuthority("ROLE_APP_RAPORTOINTI_KK"),
-      SimpleGrantedAuthority("ROLE_APP_RAPORTOINTI_1.2.246.562.10.333334445"),
-    ).asJava
-    assert(AuthoritiesUtil.getRaportointiOrganisaatiot(allAuthorities) == List("1.2.246.562.10.789101112", "1.2.246.562.10.654321", "1.2.246.562.10.333334445"))
+    val allAuthorities = List(
+      "ROLE_APP_SUORITUSREKISTERI_CRUD_1.2.246.562.10.654321",
+      "ROLE_APP_RAPORTOINTI_1.2.246.562.10.789101112",
+      "ROLE_APP_RAPORTOINTI_OPO",
+      "ROLE_APP_KOUTA",
+      "ROLE_APP_RAPORTOINTI_1.2.246.562.10.654321",
+      "ROLE_APP_RAPORTOINTI_KK",
+      "ROLE_APP_RAPORTOINTI_1.2.246.562.10.333334445",
+    )
+    assert(AuthoritiesUtil.getRaportointiOrganisaatiot(allAuthorities) == List(
+      "1.2.246.562.10.654321", "1.2.246.562.10.789101112", "1.2.246.562.10.333334445"))
   }
 }

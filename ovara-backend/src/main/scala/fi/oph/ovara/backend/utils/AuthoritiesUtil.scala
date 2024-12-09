@@ -13,9 +13,8 @@ object AuthoritiesUtil {
       .flatMap(role => raportointiAuthoritiesRegex.findFirstIn(role.getAuthority))
   }
 
-  def getRaportointiOrganisaatiot(authorities: util.Collection[? <: GrantedAuthority]): List[String] = {
-    val raportointiAuthorities = getRaportointiAuthorities(authorities)
+  def getRaportointiOrganisaatiot(authorities: List[String]): List[String] = {
     val raportointiOrganisaatiotRegex: Regex = """([0-9]\.?)+""".r
-    raportointiAuthorities.flatMap(role => raportointiOrganisaatiotRegex.findFirstIn(role))
+    authorities.flatMap(role => raportointiOrganisaatiotRegex.findFirstIn(role)).distinct
   }
 }

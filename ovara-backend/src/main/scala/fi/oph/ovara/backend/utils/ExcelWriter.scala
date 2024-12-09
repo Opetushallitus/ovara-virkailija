@@ -1,28 +1,40 @@
 package fi.oph.ovara.backend.utils
 
-import fi.oph.ovara.backend.domain.{Fi, Kielistetty, KoulutuksetToteutuksetHakukohteetResult}
+import fi.oph.ovara.backend.domain.{Kieli, Kielistetty, KoulutuksetToteutuksetHakukohteetResult, User}
 import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.xssf.usermodel.*
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
-import java.io.FileOutputStream
-
-val KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES = List(
-  "Hakukohteen nimi",
-  "Hakukohteen oid",
-  "Kou.tila",
-  "Tot.tila",
-  "Hak.tila",
-  "Aloituspaikat",
-  "Koe",
-  "Voi suorittaa kaksoistutkinnon?",
-  "Voi suorittaa tutkinnon urheilijana?",
+val KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES = Map(
+  "fi" -> List(
+    "Hakukohteen nimi",
+    "Hakukohteen oid",
+    "Kou.tila",
+    "Tot.tila",
+    "Hak.tila",
+    "Aloituspaikat",
+    "Koe",
+    "Voi suorittaa kaksoistutkinnon?",
+    "Voi suorittaa tutkinnon urheilijana?"
+  ),
+  "sv" -> List(
+    "Hakukohteen nimi SV",
+    "Hakukohteen oid SV",
+    "Kou.tila SV",
+    "Tot.tila SV",
+    "Hak.tila SV",
+    "Aloituspaikat SV",
+    "Koe SV",
+    "Voi suorittaa kaksoistutkinnon? SV",
+    "Voi suorittaa tutkinnon urheilijana? SV"
+  )
 )
 
 object ExcelWriter {
-  val LOG = LoggerFactory.getLogger("ExcelWriter");
+  val LOG: Logger = LoggerFactory.getLogger("ExcelWriter")
 
-  def writeRaportti(queryResult: Vector[KoulutuksetToteutuksetHakukohteetResult], raporttiColumnTitles: List[String]): XSSFWorkbook = {
+  def writeRaportti(queryResult: Vector[KoulutuksetToteutuksetHakukohteetResult], raporttiColumnTitles: Map[String, List[String]], user: User): XSSFWorkbook = {
+    val asiointikieli = user.asiointikieli.getOrElse("fi")
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
       LOG.info("Creating new excel from db results")
@@ -38,9 +50,12 @@ object ExcelWriter {
       cellstyle.setFont(font1)
       cellstyle.setDataFormat(dataformat.getFormat("text"))
       cellstyle2.setFont(font2)
-      workbook.setSheetName(0, WorkbookUtil.createSafeSheetName("Yhteenveto"))
+      workbook.setSheetName(0, WorkbookUtil.createSafeSheetName("Yhteenveto")) //TODO: käännös
       val row = sheet.createRow(0)
-      val raporttiColumnTitlesWithIndex = raporttiColumnTitles.zipWithIndex
+      val titles = raporttiColumnTitles.getOrElse(
+        asiointikieli, 
+        raporttiColumnTitles.getOrElse("fi", List()))
+      val raporttiColumnTitlesWithIndex = titles.zipWithIndex
       raporttiColumnTitlesWithIndex.foreach {
         case (title, index) =>
           val cell = row.createCell(index)
@@ -56,8 +71,8 @@ object ExcelWriter {
             cell.setCellStyle(cellstyle2)
             result.productElement(i) match {
               case kielistetty: Kielistetty =>
-                // TODO: Käyttäjän kieli ja käännökset
-                cell.setCellValue(kielistetty.getOrElse(Fi, ""))
+                val kielistettyValue = kielistetty(Kieli.withName(asiointikieli))
+                cell.setCellValue(kielistettyValue)
               case string: String =>
                 cell.setCellValue(string)
               case Some(s: String) =>

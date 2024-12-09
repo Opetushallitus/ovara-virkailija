@@ -4,7 +4,7 @@ sealed trait Kieli extends EnumType with Product with Serializable
 
 object Kieli extends Enum[Kieli] {
   override def name: String = "kieli"
-  def values = List(Fi, Sv, En)
+  def values: List[Kieli] = List(Fi, Sv, En)
 }
 
 case object Fi extends Kieli { val name = "fi" }

@@ -2,16 +2,12 @@ package fi.oph.ovara.backend.raportointi
 
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import fi.oph.ovara.backend.domain.{User, UserResponse}
-import fi.oph.ovara.backend.service.{CommonService, KoulutuksetToteutuksetHakukohteetService, OnrService}
-import fi.oph.ovara.backend.utils.AuthoritiesUtil
+import fi.oph.ovara.backend.domain.UserResponse
+import fi.oph.ovara.backend.service.{CommonService, KoulutuksetToteutuksetHakukohteetService, UserService}
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.{HttpHeaders, MediaType}
-import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.http.HttpHeaders
 import org.springframework.security.web.csrf.CsrfToken
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
 import org.springframework.web.servlet.view.RedirectView
@@ -23,9 +19,9 @@ import scala.jdk.CollectionConverters.*
 @RestController
 @RequestMapping(path = Array("api"))
 class Controller(
-    onrService: OnrService,
     commonService: CommonService,
-    koulutuksetToteutuksetHakukohteetService: KoulutuksetToteutuksetHakukohteetService
+    koulutuksetToteutuksetHakukohteetService: KoulutuksetToteutuksetHakukohteetService,
+    userService: UserService,
 ) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[Controller]);
 
@@ -41,22 +37,15 @@ class Controller(
   def ping = "Ovara application is running!"
 
   @GetMapping(path = Array("user"))
-  def user(@AuthenticationPrincipal userDetails: UserDetails): String = {
+  def user(): String = {
+    val enrichedUserDetails = userService.getEnrichedUserDetails
     mapper.writeValueAsString(
       UserResponse(
         user =
-          if (userDetails == null)
+          if (enrichedUserDetails == null)
             null
           else
-            val asiointikieli = onrService.getAsiointikieli(userDetails.getUsername) match
-              case Left(e) => None
-              case Right(v) => Some(v)
-
-            User(
-              userOid = userDetails.getUsername,
-              authorities = AuthoritiesUtil.getRaportointiAuthorities(userDetails.getAuthorities),
-              asiointikieli = asiointikieli
-            )
+            enrichedUserDetails
       )
     )
   }
