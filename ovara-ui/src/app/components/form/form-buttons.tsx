@@ -1,6 +1,7 @@
+import { forwardRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { OphButton } from '@opetushallitus/oph-design-system';
-import { Box, Stack } from '@mui/material';
+import { Box, Stack, type ButtonProps } from '@mui/material';
 import { useSearchParams } from '@/app/hooks/useSearchParams';
 
 export const FormButtons = ({
@@ -10,14 +11,11 @@ export const FormButtons = ({
   disabled: boolean;
   excelDownloadUrl: string;
 }) => {
-  const t = useTranslations();
-
   return (
     <Box sx={{ display: 'flex', justifyContent: 'end' }}>
       <Stack direction="row" spacing={2}>
-        <TyhjennaHakuehdotButton t={t} />
+        <TyhjennaHakuehdotButton />
         <MuodostaExcelButton
-          t={t}
           disabled={disabled}
           excelDownloadUrl={excelDownloadUrl}
         />
@@ -26,11 +24,8 @@ export const FormButtons = ({
   );
 };
 
-export const TyhjennaHakuehdotButton = ({
-  t,
-}: {
-  t: typeof useTranslations;
-}) => {
+export const TyhjennaHakuehdotButton = () => {
+  const t = useTranslations();
   const {
     setSelectedAlkamiskaudet,
     setSelectedHaut,
@@ -56,17 +51,27 @@ export const TyhjennaHakuehdotButton = ({
   );
 };
 
+export type DownloadButtonProps = Omit<ButtonProps, 'endIcon'> & {
+  download: boolean;
+};
+
+export const DownloadButton = forwardRef<
+  HTMLButtonElement,
+  DownloadButtonProps
+>(function renderButton(props, ref) {
+  return <OphButton {...props} ref={ref} />;
+});
+
 export const MuodostaExcelButton = ({
-  t,
   disabled,
   excelDownloadUrl,
 }: {
-  t: typeof useTranslations;
   disabled: boolean;
   excelDownloadUrl: string;
 }) => {
+  const t = useTranslations();
   return (
-    <OphButton
+    <DownloadButton
       variant="contained"
       type="submit"
       disabled={disabled}
@@ -74,6 +79,6 @@ export const MuodostaExcelButton = ({
       download
     >
       {t('raportti.muodosta-raportti')}
-    </OphButton>
+    </DownloadButton>
   );
 };

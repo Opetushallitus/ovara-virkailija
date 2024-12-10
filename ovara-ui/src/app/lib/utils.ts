@@ -4,7 +4,7 @@ import { set } from 'lodash';
 export type KoulutuksenAlkaminen = {
   alkamiskausinimi: string;
   value: string;
-  alkamisvuosi?: number | undefined;
+  alkamisvuosi?: number;
 };
 
 export const getSortedKoulutuksenAlkamisKaudet = (
@@ -31,10 +31,9 @@ export const getSortedKoulutuksenAlkamisKaudet = (
           value: `${alkamisvuosi}_syksy`,
         },
       ];
-    });
+    }) as KoulutuksenAlkaminen[];
 
     sortedAlkamiskaudet.unshift({
-      alkamisvuosi: undefined,
       value: 'henkilokohtainen_suunnitelma',
       alkamiskausinimi: 'yleinen.henkilokohtainen-suunnitelma',
     });
