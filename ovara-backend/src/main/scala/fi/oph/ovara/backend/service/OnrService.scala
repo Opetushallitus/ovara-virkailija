@@ -18,7 +18,7 @@ import scala.jdk.javaapi.FutureConverters.asScala
 class OnrService {
   val LOG: Logger = LoggerFactory.getLogger(classOf[OnrService])
 
-  @Value("${opintopolku.virkailija.domain}")
+  @Value("${opintopolku.virkailija.url}")
   val opintopolku_virkailija_domain: String = null
   
   @Autowired

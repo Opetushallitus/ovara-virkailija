@@ -1,8 +1,8 @@
 export const DOMAIN =
   process.env.APP_URL ?? process.env.VIRKAILIJA_URL ?? 'https://localhost:3405';
 
-export const OVARA_BACKEND_DOMAIN =
-  process.env.OVARA_BACKEND ?? 'http://localhost:8080';
+export const OVARA_BACKEND =
+  process.env.OVARA_BACKEND ?? process.env.VIRKAILIJA_URL;
 
 export const isLocalhost = DOMAIN.includes('localhost');
 
@@ -14,6 +14,6 @@ export const isTesting = process.env.TEST === 'true';
 
 export const configuration = {
   raamitUrl: `${DOMAIN}/virkailija-raamit/apply-raamit.js`,
-  ovaraBackendApiUrl: `${OVARA_BACKEND_DOMAIN}/ovara-backend/api`,
+  ovaraBackendApiUrl: `${OVARA_BACKEND}/ovara-backend/api`,
   virkailijaUrl: DOMAIN,
 } as const;

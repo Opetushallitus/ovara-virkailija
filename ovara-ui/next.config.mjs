@@ -16,7 +16,7 @@ const cspHeader = `
 
 const isStandalone = process.env.STANDALONE === 'true';
 
-const basePath = '/raportointi';
+const basePath = '/ovara';
 
 /** @type {import('next').NextConfig} */
 export const nextConfig = {
@@ -26,7 +26,7 @@ export const nextConfig = {
     ignoreDuringBuilds: true,
   },
   typescript: {
-    ignoreBuildErrors: Boolean(process.env.CI),
+    ignoreBuildErrors: Boolean(process.env.SKIP_TYPECHECK),
   },
   async headers() {
     return [
@@ -44,6 +44,7 @@ export const nextConfig = {
   env: {
     VIRKAILIJA_URL: process.env.VIRKAILIJA_URL,
     APP_URL: process.env.APP_URL,
+    OVARA_BACKEND: process.env.APP_URL ?? process.env.VIRKAILIJA_URL,
   },
   output: isStandalone ? 'standalone' : undefined,
 };

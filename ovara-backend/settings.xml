@@ -1,4 +1,5 @@
 <!-- Maven settings -tiedosto CI-buildia varten, tarvitaan jotta voidaan autentikoitua Github Packages -repoon -->
+
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
@@ -28,6 +29,16 @@
             <id>github</id>
             <username>private-token</username>
             <password>${env.GITHUB_TOKEN}</password>
+        </server>
+        <server>
+            <id>oph-sade-artifactory</id>
+            <username>${env.ARTIFACTORY_USERNAME}</username>
+            <password>${env.ARTIFACTORY_PASSWORD}</password>
+        </server>
+        <server>
+            <id>oph-nexus</id>
+            <username>${env.ARTIFACTORY_USERNAME}</username>
+            <password>${env.ARTIFACTORY_PASSWORD}</password>
         </server>
     </servers>
 </settings>
