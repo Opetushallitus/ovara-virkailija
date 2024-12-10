@@ -33,8 +33,8 @@ class Controller(
   mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
   mapper.configure(SerializationFeature.INDENT_OUTPUT, true)
 
-  @GetMapping(path = Array("ping"))
-  def ping = "Ovara application is running!"
+  @GetMapping(path = Array("healthcheck"))
+  def healthcheck = "Ovara application is running!"
 
   @GetMapping(path = Array("user"))
   def user(): String = {

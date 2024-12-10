@@ -4,3 +4,12 @@ node_modules
 .next
 
 .mise.toml
+
+# local env files
+.env*.local
+
+# CDK
+.cdk.staging
+cdk.out
+.open-next
+cdk/**/*.d.ts
