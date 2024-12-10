@@ -6,11 +6,13 @@ import {
 import { useSearchParams } from '@/app/hooks/useSearchParams';
 import { isEmpty } from 'remeda';
 import { useTranslations } from 'next-intl';
+import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
+import { LanguageCode } from '@/app/lib/types/common';
 
 export const Haku = () => {
   const t = useTranslations();
-  // TODO: Lisää lokalisointi
-  const locale = 'fi';
+  const user = useAuthorizedUser();
+  const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const haut = useFetchHaut() || [];
 
   const { selectedHaut, setSelectedHaut } = useSearchParams();
