@@ -9,11 +9,11 @@ export default function Home() {
   const user = useAuthorizedUser();
 
   const userRoles = user?.authorities;
-  const hasRaportointiRole = userRoles?.includes('ROLE_APP_RAPORTOINTI');
+  const hasOvaraRole = userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA');
   return (
     <MainContainer>
       {user ? <p>Welcome, {user.userOid}!</p> : null}
-      {hasRaportointiRole ? <ListTable list={TOISEN_ASTEEN_RAPORTIT} /> : null}
+      {hasOvaraRole ? <ListTable list={TOISEN_ASTEEN_RAPORTIT} /> : null}
     </MainContainer>
   );
 }
