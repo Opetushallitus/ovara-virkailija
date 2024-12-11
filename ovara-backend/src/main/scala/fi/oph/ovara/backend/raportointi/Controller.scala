@@ -62,8 +62,8 @@ class Controller(
   @GetMapping(path = Array("haut"))
   def haut: String = mapper.writeValueAsString(commonService.getHaut)
 
-  @GetMapping(path = Array("koulutustoimijat"))
-  def koulutustoimijat: String = mapper.writeValueAsString(commonService.getKoulutustoimijat)
+  @GetMapping(path = Array("organisaatiot"))
+  def organisaatiot: String = mapper.writeValueAsString(commonService.getOrganisaatiotByOrganisaatiotyyppi)
 
 
   // RAPORTIT

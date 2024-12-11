@@ -19,14 +19,13 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     db.run(commonRepository.selectDistinctExistingHaut())
   }
 
-  def getKoulutustoimijat: Vector[Organisaatio] = {
-    val u = userService.getEnrichedUserDetails
-    println("getKoulutustoimijat")
-    println(u)
-    val organisaatiot = AuthoritiesUtil.getOrganisaatiot(u.authorities)
-    println(organisaatiot)
-    val res = db.run(commonRepository.selectDistinctOrganisaatiotByOrganisaatiotyyppi(organisaatiot, KOULUTUSTOIMIJAORGANISAATIOTYYPPI))
-    println(res)
-    res
+  def getOrganisaatiotByOrganisaatiotyyppi: Map[String, Vector[Organisaatio]] = {
+    val user = userService.getEnrichedUserDetails
+    val organisaatiot = AuthoritiesUtil.getOrganisaatiot(user.authorities)
+    //val res = db.run(commonRepository.selectDistinctOrganisaatiotByOrganisaatiotyyppi(organisaatiot, KOULUTUSTOIMIJAORGANISAATIOTYYPPI))
+
+    val parentChildOrgs = db.run(commonRepository.selectChildOrganisaatiot(organisaatiot))
+    val parentOids = parentChildOrgs.groupBy(_.parent_oid).keys.toList
+    db.run(commonRepository.selectDistinctOrganisaatiot(parentOids)).groupBy(_.organisaatiotyyppi)
   }
 }
