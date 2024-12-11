@@ -10,13 +10,13 @@ import scala.jdk.CollectionConverters.*
 class AuthoritiesUtilSpec extends AnyFlatSpec {
   "getRaportointiAuthorities" should "return empty list if no role in all authorities" in {
     val allAuthorities: java.util.Collection[SimpleGrantedAuthority] = List().asJava
-    assert(AuthoritiesUtil.getRaportointiAuthorities(allAuthorities).isEmpty)
+    assert(AuthoritiesUtil.getOvaraAuthorities(allAuthorities).isEmpty)
   }
 
   it should "return empty list when there is one role without the ROLE_APP_OVARA-VIRKAILIJA prefix" in {
     val allAuthorities: java.util.Collection[SimpleGrantedAuthority] = List(
       SimpleGrantedAuthority("ROLE_APP_SUORITUSREKISTERI_CRUD_1.2.246.562.10.00000000001")).asJava
-    assert(AuthoritiesUtil.getRaportointiAuthorities(allAuthorities).isEmpty)
+    assert(AuthoritiesUtil.getOvaraAuthorities(allAuthorities).isEmpty)
   }
 
   it should "return only authorities with ROLE_APP_OVARA-VIRKAILIJA prefix" in {
@@ -27,7 +27,7 @@ class AuthoritiesUtilSpec extends AnyFlatSpec {
       SimpleGrantedAuthority("ROLE_APP_KOUTA"),
       SimpleGrantedAuthority("ROLE_APP_OVARA-VIRKAILIJA_KK")
     ).asJava
-    assert(AuthoritiesUtil.getRaportointiAuthorities(allAuthorities) == List(
+    assert(AuthoritiesUtil.getOvaraAuthorities(allAuthorities) == List(
       "ROLE_APP_OVARA-VIRKAILIJA_KK_1.2.246.562.10.00000000001",
       "ROLE_APP_OVARA-VIRKAILIJA",
       "ROLE_APP_OVARA-VIRKAILIJA_KK",
@@ -43,7 +43,7 @@ class AuthoritiesUtilSpec extends AnyFlatSpec {
       "ROLE_APP_KOUTA",
       "ROLE_APP_RAPORTOINTI_KK"
     )
-    assert(AuthoritiesUtil.getRaportointiOrganisaatiot(allAuthorities) == List("1.2.246.562.10.654321"))
+    assert(AuthoritiesUtil.getOrganisaatiot(allAuthorities) == List("1.2.246.562.10.654321"))
   }
 
   it should "return all organisaatiot the user has rights for" in {
@@ -56,7 +56,7 @@ class AuthoritiesUtilSpec extends AnyFlatSpec {
       "ROLE_APP_RAPORTOINTI_KK",
       "ROLE_APP_RAPORTOINTI_1.2.246.562.10.333334445",
     )
-    assert(AuthoritiesUtil.getRaportointiOrganisaatiot(allAuthorities) == List(
+    assert(AuthoritiesUtil.getOrganisaatiot(allAuthorities) == List(
       "1.2.246.562.10.654321", "1.2.246.562.10.789101112", "1.2.246.562.10.333334445"))
   }
 }

@@ -13,4 +13,6 @@ package object domain {
     "24", // Lukiokoulutus
     "21", // Yhteishaun ulkopuolinen lukiokoulutus
   )
+  
+  val KOULUTUSTOIMIJAORGANISAATIOTYYPPI = "01"
 }

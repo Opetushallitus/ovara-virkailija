@@ -22,7 +22,7 @@ class UserService(onrService: OnrService, authenticationFacade: AuthenticationFa
 
       User(
         userOid = username,
-        authorities = AuthoritiesUtil.getRaportointiAuthorities(principal.getAuthorities),
+        authorities = AuthoritiesUtil.getOvaraAuthorities(principal.getAuthorities),
         asiointikieli = asiointikieli
       )
 

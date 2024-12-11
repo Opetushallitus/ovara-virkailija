@@ -1,11 +1,6 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.domain.{
-  Haku,
-  Kieli,
-  Kielistetty,
-  KoulutuksetToteutuksetHakukohteetResult,
-}
+import fi.oph.ovara.backend.domain.{Haku, Kieli, Kielistetty, KoulutuksetToteutuksetHakukohteetResult, Organisaatio}
 import fi.oph.ovara.backend.utils.GenericOvaraJsonFormats
 import org.json4s.jackson.Serialization.read
 import slick.jdbc.GetResult
@@ -17,6 +12,14 @@ trait Extractors extends GenericOvaraJsonFormats {
     Haku(
       haku_oid = r.nextString(),
       haku_nimi = extractKielistetty(r.nextStringOption())
+    )
+  )
+
+  implicit val getOrganisaatioResult: GetResult[Organisaatio] = GetResult(r =>
+    Organisaatio(
+      organisaatio_oid = r.nextString(),
+      organisaatio_nimi = extractKielistetty(r.nextStringOption()),
+      organisaatiotyyppi = r.nextString()
     )
   )
 

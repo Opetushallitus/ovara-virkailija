@@ -7,7 +7,7 @@ import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { THEME_OVERRIDES } from '@/app/theme';
 import { AuthorizedUserProvider } from './contexts/AuthorizedUserProvider';
 import LocalizationProvider from './components/localization-provider';
-import { getLocale } from 'next-intl/server';
+import { getLocale, getMessages } from 'next-intl/server';
 import { LanguageCode } from './lib/types/common';
 
 export const metadata: Metadata = {
@@ -21,6 +21,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = (await getLocale()) as LanguageCode;
+  const messages = (await getMessages()) as IntlMessages;
 
   return (
     <html lang={locale}>
@@ -29,7 +30,7 @@ export default async function RootLayout({
         <AppRouterCacheProvider>
           <OphNextJsThemeProvider variant="oph" overrides={THEME_OVERRIDES}>
             <AuthorizedUserProvider>
-              <LocalizationProvider>
+              <LocalizationProvider messagesFromLocalFile={messages}>
                 <NuqsAdapter>{children}</NuqsAdapter>
               </LocalizationProvider>
             </AuthorizedUserProvider>

@@ -24,7 +24,7 @@ class KoulutuksetToteutuksetHakukohteetService(
   ): XSSFWorkbook = {
     val user = userService.getEnrichedUserDetails
     val authorities              = user.authorities
-    val raportointiOrganisaatiot = AuthoritiesUtil.getRaportointiOrganisaatiot(authorities)
+    val raportointiOrganisaatiot = AuthoritiesUtil.getOrganisaatiot(authorities)
     val res = db.run(
       koulutuksetToteutuksetHakukohteetRepository.selectWithParams(
         raportointiOrganisaatiot,

@@ -62,6 +62,12 @@ class Controller(
   @GetMapping(path = Array("haut"))
   def haut: String = mapper.writeValueAsString(commonService.getHaut)
 
+  @GetMapping(path = Array("koulutustoimijat"))
+  def koulutustoimijat: String = mapper.writeValueAsString(commonService.getKoulutustoimijat)
+
+
+  // RAPORTIT
+
   @GetMapping(path = Array("koulutukset-toteutukset-hakukohteet"))
   def koulutukset_toteutukset_hakukohteet(
       @RequestParam("alkamiskausi") alkamiskausi: java.util.Collection[String],

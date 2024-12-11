@@ -17,13 +17,18 @@ export async function fetchLokalisaatiot(lang: string) {
 
 const LocalizationContent = ({
   lng,
+  messagesFromLocalFile,
   children,
 }: {
+  messagesFromLocalFile: IntlMessages;
   children: React.ReactNode;
   lng?: string;
 }) => {
   const locale = lng ?? 'fi';
-  const messages = useFetchTranslations(locale) as IntlMessages;
+  const messagesFromLokalisointi = useFetchTranslations(locale) as IntlMessages;
+  const messages = process.env.DEV
+    ? messagesFromLocalFile
+    : messagesFromLokalisointi;
 
   const timeZone = 'Europe/Helsinki';
 
@@ -39,12 +44,21 @@ const LocalizationContent = ({
 };
 
 export default function LocalizationProvider({
+  messagesFromLocalFile,
   children,
 }: {
+  messagesFromLocalFile: IntlMessages;
   children: React.ReactNode;
 }) {
   const user = useFetchUser();
   const language = user?.asiointikieli;
 
-  return <LocalizationContent lng={language}>{children}</LocalizationContent>;
+  return (
+    <LocalizationContent
+      lng={language}
+      messagesFromLocalFile={messagesFromLocalFile}
+    >
+      {children}
+    </LocalizationContent>
+  );
 }

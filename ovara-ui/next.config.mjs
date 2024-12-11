@@ -45,6 +45,7 @@ export const nextConfig = {
     VIRKAILIJA_URL: process.env.VIRKAILIJA_URL,
     APP_URL: process.env.APP_URL,
     OVARA_BACKEND: process.env.APP_URL ?? process.env.VIRKAILIJA_URL,
+    DEV: process.env.DEV,
   },
   output: isStandalone ? 'standalone' : undefined,
 };
