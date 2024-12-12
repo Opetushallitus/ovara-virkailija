@@ -36,6 +36,9 @@
   "raportti": {
     "alkamiskausi": "Koulutus alkaa",
     "haku": "Haku",
+    "koulutustoimija": "Koulutustoimija",
+    "oppilaitos": "Oppilaitos",
+    "toimipiste": "Toimipiste",
     "koulutuksen-tila": "Koulutuksen tila",
     "toteutuksen-tila": "Toteutuksen tila",
     "hakukohteen-tila": "Hakukohteen tila",

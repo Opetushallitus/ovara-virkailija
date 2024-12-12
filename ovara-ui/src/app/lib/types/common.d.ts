@@ -7,3 +7,9 @@ export type User = {
   authorities: Array<string>;
   asiointikieli: string;
 };
+
+type Organisaatio = {
+  organisaatio_oid: string;
+  organisaatio_nimi: Kielistetty;
+  organisaatiotyyppi: string;
+};

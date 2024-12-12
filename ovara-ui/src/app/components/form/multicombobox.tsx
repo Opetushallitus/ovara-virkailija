@@ -28,16 +28,21 @@ export const MultiComboBox = ({
   const t = useTranslations();
 
   const getValueFromOptions = (value: Array<string>) => {
-    return value?.map((v) => {
-      return find(options, (o) => o.value === v);
-    });
+    return (
+      value
+        ?.map((v) => {
+          return find(options, (o) => o.value === v);
+        })
+        // filter undefined values
+        .filter((v) => !!v)
+    );
   };
 
   return (
     <OvaraFormControl
       label={required ? `${label} *` : label}
       renderInput={() => (
-        <Autocomplete<SelectOption, true, true, false>
+        <Autocomplete
           multiple
           id={id}
           sx={{ width: '100%', overflow: 'hidden' }}
@@ -45,9 +50,9 @@ export const MultiComboBox = ({
           value={value ? getValueFromOptions(value) : []}
           options={options}
           filterSelectedOptions
-          isOptionEqualToValue={(option, selected) =>
-            option.value === selected.value
-          }
+          isOptionEqualToValue={(option, selected) => {
+            return option.value === selected.value;
+          }}
           getOptionKey={(option) => option.value}
           renderTags={(value: Array<SelectOption>, getTagProps) => {
             return value?.map((option: SelectOption, index: number) => {
@@ -55,6 +60,49 @@ export const MultiComboBox = ({
               return <Chip label={option?.label} key={key} {...tagProps} />;
             });
           }}
+          renderInput={(params) => (
+            <TextField {...params} placeholder={t('yleinen.valitse')} />
+          )}
+        />
+      )}
+    />
+  );
+};
+
+type ComboBoxProps = {
+  options: Array<SelectOption>;
+  onChange: (e: React.SyntheticEvent, value: SelectOption | null) => void;
+  id: string;
+  label: string;
+  value?: string;
+  required?: boolean;
+};
+
+export const ComboBox = ({
+  options,
+  onChange,
+  id,
+  label,
+  value,
+  required,
+}: ComboBoxProps) => {
+  const t = useTranslations();
+
+  const getValueFromOptions = (value: string | undefined) => {
+    return find(options, (o) => o.value === value) ?? null;
+  };
+
+  return (
+    <OvaraFormControl
+      label={required ? `${label} *` : label}
+      renderInput={() => (
+        <Autocomplete
+          id={id}
+          sx={{ width: '100%', overflow: 'hidden' }}
+          value={getValueFromOptions(value)}
+          onChange={onChange}
+          options={options}
+          getOptionKey={(option) => option.value}
           renderInput={(params) => (
             <TextField {...params} placeholder={t('yleinen.valitse')} />
           )}

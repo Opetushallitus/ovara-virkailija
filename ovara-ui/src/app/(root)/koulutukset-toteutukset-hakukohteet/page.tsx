@@ -10,6 +10,7 @@ import {
   KoulutuksenTila,
   ToteutuksenTila,
 } from '@/app/components/form/tila';
+import { OrganisaatioValikot } from '@/app/components/form/organisaatiovalikot';
 import { Valintakoe } from '@/app/components/form/valintakoe';
 import { FormButtons } from '@/app/components/form/form-buttons';
 import { Divider, styled } from '@mui/material';
@@ -34,6 +35,7 @@ export default function KoulutuksetToteutuksetHakukohteet() {
         <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
         <KoulutuksenAlkaminen />
         <Haku />
+        <OrganisaatioValikot />
         <KoulutuksenTila />
         <ToteutuksenTila />
         <HakukohteenTila />

@@ -22,6 +22,21 @@ export const useSearchParams = () => {
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
+  const [selectedKoulutustoimija, setSelectedKoulutustoimija] = useQueryState(
+    'koulutustoimija',
+    DEFAULT_NUQS_OPTIONS,
+  );
+
+  const [selectedOppilaitokset, setSelectedOppilaitokset] = useQueryState(
+    'oppilaitos',
+    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
+  const [selectedToimipisteet, setSelectedToimipisteet] = useQueryState(
+    'toimipiste',
+    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
   const [selectedKoulutuksenTila, setSelectedKoulutuksenTila] = useQueryState(
     'koulutuksen-tila',
     DEFAULT_NUQS_OPTIONS,
@@ -47,6 +62,12 @@ export const useSearchParams = () => {
     setSelectedAlkamiskaudet,
     selectedHaut,
     setSelectedHaut,
+    selectedKoulutustoimija,
+    setSelectedKoulutustoimija,
+    selectedOppilaitokset,
+    setSelectedOppilaitokset,
+    selectedToimipisteet,
+    setSelectedToimipisteet,
     selectedKoulutuksenTila,
     setSelectedKoulutuksenTila,
     selectedToteutuksenTila,
