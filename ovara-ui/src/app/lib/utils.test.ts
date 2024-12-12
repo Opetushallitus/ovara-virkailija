@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import {
   getSortedKoulutuksenAlkamisKaudet,
+  hasOvaraRole,
+  hasOvaraToinenAsteRole,
   removeDotsFromTranslations,
 } from './utils';
 
@@ -84,5 +86,74 @@ describe('removeDotsFromTranslations', () => {
       },
     };
     expect(removeDotsFromTranslations(translations)).toEqual(result);
+  });
+});
+
+describe('hasOvaraRole', () => {
+  test('should return true if user has ovara-virkailija role in their authorities', () => {
+    const userRoles = [
+      'ROLE_APP_OVARA-VIRKAILIJA',
+      'ROLE_APP_OVARA-VIRKAILIJA_2ASTE',
+      'ROLE_APP_OVARA-VIRKAILIJA_2ASTE_1.2.246.562.10.81934895871',
+    ];
+    expect(hasOvaraRole(userRoles)).toBeTruthy();
+  });
+
+  test("should return false if user doesn't ovara-virkailija role in their authorities", () => {
+    const userRoles = [
+      'ROLE_APP_RAPORTOINTI',
+      'ROLE_APP_RAPORTOINTI_2ASTE',
+      'ROLE_APP_RAPORTOINTI_2ASTE_1.2.246.562.10.81934895871',
+    ];
+    expect(hasOvaraRole(userRoles)).toBeFalsy();
+  });
+
+  test('should return false if authorities is empty', () => {
+    const userRoles = [];
+    expect(hasOvaraRole(userRoles)).toBeFalsy();
+  });
+
+  test('should return falsy if authorities is undefined', () => {
+    const userRoles = undefined;
+    expect(hasOvaraRole(userRoles)).toBeFalsy();
+  });
+});
+
+describe('hasOvaraToinenAsteRole', () => {
+  test('should return true if user has ovara-virkailija_2aste role in their authorities', () => {
+    const userRoles = [
+      'ROLE_APP_OVARA-VIRKAILIJA',
+      'ROLE_APP_OVARA-VIRKAILIJA_2ASTE',
+      'ROLE_APP_OVARA-VIRKAILIJA_2ASTE_1.2.246.562.10.81934895871',
+    ];
+    expect(hasOvaraToinenAsteRole(userRoles)).toBeTruthy();
+  });
+
+  test("should return false if user doesn't ovara-virkailija_2aste role in their authorities", () => {
+    const userRoles = [
+      'ROLE_APP_RAPORTOINTI',
+      'ROLE_APP_RAPORTOINTI_2ASTE',
+      'ROLE_APP_RAPORTOINTI_2ASTE_1.2.246.562.10.81934895871',
+    ];
+    expect(hasOvaraToinenAsteRole(userRoles)).toBeFalsy();
+  });
+
+  test('should return false if authorities is empty', () => {
+    const userRoles = [];
+    expect(hasOvaraToinenAsteRole(userRoles)).toBeFalsy();
+  });
+
+  test('should return falsy if authorities is undefined', () => {
+    const userRoles = undefined;
+    expect(hasOvaraToinenAsteRole(userRoles)).toBeFalsy();
+  });
+
+  test('should return true when user has OPH_PAAKAYTTAJA user role', () => {
+    const userRoles = [
+      'ROLE_APP_OVARA-VIRKAILIJA',
+      'ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA',
+      'ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA_1.2.246.562.10.00000000001',
+    ];
+    expect(hasOvaraToinenAsteRole(userRoles)).toBeTruthy();
   });
 });

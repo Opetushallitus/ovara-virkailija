@@ -54,3 +54,14 @@ export function removeDotsFromTranslations(
     {},
   );
 }
+
+export const hasOvaraRole = (userRoles?: Array<string>) => {
+  return userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA');
+};
+
+export const hasOvaraToinenAsteRole = (userRoles?: Array<string>) => {
+  return (
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_2ASTE') ||
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA')
+  );
+};
