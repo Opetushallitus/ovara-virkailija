@@ -16,6 +16,8 @@ import { FormButtons } from '@/app/components/form/form-buttons';
 import { Divider, styled } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
 import { configuration } from '@/app/lib/configuration';
+import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
+import { hasOvaraToinenAsteRole } from '@/app/lib/utils';
 
 const FormBox = styled('form')(({ theme }) => ({
   border: `1px solid ${ophColors.grey100}`,
@@ -25,30 +27,35 @@ const FormBox = styled('form')(({ theme }) => ({
 
 export default function KoulutuksetToteutuksetHakukohteet() {
   const t = useTranslations();
+  const user = useAuthorizedUser();
+
+  const hasToinenAsteRights = hasOvaraToinenAsteRole(user?.authorities);
   const queryParams = useSearchParams();
   const alkamiskausi = queryParams.get('alkamiskausi');
   const haku = queryParams.get('haku');
 
   return (
     <MainContainer>
-      <FormBox>
-        <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
-        <KoulutuksenAlkaminen />
-        <Haku />
-        <OrganisaatioValikot />
-        <KoulutuksenTila />
-        <ToteutuksenTila />
-        <HakukohteenTila />
-        <Valintakoe />
-        <Divider />
-        <FormButtons
-          disabled={!alkamiskausi || !haku}
-          excelDownloadUrl={
-            `${configuration.ovaraBackendApiUrl}/koulutukset-toteutukset-hakukohteet?` +
-            queryParams
-          }
-        />
-      </FormBox>
+      {hasToinenAsteRights ? (
+        <FormBox>
+          <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
+          <KoulutuksenAlkaminen />
+          <Haku />
+          <OrganisaatioValikot />
+          <KoulutuksenTila />
+          <ToteutuksenTila />
+          <HakukohteenTila />
+          <Valintakoe />
+          <Divider />
+          <FormButtons
+            disabled={!alkamiskausi || !haku}
+            excelDownloadUrl={
+              `${configuration.ovaraBackendApiUrl}/koulutukset-toteutukset-hakukohteet?` +
+              queryParams
+            }
+          />
+        </FormBox>
+      ) : null}
     </MainContainer>
   );
 }
