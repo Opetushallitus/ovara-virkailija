@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { Autocomplete, Chip, TextField } from '@mui/material';
 import { OvaraFormControl } from '@/app/components/form/ovara-form-control';
-import { find } from 'remeda';
+import { find, isEmpty } from 'remeda';
 
 export type SelectOption = {
   label: string;
@@ -63,6 +63,7 @@ export const MultiComboBox = ({
           renderInput={(params) => (
             <TextField {...params} placeholder={t('yleinen.valitse')} />
           )}
+          disabled={options && isEmpty(options)}
         />
       )}
     />
@@ -106,6 +107,7 @@ export const ComboBox = ({
           renderInput={(params) => (
             <TextField {...params} placeholder={t('yleinen.valitse')} />
           )}
+          disabled={options && isEmpty(options)}
         />
       )}
     />
