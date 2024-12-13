@@ -58,11 +58,17 @@ export const OrganisaatioValikot = () => {
     );
   };
 
-  const getOrganisaatioOptions = (org: Organisaatio) => {
-    return {
-      value: org.organisaatio_oid,
-      label: org.organisaatio_nimi[locale] || '',
-    };
+  const getOrganisaatioOptions = (orgs: Array<Organisaatio>) => {
+    if (isNullish(orgs)) {
+      return [];
+    } else {
+      return orgs.map((org) => {
+        return {
+          value: org.organisaatio_oid,
+          label: org.organisaatio_nimi[locale] || '',
+        };
+      });
+    }
   };
 
   return (
@@ -71,21 +77,21 @@ export const OrganisaatioValikot = () => {
         id={koulutustoimija_id}
         label={t(`raportti.${koulutustoimija_id}`)}
         value={selectedKoulutustoimija ?? ''}
-        options={koulutustoimijat.map(getOrganisaatioOptions)}
+        options={getOrganisaatioOptions(koulutustoimijat)}
         onChange={changeKoulutustoimija}
       />
       <MultiComboBox
         id={oppilaitos_id}
         label={t(`raportti.${oppilaitos_id}`)}
         value={selectedOppilaitokset ?? []}
-        options={oppilaitokset?.map(getOrganisaatioOptions)}
+        options={getOrganisaatioOptions(oppilaitokset)}
         onChange={changeOppilaitokset}
       />
       <MultiComboBox
         id={toimipiste_id}
         label={t(`raportti.${toimipiste_id}`)}
         value={selectedToimipisteet ?? []}
-        options={toimipisteet?.map(getOrganisaatioOptions)}
+        options={getOrganisaatioOptions(toimipisteet)}
         onChange={changeToimipisteet}
       />
     </Box>

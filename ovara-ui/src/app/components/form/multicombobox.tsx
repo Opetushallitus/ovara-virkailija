@@ -89,7 +89,7 @@ export const ComboBox = ({
   const t = useTranslations();
 
   const getValueFromOptions = (value: string | undefined) => {
-    return find(options, (o) => o.value === value) ?? null;
+    return find(options, (o) => o.value === value);
   };
 
   return (
@@ -99,7 +99,7 @@ export const ComboBox = ({
         <Autocomplete
           id={id}
           sx={{ width: '100%', overflow: 'hidden' }}
-          value={getValueFromOptions(value)}
+          value={getValueFromOptions(value) ?? null}
           onChange={onChange}
           options={options}
           getOptionKey={(option) => option.value}
