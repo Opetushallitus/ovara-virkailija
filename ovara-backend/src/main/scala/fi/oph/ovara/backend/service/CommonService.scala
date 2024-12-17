@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.{Haku, KOULUTUSTOIMIJAORGANISAATIOTYYPPI, Organisaatio}
+import fi.oph.ovara.backend.domain.{Haku, KOULUTUSTOIMIJAORGANISAATIOTYYPPI, Organisaatio, OrganisaatioPerOrganisaatiotyyppi}
 import fi.oph.ovara.backend.repository.{CommonRepository, OvaraDatabase}
 import fi.oph.ovara.backend.utils.AuthoritiesUtil
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,13 +19,12 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     db.run(commonRepository.selectDistinctExistingHaut())
   }
 
-  def getOrganisaatiotByOrganisaatiotyyppi: Map[String, Vector[Organisaatio]] = {
+  def getUserOrganisaatiotByOrganisaatiotyyppi: Map[String, Vector[OrganisaatioPerOrganisaatiotyyppi]] = {
     val user = userService.getEnrichedUserDetails
     val organisaatiot = AuthoritiesUtil.getOrganisaatiot(user.authorities)
-    //val res = db.run(commonRepository.selectDistinctOrganisaatiotByOrganisaatiotyyppi(organisaatiot, KOULUTUSTOIMIJAORGANISAATIOTYYPPI))
 
     val parentChildOrgs = db.run(commonRepository.selectChildOrganisaatiot(organisaatiot))
     val parentOids = parentChildOrgs.groupBy(_.parent_oid).keys.toList
-    db.run(commonRepository.selectDistinctOrganisaatiot(parentOids)).groupBy(_.organisaatiotyyppi)
+    db.run(commonRepository.selectOrganisaatiotPerOrganisaatiotyyppi(parentOids)).groupBy(_.organisaatiotyyppi)
   }
 }
