@@ -1,6 +1,7 @@
 package fi.oph.ovara.backend.utils
 
 import fi.oph.ovara.backend.domain.*
+import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFSheet, XSSFWorkbook}
 import org.scalatest.flatspec.AnyFlatSpec
 
 class ExcelWriterSpec extends AnyFlatSpec {
@@ -96,6 +97,59 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
 
     assert(ExcelWriter.countAloituspaikat(organisaationKoulutuksetToteutuksetHakukohteet) == 0)
+  }
+
+  "createOrganisaatioHeadingRow" should "create row with org name and total count of aloituspaikat" in {
+    val organisaatio = Organisaatio(
+      organisaatio_oid = "1.2.246.562.10.2781706420000",
+      organisaatio_nimi =
+        Map(En -> "Koulutustoimijan nimi en", Fi -> "Koulutustoimijan nimi fi", Sv -> "Koulutustoimijan nimi sv"),
+      organisaatiotyypit = List("01"))
+
+    val organisaationKoulutuksetToteutuksetHakukohteet = OrganisaationKoulutuksetToteutuksetHakukohteet(
+      Some(
+        Organisaatio(
+          organisaatio_oid = "1.2.246.562.10.278170642010",
+          organisaatio_nimi =
+            Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
+          organisaatiotyypit = List("02")
+        )
+      ),
+      Vector(
+        KoulutuksetToteutuksetHakukohteetResult(
+          hakukohdeNimi =
+            Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+          hakukohdeOid = "1.2.246.562.20.00000000000000021565",
+          koulutuksenTila = Some("julkaistu"),
+          toteutuksenTila = Some("julkaistu"),
+          hakukohteenTila = Some("julkaistu"),
+          aloituspaikat = Some(8),
+          onValintakoe = Some(false),
+          organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+          organisaatio_nimi =
+            Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
+          organisaatiotyypit = List("02")
+        )
+      )
+    )
+
+    val workbook: XSSFWorkbook = new XSSFWorkbook()
+    val sheet: XSSFSheet = workbook.createSheet()
+    val row = sheet.createRow(0)
+    val headingCellstyle: XSSFCellStyle = workbook.createCellStyle()
+    val titles = KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES.getOrElse(
+      user.asiointikieli.get,
+      KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES.getOrElse("fi", List()))
+    val raporttiColumnTitlesWithIndex = titles.zipWithIndex
+
+    val organisaatioRow = ExcelWriter.createOrganisaatioHeadingRow(
+      row = row,
+      headingCellStyle = headingCellstyle,
+      asiointikieli = user.asiointikieli.get,
+      organisaatio = Some(organisaatio),
+      organisaationKoulutuksetToteutuksetHakukohteet = organisaationKoulutuksetToteutuksetHakukohteet,
+      raporttiColumnTitlesWithIndex = raporttiColumnTitlesWithIndex)
+    assert(organisaatioRow.getCell(0).getStringCellValue == "Koulutustoimijan nimi sv")
   }
 
   "writeExcel" should "create one sheet and set 'Yhteenveto' as the name of the sheet" in {

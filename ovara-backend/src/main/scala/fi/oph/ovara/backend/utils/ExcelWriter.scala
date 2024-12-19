@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.utils
 
-import fi.oph.ovara.backend.domain.{Kieli, Kielistetty, Organisaatio, OrganisaationKoulutuksetToteutuksetHakukohteet, User}
+import fi.oph.ovara.backend.domain.*
 import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.xssf.usermodel.*
 import org.slf4j.{Logger, LoggerFactory}
@@ -36,6 +36,30 @@ object ExcelWriter {
   def countAloituspaikat(organisaationKoulutuksetToteutuksetHakukohteet: OrganisaationKoulutuksetToteutuksetHakukohteet): Int = {
     val koulutuksetToteutuksetHakukohteet = organisaationKoulutuksetToteutuksetHakukohteet.koulutuksetToteutuksetHakukohteet
     koulutuksetToteutuksetHakukohteet.flatMap(kth => kth.aloituspaikat).sum
+  }
+
+  def createOrganisaatioHeadingRow(row: XSSFRow,
+                                   headingCellStyle: XSSFCellStyle,
+                                   asiointikieli: String,
+                                   organisaatio: Option[Organisaatio],
+                                   organisaationKoulutuksetToteutuksetHakukohteet: OrganisaationKoulutuksetToteutuksetHakukohteet,
+                                   raporttiColumnTitlesWithIndex: List[(String, Int)]): XSSFRow = {
+    val orgNameCell = row.createCell(0)
+    orgNameCell.setCellStyle(headingCellStyle)
+    val kielistettyNimi = organisaatio match
+      case Some(org: Organisaatio) => org.organisaatio_nimi(Kieli.withName(asiointikieli))
+      case None => "-"
+
+    orgNameCell.setCellValue(kielistettyNimi)
+
+    raporttiColumnTitlesWithIndex.find((title, i) => title.startsWith("Aloituspaikat")) match
+      case Some((t, index)) =>
+        val aloituspaikatCell = row.createCell(index)
+        val aloituspaikat = countAloituspaikat(organisaationKoulutuksetToteutuksetHakukohteet)
+        aloituspaikatCell.setCellValue(aloituspaikat)
+      case _ =>
+
+    row
   }
 
   // TODO: userin sijaan asiointikieli parametrina?
