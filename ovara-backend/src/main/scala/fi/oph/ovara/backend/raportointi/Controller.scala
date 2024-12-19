@@ -75,13 +75,18 @@ class Controller(
       @RequestParam("koulutuksenTila", required = false) koulutuksenTila: String,
       @RequestParam("toteutuksenTila", required = false) toteutuksenTila: String,
       @RequestParam("hakukohteenTila", required = false) hakukohteenTila: String,
-      @RequestParam("valintakoe", required = false) valintakoe: Boolean,
+      @RequestParam("valintakoe", required = false) valintakoe: String,
       response: HttpServletResponse
   ): Unit = {
     val maybeKoulutuksenTila = Option(koulutuksenTila)
     val maybeToteutuksenTila = Option(toteutuksenTila)
     val maybeHakukohteenTila = Option(hakukohteenTila)
-    val maybeValintakoe      = Option(valintakoe)
+    val maybeValintakoe      = if (valintakoe == null) {
+      None
+    } else {
+      Option(valintakoe.toBoolean)
+    }
+
     val wb = koulutuksetToteutuksetHakukohteetService.
       get(
       alkamiskausi.asScala.toList,
