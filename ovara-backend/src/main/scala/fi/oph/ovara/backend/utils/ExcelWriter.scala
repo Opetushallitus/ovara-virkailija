@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.utils
 
-import fi.oph.ovara.backend.domain.{Kieli, Kielistetty, KoulutuksetToteutuksetHakukohteetResult, User}
+import fi.oph.ovara.backend.domain.{Kieli, Kielistetty, Organisaatio, OrganisaationKoulutuksetToteutuksetHakukohteet, User}
 import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.xssf.usermodel.*
 import org.slf4j.{Logger, LoggerFactory}
@@ -33,7 +33,15 @@ val KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES = Map(
 object ExcelWriter {
   val LOG: Logger = LoggerFactory.getLogger("ExcelWriter")
 
-  def writeRaportti(queryResult: Vector[KoulutuksetToteutuksetHakukohteetResult], raporttiColumnTitles: Map[String, List[String]], user: User): XSSFWorkbook = {
+  def countAloituspaikat(organisaationKoulutuksetToteutuksetHakukohteet: OrganisaationKoulutuksetToteutuksetHakukohteet): Int = {
+    val koulutuksetToteutuksetHakukohteet = organisaationKoulutuksetToteutuksetHakukohteet.koulutuksetToteutuksetHakukohteet
+    koulutuksetToteutuksetHakukohteet.flatMap(kth => kth.aloituspaikat).sum
+  }
+
+  // TODO: userin sijaan asiointikieli parametrina?
+  def writeRaportti(queryResult: List[(Organisaatio, OrganisaationKoulutuksetToteutuksetHakukohteet)],
+                    raporttiColumnTitles: Map[String, List[String]],
+                    user: User): XSSFWorkbook = {
     val asiointikieli = user.asiointikieli.getOrElse("fi")
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {

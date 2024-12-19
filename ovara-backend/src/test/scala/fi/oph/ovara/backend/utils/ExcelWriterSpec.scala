@@ -1,10 +1,103 @@
 package fi.oph.ovara.backend.utils
 
-import fi.oph.ovara.backend.domain.{En, Fi, KoulutuksetToteutuksetHakukohteetResult, Sv, User}
+import fi.oph.ovara.backend.domain.*
 import org.scalatest.flatspec.AnyFlatSpec
 
 class ExcelWriterSpec extends AnyFlatSpec {
   val user: User = User(userOid = "1.2.246.562.24.60357717666", authorities = List(), asiointikieli = Some("sv"))
+
+  "countAloituspaikat" should "return 5 for one hakukohde with 5 aloituspaikkaa" in {
+    val organisaationKoulutuksetToteutuksetHakukohteet = OrganisaationKoulutuksetToteutuksetHakukohteet(
+      Some(
+        Organisaatio(
+          organisaatio_oid = "1.2.246.562.10.278170642010",
+          organisaatio_nimi =
+            Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
+          organisaatiotyypit = List("02")
+        )
+      ),
+      Vector(
+        KoulutuksetToteutuksetHakukohteetResult(
+          hakukohdeNimi =
+            Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+          hakukohdeOid = "1.2.246.562.20.00000000000000021565",
+          koulutuksenTila = Some("julkaistu"),
+          toteutuksenTila = Some("julkaistu"),
+          hakukohteenTila = Some("julkaistu"),
+          aloituspaikat = Some(5),
+          onValintakoe = Some(false),
+          organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+          organisaatio_nimi =
+            Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
+          organisaatiotyypit = List("02")
+        )
+      )
+    )
+
+    assert(ExcelWriter.countAloituspaikat(organisaationKoulutuksetToteutuksetHakukohteet) == 5)
+  }
+
+  it should "return 35 for three hakukohde aloituspaikat summed up" in {
+    val kth = KoulutuksetToteutuksetHakukohteetResult(
+      hakukohdeNimi =
+        Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+      hakukohdeOid = "1.2.246.562.20.00000000000000021565",
+      koulutuksenTila = Some("julkaistu"),
+      toteutuksenTila = Some("julkaistu"),
+      hakukohteenTila = Some("julkaistu"),
+      aloituspaikat = Some(5),
+      onValintakoe = Some(false),
+      organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+      organisaatio_nimi =
+        Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
+      organisaatiotyypit = List("02")
+    )
+
+    val kth2 = kth.copy(
+      hakukohdeNimi =
+        Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
+      hakukohdeOid = "1.2.246.562.20.00000000000000012345",
+      aloituspaikat = Some(20),
+    )
+
+    val kth3 = kth.copy(
+      hakukohdeNimi =
+        Map(En -> "Hakukohteen 3 nimi en", Fi -> "Hakukohteen 3 nimi fi", Sv -> "Hakukohteen 3 nimi sv"),
+      hakukohdeOid = "1.2.246.562.20.00000000000000025467",
+      aloituspaikat = Some(10),
+    )
+
+    val organisaationKoulutuksetToteutuksetHakukohteet = OrganisaationKoulutuksetToteutuksetHakukohteet(
+      Some(
+        Organisaatio(
+          organisaatio_oid = "1.2.246.562.10.278170642010",
+          organisaatio_nimi =
+            Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
+          organisaatiotyypit = List("02")
+        )
+      ),
+      Vector(kth, kth2, kth3)
+    )
+
+    assert(ExcelWriter.countAloituspaikat(organisaationKoulutuksetToteutuksetHakukohteet) == 35)
+  }
+
+  it should "return 0 if there are no results" in {
+    val organisaationKoulutuksetToteutuksetHakukohteet = OrganisaationKoulutuksetToteutuksetHakukohteet(
+      Some(
+        Organisaatio(
+          organisaatio_oid = "1.2.246.562.10.278170642010",
+          organisaatio_nimi =
+            Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
+          organisaatiotyypit = List("02")
+        )
+      ),
+      Vector()
+    )
+
+    assert(ExcelWriter.countAloituspaikat(organisaationKoulutuksetToteutuksetHakukohteet) == 0)
+  }
+
   "writeExcel" should "create one sheet and set 'Yhteenveto' as the name of the sheet" in {
     val results = Vector()
     val wb      = ExcelWriter.writeRaportti(results, KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES, user)
