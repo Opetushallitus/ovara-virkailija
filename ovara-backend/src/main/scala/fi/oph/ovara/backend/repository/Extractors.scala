@@ -55,7 +55,7 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   )
 
-  implicit val getKoulutuksetToteutuksetHakukohteetResult: GetResult[KoulutuksetToteutuksetHakukohteetResult] =
+  implicit val getKoulutuksetToteutuksetHakukohteetResult: GetResult[KoulutuksetToteutuksetHakukohteetResult] = {
     GetResult(r =>
       KoulutuksetToteutuksetHakukohteetResult(
         hakukohdeNimi = extractKielistetty(r.nextStringOption()),
@@ -66,7 +66,12 @@ trait Extractors extends GenericOvaraJsonFormats {
         aloituspaikat = r.nextIntOption(),
         onValintakoe = r.nextBooleanOption(),
         voiSuorittaaKaksoistutkinnon = r.nextBooleanOption(),
-        jarjestaaUrheilijanAmmKoulutusta = r.nextBooleanOption()
+        jarjestaaUrheilijanAmmKoulutusta = r.nextBooleanOption(),
+        jarjestyspaikka_oid = r.nextStringOption(),
+        organisaatio_oid = r.nextStringOption(),
+        organisaatio_nimi = extractKielistetty(r.nextStringOption()),
+        organisaatiotyypit = extractArray(r.nextStringOption()),
       )
     )
+  }
 }

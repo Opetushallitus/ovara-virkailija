@@ -21,7 +21,7 @@ import scala.jdk.CollectionConverters.*
 class Controller(
     commonService: CommonService,
     koulutuksetToteutuksetHakukohteetService: KoulutuksetToteutuksetHakukohteetService,
-    userService: UserService,
+    userService: UserService
 ) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[Controller]);
 
@@ -65,32 +65,37 @@ class Controller(
   @GetMapping(path = Array("organisaatiot"))
   def organisaatiot: String = mapper.writeValueAsString(commonService.getUserOrganisaatiotByOrganisaatiotyyppi)
 
-
   // RAPORTIT
 
   @GetMapping(path = Array("koulutukset-toteutukset-hakukohteet"))
   def koulutukset_toteutukset_hakukohteet(
       @RequestParam("alkamiskausi") alkamiskausi: java.util.Collection[String],
       @RequestParam("haku") haku: java.util.Collection[String],
+      @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
+      @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
+      @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
       @RequestParam("koulutuksenTila", required = false) koulutuksenTila: String,
       @RequestParam("toteutuksenTila", required = false) toteutuksenTila: String,
       @RequestParam("hakukohteenTila", required = false) hakukohteenTila: String,
       @RequestParam("valintakoe", required = false) valintakoe: String,
       response: HttpServletResponse
   ): Unit = {
+    val maybeKoulutustoimija = Option(koulutustoimija)
     val maybeKoulutuksenTila = Option(koulutuksenTila)
     val maybeToteutuksenTila = Option(toteutuksenTila)
     val maybeHakukohteenTila = Option(hakukohteenTila)
-    val maybeValintakoe      = if (valintakoe == null) {
+    val maybeValintakoe = if (valintakoe == null) {
       None
     } else {
       Option(valintakoe.toBoolean)
     }
 
-    val wb = koulutuksetToteutuksetHakukohteetService.
-      get(
+    val wb = koulutuksetToteutuksetHakukohteetService.get(
       alkamiskausi.asScala.toList,
       haku.asScala.toList,
+      maybeKoulutustoimija,
+      if (oppilaitos == null) List() else oppilaitos.asScala.toList,
+      if (toimipiste == null) List() else toimipiste.asScala.toList,
       maybeKoulutuksenTila,
       maybeToteutuksenTila,
       maybeHakukohteenTila,
@@ -99,10 +104,13 @@ class Controller(
     try {
       LOG.info(s"Sending excel in the response")
       val date: LocalDateTime = LocalDateTime.now().withNano(0)
-      val dateTimeStr = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-      val out = response.getOutputStream
+      val dateTimeStr         = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+      val out                 = response.getOutputStream
       response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, s"attachment; filename=\"koulutukset-toteutukset-hakukohteet-$dateTimeStr.xlsx\"")
+      response.setHeader(
+        HttpHeaders.CONTENT_DISPOSITION,
+        s"attachment; filename=\"koulutukset-toteutukset-hakukohteet-$dateTimeStr.xlsx\""
+      )
       wb.write(out)
       out.close()
       wb.close()
