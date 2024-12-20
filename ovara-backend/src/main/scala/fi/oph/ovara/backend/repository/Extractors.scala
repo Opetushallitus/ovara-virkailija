@@ -2,14 +2,12 @@ package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.*
 import fi.oph.ovara.backend.utils.GenericOvaraJsonFormats
-import org.json4s.JArray
 import org.json4s.jackson.Serialization.read
 import slick.jdbc.*
 
-import scala.collection.Seq
-
 trait Extractors extends GenericOvaraJsonFormats {
-  private def extractKielistetty(json: Option[String]): Kielistetty = json.map(read[Map[Kieli, String]]).getOrElse(Map())
+  private def extractKielistetty(json: Option[String]): Kielistetty =
+    json.map(read[Map[Kieli, String]]).getOrElse(Map())
 
   private def extractArray(json: Option[String]): List[String] = {
     json.map(read[List[String]]).getOrElse(List())
@@ -38,7 +36,7 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   )
 
-  implicit val getOrganisaatioParentChildResult: GetResult[OrganisaatioParentChild] = GetResult(r =>
+  implicit val getOrganisaatioParentChildResult: GetResult[OrganisaatioParentChild] = GetResult(r => {
     def extractOrganisaatio(orgOid: String, r: PositionedResult) =
       Organisaatio(
         orgOid,
@@ -46,14 +44,15 @@ trait Extractors extends GenericOvaraJsonFormats {
         extractArray(r.nextStringOption())
       )
 
+    val parentOid = r.nextString()
     val child_oid = r.nextString()
 
     OrganisaatioParentChild(
-      parent_oid = r.nextString(),
+      parent_oid = parentOid,
       child_oid = child_oid,
       organisaatio = extractOrganisaatio(child_oid, r)
     )
-  )
+  })
 
   implicit val getKoulutuksetToteutuksetHakukohteetResult: GetResult[KoulutuksetToteutuksetHakukohteetResult] = {
     GetResult(r =>
@@ -70,8 +69,18 @@ trait Extractors extends GenericOvaraJsonFormats {
         jarjestyspaikka_oid = r.nextStringOption(),
         organisaatio_oid = r.nextStringOption(),
         organisaatio_nimi = extractKielistetty(r.nextStringOption()),
-        organisaatiotyypit = extractArray(r.nextStringOption()),
+        organisaatiotyypit = extractArray(r.nextStringOption())
       )
     )
   }
+
+  implicit val getOrganisaatioHierarkiaResult: GetResult[OrganisaatioHierarkia] = GetResult(r =>
+    OrganisaatioHierarkia(
+      organisaatio_oid = r.nextString(),
+      organisaatio_nimi = extractKielistetty(r.nextStringOption()),
+      organisaatiotyypit = extractArray(r.nextStringOption()),
+      parent_oids = extractArray(r.nextStringOption()),
+      children = r.nextStringOption().map(read[List[OrganisaatioHierarkia]]).getOrElse(List())
+    )
+  )
 }

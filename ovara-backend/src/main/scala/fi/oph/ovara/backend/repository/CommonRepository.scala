@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.domain.{Haku, Organisaatio, OrganisaatioParentChild, OrganisaatioPerOrganisaatiotyyppi, ammatillisetHakukohdekoodit}
+import fi.oph.ovara.backend.domain.*
 import org.springframework.stereotype.Component
 import slick.jdbc.PostgresProfile.api.*
 import slick.sql.SqlStreamingAction
@@ -40,7 +40,6 @@ class CommonRepository extends Extractors {
 
   def selectChildOrganisaatiot(organisaatiot: List[String]): SqlStreamingAction[Vector[OrganisaatioParentChild], OrganisaatioParentChild, Effect] = {
     val organisaatiotStr = organisaatiot.map(s => s"'$s'").mkString(",")
-    //val optionalOrganisaatiotClause = if (organisaatiotStr.isEmpty) "" else s"where parent_oid in ($organisaatiotStr)"
 
     sql"""WITH RECURSIVE x AS (
             SELECT parent_oid, child_oid
@@ -55,5 +54,13 @@ class CommonRepository extends Extractors {
             FROM x
             inner join pub.pub_dim_organisaatio org
             on org.organisaatio_oid = x.child_oid""".as[OrganisaatioParentChild]
+  }
+
+  def selectKoulutustoimijaDescendants(
+      koulutustoimijaOid: String): SqlStreamingAction[Vector[OrganisaatioHierarkia], OrganisaatioHierarkia, Effect] = {
+    sql"""
+         SELECT * FROM pub.koulutustoimija_with_oppilaitokset
+         WHERE parent_oids ?? $koulutustoimijaOid
+       """.as[OrganisaatioHierarkia]
   }
 }

@@ -41,12 +41,15 @@ class OvaraDatabase(@Value("${spring.datasource.url}") url: String,
     )
   }
 
-  def run[R](operations: DBIO[R]) = {
-    LOG.info("Running db query.")
+  def run[R](operations: DBIO[R], id: String): R = {
+    LOG.info(s"Running db query: $id")
 
-    Await.result(
+    val result = Await.result(
       db.run(operations),
       Duration(100, TimeUnit.SECONDS)
     )
+
+    LOG.info(s"Db query finished: $id")
+    result
   }
 }

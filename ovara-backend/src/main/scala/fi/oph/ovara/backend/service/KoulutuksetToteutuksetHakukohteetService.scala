@@ -28,41 +28,48 @@ class KoulutuksetToteutuksetHakukohteetService(
       hakukohteenTila: Option[String],
       valintakoe: Option[Boolean]
   ): XSSFWorkbook = {
-    val user                        = userService.getEnrichedUserDetails
-    val authorities                 = user.authorities
-    val kayttooikeusOrganisaatiot   = AuthoritiesUtil.getOrganisaatiot(authorities)
-    val parentChildKayttooikeusOrgs = db.run(commonRepository.selectChildOrganisaatiot(kayttooikeusOrganisaatiot))
-    val allUserKayttooikeusOrgOids  = parentChildKayttooikeusOrgs.groupBy(_.parent_oid).keys.toList.distinct
-    val kayttooikeusOrgsForKoulutustoimijaSelection = koulutustoimija match {
-      case Some(oid) =>
-        val childOrganisaatiotForKoulutustoimija = db.run(commonRepository.selectChildOrganisaatiot(List(oid)))
-        parentChildKayttooikeusOrgs intersect childOrganisaatiotForKoulutustoimija
-      case None => parentChildKayttooikeusOrgs
+    val user                      = userService.getEnrichedUserDetails
+    val userLng                   = user.asiointikieli.getOrElse("fi")
+    val authorities               = user.authorities
+    val kayttooikeusOrganisaatiot = AuthoritiesUtil.getOrganisaatiot(authorities)
+    val parentChildKayttooikeusOrgs =
+      db.run(commonRepository.selectChildOrganisaatiot(kayttooikeusOrganisaatiot), "selectChildOrganisaatiot")
+
+    val hierarkiat = koulutustoimija match {
+      case Some(koulutustoimija) =>
+        db.run(commonRepository.selectKoulutustoimijaDescendants(koulutustoimija), "selectKoulutustoimijaDescendants")
+          .toList
+      case None => List()
     }
+
+    val descendantOids = hierarkiat.flatMap(hierarkia => OrganisaatioUtils.getDescendantOids(hierarkia))
+    val orgOids = parentChildKayttooikeusOrgs.map(_.child_oid).toList intersect descendantOids
+
     val queryResult = db.run(
       koulutuksetToteutuksetHakukohteetRepository.selectWithParams(
-        kayttooikeusOrgsForKoulutustoimijaSelection.map(_.parent_oid).toList.distinct,
+        orgOids,
         alkamiskausi,
         haku,
         koulutuksenTila,
         toteutuksenTila,
         hakukohteenTila,
         valintakoe
-      )
+      ),
+      "selectWithParams"
     )
 
     val groupedQueryResult = queryResult.groupBy(_.organisaatio_oid)
 
     val organisaationKoulutuksetHakukohteetToteutukset =
-      OrganisaatioUtils.mapOrganisaationHakukohteetToParent(
-        kayttooikeusOrgsForKoulutustoimijaSelection,
+      OrganisaatioUtils.mapOrganisaationHakukohteetToParents(
+        hierarkiat,
         groupedQueryResult
       )
 
     ExcelWriter.writeRaportti(
       organisaationKoulutuksetHakukohteetToteutukset,
       KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
-      user
+      userLng
     )
   }
 }

@@ -5,228 +5,184 @@ import org.scalatest.*
 import org.scalatest.flatspec.*
 
 class OrganisaatioUtilsSpec extends AnyFlatSpec {
-  "recursiveListParentsAndSelf" should "return list of only self oid for the only org in the vector" in {
-    val orgs = Vector(
-      OrganisaatioParentChild(
-        "1.2.246.562.10.1064574979797",
-        "1.2.246.562.10.1064574979797",
-        Organisaatio(
-          "1.2.246.562.10.1064574979797",
-          Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-          List("02")
-        )
+  "getDescendantOids" should "return list of organisaatio descendants for organisaatio without children" in {
+    val hierarkia =
+      OrganisaatioHierarkia(
+        "1.2.246.562.10.41253773158",
+        Map(
+          En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+        ),
+        List("01"),
+        List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        List()
       )
-    )
 
-    assert(
-      OrganisaatioUtils.recursiveListParentsAndSelf(
-        "1.2.246.562.10.1064574979797",
-        orgs
-      ) == List(
-        Organisaatio(
-          "1.2.246.562.10.1064574979797",
-          Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-          List("02")
-        )
-      )
-    )
+    assert(OrganisaatioUtils.getDescendantOids(hierarkia) == List("1.2.246.562.10.41253773158"))
   }
 
-  it should "return koulutustoimija parent oid and oppilaitos oid for oppilaitos org" in {
-    val orgs = Vector(
-      OrganisaatioParentChild(
-        "1.2.246.562.10.1064574979797",
-        "1.2.246.562.10.1064574979797",
-        Organisaatio(
-          "1.2.246.562.10.1064574979797",
-          Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-          List("02")
-        )
-      ),
-      OrganisaatioParentChild(
-        "1.2.246.562.10.10645749713",
-        "1.2.246.562.10.1064574979797",
-        Organisaatio(
-          "1.2.246.562.10.1064574979797",
-          Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-          List("02")
-        )
-      ),
-      OrganisaatioParentChild(
-        "1.2.246.562.10.10645749713",
-        "1.2.246.562.10.1064574979696",
-        Organisaatio(
-          "1.2.246.562.10.1064574979696",
-          Map(En -> "Oppilaitos 2 en", Fi -> "Oppilaitos 2 fi", Sv -> "Oppilaitos 2 sv"),
-          List("02")
-        )
-      ),
-      OrganisaatioParentChild(
-        "1.2.246.562.10.10645749713",
-        "1.2.246.562.10.10645749713",
-        Organisaatio(
-          "1.2.246.562.10.10645749713",
-          Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-          List("01")
-        )
-      )
-    )
-
-    assert(
-      OrganisaatioUtils.recursiveListParentsAndSelf("1.2.246.562.10.1064574979797", orgs) ==
+  it should "return list of organisaatio descendants for organisaatio with one child" in {
+    val hierarkia =
+      OrganisaatioHierarkia(
+        "1.2.246.562.10.41253773158",
+        Map(
+          En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+        ),
+        List("01"),
+        List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
         List(
-          Organisaatio(
-            "1.2.246.562.10.1064574979797",
-            Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-            List("02")
-          ),
-          Organisaatio(
-            "1.2.246.562.10.1064574979797",
-            Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-            List("02")
-          ),
-          Organisaatio(
-            "1.2.246.562.10.10645749713",
-            Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-            List("01")
+          OrganisaatioHierarkia(
+            "1.2.246.562.10.93483820481",
+            Map(En -> "Ammattiopisto Lappia", Fi -> "Ammattiopisto Lappia", Sv -> "Ammattiopisto Lappia"),
+            List("02"),
+            List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+            List()
           )
         )
-    )
-  }
-
-  it should "list koulutustoimija, oppilaitos and toimipiste as parents for toimipiste" in {
-    val orgs = Vector(
-      OrganisaatioParentChild(
-        "1.2.246.562.10.1064574979797",
-        "1.2.246.562.10.1064574979856",
-        Organisaatio(
-          "1.2.246.562.10.1064574979856",
-          Map(En -> "Toimipiste en", Fi -> "Toimipiste fi", Sv -> "Toimipiste sv"),
-          List("03")
-        )
-      ),
-      OrganisaatioParentChild(
-        "1.2.246.562.10.10645749713",
-        "1.2.246.562.10.1064574979696",
-        Organisaatio(
-          "1.2.246.562.10.1064574979696",
-          Map(En -> "Oppilaitos 2 en", Fi -> "Oppilaitos 2 fi", Sv -> "Oppilaitos 2 sv"),
-          List("02")
-        )
-      ),
-      OrganisaatioParentChild(
-        "1.2.246.562.10.1064574979797",
-        "1.2.246.562.10.1064574979797",
-        Organisaatio(
-          "1.2.246.562.10.1064574979797",
-          Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-          List("02")
-        )
-      ),
-      OrganisaatioParentChild(
-        "1.2.246.562.10.10645749713",
-        "1.2.246.562.10.1064574979797",
-        Organisaatio(
-          "1.2.246.562.10.1064574979797",
-          Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-          List("02")
-        )
-      ),
-      OrganisaatioParentChild(
-        "1.2.246.562.10.10645749713",
-        "1.2.246.562.10.10645749713",
-        Organisaatio(
-          "1.2.246.562.10.10645749713",
-          Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-          List("01")
-        )
       )
-    )
 
     assert(
-      OrganisaatioUtils.recursiveListParentsAndSelf(
-        "1.2.246.562.10.1064574979856",
-        orgs
-      ) ==
-        List(
-          Organisaatio(
-            "1.2.246.562.10.1064574979856",
-            Map(En -> "Toimipiste en", Fi -> "Toimipiste fi", Sv -> "Toimipiste sv"),
-            List("03")
-          ),
-          Organisaatio(
-            "1.2.246.562.10.1064574979797",
-            Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-            List("02")
-          ),
-          Organisaatio(
-            "1.2.246.562.10.1064574979797",
-            Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-            List("02")
-          ),
-          Organisaatio(
-            "1.2.246.562.10.10645749713",
-            Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-            List("01")
-          )
-        )
+      OrganisaatioUtils.getDescendantOids(hierarkia) == List("1.2.246.562.10.41253773158", "1.2.246.562.10.93483820481")
     )
   }
 
-  it should "list koulutustoimija and oppilaitos as parents for oppilaitos when koulutustoimija is earlier in the list" in {
-    val orgs = Vector(
-      OrganisaatioParentChild(
-        "1.2.246.562.10.10645749713",
-        "1.2.246.562.10.10645749713",
-        Organisaatio(
-          "1.2.246.562.10.10645749713",
-          Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-          List("01")
-        )
-      ),
-      OrganisaatioParentChild(
-        "1.2.246.562.10.10645749713",
-        "1.2.246.562.10.10645749797",
-        Organisaatio(
-          "1.2.246.562.10.10645749797",
-          Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-          List("02")
+  it should "return list of organisaatio descendants for organisaatio with two children" in {
+    val hierarkia =
+      OrganisaatioHierarkia(
+        "1.2.246.562.10.41253773158",
+        Map(
+          En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+        ),
+        List("01"),
+        List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        List(
+          OrganisaatioHierarkia(
+            "1.2.246.562.10.93483820481",
+            Map(En -> "Ammattiopisto Lappia", Fi -> "Ammattiopisto Lappia", Sv -> "Ammattiopisto Lappia"),
+            List("02"),
+            List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+            List()
+          ),
+          OrganisaatioHierarkia(
+            "1.2.246.562.10.95915936017",
+            Map(
+              En -> "Kemi-Tornion ammattikorkeakoulu",
+              Fi -> "Kemi-Tornion ammattikorkeakoulu",
+              Sv -> "Kemi-Tornion ammattikorkeakoulu"
+            ),
+            List("02"),
+            List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+            List()
+          )
         )
       )
-    )
 
     assert(
-      OrganisaatioUtils.recursiveListParentsAndSelf(
-        "1.2.246.562.10.10645749797",
-        orgs
-      ) ==
-        List(
-          Organisaatio(
-            "1.2.246.562.10.10645749797",
-            Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-            List("02")
-          ),
-          Organisaatio(
-            "1.2.246.562.10.10645749713",
-            Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-            List("01")
-          )
-        )
+      OrganisaatioUtils.getDescendantOids(hierarkia) == List(
+        "1.2.246.562.10.41253773158",
+        "1.2.246.562.10.93483820481",
+        "1.2.246.562.10.95915936017"
+      )
     )
   }
 
-  "mapToParent" should "return two hakukohde mapped to koulutustoimija" in {
-    val orgs = Vector(
-      OrganisaatioParentChild(
-        "1.2.246.562.10.10645749713",
-        "1.2.246.562.10.10645749713",
-        Organisaatio(
-          "1.2.246.562.10.10645749713",
-          Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-          List("01")
+  it should "return list of organisaatio descendants for organisaatio with two children and grandchildren and grandgrandchildren" in {
+    val hierarkia =
+      OrganisaatioHierarkia(
+        "1.2.246.562.10.41253773158",
+        Map(
+          En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+        ),
+        List("01"),
+        List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        List(
+          OrganisaatioHierarkia(
+            "1.2.246.562.10.93483820481",
+            Map(En -> "Ammattiopisto Lappia", Fi -> "Ammattiopisto Lappia", Sv -> "Ammattiopisto Lappia"),
+            List("02"),
+            List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+            List(
+              OrganisaatioHierarkia(
+                "1.2.246.562.10.10645749713",
+                Map(
+                  En -> "Pop & Jazz Konservatorio Lappia",
+                  Fi -> "Pop & Jazz Konservatorio Lappia",
+                  Sv -> "Pop & Jazz Konservatorio Lappia"
+                ),
+                List("03"),
+                List(
+                  "1.2.246.562.10.10645749713",
+                  "1.2.246.562.10.00000000001",
+                  "1.2.246.562.10.41253773158",
+                  "1.2.246.562.10.93483820481"
+                ),
+                List(
+                  OrganisaatioHierarkia(
+                    "1.2.246.562.10.1064574971333",
+                    Map(
+                      En -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+                      Fi -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+                      Sv -> "Pop & Jazz Konservatorio Lappia alitoimipiste"
+                    ),
+                    List("03"),
+                    List(
+                      "1.2.246.562.10.1064574971333",
+                      "1.2.246.562.10.10645749713",
+                      "1.2.246.562.10.00000000001",
+                      "1.2.246.562.10.41253773158",
+                      "1.2.246.562.10.93483820481"
+                    ),
+                    List()
+                  )
+                )
+              )
+            )
+          ),
+          OrganisaatioHierarkia(
+            "1.2.246.562.10.95915936017",
+            Map(
+              En -> "Kemi-Tornion ammattikorkeakoulu",
+              Fi -> "Kemi-Tornion ammattikorkeakoulu",
+              Sv -> "Kemi-Tornion ammattikorkeakoulu"
+            ),
+            List("02"),
+            List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+            List()
+          )
         )
       )
+
+    assert(
+      OrganisaatioUtils.getDescendantOids(hierarkia) == List(
+        "1.2.246.562.10.41253773158",
+        "1.2.246.562.10.93483820481",
+        "1.2.246.562.10.10645749713",
+        "1.2.246.562.10.1064574971333",
+        "1.2.246.562.10.95915936017"
+      )
     )
+  }
+
+  "mapOrganisaationHakukohteetToParent2" should "return koulutustoimijan hakukohteet for hierarkia with only koulutustoimija" in {
+    val hierarkia =
+      OrganisaatioHierarkia(
+        "1.2.246.562.10.41253773158",
+        Map(
+          En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+        ),
+        List("01"),
+        List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        List()
+      )
 
     val kth = KoulutuksetToteutuksetHakukohteetResult(
       Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
@@ -238,9 +194,13 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
       Some(true),
       Some(true),
       Some(false),
-      Some("1.2.246.562.10.10645749713"),
-      Some("1.2.246.562.10.10645749713"),
-      Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
+      Some("1.2.246.562.10.41253773158"),
+      Some("1.2.246.562.10.41253773158"),
+      Map(
+        En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+        Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+        Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+      ),
       List("01")
     )
 
@@ -251,229 +211,555 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
 
     assert(
       OrganisaatioUtils.mapOrganisaationHakukohteetToParent(
-        orgs,
+        hierarkia,
+        Map(
+          Some("1.2.246.562.10.41253773158") -> Vector(kth, kth2)
+        )
+      ) ==
+        OrganisaatioHierarkiaWithHakukohteet(
+          "1.2.246.562.10.41253773158",
+          Map(
+            En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+          ),
+          List("01"),
+          List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          List(),
+          List(kth, kth2)
+        )
+    )
+  }
+
+  it should "return koulutustoimijan oppilaitos with hakukohteet for one hierarkia" in {
+    val hierarkia =
+      OrganisaatioHierarkia(
+        "1.2.246.562.10.41253773158",
+        Map(
+          En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+        ),
+        List("01"),
+        List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        List(
+          OrganisaatioHierarkia(
+            "1.2.246.562.10.10645749713",
+            Map(
+              En -> "Pop & Jazz Konservatorio Lappia",
+              Fi -> "Pop & Jazz Konservatorio Lappia",
+              Sv -> "Pop & Jazz Konservatorio Lappia"
+            ),
+            List("02"),
+            List(
+              "1.2.246.562.10.10645749713",
+              "1.2.246.562.10.00000000001",
+              "1.2.246.562.10.41253773158",
+              "1.2.246.562.10.93483820481"
+            ),
+            List()
+          )
+        )
+      )
+
+    val kth = KoulutuksetToteutuksetHakukohteetResult(
+      Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
+      "1.2.246.562.20.00000000000000041885",
+      Some("julkaistu"),
+      Some("arkistoitu"),
+      Some("arkistoitu"),
+      Some(18),
+      Some(true),
+      Some(true),
+      Some(false),
+      Some("1.2.246.562.10.10645749713"),
+      Some("1.2.246.562.10.10645749713"),
+      Map(
+        En -> "Pop & Jazz Konservatorio Lappia",
+        Fi -> "Pop & Jazz Konservatorio Lappia",
+        Sv -> "Pop & Jazz Konservatorio Lappia"
+      ),
+      List("02")
+    )
+
+    val kth2 = kth.copy(
+      hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
+      hakukohdeOid = "1.2.246.562.20.00000000000000041886"
+    )
+
+    assert(
+      OrganisaatioUtils.mapOrganisaationHakukohteetToParent(
+        hierarkia,
+        Map(
+          Some("1.2.246.562.10.10645749713") -> Vector(kth, kth2)
+        )
+      ) ==
+        OrganisaatioHierarkiaWithHakukohteet(
+          "1.2.246.562.10.41253773158",
+          Map(
+            En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+          ),
+          List("01"),
+          List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          List(
+            OrganisaatioHierarkiaWithHakukohteet(
+              "1.2.246.562.10.10645749713",
+              Map(
+                En -> "Pop & Jazz Konservatorio Lappia",
+                Fi -> "Pop & Jazz Konservatorio Lappia",
+                Sv -> "Pop & Jazz Konservatorio Lappia"
+              ),
+              List("02"),
+              List(
+                "1.2.246.562.10.10645749713",
+                "1.2.246.562.10.00000000001",
+                "1.2.246.562.10.41253773158",
+                "1.2.246.562.10.93483820481"
+              ),
+              List(),
+              List(kth, kth2)
+            )
+          ),
+          hakukohteet = List()
+        )
+    )
+  }
+
+  it should "return one hakukohde for alitoimipiste and two for oppilaitos in one hierarkia" in {
+    val hierarkia =
+      OrganisaatioHierarkia(
+        "1.2.246.562.10.41253773158",
+        Map(
+          En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+        ),
+        List("01"),
+        List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        List(
+          OrganisaatioHierarkia(
+            "1.2.246.562.10.10645749713",
+            Map(
+              En -> "Pop & Jazz Konservatorio Lappia",
+              Fi -> "Pop & Jazz Konservatorio Lappia",
+              Sv -> "Pop & Jazz Konservatorio Lappia"
+            ),
+            List("02"),
+            List(
+              "1.2.246.562.10.10645749713",
+              "1.2.246.562.10.00000000001",
+              "1.2.246.562.10.41253773158"
+            ),
+            List(
+              OrganisaatioHierarkia(
+                "1.2.246.562.10.10645749712223",
+                Map(
+                  En -> "Pop & Jazz Konservatorio Lappia",
+                  Fi -> "Pop & Jazz Konservatorio Lappia",
+                  Sv -> "Pop & Jazz Konservatorio Lappia"
+                ),
+                List("03"),
+                List(
+                  "1.2.246.562.10.10645749712223",
+                  "1.2.246.562.10.10645749713",
+                  "1.2.246.562.10.00000000001",
+                  "1.2.246.562.10.41253773158"
+                ),
+                List(
+                  OrganisaatioHierarkia(
+                    "1.2.246.562.10.1064574971333",
+                    Map(
+                      En -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+                      Fi -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+                      Sv -> "Pop & Jazz Konservatorio Lappia alitoimipiste"
+                    ),
+                    List("03"),
+                    List(
+                      "1.2.246.562.10.1064574971333",
+                      "1.2.246.562.10.10645749712223",
+                      "1.2.246.562.10.10645749713",
+                      "1.2.246.562.10.00000000001",
+                      "1.2.246.562.10.41253773158"
+                    ),
+                    List()
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+
+    val kth = KoulutuksetToteutuksetHakukohteetResult(
+      Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
+      "1.2.246.562.20.00000000000000041885",
+      Some("julkaistu"),
+      Some("arkistoitu"),
+      Some("arkistoitu"),
+      Some(18),
+      Some(true),
+      Some(true),
+      Some(false),
+      Some("1.2.246.562.10.10645749713"),
+      Some("1.2.246.562.10.10645749713"),
+      Map(
+        En -> "Pop & Jazz Konservatorio Lappia",
+        Fi -> "Pop & Jazz Konservatorio Lappia",
+        Sv -> "Pop & Jazz Konservatorio Lappia"
+      ),
+      List("02")
+    )
+
+    val kth2 = kth.copy(
+      hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
+      hakukohdeOid = "1.2.246.562.20.00000000000000041886"
+    )
+
+    val alitoimipisteKth = KoulutuksetToteutuksetHakukohteetResult(
+      Map(
+        En -> "Alitoimipisteen hakukohde 1 en",
+        Fi -> "Alitoimipisteen hakukohde 1 fi",
+        Sv -> "Alitoimipisteen hakukohde 1 sv"
+      ),
+      "1.2.246.562.20.000000000000000419995",
+      Some("julkaistu"),
+      Some("arkistoitu"),
+      Some("arkistoitu"),
+      Some(18),
+      Some(true),
+      Some(true),
+      Some(false),
+      Some("1.2.246.562.10.1064574971333"),
+      Some("1.2.246.562.10.1064574971333"),
+      Map(
+        En -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+        Fi -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+        Sv -> "Pop & Jazz Konservatorio Lappia alitoimipiste"
+      ),
+      List("03")
+    )
+
+    val ylimaarainenKth = KoulutuksetToteutuksetHakukohteetResult(
+      Map(
+        En -> "Ylimääräinen hakukohde 1 en",
+        Fi -> "Ylimääräinen hakukohde 1 fi",
+        Sv -> "Ylimääräinen hakukohde 1 sv"
+      ),
+      "1.2.246.562.20.00000000000000041999100",
+      Some("julkaistu"),
+      Some("arkistoitu"),
+      Some("arkistoitu"),
+      Some(18),
+      Some(true),
+      Some(true),
+      Some(false),
+      Some("1.2.246.562.10.1064574971445"),
+      Some("1.2.246.562.10.1064574971445"),
+      Map(
+        En -> "Tuntematon toimipiste",
+        Fi -> "Tuntematon toimipiste",
+        Sv -> "Tuntematon toimipiste"
+      ),
+      List("03")
+    )
+
+    assert(
+      OrganisaatioUtils.mapOrganisaationHakukohteetToParent(
+        hierarkia,
+        Map(
+          Some("1.2.246.562.10.10645749713")   -> Vector(kth, kth2),
+          Some("1.2.246.562.10.1064574971333") -> Vector(alitoimipisteKth),
+          Some("1.2.246.562.10.1064574971445") -> Vector(ylimaarainenKth)
+        )
+      ) ==
+        OrganisaatioHierarkiaWithHakukohteet(
+          "1.2.246.562.10.41253773158",
+          Map(
+            En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+          ),
+          List("01"),
+          List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          List(
+            OrganisaatioHierarkiaWithHakukohteet(
+              "1.2.246.562.10.10645749713",
+              Map(
+                En -> "Pop & Jazz Konservatorio Lappia",
+                Fi -> "Pop & Jazz Konservatorio Lappia",
+                Sv -> "Pop & Jazz Konservatorio Lappia"
+              ),
+              List("02"),
+              List(
+                "1.2.246.562.10.10645749713",
+                "1.2.246.562.10.00000000001",
+                "1.2.246.562.10.41253773158"
+              ),
+              List(
+                OrganisaatioHierarkiaWithHakukohteet(
+                  "1.2.246.562.10.10645749712223",
+                  Map(
+                    En -> "Pop & Jazz Konservatorio Lappia",
+                    Fi -> "Pop & Jazz Konservatorio Lappia",
+                    Sv -> "Pop & Jazz Konservatorio Lappia"
+                  ),
+                  List("03"),
+                  List(
+                    "1.2.246.562.10.10645749712223",
+                    "1.2.246.562.10.10645749713",
+                    "1.2.246.562.10.00000000001",
+                    "1.2.246.562.10.41253773158"
+                  ),
+                  List(
+                    OrganisaatioHierarkiaWithHakukohteet(
+                      "1.2.246.562.10.1064574971333",
+                      Map(
+                        En -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+                        Fi -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+                        Sv -> "Pop & Jazz Konservatorio Lappia alitoimipiste"
+                      ),
+                      List("03"),
+                      List(
+                        "1.2.246.562.10.1064574971333",
+                        "1.2.246.562.10.10645749712223",
+                        "1.2.246.562.10.10645749713",
+                        "1.2.246.562.10.00000000001",
+                        "1.2.246.562.10.41253773158"
+                      ),
+                      List(),
+                      List(alitoimipisteKth)
+                    )
+                  ),
+                  List()
+                )
+              ),
+              List(kth, kth2)
+            )
+          ),
+          hakukohteet = List()
+        )
+    )
+  }
+
+  "mapOrganisaationHakukohteetToParents" should "return two hakukohde mapped to koulutustoimija" in {
+    val hierarkia =
+      List(
+        OrganisaatioHierarkia(
+          "1.2.246.562.10.41253773158",
+          Map(
+            En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+          ),
+          List("01"),
+          List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          List()
+        )
+      )
+
+    val kth = KoulutuksetToteutuksetHakukohteetResult(
+      Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
+      "1.2.246.562.20.00000000000000041885",
+      Some("julkaistu"),
+      Some("arkistoitu"),
+      Some("arkistoitu"),
+      Some(18),
+      Some(true),
+      Some(true),
+      Some(false),
+      Some("1.2.246.562.10.41253773158"),
+      Some("1.2.246.562.10.41253773158"),
+      Map(
+        En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+        Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+        Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+      ),
+      List("01")
+    )
+
+    val kth2 = kth.copy(
+      hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
+      hakukohdeOid = "1.2.246.562.20.00000000000000041886"
+    )
+
+    assert(
+      OrganisaatioUtils.mapOrganisaationHakukohteetToParents(
+        hierarkia,
+        Map(
+          Some("1.2.246.562.10.41253773158") -> Vector(kth, kth2)
+        )
+      ) == List(
+        OrganisaatioHierarkiaWithHakukohteet(
+          "1.2.246.562.10.41253773158",
+          Map(
+            En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+          ),
+          List("01"),
+          List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          List(),
+          hakukohteet = List(kth, kth2)
+        )
+      )
+    )
+  }
+
+  it should "return koulutustoimija without hakukohteet" in {
+    val hierarkia =
+      List(
+        OrganisaatioHierarkia(
+          "1.2.246.562.10.41253773158",
+          Map(
+            En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+          ),
+          List("01"),
+          List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          List()
+        )
+      )
+
+    val kth = KoulutuksetToteutuksetHakukohteetResult(
+      Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
+      "1.2.246.562.20.00000000000000041885",
+      Some("julkaistu"),
+      Some("arkistoitu"),
+      Some("arkistoitu"),
+      Some(18),
+      Some(true),
+      Some(true),
+      Some(false),
+      Some("1.2.246.562.10.10065598749"),
+      Some("1.2.246.562.10.10065598749"),
+      Map(
+        En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+        Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+        Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+      ),
+      List("01")
+    )
+
+    assert(
+      OrganisaatioUtils.mapOrganisaationHakukohteetToParents(
+        hierarkia,
+        Map(
+          Some("1.2.246.562.10.10065598749") -> Vector(kth)
+        )
+      ) == List(
+        OrganisaatioHierarkiaWithHakukohteet(
+          "1.2.246.562.10.41253773158",
+          Map(
+            En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+          ),
+          List("01"),
+          List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          List(),
+          hakukohteet = List()
+        )
+      )
+    )
+  }
+
+  it should "return koulutustoimijan oppilaitos with hakukohteet" in {
+    val hierarkia =
+      List(
+        OrganisaatioHierarkia(
+          "1.2.246.562.10.41253773158",
+          Map(
+            En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+          ),
+          List("01"),
+          List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          List(
+            OrganisaatioHierarkia(
+              "1.2.246.562.10.10645749713",
+              Map(
+                En -> "Pop & Jazz Konservatorio Lappia",
+                Fi -> "Pop & Jazz Konservatorio Lappia",
+                Sv -> "Pop & Jazz Konservatorio Lappia"
+              ),
+              List("03"),
+              List(
+                "1.2.246.562.10.10645749713",
+                "1.2.246.562.10.00000000001",
+                "1.2.246.562.10.41253773158",
+                "1.2.246.562.10.93483820481"
+              ),
+              List()
+            )
+          )
+        )
+      )
+
+    val kth = KoulutuksetToteutuksetHakukohteetResult(
+      Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
+      "1.2.246.562.20.00000000000000041885",
+      Some("julkaistu"),
+      Some("arkistoitu"),
+      Some("arkistoitu"),
+      Some(18),
+      Some(true),
+      Some(true),
+      Some(false),
+      Some("1.2.246.562.10.10645749713"),
+      Some("1.2.246.562.10.10645749713"),
+      Map(
+        En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+        Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+        Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+      ),
+      List("01")
+    )
+
+    val kth2 = kth.copy(
+      hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
+      hakukohdeOid = "1.2.246.562.20.00000000000000041886"
+    )
+
+    assert(
+      OrganisaatioUtils.mapOrganisaationHakukohteetToParents(
+        hierarkia,
         Map(
           Some("1.2.246.562.10.10645749713") -> Vector(kth, kth2)
         )
       ) == List(
-        (
-          Organisaatio(
-            "1.2.246.562.10.10645749713",
-            Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-            List("01")
+        OrganisaatioHierarkiaWithHakukohteet(
+          "1.2.246.562.10.41253773158",
+          Map(
+            En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
           ),
-          OrganisaationKoulutuksetToteutuksetHakukohteet(
-            Some(
-              Organisaatio(
+          List("01"),
+          List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          List(
+            OrganisaatioHierarkiaWithHakukohteet(
+              "1.2.246.562.10.10645749713",
+              Map(
+                En -> "Pop & Jazz Konservatorio Lappia",
+                Fi -> "Pop & Jazz Konservatorio Lappia",
+                Sv -> "Pop & Jazz Konservatorio Lappia"
+              ),
+              List("03"),
+              List(
                 "1.2.246.562.10.10645749713",
-                Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-                List("01")
-              )
-            ),
-            Vector(kth, kth2)
-          )
-        )
-      )
-    )
-  }
-
-  it should "return two hakukohde mapped to oppilaitos with koulutustoimija as the parent" in {
-    val orgs = Vector(
-      OrganisaatioParentChild(
-        "1.2.246.562.10.10645749713",
-        "1.2.246.562.10.10645749713",
-        Organisaatio(
-          "1.2.246.562.10.10645749713",
-          Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-          List("01")
-        )
-      ),
-      OrganisaatioParentChild(
-        "1.2.246.562.10.10645749713",
-        "1.2.246.562.10.10645749797",
-        Organisaatio(
-          "1.2.246.562.10.10645749797",
-          Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-          List("02")
-        )
-      )
-    )
-
-    val kth = KoulutuksetToteutuksetHakukohteetResult(
-      Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
-      "1.2.246.562.20.00000000000000041885",
-      Some("julkaistu"),
-      Some("arkistoitu"),
-      Some("arkistoitu"),
-      Some(18),
-      Some(true),
-      Some(true),
-      Some(false),
-      Some("1.2.246.562.10.10645749797"),
-      Some("1.2.246.562.10.10645749797"),
-      Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-      List("02")
-    )
-
-    val kth2 = kth.copy(
-      hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
-      hakukohdeOid = "1.2.246.562.20.00000000000000041886"
-    )
-
-    assert(
-      OrganisaatioUtils.mapOrganisaationHakukohteetToParent(
-        orgs,
-        Map(
-          Some("1.2.246.562.10.10645749797") -> Vector(kth, kth2)
-        )
-      ) == List(
-        (
-          Organisaatio(
-            "1.2.246.562.10.10645749713",
-            Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-            List("01")
+                "1.2.246.562.10.00000000001",
+                "1.2.246.562.10.41253773158",
+                "1.2.246.562.10.93483820481"
+              ),
+              List(),
+              List(kth, kth2)
+            )
           ),
-          OrganisaationKoulutuksetToteutuksetHakukohteet(
-            Some(
-              Organisaatio(
-                "1.2.246.562.10.10645749797",
-                Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-                List("02")
-              )
-            ),
-            Vector(kth, kth2)
-          )
-        )
-      )
-    )
-  }
-
-  it should "return" in {
-    val orgs =
-      Vector(
-        OrganisaatioParentChild(
-          "1.2.246.562.10.1064574979797",
-          "1.2.246.562.10.1064574979856",
-          Organisaatio(
-            "1.2.246.562.10.1064574979856",
-            Map(En -> "Toimipiste en", Fi -> "Toimipiste fi", Sv -> "Toimipiste sv"),
-            List("03")
-          )
-        ),
-        OrganisaatioParentChild(
-          "1.2.246.562.10.10645749713",
-          "1.2.246.562.10.1064574979696",
-          Organisaatio(
-            "1.2.246.562.10.1064574979696",
-            Map(En -> "Oppilaitos 2 en", Fi -> "Oppilaitos 2 fi", Sv -> "Oppilaitos 2 sv"),
-            List("02")
-          )
-        ),
-        OrganisaatioParentChild(
-          "1.2.246.562.10.1064574979797",
-          "1.2.246.562.10.1064574979797",
-          Organisaatio(
-            "1.2.246.562.10.1064574979797",
-            Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-            List("02")
-          )
-        ),
-        OrganisaatioParentChild(
-          "1.2.246.562.10.10645749713",
-          "1.2.246.562.10.1064574979797",
-          Organisaatio(
-            "1.2.246.562.10.1064574979797",
-            Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-            List("02")
-          )
-        ),
-        OrganisaatioParentChild(
-          "1.2.246.562.10.10645749713",
-          "1.2.246.562.10.10645749713",
-          Organisaatio(
-            "1.2.246.562.10.10645749713",
-            Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-            List("01")
-          )
-        )
-      )
-
-    val kth = KoulutuksetToteutuksetHakukohteetResult(
-      Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
-      "1.2.246.562.20.00000000000000041885",
-      Some("julkaistu"),
-      Some("arkistoitu"),
-      Some("arkistoitu"),
-      Some(18),
-      Some(true),
-      Some(true),
-      Some(false),
-      Some("1.2.246.562.10.10645749797"),
-      Some("1.2.246.562.10.10645749797"),
-      Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-      List("02")
-    )
-
-    val kth2 = kth.copy(
-      hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
-      hakukohdeOid = "1.2.246.562.20.00000000000000041886"
-    )
-
-    val kth3 = kth.copy(
-      hakukohdeNimi = Map(En -> "hakukohde 3 en", Fi -> "hakukohde 3 fi", Sv -> "hakukohde 3 sv"),
-      hakukohdeOid = "1.2.246.562.20.00000000000000050000",
-      jarjestyspaikka_oid = Some("1.2.246.562.10.1064574979856"),
-      organisaatio_oid = Some("1.2.246.562.10.1064574979856"),
-      organisaatio_nimi = Map(En -> "Toimipiste en", Fi -> "Toimipiste fi", Sv -> "Toimipiste sv"),
-      organisaatiotyypit = List("03")
-    )
-
-    val kth4 = kth3.copy(
-      hakukohdeNimi = Map(En -> "hakukohde 4 en", Fi -> "hakukohde 4 fi", Sv -> "hakukohde 4 sv"),
-      hakukohdeOid = "1.2.246.562.20.000000000000000500001"
-    )
-
-    assert(
-      OrganisaatioUtils.mapOrganisaationHakukohteetToParent(
-        orgs,
-        Map(
-          Some("1.2.246.562.10.1064574979797")   -> Vector(kth, kth2),
-          Some("1.2.246.562.10.1064574979856") -> Vector(kth3, kth4)
-        )
-      ) == List(
-        (
-          Organisaatio(
-            "1.2.246.562.10.10645749713",
-            Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-            List("01")
-          ),
-          OrganisaationKoulutuksetToteutuksetHakukohteet(
-            Some(
-              Organisaatio(
-                "1.2.246.562.10.1064574979797",
-                Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-                List("02")
-              )
-            ),
-            Vector(kth, kth2)
-          )
-        ),
-        (
-          Organisaatio(
-            "1.2.246.562.10.10645749713",
-            Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-            List("01")
-          ),
-          OrganisaationKoulutuksetToteutuksetHakukohteet(
-            Some(
-              Organisaatio(
-                "1.2.246.562.10.1064574979856",
-                Map(En -> "Toimipiste en", Fi -> "Toimipiste fi", Sv -> "Toimipiste sv"),
-                List("03")
-              )
-            ),
-            Vector(kth3, kth4)
-          )
+          hakukohteet = List()
         )
       )
     )
