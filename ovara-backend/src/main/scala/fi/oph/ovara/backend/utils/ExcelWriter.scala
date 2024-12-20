@@ -10,10 +10,9 @@ object ExcelWriter {
   val LOG: Logger = LoggerFactory.getLogger("ExcelWriter")
 
   def countAloituspaikat(
-      organisaationKoulutuksetToteutuksetHakukohteet: OrganisaationKoulutuksetToteutuksetHakukohteet
+      organisaationKoulutuksetToteutuksetHakukohteet: List[KoulutuksetToteutuksetHakukohteetResult]
   ): Int = {
-    val koulutuksetToteutuksetHakukohteet =
-      organisaationKoulutuksetToteutuksetHakukohteet.koulutuksetToteutuksetHakukohteet
+    val koulutuksetToteutuksetHakukohteet = organisaationKoulutuksetToteutuksetHakukohteet
     koulutuksetToteutuksetHakukohteet.flatMap(kth => kth.aloituspaikat).sum
   }
 
@@ -21,16 +20,13 @@ object ExcelWriter {
       row: XSSFRow,
       headingCellStyle: XSSFCellStyle,
       asiointikieli: String,
-      organisaatio: Option[Organisaatio],
-      organisaationKoulutuksetToteutuksetHakukohteet: OrganisaationKoulutuksetToteutuksetHakukohteet,
+      organisaatio: Organisaatio,
+      organisaationKoulutuksetToteutuksetHakukohteet: List[KoulutuksetToteutuksetHakukohteetResult],
       raporttiColumnTitlesWithIndex: List[(String, Int)]
   ): XSSFRow = {
     val orgNameCell = row.createCell(0)
     orgNameCell.setCellStyle(headingCellStyle)
-    val kielistettyNimi = organisaatio match {
-      case Some(org: Organisaatio) => org.organisaatio_nimi(Kieli.withName(asiointikieli))
-      case None                    => "-"
-    }
+    val kielistettyNimi = organisaatio.organisaatio_nimi(Kieli.withName(asiointikieli))
 
     orgNameCell.setCellValue(kielistettyNimi)
 
@@ -47,11 +43,10 @@ object ExcelWriter {
 
   // TODO: userin sijaan asiointikieli parametrina?
   def writeRaportti(
-      queryResult: List[(Organisaatio, OrganisaationKoulutuksetToteutuksetHakukohteet)],
+      queryResult: Map[String, List[(Organisaatio, OrganisaationKoulutuksetToteutuksetHakukohteet)]],
       raporttiColumnTitles: Map[String, List[String]],
-      user: User
+      userLng: String
   ): XSSFWorkbook = {
-    val asiointikieli          = user.asiointikieli.getOrElse("fi")
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
       LOG.info("Creating new excel from db results")
@@ -68,8 +63,10 @@ object ExcelWriter {
       headingCellstyle.setDataFormat(dataformat.getFormat("text"))
       cellstyle2.setFont(font2)
       workbook.setSheetName(0, WorkbookUtil.createSafeSheetName("Yhteenveto")) //TODO: käännös
-      val row                           = sheet.createRow(0)
-      val titles                        = raporttiColumnTitles.getOrElse(asiointikieli, raporttiColumnTitles.getOrElse("fi", List()))
+      var currentRowIndex = 0
+      val row             = sheet.createRow(currentRowIndex)
+      currentRowIndex = currentRowIndex + 1
+      val titles                        = raporttiColumnTitles.getOrElse(userLng, raporttiColumnTitles.getOrElse("fi", List()))
       val raporttiColumnTitlesWithIndex = titles.zipWithIndex
       raporttiColumnTitlesWithIndex.foreach { case (title, index) =>
         val cell = row.createCell(index)
@@ -77,55 +74,85 @@ object ExcelWriter {
         cell.setCellStyle(headingCellstyle)
       }
 
-      queryResult.zipWithIndex.foreach {
-        case (result: (Organisaatio, OrganisaationKoulutuksetToteutuksetHakukohteet), index) =>
-          val parentOrgRow          = sheet.createRow(1 + index)
-          val parentOrg             = result._1
-          val organisaationTulokset = result._2
+      queryResult.foreach(orgResults => {
+        val parentOrgOid = orgResults._1
+        val res          = orgResults._2
+
+        val orgKths = orgResults._2
+        if (orgKths.nonEmpty) {
+          val parentOrgRow = sheet.createRow(currentRowIndex)
+          currentRowIndex = currentRowIndex + 1
+          val parentOrg = orgKths.head._1
+          val organisaationTulokset =
+            orgResults._2
+              .flatMap((r: (Organisaatio, OrganisaationKoulutuksetToteutuksetHakukohteet)) =>
+                r._2.koulutuksetToteutuksetHakukohteet
+              )
+
           createOrganisaatioHeadingRow(
             parentOrgRow,
             headingCellstyle,
-            asiointikieli,
-            Some(parentOrg),
+            userLng,
+            parentOrg,
             organisaationTulokset,
             raporttiColumnTitlesWithIndex
           )
 
-          val orgRow = sheet.createRow(2 + index)
-          createOrganisaatioHeadingRow(
-            orgRow,
-            headingCellstyle,
-            asiointikieli,
-            organisaationTulokset._1,
-            organisaationTulokset,
-            raporttiColumnTitlesWithIndex
-          )
-
-          val kths                 = organisaationTulokset.koulutuksetToteutuksetHakukohteet
-          val firstKth             = kths.head
-          val hakukohteenTiedotRow = sheet.createRow(3 + index)
-
-          for (i <- 0 until firstKth.productArity) yield {
-            val cell = hakukohteenTiedotRow.createCell(i)
-            cell.setCellStyle(cellstyle2)
-            firstKth.productElement(i) match {
-              case kielistetty: Kielistetty =>
-                val kielistettyValue = kielistetty(Kieli.withName(asiointikieli))
-                cell.setCellValue(kielistettyValue)
-              case string: String =>
-                cell.setCellValue(string)
-              case Some(s: String) =>
-                cell.setCellValue(s)
-              case Some(int: Int) =>
-                cell.setCellValue(int)
-              case Some(b: Boolean) =>
-                val value = if (b) "X" else "-"
-                cell.setCellValue(value)
-              case _ =>
-                cell.setCellValue("-")
+          res.zipWithIndex.foreach { case ((org, koulutuksetToteutuksetHakukohteet), index) =>
+            val childOrg = koulutuksetToteutuksetHakukohteet.organisaatio
+            val childOrgOid = childOrg match {
+              case Some(org) => org.organisaatio_oid
+              case _         => ""
             }
+
+            val koulTotHak = koulutuksetToteutuksetHakukohteet.koulutuksetToteutuksetHakukohteet.toList
+
+            if (parentOrgOid != childOrgOid && childOrgOid != "") {
+              val orgRow = sheet.createRow(currentRowIndex)
+              currentRowIndex = currentRowIndex + 1
+
+              createOrganisaatioHeadingRow(
+                orgRow,
+                headingCellstyle,
+                userLng,
+                childOrg.get, //TODO: Muuta param optioniksi
+                koulTotHak,
+                raporttiColumnTitlesWithIndex
+              )
+            }
+
+            val kths = koulutuksetToteutuksetHakukohteet._2
+            var kthsLen = kths.length
+            kths.zipWithIndex.foreach(
+              (kth: KoulutuksetToteutuksetHakukohteetResult, resultRowIndex: Int) => {
+                val hakukohteenTiedotRow = sheet.createRow(currentRowIndex)
+                currentRowIndex = currentRowIndex + 1
+
+                for (i <- 0 until kth.productArity) yield {
+                  val cell = hakukohteenTiedotRow.createCell(i)
+                  cell.setCellStyle(cellstyle2)
+                  kth.productElement(i) match {
+                    case kielistetty: Kielistetty =>
+                      val kielistettyValue = kielistetty(Kieli.withName(userLng))
+                      cell.setCellValue(kielistettyValue)
+                    case string: String =>
+                      cell.setCellValue(string)
+                    case Some(s: String) =>
+                      cell.setCellValue(s)
+                    case Some(int: Int) =>
+                      cell.setCellValue(int)
+                    case Some(b: Boolean) =>
+                      val value = if (b) "X" else "-"
+                      cell.setCellValue(value)
+                    case _ =>
+                      cell.setCellValue("-")
+                  }
+                }
+              }
+            )
           }
-      }
+        }
+      })
     } catch {
       case e: Exception =>
         LOG.error(s"Error creating excel: ${e.getMessage}")

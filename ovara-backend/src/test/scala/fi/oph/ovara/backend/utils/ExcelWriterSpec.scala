@@ -5,32 +5,22 @@ import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFSheet, XSSFWorkbook}
 import org.scalatest.flatspec.AnyFlatSpec
 
 class ExcelWriterSpec extends AnyFlatSpec {
-  val user: User = User(userOid = "1.2.246.562.24.60357717666", authorities = List(), asiointikieli = Some("sv"))
+  val userLng: String = "sv"
 
   "countAloituspaikat" should "return 5 for one hakukohde with 5 aloituspaikkaa" in {
-    val organisaationKoulutuksetToteutuksetHakukohteet = OrganisaationKoulutuksetToteutuksetHakukohteet(
-      Some(
-        Organisaatio(
-          organisaatio_oid = "1.2.246.562.10.278170642010",
-          organisaatio_nimi =
-            Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
-          organisaatiotyypit = List("02")
-        )
-      ),
-      Vector(
-        KoulutuksetToteutuksetHakukohteetResult(
-          hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
-          hakukohdeOid = "1.2.246.562.20.00000000000000021565",
-          koulutuksenTila = Some("julkaistu"),
-          toteutuksenTila = Some("julkaistu"),
-          hakukohteenTila = Some("julkaistu"),
-          aloituspaikat = Some(5),
-          onValintakoe = Some(false),
-          organisaatio_oid = Some("1.2.246.562.10.278170642010"),
-          organisaatio_nimi =
-            Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
-          organisaatiotyypit = List("02")
-        )
+    val organisaationKoulutuksetToteutuksetHakukohteet = List(
+      KoulutuksetToteutuksetHakukohteetResult(
+        hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000021565",
+        koulutuksenTila = Some("julkaistu"),
+        toteutuksenTila = Some("julkaistu"),
+        hakukohteenTila = Some("julkaistu"),
+        aloituspaikat = Some(5),
+        onValintakoe = Some(false),
+        organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+        organisaatio_nimi =
+          Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
+        organisaatiotyypit = List("02")
       )
     )
 
@@ -64,35 +54,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
       aloituspaikat = Some(10)
     )
 
-    val organisaationKoulutuksetToteutuksetHakukohteet = OrganisaationKoulutuksetToteutuksetHakukohteet(
-      Some(
-        Organisaatio(
-          organisaatio_oid = "1.2.246.562.10.278170642010",
-          organisaatio_nimi =
-            Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
-          organisaatiotyypit = List("02")
-        )
-      ),
-      Vector(kth, kth2, kth3)
-    )
+    val organisaationKoulutuksetToteutuksetHakukohteet = List(kth, kth2, kth3)
 
     assert(ExcelWriter.countAloituspaikat(organisaationKoulutuksetToteutuksetHakukohteet) == 35)
   }
 
   it should "return 0 if there are no results" in {
-    val organisaationKoulutuksetToteutuksetHakukohteet = OrganisaationKoulutuksetToteutuksetHakukohteet(
-      Some(
-        Organisaatio(
-          organisaatio_oid = "1.2.246.562.10.278170642010",
-          organisaatio_nimi =
-            Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
-          organisaatiotyypit = List("02")
-        )
-      ),
-      Vector()
-    )
-
-    assert(ExcelWriter.countAloituspaikat(organisaationKoulutuksetToteutuksetHakukohteet) == 0)
+    assert(ExcelWriter.countAloituspaikat(List()) == 0)
   }
 
   "createOrganisaatioHeadingRow" should "create row with org name and total count of aloituspaikat" in {
@@ -103,29 +71,19 @@ class ExcelWriterSpec extends AnyFlatSpec {
       organisaatiotyypit = List("01")
     )
 
-    val organisaationKoulutuksetToteutuksetHakukohteet = OrganisaationKoulutuksetToteutuksetHakukohteet(
-      Some(
-        Organisaatio(
-          organisaatio_oid = "1.2.246.562.10.278170642010",
-          organisaatio_nimi =
-            Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
-          organisaatiotyypit = List("02")
-        )
-      ),
-      Vector(
-        KoulutuksetToteutuksetHakukohteetResult(
-          hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
-          hakukohdeOid = "1.2.246.562.20.00000000000000021565",
-          koulutuksenTila = Some("julkaistu"),
-          toteutuksenTila = Some("julkaistu"),
-          hakukohteenTila = Some("julkaistu"),
-          aloituspaikat = Some(8),
-          onValintakoe = Some(false),
-          organisaatio_oid = Some("1.2.246.562.10.278170642010"),
-          organisaatio_nimi =
-            Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
-          organisaatiotyypit = List("02")
-        )
+    val organisaationKoulutuksetToteutuksetHakukohteet = List(
+      KoulutuksetToteutuksetHakukohteetResult(
+        hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000021565",
+        koulutuksenTila = Some("julkaistu"),
+        toteutuksenTila = Some("julkaistu"),
+        hakukohteenTila = Some("julkaistu"),
+        aloituspaikat = Some(8),
+        onValintakoe = Some(false),
+        organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+        organisaatio_nimi =
+          Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
+        organisaatiotyypit = List("02")
       )
     )
 
@@ -134,7 +92,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val row                             = sheet.createRow(0)
     val headingCellstyle: XSSFCellStyle = workbook.createCellStyle()
     val titles = KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES.getOrElse(
-      user.asiointikieli.get,
+      userLng,
       KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES.getOrElse("fi", List())
     )
     val raporttiColumnTitlesWithIndex = titles.zipWithIndex
@@ -142,8 +100,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val organisaatioRow = ExcelWriter.createOrganisaatioHeadingRow(
       row = row,
       headingCellStyle = headingCellstyle,
-      asiointikieli = user.asiointikieli.get,
-      organisaatio = Some(organisaatio),
+      asiointikieli = userLng,
+      organisaatio = organisaatio,
       organisaationKoulutuksetToteutuksetHakukohteet = organisaationKoulutuksetToteutuksetHakukohteet,
       raporttiColumnTitlesWithIndex = raporttiColumnTitlesWithIndex
     )
@@ -173,16 +131,15 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   "writeExcel" should "create one sheet and set 'Yhteenveto' as the name of the sheet" in {
-    val results = List()
-    val wb      = ExcelWriter.writeRaportti(results, KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES, user)
+    val results = Map("1.2.246.562.10.2781706420000" -> List())
+    val wb      = ExcelWriter.writeRaportti(results, KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES, userLng)
     assert(wb.getNumberOfSheets == 1)
     assert(wb.getSheetName(0) == "Yhteenveto")
   }
 
   it should "create one sheet with the column title row and no results" in {
-    val results = List()
-    val wb      = ExcelWriter.writeRaportti(results, KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES, user)
-    assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 1)
+    val results = Map("1.2.246.562.10.2781706420000" -> List())
+    val wb      = ExcelWriter.writeRaportti(results, KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES, userLng)
     assert(wb.getSheetAt(0).getRow(0).getCell(0).getStringCellValue == "Hakukohteen nimi SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(1).getStringCellValue == "Hakukohteen oid SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(2).getStringCellValue == "Kou.tila SV")
@@ -193,48 +150,64 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(0).getCell(7).getStringCellValue == "Voi suorittaa kaksoistutkinnon? SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(8).getStringCellValue == "Voi suorittaa tutkinnon urheilijana? SV")
     assert(wb.getSheetAt(0).getRow(1) == null)
+    assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 1)
   }
 
-  it should "create a sheet with the column title row and one result row for koulutustoimija" in {
-    val results = List(
-      (
-        Organisaatio(
-          organisaatio_oid = "1.2.246.562.10.2781706420000",
-          organisaatio_nimi =
-            Map(En -> "Koulutustoimijan nimi en", Fi -> "Koulutustoimijan nimi fi", Sv -> "Koulutustoimijan nimi sv"),
-          organisaatiotyypit = List("01")
-        ),
-        OrganisaationKoulutuksetToteutuksetHakukohteet(
-          Some(
-            Organisaatio(
-              organisaatio_oid = "1.2.246.562.10.278170642010",
-              organisaatio_nimi =
-                Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
-              organisaatiotyypit = List("02")
-            )
+  it should "create a sheet with the column title row and two result rows for koulutustoimija" in {
+    val results = Map(
+      "1.2.246.562.10.2781706420000" -> List(
+        (
+          Organisaatio(
+            organisaatio_oid = "1.2.246.562.10.2781706420000",
+            organisaatio_nimi =
+              Map(En -> "Koulutustoimijan nimi en", Fi -> "Koulutustoimijan nimi fi", Sv -> "Koulutustoimijan nimi sv"),
+            organisaatiotyypit = List("01")
           ),
-          Vector(
-            KoulutuksetToteutuksetHakukohteetResult(
-              hakukohdeNimi =
-                Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
-              hakukohdeOid = "1.2.246.562.20.00000000000000021565",
-              koulutuksenTila = Some("julkaistu"),
-              toteutuksenTila = Some("julkaistu"),
-              hakukohteenTila = Some("julkaistu"),
-              aloituspaikat = Some(8),
-              onValintakoe = Some(false),
-              organisaatio_oid = Some("1.2.246.562.10.278170642010"),
-              organisaatio_nimi =
-                Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
-              organisaatiotyypit = List("02")
+          OrganisaationKoulutuksetToteutuksetHakukohteet(
+            Some(
+              Organisaatio(
+                organisaatio_oid = "1.2.246.562.10.278170642010",
+                organisaatio_nimi =
+                  Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
+                organisaatiotyypit = List("02")
+              )
+            ),
+            Vector(
+              KoulutuksetToteutuksetHakukohteetResult(
+                hakukohdeNimi =
+                  Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+                hakukohdeOid = "1.2.246.562.20.00000000000000021565",
+                koulutuksenTila = Some("julkaistu"),
+                toteutuksenTila = Some("julkaistu"),
+                hakukohteenTila = Some("julkaistu"),
+                aloituspaikat = Some(8),
+                onValintakoe = Some(false),
+                organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+                organisaatio_nimi =
+                  Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
+                organisaatiotyypit = List("02")
+              ),
+              KoulutuksetToteutuksetHakukohteetResult(
+                hakukohdeNimi =
+                  Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
+                hakukohdeOid = "1.2.246.562.20.00000000000000031232",
+                koulutuksenTila = Some("julkaistu"),
+                toteutuksenTila = Some("tallennettu"),
+                hakukohteenTila = Some("tallennettu"),
+                aloituspaikat = Some(5),
+                onValintakoe = Some(true),
+                organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+                organisaatio_nimi =
+                  Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
+                organisaatiotyypit = List("02")
+              )
             )
           )
         )
       )
     )
-    val wb    = ExcelWriter.writeRaportti(results, KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES, user)
+    val wb    = ExcelWriter.writeRaportti(results, KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES, userLng)
     val sheet = wb.getSheetAt(0)
-    assert(sheet.getPhysicalNumberOfRows == 4)
     // Heading row
     assert(sheet.getRow(0).getCell(0).getStringCellValue == "Hakukohteen nimi SV")
     assert(sheet.getRow(0).getCell(4).getStringCellValue == "Hak.tila SV")
@@ -248,10 +221,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Parent organisaatio row with aloituspaikat sum
     assert(sheet.getRow(1).getCell(0).getStringCellValue == "Koulutustoimijan nimi sv")
     for (i <- 1 until 5) {
-      println(i)
       assert(sheet.getRow(1).getCell(i) == null)
     }
-    assert(sheet.getRow(1).getCell(5).getNumericCellValue == 8)
+    assert(sheet.getRow(1).getCell(5).getNumericCellValue == 13)
     for (i <- 6 until 8) {
       assert(sheet.getRow(1).getCell(i) == null)
     }
@@ -264,127 +236,164 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(3).getCell(4).getStringCellValue == "julkaistu")
     assert(sheet.getRow(3).getCell(5).getNumericCellValue == 8)
     assert(sheet.getRow(3).getCell(6).getStringCellValue == "-")
+
+    // Hakukohde 2 result row
+    assert(sheet.getRow(4).getCell(0).getStringCellValue == "Hakukohteen 2 nimi sv")
+    assert(sheet.getRow(4).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000031232")
+    assert(sheet.getRow(4).getCell(2).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(4).getCell(3).getStringCellValue == "tallennettu")
+    assert(sheet.getRow(4).getCell(4).getStringCellValue == "tallennettu")
+    assert(sheet.getRow(4).getCell(5).getNumericCellValue == 5)
+    assert(sheet.getRow(4).getCell(6).getStringCellValue == "X")
+
+    assert(sheet.getPhysicalNumberOfRows == 5)
   }
 
   //TODO: Testi jossa ylätason organisaatiolla hakukohteita kts. kälikuva
 
-  /*it should "create a sheet with one result row with 'Koe', 'Voi suorittaa kaksoistutkinnon' and 'Voi suorittaa tutkinnon urheilijana' as not defined" in {
-    val results = List(
-      OrganisaationKoulutuksetToteutuksetHakukohteet(
-        Some(
+  it should "create a sheet with two result rows for koulutustoimija and one result row for its oppilaitos" in {
+    val results = Map(
+      "1.2.246.562.10.2781706420000" -> List(
+        (
           Organisaatio(
-            organisaatio_oid = "1.2.246.562.10.278170642010",
+            organisaatio_oid = "1.2.246.562.10.2781706420000",
             organisaatio_nimi =
-              Map(En -> "Organisaation nimi en", Fi -> "Organisaation nimi fi", Sv -> "Organisaation nimi sv"),
-            organisaatiotyyppi = "01"
-          )
-        ),
-        Vector(
-          KoulutuksetToteutuksetHakukohteetResult(
-            hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
-            hakukohdeOid = "1.2.246.562.20.00000000000000021565",
-            koulutuksenTila = Some("julkaistu"),
-            toteutuksenTila = Some("julkaistu"),
-            hakukohteenTila = Some("julkaistu"),
-            organisaatio_oid = Some("1.2.246.562.10.278170642010"),
-            organisaatio_nimi =
-              Map(En -> "Organisaation nimi en", Fi -> "Organisaation nimi fi", Sv -> "Organisaation nimi sv"),
-            organisaatiotyypit = List("01")
-          )
-        )
-      )
-    )
-    val wb = ExcelWriter.writeRaportti(results, KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES, user)
-    assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 2)
-    assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Hakukohteen nimi sv")
-    assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000021565")
-    assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "julkaistu")
-    assert(wb.getSheetAt(0).getRow(1).getCell(3).getStringCellValue == "julkaistu")
-    assert(wb.getSheetAt(0).getRow(1).getCell(4).getStringCellValue == "julkaistu")
-    assert(wb.getSheetAt(0).getRow(1).getCell(5).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(1).getCell(6).getStringCellValue == "-")
-  }
-
-  it should "create a sheet with 'X' as the value for Koe-column when it is set as true" in {
-    val results = List(
-      OrganisaationKoulutuksetToteutuksetHakukohteet(
-        Some(
-          Organisaatio(
-            organisaatio_oid = "1.2.246.562.10.278170642010",
-            organisaatio_nimi =
-              Map(En -> "Organisaation nimi en", Fi -> "Organisaation nimi fi", Sv -> "Organisaation nimi sv"),
-            organisaatiotyyppi = "01"
-          )
-        ),
-        Vector(
-          KoulutuksetToteutuksetHakukohteetResult(
-            Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
-            "1.2.246.562.20.00000000000000021565",
-            Some("julkaistu"),
-            Some("julkaistu"),
-            Some("julkaistu"),
-            Some(10),
-            Some(true),
-            organisaatio_oid = Some("1.2.246.562.10.278170642010"),
-            organisaatio_nimi =
-              Map(En -> "Organisaation nimi en", Fi -> "Organisaation nimi fi", Sv -> "Organisaation nimi sv"),
-            organisaatiotyypit = List("01")
-          )
-        )
-      )
-    )
-    val wb = ExcelWriter.writeRaportti(results, KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES, user)
-    assert(wb.getSheetAt(0).getRow(1).getCell(6).getStringCellValue == "X")
-  }
-
-  it should "create a sheet with two rows from two query results" in {
-    val results = List(
-      OrganisaationKoulutuksetToteutuksetHakukohteet(
-        Some(
-          Organisaatio(
-            organisaatio_oid = "1.2.246.562.10.278170642010",
-            organisaatio_nimi =
-              Map(En -> "Organisaation nimi en", Fi -> "Organisaation nimi fi", Sv -> "Organisaation nimi sv"),
-            organisaatiotyyppi = "01"
-          )
-        ),
-        Vector(
-          KoulutuksetToteutuksetHakukohteetResult(
-            Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
-            "1.2.246.562.20.00000000000000021565",
-            Some("julkaistu"),
-            Some("julkaistu"),
-            Some("julkaistu"),
-            organisaatio_oid = Some("1.2.246.562.10.278170642010"),
-            organisaatio_nimi =
-              Map(En -> "Organisaation nimi en", Fi -> "Organisaation nimi fi", Sv -> "Organisaation nimi sv"),
+              Map(En -> "Koulutustoimijan nimi en", Fi -> "Koulutustoimijan nimi fi", Sv -> "Koulutustoimijan nimi sv"),
             organisaatiotyypit = List("01")
           ),
-          KoulutuksetToteutuksetHakukohteetResult(
-            Map(En -> "Hakukohde 2 en", Fi -> "Hakukohde 2 fi", Sv -> "Hakukohde 2 sv"),
-            "1.2.246.562.20.00000000000000021666",
-            Some("julkaistu"),
-            Some("arkistoitu"),
-            Some("arkistoitu"),
-            Some(10),
-            Some(true),
-            organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+          OrganisaationKoulutuksetToteutuksetHakukohteet(
+            Some(
+              Organisaatio(
+                organisaatio_oid = "1.2.246.562.10.2781706420000",
+                organisaatio_nimi = Map(
+                  En -> "Koulutustoimijan nimi en",
+                  Fi -> "Koulutustoimijan nimi fi",
+                  Sv -> "Koulutustoimijan nimi sv"
+                ),
+                organisaatiotyypit = List("01")
+              )
+            ),
+            Vector(
+              KoulutuksetToteutuksetHakukohteetResult(
+                hakukohdeNimi =
+                  Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+                hakukohdeOid = "1.2.246.562.20.00000000000000021565",
+                koulutuksenTila = Some("julkaistu"),
+                toteutuksenTila = Some("julkaistu"),
+                hakukohteenTila = Some("julkaistu"),
+                aloituspaikat = Some(8),
+                onValintakoe = Some(false),
+                organisaatio_oid = Some("1.2.246.562.10.2781706420000"),
+                organisaatio_nimi = Map(
+                  En -> "Koulutustoimijan nimi en",
+                  Fi -> "Koulutustoimijan nimi fi",
+                  Sv -> "Koulutustoimijan nimi sv"
+                ),
+                organisaatiotyypit = List("01")
+              ),
+              KoulutuksetToteutuksetHakukohteetResult(
+                hakukohdeNimi =
+                  Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
+                hakukohdeOid = "1.2.246.562.20.00000000000000031232",
+                koulutuksenTila = Some("julkaistu"),
+                toteutuksenTila = Some("tallennettu"),
+                hakukohteenTila = Some("tallennettu"),
+                aloituspaikat = Some(5),
+                onValintakoe = Some(true),
+                organisaatio_oid = Some("1.2.246.562.10.2781706420000"),
+                organisaatio_nimi = Map(
+                  En -> "Koulutustoimijan nimi en",
+                  Fi -> "Koulutustoimijan nimi fi",
+                  Sv -> "Koulutustoimijan nimi sv"
+                ),
+                organisaatiotyypit = List("01")
+              )
+            )
+          )
+        ),
+        (
+          Organisaatio(
+            organisaatio_oid = "1.2.246.562.10.2781706420000",
             organisaatio_nimi =
-              Map(En -> "Organisaation nimi en", Fi -> "Organisaation nimi fi", Sv -> "Organisaation nimi sv"),
+              Map(En -> "Koulutustoimijan nimi en", Fi -> "Koulutustoimijan nimi fi", Sv -> "Koulutustoimijan nimi sv"),
             organisaatiotyypit = List("01")
+          ),
+          OrganisaationKoulutuksetToteutuksetHakukohteet(
+            Some(
+              Organisaatio(
+                organisaatio_oid = "1.2.246.562.10.278170642010",
+                organisaatio_nimi =
+                  Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
+                organisaatiotyypit = List("02")
+              )
+            ),
+            Vector(
+              KoulutuksetToteutuksetHakukohteetResult(
+                hakukohdeNimi = Map(
+                  En -> "Oppilaitoksen hakukohteen nimi en",
+                  Fi -> "Oppilaitoksen hakukohteen nimi fi",
+                  Sv -> "Oppilaitoksen hakukohteen nimi sv"
+                ),
+                hakukohdeOid = "1.2.246.562.20.00000000000000089796",
+                koulutuksenTila = Some("julkaistu"),
+                toteutuksenTila = Some("julkaistu"),
+                hakukohteenTila = Some("julkaistu"),
+                aloituspaikat = Some(10),
+                onValintakoe = Some(false),
+                organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+                organisaatio_nimi =
+                  Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
+                organisaatiotyypit = List("02")
+              )
+            )
           )
         )
       )
     )
-    val wb = ExcelWriter.writeRaportti(results, KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES, user)
-    assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 3)
-    assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Hakukohteen nimi sv")
-    assert(wb.getSheetAt(0).getRow(2).getCell(0).getStringCellValue == "Hakukohde 2 sv")
-    assert(wb.getSheetAt(0).getRow(1).getCell(3).getStringCellValue == "julkaistu")
-    assert(wb.getSheetAt(0).getRow(2).getCell(3).getStringCellValue == "arkistoitu")
-    assert(wb.getSheetAt(0).getRow(1).getCell(5).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(2).getCell(5).getNumericCellValue == 10)
-    assert(wb.getSheetAt(0).getRow(1).getCell(6).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(2).getCell(6).getStringCellValue == "X")
-  }*/
+    val wb    = ExcelWriter.writeRaportti(results, KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES, userLng)
+    val sheet = wb.getSheetAt(0)
+    // Parent organisaatio row with aloituspaikat sum
+    assert(sheet.getRow(1).getCell(0).getStringCellValue == "Koulutustoimijan nimi sv")
+    for (i <- 1 until 5) {
+      assert(sheet.getRow(1).getCell(i) == null)
+    }
+//    assert(sheet.getRow(1).getCell(5).getNumericCellValue == 23)
+    for (i <- 6 until 8) {
+      assert(sheet.getRow(1).getCell(i) == null)
+    }
+    // Hakukohde result row
+    assert(sheet.getRow(2).getCell(0).getStringCellValue == "Hakukohteen nimi sv")
+    assert(sheet.getRow(2).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000021565")
+    assert(sheet.getRow(2).getCell(2).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(2).getCell(3).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(2).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(2).getCell(5).getNumericCellValue == 8)
+    assert(sheet.getRow(2).getCell(6).getStringCellValue == "-")
+
+    // Hakukohde 2 result row
+    assert(sheet.getRow(3).getCell(0).getStringCellValue == "Hakukohteen 2 nimi sv")
+    assert(sheet.getRow(3).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000031232")
+    assert(sheet.getRow(3).getCell(2).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(3).getCell(3).getStringCellValue == "tallennettu")
+    assert(sheet.getRow(3).getCell(4).getStringCellValue == "tallennettu")
+    assert(sheet.getRow(3).getCell(5).getNumericCellValue == 5)
+    assert(sheet.getRow(3).getCell(6).getStringCellValue == "X")
+
+    assert(sheet.getRow(4).getCell(0).getStringCellValue == "Oppilaitoksen nimi sv")
+    for (i <- 1 until 5) {
+      assert(sheet.getRow(1).getCell(i) == null)
+    }
+    assert(sheet.getRow(4).getCell(5).getNumericCellValue == 10)
+
+    // Oppilaitoksen hakukohteen nimi result row
+    assert(sheet.getRow(5).getCell(0).getStringCellValue == "Oppilaitoksen hakukohteen nimi sv")
+    assert(sheet.getRow(5).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000089796")
+    assert(sheet.getRow(5).getCell(2).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(5).getCell(3).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(5).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(5).getCell(5).getNumericCellValue == 10)
+    assert(sheet.getRow(5).getCell(6).getStringCellValue == "-")
+
+    assert(sheet.getPhysicalNumberOfRows == 6)
+  }
 }

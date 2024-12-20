@@ -215,7 +215,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
     )
   }
 
-  "mapToParent" should "return two hakukohde mapped to koulutustoimija" in {
+  "mapOrganisaationHakukohteetToParent" should "return two hakukohde mapped to koulutustoimija" in {
     val orgs = Vector(
       OrganisaatioParentChild(
         "1.2.246.562.10.10645749713",
@@ -255,22 +255,24 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         Map(
           Some("1.2.246.562.10.10645749713") -> Vector(kth, kth2)
         )
-      ) == List(
-        (
-          Organisaatio(
-            "1.2.246.562.10.10645749713",
-            Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-            List("01")
-          ),
-          OrganisaationKoulutuksetToteutuksetHakukohteet(
-            Some(
-              Organisaatio(
-                "1.2.246.562.10.10645749713",
-                Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-                List("01")
-              )
+      ) == Map(
+        "1.2.246.562.10.10645749713" -> List(
+          (
+            Organisaatio(
+              "1.2.246.562.10.10645749713",
+              Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
+              List("01")
             ),
-            Vector(kth, kth2)
+            OrganisaationKoulutuksetToteutuksetHakukohteet(
+              Some(
+                Organisaatio(
+                  "1.2.246.562.10.10645749713",
+                  Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
+                  List("01")
+                )
+              ),
+              Vector(kth, kth2)
+            )
           )
         )
       )
@@ -326,29 +328,31 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         Map(
           Some("1.2.246.562.10.10645749797") -> Vector(kth, kth2)
         )
-      ) == List(
-        (
-          Organisaatio(
-            "1.2.246.562.10.10645749713",
-            Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-            List("01")
-          ),
-          OrganisaationKoulutuksetToteutuksetHakukohteet(
-            Some(
-              Organisaatio(
-                "1.2.246.562.10.10645749797",
-                Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-                List("02")
-              )
+      ) == Map(
+        "1.2.246.562.10.10645749713" -> List(
+          (
+            Organisaatio(
+              "1.2.246.562.10.10645749713",
+              Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
+              List("01")
             ),
-            Vector(kth, kth2)
+            OrganisaationKoulutuksetToteutuksetHakukohteet(
+              Some(
+                Organisaatio(
+                  "1.2.246.562.10.10645749797",
+                  Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
+                  List("02")
+                )
+              ),
+              Vector(kth, kth2)
+            )
           )
         )
       )
     )
   }
 
-  it should "return" in {
+  it should "return hakukohteet mapped to correct oppilaitos and toimipiste according to hakukohteen järjestyspaikka" in {
     val orgs =
       Vector(
         OrganisaatioParentChild(
@@ -437,45 +441,49 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
       OrganisaatioUtils.mapOrganisaationHakukohteetToParent(
         orgs,
         Map(
-          Some("1.2.246.562.10.1064574979797")   -> Vector(kth, kth2),
+          Some("1.2.246.562.10.1064574979797") -> Vector(kth, kth2),
           Some("1.2.246.562.10.1064574979856") -> Vector(kth3, kth4)
         )
-      ) == List(
-        (
-          Organisaatio(
-            "1.2.246.562.10.10645749713",
-            Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-            List("01")
-          ),
-          OrganisaationKoulutuksetToteutuksetHakukohteet(
-            Some(
-              Organisaatio(
-                "1.2.246.562.10.1064574979797",
-                Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
-                List("02")
-              )
+      ) == Map(
+        "1.2.246.562.10.10645749713" -> List(
+          (
+            Organisaatio(
+              "1.2.246.562.10.10645749713",
+              Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
+              List("01")
             ),
-            Vector(kth, kth2)
-          )
-        ),
-        (
-          Organisaatio(
-            "1.2.246.562.10.10645749713",
-            Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
-            List("01")
+            OrganisaationKoulutuksetToteutuksetHakukohteet(
+              Some(
+                Organisaatio(
+                  "1.2.246.562.10.1064574979797",
+                  Map(En -> "Oppilaitos en", Fi -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
+                  List("02")
+                )
+              ),
+              Vector(kth, kth2)
+            )
           ),
-          OrganisaationKoulutuksetToteutuksetHakukohteet(
-            Some(
-              Organisaatio(
-                "1.2.246.562.10.1064574979856",
-                Map(En -> "Toimipiste en", Fi -> "Toimipiste fi", Sv -> "Toimipiste sv"),
-                List("03")
-              )
+          (
+            Organisaatio(
+              "1.2.246.562.10.10645749713",
+              Map(En -> "Koulutustoimija en", Fi -> "Koulutustoimija fi", Sv -> "Koulutustoimija sv"),
+              List("01")
             ),
-            Vector(kth3, kth4)
+            OrganisaationKoulutuksetToteutuksetHakukohteet(
+              Some(
+                Organisaatio(
+                  "1.2.246.562.10.1064574979856",
+                  Map(En -> "Toimipiste en", Fi -> "Toimipiste fi", Sv -> "Toimipiste sv"),
+                  List("03")
+                )
+              ),
+              Vector(kth3, kth4)
+            )
           )
         )
       )
     )
   }
+
+  //TODO: lisää testejä tänne monimutkaisemmalle datalle: miltä data näyttää useammalle oppilaitokselle?
 }

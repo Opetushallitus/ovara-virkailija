@@ -29,6 +29,7 @@ class KoulutuksetToteutuksetHakukohteetService(
       valintakoe: Option[Boolean]
   ): XSSFWorkbook = {
     val user                        = userService.getEnrichedUserDetails
+    val userLng                     = user.asiointikieli.getOrElse("fi")
     val authorities                 = user.authorities
     val kayttooikeusOrganisaatiot   = AuthoritiesUtil.getOrganisaatiot(authorities)
     val parentChildKayttooikeusOrgs = db.run(commonRepository.selectChildOrganisaatiot(kayttooikeusOrganisaatiot))
@@ -62,7 +63,7 @@ class KoulutuksetToteutuksetHakukohteetService(
     ExcelWriter.writeRaportti(
       organisaationKoulutuksetHakukohteetToteutukset,
       KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
-      user
+      userLng
     )
   }
 }
