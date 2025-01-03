@@ -145,4 +145,4 @@ jobs:
           cd ovara-ui
           SKIP_TYPECHECK=true npm run build
           zip -r ga-${{github.run_number}}.zip .next/*.* .next/BUILD_ID .next/static .next/standalone public
-          aws s3 cp --no-progress ga-${{github.run_number}}.zip s3://"$bucket"/ga-${{github.run_number}}.zip
+          aws s3 cp --no-progress ga-${{github.run_number}}.zip s3://"$bucket"/ovara-ui/ga-${{github.run_number}}.zip
