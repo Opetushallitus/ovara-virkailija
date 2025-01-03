@@ -40,28 +40,38 @@ object ExcelWriter {
   }
 
   def createOrganisaatioHeadingRow(
-      row: XSSFRow,
+      sheet: XSSFSheet,
+      initialRowIndex: Int,
       headingCellStyle: XSSFCellStyle,
       asiointikieli: String,
-      organisaatio: Organisaatio,
-      organisaationKoulutuksetToteutuksetHakukohteet: List[KoulutuksetToteutuksetHakukohteetResult],
+      hierarkiaWithHakukohteet: OrganisaatioHierarkiaWithHakukohteet,
       raporttiColumnTitlesWithIndex: List[(String, Int)]
-  ): XSSFRow = {
-    val orgNameCell = row.createCell(0)
-    orgNameCell.setCellStyle(headingCellStyle)
-    val kielistettyNimi = organisaatio.organisaatio_nimi(Kieli.withName(asiointikieli))
+  ): Int = {
+    val hakukohteet = flattenHierarkiaHakukohteet(hierarkiaWithHakukohteet)
 
-    orgNameCell.setCellValue(kielistettyNimi)
+    if (hakukohteet.nonEmpty) {
+      val row             = sheet.createRow(initialRowIndex)
+      val updatedRowIndex = initialRowIndex + 1
 
-    raporttiColumnTitlesWithIndex.find((title, i) => title.startsWith("Aloituspaikat")) match {
-      case Some((t, index)) =>
-        val aloituspaikatCell = row.createCell(index)
-        val aloituspaikat     = countAloituspaikat(organisaationKoulutuksetToteutuksetHakukohteet)
-        aloituspaikatCell.setCellValue(aloituspaikat)
-      case _ =>
+      val orgNameCell = row.createCell(0)
+      orgNameCell.setCellStyle(headingCellStyle)
+      val kielistettyNimi = hierarkiaWithHakukohteet.organisaatio_nimi(Kieli.withName(asiointikieli))
+
+      orgNameCell.setCellValue(kielistettyNimi)
+
+      raporttiColumnTitlesWithIndex.find((title, i) => title.startsWith("Aloituspaikat")) match {
+        case Some((t, index)) =>
+          val aloituspaikatCell = row.createCell(index)
+          aloituspaikatCell.setCellStyle(headingCellStyle)
+          val aloituspaikat = countAloituspaikat(hakukohteet)
+          aloituspaikatCell.setCellValue(aloituspaikat)
+        case _ =>
+      }
+
+      updatedRowIndex
+    } else {
+      initialRowIndex
     }
-
-    row
   }
 
   def writeRaportti(
@@ -72,7 +82,7 @@ object ExcelWriter {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
       LOG.info("Creating new excel from db results")
-      val sheet: XSSFSheet                = workbook.createSheet()
+      var sheet: XSSFSheet                = workbook.createSheet()
       val headingCellstyle: XSSFCellStyle = workbook.createCellStyle()
       val cellstyle2: XSSFCellStyle       = workbook.createCellStyle()
       val dataformat: XSSFDataFormat      = workbook.createDataFormat()
@@ -96,73 +106,70 @@ object ExcelWriter {
         cell.setCellValue(title)
       }
 
+      def createHakukohdeRow(kth: KoulutuksetToteutuksetHakukohteetResult) = {
+        val hakukohteenTiedotRow = sheet.createRow(currentRowIndex)
+        currentRowIndex = currentRowIndex + 1
+
+        for (i <- 0 until kth.productArity) yield {
+          val cell = hakukohteenTiedotRow.createCell(i)
+          cell.setCellStyle(cellstyle2)
+          kth.productElement(i) match {
+            case kielistetty: Kielistetty =>
+              val kielistettyValue = kielistetty(Kieli.withName(userLng))
+              cell.setCellValue(kielistettyValue)
+            case string: String =>
+              cell.setCellValue(string)
+            case Some(s: String) =>
+              cell.setCellValue(s)
+            case Some(int: Int) =>
+              cell.setCellValue(int)
+            case Some(b: Boolean) =>
+              val value = if (b) "X" else "-"
+              cell.setCellValue(value)
+            case _ =>
+              cell.setCellValue("-")
+          }
+        }
+      }
+
       val allHierarkiat         = hierarkiatWithResults.flatMap(child => flattenHierarkiat(child))
       val hakukohteet           = allHierarkiat.flatMap(_.hakukohteet)
       val allAloituspaikatCount = countAloituspaikat(hakukohteet)
 
       hierarkiatWithResults.foreach(orgHierarkiaWithResults => {
-        val parentOrgRow = sheet.createRow(currentRowIndex)
-        currentRowIndex = currentRowIndex + 1
-        val orgNameCell = parentOrgRow.createCell(0)
-        orgNameCell.setCellStyle(headingCellstyle)
-        val kielistettyNimi = orgHierarkiaWithResults.organisaatio_nimi(Kieli.withName(userLng))
-        orgNameCell.setCellValue(kielistettyNimi)
+        val updatedRowIndex = createOrganisaatioHeadingRow(
+          sheet = sheet,
+          initialRowIndex = currentRowIndex,
+          headingCellStyle = headingCellstyle,
+          asiointikieli = userLng,
+          hierarkiaWithHakukohteet = orgHierarkiaWithResults,
+          raporttiColumnTitlesWithIndex = raporttiColumnTitlesWithIndex
+        )
+        currentRowIndex = updatedRowIndex
+
+        orgHierarkiaWithResults.hakukohteet.foreach(hakukohde => {
+          createHakukohdeRow(hakukohde)
+        })
+
         val h           = orgHierarkiaWithResults.children.flatMap(child => flattenHierarkiat(child))
         val hakukohteet = h.flatMap(_.hakukohteet)
 
-        raporttiColumnTitlesWithIndex.find((title, i) => title.startsWith("Aloituspaikat")) match {
-          case Some((t, index)) =>
-            val aloituspaikatCell = parentOrgRow.createCell(index)
-            val aloituspaikat     = countAloituspaikat(hakukohteet)
-            aloituspaikatCell.setCellValue(allAloituspaikatCount)
-          case _ =>
-        }
-
-        val children = orgHierarkiaWithResults.children.flatMap(child => flattenHierarkiat(child))
         h.foreach(orgHierarkiaWithResults => {
-          val kths         = orgHierarkiaWithResults.hakukohteet
-          val parentOrgRow = sheet.createRow(currentRowIndex)
-          currentRowIndex = currentRowIndex + 1
-          val orgNameCell = parentOrgRow.createCell(0)
-          orgNameCell.setCellStyle(headingCellstyle)
-          val kielistettyNimi = orgHierarkiaWithResults.organisaatio_nimi(Kieli.withName(userLng))
+          val updatedRowIndex = createOrganisaatioHeadingRow(
+            sheet = sheet,
+            initialRowIndex = currentRowIndex,
+            headingCellStyle = headingCellstyle,
+            asiointikieli = userLng,
+            hierarkiaWithHakukohteet = orgHierarkiaWithResults,
+            raporttiColumnTitlesWithIndex = raporttiColumnTitlesWithIndex
+          )
+          currentRowIndex = updatedRowIndex
 
-          orgNameCell.setCellValue(kielistettyNimi)
-          val hakukohteet = flattenHierarkiaHakukohteet(orgHierarkiaWithResults)
-
-          raporttiColumnTitlesWithIndex.find((title, i) => title.startsWith("Aloituspaikat")) match {
-            case Some((t, index)) =>
-              val aloituspaikatCell = parentOrgRow.createCell(index)
-              val aloituspaikat     = countAloituspaikat(hakukohteet)
-              aloituspaikatCell.setCellValue(aloituspaikat)
-            case _ =>
-          }
+          val kths = orgHierarkiaWithResults.hakukohteet
 
           if (kths.nonEmpty) {
             kths.zipWithIndex.foreach((kth: KoulutuksetToteutuksetHakukohteetResult, resultRowIndex: Int) => {
-              val hakukohteenTiedotRow = sheet.createRow(currentRowIndex)
-              currentRowIndex = currentRowIndex + 1
-
-              for (i <- 0 until kth.productArity) yield {
-                val cell = hakukohteenTiedotRow.createCell(i)
-                cell.setCellStyle(cellstyle2)
-                kth.productElement(i) match {
-                  case kielistetty: Kielistetty =>
-                    val kielistettyValue = kielistetty(Kieli.withName(userLng))
-                    cell.setCellValue(kielistettyValue)
-                  case string: String =>
-                    cell.setCellValue(string)
-                  case Some(s: String) =>
-                    cell.setCellValue(s)
-                  case Some(int: Int) =>
-                    cell.setCellValue(int)
-                  case Some(b: Boolean) =>
-                    val value = if (b) "X" else "-"
-                    cell.setCellValue(value)
-                  case _ =>
-                    cell.setCellValue("-")
-                }
-              }
+              createHakukohdeRow(kth)
             })
           }
         })
