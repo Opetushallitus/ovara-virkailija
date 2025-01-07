@@ -43,6 +43,7 @@ object ExcelWriter {
   def createOrganisaatioHeadingRow(
       sheet: XSSFSheet,
       initialRowIndex: Int,
+      indentedHeadingCellStyle: XSSFCellStyle,
       headingCellStyle: XSSFCellStyle,
       asiointikieli: String,
       hierarkiaWithHakukohteet: OrganisaatioHierarkiaWithHakukohteet,
@@ -55,7 +56,7 @@ object ExcelWriter {
       val updatedRowIndex = initialRowIndex + 1
 
       val orgNameCell = row.createCell(0)
-      orgNameCell.setCellStyle(headingCellStyle)
+      orgNameCell.setCellStyle(indentedHeadingCellStyle)
 
       val kielistettyNimi = hierarkiaWithHakukohteet.organisaatio_nimi(Kieli.withName(asiointikieli))
 
@@ -117,7 +118,7 @@ object ExcelWriter {
       initialRowIndex: Int,
       headingCellStyle: XSSFCellStyle,
       cellStyle: XSSFCellStyle,
-      font1: XSSFFont,
+      headingFont: XSSFFont,
       asiointikieli: String,
       raporttiColumnTitlesWithIndex: List[(String, Int)]
   ): Unit = {
@@ -128,21 +129,22 @@ object ExcelWriter {
     if (hierarkiatWithHakukohteet.nonEmpty) {
       hierarkiatWithHakukohteet.foreach(orgHierarkiaWithResults => {
 
-        var indent2 = 0
+        var indent = 0
         if (orgHierarkiaWithResults.organisaatiotyypit.contains(OPPILAITOSORGANISAATIOTYYPPI)) {
-          indent2 = 1
+          indent = 1
         } else if (orgHierarkiaWithResults.organisaatiotyypit.contains(TOIMIPISTEORGANISAATIOTYYPPI)) {
-          indent2 = 2
+          indent = 2
         }
 
-        val headingCellStyle: XSSFCellStyle = workbook.createCellStyle()
-        headingCellStyle.setFont(font1)
-        headingCellStyle.setAlignment(HorizontalAlignment.LEFT)
-        headingCellStyle.setIndention(indent2.toShort)
+        val indentedHeadingCellStyle: XSSFCellStyle = workbook.createCellStyle()
+        indentedHeadingCellStyle.setFont(headingFont)
+        indentedHeadingCellStyle.setAlignment(HorizontalAlignment.LEFT)
+        indentedHeadingCellStyle.setIndention(indent.toShort)
 
         val updatedRowIndex = createOrganisaatioHeadingRow(
           sheet = sheet,
           initialRowIndex = currentRowIndex,
+          indentedHeadingCellStyle = indentedHeadingCellStyle,
           headingCellStyle = headingCellStyle,
           asiointikieli = asiointikieli,
           hierarkiaWithHakukohteet = orgHierarkiaWithResults,
@@ -163,7 +165,7 @@ object ExcelWriter {
             currentRowIndex,
             headingCellStyle,
             cellStyle,
-            font1,
+            headingFont,
             asiointikieli,
             raporttiColumnTitlesWithIndex
           )
@@ -180,27 +182,34 @@ object ExcelWriter {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
       LOG.info("Creating new excel from db results")
-      val sheet: XSSFSheet                = workbook.createSheet()
-      val headingCellstyle: XSSFCellStyle = workbook.createCellStyle()
-      val cellstyle2: XSSFCellStyle       = workbook.createCellStyle()
-      val dataformat: XSSFDataFormat      = workbook.createDataFormat()
-      val font1                           = workbook.createFont()
-      val font2                           = workbook.createFont()
-      font1.setFontHeightInPoints(12)
-      font1.setBold(true)
-      font2.setFontHeightInPoints(10)
-      headingCellstyle.setFont(font1)
-      headingCellstyle.setDataFormat(dataformat.getFormat("text"))
-      cellstyle2.setFont(font2)
+      val sheet: XSSFSheet                 = workbook.createSheet()
+      val headingCellStyle: XSSFCellStyle  = workbook.createCellStyle()
+      val bodyTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
+      val dataformat: XSSFDataFormat       = workbook.createDataFormat()
+      val headingFont                      = workbook.createFont()
+      val bodyTextFont                     = workbook.createFont()
+
+      headingFont.setFontHeightInPoints(12)
+      headingFont.setBold(true)
+      headingCellStyle.setFont(headingFont)
+      headingCellStyle.setAlignment(HorizontalAlignment.LEFT)
+      headingCellStyle.setDataFormat(dataformat.getFormat("text"))
+
+      bodyTextFont.setFontHeightInPoints(10)
+      bodyTextCellStyle.setFont(bodyTextFont)
+      bodyTextCellStyle.setAlignment(HorizontalAlignment.LEFT)
+
       workbook.setSheetName(0, WorkbookUtil.createSafeSheetName("Yhteenveto")) //TODO: käännös
+
       var currentRowIndex = 0
       val row             = sheet.createRow(currentRowIndex)
       currentRowIndex = currentRowIndex + 1
+
       val titles                        = raporttiColumnTitles.getOrElse(userLng, raporttiColumnTitles.getOrElse("fi", List()))
       val raporttiColumnTitlesWithIndex = titles.zipWithIndex
       raporttiColumnTitlesWithIndex.foreach { case (title, index) =>
         val cell = row.createCell(index)
-        cell.setCellStyle(headingCellstyle)
+        cell.setCellStyle(headingCellStyle)
         cell.setCellValue(title)
       }
 
@@ -209,9 +218,9 @@ object ExcelWriter {
         sheet = sheet,
         hierarkiatWithHakukohteet = hierarkiatWithResults,
         initialRowIndex = currentRowIndex,
-        headingCellStyle = headingCellstyle,
-        cellStyle = cellstyle2,
-        font1 = font1,
+        headingCellStyle = headingCellStyle,
+        cellStyle = bodyTextCellStyle,
+        headingFont = headingFont,
         asiointikieli = userLng,
         raporttiColumnTitlesWithIndex = raporttiColumnTitlesWithIndex
       )

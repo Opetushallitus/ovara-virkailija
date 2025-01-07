@@ -441,6 +441,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val currentRowIndex = ExcelWriter.createOrganisaatioHeadingRow(
       sheet = sheet,
       initialRowIndex = 0,
+      indentedHeadingCellStyle = headingCellstyle,
       headingCellStyle = headingCellstyle,
       asiointikieli = userLng,
       hierarkiaWithHakukohteet = hierarkiaWithHakukohteet,
@@ -480,6 +481,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val currentRowIndex = ExcelWriter.createOrganisaatioHeadingRow(
       sheet = sheet,
       initialRowIndex = 0,
+      indentedHeadingCellStyle = headingCellstyle,
       headingCellStyle = headingCellstyle,
       asiointikieli = userLng,
       hierarkiaWithHakukohteet = hierarkiaWithHakukohteet,
