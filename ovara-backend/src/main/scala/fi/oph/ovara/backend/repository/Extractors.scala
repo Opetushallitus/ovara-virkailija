@@ -66,10 +66,7 @@ trait Extractors extends GenericOvaraJsonFormats {
         onValintakoe = r.nextBooleanOption(),
         voiSuorittaaKaksoistutkinnon = r.nextBooleanOption(),
         jarjestaaUrheilijanAmmKoulutusta = r.nextBooleanOption(),
-        jarjestyspaikka_oid = r.nextStringOption(),
         organisaatio_oid = r.nextStringOption(),
-        organisaatio_nimi = extractKielistetty(r.nextStringOption()),
-        organisaatiotyypit = extractArray(r.nextStringOption())
       )
     )
   }

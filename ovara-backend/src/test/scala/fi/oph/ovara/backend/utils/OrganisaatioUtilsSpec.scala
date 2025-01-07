@@ -194,14 +194,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
       Some(true),
       Some(true),
       Some(false),
-      Some("1.2.246.562.10.41253773158"),
-      Some("1.2.246.562.10.41253773158"),
-      Map(
-        En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
-        Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
-        Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
-      ),
-      List("01")
+      Some("1.2.246.562.10.41253773158")
     )
 
     val kth2 = kth.copy(
@@ -272,14 +265,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
       Some(true),
       Some(true),
       Some(false),
-      Some("1.2.246.562.10.10645749713"),
-      Some("1.2.246.562.10.10645749713"),
-      Map(
-        En -> "Pop & Jazz Konservatorio Lappia",
-        Fi -> "Pop & Jazz Konservatorio Lappia",
-        Sv -> "Pop & Jazz Konservatorio Lappia"
-      ),
-      List("02")
+      Some("1.2.246.562.10.10645749713")
     )
 
     val kth2 = kth.copy(
@@ -403,13 +389,6 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
       Some(true),
       Some(false),
       Some("1.2.246.562.10.10645749713"),
-      Some("1.2.246.562.10.10645749713"),
-      Map(
-        En -> "Pop & Jazz Konservatorio Lappia",
-        Fi -> "Pop & Jazz Konservatorio Lappia",
-        Sv -> "Pop & Jazz Konservatorio Lappia"
-      ),
-      List("02")
     )
 
     val kth2 = kth.copy(
@@ -432,13 +411,6 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
       Some(true),
       Some(false),
       Some("1.2.246.562.10.1064574971333"),
-      Some("1.2.246.562.10.1064574971333"),
-      Map(
-        En -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
-        Fi -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
-        Sv -> "Pop & Jazz Konservatorio Lappia alitoimipiste"
-      ),
-      List("03")
     )
 
     val ylimaarainenKth = KoulutuksetToteutuksetHakukohteetResult(
@@ -456,13 +428,6 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
       Some(true),
       Some(false),
       Some("1.2.246.562.10.1064574971445"),
-      Some("1.2.246.562.10.1064574971445"),
-      Map(
-        En -> "Tuntematon toimipiste",
-        Fi -> "Tuntematon toimipiste",
-        Sv -> "Tuntematon toimipiste"
-      ),
-      List("03")
     )
 
     assert(
@@ -570,13 +535,6 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
       Some(true),
       Some(false),
       Some("1.2.246.562.10.41253773158"),
-      Some("1.2.246.562.10.41253773158"),
-      Map(
-        En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
-        Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
-        Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
-      ),
-      List("01")
     )
 
     val kth2 = kth.copy(
@@ -634,13 +592,6 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
       Some(true),
       Some(false),
       Some("1.2.246.562.10.10065598749"),
-      Some("1.2.246.562.10.10065598749"),
-      Map(
-        En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
-        Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
-        Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
-      ),
-      List("01")
     )
 
     assert(
@@ -710,13 +661,6 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
       Some(true),
       Some(false),
       Some("1.2.246.562.10.10645749713"),
-      Some("1.2.246.562.10.10645749713"),
-      Map(
-        En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
-        Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
-        Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
-      ),
-      List("01")
     )
 
     val kth2 = kth.copy(

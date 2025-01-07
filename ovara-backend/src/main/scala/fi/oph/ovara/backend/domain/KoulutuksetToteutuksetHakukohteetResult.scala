@@ -22,10 +22,7 @@ case class KoulutuksetToteutuksetHakukohteetResult(
     onValintakoe: Option[Boolean] = None,
     voiSuorittaaKaksoistutkinnon: Option[Boolean] = None,
     jarjestaaUrheilijanAmmKoulutusta: Option[Boolean] = None,
-    jarjestyspaikka_oid: Option[String] = None,
     organisaatio_oid: Option[String],
-    organisaatio_nimi: Kielistetty,
-    organisaatiotyypit: List[String]
 ) extends KoulutuksetToteutuksetHakukohteet
 
 case class OrganisaationKoulutuksetToteutuksetHakukohteet(

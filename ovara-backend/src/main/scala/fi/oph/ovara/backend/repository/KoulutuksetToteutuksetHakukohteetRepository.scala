@@ -33,10 +33,7 @@ class KoulutuksetToteutuksetHakukohteetRepository extends Extractors {
                  hk.on_valintakoe,
                  hk.toinen_aste_onko_kaksoistutkinto,
                  hk.jarjestaa_urheilijan_ammkoulutusta,
-                 hk.jarjestyspaikka_oid,
-                 o.organisaatio_oid,
-                 o.organisaatio_nimi,
-                 o.organisaatiotyypit
+                 o.organisaatio_oid
           from pub.pub_dim_haku h
           join pub.pub_dim_hakukohde hk
           on h.haku_oid = hk.haku_oid

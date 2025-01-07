@@ -1,6 +1,7 @@
 package fi.oph.ovara.backend.utils
 
 import fi.oph.ovara.backend.domain.*
+import org.apache.poi.ss.usermodel.HorizontalAlignment
 import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.xssf.usermodel.*
 import org.slf4j.{Logger, LoggerFactory}
@@ -55,6 +56,7 @@ object ExcelWriter {
 
       val orgNameCell = row.createCell(0)
       orgNameCell.setCellStyle(headingCellStyle)
+
       val kielistettyNimi = hierarkiaWithHakukohteet.organisaatio_nimi(Kieli.withName(asiointikieli))
 
       orgNameCell.setCellValue(kielistettyNimi)
@@ -74,6 +76,102 @@ object ExcelWriter {
     }
   }
 
+  private def createHakukohdeRow(
+      sheet: XSSFSheet,
+      initialRowIndex: Int,
+      resultRowIndex: Int,
+      cellStyle: XSSFCellStyle,
+      kth: KoulutuksetToteutuksetHakukohteetResult,
+      asiointikieli: String
+  ) = {
+    val hakukohteenTiedotRow = sheet.createRow(initialRowIndex)
+
+    for (i <- 0 until kth.productArity) yield {
+      val cell = hakukohteenTiedotRow.createCell(i)
+      cell.setCellStyle(cellStyle)
+      kth.productElement(i) match {
+        case kielistetty: Kielistetty =>
+          val kielistettyValue = kielistetty(Kieli.withName(asiointikieli))
+          cell.setCellValue(kielistettyValue)
+        case string: String =>
+          cell.setCellValue(string)
+        case Some(s: String) =>
+          cell.setCellValue(s)
+        case Some(int: Int) =>
+          cell.setCellValue(int)
+        case Some(b: Boolean) =>
+          val value = if (b) "X" else "-"
+          cell.setCellValue(value)
+        case _ =>
+          cell.setCellValue("-")
+      }
+    }
+
+    initialRowIndex + 1
+  }
+
+  def createResultRows(
+      workbook: XSSFWorkbook,
+      sheet: XSSFSheet,
+      hierarkiatWithHakukohteet: List[OrganisaatioHierarkiaWithHakukohteet],
+      initialRowIndex: Int,
+      headingCellStyle: XSSFCellStyle,
+      cellStyle: XSSFCellStyle,
+      font1: XSSFFont,
+      asiointikieli: String,
+      raporttiColumnTitlesWithIndex: List[(String, Int)]
+  ): Unit = {
+    val allHierarkiat   = hierarkiatWithHakukohteet.flatMap(child => flattenHierarkiat(child))
+    val hakukohteet     = allHierarkiat.flatMap(_.hakukohteet)
+    var currentRowIndex = initialRowIndex
+
+    if (hierarkiatWithHakukohteet.nonEmpty) {
+      hierarkiatWithHakukohteet.foreach(orgHierarkiaWithResults => {
+
+        var indent2 = 0
+        if (orgHierarkiaWithResults.organisaatiotyypit.contains(OPPILAITOSORGANISAATIOTYYPPI)) {
+          indent2 = 1
+        } else if (orgHierarkiaWithResults.organisaatiotyypit.contains(TOIMIPISTEORGANISAATIOTYYPPI)) {
+          indent2 = 2
+        }
+
+        val headingCellStyle: XSSFCellStyle = workbook.createCellStyle()
+        headingCellStyle.setFont(font1)
+        headingCellStyle.setAlignment(HorizontalAlignment.LEFT)
+        headingCellStyle.setIndention(indent2.toShort)
+
+        val updatedRowIndex = createOrganisaatioHeadingRow(
+          sheet = sheet,
+          initialRowIndex = currentRowIndex,
+          headingCellStyle = headingCellStyle,
+          asiointikieli = asiointikieli,
+          hierarkiaWithHakukohteet = orgHierarkiaWithResults,
+          raporttiColumnTitlesWithIndex = raporttiColumnTitlesWithIndex
+        )
+        currentRowIndex = updatedRowIndex
+
+        orgHierarkiaWithResults.hakukohteet.zipWithIndex.foreach((hakukohde, resultRowIndex) => {
+          currentRowIndex =
+            createHakukohdeRow(sheet, currentRowIndex, resultRowIndex, cellStyle, hakukohde, asiointikieli)
+        })
+
+        if (orgHierarkiaWithResults.children.nonEmpty) {
+          createResultRows(
+            workbook,
+            sheet,
+            orgHierarkiaWithResults.children,
+            currentRowIndex,
+            headingCellStyle,
+            cellStyle,
+            font1,
+            asiointikieli,
+            raporttiColumnTitlesWithIndex
+          )
+        }
+      })
+    }
+  }
+
   def writeRaportti(
       hierarkiatWithResults: List[OrganisaatioHierarkiaWithHakukohteet],
       raporttiColumnTitles: Map[String, List[String]],
@@ -82,7 +180,7 @@ object ExcelWriter {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
       LOG.info("Creating new excel from db results")
-      var sheet: XSSFSheet                = workbook.createSheet()
+      val sheet: XSSFSheet                = workbook.createSheet()
       val headingCellstyle: XSSFCellStyle = workbook.createCellStyle()
       val cellstyle2: XSSFCellStyle       = workbook.createCellStyle()
       val dataformat: XSSFDataFormat      = workbook.createDataFormat()
@@ -106,74 +204,17 @@ object ExcelWriter {
         cell.setCellValue(title)
       }
 
-      def createHakukohdeRow(kth: KoulutuksetToteutuksetHakukohteetResult) = {
-        val hakukohteenTiedotRow = sheet.createRow(currentRowIndex)
-        currentRowIndex = currentRowIndex + 1
-
-        for (i <- 0 until kth.productArity) yield {
-          val cell = hakukohteenTiedotRow.createCell(i)
-          cell.setCellStyle(cellstyle2)
-          kth.productElement(i) match {
-            case kielistetty: Kielistetty =>
-              val kielistettyValue = kielistetty(Kieli.withName(userLng))
-              cell.setCellValue(kielistettyValue)
-            case string: String =>
-              cell.setCellValue(string)
-            case Some(s: String) =>
-              cell.setCellValue(s)
-            case Some(int: Int) =>
-              cell.setCellValue(int)
-            case Some(b: Boolean) =>
-              val value = if (b) "X" else "-"
-              cell.setCellValue(value)
-            case _ =>
-              cell.setCellValue("-")
-          }
-        }
-      }
-
-      val allHierarkiat         = hierarkiatWithResults.flatMap(child => flattenHierarkiat(child))
-      val hakukohteet           = allHierarkiat.flatMap(_.hakukohteet)
-      val allAloituspaikatCount = countAloituspaikat(hakukohteet)
-
-      hierarkiatWithResults.foreach(orgHierarkiaWithResults => {
-        val updatedRowIndex = createOrganisaatioHeadingRow(
-          sheet = sheet,
-          initialRowIndex = currentRowIndex,
-          headingCellStyle = headingCellstyle,
-          asiointikieli = userLng,
-          hierarkiaWithHakukohteet = orgHierarkiaWithResults,
-          raporttiColumnTitlesWithIndex = raporttiColumnTitlesWithIndex
-        )
-        currentRowIndex = updatedRowIndex
-
-        orgHierarkiaWithResults.hakukohteet.foreach(hakukohde => {
-          createHakukohdeRow(hakukohde)
-        })
-
-        val h           = orgHierarkiaWithResults.children.flatMap(child => flattenHierarkiat(child))
-        val hakukohteet = h.flatMap(_.hakukohteet)
-
-        h.foreach(orgHierarkiaWithResults => {
-          val updatedRowIndex = createOrganisaatioHeadingRow(
-            sheet = sheet,
-            initialRowIndex = currentRowIndex,
-            headingCellStyle = headingCellstyle,
-            asiointikieli = userLng,
-            hierarkiaWithHakukohteet = orgHierarkiaWithResults,
-            raporttiColumnTitlesWithIndex = raporttiColumnTitlesWithIndex
-          )
-          currentRowIndex = updatedRowIndex
-
-          val kths = orgHierarkiaWithResults.hakukohteet
-
-          if (kths.nonEmpty) {
-            kths.zipWithIndex.foreach((kth: KoulutuksetToteutuksetHakukohteetResult, resultRowIndex: Int) => {
-              createHakukohdeRow(kth)
-            })
-          }
-        })
-      })
+      createResultRows(
+        workbook = workbook,
+        sheet = sheet,
+        hierarkiatWithHakukohteet = hierarkiatWithResults,
+        initialRowIndex = currentRowIndex,
+        headingCellStyle = headingCellstyle,
+        cellStyle = cellstyle2,
+        font1 = font1,
+        asiointikieli = userLng,
+        raporttiColumnTitlesWithIndex = raporttiColumnTitlesWithIndex
+      )
 
       // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
       raporttiColumnTitlesWithIndex.foreach { case (title, index) =>
