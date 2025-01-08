@@ -29,17 +29,6 @@ object ExcelWriter {
     }
   }
 
-  def flattenHierarkiat(
-      organisaatioHierarkiaWithHakukohteet: OrganisaatioHierarkiaWithHakukohteet
-  ): List[OrganisaatioHierarkiaWithHakukohteet] = {
-    if (organisaatioHierarkiaWithHakukohteet.children.isEmpty) {
-      List(organisaatioHierarkiaWithHakukohteet)
-    } else {
-      val childHierarkiat = organisaatioHierarkiaWithHakukohteet.children.flatMap(child => flattenHierarkiat(child))
-      organisaatioHierarkiaWithHakukohteet :: childHierarkiat
-    }
-  }
-
   def createOrganisaatioHeadingRow(
       sheet: XSSFSheet,
       initialRowIndex: Int,
@@ -122,8 +111,6 @@ object ExcelWriter {
       asiointikieli: String,
       raporttiColumnTitlesWithIndex: List[(String, Int)]
   ): Unit = {
-    val allHierarkiat   = hierarkiatWithHakukohteet.flatMap(child => flattenHierarkiat(child))
-    val hakukohteet     = allHierarkiat.flatMap(_.hakukohteet)
     var currentRowIndex = initialRowIndex
 
     if (hierarkiatWithHakukohteet.nonEmpty) {
