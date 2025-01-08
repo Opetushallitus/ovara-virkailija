@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.domain.KoulutuksetToteutuksetHakukohteetResult
+import fi.oph.ovara.backend.domain.{KoulutusToteutusHakukohdeResult, OrganisaationKoulutusToteutusHakukohde}
 import fi.oph.ovara.backend.utils.RepositoryUtils
 import org.springframework.stereotype.Component
 import slick.jdbc.PostgresProfile.api.*
@@ -17,8 +17,8 @@ class KoulutuksetToteutuksetHakukohteetRepository extends Extractors {
       hakukohteenTila: Option[String],
       valintakoe: Option[Boolean]
   ): SqlStreamingAction[Vector[
-    KoulutuksetToteutuksetHakukohteetResult
-  ], KoulutuksetToteutuksetHakukohteetResult, Effect] = {
+    OrganisaationKoulutusToteutusHakukohde
+  ], OrganisaationKoulutusToteutusHakukohde, Effect] = {
     val alkamiskaudetAndHenkKohtSuunnitelma =
       RepositoryUtils.extractAlkamisvuosiKausiAndHenkkohtSuunnitelma(alkamiskausi)
     val alkamiskaudet               = alkamiskaudetAndHenkKohtSuunnitelma._1
@@ -50,6 +50,6 @@ class KoulutuksetToteutuksetHakukohteetRepository extends Extractors {
           #${RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "t.tila", toteutuksenTila)}
           #${RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "hk.tila", hakukohteenTila)}
           #${RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "hk.on_valintakoe", valintakoe)}
-          """.as[KoulutuksetToteutuksetHakukohteetResult]
+          """.as[OrganisaationKoulutusToteutusHakukohde]
   }
 }

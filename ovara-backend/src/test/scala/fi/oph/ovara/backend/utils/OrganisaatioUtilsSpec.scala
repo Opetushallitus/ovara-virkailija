@@ -184,22 +184,26 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         List()
       )
 
-    val kth = KoulutuksetToteutuksetHakukohteetResult(
-      Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
-      "1.2.246.562.20.00000000000000041885",
-      Some("julkaistu"),
-      Some("arkistoitu"),
-      Some("arkistoitu"),
-      Some(18),
-      Some(true),
-      Some(true),
-      Some(false),
-      Some("1.2.246.562.10.41253773158")
+    val kth = OrganisaationKoulutusToteutusHakukohde(
+      Some("1.2.246.562.10.41253773158"),
+      KoulutusToteutusHakukohdeResult(
+        Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
+        "1.2.246.562.20.00000000000000041885",
+        Some("julkaistu"),
+        Some("arkistoitu"),
+        Some("arkistoitu"),
+        Some(18),
+        Some(true),
+        Some(true),
+        Some(false)
+      )
     )
 
-    val kth2 = kth.copy(
-      hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
-      hakukohdeOid = "1.2.246.562.20.00000000000000041886"
+    val kth2 = kth.copy(koulutusToteutusHakukohde =
+      kth._2.copy(
+        hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000041886"
+      )
     )
 
     assert(
@@ -255,22 +259,26 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         )
       )
 
-    val kth = KoulutuksetToteutuksetHakukohteetResult(
-      Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
-      "1.2.246.562.20.00000000000000041885",
-      Some("julkaistu"),
-      Some("arkistoitu"),
-      Some("arkistoitu"),
-      Some(18),
-      Some(true),
-      Some(true),
-      Some(false),
-      Some("1.2.246.562.10.10645749713")
+    val kth = OrganisaationKoulutusToteutusHakukohde(
+      Some("1.2.246.562.10.10645749713"),
+      KoulutusToteutusHakukohdeResult(
+        Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
+        "1.2.246.562.20.00000000000000041885",
+        Some("julkaistu"),
+        Some("arkistoitu"),
+        Some("arkistoitu"),
+        Some(18),
+        Some(true),
+        Some(true),
+        Some(false)
+      )
     )
 
     val kth2 = kth.copy(
-      hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
-      hakukohdeOid = "1.2.246.562.20.00000000000000041886"
+      koulutusToteutusHakukohde = kth._2.copy(
+        hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000041886"
+      )
     )
 
     assert(
@@ -378,56 +386,64 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         )
       )
 
-    val kth = KoulutuksetToteutuksetHakukohteetResult(
-      Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
-      "1.2.246.562.20.00000000000000041885",
-      Some("julkaistu"),
-      Some("arkistoitu"),
-      Some("arkistoitu"),
-      Some(18),
-      Some(true),
-      Some(true),
-      Some(false),
+    val kth = OrganisaationKoulutusToteutusHakukohde(
       Some("1.2.246.562.10.10645749713"),
+      KoulutusToteutusHakukohdeResult(
+        Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
+        "1.2.246.562.20.00000000000000041885",
+        Some("julkaistu"),
+        Some("arkistoitu"),
+        Some("arkistoitu"),
+        Some(18),
+        Some(true),
+        Some(true),
+        Some(false)
+      )
     )
 
-    val kth2 = kth.copy(
-      hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
-      hakukohdeOid = "1.2.246.562.20.00000000000000041886"
+    val kth2 = kth.copy(koulutusToteutusHakukohde =
+      kth._2.copy(
+        hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000041886"
+      )
     )
 
-    val alitoimipisteKth = KoulutuksetToteutuksetHakukohteetResult(
-      Map(
-        En -> "Alitoimipisteen hakukohde 1 en",
-        Fi -> "Alitoimipisteen hakukohde 1 fi",
-        Sv -> "Alitoimipisteen hakukohde 1 sv"
-      ),
-      "1.2.246.562.20.000000000000000419995",
-      Some("julkaistu"),
-      Some("arkistoitu"),
-      Some("arkistoitu"),
-      Some(18),
-      Some(true),
-      Some(true),
-      Some(false),
+    val alitoimipisteKth = OrganisaationKoulutusToteutusHakukohde(
       Some("1.2.246.562.10.1064574971333"),
+      KoulutusToteutusHakukohdeResult(
+        Map(
+          En -> "Alitoimipisteen hakukohde 1 en",
+          Fi -> "Alitoimipisteen hakukohde 1 fi",
+          Sv -> "Alitoimipisteen hakukohde 1 sv"
+        ),
+        "1.2.246.562.20.000000000000000419995",
+        Some("julkaistu"),
+        Some("arkistoitu"),
+        Some("arkistoitu"),
+        Some(18),
+        Some(true),
+        Some(true),
+        Some(false)
+      )
     )
 
-    val ylimaarainenKth = KoulutuksetToteutuksetHakukohteetResult(
-      Map(
-        En -> "Ylimääräinen hakukohde 1 en",
-        Fi -> "Ylimääräinen hakukohde 1 fi",
-        Sv -> "Ylimääräinen hakukohde 1 sv"
-      ),
-      "1.2.246.562.20.00000000000000041999100",
-      Some("julkaistu"),
-      Some("arkistoitu"),
-      Some("arkistoitu"),
-      Some(18),
-      Some(true),
-      Some(true),
-      Some(false),
+    val ylimaarainenKth = OrganisaationKoulutusToteutusHakukohde(
       Some("1.2.246.562.10.1064574971445"),
+      KoulutusToteutusHakukohdeResult(
+        Map(
+          En -> "Ylimääräinen hakukohde 1 en",
+          Fi -> "Ylimääräinen hakukohde 1 fi",
+          Sv -> "Ylimääräinen hakukohde 1 sv"
+        ),
+        "1.2.246.562.20.00000000000000041999100",
+        Some("julkaistu"),
+        Some("arkistoitu"),
+        Some("arkistoitu"),
+        Some(18),
+        Some(true),
+        Some(true),
+        Some(false)
+      )
     )
 
     assert(
@@ -524,22 +540,26 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         )
       )
 
-    val kth = KoulutuksetToteutuksetHakukohteetResult(
-      Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
-      "1.2.246.562.20.00000000000000041885",
-      Some("julkaistu"),
-      Some("arkistoitu"),
-      Some("arkistoitu"),
-      Some(18),
-      Some(true),
-      Some(true),
-      Some(false),
+    val kth = OrganisaationKoulutusToteutusHakukohde(
       Some("1.2.246.562.10.41253773158"),
+      KoulutusToteutusHakukohdeResult(
+        Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
+        "1.2.246.562.20.00000000000000041885",
+        Some("julkaistu"),
+        Some("arkistoitu"),
+        Some("arkistoitu"),
+        Some(18),
+        Some(true),
+        Some(true),
+        Some(false)
+      )
     )
 
-    val kth2 = kth.copy(
-      hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
-      hakukohdeOid = "1.2.246.562.20.00000000000000041886"
+    val kth2 = kth.copy(koulutusToteutusHakukohde =
+      kth._2.copy(
+        hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000041886"
+      )
     )
 
     assert(
@@ -581,17 +601,19 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         )
       )
 
-    val kth = KoulutuksetToteutuksetHakukohteetResult(
-      Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
-      "1.2.246.562.20.00000000000000041885",
-      Some("julkaistu"),
-      Some("arkistoitu"),
-      Some("arkistoitu"),
-      Some(18),
-      Some(true),
-      Some(true),
-      Some(false),
+    val kth = OrganisaationKoulutusToteutusHakukohde(
       Some("1.2.246.562.10.10065598749"),
+      KoulutusToteutusHakukohdeResult(
+        Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
+        "1.2.246.562.20.00000000000000041885",
+        Some("julkaistu"),
+        Some("arkistoitu"),
+        Some("arkistoitu"),
+        Some(18),
+        Some(true),
+        Some(true),
+        Some(false)
+      )
     )
 
     assert(
@@ -650,22 +672,26 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         )
       )
 
-    val kth = KoulutuksetToteutuksetHakukohteetResult(
-      Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
-      "1.2.246.562.20.00000000000000041885",
-      Some("julkaistu"),
-      Some("arkistoitu"),
-      Some("arkistoitu"),
-      Some(18),
-      Some(true),
-      Some(true),
-      Some(false),
+    val kth = OrganisaationKoulutusToteutusHakukohde(
       Some("1.2.246.562.10.10645749713"),
+      KoulutusToteutusHakukohdeResult(
+        Map(En -> "hakukohde 1 en", Fi -> "hakukohde 1 fi", Sv -> "hakukohde 1 sv"),
+        "1.2.246.562.20.00000000000000041885",
+        Some("julkaistu"),
+        Some("arkistoitu"),
+        Some("arkistoitu"),
+        Some(18),
+        Some(true),
+        Some(true),
+        Some(false)
+      )
     )
 
-    val kth2 = kth.copy(
-      hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
-      hakukohdeOid = "1.2.246.562.20.00000000000000041886"
+    val kth2 = kth.copy(koulutusToteutusHakukohde =
+      kth._2.copy(
+        hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000041886"
+      )
     )
 
     assert(

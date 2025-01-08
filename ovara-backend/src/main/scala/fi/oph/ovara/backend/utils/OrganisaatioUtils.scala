@@ -5,7 +5,7 @@ import fi.oph.ovara.backend.domain.*
 object OrganisaatioUtils {
   def mapOrganisaationHakukohteetToParent(
       hierarkia: OrganisaatioHierarkia,
-      organisaatiotWithHakukohteet: Map[Option[String], Vector[KoulutuksetToteutuksetHakukohteetResult]]
+      organisaatiotWithHakukohteet: Map[Option[String], Vector[OrganisaationKoulutusToteutusHakukohde]]
   ): OrganisaatioHierarkiaWithHakukohteet = {
     val organisaatioOid = hierarkia.organisaatio_oid
     val kths = organisaatiotWithHakukohteet.find(o => {
@@ -34,7 +34,7 @@ object OrganisaatioUtils {
 
   def mapOrganisaationHakukohteetToParents(
       hierarkiat: List[OrganisaatioHierarkia],
-      organisaatiotWithHakukohteet: Map[Option[String], Vector[KoulutuksetToteutuksetHakukohteetResult]]
+      organisaatiotWithHakukohteet: Map[Option[String], Vector[OrganisaationKoulutusToteutusHakukohde]]
   ): List[OrganisaatioHierarkiaWithHakukohteet] = {
     hierarkiat.map(hierarkia => mapOrganisaationHakukohteetToParent(hierarkia, organisaatiotWithHakukohteet))
   }

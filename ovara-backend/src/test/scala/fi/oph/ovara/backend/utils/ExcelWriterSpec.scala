@@ -20,15 +20,17 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
   "countAloituspaikat" should "return 5 for one hakukohde with 5 aloituspaikkaa" in {
     val organisaationKoulutuksetToteutuksetHakukohteet = List(
-      KoulutuksetToteutuksetHakukohteetResult(
-        hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
-        hakukohdeOid = "1.2.246.562.20.00000000000000021565",
-        koulutuksenTila = Some("julkaistu"),
-        toteutuksenTila = Some("julkaistu"),
-        hakukohteenTila = Some("julkaistu"),
-        aloituspaikat = Some(5),
-        onValintakoe = Some(false),
-        organisaatio_oid = Some("1.2.246.562.10.278170642010")
+      OrganisaationKoulutusToteutusHakukohde(
+        organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+        koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+          hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+          hakukohdeOid = "1.2.246.562.20.00000000000000021565",
+          koulutuksenTila = Some("julkaistu"),
+          toteutuksenTila = Some("julkaistu"),
+          hakukohteenTila = Some("julkaistu"),
+          aloituspaikat = Some(5),
+          onValintakoe = Some(false)
+        )
       )
     )
 
@@ -36,27 +38,35 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   it should "return 35 for three hakukohde aloituspaikat summed up" in {
-    val kth = KoulutuksetToteutuksetHakukohteetResult(
-      hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
-      hakukohdeOid = "1.2.246.562.20.00000000000000021565",
-      koulutuksenTila = Some("julkaistu"),
-      toteutuksenTila = Some("julkaistu"),
-      hakukohteenTila = Some("julkaistu"),
-      aloituspaikat = Some(5),
-      onValintakoe = Some(false),
-      organisaatio_oid = Some("1.2.246.562.10.278170642010")
+    val kth = OrganisaationKoulutusToteutusHakukohde(
+      organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+      koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+        hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000021565",
+        koulutuksenTila = Some("julkaistu"),
+        toteutuksenTila = Some("julkaistu"),
+        hakukohteenTila = Some("julkaistu"),
+        aloituspaikat = Some(5),
+        onValintakoe = Some(false)
+      )
     )
 
-    val kth2 = kth.copy(
-      hakukohdeNimi = Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
-      hakukohdeOid = "1.2.246.562.20.00000000000000012345",
-      aloituspaikat = Some(20)
+    val kth2 = kth.copy(koulutusToteutusHakukohde =
+      kth._2.copy(
+        hakukohdeNimi =
+          Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000012345",
+        aloituspaikat = Some(20)
+      )
     )
 
-    val kth3 = kth.copy(
-      hakukohdeNimi = Map(En -> "Hakukohteen 3 nimi en", Fi -> "Hakukohteen 3 nimi fi", Sv -> "Hakukohteen 3 nimi sv"),
-      hakukohdeOid = "1.2.246.562.20.00000000000000025467",
-      aloituspaikat = Some(10)
+    val kth3 = kth.copy(koulutusToteutusHakukohde =
+      kth._2.copy(
+        hakukohdeNimi =
+          Map(En -> "Hakukohteen 3 nimi en", Fi -> "Hakukohteen 3 nimi fi", Sv -> "Hakukohteen 3 nimi sv"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000025467",
+        aloituspaikat = Some(10)
+      )
     )
 
     val organisaationKoulutuksetToteutuksetHakukohteet = List(kth, kth2, kth3)
@@ -69,15 +79,17 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   "flattenHierarkiaHakukohteet" should "return list with one hakukohde for one org in hierarkia" in {
-    val kth = KoulutuksetToteutuksetHakukohteetResult(
-      hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
-      hakukohdeOid = "1.2.246.562.20.00000000000000021565",
-      koulutuksenTila = Some("julkaistu"),
-      toteutuksenTila = Some("julkaistu"),
-      hakukohteenTila = Some("julkaistu"),
-      aloituspaikat = Some(8),
-      onValintakoe = Some(false),
-      organisaatio_oid = Some("1.2.246.562.10.2781706420000")
+    val kth = OrganisaationKoulutusToteutusHakukohde(
+      organisaatio_oid = Some("1.2.246.562.10.2781706420000"),
+      koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+        hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000021565",
+        koulutuksenTila = Some("julkaistu"),
+        toteutuksenTila = Some("julkaistu"),
+        hakukohteenTila = Some("julkaistu"),
+        aloituspaikat = Some(8),
+        onValintakoe = Some(false)
+      )
     )
 
     val hierarkiaWithHakukohteet =
@@ -98,26 +110,34 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   it should "return list with two hakukohde for koulutustoimija and oppilaitos in hierarkia" in {
-    val kth = KoulutuksetToteutuksetHakukohteetResult(
-      hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
-      hakukohdeOid = "1.2.246.562.20.00000000000000021565",
-      koulutuksenTila = Some("julkaistu"),
-      toteutuksenTila = Some("julkaistu"),
-      hakukohteenTila = Some("julkaistu"),
-      aloituspaikat = Some(3),
-      onValintakoe = Some(false),
-      organisaatio_oid = Some("1.2.246.562.10.2781706420000")
+    val kth = OrganisaationKoulutusToteutusHakukohde(
+      organisaatio_oid = Some("1.2.246.562.10.2781706420000"),
+      koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+        hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000021565",
+        koulutuksenTila = Some("julkaistu"),
+        toteutuksenTila = Some("julkaistu"),
+        hakukohteenTila = Some("julkaistu"),
+        aloituspaikat = Some(3),
+        onValintakoe = Some(false)
+      )
     )
 
-    val oppilaitoksenKth = KoulutuksetToteutuksetHakukohteetResult(
-      hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
-      hakukohdeOid = "1.2.246.562.20.00000000000000021565",
-      koulutuksenTila = Some("julkaistu"),
-      toteutuksenTila = Some("julkaistu"),
-      hakukohteenTila = Some("julkaistu"),
-      aloituspaikat = Some(8),
-      onValintakoe = Some(false),
-      organisaatio_oid = Some("1.2.246.562.10.2781706420111")
+    val oppilaitoksenKth = OrganisaationKoulutusToteutusHakukohde(
+      organisaatio_oid = Some("1.2.246.562.10.2781706420111"),
+      koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+        hakukohdeNimi = Map(
+          En -> "Oppilaitoksen hakukohteen nimi en",
+          Fi -> "Oppilaitoksen hakukohteen nimi fi",
+          Sv -> "Oppilaitoksen hakukohteen nimi sv"
+        ),
+        hakukohdeOid = "1.2.246.562.20.000000000000000215666",
+        koulutuksenTila = Some("julkaistu"),
+        toteutuksenTila = Some("julkaistu"),
+        hakukohteenTila = Some("julkaistu"),
+        aloituspaikat = Some(8),
+        onValintakoe = Some(false)
+      )
     )
 
     val hierarkiaWithHakukohteet =
@@ -151,20 +171,25 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   it should "return list with two oppilaitos hakukohde in hierarkia" in {
-    val kth1 = KoulutuksetToteutuksetHakukohteetResult(
-      hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
-      hakukohdeOid = "1.2.246.562.20.00000000000000021565",
-      koulutuksenTila = Some("julkaistu"),
-      toteutuksenTila = Some("julkaistu"),
-      hakukohteenTila = Some("julkaistu"),
-      aloituspaikat = Some(8),
-      onValintakoe = Some(false),
-      organisaatio_oid = Some("1.2.246.562.10.278170642010")
+    val kth1 = OrganisaationKoulutusToteutusHakukohde(
+      organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+      koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+        hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000021565",
+        koulutuksenTila = Some("julkaistu"),
+        toteutuksenTila = Some("julkaistu"),
+        hakukohteenTila = Some("julkaistu"),
+        aloituspaikat = Some(8),
+        onValintakoe = Some(false)
+      )
     )
 
-    val kth2 = kth1.copy(
-      hakukohdeNimi = Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
-      hakukohdeOid = "1.2.246.562.20.0000000000000002156667"
+    val kth2 = kth1.copy(koulutusToteutusHakukohde =
+      kth1._2.copy(
+        hakukohdeNimi =
+          Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
+        hakukohdeOid = "1.2.246.562.20.0000000000000002156667"
+      )
     )
 
     val hierarkiaWithHakukohteet =
@@ -194,29 +219,36 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   it should "return list with one toimipiste hakukohde and two oppilaitos hakukohde in hierarkia" in {
-    val oppilaitoksenKth1 = KoulutuksetToteutuksetHakukohteetResult(
-      hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
-      hakukohdeOid = "1.2.246.562.20.00000000000000021565",
-      koulutuksenTila = Some("julkaistu"),
-      toteutuksenTila = Some("julkaistu"),
-      hakukohteenTila = Some("julkaistu"),
-      aloituspaikat = Some(8),
-      onValintakoe = Some(false),
-      organisaatio_oid = Some("1.2.246.562.10.278170642010")
+    val oppilaitoksenKth1 = OrganisaationKoulutusToteutusHakukohde(
+      organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+      koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+        hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000021565",
+        koulutuksenTila = Some("julkaistu"),
+        toteutuksenTila = Some("julkaistu"),
+        hakukohteenTila = Some("julkaistu"),
+        aloituspaikat = Some(8),
+        onValintakoe = Some(false)
+      )
     )
 
     val oppilaitoksenKth2 = oppilaitoksenKth1.copy(
-      hakukohdeNimi = Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
-      hakukohdeOid = "1.2.246.562.20.0000000000000002156667"
+      koulutusToteutusHakukohde = oppilaitoksenKth1._2.copy(
+        hakukohdeNimi =
+          Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
+        hakukohdeOid = "1.2.246.562.20.0000000000000002156667"
+      )
     )
 
     val toimipisteenKth = oppilaitoksenKth1.copy(
-      hakukohdeNimi = Map(
-        En -> "Toimipiste hakukohteen nimi en",
-        Fi -> "Toimipiste hakukohteen nimi fi",
-        Sv -> "Toimipiste hakukohteen nimi sv"
+      koulutusToteutusHakukohde = oppilaitoksenKth1._2.copy(
+        hakukohdeNimi = Map(
+          En -> "Toimipiste hakukohteen nimi en",
+          Fi -> "Toimipiste hakukohteen nimi fi",
+          Sv -> "Toimipiste hakukohteen nimi sv"
+        ),
+        hakukohdeOid = "1.2.246.562.20.000000000000000215521"
       ),
-      hakukohdeOid = "1.2.246.562.20.000000000000000215521",
       organisaatio_oid = Some("1.2.246.562.10.2781706420101111")
     )
 
@@ -267,30 +299,37 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   "flattenHierarkiat" should "return list with one toimipiste hakukohde and two oppilaitos hakukohde in hierarkia" in {
-    val oppilaitoksenKth1 = KoulutuksetToteutuksetHakukohteetResult(
-      hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
-      hakukohdeOid = "1.2.246.562.20.00000000000000021565",
-      koulutuksenTila = Some("julkaistu"),
-      toteutuksenTila = Some("julkaistu"),
-      hakukohteenTila = Some("julkaistu"),
-      aloituspaikat = Some(8),
-      onValintakoe = Some(false),
-      organisaatio_oid = Some("1.2.246.562.10.278170642010")
+    val oppilaitoksenKth1 = OrganisaationKoulutusToteutusHakukohde(
+      organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+      koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+        hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000021565",
+        koulutuksenTila = Some("julkaistu"),
+        toteutuksenTila = Some("julkaistu"),
+        hakukohteenTila = Some("julkaistu"),
+        aloituspaikat = Some(8),
+        onValintakoe = Some(false)
+      )
     )
 
-    val oppilaitoksenKth2 = oppilaitoksenKth1.copy(
-      hakukohdeNimi = Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
-      hakukohdeOid = "1.2.246.562.20.0000000000000002156667"
+    val oppilaitoksenKth2 = oppilaitoksenKth1.copy(koulutusToteutusHakukohde =
+      oppilaitoksenKth1._2.copy(
+        hakukohdeNimi =
+          Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
+        hakukohdeOid = "1.2.246.562.20.0000000000000002156667"
+      )
     )
 
     val toimipisteenKth = oppilaitoksenKth1.copy(
-      hakukohdeNimi = Map(
-        En -> "Toimipiste hakukohteen nimi en",
-        Fi -> "Toimipiste hakukohteen nimi fi",
-        Sv -> "Toimipiste hakukohteen nimi sv"
-      ),
-      hakukohdeOid = "1.2.246.562.20.000000000000000215521",
-      organisaatio_oid = Some("1.2.246.562.10.2781706420101111")
+      organisaatio_oid = Some("1.2.246.562.10.2781706420101111"),
+      koulutusToteutusHakukohde = oppilaitoksenKth1._2.copy(
+        hakukohdeNimi = Map(
+          En -> "Toimipiste hakukohteen nimi en",
+          Fi -> "Toimipiste hakukohteen nimi fi",
+          Sv -> "Toimipiste hakukohteen nimi sv"
+        ),
+        hakukohdeOid = "1.2.246.562.20.000000000000000215521"
+      )
     )
 
     val hierarkiaWithHakukohteet =
@@ -398,21 +437,25 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   "createOrganisaatioHeadingRow" should "create row with org name and total count of aloituspaikat" in {
-    val oppilaitoksenKth1 =
-      KoulutuksetToteutuksetHakukohteetResult(
+    val oppilaitoksenKth1 = OrganisaationKoulutusToteutusHakukohde(
+      organisaatio_oid = Some("1.2.246.562.10.2781706420000"),
+      koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
         hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
         hakukohdeOid = "1.2.246.562.20.00000000000000021565",
         koulutuksenTila = Some("julkaistu"),
         toteutuksenTila = Some("julkaistu"),
         hakukohteenTila = Some("julkaistu"),
         aloituspaikat = Some(8),
-        onValintakoe = Some(false),
-        organisaatio_oid = Some("1.2.246.562.10.2781706420000")
+        onValintakoe = Some(false)
       )
+    )
 
     val oppilaitoksenKth2 = oppilaitoksenKth1.copy(
-      hakukohdeNimi = Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
-      hakukohdeOid = "1.2.246.562.20.0000000000000002156667"
+      koulutusToteutusHakukohde = oppilaitoksenKth1._2.copy(
+        hakukohdeNimi =
+          Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
+        hakukohdeOid = "1.2.246.562.20.0000000000000002156667"
+      )
     )
 
     val hierarkiaWithHakukohteet =
@@ -584,27 +627,31 @@ class ExcelWriterSpec extends AnyFlatSpec {
             List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000", "1.2.246.562.10.278170642010"),
             List(),
             List(
-              KoulutuksetToteutuksetHakukohteetResult(
-                hakukohdeNimi =
-                  Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
-                hakukohdeOid = "1.2.246.562.20.00000000000000021565",
-                koulutuksenTila = Some("julkaistu"),
-                toteutuksenTila = Some("julkaistu"),
-                hakukohteenTila = Some("julkaistu"),
-                aloituspaikat = Some(8),
-                onValintakoe = Some(false),
-                organisaatio_oid = Some("1.2.246.562.10.278170642010")
+              OrganisaationKoulutusToteutusHakukohde(
+                organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+                koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+                  hakukohdeNimi =
+                    Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+                  hakukohdeOid = "1.2.246.562.20.00000000000000021565",
+                  koulutuksenTila = Some("julkaistu"),
+                  toteutuksenTila = Some("julkaistu"),
+                  hakukohteenTila = Some("julkaistu"),
+                  aloituspaikat = Some(8),
+                  onValintakoe = Some(false)
+                )
               ),
-              KoulutuksetToteutuksetHakukohteetResult(
-                hakukohdeNimi =
-                  Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
-                hakukohdeOid = "1.2.246.562.20.00000000000000031232",
-                koulutuksenTila = Some("julkaistu"),
-                toteutuksenTila = Some("tallennettu"),
-                hakukohteenTila = Some("tallennettu"),
-                aloituspaikat = Some(5),
-                onValintakoe = Some(true),
-                organisaatio_oid = Some("1.2.246.562.10.278170642010")
+              OrganisaationKoulutusToteutusHakukohde(
+                organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+                koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+                  hakukohdeNimi =
+                    Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
+                  hakukohdeOid = "1.2.246.562.20.00000000000000031232",
+                  koulutuksenTila = Some("julkaistu"),
+                  toteutuksenTila = Some("tallennettu"),
+                  hakukohteenTila = Some("tallennettu"),
+                  aloituspaikat = Some(5),
+                  onValintakoe = Some(true)
+                )
               )
             )
           )
@@ -671,26 +718,31 @@ class ExcelWriterSpec extends AnyFlatSpec {
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
         List(),
         List(
-          KoulutuksetToteutuksetHakukohteetResult(
-            hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
-            hakukohdeOid = "1.2.246.562.20.00000000000000021565",
-            koulutuksenTila = Some("julkaistu"),
-            toteutuksenTila = Some("julkaistu"),
-            hakukohteenTila = Some("julkaistu"),
-            aloituspaikat = Some(8),
-            onValintakoe = Some(false),
-            organisaatio_oid = Some("1.2.246.562.10.2781706420000")
+          OrganisaationKoulutusToteutusHakukohde(
+            organisaatio_oid = Some("1.2.246.562.10.2781706420000"),
+            koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+              hakukohdeNimi =
+                Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+              hakukohdeOid = "1.2.246.562.20.00000000000000021565",
+              koulutuksenTila = Some("julkaistu"),
+              toteutuksenTila = Some("julkaistu"),
+              hakukohteenTila = Some("julkaistu"),
+              aloituspaikat = Some(8),
+              onValintakoe = Some(false)
+            )
           ),
-          KoulutuksetToteutuksetHakukohteetResult(
-            hakukohdeNimi =
-              Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
-            hakukohdeOid = "1.2.246.562.20.00000000000000031232",
-            koulutuksenTila = Some("julkaistu"),
-            toteutuksenTila = Some("tallennettu"),
-            hakukohteenTila = Some("tallennettu"),
-            aloituspaikat = Some(5),
-            onValintakoe = Some(true),
-            organisaatio_oid = Some("1.2.246.562.10.2781706420000")
+          OrganisaationKoulutusToteutusHakukohde(
+            organisaatio_oid = Some("1.2.246.562.10.2781706420000"),
+            koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+              hakukohdeNimi =
+                Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
+              hakukohdeOid = "1.2.246.562.20.00000000000000031232",
+              koulutuksenTila = Some("julkaistu"),
+              toteutuksenTila = Some("tallennettu"),
+              hakukohteenTila = Some("tallennettu"),
+              aloituspaikat = Some(5),
+              onValintakoe = Some(true)
+            )
           )
         )
       )
@@ -762,19 +814,21 @@ class ExcelWriterSpec extends AnyFlatSpec {
                 ),
                 List(),
                 List(
-                  KoulutuksetToteutuksetHakukohteetResult(
-                    hakukohdeNimi = Map(
-                      En -> "Toimipisteen hakukohteen nimi en",
-                      Fi -> "Toimipisteen hakukohteen nimi fi",
-                      Sv -> "Toimipisteen hakukohteen nimi sv"
-                    ),
-                    hakukohdeOid = "1.2.246.562.20.0000000000000004567",
-                    koulutuksenTila = Some("arkistoitu"),
-                    toteutuksenTila = Some("julkaistu"),
-                    hakukohteenTila = Some("julkaistu"),
-                    aloituspaikat = Some(3),
-                    onValintakoe = Some(false),
-                    organisaatio_oid = Some("1.2.246.562.10.2781706420111")
+                  OrganisaationKoulutusToteutusHakukohde(
+                    organisaatio_oid = Some("1.2.246.562.10.2781706420111"),
+                    koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+                      hakukohdeNimi = Map(
+                        En -> "Toimipisteen hakukohteen nimi en",
+                        Fi -> "Toimipisteen hakukohteen nimi fi",
+                        Sv -> "Toimipisteen hakukohteen nimi sv"
+                      ),
+                      hakukohdeOid = "1.2.246.562.20.0000000000000004567",
+                      koulutuksenTila = Some("arkistoitu"),
+                      toteutuksenTila = Some("julkaistu"),
+                      hakukohteenTila = Some("julkaistu"),
+                      aloituspaikat = Some(3),
+                      onValintakoe = Some(false)
+                    )
                   )
                 )
               ),
@@ -806,81 +860,91 @@ class ExcelWriterSpec extends AnyFlatSpec {
                     ),
                     List(),
                     List(
-                      KoulutuksetToteutuksetHakukohteetResult(
-                        hakukohdeNimi = Map(
-                          En -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi en",
-                          Fi -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi fi",
-                          Sv -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi sv"
-                        ),
-                        hakukohdeOid = "1.2.246.562.20.000000000000000456811",
-                        koulutuksenTila = Some("arkistoitu"),
-                        toteutuksenTila = Some("julkaistu"),
-                        hakukohteenTila = Some("julkaistu"),
-                        aloituspaikat = Some(2),
-                        onValintakoe = Some(false),
-                        organisaatio_oid = Some("1.2.246.562.10.278170642013211")
+                      OrganisaationKoulutusToteutusHakukohde(
+                        organisaatio_oid = Some("1.2.246.562.10.278170642013211"),
+                        koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+                          hakukohdeNimi = Map(
+                            En -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi en",
+                            Fi -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi fi",
+                            Sv -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi sv"
+                          ),
+                          hakukohdeOid = "1.2.246.562.20.000000000000000456811",
+                          koulutuksenTila = Some("arkistoitu"),
+                          toteutuksenTila = Some("julkaistu"),
+                          hakukohteenTila = Some("julkaistu"),
+                          aloituspaikat = Some(2),
+                          onValintakoe = Some(false)
+                        )
                       )
                     )
                   )
                 ),
                 List(
-                  KoulutuksetToteutuksetHakukohteetResult(
-                    hakukohdeNimi = Map(
-                      En -> "Toimipisteen 2 hakukohteen nimi en",
-                      Fi -> "Toimipisteen 2 hakukohteen nimi fi",
-                      Sv -> "Toimipisteen 2 hakukohteen nimi sv"
-                    ),
-                    hakukohdeOid = "1.2.246.562.20.0000000000000004568",
-                    koulutuksenTila = Some("arkistoitu"),
-                    toteutuksenTila = Some("julkaistu"),
-                    hakukohteenTila = Some("julkaistu"),
-                    aloituspaikat = Some(4),
-                    onValintakoe = Some(true),
-                    organisaatio_oid = Some("1.2.246.562.10.2781706420132")
+                  OrganisaationKoulutusToteutusHakukohde(
+                    organisaatio_oid = Some("1.2.246.562.10.2781706420132"),
+                    koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+                      hakukohdeNimi = Map(
+                        En -> "Toimipisteen 2 hakukohteen nimi en",
+                        Fi -> "Toimipisteen 2 hakukohteen nimi fi",
+                        Sv -> "Toimipisteen 2 hakukohteen nimi sv"
+                      ),
+                      hakukohdeOid = "1.2.246.562.20.0000000000000004568",
+                      koulutuksenTila = Some("arkistoitu"),
+                      toteutuksenTila = Some("julkaistu"),
+                      hakukohteenTila = Some("julkaistu"),
+                      aloituspaikat = Some(4),
+                      onValintakoe = Some(true)
+                    )
                   )
                 )
               )
             ),
             List(
-              KoulutuksetToteutuksetHakukohteetResult(
-                hakukohdeNimi =
-                  Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
-                hakukohdeOid = "1.2.246.562.20.00000000000000021565",
-                koulutuksenTila = Some("julkaistu"),
-                toteutuksenTila = Some("julkaistu"),
-                hakukohteenTila = Some("julkaistu"),
-                aloituspaikat = Some(8),
-                onValintakoe = Some(false),
-                organisaatio_oid = Some("1.2.246.562.10.278170642010")
+              OrganisaationKoulutusToteutusHakukohde(
+                organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+                koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+                  hakukohdeNimi =
+                    Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+                  hakukohdeOid = "1.2.246.562.20.00000000000000021565",
+                  koulutuksenTila = Some("julkaistu"),
+                  toteutuksenTila = Some("julkaistu"),
+                  hakukohteenTila = Some("julkaistu"),
+                  aloituspaikat = Some(8),
+                  onValintakoe = Some(false)
+                )
               ),
-              KoulutuksetToteutuksetHakukohteetResult(
-                hakukohdeNimi =
-                  Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
-                hakukohdeOid = "1.2.246.562.20.00000000000000031232",
-                koulutuksenTila = Some("julkaistu"),
-                toteutuksenTila = Some("tallennettu"),
-                hakukohteenTila = Some("tallennettu"),
-                aloituspaikat = Some(5),
-                onValintakoe = Some(true),
-                organisaatio_oid = Some("1.2.246.562.10.278170642010")
+              OrganisaationKoulutusToteutusHakukohde(
+                organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+                koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+                  hakukohdeNimi =
+                    Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
+                  hakukohdeOid = "1.2.246.562.20.00000000000000031232",
+                  koulutuksenTila = Some("julkaistu"),
+                  toteutuksenTila = Some("tallennettu"),
+                  hakukohteenTila = Some("tallennettu"),
+                  aloituspaikat = Some(5),
+                  onValintakoe = Some(true)
+                )
               )
             )
           )
         ),
         List(
-          KoulutuksetToteutuksetHakukohteetResult(
-            hakukohdeNimi = Map(
-              En -> "Koulutustoimijan hakukohteen nimi en",
-              Fi -> "Koulutustoimijan hakukohteen nimi fi",
-              Sv -> "Koulutustoimijan hakukohteen nimi sv"
-            ),
-            hakukohdeOid = "1.2.246.562.20.00000000000000021542013",
-            koulutuksenTila = Some("julkaistu"),
-            toteutuksenTila = Some("julkaistu"),
-            hakukohteenTila = Some("julkaistu"),
-            aloituspaikat = Some(4),
-            onValintakoe = Some(false),
-            organisaatio_oid = Some("1.2.246.562.10.2781706420000")
+          OrganisaationKoulutusToteutusHakukohde(
+            organisaatio_oid = Some("1.2.246.562.10.2781706420000"),
+            koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+              hakukohdeNimi = Map(
+                En -> "Koulutustoimijan hakukohteen nimi en",
+                Fi -> "Koulutustoimijan hakukohteen nimi fi",
+                Sv -> "Koulutustoimijan hakukohteen nimi sv"
+              ),
+              hakukohdeOid = "1.2.246.562.20.00000000000000021542013",
+              koulutuksenTila = Some("julkaistu"),
+              toteutuksenTila = Some("julkaistu"),
+              hakukohteenTila = Some("julkaistu"),
+              aloituspaikat = Some(4),
+              onValintakoe = Some(false)
+            )
           )
         )
       )

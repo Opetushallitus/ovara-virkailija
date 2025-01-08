@@ -24,5 +24,5 @@ case class OrganisaatioHierarkiaWithHakukohteet(
     organisaatiotyypit: List[String],
     parent_oids: List[String],
     children: List[OrganisaatioHierarkiaWithHakukohteet] = List(),
-    hakukohteet: List[KoulutuksetToteutuksetHakukohteetResult]
+    hakukohteet: List[OrganisaationKoulutusToteutusHakukohde]
 )

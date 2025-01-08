@@ -11,15 +11,15 @@ object ExcelWriter {
   val LOG: Logger = LoggerFactory.getLogger("ExcelWriter")
 
   def countAloituspaikat(
-      organisaationKoulutuksetToteutuksetHakukohteet: List[KoulutuksetToteutuksetHakukohteetResult]
+      organisaationKoulutuksetToteutuksetHakukohteet: List[OrganisaationKoulutusToteutusHakukohde]
   ): Int = {
     val koulutuksetToteutuksetHakukohteet = organisaationKoulutuksetToteutuksetHakukohteet
-    koulutuksetToteutuksetHakukohteet.flatMap(kth => kth.aloituspaikat).sum
+    koulutuksetToteutuksetHakukohteet.flatMap(kth => kth.koulutusToteutusHakukohde.aloituspaikat).sum
   }
 
   def flattenHierarkiaHakukohteet(
       organisaatioHierarkiaWithHakukohteet: OrganisaatioHierarkiaWithHakukohteet
-  ): List[KoulutuksetToteutuksetHakukohteetResult] = {
+  ): List[OrganisaationKoulutusToteutusHakukohde] = {
     if (organisaatioHierarkiaWithHakukohteet.children.isEmpty) {
       organisaatioHierarkiaWithHakukohteet.hakukohteet
     } else {
@@ -82,7 +82,7 @@ object ExcelWriter {
       initialRowIndex: Int,
       resultRowIndex: Int,
       cellStyle: XSSFCellStyle,
-      kth: KoulutuksetToteutuksetHakukohteetResult,
+      kth: KoulutusToteutusHakukohdeResult,
       asiointikieli: String
   ) = {
     val hakukohteenTiedotRow = sheet.createRow(initialRowIndex)
@@ -154,7 +154,7 @@ object ExcelWriter {
 
         orgHierarkiaWithResults.hakukohteet.zipWithIndex.foreach((hakukohde, resultRowIndex) => {
           currentRowIndex =
-            createHakukohdeRow(sheet, currentRowIndex, resultRowIndex, cellStyle, hakukohde, asiointikieli)
+            createHakukohdeRow(sheet, currentRowIndex, resultRowIndex, cellStyle, hakukohde._2, asiointikieli)
         })
 
         if (orgHierarkiaWithResults.children.nonEmpty) {
