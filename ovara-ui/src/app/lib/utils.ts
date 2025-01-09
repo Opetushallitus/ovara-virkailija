@@ -1,5 +1,6 @@
-import { sort } from 'remeda';
+import { sort, isEmpty } from 'remeda';
 import { set } from 'lodash';
+import { OrganisaatioHierarkia } from './types/common';
 
 export type KoulutuksenAlkaminen = {
   alkamiskausinimi: string;
@@ -63,5 +64,31 @@ export const hasOvaraToinenAsteRole = (userRoles?: Array<string>) => {
   return (
     userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_2ASTE') ||
     userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA')
+  );
+};
+
+export const findOrganisaatiotWithOrganisaatiotyyppi = (
+  hierarkia: OrganisaatioHierarkia,
+  organisaatiotyyppi: string,
+): Array<OrganisaatioHierarkia> => {
+  if (isEmpty(hierarkia.children)) {
+    if (hierarkia.organisaatiotyypit.includes(organisaatiotyyppi)) {
+      return [hierarkia];
+    } else {
+      return [];
+    }
+  }
+
+  if (hierarkia.organisaatiotyypit.includes(organisaatiotyyppi)) {
+    return [
+      hierarkia,
+      ...hierarkia.children.flatMap((child) =>
+        findOrganisaatiotWithOrganisaatiotyyppi(child, organisaatiotyyppi),
+      ),
+    ];
+  }
+
+  return hierarkia.children.flatMap((child) =>
+    findOrganisaatiotWithOrganisaatiotyyppi(child, organisaatiotyyppi),
   );
 };
