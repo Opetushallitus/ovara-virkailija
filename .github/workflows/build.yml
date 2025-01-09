@@ -1,4 +1,4 @@
-name: Ovara build workflow
+name: Ovara-virkailija build workflow
 
 on:
   workflow_dispatch:
