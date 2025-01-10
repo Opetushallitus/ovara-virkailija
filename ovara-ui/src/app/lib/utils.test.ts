@@ -1,13 +1,18 @@
 import { describe, expect, test } from 'vitest';
 import {
   findOrganisaatiotWithOrganisaatiotyyppi,
+  getOrganisaatiotToShow,
+  getKoulutustoimijatToShow,
   getSortedKoulutuksenAlkamisKaudet,
   hasOvaraRole,
   hasOvaraToinenAsteRole,
   removeDotsFromTranslations,
+  getOppilaitoksetToShow,
+  getToimipisteetToShow,
 } from './utils';
 import {
   KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
+  OPPILAITOSORGANISAATIOTYYPPI,
   TOIMIPISTEORGANISAATIOTYYPPI,
 } from './constants';
 
@@ -164,8 +169,8 @@ describe('hasOvaraToinenAsteRole', () => {
 });
 
 describe('findOrganisaatioByOrganisaatiotyyppi', () => {
-  test('should return koulutustoimija from hierarkia', () => {
-    const hierarkia = {
+  test('should return koulutustoimija from koulutustoimija1 ', () => {
+    const koulutustoimija1 = {
       organisaatio_oid: '1.2.246.562.10.10063814452',
       organisaatio_nimi: {
         en: 'Iin kunta',
@@ -179,14 +184,14 @@ describe('findOrganisaatioByOrganisaatiotyyppi', () => {
 
     expect(
       findOrganisaatiotWithOrganisaatiotyyppi(
-        hierarkia,
+        koulutustoimija1,
         KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
       ),
-    ).toEqual([hierarkia]);
+    ).toEqual([koulutustoimija1]);
   });
 
-  test('should return empty array as there are no toimipiste in hierarkia', () => {
-    const hierarkia = {
+  test('should return empty array as there are no toimipiste in koulutustoimija1 ', () => {
+    const koulutustoimija1 = {
       organisaatio_oid: '1.2.246.562.10.10063814452',
       organisaatio_nimi: {
         en: 'Iin kunta',
@@ -200,13 +205,13 @@ describe('findOrganisaatioByOrganisaatiotyyppi', () => {
 
     expect(
       findOrganisaatiotWithOrganisaatiotyyppi(
-        hierarkia,
+        koulutustoimija1,
         TOIMIPISTEORGANISAATIOTYYPPI,
       ),
     ).toEqual([]);
   });
 
-  test('should return all toimipisteet from hierarkia', () => {
+  test('should return all toimipisteet from koulutustoimija1 ', () => {
     const toimipiste1_1 = {
       organisaatio_oid: '1.2.246.562.10.19461923609',
       organisaatio_nimi: {
@@ -224,7 +229,7 @@ describe('findOrganisaatioByOrganisaatiotyyppi', () => {
       children: [],
     };
 
-    const oppilaitos1 = {
+    const oppilaitos1_1 = {
       organisaatio_oid: '1.2.246.562.10.27440356239',
       organisaatio_nimi: {
         en: 'Pohjois-Iin koulu',
@@ -292,7 +297,7 @@ describe('findOrganisaatioByOrganisaatiotyyppi', () => {
       ],
       children: [toimipiste2_1_1, toimipiste2_1_2],
     };
-    const oppilaitos2 = {
+    const oppilaitos1_2 = {
       organisaatio_oid: '1.2.246.562.10.44529610774',
       organisaatio_nimi: {
         en: 'Iin lukio',
@@ -308,7 +313,7 @@ describe('findOrganisaatioByOrganisaatiotyyppi', () => {
       children: [toimipiste2_1],
     };
 
-    const hierarkia = {
+    const koulutustoimija1 = {
       organisaatio_oid: '1.2.246.562.10.10063814452',
       organisaatio_nimi: {
         en: 'Iin kunta',
@@ -317,14 +322,367 @@ describe('findOrganisaatioByOrganisaatiotyyppi', () => {
       },
       organisaatiotyypit: ['01', '07', '09'],
       parent_oids: ['1.2.246.562.10.00000000001', '1.2.246.562.10.10063814452'],
-      children: [oppilaitos1, oppilaitos2],
+      children: [oppilaitos1_1, oppilaitos1_2],
     };
 
     expect(
       findOrganisaatiotWithOrganisaatiotyyppi(
-        hierarkia,
+        koulutustoimija1,
         TOIMIPISTEORGANISAATIOTYYPPI,
       ),
     ).toEqual([toimipiste1_1, toimipiste2_1, toimipiste2_1_1, toimipiste2_1_2]);
+  });
+});
+
+const toimipiste1_1 = {
+  organisaatio_oid: '1.2.246.562.10.19461923609',
+  organisaatio_nimi: {
+    en: 'Pohjois-Iin koulu',
+    fi: 'Pohjois-Iin koulu',
+    sv: 'Pohjois-Iin koulu',
+  },
+  organisaatiotyypit: ['03'],
+  parent_oids: [
+    '1.2.246.562.10.10063814452',
+    '1.2.246.562.10.27440356239',
+    '1.2.246.562.10.00000000001',
+    '1.2.246.562.10.19461923609',
+  ],
+  children: [],
+};
+
+const oppilaitos1_1 = {
+  organisaatio_oid: '1.2.246.562.10.27440356239',
+  organisaatio_nimi: {
+    en: 'Pohjois-Iin koulu',
+    fi: 'Pohjois-Iin koulu',
+    sv: 'Pohjois-Iin koulu',
+  },
+  organisaatiotyypit: ['02'],
+  parent_oids: [
+    '1.2.246.562.10.27440356239',
+    '1.2.246.562.10.10063814452',
+    '1.2.246.562.10.00000000001',
+  ],
+  children: [toimipiste1_1],
+};
+
+const oppilaitos1_2 = {
+  organisaatio_oid: '1.2.246.562.10.44529610774',
+  organisaatio_nimi: {
+    en: 'Iin lukio',
+    fi: 'Iin lukio',
+    sv: 'Iin lukio',
+  },
+  organisaatiotyypit: ['02'],
+  parent_oids: [
+    '1.2.246.562.10.10063814452',
+    '1.2.246.562.10.44529610774',
+    '1.2.246.562.10.00000000001',
+  ],
+  children: [],
+};
+
+const koulutustoimija1 = {
+  organisaatio_oid: '1.2.246.562.10.10063814452',
+  organisaatio_nimi: {
+    en: 'Iin kunta',
+    fi: 'Iin kunta',
+    sv: 'Iin kunta',
+  },
+  organisaatiotyypit: ['01', '07', '09'],
+  parent_oids: ['1.2.246.562.10.00000000001', '1.2.246.562.10.10063814452'],
+  children: [oppilaitos1_1, oppilaitos1_2],
+};
+
+const toimipiste2_1_1 = {
+  organisaatio_oid: '1.2.246.562.10.15270964875',
+  organisaatio_nimi: {
+    en: 'Nylands hotell- och restaurangskola',
+    fi: 'Nylands hotell- och restaurangskola',
+    sv: 'Nylands hotell- och restaurangskola',
+  },
+  organisaatiotyypit: ['03'],
+  parent_oids: [
+    '1.2.246.562.10.10281960954',
+    '1.2.246.562.10.00000000001',
+    '1.2.246.562.10.221157551210',
+    '1.2.246.562.10.15270964875',
+  ],
+  children: [],
+};
+
+const oppilaitos2_1 = {
+  organisaatio_oid: '1.2.246.562.10.10281960954',
+  organisaatio_nimi: {
+    en: 'Nylands hotell- och restaurangskola',
+    fi: 'Nylands hotell- och restaurangskola',
+    sv: 'Nylands hotell- och restaurangskola',
+  },
+  organisaatiotyypit: ['02'],
+  parent_oids: [
+    '1.2.246.562.10.10281960954',
+    '1.2.246.562.10.00000000001',
+    '1.2.246.562.10.221157551210',
+  ],
+  children: [toimipiste2_1_1],
+};
+
+const toimipiste2_2_1 = {
+  organisaatio_oid: '1.2.246.562.10.61864390655',
+  organisaatio_nimi: {
+    en: 'Överby trädgårds- och lantbruksskolor',
+    fi: 'Överby trädgårds- och lantbruksskolor',
+    sv: 'Överby trädgårds- och lantbruksskolor',
+  },
+  organisaatiotyypit: ['03'],
+  parent_oids: [
+    '1.2.246.562.10.208433283510',
+    '1.2.246.562.10.221157551210',
+    '1.2.246.562.10.00000000001',
+    '1.2.246.562.10.61864390655',
+  ],
+  children: [],
+};
+
+const toimipiste2_2_2 = {
+  organisaatio_oid: '1.2.246.562.10.61864390666',
+  organisaatio_nimi: {
+    en: 'Överby trädgårds- och lantbruksskolor 2',
+    fi: 'Överby trädgårds- och lantbruksskolor 2',
+    sv: 'Överby trädgårds- och lantbruksskolor 2',
+  },
+  organisaatiotyypit: ['03'],
+  parent_oids: [
+    '1.2.246.562.10.208433283510',
+    '1.2.246.562.10.221157551210',
+    '1.2.246.562.10.00000000001',
+    '1.2.246.562.10.61864390666',
+  ],
+  children: [],
+};
+
+const toimipiste2_2_3 = {
+  organisaatio_oid: '1.2.246.562.10.618643906665',
+  organisaatio_nimi: {
+    en: 'Överby trädgårds- och lantbruksskolor 3',
+    fi: 'Överby trädgårds- och lantbruksskolor 3',
+    sv: 'Överby trädgårds- och lantbruksskolor 3',
+  },
+  organisaatiotyypit: ['03'],
+  parent_oids: [
+    '1.2.246.562.10.208433283510',
+    '1.2.246.562.10.221157551210',
+    '1.2.246.562.10.00000000001',
+    '1.2.246.562.10.618643906665',
+  ],
+  children: [],
+};
+
+const oppilaitos2_2 = {
+  organisaatio_oid: '1.2.246.562.10.208433283510',
+  organisaatio_nimi: {
+    en: 'Överby trädgårds- och lantbruksskolor',
+    fi: 'Överby trädgårds- och lantbruksskolor',
+    sv: 'Överby trädgårds- och lantbruksskolor',
+  },
+  organisaatiotyypit: ['02'],
+  parent_oids: [
+    '1.2.246.562.10.208433283510',
+    '1.2.246.562.10.221157551210',
+    '1.2.246.562.10.00000000001',
+  ],
+  children: [toimipiste2_2_1, toimipiste2_2_2, toimipiste2_2_3],
+};
+
+const toimipiste2_3_1 = {
+  organisaatio_oid: '1.2.246.562.10.61864390667',
+  organisaatio_nimi: {
+    en: 'Överby trädgårds- och lantbruksskolor 3',
+    fi: 'Överby trädgårds- och lantbruksskolor 3',
+    sv: 'Överby trädgårds- och lantbruksskolor 3',
+  },
+  organisaatiotyypit: ['03'],
+  parent_oids: [
+    '1.2.246.562.10.2084332835113',
+    '1.2.246.562.10.221157551210',
+    '1.2.246.562.10.00000000001',
+    '1.2.246.562.10.61864390667',
+  ],
+  children: [],
+};
+
+const oppilaitos2_3 = {
+  organisaatio_oid: '1.2.246.562.10.2084332835113',
+  organisaatio_nimi: {
+    en: 'Överby trädgårds- och lantbruksskolor oppilaitos 3',
+    fi: 'Överby trädgårds- och lantbruksskolor oppilaitos 3',
+    sv: 'Överby trädgårds- och lantbruksskolor oppilaitos 3',
+  },
+  organisaatiotyypit: ['02'],
+  parent_oids: [
+    '1.2.246.562.10.2084332835113',
+    '1.2.246.562.10.221157551210',
+    '1.2.246.562.10.00000000001',
+  ],
+  children: [toimipiste2_3_1],
+};
+
+const koulutustoimija2 = {
+  organisaatio_oid: '1.2.246.562.10.221157551210',
+  organisaatio_nimi: {
+    en: 'Samkommunen för huvudstadsregionens svenskspråkiga yrkesskolor',
+    fi: 'Samkommunen för huvudstadsregionens svenskspråkiga yrkesskolor',
+    sv: 'Samkommunen för huvudstadsregionens svenskspråkiga yrkesskolor',
+  },
+  organisaatiotyypit: ['01'],
+  parent_oids: ['1.2.246.562.10.00000000001', '1.2.246.562.10.221157551210'],
+  children: [oppilaitos2_1, oppilaitos2_2, oppilaitos2_3],
+};
+
+describe('getOrganisaatiotToShow', () => {
+  test('should return all koulutustoimijat', () => {
+    expect(
+      getOrganisaatiotToShow(
+        [koulutustoimija1, koulutustoimija2],
+        KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
+        null,
+      ),
+    ).toEqual([koulutustoimija1, koulutustoimija2]);
+  });
+
+  test('should return selected koulutustoimija2', () => {
+    expect(
+      getOrganisaatiotToShow(
+        [koulutustoimija1, koulutustoimija2],
+        KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
+        ['1.2.246.562.10.221157551210'],
+      ),
+    ).toEqual([koulutustoimija2]);
+  });
+
+  test('should return all oppilaitokset from selected koulutustoimija because oppilaitokset have not been selected', () => {
+    expect(
+      getOrganisaatiotToShow(
+        [koulutustoimija1],
+        OPPILAITOSORGANISAATIOTYYPPI,
+        null,
+      ),
+    ).toEqual([oppilaitos1_1, oppilaitos1_2]);
+  });
+
+  test('should return only oppilaitos2_1 and oppilaitos2_2 from selected koulutustoimija2', () => {
+    expect(
+      getOrganisaatiotToShow([koulutustoimija2], OPPILAITOSORGANISAATIOTYYPPI, [
+        '1.2.246.562.10.208433283510',
+      ]),
+    ).toEqual([oppilaitos2_2]);
+  });
+
+  test('should return all toimipisteet because no koulutustoimija and oppilaitos has been selected', () => {
+    expect(
+      getOrganisaatiotToShow(
+        [oppilaitos1_1, oppilaitos2_1, oppilaitos2_2],
+        TOIMIPISTEORGANISAATIOTYYPPI,
+      ),
+    ).toEqual([
+      toimipiste1_1,
+      toimipiste2_1_1,
+      toimipiste2_2_1,
+      toimipiste2_2_2,
+      toimipiste2_2_3,
+    ]);
+  });
+
+  test('should return toimipisteet under oppilaitos2_2 because oppilaitos2_2 has been selected', () => {
+    expect(
+      getOrganisaatiotToShow([oppilaitos2_2], TOIMIPISTEORGANISAATIOTYYPPI),
+    ).toEqual([toimipiste2_2_1, toimipiste2_2_2, toimipiste2_2_3]);
+  });
+
+  test('should return toimipisteet under selected oppilaitos2_2 and oppilaitos2_3', () => {
+    expect(
+      getOrganisaatiotToShow(
+        [oppilaitos2_2, oppilaitos2_3],
+        TOIMIPISTEORGANISAATIOTYYPPI,
+      ),
+    ).toEqual([
+      toimipiste2_2_1,
+      toimipiste2_2_2,
+      toimipiste2_2_3,
+      toimipiste2_3_1,
+    ]);
+  });
+});
+
+describe('getKoulutustoimijatToShow', () => {
+  test('should return all koulutustoimijat', () => {
+    expect(
+      getKoulutustoimijatToShow(
+        [koulutustoimija1, koulutustoimija2],
+        null,
+        null,
+      ),
+    ).toEqual([koulutustoimija1, koulutustoimija2]);
+  });
+
+  test('should return selected koulutustoimija', () => {
+    expect(
+      getKoulutustoimijatToShow(
+        [koulutustoimija1, koulutustoimija2],
+        '1.2.246.562.10.221157551210',
+      ),
+    ).toEqual([koulutustoimija2]);
+  });
+
+  test('should return selected koulutustoimija when oppilaitos is selected', () => {
+    expect(
+      getKoulutustoimijatToShow(
+        [koulutustoimija1, koulutustoimija2],
+        '1.2.246.562.10.221157551210',
+      ),
+    ).toEqual([koulutustoimija2]);
+  });
+});
+
+describe('getOppilaitoksetToShow', () => {
+  test('should return selected oppilaitos', () => {
+    expect(
+      getOppilaitoksetToShow([koulutustoimija2], '1.2.246.562.10.208433283510'),
+    ).toEqual([oppilaitos2_2]);
+  });
+
+  test('should return oppilaitos2_1 and oppilaitos2_3 when selected', () => {
+    expect(
+      getOppilaitoksetToShow(
+        [koulutustoimija2],
+        ['1.2.246.562.10.208433283510', '1.2.246.562.10.2084332835113'],
+      ),
+    ).toEqual([oppilaitos2_2, oppilaitos2_3]);
+  });
+});
+
+describe('getToimipisteetToShow', () => {
+  test('should return all toimipisteet in hierarkia as no toimipiste has been selected', () => {
+    expect(getToimipisteetToShow([oppilaitos2_2], null)).toEqual([
+      toimipiste2_2_1,
+      toimipiste2_2_2,
+      toimipiste2_2_3,
+    ]);
+  });
+
+  test('should return only selected toimipiste', () => {
+    expect(
+      getToimipisteetToShow([oppilaitos2_2], ['1.2.246.562.10.61864390666']),
+    ).toEqual([toimipiste2_2_2]);
+  });
+
+  test('should return oppilaitos2_1 and oppilaitos2_3 when selected', () => {
+    expect(
+      getToimipisteetToShow(
+        [oppilaitos2_2],
+        ['1.2.246.562.10.61864390655', '1.2.246.562.10.618643906665'],
+      ),
+    ).toEqual([toimipiste2_2_1, toimipiste2_2_3]);
   });
 });

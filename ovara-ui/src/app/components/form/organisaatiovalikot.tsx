@@ -10,12 +10,19 @@ import {
   MultiComboBox,
   SelectOption,
 } from '@/app/components/form/multicombobox';
+import { getOrganisaatiotToShow } from '@/app/lib/utils';
+import {
+  KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
+  OPPILAITOSORGANISAATIOTYYPPI,
+  TOIMIPISTEORGANISAATIOTYYPPI,
+} from '@/app/lib/constants';
 
 export const OrganisaatioValikot = () => {
   const t = useTranslations();
   const user = useAuthorizedUser();
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const organisaatiot = useFetchOrganisaatiotByOrganisaatiotyyppi();
+
   const {
     selectedKoulutustoimija,
     setSelectedKoulutustoimija,
@@ -29,9 +36,23 @@ export const OrganisaatioValikot = () => {
   const oppilaitos_id = 'oppilaitos';
   const toimipiste_id = 'toimipiste';
 
-  const koulutustoimijat = isNullish(organisaatiot) ? [] : organisaatiot['01'];
-  const oppilaitokset = isNullish(organisaatiot) ? [] : organisaatiot['02'];
-  const toimipisteet = isNullish(organisaatiot) ? [] : organisaatiot['03'];
+  const koulutustoimijat = getOrganisaatiotToShow(
+    organisaatiot,
+    KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
+    [selectedKoulutustoimija],
+  );
+
+  const oppilaitokset = getOrganisaatiotToShow(
+    koulutustoimijat,
+    OPPILAITOSORGANISAATIOTYYPPI,
+    selectedOppilaitokset,
+  );
+
+  const toimipisteet = getOrganisaatiotToShow(
+    oppilaitokset,
+    TOIMIPISTEORGANISAATIOTYYPPI,
+    selectedOppilaitokset,
+  );
 
   const changeKoulutustoimija = (
     _: React.SyntheticEvent,
