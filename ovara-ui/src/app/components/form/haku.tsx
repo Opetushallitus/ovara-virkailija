@@ -5,12 +5,14 @@ import {
 } from '@/app/components/form/multicombobox';
 import { useSearchParams } from '@/app/hooks/useSearchParams';
 import { isEmpty } from 'remeda';
-import { useTranslations } from 'next-intl';
+import { useTranslate } from '@tolgee/react';
+import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
+import { LanguageCode } from '@/app/lib/types/common';
 
 export const Haku = () => {
-  const t = useTranslations();
-  // TODO: Lisää lokalisointi
-  const locale = 'fi';
+  const { t } = useTranslate();
+  const user = useAuthorizedUser();
+  const locale = (user?.asiointikieli ?? 'fi') as LanguageCode;
   const haut = useFetchHaut() || [];
 
   const { selectedHaut, setSelectedHaut } = useSearchParams();
@@ -25,7 +27,7 @@ export const Haku = () => {
   return (
     <MultiComboBox
       id={'haku'}
-      label={`${t('raportti.haku')}`}
+      label={t('raportti.haku')}
       value={selectedHaut ?? []}
       options={haut?.map((haku) => {
         return {

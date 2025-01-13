@@ -7,23 +7,19 @@ import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { THEME_OVERRIDES } from '@/app/theme';
 import { AuthorizedUserProvider } from './contexts/AuthorizedUserProvider';
 import LocalizationProvider from './components/localization-provider';
-import { getLocale } from 'next-intl/server';
-import { LanguageCode } from './lib/types/common';
 
 export const metadata: Metadata = {
   title: 'Opiskelijavalinnan raportointi',
   description: 'Opiskelijavalinnan raportointikäyttöliittymä',
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = (await getLocale()) as LanguageCode;
-
   return (
-    <html lang={locale}>
+    <html>
       <Script src={configuration.raamitUrl} />
       <body>
         <AppRouterCacheProvider>

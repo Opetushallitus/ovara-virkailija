@@ -16,4 +16,5 @@ export const configuration = {
   raamitUrl: `${DOMAIN}/virkailija-raamit/apply-raamit.js`,
   ovaraBackendApiUrl: `${OVARA_BACKEND}/ovara-backend/api`,
   virkailijaUrl: DOMAIN,
+  lokalisointiPrefix: `${DOMAIN}/lokalisointi/tolgee`,
 } as const;

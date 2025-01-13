@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl';
+import { useTranslate } from '@tolgee/react';
 import { OphButton } from '@opetushallitus/oph-design-system';
 import { Box, Stack } from '@mui/material';
 import { useSearchParams } from '@/app/hooks/useSearchParams';
@@ -10,14 +10,11 @@ export const FormButtons = ({
   disabled: boolean;
   excelDownloadUrl: string;
 }) => {
-  const t = useTranslations();
-
   return (
     <Box sx={{ display: 'flex', justifyContent: 'end' }}>
       <Stack direction="row" spacing={2}>
-        <TyhjennaHakuehdotButton t={t} />
+        <TyhjennaHakuehdotButton />
         <MuodostaExcelButton
-          t={t}
           disabled={disabled}
           excelDownloadUrl={excelDownloadUrl}
         />
@@ -26,11 +23,8 @@ export const FormButtons = ({
   );
 };
 
-export const TyhjennaHakuehdotButton = ({
-  t,
-}: {
-  t: typeof useTranslations;
-}) => {
+export const TyhjennaHakuehdotButton = () => {
+  const { t } = useTranslate();
   const {
     setSelectedAlkamiskaudet,
     setSelectedHaut,
@@ -57,21 +51,19 @@ export const TyhjennaHakuehdotButton = ({
 };
 
 export const MuodostaExcelButton = ({
-  t,
   disabled,
   excelDownloadUrl,
 }: {
-  t: typeof useTranslations;
   disabled: boolean;
   excelDownloadUrl: string;
 }) => {
+  const { t } = useTranslate();
   return (
     <OphButton
       variant="contained"
       type="submit"
       disabled={disabled}
       href={excelDownloadUrl}
-      download
     >
       {t('raportti.muodosta-raportti')}
     </OphButton>

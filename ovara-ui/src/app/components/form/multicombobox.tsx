@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl';
+import { useTranslate } from '@tolgee/react';
 import { Autocomplete, Chip, TextField } from '@mui/material';
 import { OvaraFormControl } from '@/app/components/form/ovara-form-control';
 import { find } from 'remeda';
@@ -25,11 +25,12 @@ export const MultiComboBox = ({
   value,
   required,
 }: MultiComboBoxProps) => {
-  const t = useTranslations();
+  const { t } = useTranslate();
 
   const getValueFromOptions = (value: Array<string>) => {
-    return value?.map((v) => {
-      return find(options, (o) => o.value === v);
+    return value.flatMap((v) => {
+      const match = find(options, (o) => o.value === v);
+      return match ? [match] : [];
     });
   };
 
