@@ -21,24 +21,21 @@ class CommonRepository extends Extractors {
           and h.tila != 'poistettu'""".as[Haku]
   }
 
-  def selectOrganisaatiotPerOrganisaatiotyyppi(organisaatiot: List[String]): SqlStreamingAction[Vector[OrganisaatioPerOrganisaatiotyyppi], OrganisaatioPerOrganisaatiotyyppi, Effect] = {
+  def selectDistinctOrganisaatiot(
+      organisaatiot: List[String]
+  ): SqlStreamingAction[Vector[Organisaatio], Organisaatio, Effect] = {
     val organisaatiotStr = organisaatiot.map(s => s"'$s'").mkString(",")
-    sql"""select distinct *
-          from (select organisaatio_oid, organisaatio_nimi, jsonb_array_elements_text(organisaatiotyypit) as organisaatiotyyppi
-	            from pub.pub_dim_organisaatio o) as org
-          where org.organisaatio_oid in (#$organisaatiotStr)""".as[OrganisaatioPerOrganisaatiotyyppi]
-  }
-
-  def selectDistinctOrganisaatiot(organisaatiot: List[String]): SqlStreamingAction[Vector[Organisaatio], Organisaatio, Effect] = {
-    val organisaatiotStr = organisaatiot.map(s => s"'$s'").mkString(",")
-    val optionalOrganisaatiotClause = if (organisaatiotStr.isEmpty) "" else s"where org.organisaatio_oid in ($organisaatiotStr)"
+    val optionalOrganisaatiotClause =
+      if (organisaatiotStr.isEmpty) "" else s"where org.organisaatio_oid in ($organisaatiotStr)"
     sql"""select distinct *
           from (select organisaatio_oid, organisaatio_nimi, organisaatiotyypit
                 from pub.pub_dim_organisaatio o) as org
                 #$optionalOrganisaatiotClause""".as[Organisaatio]
   }
 
-  def selectChildOrganisaatiot(organisaatiot: List[String]): SqlStreamingAction[Vector[OrganisaatioParentChild], OrganisaatioParentChild, Effect] = {
+  def selectChildOrganisaatiot(
+      organisaatiot: List[String]
+  ): SqlStreamingAction[Vector[OrganisaatioParentChild], OrganisaatioParentChild, Effect] = {
     val organisaatiotStr = organisaatiot.map(s => s"'$s'").mkString(",")
 
     sql"""WITH RECURSIVE x AS (
@@ -57,10 +54,50 @@ class CommonRepository extends Extractors {
   }
 
   def selectKoulutustoimijaDescendants(
-      koulutustoimijaOid: String): SqlStreamingAction[Vector[OrganisaatioHierarkia], OrganisaatioHierarkia, Effect] = {
-    sql"""
-         SELECT * FROM pub.koulutustoimija_with_oppilaitokset
-         WHERE parent_oids ?? $koulutustoimijaOid
-       """.as[OrganisaatioHierarkia]
+      koulutustoimijaOids: List[String]
+  ): SqlStreamingAction[Vector[OrganisaatioHierarkia], OrganisaatioHierarkia, Effect] = {
+    val organisaatiotStr = koulutustoimijaOids.map(s => s"'$s'").mkString(",")
+    sql"""SELECT
+            organisaatio_oid,
+            organisaatio_nimi,
+            organisaatiotyypit,
+            parent_oids,
+            children
+          FROM pub.pub_dim_koulutustoimija_ja_toimipisteet,
+          LATERAL jsonb_array_elements_text(parent_oids) AS parent_oid
+          WHERE parent_oid IN (#$organisaatiotStr)
+         """.as[OrganisaatioHierarkia]
+  }
+
+  def selectOppilaitosDescendants(
+      oids: List[String]
+  ): SqlStreamingAction[Vector[OrganisaatioHierarkia], OrganisaatioHierarkia, Effect] = {
+    val organisaatiotStr = oids.map(s => s"'$s'").mkString(",")
+    sql"""SELECT
+              organisaatio_oid,
+              organisaatio_nimi,
+              organisaatiotyypit,
+              parent_oids,
+              children
+            FROM pub.oppilaitos_with_toimipisteet,
+            LATERAL jsonb_array_elements_text(parent_oids) AS parent_oid
+            WHERE parent_oid IN (#$organisaatiotStr)
+           """.as[OrganisaatioHierarkia]
+  }
+
+  def selectToimipisteDescendants(
+      oids: List[String]
+  ): SqlStreamingAction[Vector[OrganisaatioHierarkia], OrganisaatioHierarkia, Effect] = {
+    val organisaatiotStr = oids.map(s => s"'$s'").mkString(",")
+    sql"""SELECT
+                organisaatio_oid,
+                organisaatio_nimi,
+                organisaatiotyypit,
+                parent_oids,
+                children
+              FROM pub.toimipiste_with_toimipisteet,
+              LATERAL jsonb_array_elements_text(parent_oids) AS parent_oid
+              WHERE parent_oid IN (#$organisaatiotStr)
+             """.as[OrganisaatioHierarkia]
   }
 }

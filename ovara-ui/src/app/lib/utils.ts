@@ -99,7 +99,7 @@ export const findOrganisaatiotWithOrganisaatiotyyppi = (
 };
 
 const getUniqueOrganisaatiotByOrganisaatiotyyppi = (
-  organisaatiot: Array<OrganisaatioHierarkia>,
+  organisaatiot: Array<OrganisaatioHierarkia> | null,
   organisaatiotyyppi: string,
 ) => {
   return uniqueBy(
@@ -110,82 +110,47 @@ const getUniqueOrganisaatiotByOrganisaatiotyyppi = (
   );
 };
 
-export const getOrganisaatiotToShow = (
-  organisaatiot: Array<OrganisaatioHierarkia>,
-  organisaatiotyyppi: string,
-  oids?: Array<string>,
-) => {
-  const orgsByOrganisaatiotyyppi = uniqueBy(
-    organisaatiot?.flatMap((o) =>
-      findOrganisaatiotWithOrganisaatiotyyppi(o, organisaatiotyyppi),
-    ) || [],
-    (o) => o.organisaatio_oid,
-  );
-
-  if (isNullish(oids) || isEmpty(oids)) {
-    return orgsByOrganisaatiotyyppi;
-  } else {
-    return orgsByOrganisaatiotyyppi.filter((o) => {
-      return o.parent_oids.some((oid) => oids?.includes(oid));
-    });
-  }
-};
-
 export const getKoulutustoimijatToShow = (
-  organisaatiot: Array<OrganisaatioHierarkia>,
-  koulutustoimijaOid?: string,
+  organisaatiot: Array<OrganisaatioHierarkia> | null,
 ) => {
-  const koulutustoimijaOrgs = uniqueBy(
-    organisaatiot?.flatMap((o) =>
-      findOrganisaatiotWithOrganisaatiotyyppi(
-        o,
-        KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
-      ),
-    ) || [],
-    (o) => o.organisaatio_oid,
+  return getUniqueOrganisaatiotByOrganisaatiotyyppi(
+    organisaatiot,
+    KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
   );
-
-  if (isNullish(koulutustoimijaOid)) {
-    return koulutustoimijaOrgs;
-  } else {
-    return koulutustoimijaOrgs.filter((o) =>
-      o.parent_oids.includes(koulutustoimijaOid),
-    );
-  }
 };
 
 export const getOppilaitoksetToShow = (
-  selectedKoulutustoimijat: Array<OrganisaatioHierarkia>,
-  oppilaitosOids: Array<string>,
+  hierarkiat: Array<OrganisaatioHierarkia> | null,
+  selectedKoulutustoimija: string | null,
 ) => {
   const oppilaitokset = getUniqueOrganisaatiotByOrganisaatiotyyppi(
-    selectedKoulutustoimijat,
+    hierarkiat,
     OPPILAITOSORGANISAATIOTYYPPI,
   );
 
-  if (isNullish(oppilaitosOids) || isEmpty(oppilaitosOids)) {
+  if (isNullish(selectedKoulutustoimija)) {
     return oppilaitokset;
   } else {
     return oppilaitokset.filter((o) => {
-      return o.parent_oids.some((oid) => oppilaitosOids?.includes(oid));
+      return o.parent_oids.includes(selectedKoulutustoimija);
     });
   }
 };
 
 export const getToimipisteetToShow = (
-  selectedOppilaitokset: Array<OrganisaatioHierarkia>,
-  toimipisteOids: Array<string>,
+  selectedOppilaitokset: Array<OrganisaatioHierarkia> | null,
+  selectedOppilaitosOids: Array<string> | null,
 ) => {
   const toimipisteet = getUniqueOrganisaatiotByOrganisaatiotyyppi(
     selectedOppilaitokset,
     TOIMIPISTEORGANISAATIOTYYPPI,
   );
 
-  if (isNullish(toimipisteOids) || isEmpty(toimipisteOids)) {
+  if (isNullish(selectedOppilaitosOids) || isEmpty(selectedOppilaitosOids)) {
     return toimipisteet;
   } else {
     return toimipisteet.filter((o) => {
-      return o.parent_oids.some((oid) => toimipisteOids?.includes(oid));
+      return o.parent_oids.some((oid) => selectedOppilaitosOids?.includes(oid));
     });
   }
 };

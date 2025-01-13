@@ -1,19 +1,13 @@
 import { useEffect, useState } from 'react';
 import { apiFetch } from '@/app/lib/ovara-backend/api';
-import { Organisaatio } from '@/app/lib/types/common';
+import { OrganisaatioHierarkia } from '@/app/lib/types/common';
 
-type OrganisaatiotByTyyppi = {
-  '01': Array<Organisaatio>;
-  '02': Array<Organisaatio>;
-  '03': Array<Organisaatio>;
-};
-
-export function useFetchOrganisaatiotByOrganisaatiotyyppi() {
+export function useFetchOrganisaatiohierarkiat() {
   const [organisaatiot, setOrganisaatiot] =
-    useState<OrganisaatiotByTyyppi | null>(null);
+    useState<Array<OrganisaatioHierarkia> | null>(null);
 
   useEffect(() => {
-    async function fetchOrganisaatiotByOrganisaatiotyyppi() {
+    async function fetchOrganisaatiohierarkiat() {
       const response = await apiFetch('organisaatiot');
       if (response.status === 200) {
         const organisaatiot = await response.json();
@@ -23,7 +17,7 @@ export function useFetchOrganisaatiotByOrganisaatiotyyppi() {
       }
     }
 
-    fetchOrganisaatiotByOrganisaatiotyyppi();
+    fetchOrganisaatiohierarkiat();
   }, []);
 
   return organisaatiot;

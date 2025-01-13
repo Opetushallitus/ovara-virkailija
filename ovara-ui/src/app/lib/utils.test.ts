@@ -1,7 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import {
   findOrganisaatiotWithOrganisaatiotyyppi,
-  getOrganisaatiotToShow,
   getKoulutustoimijatToShow,
   getSortedKoulutuksenAlkamisKaudet,
   hasOvaraRole,
@@ -12,7 +11,6 @@ import {
 } from './utils';
 import {
   KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
-  OPPILAITOSORGANISAATIOTYYPPI,
   TOIMIPISTEORGANISAATIOTYYPPI,
 } from './constants';
 
@@ -540,149 +538,59 @@ const koulutustoimija2 = {
   children: [oppilaitos2_1, oppilaitos2_2, oppilaitos2_3],
 };
 
-describe('getOrganisaatiotToShow', () => {
+const hierarkiat = [koulutustoimija1, koulutustoimija2];
+
+describe('getKoulutustoimijatToShow', () => {
   test('should return all koulutustoimijat', () => {
-    expect(
-      getOrganisaatiotToShow(
-        [koulutustoimija1, koulutustoimija2],
-        KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
-        null,
-      ),
-    ).toEqual([koulutustoimija1, koulutustoimija2]);
+    expect(getKoulutustoimijatToShow(hierarkiat)).toEqual([
+      koulutustoimija1,
+      koulutustoimija2,
+    ]);
   });
+});
 
-  test('should return selected koulutustoimija2', () => {
-    expect(
-      getOrganisaatiotToShow(
-        [koulutustoimija1, koulutustoimija2],
-        KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
-        ['1.2.246.562.10.221157551210'],
-      ),
-    ).toEqual([koulutustoimija2]);
-  });
-
-  test('should return all oppilaitokset from selected koulutustoimija because oppilaitokset have not been selected', () => {
-    expect(
-      getOrganisaatiotToShow(
-        [koulutustoimija1],
-        OPPILAITOSORGANISAATIOTYYPPI,
-        null,
-      ),
-    ).toEqual([oppilaitos1_1, oppilaitos1_2]);
-  });
-
-  test('should return only oppilaitos2_1 and oppilaitos2_2 from selected koulutustoimija2', () => {
-    expect(
-      getOrganisaatiotToShow([koulutustoimija2], OPPILAITOSORGANISAATIOTYYPPI, [
-        '1.2.246.562.10.208433283510',
-      ]),
-    ).toEqual([oppilaitos2_2]);
-  });
-
-  test('should return all toimipisteet because no koulutustoimija and oppilaitos has been selected', () => {
-    expect(
-      getOrganisaatiotToShow(
-        [oppilaitos1_1, oppilaitos2_1, oppilaitos2_2],
-        TOIMIPISTEORGANISAATIOTYYPPI,
-      ),
-    ).toEqual([
-      toimipiste1_1,
-      toimipiste2_1_1,
-      toimipiste2_2_1,
-      toimipiste2_2_2,
-      toimipiste2_2_3,
+describe('getOppilaitoksetToShow', () => {
+  test('should return all oppilaitokset when koulutustoimija is not selected', () => {
+    expect(getOppilaitoksetToShow(hierarkiat, null)).toEqual([
+      oppilaitos1_1,
+      oppilaitos1_2,
+      oppilaitos2_1,
+      oppilaitos2_2,
+      oppilaitos2_3,
     ]);
   });
 
-  test('should return toimipisteet under oppilaitos2_2 because oppilaitos2_2 has been selected', () => {
+  test('should return selected oppilaitos', () => {
     expect(
-      getOrganisaatiotToShow([oppilaitos2_2], TOIMIPISTEORGANISAATIOTYYPPI),
-    ).toEqual([toimipiste2_2_1, toimipiste2_2_2, toimipiste2_2_3]);
+      getOppilaitoksetToShow(hierarkiat, '1.2.246.562.10.221157551210'),
+    ).toEqual([oppilaitos2_1, oppilaitos2_2, oppilaitos2_3]);
   });
+});
 
-  test('should return toimipisteet under selected oppilaitos2_2 and oppilaitos2_3', () => {
-    expect(
-      getOrganisaatiotToShow(
-        [oppilaitos2_2, oppilaitos2_3],
-        TOIMIPISTEORGANISAATIOTYYPPI,
-      ),
-    ).toEqual([
+describe('getToimipisteetToShow', () => {
+  test('should return all toimipisteet in hierarkia as no toimipiste has been selected', () => {
+    expect(getToimipisteetToShow(hierarkiat, null)).toEqual([
+      toimipiste1_1,
+      toimipiste2_1_1,
       toimipiste2_2_1,
       toimipiste2_2_2,
       toimipiste2_2_3,
       toimipiste2_3_1,
     ]);
   });
-});
-
-describe('getKoulutustoimijatToShow', () => {
-  test('should return all koulutustoimijat', () => {
-    expect(
-      getKoulutustoimijatToShow(
-        [koulutustoimija1, koulutustoimija2],
-        null,
-        null,
-      ),
-    ).toEqual([koulutustoimija1, koulutustoimija2]);
-  });
-
-  test('should return selected koulutustoimija', () => {
-    expect(
-      getKoulutustoimijatToShow(
-        [koulutustoimija1, koulutustoimija2],
-        '1.2.246.562.10.221157551210',
-      ),
-    ).toEqual([koulutustoimija2]);
-  });
-
-  test('should return selected koulutustoimija when oppilaitos is selected', () => {
-    expect(
-      getKoulutustoimijatToShow(
-        [koulutustoimija1, koulutustoimija2],
-        '1.2.246.562.10.221157551210',
-      ),
-    ).toEqual([koulutustoimija2]);
-  });
-});
-
-describe('getOppilaitoksetToShow', () => {
-  test('should return selected oppilaitos', () => {
-    expect(
-      getOppilaitoksetToShow([koulutustoimija2], '1.2.246.562.10.208433283510'),
-    ).toEqual([oppilaitos2_2]);
-  });
-
-  test('should return oppilaitos2_1 and oppilaitos2_3 when selected', () => {
-    expect(
-      getOppilaitoksetToShow(
-        [koulutustoimija2],
-        ['1.2.246.562.10.208433283510', '1.2.246.562.10.2084332835113'],
-      ),
-    ).toEqual([oppilaitos2_2, oppilaitos2_3]);
-  });
-});
-
-describe('getToimipisteetToShow', () => {
-  test('should return all toimipisteet in hierarkia as no toimipiste has been selected', () => {
-    expect(getToimipisteetToShow([oppilaitos2_2], null)).toEqual([
-      toimipiste2_2_1,
-      toimipiste2_2_2,
-      toimipiste2_2_3,
-    ]);
-  });
 
   test('should return only selected toimipiste', () => {
     expect(
-      getToimipisteetToShow([oppilaitos2_2], ['1.2.246.562.10.61864390666']),
-    ).toEqual([toimipiste2_2_2]);
+      getToimipisteetToShow(hierarkiat, ['1.2.246.562.10.208433283510']),
+    ).toEqual([toimipiste2_2_1, toimipiste2_2_2, toimipiste2_2_3]);
   });
 
-  test('should return oppilaitos2_1 and oppilaitos2_3 when selected', () => {
+  test('should return toimipisteet under oppilaitos2_1 and oppilaitos2_3 when selected', () => {
     expect(
-      getToimipisteetToShow(
-        [oppilaitos2_2],
-        ['1.2.246.562.10.61864390655', '1.2.246.562.10.618643906665'],
-      ),
-    ).toEqual([toimipiste2_2_1, toimipiste2_2_3]);
+      getToimipisteetToShow(hierarkiat, [
+        '1.2.246.562.10.10281960954',
+        '1.2.246.562.10.2084332835113',
+      ]),
+    ).toEqual([toimipiste2_1_1, toimipiste2_3_1]);
   });
 });

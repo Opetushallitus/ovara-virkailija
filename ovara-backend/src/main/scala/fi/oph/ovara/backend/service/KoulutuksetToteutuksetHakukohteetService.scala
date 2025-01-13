@@ -37,13 +37,15 @@ class KoulutuksetToteutuksetHakukohteetService(
 
     val hierarkiat = koulutustoimija match {
       case Some(koulutustoimija) =>
-        db.run(commonRepository.selectKoulutustoimijaDescendants(koulutustoimija), "selectKoulutustoimijaDescendants")
-          .toList
+        db.run(
+          commonRepository.selectKoulutustoimijaDescendants(List(koulutustoimija)),
+          "selectKoulutustoimijaDescendants"
+        ).toList
       case None => List()
     }
 
     val descendantOids = hierarkiat.flatMap(hierarkia => OrganisaatioUtils.getDescendantOids(hierarkia))
-    val orgOids = parentChildKayttooikeusOrgs.map(_.child_oid).toList intersect descendantOids
+    val orgOids        = parentChildKayttooikeusOrgs.map(_.child_oid).toList intersect descendantOids
 
     val queryResult = db.run(
       koulutuksetToteutuksetHakukohteetRepository.selectWithParams(

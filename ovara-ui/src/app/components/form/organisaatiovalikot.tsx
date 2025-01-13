@@ -2,26 +2,25 @@ import { useTranslations } from 'next-intl';
 import { useSearchParams } from '@/app/hooks/useSearchParams';
 import { Box } from '@mui/material';
 import { isEmpty, isNullish } from 'remeda';
-import { useFetchOrganisaatiotByOrganisaatiotyyppi } from '@/app/hooks/useFetchOrganisaatiotByOrganisaatiotyyppi';
+import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
-import { LanguageCode, Organisaatio } from '@/app/lib/types/common';
+import { LanguageCode, OrganisaatioHierarkia } from '@/app/lib/types/common';
 import {
   ComboBox,
   MultiComboBox,
   SelectOption,
 } from '@/app/components/form/multicombobox';
-import { getOrganisaatiotToShow } from '@/app/lib/utils';
 import {
-  KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
-  OPPILAITOSORGANISAATIOTYYPPI,
-  TOIMIPISTEORGANISAATIOTYYPPI,
-} from '@/app/lib/constants';
+  getKoulutustoimijatToShow,
+  getOppilaitoksetToShow,
+  getToimipisteetToShow,
+} from '@/app/lib/utils';
 
 export const OrganisaatioValikot = () => {
   const t = useTranslations();
   const user = useAuthorizedUser();
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
-  const organisaatiot = useFetchOrganisaatiotByOrganisaatiotyyppi();
+  const organisaatiot = useFetchOrganisaatiohierarkiat();
 
   const {
     selectedKoulutustoimija,
@@ -36,21 +35,15 @@ export const OrganisaatioValikot = () => {
   const oppilaitos_id = 'oppilaitos';
   const toimipiste_id = 'toimipiste';
 
-  const koulutustoimijat = getOrganisaatiotToShow(
+  const koulutustoimijat = getKoulutustoimijatToShow(organisaatiot);
+
+  const oppilaitokset = getOppilaitoksetToShow(
     organisaatiot,
-    KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
-    [selectedKoulutustoimija],
+    selectedKoulutustoimija,
   );
 
-  const oppilaitokset = getOrganisaatiotToShow(
-    koulutustoimijat,
-    OPPILAITOSORGANISAATIOTYYPPI,
-    selectedOppilaitokset,
-  );
-
-  const toimipisteet = getOrganisaatiotToShow(
-    oppilaitokset,
-    TOIMIPISTEORGANISAATIOTYYPPI,
+  const toimipisteet = getToimipisteetToShow(
+    organisaatiot,
     selectedOppilaitokset,
   );
 
@@ -79,7 +72,7 @@ export const OrganisaatioValikot = () => {
     );
   };
 
-  const getOrganisaatioOptions = (orgs: Array<Organisaatio>) => {
+  const getOrganisaatioOptions = (orgs: Array<OrganisaatioHierarkia>) => {
     if (isNullish(orgs)) {
       return [];
     } else {
