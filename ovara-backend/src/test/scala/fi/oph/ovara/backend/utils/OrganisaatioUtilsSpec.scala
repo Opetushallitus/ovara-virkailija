@@ -735,7 +735,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
     )
   }
 
-  "getKayttooikeusDescendantOids" should "return empty list for onr org when org does not have descendants" in {
+  "getKayttooikeusDescendantOids" should "return list with only org self when org does not have descendants" in {
     val hierarkia =
       OrganisaatioHierarkia(
         "1.2.246.562.10.41253773158",
@@ -804,7 +804,9 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
       )
 
     assert(
-      OrganisaatioUtils.getKayttooikeusDescendantOids(hierarkia, List("1.2.246.562.10.95915936017")) == List()
+      OrganisaatioUtils.getKayttooikeusDescendantAndSelfOids(hierarkia, List("1.2.246.562.10.95915936017")) == List(
+        "1.2.246.562.10.95915936017"
+      )
     )
   }
 
@@ -877,7 +879,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
       )
 
     assert(
-      OrganisaatioUtils.getKayttooikeusDescendantOids(hierarkia, List("1.2.246.562.10.41253773158")) == List(
+      OrganisaatioUtils.getKayttooikeusDescendantAndSelfOids(hierarkia, List("1.2.246.562.10.41253773158")) == List(
         "1.2.246.562.10.41253773158",
         "1.2.246.562.10.93483820481",
         "1.2.246.562.10.10645749713",
@@ -973,7 +975,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
       )
 
     assert(
-      OrganisaatioUtils.getKayttooikeusDescendantOids(
+      OrganisaatioUtils.getKayttooikeusDescendantAndSelfOids(
         hierarkia,
         List("1.2.246.562.10.95915936017", "1.2.246.562.10.93483820481")
       ) == List(
@@ -981,7 +983,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         "1.2.246.562.10.10645749713",
         "1.2.246.562.10.1064574971333",
         "1.2.246.562.10.95915936017",
-        "1.2.246.562.10.77504323534",
+        "1.2.246.562.10.77504323534"
       )
     )
   }

@@ -69,7 +69,7 @@ class KoulutuksetToteutuksetHakukohteetService(
       selectedOrgsDescendantOids
     } else {
       val childKayttooikeusOrgs = hierarkiat.flatMap(hierarkia =>
-        OrganisaatioUtils.getKayttooikeusDescendantOids(hierarkia, kayttooikeusOrganisaatiot)
+        OrganisaatioUtils.getKayttooikeusDescendantAndSelfOids(hierarkia, kayttooikeusOrganisaatiot)
       )
       (childKayttooikeusOrgs intersect selectedOrgsDescendantOids).distinct
     }

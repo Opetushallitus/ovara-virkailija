@@ -49,16 +49,16 @@ object OrganisaatioUtils {
     }
   }
 
-  def getKayttooikeusDescendantOids(hierarkia: OrganisaatioHierarkia, organisaatioOids: List[String]): List[String] = {
+  def getKayttooikeusDescendantAndSelfOids(hierarkia: OrganisaatioHierarkia, organisaatioOids: List[String]): List[String] = {
     val children   = hierarkia.children
     val parentOids = hierarkia.parent_oids
 
     if (parentOids.exists(parentOid => organisaatioOids.contains(parentOid))) {
       List(hierarkia.organisaatio_oid) ::: children.flatMap(child =>
-        getKayttooikeusDescendantOids(child, organisaatioOids)
+        getKayttooikeusDescendantAndSelfOids(child, organisaatioOids)
       )
     } else {
-      children.flatMap(child => getKayttooikeusDescendantOids(child, organisaatioOids))
+      children.flatMap(child => getKayttooikeusDescendantAndSelfOids(child, organisaatioOids))
     }
   }
 }
