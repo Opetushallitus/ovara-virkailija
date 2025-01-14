@@ -46,7 +46,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           cd ovara-backend
-          mvn clean package -B -DskipTests
+          mvn clean package -B
 
   deploy-backend-container:
     needs: build-backend
