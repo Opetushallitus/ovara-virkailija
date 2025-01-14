@@ -34,6 +34,6 @@ build/
 
 .mise.toml
 
-application-dev.properties
+src/main/resources/oph-configuration/application-dev.properties
 
 ovara.dump

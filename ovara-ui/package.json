@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "touch .env.development.local && NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" node --env-file=.env.development --env-file=.env.development.local dev-server.mjs",
-    "build": "next build",
+    "build": "STANDALONE=true next build",
     "start": "next start",
     "lint": "next lint",
     "prepare": "cd .. && husky ovara-ui/.husky",
     "create-dev-certs": "mkdir -p certificates && cd certificates && mkcert localhost && mkcert -install",
     "test": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc"
   },
   "dependencies": {
     "@emotion/cache": "^11.13.1",
@@ -33,6 +34,7 @@
     "ts-pattern": "^5.5.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.13",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -46,7 +48,7 @@
     "lint-staged": "^15.2.10",
     "postcss": "^8",
     "prettier": "3.3.3",
-    "typescript": "^5",
+    "typescript": "^5.7.2",
     "vitest": "^2.1.3"
   }
 }

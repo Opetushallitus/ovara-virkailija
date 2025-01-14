@@ -1,0 +1,16 @@
+# ENVIRONMENT SPECIFIC CONFIG
+# DB CONNECTION
+spring.datasource.url={{host_postgresql_ovara}}
+spring.datasource.username={{ovara_backend_postgresql_username}}
+spring.datasource.password={{ovara_backend_postgresql_password}}
+
+# CAS
+opintopolku.virkailija.domain={{host_virkailija}}
+opintopolku.virkailija.url=https://${opintopolku.virkailija.domain}
+ovara.backend.url=${opintopolku.virkailija.url}/ovara-backend
+ovara.ui.url=${opintopolku.virkailija.url}/ovara
+cas.url=${opintopolku.virkailija.url}/cas
+ovara-backend.cas.username={{ovara_backend_cas_username}}
+ovara-backend.cas.password={{ovara_backend_cas_password}}
+
+ovara_backend.uses-ssl-proxy

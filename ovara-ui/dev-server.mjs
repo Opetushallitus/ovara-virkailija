@@ -49,14 +49,12 @@ app.prepare().then(() => {
     if (!pathname || pathname === '' || pathname === '/') {
       res.writeHead(302, { Location: basePath });
       res.end();
+    } else if (ovaraBackendOrigin && pathname.startsWith('/ovara-backend')) {
+      ovaraBackendProxy(req, res);
     } else if (pathname.startsWith(basePath)) {
       handle(req, res, parsedUrl);
     } else {
-      if (ovaraBackendOrigin && pathname.startsWith('/ovara-backend')) {
-        ovaraBackendProxy(req, res);
-      } else {
-        virkailijaProxy(req, res);
-      }
+      virkailijaProxy(req, res);
     }
   })
     .listen(port, () => {
