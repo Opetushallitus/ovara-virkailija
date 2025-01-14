@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.repository.{CommonRepository, KoulutuksetToteutuksetHakukohteetRepository, OvaraDatabase}
+import fi.oph.ovara.backend.repository.{KoulutuksetToteutuksetHakukohteetRepository, OvaraDatabase}
 import fi.oph.ovara.backend.utils.Constants.{KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES, OPH_PAAKAYTTAJA_OID}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter, OrganisaatioUtils}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 class KoulutuksetToteutuksetHakukohteetService(
     koulutuksetToteutuksetHakukohteetRepository: KoulutuksetToteutuksetHakukohteetRepository,
     userService: UserService,
-    commonRepository: CommonRepository
+    commonService: CommonService
 ) {
 
   @Autowired
@@ -39,44 +39,24 @@ class KoulutuksetToteutuksetHakukohteetService(
 
     val hierarkiat =
       if (toimipisteet.nonEmpty) {
-        db.run(
-          commonRepository.selectToimipisteDescendants(toimipisteet),
-          "selectToimipisteDescendants"
-        ).toList
+        commonService.getToimipistehierarkia(toimipisteet)
       } else if (oppilaitokset.nonEmpty) {
-        db.run(
-          commonRepository.selectOppilaitosDescendants(oppilaitokset),
-          "selectOppilaitosDescendants"
-        ).toList
+        commonService.getOppilaitoshierarkia(oppilaitokset)
       } else if (koulutustoimija.nonEmpty) {
         koulutustoimija match {
           case Some(koulutustoimija) =>
-            db.run(
-              commonRepository.selectKoulutustoimijaDescendants(List(koulutustoimija)),
-              "selectKoulutustoimijaDescendants"
-            ).toList
+            commonService.getKoulutustoimijahierarkia(List(koulutustoimija))
           case None => List()
         }
       } else {
-        val koulutustoimijahierarkia = db
-          .run(
-            commonRepository.selectKoulutustoimijaDescendants(kayttooikeusOrganisaatiot),
-            "selectKoulutustoimijaDescendants"
-          )
-          .toList
+        val koulutustoimijahierarkia = commonService.getKoulutustoimijahierarkia(kayttooikeusOrganisaatiot)
 
         if (hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)) {
           koulutustoimijahierarkia
         } else {
-          val oppilaitoshierarkia = db.run(
-            commonRepository.selectOppilaitosDescendants(kayttooikeusOrganisaatiot),
-            "selectOppilaitosDescendants"
-          )
+          val oppilaitoshierarkia = commonService.getOppilaitoshierarkia(oppilaitokset)
 
-          val toimipistehierarkia = db.run(
-            commonRepository.selectToimipisteDescendants(kayttooikeusOrganisaatiot),
-            "selectToimipisteDescendants"
-          )
+          val toimipistehierarkia = commonService.getToimipistehierarkia(toimipisteet)
 
           koulutustoimijahierarkia concat oppilaitoshierarkia concat toimipistehierarkia
         }

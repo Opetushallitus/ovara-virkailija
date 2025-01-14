@@ -20,7 +20,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     db.run(commonRepository.selectDistinctExistingHaut(), "selectDistinctExistingHaut")
   }
 
-  def getOrganisaatioHierarkiatWithUserRights: Vector[OrganisaatioHierarkia] = {
+  def getOrganisaatioHierarkiatWithUserRights: List[OrganisaatioHierarkia] = {
     val user                = userService.getEnrichedUserDetails
     val organisaatiot       = AuthoritiesUtil.getOrganisaatiot(user.authorities)
 
@@ -33,25 +33,37 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
 
     // TODO: Haetaan käyttäjän organisaatioille organisaatiotyyppi ja sen perusteella haetaan kannasta toimipisteet, oppilaitokset ja koulutustoimijat?
     // TODO: Nyt haetaan kaikilla parentOidseilla joka tasolta riippumatta parentoidin organisaation tyypistä
-    val koulutustoimijahierarkia = db.run(
-      commonRepository.selectKoulutustoimijaDescendants(parentOids),
-      "selectKoulutustoimijaDescendants"
-    )
+    val koulutustoimijahierarkia = getKoulutustoimijahierarkia(parentOids)
 
     if (organisaatiot.contains(OPH_PAAKAYTTAJA_OID)) {
       koulutustoimijahierarkia
     } else {
-      val oppilaitoshierarkia = db.run(
-        commonRepository.selectOppilaitosDescendants(parentOids),
-        "selectOppilaitosDescendants"
-      )
+      val oppilaitoshierarkia = getOppilaitoshierarkia(parentOids)
 
-      val toimipistehierarkia = db.run(
-        commonRepository.selectToimipisteDescendants(parentOids),
-        "selectToimipisteDescendants"
-      )
+      val toimipistehierarkia = getToimipistehierarkia(parentOids)
 
       koulutustoimijahierarkia concat oppilaitoshierarkia concat toimipistehierarkia
     }
+  }
+
+  def getToimipistehierarkia(toimipisteet: List[String]): List[OrganisaatioHierarkia] = {
+    db.run(
+      commonRepository.selectToimipisteDescendants(toimipisteet),
+      "selectToimipisteDescendants"
+    ).toList
+  }
+
+  def getOppilaitoshierarkia(oppilaitokset: List[String]): List[OrganisaatioHierarkia] = {
+    db.run(
+      commonRepository.selectOppilaitosDescendants(oppilaitokset),
+      "selectOppilaitosDescendants"
+    ).toList
+  }
+
+  def getKoulutustoimijahierarkia(koulutustoimijat: List[String]): List[OrganisaatioHierarkia] = {
+    db.run(
+      commonRepository.selectKoulutustoimijaDescendants(koulutustoimijat),
+      "selectKoulutustoimijaDescendants"
+    ).toList
   }
 }
