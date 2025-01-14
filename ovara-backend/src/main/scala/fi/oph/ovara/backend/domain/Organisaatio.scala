@@ -14,6 +14,8 @@ case class OrganisaatioHierarkia(
     organisaatio_oid: String,
     organisaatio_nimi: Kielistetty,
     organisaatiotyypit: List[String],
+    oppilaitostyyppi: Option[String] = None,
+    tila: String,
     parent_oids: List[String],
     children: List[OrganisaatioHierarkia]
 )

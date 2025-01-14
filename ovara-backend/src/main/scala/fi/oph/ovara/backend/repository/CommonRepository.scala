@@ -53,51 +53,45 @@ class CommonRepository extends Extractors {
             on org.organisaatio_oid = x.child_oid""".as[OrganisaatioParentChild]
   }
 
+  val selectOrganisaatioHierarkiaSql =
+    """SELECT organisaatio_oid,
+              organisaatio_nimi,
+              organisaatiotyypit,
+              oppilaitostyyppi,
+              tila,
+              parent_oids,
+              children"""
+  
   def selectKoulutustoimijaDescendants(
       koulutustoimijaOids: List[String]
   ): SqlStreamingAction[Vector[OrganisaatioHierarkia], OrganisaatioHierarkia, Effect] = {
     val organisaatiotStr = koulutustoimijaOids.map(s => s"'$s'").mkString(",")
-    sql"""SELECT
-            organisaatio_oid,
-            organisaatio_nimi,
-            organisaatiotyypit,
-            parent_oids,
-            children
+    sql"""#$selectOrganisaatioHierarkiaSql
           FROM pub.pub_dim_koulutustoimija_ja_toimipisteet,
           LATERAL jsonb_array_elements_text(parent_oids) AS parent_oid
           WHERE parent_oid IN (#$organisaatiotStr)
-         """.as[OrganisaatioHierarkia]
+          """.as[OrganisaatioHierarkia]
   }
 
   def selectOppilaitosDescendants(
       oids: List[String]
   ): SqlStreamingAction[Vector[OrganisaatioHierarkia], OrganisaatioHierarkia, Effect] = {
     val organisaatiotStr = oids.map(s => s"'$s'").mkString(",")
-    sql"""SELECT
-              organisaatio_oid,
-              organisaatio_nimi,
-              organisaatiotyypit,
-              parent_oids,
-              children
-            FROM pub.pub_dim_oppilaitos_ja_toimipisteet,
-            LATERAL jsonb_array_elements_text(parent_oids) AS parent_oid
-            WHERE parent_oid IN (#$organisaatiotStr)
-           """.as[OrganisaatioHierarkia]
+    sql"""#$selectOrganisaatioHierarkiaSql
+          FROM pub.pub_dim_oppilaitos_ja_toimipisteet,
+          LATERAL jsonb_array_elements_text(parent_oids) AS parent_oid
+          WHERE parent_oid IN (#$organisaatiotStr)
+          """.as[OrganisaatioHierarkia]
   }
 
   def selectToimipisteDescendants(
       oids: List[String]
   ): SqlStreamingAction[Vector[OrganisaatioHierarkia], OrganisaatioHierarkia, Effect] = {
     val organisaatiotStr = oids.map(s => s"'$s'").mkString(",")
-    sql"""SELECT
-                organisaatio_oid,
-                organisaatio_nimi,
-                organisaatiotyypit,
-                parent_oids,
-                children
-              FROM pub.pub_dim_toimipiste_ja_toimipisteet,
-              LATERAL jsonb_array_elements_text(parent_oids) AS parent_oid
-              WHERE parent_oid IN (#$organisaatiotStr)
-             """.as[OrganisaatioHierarkia]
+    sql"""#$selectOrganisaatioHierarkiaSql
+          FROM pub.pub_dim_toimipiste_ja_toimipisteet,
+          LATERAL jsonb_array_elements_text(parent_oids) AS parent_oid
+          WHERE parent_oid IN (#$organisaatiotStr)
+          """.as[OrganisaatioHierarkia]
   }
 }

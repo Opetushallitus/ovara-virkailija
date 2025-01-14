@@ -80,7 +80,8 @@ export const OrganisaatioValikot = () => {
       return orgs.map((org) => {
         return {
           value: org.organisaatio_oid,
-          label: org.organisaatio_nimi[locale] || '',
+          // TODO: Jos org tila jätetään labeliin, täytyy lisätä käännös
+          label: `${org.organisaatio_nimi[locale]} (${org.tila})` || '',
         };
       });
     }

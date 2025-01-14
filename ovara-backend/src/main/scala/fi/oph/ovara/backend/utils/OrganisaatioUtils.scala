@@ -61,4 +61,15 @@ object OrganisaatioUtils {
       children.flatMap(child => getKayttooikeusDescendantAndSelfOids(child, organisaatioOids))
     }
   }
-}
+  
+  def filterExistingOrgs(hierarkia: OrganisaatioHierarkia): Option[OrganisaatioHierarkia] = {
+    val children = hierarkia.children
+
+    if (hierarkia.tila == "POISTETTU") {
+      None
+    } else {
+      val filteredChildHierarkiat = children.flatMap(child => filterExistingOrgs(child))
+      Some(hierarkia.copy(children = filteredChildHierarkiat))
+    }
+  }
+ }

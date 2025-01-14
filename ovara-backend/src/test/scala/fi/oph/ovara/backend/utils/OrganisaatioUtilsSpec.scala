@@ -15,6 +15,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
         ),
         List("01"),
+        None,
+        "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
         List()
       )
@@ -32,12 +34,16 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
         ),
         List("01"),
+        None,
+        "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
         List(
           OrganisaatioHierarkia(
             "1.2.246.562.10.93483820481",
             Map(En -> "Ammattiopisto Lappia", Fi -> "Ammattiopisto Lappia", Sv -> "Ammattiopisto Lappia"),
             List("02"),
+            Some("oppilaitostyyppi_21#1"),
+            "AKTIIVINEN",
             List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
             List()
           )
@@ -59,12 +65,16 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
         ),
         List("01"),
+        None,
+        "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
         List(
           OrganisaatioHierarkia(
             "1.2.246.562.10.93483820481",
             Map(En -> "Ammattiopisto Lappia", Fi -> "Ammattiopisto Lappia", Sv -> "Ammattiopisto Lappia"),
             List("02"),
+            Some("oppilaitostyyppi_21#1"),
+            "AKTIIVINEN",
             List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
             List()
           ),
@@ -76,6 +86,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
               Sv -> "Kemi-Tornion ammattikorkeakoulu"
             ),
             List("02"),
+            Some("oppilaitostyyppi_21#1"),
+            "LAKKAUTETTU",
             List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
             List()
           )
@@ -101,12 +113,16 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
         ),
         List("01"),
+        None,
+        "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
         List(
           OrganisaatioHierarkia(
             "1.2.246.562.10.93483820481",
             Map(En -> "Ammattiopisto Lappia", Fi -> "Ammattiopisto Lappia", Sv -> "Ammattiopisto Lappia"),
             List("02"),
+            Some("oppilaitostyyppi_21#1"),
+            "AKTIIVINEN",
             List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
             List(
               OrganisaatioHierarkia(
@@ -117,6 +133,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                   Sv -> "Pop & Jazz Konservatorio Lappia"
                 ),
                 List("03"),
+                None,
+                "AKTIIVINEN",
                 List(
                   "1.2.246.562.10.10645749713",
                   "1.2.246.562.10.00000000001",
@@ -132,6 +150,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                       Sv -> "Pop & Jazz Konservatorio Lappia alitoimipiste"
                     ),
                     List("03"),
+                    None,
+                    "AKTIIVINEN",
                     List(
                       "1.2.246.562.10.1064574971333",
                       "1.2.246.562.10.10645749713",
@@ -153,6 +173,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
               Sv -> "Kemi-Tornion ammattikorkeakoulu"
             ),
             List("02"),
+            Some("oppilaitostyyppi_41#1"),
+            "LAKKAUTETTU",
             List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
             List()
           )
@@ -180,6 +202,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
         ),
         List("01"),
+        None,
+        "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
         List()
       )
@@ -238,6 +262,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
         ),
         List("01"),
+        None,
+        "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
         List(
           OrganisaatioHierarkia(
@@ -248,6 +274,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
               Sv -> "Pop & Jazz Konservatorio Lappia"
             ),
             List("02"),
+            Some("oppilaitostyyppi_21#1"),
+            "AKTIIVINEN",
             List(
               "1.2.246.562.10.10645749713",
               "1.2.246.562.10.00000000001",
@@ -331,6 +359,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
         ),
         List("01"),
+        None,
+        "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
         List(
           OrganisaatioHierarkia(
@@ -341,6 +371,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
               Sv -> "Pop & Jazz Konservatorio Lappia"
             ),
             List("02"),
+            Some("oppilaitostyyppi_21#1"),
+            "AKTIIVINEN",
             List(
               "1.2.246.562.10.10645749713",
               "1.2.246.562.10.00000000001",
@@ -355,6 +387,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                   Sv -> "Pop & Jazz Konservatorio Lappia"
                 ),
                 List("03"),
+                None,
+                "AKTIIVINEN",
                 List(
                   "1.2.246.562.10.10645749712223",
                   "1.2.246.562.10.10645749713",
@@ -370,6 +404,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                       Sv -> "Pop & Jazz Konservatorio Lappia alitoimipiste"
                     ),
                     List("03"),
+                    None,
+                    "AKTIIVINEN",
                     List(
                       "1.2.246.562.10.1064574971333",
                       "1.2.246.562.10.10645749712223",
@@ -535,6 +571,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
             Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
           ),
           List("01"),
+          None,
+          "AKTIIVINEN",
           List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
           List()
         )
@@ -596,6 +634,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
             Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
           ),
           List("01"),
+          None,
+          "AKTIIVINEN",
           List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
           List()
         )
@@ -650,6 +690,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
             Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
           ),
           List("01"),
+          None,
+          "AKTIIVINEN",
           List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
           List(
             OrganisaatioHierarkia(
@@ -660,6 +702,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                 Sv -> "Pop & Jazz Konservatorio Lappia"
               ),
               List("03"),
+              None,
+              "AKTIIVINEN",
               List(
                 "1.2.246.562.10.10645749713",
                 "1.2.246.562.10.00000000001",
@@ -745,12 +789,16 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
         ),
         List("01"),
+        None,
+        "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
         List(
           OrganisaatioHierarkia(
             "1.2.246.562.10.93483820481",
             Map(En -> "Ammattiopisto Lappia", Fi -> "Ammattiopisto Lappia", Sv -> "Ammattiopisto Lappia"),
             List("02"),
+            Some("oppilaitostyyppi_21#1"),
+            "AKTIIVINEN",
             List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
             List(
               OrganisaatioHierarkia(
@@ -761,6 +809,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                   Sv -> "Pop & Jazz Konservatorio Lappia"
                 ),
                 List("03"),
+                None,
+                "AKTIIVINEN",
                 List(
                   "1.2.246.562.10.10645749713",
                   "1.2.246.562.10.00000000001",
@@ -776,6 +826,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                       Sv -> "Pop & Jazz Konservatorio Lappia alitoimipiste"
                     ),
                     List("03"),
+                    None,
+                    "AKTIIVINEN",
                     List(
                       "1.2.246.562.10.1064574971333",
                       "1.2.246.562.10.10645749713",
@@ -797,6 +849,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
               Sv -> "Kemi-Tornion ammattikorkeakoulu"
             ),
             List("02"),
+            Some("oppilaitostyyppi_41#1"),
+            "LAKKAUTETTU",
             List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
             List()
           )
@@ -820,12 +874,16 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
         ),
         List("01"),
+        None,
+        "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
         List(
           OrganisaatioHierarkia(
             "1.2.246.562.10.93483820481",
             Map(En -> "Ammattiopisto Lappia", Fi -> "Ammattiopisto Lappia", Sv -> "Ammattiopisto Lappia"),
             List("02"),
+            Some("oppilaitostyyppi_21#1"),
+            "AKTIIVINEN",
             List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
             List(
               OrganisaatioHierarkia(
@@ -836,6 +894,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                   Sv -> "Pop & Jazz Konservatorio Lappia"
                 ),
                 List("03"),
+                None,
+                "AKTIIVINEN",
                 List(
                   "1.2.246.562.10.10645749713",
                   "1.2.246.562.10.00000000001",
@@ -851,6 +911,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                       Sv -> "Pop & Jazz Konservatorio Lappia alitoimipiste"
                     ),
                     List("03"),
+                    None,
+                    "AKTIIVINEN",
                     List(
                       "1.2.246.562.10.1064574971333",
                       "1.2.246.562.10.10645749713",
@@ -872,6 +934,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
               Sv -> "Kemi-Tornion ammattikorkeakoulu"
             ),
             List("02"),
+            Some("oppilaitostyyppi_41#1"),
+            "LAKKAUTETTU",
             List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
             List()
           )
@@ -899,12 +963,16 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
         ),
         List("01"),
+        None,
+        "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
         List(
           OrganisaatioHierarkia(
             "1.2.246.562.10.93483820481",
             Map(En -> "Ammattiopisto Lappia", Fi -> "Ammattiopisto Lappia", Sv -> "Ammattiopisto Lappia"),
             List("02"),
+            Some("oppilaitostyyppi_41#1"),
+            "AKTIIVINEN",
             List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
             List(
               OrganisaatioHierarkia(
@@ -915,6 +983,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                   Sv -> "Pop & Jazz Konservatorio Lappia"
                 ),
                 List("03"),
+                None,
+                "AKTIIVINEN",
                 List(
                   "1.2.246.562.10.10645749713",
                   "1.2.246.562.10.00000000001",
@@ -930,6 +1000,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                       Sv -> "Pop & Jazz Konservatorio Lappia alitoimipiste"
                     ),
                     List("03"),
+                    None,
+                    "AKTIIVINEN",
                     List(
                       "1.2.246.562.10.1064574971333",
                       "1.2.246.562.10.10645749713",
@@ -951,6 +1023,8 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
               Sv -> "Kemi-Tornion ammattikorkeakoulu"
             ),
             List("02"),
+            Some("oppilaitostyyppi_41#1"),
+            "LAKKAUTETTU",
             List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
             List(
               OrganisaatioHierarkia(
@@ -960,7 +1034,9 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                   Fi -> "Kemi-Tornion ammattikorkeakoulu, Kulttuuriala",
                   Sv -> "Kemi-Tornion ammattikorkeakoulu, Kulttuuriala"
                 ),
-                List(),
+                List("03"),
+                None,
+                "LAKKAUTETTU",
                 List(
                   "1.2.246.562.10.95915936017",
                   "1.2.246.562.10.00000000001",
@@ -986,5 +1062,349 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         "1.2.246.562.10.77504323534"
       )
     )
+  }
+
+  "filterExistingOrgs" should "remove POISTETTU org and childs from hierarkia" in {
+    val hierarkia =
+      OrganisaatioHierarkia(
+        "1.2.246.562.10.41253773158",
+        Map(
+          En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+        ),
+        List("01"),
+        None,
+        "AKTIIVINEN",
+        List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        List(
+          OrganisaatioHierarkia(
+            "1.2.246.562.10.93483820481",
+            Map(En -> "Ammattiopisto Lappia", Fi -> "Ammattiopisto Lappia", Sv -> "Ammattiopisto Lappia"),
+            List("02"),
+            Some("oppilaitostyyppi_41#1"),
+            "AKTIIVINEN",
+            List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+            List(
+              OrganisaatioHierarkia(
+                "1.2.246.562.10.10645749713",
+                Map(
+                  En -> "Pop & Jazz Konservatorio Lappia",
+                  Fi -> "Pop & Jazz Konservatorio Lappia",
+                  Sv -> "Pop & Jazz Konservatorio Lappia"
+                ),
+                List("03"),
+                None,
+                "AKTIIVINEN",
+                List(
+                  "1.2.246.562.10.10645749713",
+                  "1.2.246.562.10.00000000001",
+                  "1.2.246.562.10.41253773158",
+                  "1.2.246.562.10.93483820481"
+                ),
+                List(
+                  OrganisaatioHierarkia(
+                    "1.2.246.562.10.1064574971333",
+                    Map(
+                      En -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+                      Fi -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+                      Sv -> "Pop & Jazz Konservatorio Lappia alitoimipiste"
+                    ),
+                    List("03"),
+                    None,
+                    "AKTIIVINEN",
+                    List(
+                      "1.2.246.562.10.1064574971333",
+                      "1.2.246.562.10.10645749713",
+                      "1.2.246.562.10.00000000001",
+                      "1.2.246.562.10.41253773158",
+                      "1.2.246.562.10.93483820481"
+                    ),
+                    List()
+                  )
+                )
+              )
+            )
+          ),
+          OrganisaatioHierarkia(
+            "1.2.246.562.10.95915936017",
+            Map(
+              En -> "Kemi-Tornion ammattikorkeakoulu",
+              Fi -> "Kemi-Tornion ammattikorkeakoulu",
+              Sv -> "Kemi-Tornion ammattikorkeakoulu"
+            ),
+            List("02"),
+            Some("oppilaitostyyppi_41#1"),
+            "POISTETTU",
+            List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+            List(
+              OrganisaatioHierarkia(
+                "1.2.246.562.10.77504323534",
+                Map(
+                  En -> "Kemi-Tornion ammattikorkeakoulu, Kulttuuriala",
+                  Fi -> "Kemi-Tornion ammattikorkeakoulu, Kulttuuriala",
+                  Sv -> "Kemi-Tornion ammattikorkeakoulu, Kulttuuriala"
+                ),
+                List("03"),
+                None,
+                "POISTETTU",
+                List(
+                  "1.2.246.562.10.95915936017",
+                  "1.2.246.562.10.00000000001",
+                  "1.2.246.562.10.41253773158",
+                  "1.2.246.562.10.77504323534"
+                ),
+                List()
+              )
+            )
+          )
+        )
+      )
+
+    val result =
+      Some(
+        OrganisaatioHierarkia(
+          "1.2.246.562.10.41253773158",
+          Map(
+            En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+          ),
+          List("01"),
+          None,
+          "AKTIIVINEN",
+          List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          List(
+            OrganisaatioHierarkia(
+              "1.2.246.562.10.93483820481",
+              Map(En -> "Ammattiopisto Lappia", Fi -> "Ammattiopisto Lappia", Sv -> "Ammattiopisto Lappia"),
+              List("02"),
+              Some("oppilaitostyyppi_41#1"),
+              "AKTIIVINEN",
+              List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+              List(
+                OrganisaatioHierarkia(
+                  "1.2.246.562.10.10645749713",
+                  Map(
+                    En -> "Pop & Jazz Konservatorio Lappia",
+                    Fi -> "Pop & Jazz Konservatorio Lappia",
+                    Sv -> "Pop & Jazz Konservatorio Lappia"
+                  ),
+                  List("03"),
+                  None,
+                  "AKTIIVINEN",
+                  List(
+                    "1.2.246.562.10.10645749713",
+                    "1.2.246.562.10.00000000001",
+                    "1.2.246.562.10.41253773158",
+                    "1.2.246.562.10.93483820481"
+                  ),
+                  List(
+                    OrganisaatioHierarkia(
+                      "1.2.246.562.10.1064574971333",
+                      Map(
+                        En -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+                        Fi -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+                        Sv -> "Pop & Jazz Konservatorio Lappia alitoimipiste"
+                      ),
+                      List("03"),
+                      None,
+                      "AKTIIVINEN",
+                      List(
+                        "1.2.246.562.10.1064574971333",
+                        "1.2.246.562.10.10645749713",
+                        "1.2.246.562.10.00000000001",
+                        "1.2.246.562.10.41253773158",
+                        "1.2.246.562.10.93483820481"
+                      ),
+                      List()
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+
+    assert(OrganisaatioUtils.filterExistingOrgs(hierarkia) == result)
+  }
+
+  it should "remove POISTETTU alitoimipiste from deeper in hierarkia" in {
+    val hierarkia =
+      OrganisaatioHierarkia(
+        "1.2.246.562.10.41253773158",
+        Map(
+          En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+        ),
+        List("01"),
+        None,
+        "AKTIIVINEN",
+        List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        List(
+          OrganisaatioHierarkia(
+            "1.2.246.562.10.93483820481",
+            Map(En -> "Ammattiopisto Lappia", Fi -> "Ammattiopisto Lappia", Sv -> "Ammattiopisto Lappia"),
+            List("02"),
+            Some("oppilaitostyyppi_41#1"),
+            "AKTIIVINEN",
+            List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+            List(
+              OrganisaatioHierarkia(
+                "1.2.246.562.10.10645749713",
+                Map(
+                  En -> "Pop & Jazz Konservatorio Lappia",
+                  Fi -> "Pop & Jazz Konservatorio Lappia",
+                  Sv -> "Pop & Jazz Konservatorio Lappia"
+                ),
+                List("03"),
+                None,
+                "AKTIIVINEN",
+                List(
+                  "1.2.246.562.10.10645749713",
+                  "1.2.246.562.10.00000000001",
+                  "1.2.246.562.10.41253773158",
+                  "1.2.246.562.10.93483820481"
+                ),
+                List(
+                  OrganisaatioHierarkia(
+                    "1.2.246.562.10.1064574971333",
+                    Map(
+                      En -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+                      Fi -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+                      Sv -> "Pop & Jazz Konservatorio Lappia alitoimipiste"
+                    ),
+                    List("03"),
+                    None,
+                    "POISTETTU",
+                    List(
+                      "1.2.246.562.10.1064574971333",
+                      "1.2.246.562.10.10645749713",
+                      "1.2.246.562.10.00000000001",
+                      "1.2.246.562.10.41253773158",
+                      "1.2.246.562.10.93483820481"
+                    ),
+                    List()
+                  )
+                )
+              )
+            )
+          ),
+          OrganisaatioHierarkia(
+            "1.2.246.562.10.95915936017",
+            Map(
+              En -> "Kemi-Tornion ammattikorkeakoulu",
+              Fi -> "Kemi-Tornion ammattikorkeakoulu",
+              Sv -> "Kemi-Tornion ammattikorkeakoulu"
+            ),
+            List("02"),
+            Some("oppilaitostyyppi_41#1"),
+            "LAKKAUTETTU",
+            List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+            List(
+              OrganisaatioHierarkia(
+                "1.2.246.562.10.77504323534",
+                Map(
+                  En -> "Kemi-Tornion ammattikorkeakoulu, Kulttuuriala",
+                  Fi -> "Kemi-Tornion ammattikorkeakoulu, Kulttuuriala",
+                  Sv -> "Kemi-Tornion ammattikorkeakoulu, Kulttuuriala"
+                ),
+                List("03"),
+                None,
+                "LAKKAUTETTU",
+                List(
+                  "1.2.246.562.10.95915936017",
+                  "1.2.246.562.10.00000000001",
+                  "1.2.246.562.10.41253773158",
+                  "1.2.246.562.10.77504323534"
+                ),
+                List()
+              )
+            )
+          )
+        )
+      )
+
+    val result =
+      Some(
+        OrganisaatioHierarkia(
+          "1.2.246.562.10.41253773158",
+          Map(
+            En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+            Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+          ),
+          List("01"),
+          None,
+          "AKTIIVINEN",
+          List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          List(
+            OrganisaatioHierarkia(
+              "1.2.246.562.10.93483820481",
+              Map(En -> "Ammattiopisto Lappia", Fi -> "Ammattiopisto Lappia", Sv -> "Ammattiopisto Lappia"),
+              List("02"),
+              Some("oppilaitostyyppi_41#1"),
+              "AKTIIVINEN",
+              List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+              List(
+                OrganisaatioHierarkia(
+                  "1.2.246.562.10.10645749713",
+                  Map(
+                    En -> "Pop & Jazz Konservatorio Lappia",
+                    Fi -> "Pop & Jazz Konservatorio Lappia",
+                    Sv -> "Pop & Jazz Konservatorio Lappia"
+                  ),
+                  List("03"),
+                  None,
+                  "AKTIIVINEN",
+                  List(
+                    "1.2.246.562.10.10645749713",
+                    "1.2.246.562.10.00000000001",
+                    "1.2.246.562.10.41253773158",
+                    "1.2.246.562.10.93483820481"
+                  ),
+                  List()
+                )
+              )
+            ),
+            OrganisaatioHierarkia(
+              "1.2.246.562.10.95915936017",
+              Map(
+                En -> "Kemi-Tornion ammattikorkeakoulu",
+                Fi -> "Kemi-Tornion ammattikorkeakoulu",
+                Sv -> "Kemi-Tornion ammattikorkeakoulu"
+              ),
+              List("02"),
+              Some("oppilaitostyyppi_41#1"),
+              "LAKKAUTETTU",
+              List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+              List(
+                OrganisaatioHierarkia(
+                  "1.2.246.562.10.77504323534",
+                  Map(
+                    En -> "Kemi-Tornion ammattikorkeakoulu, Kulttuuriala",
+                    Fi -> "Kemi-Tornion ammattikorkeakoulu, Kulttuuriala",
+                    Sv -> "Kemi-Tornion ammattikorkeakoulu, Kulttuuriala"
+                  ),
+                  List("03"),
+                  None,
+                  "LAKKAUTETTU",
+                  List(
+                    "1.2.246.562.10.95915936017",
+                    "1.2.246.562.10.00000000001",
+                    "1.2.246.562.10.41253773158",
+                    "1.2.246.562.10.77504323534"
+                  ),
+                  List()
+                )
+              )
+            )
+          )
+        )
+      )
+
+    assert(OrganisaatioUtils.filterExistingOrgs(hierarkia) == result)
   }
 }

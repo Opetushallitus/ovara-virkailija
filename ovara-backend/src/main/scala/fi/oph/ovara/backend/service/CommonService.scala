@@ -2,7 +2,7 @@ package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.domain.{Haku, OrganisaatioHierarkia}
 import fi.oph.ovara.backend.repository.{CommonRepository, OvaraDatabase}
-import fi.oph.ovara.backend.utils.AuthoritiesUtil
+import fi.oph.ovara.backend.utils.{AuthoritiesUtil, OrganisaatioUtils}
 import fi.oph.ovara.backend.utils.Constants.OPH_PAAKAYTTAJA_OID
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -35,7 +35,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     // TODO: Nyt haetaan kaikilla parentOidseilla joka tasolta riippumatta parentoidin organisaation tyypistä
     val koulutustoimijahierarkia = getKoulutustoimijahierarkia(parentOids)
 
-    if (organisaatiot.contains(OPH_PAAKAYTTAJA_OID)) {
+    val kayttoOikeushierarkiat = if (organisaatiot.contains(OPH_PAAKAYTTAJA_OID)) {
       koulutustoimijahierarkia
     } else {
       val oppilaitoshierarkia = getOppilaitoshierarkia(parentOids)
@@ -44,26 +44,34 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
 
       koulutustoimijahierarkia concat oppilaitoshierarkia concat toimipistehierarkia
     }
+    
+    kayttoOikeushierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
   }
 
   def getToimipistehierarkia(toimipisteet: List[String]): List[OrganisaatioHierarkia] = {
-    db.run(
+    val hierarkiat = db.run(
       commonRepository.selectToimipisteDescendants(toimipisteet),
       "selectToimipisteDescendants"
     ).toList
+    
+    hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
   }
 
   def getOppilaitoshierarkia(oppilaitokset: List[String]): List[OrganisaatioHierarkia] = {
-    db.run(
+    val hierarkiat = db.run(
       commonRepository.selectOppilaitosDescendants(oppilaitokset),
       "selectOppilaitosDescendants"
     ).toList
+    
+    hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
   }
 
   def getKoulutustoimijahierarkia(koulutustoimijat: List[String]): List[OrganisaatioHierarkia] = {
-    db.run(
+    val hierarkiat = db.run(
       commonRepository.selectKoulutustoimijaDescendants(koulutustoimijat),
       "selectKoulutustoimijaDescendants"
     ).toList
+
+    hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
   }
 }

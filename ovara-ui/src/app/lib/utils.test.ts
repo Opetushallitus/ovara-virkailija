@@ -176,6 +176,8 @@ describe('findOrganisaatioByOrganisaatiotyyppi', () => {
         sv: 'Iin kunta',
       },
       organisaatiotyypit: ['01', '07', '09'],
+      oppilaitostyyppi: null,
+      tila: 'AKTIIVINEN',
       parent_oids: ['1.2.246.562.10.00000000001', '1.2.246.562.10.10063814452'],
       children: [],
     };
@@ -197,6 +199,8 @@ describe('findOrganisaatioByOrganisaatiotyyppi', () => {
         sv: 'Iin kunta',
       },
       organisaatiotyypit: ['01', '07', '09'],
+      oppilaitostyyppi: null,
+      tila: 'AKTIIVINEN',
       parent_oids: ['1.2.246.562.10.00000000001', '1.2.246.562.10.10063814452'],
       children: [],
     };
@@ -218,6 +222,8 @@ describe('findOrganisaatioByOrganisaatiotyyppi', () => {
         sv: 'Pohjois-Iin koulu',
       },
       organisaatiotyypit: ['03'],
+      oppilaitostyyppi: null,
+      tila: 'AKTIIVINEN',
       parent_oids: [
         '1.2.246.562.10.10063814452',
         '1.2.246.562.10.27440356239',
@@ -235,6 +241,8 @@ describe('findOrganisaatioByOrganisaatiotyyppi', () => {
         sv: 'Pohjois-Iin koulu',
       },
       organisaatiotyypit: ['02'],
+      oppilaitostyyppi: 'oppilaitostyyppi_11#1',
+      tila: 'AKTIIVINEN',
       parent_oids: [
         '1.2.246.562.10.27440356239',
         '1.2.246.562.10.10063814452',
@@ -251,6 +259,8 @@ describe('findOrganisaatioByOrganisaatiotyyppi', () => {
         sv: 'Iin alalukio',
       },
       organisaatiotyypit: ['03'],
+      oppilaitostyyppi: null,
+      tila: 'AKTIIVINEN',
       parent_oids: [
         '1.2.246.562.10.413830129721',
         '1.2.246.562.10.44529610774',
@@ -269,6 +279,8 @@ describe('findOrganisaatioByOrganisaatiotyyppi', () => {
         sv: 'Joku toinen alatoimipiste',
       },
       organisaatiotyypit: ['03'],
+      oppilaitostyyppi: null,
+      tila: 'AKTIIVINEN',
       parent_oids: [
         '1.2.246.562.10.413830129721',
         '1.2.246.562.10.44529610774',
@@ -287,6 +299,8 @@ describe('findOrganisaatioByOrganisaatiotyyppi', () => {
         sv: 'Iin lukio',
       },
       organisaatiotyypit: ['03'],
+      oppilaitostyyppi: null,
+      tila: 'AKTIIVINEN',
       parent_oids: [
         '1.2.246.562.10.44529610774',
         '1.2.246.562.10.41383012972',
@@ -303,6 +317,8 @@ describe('findOrganisaatioByOrganisaatiotyyppi', () => {
         sv: 'Iin lukio',
       },
       organisaatiotyypit: ['02'],
+      oppilaitostyyppi: 'oppilaitostyyppi_15#1',
+      tila: 'AKTIIVINEN',
       parent_oids: [
         '1.2.246.562.10.10063814452',
         '1.2.246.562.10.44529610774',
@@ -319,6 +335,8 @@ describe('findOrganisaatioByOrganisaatiotyyppi', () => {
         sv: 'Iin kunta',
       },
       organisaatiotyypit: ['01', '07', '09'],
+      oppilaitostyyppi: null,
+      tila: 'AKTIIVINEN',
       parent_oids: ['1.2.246.562.10.00000000001', '1.2.246.562.10.10063814452'],
       children: [oppilaitos1_1, oppilaitos1_2],
     };
@@ -340,6 +358,8 @@ const toimipiste1_1 = {
     sv: 'Pohjois-Iin koulu',
   },
   organisaatiotyypit: ['03'],
+  oppilaitostyyppi: null,
+  tila: 'AKTIIVINEN',
   parent_oids: [
     '1.2.246.562.10.10063814452',
     '1.2.246.562.10.27440356239',
@@ -357,6 +377,8 @@ const oppilaitos1_1 = {
     sv: 'Pohjois-Iin koulu',
   },
   organisaatiotyypit: ['02'],
+  oppilaitostyyppi: 'oppilaitostyyppi_11#1',
+  tila: 'AKTIIVINEN',
   parent_oids: [
     '1.2.246.562.10.27440356239',
     '1.2.246.562.10.10063814452',
@@ -373,6 +395,8 @@ const oppilaitos1_2 = {
     sv: 'Iin lukio',
   },
   organisaatiotyypit: ['02'],
+  oppilaitostyyppi: 'oppilaitostyyppi_15#1',
+  tila: 'AKTIIVINEN',
   parent_oids: [
     '1.2.246.562.10.10063814452',
     '1.2.246.562.10.44529610774',
@@ -389,6 +413,8 @@ const koulutustoimija1 = {
     sv: 'Iin kunta',
   },
   organisaatiotyypit: ['01', '07', '09'],
+  oppilaitostyyppi: null,
+  tila: 'AKTIIVINEN',
   parent_oids: ['1.2.246.562.10.00000000001', '1.2.246.562.10.10063814452'],
   children: [oppilaitos1_1, oppilaitos1_2],
 };
@@ -401,6 +427,8 @@ const toimipiste2_1_1 = {
     sv: 'Nylands hotell- och restaurangskola',
   },
   organisaatiotyypit: ['03'],
+  oppilaitostyyppi: null,
+  tila: 'AKTIIVINEN',
   parent_oids: [
     '1.2.246.562.10.10281960954',
     '1.2.246.562.10.00000000001',
@@ -418,6 +446,8 @@ const oppilaitos2_1 = {
     sv: 'Nylands hotell- och restaurangskola',
   },
   organisaatiotyypit: ['02'],
+  oppilaitostyyppi: 'oppilaitostyyppi_11#1',
+  tila: 'AKTIIVINEN',
   parent_oids: [
     '1.2.246.562.10.10281960954',
     '1.2.246.562.10.00000000001',
@@ -434,6 +464,8 @@ const toimipiste2_2_1 = {
     sv: 'Överby trädgårds- och lantbruksskolor',
   },
   organisaatiotyypit: ['03'],
+  oppilaitostyyppi: null,
+  tila: 'AKTIIVINEN',
   parent_oids: [
     '1.2.246.562.10.208433283510',
     '1.2.246.562.10.221157551210',
@@ -451,6 +483,8 @@ const toimipiste2_2_2 = {
     sv: 'Överby trädgårds- och lantbruksskolor 2',
   },
   organisaatiotyypit: ['03'],
+  oppilaitostyyppi: null,
+  tila: 'AKTIIVINEN',
   parent_oids: [
     '1.2.246.562.10.208433283510',
     '1.2.246.562.10.221157551210',
@@ -468,6 +502,8 @@ const toimipiste2_2_3 = {
     sv: 'Överby trädgårds- och lantbruksskolor 3',
   },
   organisaatiotyypit: ['03'],
+  oppilaitostyyppi: null,
+  tila: 'AKTIIVINEN',
   parent_oids: [
     '1.2.246.562.10.208433283510',
     '1.2.246.562.10.221157551210',
@@ -485,6 +521,8 @@ const oppilaitos2_2 = {
     sv: 'Överby trädgårds- och lantbruksskolor',
   },
   organisaatiotyypit: ['02'],
+  oppilaitostyyppi: 'oppilaitostyyppi_11#1',
+  tila: 'AKTIIVINEN',
   parent_oids: [
     '1.2.246.562.10.208433283510',
     '1.2.246.562.10.221157551210',
@@ -501,6 +539,8 @@ const toimipiste2_3_1 = {
     sv: 'Överby trädgårds- och lantbruksskolor 3',
   },
   organisaatiotyypit: ['03'],
+  oppilaitostyyppi: null,
+  tila: 'AKTIIVINEN',
   parent_oids: [
     '1.2.246.562.10.2084332835113',
     '1.2.246.562.10.221157551210',
@@ -518,6 +558,8 @@ const oppilaitos2_3 = {
     sv: 'Överby trädgårds- och lantbruksskolor oppilaitos 3',
   },
   organisaatiotyypit: ['02'],
+  oppilaitostyyppi: 'oppilaitostyyppi_11#1',
+  tila: 'AKTIIVINEN',
   parent_oids: [
     '1.2.246.562.10.2084332835113',
     '1.2.246.562.10.221157551210',
@@ -534,6 +576,8 @@ const koulutustoimija2 = {
     sv: 'Samkommunen för huvudstadsregionens svenskspråkiga yrkesskolor',
   },
   organisaatiotyypit: ['01'],
+  oppilaitostyyppi: null,
+  tila: 'AKTIIVINEN',
   parent_oids: ['1.2.246.562.10.00000000001', '1.2.246.562.10.221157551210'],
   children: [oppilaitos2_1, oppilaitos2_2, oppilaitos2_3],
 };

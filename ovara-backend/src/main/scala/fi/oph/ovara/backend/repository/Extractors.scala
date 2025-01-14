@@ -20,14 +20,6 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   )
 
-  implicit val getOrganisaatioPerOrganisaatiotyyppiResult: GetResult[OrganisaatioPerOrganisaatiotyyppi] = GetResult(r =>
-    OrganisaatioPerOrganisaatiotyyppi(
-      organisaatio_oid = r.nextString(),
-      organisaatio_nimi = extractKielistetty(r.nextStringOption()),
-      organisaatiotyyppi = r.nextString()
-    )
-  )
-
   implicit val getOrganisaatioResult: GetResult[Organisaatio] = GetResult(r =>
     Organisaatio(
       organisaatio_oid = r.nextString(),
@@ -81,6 +73,8 @@ trait Extractors extends GenericOvaraJsonFormats {
       organisaatio_oid = r.nextString(),
       organisaatio_nimi = extractKielistetty(r.nextStringOption()),
       organisaatiotyypit = extractArray(r.nextStringOption()),
+      oppilaitostyyppi = r.nextStringOption(),
+      tila = r.nextString(),
       parent_oids = extractArray(r.nextStringOption()),
       children = r.nextStringOption().map(read[List[OrganisaatioHierarkia]]).getOrElse(List())
     )

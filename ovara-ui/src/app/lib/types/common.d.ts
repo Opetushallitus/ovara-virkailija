@@ -18,6 +18,8 @@ type OrganisaatioHierarkia = {
   organisaatio_oid: string;
   organisaatio_nimi: Kielistetty;
   organisaatiotyypit: Array<string>;
+  oppilaitostyyppi: string | null;
+  tila: string;
   parent_oids: Array<string>;
   children: Array<OrganisaatioHierarkia>;
 };

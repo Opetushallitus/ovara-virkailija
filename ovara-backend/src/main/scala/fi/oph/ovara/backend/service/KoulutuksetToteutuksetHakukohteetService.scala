@@ -62,6 +62,8 @@ class KoulutuksetToteutuksetHakukohteetService(
         }
       }
 
+    val hierarkiatWithExistingOrgs = hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+
     val selectedOrgsDescendantOids =
       hierarkiat.flatMap(hierarkia => OrganisaatioUtils.getDescendantOids(hierarkia)).distinct
 
