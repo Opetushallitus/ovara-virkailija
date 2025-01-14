@@ -63,7 +63,7 @@ class Controller(
   def haut: String = mapper.writeValueAsString(commonService.getHaut)
 
   @GetMapping(path = Array("organisaatiot"))
-  def organisaatiot: String = mapper.writeValueAsString(commonService.getOrganisaatioHierarkiat)
+  def organisaatiot: String = mapper.writeValueAsString(commonService.getOrganisaatioHierarkiatWithUserRights)
 
   // RAPORTIT
 

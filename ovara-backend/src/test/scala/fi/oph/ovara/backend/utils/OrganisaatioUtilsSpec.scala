@@ -170,7 +170,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
     )
   }
 
-  "mapOrganisaationHakukohteetToParent2" should "return koulutustoimijan hakukohteet for hierarkia with only koulutustoimija" in {
+  "mapOrganisaationHakukohteetToParent" should "return koulutustoimijan hakukohteet for hierarkia with only koulutustoimija" in {
     val hierarkia =
       OrganisaatioHierarkia(
         "1.2.246.562.10.41253773158",
@@ -731,6 +731,257 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           ),
           hakukohteet = List()
         )
+      )
+    )
+  }
+
+  "getKayttooikeusDescendantOids" should "return empty list for onr org when org does not have descendants" in {
+    val hierarkia =
+      OrganisaatioHierarkia(
+        "1.2.246.562.10.41253773158",
+        Map(
+          En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+        ),
+        List("01"),
+        List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        List(
+          OrganisaatioHierarkia(
+            "1.2.246.562.10.93483820481",
+            Map(En -> "Ammattiopisto Lappia", Fi -> "Ammattiopisto Lappia", Sv -> "Ammattiopisto Lappia"),
+            List("02"),
+            List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+            List(
+              OrganisaatioHierarkia(
+                "1.2.246.562.10.10645749713",
+                Map(
+                  En -> "Pop & Jazz Konservatorio Lappia",
+                  Fi -> "Pop & Jazz Konservatorio Lappia",
+                  Sv -> "Pop & Jazz Konservatorio Lappia"
+                ),
+                List("03"),
+                List(
+                  "1.2.246.562.10.10645749713",
+                  "1.2.246.562.10.00000000001",
+                  "1.2.246.562.10.41253773158",
+                  "1.2.246.562.10.93483820481"
+                ),
+                List(
+                  OrganisaatioHierarkia(
+                    "1.2.246.562.10.1064574971333",
+                    Map(
+                      En -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+                      Fi -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+                      Sv -> "Pop & Jazz Konservatorio Lappia alitoimipiste"
+                    ),
+                    List("03"),
+                    List(
+                      "1.2.246.562.10.1064574971333",
+                      "1.2.246.562.10.10645749713",
+                      "1.2.246.562.10.00000000001",
+                      "1.2.246.562.10.41253773158",
+                      "1.2.246.562.10.93483820481"
+                    ),
+                    List()
+                  )
+                )
+              )
+            )
+          ),
+          OrganisaatioHierarkia(
+            "1.2.246.562.10.95915936017",
+            Map(
+              En -> "Kemi-Tornion ammattikorkeakoulu",
+              Fi -> "Kemi-Tornion ammattikorkeakoulu",
+              Sv -> "Kemi-Tornion ammattikorkeakoulu"
+            ),
+            List("02"),
+            List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+            List()
+          )
+        )
+      )
+
+    assert(
+      OrganisaatioUtils.getKayttooikeusDescendantOids(hierarkia, List("1.2.246.562.10.95915936017")) == List()
+    )
+  }
+
+  it should "return list of käyttöoikeusdescendants for one käyttöoikeus org" in {
+    val hierarkia =
+      OrganisaatioHierarkia(
+        "1.2.246.562.10.41253773158",
+        Map(
+          En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+        ),
+        List("01"),
+        List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        List(
+          OrganisaatioHierarkia(
+            "1.2.246.562.10.93483820481",
+            Map(En -> "Ammattiopisto Lappia", Fi -> "Ammattiopisto Lappia", Sv -> "Ammattiopisto Lappia"),
+            List("02"),
+            List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+            List(
+              OrganisaatioHierarkia(
+                "1.2.246.562.10.10645749713",
+                Map(
+                  En -> "Pop & Jazz Konservatorio Lappia",
+                  Fi -> "Pop & Jazz Konservatorio Lappia",
+                  Sv -> "Pop & Jazz Konservatorio Lappia"
+                ),
+                List("03"),
+                List(
+                  "1.2.246.562.10.10645749713",
+                  "1.2.246.562.10.00000000001",
+                  "1.2.246.562.10.41253773158",
+                  "1.2.246.562.10.93483820481"
+                ),
+                List(
+                  OrganisaatioHierarkia(
+                    "1.2.246.562.10.1064574971333",
+                    Map(
+                      En -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+                      Fi -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+                      Sv -> "Pop & Jazz Konservatorio Lappia alitoimipiste"
+                    ),
+                    List("03"),
+                    List(
+                      "1.2.246.562.10.1064574971333",
+                      "1.2.246.562.10.10645749713",
+                      "1.2.246.562.10.00000000001",
+                      "1.2.246.562.10.41253773158",
+                      "1.2.246.562.10.93483820481"
+                    ),
+                    List()
+                  )
+                )
+              )
+            )
+          ),
+          OrganisaatioHierarkia(
+            "1.2.246.562.10.95915936017",
+            Map(
+              En -> "Kemi-Tornion ammattikorkeakoulu",
+              Fi -> "Kemi-Tornion ammattikorkeakoulu",
+              Sv -> "Kemi-Tornion ammattikorkeakoulu"
+            ),
+            List("02"),
+            List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+            List()
+          )
+        )
+      )
+
+    assert(
+      OrganisaatioUtils.getKayttooikeusDescendantOids(hierarkia, List("1.2.246.562.10.41253773158")) == List(
+        "1.2.246.562.10.41253773158",
+        "1.2.246.562.10.93483820481",
+        "1.2.246.562.10.10645749713",
+        "1.2.246.562.10.1064574971333",
+        "1.2.246.562.10.95915936017"
+      )
+    )
+  }
+
+  it should "return list of käyttöoikeusdescendants for two toimipiste käyttöoikeus orgs" in {
+    val hierarkia =
+      OrganisaatioHierarkia(
+        "1.2.246.562.10.41253773158",
+        Map(
+          En -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Fi -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia",
+          Sv -> "Kemi-Tornionlaakson koulutuskuntayhtymä Lappia"
+        ),
+        List("01"),
+        List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        List(
+          OrganisaatioHierarkia(
+            "1.2.246.562.10.93483820481",
+            Map(En -> "Ammattiopisto Lappia", Fi -> "Ammattiopisto Lappia", Sv -> "Ammattiopisto Lappia"),
+            List("02"),
+            List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+            List(
+              OrganisaatioHierarkia(
+                "1.2.246.562.10.10645749713",
+                Map(
+                  En -> "Pop & Jazz Konservatorio Lappia",
+                  Fi -> "Pop & Jazz Konservatorio Lappia",
+                  Sv -> "Pop & Jazz Konservatorio Lappia"
+                ),
+                List("03"),
+                List(
+                  "1.2.246.562.10.10645749713",
+                  "1.2.246.562.10.00000000001",
+                  "1.2.246.562.10.41253773158",
+                  "1.2.246.562.10.93483820481"
+                ),
+                List(
+                  OrganisaatioHierarkia(
+                    "1.2.246.562.10.1064574971333",
+                    Map(
+                      En -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+                      Fi -> "Pop & Jazz Konservatorio Lappia alitoimipiste",
+                      Sv -> "Pop & Jazz Konservatorio Lappia alitoimipiste"
+                    ),
+                    List("03"),
+                    List(
+                      "1.2.246.562.10.1064574971333",
+                      "1.2.246.562.10.10645749713",
+                      "1.2.246.562.10.00000000001",
+                      "1.2.246.562.10.41253773158",
+                      "1.2.246.562.10.93483820481"
+                    ),
+                    List()
+                  )
+                )
+              )
+            )
+          ),
+          OrganisaatioHierarkia(
+            "1.2.246.562.10.95915936017",
+            Map(
+              En -> "Kemi-Tornion ammattikorkeakoulu",
+              Fi -> "Kemi-Tornion ammattikorkeakoulu",
+              Sv -> "Kemi-Tornion ammattikorkeakoulu"
+            ),
+            List("02"),
+            List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+            List(
+              OrganisaatioHierarkia(
+                "1.2.246.562.10.77504323534",
+                Map(
+                  En -> "Kemi-Tornion ammattikorkeakoulu, Kulttuuriala",
+                  Fi -> "Kemi-Tornion ammattikorkeakoulu, Kulttuuriala",
+                  Sv -> "Kemi-Tornion ammattikorkeakoulu, Kulttuuriala"
+                ),
+                List(),
+                List(
+                  "1.2.246.562.10.95915936017",
+                  "1.2.246.562.10.00000000001",
+                  "1.2.246.562.10.41253773158",
+                  "1.2.246.562.10.77504323534"
+                ),
+                List()
+              )
+            )
+          )
+        )
+      )
+
+    assert(
+      OrganisaatioUtils.getKayttooikeusDescendantOids(
+        hierarkia,
+        List("1.2.246.562.10.95915936017", "1.2.246.562.10.93483820481")
+      ) == List(
+        "1.2.246.562.10.93483820481",
+        "1.2.246.562.10.10645749713",
+        "1.2.246.562.10.1064574971333",
+        "1.2.246.562.10.95915936017",
+        "1.2.246.562.10.77504323534",
       )
     )
   }

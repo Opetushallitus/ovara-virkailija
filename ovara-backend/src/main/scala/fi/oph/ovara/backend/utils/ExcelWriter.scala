@@ -127,7 +127,6 @@ object ExcelWriter {
         indentedHeadingCellStyle.setFont(headingFont)
         indentedHeadingCellStyle.setAlignment(HorizontalAlignment.LEFT)
         indentedHeadingCellStyle.setIndention(indent.toShort)
-
         val updatedRowIndex = createOrganisaatioHeadingRow(
           sheet = sheet,
           initialRowIndex = currentRowIndex,
@@ -143,7 +142,6 @@ object ExcelWriter {
           currentRowIndex =
             createHakukohdeRow(sheet, currentRowIndex, resultRowIndex, cellStyle, hakukohde._2, asiointikieli)
         })
-
         if (orgHierarkiaWithResults.children.nonEmpty) {
           createResultRows(
             workbook,
@@ -185,6 +183,7 @@ object ExcelWriter {
       bodyTextFont.setFontHeightInPoints(10)
       bodyTextCellStyle.setFont(bodyTextFont)
       bodyTextCellStyle.setAlignment(HorizontalAlignment.LEFT)
+      bodyTextCellStyle.setIndention(2.toShort)
 
       workbook.setSheetName(0, WorkbookUtil.createSafeSheetName("Yhteenveto")) //TODO: käännös
 

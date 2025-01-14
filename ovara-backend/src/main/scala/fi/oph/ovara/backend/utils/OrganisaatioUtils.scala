@@ -48,4 +48,17 @@ object OrganisaatioUtils {
       List(organisaatioOid) ::: children.flatMap(child => getDescendantOids(child))
     }
   }
+
+  def getKayttooikeusDescendantOids(hierarkia: OrganisaatioHierarkia, organisaatioOids: List[String]): List[String] = {
+    val children   = hierarkia.children
+    val parentOids = hierarkia.parent_oids
+
+    if (parentOids.exists(parentOid => organisaatioOids.contains(parentOid))) {
+      List(hierarkia.organisaatio_oid) ::: children.flatMap(child =>
+        getKayttooikeusDescendantOids(child, organisaatioOids)
+      )
+    } else {
+      children.flatMap(child => getKayttooikeusDescendantOids(child, organisaatioOids))
+    }
+  }
 }

@@ -79,7 +79,7 @@ class CommonRepository extends Extractors {
               organisaatiotyypit,
               parent_oids,
               children
-            FROM pub.oppilaitos_with_toimipisteet,
+            FROM pub.pub_dim_oppilaitos_ja_toimipisteet,
             LATERAL jsonb_array_elements_text(parent_oids) AS parent_oid
             WHERE parent_oid IN (#$organisaatiotStr)
            """.as[OrganisaatioHierarkia]
@@ -95,7 +95,7 @@ class CommonRepository extends Extractors {
                 organisaatiotyypit,
                 parent_oids,
                 children
-              FROM pub.toimipiste_with_toimipisteet,
+              FROM pub.pub_dim_toimipiste_ja_toimipisteet,
               LATERAL jsonb_array_elements_text(parent_oids) AS parent_oid
               WHERE parent_oid IN (#$organisaatiotStr)
              """.as[OrganisaatioHierarkia]

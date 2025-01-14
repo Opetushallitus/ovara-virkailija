@@ -1,7 +1,7 @@
 package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.repository.{CommonRepository, KoulutuksetToteutuksetHakukohteetRepository, OvaraDatabase}
-import fi.oph.ovara.backend.utils.Constants.KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES
+import fi.oph.ovara.backend.utils.Constants.{KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES, OPH_PAAKAYTTAJA_OID}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter, OrganisaatioUtils}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,8 +21,8 @@ class KoulutuksetToteutuksetHakukohteetService(
       alkamiskausi: List[String],
       haku: List[String],
       koulutustoimija: Option[String],
-      oppilaitos: List[String],
-      toimipiste: List[String],
+      oppilaitokset: List[String],
+      toimipisteet: List[String],
       koulutuksenTila: Option[String],
       toteutuksenTila: Option[String],
       hakukohteenTila: Option[String],
@@ -32,24 +32,71 @@ class KoulutuksetToteutuksetHakukohteetService(
     val userLng                   = user.asiointikieli.getOrElse("fi")
     val authorities               = user.authorities
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getOrganisaatiot(authorities)
-    val parentChildKayttooikeusOrgs =
-      db.run(commonRepository.selectChildOrganisaatiot(kayttooikeusOrganisaatiot), "selectChildOrganisaatiot")
 
-    val hierarkiat = koulutustoimija match {
-      case Some(koulutustoimija) =>
-        db.run(
-          commonRepository.selectKoulutustoimijaDescendants(List(koulutustoimija)),
-          "selectKoulutustoimijaDescendants"
-        ).toList
-      case None => List()
+    def hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot: List[String]) = {
+      kayttooikeusOrganisaatiot.contains(OPH_PAAKAYTTAJA_OID)
     }
 
-    val descendantOids = hierarkiat.flatMap(hierarkia => OrganisaatioUtils.getDescendantOids(hierarkia))
-    val orgOids        = parentChildKayttooikeusOrgs.map(_.child_oid).toList intersect descendantOids
+    val hierarkiat =
+      if (toimipisteet.nonEmpty) {
+        db.run(
+          commonRepository.selectToimipisteDescendants(toimipisteet),
+          "selectToimipisteDescendants"
+        ).toList
+      } else if (oppilaitokset.nonEmpty) {
+        db.run(
+          commonRepository.selectOppilaitosDescendants(oppilaitokset),
+          "selectOppilaitosDescendants"
+        ).toList
+      } else if (koulutustoimija.nonEmpty) {
+        koulutustoimija match {
+          case Some(koulutustoimija) =>
+            db.run(
+              commonRepository.selectKoulutustoimijaDescendants(List(koulutustoimija)),
+              "selectKoulutustoimijaDescendants"
+            ).toList
+          case None => List()
+        }
+      } else {
+        val koulutustoimijahierarkia = db
+          .run(
+            commonRepository.selectKoulutustoimijaDescendants(kayttooikeusOrganisaatiot),
+            "selectKoulutustoimijaDescendants"
+          )
+          .toList
+
+        if (hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)) {
+          koulutustoimijahierarkia
+        } else {
+          val oppilaitoshierarkia = db.run(
+            commonRepository.selectOppilaitosDescendants(kayttooikeusOrganisaatiot),
+            "selectOppilaitosDescendants"
+          )
+
+          val toimipistehierarkia = db.run(
+            commonRepository.selectToimipisteDescendants(kayttooikeusOrganisaatiot),
+            "selectToimipisteDescendants"
+          )
+
+          koulutustoimijahierarkia concat oppilaitoshierarkia concat toimipistehierarkia
+        }
+      }
+
+    val selectedOrgsDescendantOids =
+      hierarkiat.flatMap(hierarkia => OrganisaatioUtils.getDescendantOids(hierarkia)).distinct
+
+    val orgOidsForQuery = if (hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)) {
+      selectedOrgsDescendantOids
+    } else {
+      val childKayttooikeusOrgs = hierarkiat.flatMap(hierarkia =>
+        OrganisaatioUtils.getKayttooikeusDescendantOids(hierarkia, kayttooikeusOrganisaatiot)
+      )
+      (childKayttooikeusOrgs intersect selectedOrgsDescendantOids).distinct
+    }
 
     val queryResult = db.run(
       koulutuksetToteutuksetHakukohteetRepository.selectWithParams(
-        orgOids,
+        orgOidsForQuery,
         alkamiskausi,
         haku,
         koulutuksenTila,
