@@ -30,7 +30,7 @@ class OvaraDatabase(@Value("${spring.datasource.url}") url: String,
     config.setMinimumIdle(1)
     config
   }
-
+  
   @Bean
   val db = {
     val executor = AsyncExecutor("ovara", hikariConfig.getMaximumPoolSize, 1000)
