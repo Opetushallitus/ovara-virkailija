@@ -138,16 +138,23 @@ export const getOppilaitoksetToShow = (
 };
 
 export const getToimipisteetToShow = (
-  selectedOppilaitokset: Array<OrganisaatioHierarkia> | null,
+  hierarkiat: Array<OrganisaatioHierarkia> | null,
   selectedOppilaitosOids: Array<string> | null,
+  selectedKoulutustoimija: string | null,
 ) => {
   const toimipisteet = getUniqueOrganisaatiotByOrganisaatiotyyppi(
-    selectedOppilaitokset,
+    hierarkiat,
     TOIMIPISTEORGANISAATIOTYYPPI,
   );
 
   if (isNullish(selectedOppilaitosOids) || isEmpty(selectedOppilaitosOids)) {
-    return toimipisteet;
+    if (isNullish(selectedKoulutustoimija)) {
+      return toimipisteet;
+    }
+
+    return toimipisteet.filter((o) => {
+      return o.parent_oids.includes(selectedKoulutustoimija);
+    });
   } else {
     return toimipisteet.filter((o) => {
       return o.parent_oids.some((oid) => selectedOppilaitosOids?.includes(oid));

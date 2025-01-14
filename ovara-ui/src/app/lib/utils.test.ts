@@ -593,4 +593,10 @@ describe('getToimipisteetToShow', () => {
       ]),
     ).toEqual([toimipiste2_1_1, toimipiste2_3_1]);
   });
+
+  test("should return toimipisteet under selected koulutustoimija1 when oppilaitos hasn't been selected", () => {
+    expect(
+      getToimipisteetToShow(hierarkiat, [], '1.2.246.562.10.10063814452'),
+    ).toEqual([toimipiste1_1]);
+  });
 });

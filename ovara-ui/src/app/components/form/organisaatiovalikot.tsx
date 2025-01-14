@@ -45,6 +45,7 @@ export const OrganisaatioValikot = () => {
   const toimipisteet = getToimipisteetToShow(
     organisaatiot,
     selectedOppilaitokset,
+    selectedKoulutustoimija,
   );
 
   const changeKoulutustoimija = (
