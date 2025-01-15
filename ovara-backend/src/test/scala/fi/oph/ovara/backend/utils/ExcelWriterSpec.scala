@@ -102,6 +102,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         ),
         List("01"),
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        None,
         List(),
         List(kth)
       )
@@ -150,6 +151,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         ),
         List("01"),
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        None,
         List(
           OrganisaatioHierarkiaWithHakukohteet(
             "1.2.246.562.10.2781706420111",
@@ -160,6 +162,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
             ),
             List("02"),
             List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000", "1.2.246.562.10.2781706420111"),
+            None,
             List(),
             List(oppilaitoksenKth)
           )
@@ -202,12 +205,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
         ),
         List("01"),
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        None,
         List(
           OrganisaatioHierarkiaWithHakukohteet(
             "1.2.246.562.10.278170642010",
             Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
             List("02"),
             List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000", "1.2.246.562.10.278170642010"),
+            None,
             List(),
             List(kth1, kth2)
           )
@@ -262,12 +267,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
         ),
         List("01"),
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        None,
         List(
           OrganisaatioHierarkiaWithHakukohteet(
             "1.2.246.562.10.278170642010",
             Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
             List("02"),
             List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000", "1.2.246.562.10.278170642010"),
+            None,
             List(
               OrganisaatioHierarkiaWithHakukohteet(
                 "1.2.246.562.10.2781706420101111",
@@ -279,6 +286,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
                   "1.2.246.562.10.278170642010",
                   "1.2.246.562.10.2781706420101111"
                 ),
+                None,
                 List(),
                 List(toimipisteenKth)
               )
@@ -330,6 +338,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         ),
         List("01"),
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        None,
         List(),
         List(oppilaitoksenKth1, oppilaitoksenKth2)
       )
@@ -370,6 +379,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         ),
         List("01"),
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        None,
         List(),
         List()
       )
@@ -408,13 +418,19 @@ class ExcelWriterSpec extends AnyFlatSpec {
         ),
         List("01"),
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        None,
         List(),
         List()
       )
     )
 
     val wb =
-      ExcelWriter.writeRaportti(hierarkiatWithHakukohteet, KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES, userLng)
+      ExcelWriter.writeRaportti(
+        hierarkiatWithHakukohteet,
+        KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
+        userLng,
+        KOULUTUSTOIMIJARAPORTTI
+      )
     assert(wb.getNumberOfSheets == 1)
     assert(wb.getSheetName(0) == "Yhteenveto")
   }
@@ -422,7 +438,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "create one sheet with the column title row and no results" in {
     val hierarkiatWithHakukohteet = List()
     val wb =
-      ExcelWriter.writeRaportti(hierarkiatWithHakukohteet, KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES, userLng)
+      ExcelWriter.writeRaportti(
+        hierarkiatWithHakukohteet,
+        KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
+        userLng,
+        KOULUTUSTOIMIJARAPORTTI
+      )
     assert(wb.getSheetAt(0).getRow(0).getCell(0).getStringCellValue == "Hakukohteen nimi SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(1).getStringCellValue == "Hakukohteen oid SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(2).getStringCellValue == "Kou.tila SV")
@@ -447,13 +468,19 @@ class ExcelWriterSpec extends AnyFlatSpec {
         ),
         List("01"),
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        None,
         List(),
         List()
       )
     )
 
     val wb =
-      ExcelWriter.writeRaportti(hierarkiatWithHakukohteet, KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES, userLng)
+      ExcelWriter.writeRaportti(
+        hierarkiatWithHakukohteet,
+        KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
+        userLng,
+        KOULUTUSTOIMIJARAPORTTI
+      )
     val sheet = wb.getSheetAt(0)
     // Heading row
     assert(sheet.getRow(0).getCell(0).getStringCellValue == "Hakukohteen nimi SV")
@@ -481,12 +508,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
         ),
         List("01"),
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        None,
         List(
           OrganisaatioHierarkiaWithHakukohteet(
             "1.2.246.562.10.278170642010",
             Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
             List("02"),
             List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000", "1.2.246.562.10.278170642010"),
+            None,
             List(),
             List(
               OrganisaationKoulutusToteutusHakukohde(
@@ -523,7 +552,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
 
     val wb =
-      ExcelWriter.writeRaportti(hierarkiatWithHakukohteet, KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES, userLng)
+      ExcelWriter.writeRaportti(
+        hierarkiatWithHakukohteet,
+        KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
+        userLng,
+        KOULUTUSTOIMIJARAPORTTI
+      )
     val sheet = wb.getSheetAt(0)
     // Heading row
     assert(sheet.getRow(0).getCell(0).getStringCellValue == "Hakukohteen nimi SV")
@@ -538,13 +572,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     // Parent organisaatio row with aloituspaikat sum
     assert(sheet.getRow(1).getCell(0).getStringCellValue == "Koulutustoimijan nimi sv")
-    for (i <- 1 until 5) {
-      assert(sheet.getRow(1).getCell(i) == null)
-    }
-    assert(sheet.getRow(1).getCell(5).getNumericCellValue == 13)
-    for (i <- 6 until 8) {
-      assert(sheet.getRow(1).getCell(i) == null)
-    }
+    checkAloituspaikatRowValidity(sheet, 1, 13)
+
     assert(sheet.getRow(2).getCell(0).getStringCellValue == "Oppilaitoksen nimi sv")
     // Hakukohde result row
     assert(sheet.getRow(3).getCell(0).getStringCellValue == "Hakukohteen nimi sv")
@@ -578,6 +607,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         ),
         List("01"),
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        None,
         List(),
         List(
           OrganisaationKoulutusToteutusHakukohde(
@@ -613,18 +643,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb = ExcelWriter.writeRaportti(
       koulutustoimijaWithHakukohteet,
       KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
-      userLng
+      userLng,
+      KOULUTUSTOIMIJARAPORTTI
     )
     val sheet = wb.getSheetAt(0)
     // Parent organisaatio row with aloituspaikat sum
     assert(sheet.getRow(1).getCell(0).getStringCellValue == "Koulutustoimijan nimi sv")
-    for (i <- 1 until 5) {
-      assert(sheet.getRow(1).getCell(i) == null)
-    }
-    assert(sheet.getRow(1).getCell(5).getNumericCellValue == 13)
-    for (i <- 6 until 8) {
-      assert(sheet.getRow(1).getCell(i) == null)
-    }
+    checkAloituspaikatRowValidity(sheet, 1, 13)
+
     // Hakukohde result row
     assert(sheet.getRow(2).getCell(0).getStringCellValue == "Hakukohteen nimi sv")
     assert(sheet.getRow(2).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000021565")
@@ -646,6 +672,511 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getPhysicalNumberOfRows == 4)
   }
 
+  it should "create an oppilaitosraportti with two oppilaitos and subheadings with koulutustoimija name" in {
+    val hierarkiatWithHakukohteet = List(
+      OrganisaatioHierarkiaWithHakukohteet(
+        "1.2.246.562.10.278170642010",
+        Map(En -> "Oppilaitoksen 1 nimi en", Fi -> "Oppilaitoksen 1 nimi fi", Sv -> "Oppilaitoksen 1 nimi sv"),
+        List("02"),
+        List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000", "1.2.246.562.10.278170642010"),
+        Some(
+          Organisaatio(
+            "1.2.246.562.10.2781706420000",
+            Map(
+              En -> "Koulutustoimijan nimi en",
+              Fi -> "Koulutustoimijan nimi fi",
+              Sv -> "Koulutustoimijan nimi sv"
+            ),
+            List("01")
+          )
+        ),
+        List(
+          OrganisaatioHierarkiaWithHakukohteet(
+            "1.2.246.562.10.2781706420111",
+            Map(En -> "Toimipisteen nimi en", Fi -> "Toimipisteen nimi fi", Sv -> "Toimipisteen nimi sv"),
+            List("03"),
+            List(
+              "1.2.246.562.10.00000000001",
+              "1.2.246.562.10.2781706420000",
+              "1.2.246.562.10.278170642010",
+              "1.2.246.562.10.2781706420111"
+            ),
+            Some(
+              Organisaatio(
+                "1.2.246.562.10.2781706420000",
+                Map(
+                  En -> "Koulutustoimijan nimi en",
+                  Fi -> "Koulutustoimijan nimi fi",
+                  Sv -> "Koulutustoimijan nimi sv"
+                ),
+                List("01")
+              )
+            ),
+            List(),
+            List(
+              OrganisaationKoulutusToteutusHakukohde(
+                organisaatio_oid = Some("1.2.246.562.10.2781706420111"),
+                koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+                  hakukohdeNimi = Map(
+                    En -> "Toimipisteen hakukohteen nimi en",
+                    Fi -> "Toimipisteen hakukohteen nimi fi",
+                    Sv -> "Toimipisteen hakukohteen nimi sv"
+                  ),
+                  hakukohdeOid = "1.2.246.562.20.0000000000000004567",
+                  koulutuksenTila = Some("arkistoitu"),
+                  toteutuksenTila = Some("julkaistu"),
+                  hakukohteenTila = Some("julkaistu"),
+                  aloituspaikat = Some(3),
+                  onValintakoe = Some(false)
+                )
+              )
+            )
+          ),
+          OrganisaatioHierarkiaWithHakukohteet(
+            "1.2.246.562.10.2781706420132",
+            Map(En -> "Toimipisteen 2 nimi en", Fi -> "Toimipisteen 2 nimi fi", Sv -> "Toimipisteen 2 nimi sv"),
+            List("03"),
+            List(
+              "1.2.246.562.10.00000000001",
+              "1.2.246.562.10.2781706420000",
+              "1.2.246.562.10.278170642010",
+              "1.2.246.562.10.2781706420132"
+            ),
+            Some(
+              Organisaatio(
+                "1.2.246.562.10.2781706420000",
+                Map(
+                  En -> "Koulutustoimijan nimi en",
+                  Fi -> "Koulutustoimijan nimi fi",
+                  Sv -> "Koulutustoimijan nimi sv"
+                ),
+                List("01")
+              )
+            ),
+            List(
+              OrganisaatioHierarkiaWithHakukohteet(
+                "1.2.246.562.10.278170642013211",
+                Map(
+                  En -> "Toimipisteen 2 alitoimipisteen nimi en",
+                  Fi -> "Toimipisteen 2 alitoimipisteen nimi fi",
+                  Sv -> "Toimipisteen 2 alitoimipisteen nimi sv"
+                ),
+                List("03"),
+                List(
+                  "1.2.246.562.10.00000000001",
+                  "1.2.246.562.10.2781706420000",
+                  "1.2.246.562.10.278170642010",
+                  "1.2.246.562.10.2781706420132",
+                  "1.2.246.562.10.278170642013211"
+                ),
+                Some(
+                  Organisaatio(
+                    "1.2.246.562.10.2781706420000",
+                    Map(
+                      En -> "Koulutustoimijan nimi en",
+                      Fi -> "Koulutustoimijan nimi fi",
+                      Sv -> "Koulutustoimijan nimi sv"
+                    ),
+                    List("01")
+                  )
+                ),
+                List(),
+                List(
+                  OrganisaationKoulutusToteutusHakukohde(
+                    organisaatio_oid = Some("1.2.246.562.10.278170642013211"),
+                    koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+                      hakukohdeNimi = Map(
+                        En -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi en",
+                        Fi -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi fi",
+                        Sv -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi sv"
+                      ),
+                      hakukohdeOid = "1.2.246.562.20.000000000000000456811",
+                      koulutuksenTila = Some("arkistoitu"),
+                      toteutuksenTila = Some("julkaistu"),
+                      hakukohteenTila = Some("julkaistu"),
+                      aloituspaikat = Some(2),
+                      onValintakoe = Some(false)
+                    )
+                  )
+                )
+              )
+            ),
+            List(
+              OrganisaationKoulutusToteutusHakukohde(
+                organisaatio_oid = Some("1.2.246.562.10.2781706420132"),
+                koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+                  hakukohdeNimi = Map(
+                    En -> "Toimipisteen 2 hakukohteen nimi en",
+                    Fi -> "Toimipisteen 2 hakukohteen nimi fi",
+                    Sv -> "Toimipisteen 2 hakukohteen nimi sv"
+                  ),
+                  hakukohdeOid = "1.2.246.562.20.0000000000000004568",
+                  koulutuksenTila = Some("arkistoitu"),
+                  toteutuksenTila = Some("julkaistu"),
+                  hakukohteenTila = Some("julkaistu"),
+                  aloituspaikat = Some(4),
+                  onValintakoe = Some(true)
+                )
+              )
+            )
+          )
+        ),
+        List(
+          OrganisaationKoulutusToteutusHakukohde(
+            organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+            koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+              hakukohdeNimi =
+                Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+              hakukohdeOid = "1.2.246.562.20.00000000000000021565",
+              koulutuksenTila = Some("julkaistu"),
+              toteutuksenTila = Some("julkaistu"),
+              hakukohteenTila = Some("julkaistu"),
+              aloituspaikat = Some(8),
+              onValintakoe = Some(false)
+            )
+          ),
+          OrganisaationKoulutusToteutusHakukohde(
+            organisaatio_oid = Some("1.2.246.562.10.278170642010"),
+            koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+              hakukohdeNimi =
+                Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
+              hakukohdeOid = "1.2.246.562.20.00000000000000031232",
+              koulutuksenTila = Some("julkaistu"),
+              toteutuksenTila = Some("tallennettu"),
+              hakukohteenTila = Some("tallennettu"),
+              aloituspaikat = Some(5),
+              onValintakoe = Some(true)
+            )
+          )
+        )
+      ),
+      OrganisaatioHierarkiaWithHakukohteet(
+        "1.2.246.562.10.278170642012",
+        Map(En -> "Oppilaitoksen 2 nimi en", Fi -> "Oppilaitoksen 2 nimi fi", Sv -> "Oppilaitoksen 2 nimi sv"),
+        List("02"),
+        List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000", "1.2.246.562.10.278170642012"),
+        Some(
+          Organisaatio(
+            "1.2.246.562.10.2781706420002",
+            Map(
+              En -> "Koulutustoimijan 2 nimi en",
+              Fi -> "Koulutustoimijan 2 nimi fi",
+              Sv -> "Koulutustoimijan 2 nimi sv"
+            ),
+            List("01")
+          )
+        ),
+        List(
+          OrganisaatioHierarkiaWithHakukohteet(
+            "1.2.246.562.10.27817064201113",
+            Map(En -> "Toimipisteen 3 nimi en", Fi -> "Toimipisteen 3 nimi fi", Sv -> "Toimipisteen 3 nimi sv"),
+            List("03"),
+            List(
+              "1.2.246.562.10.00000000001",
+              "1.2.246.562.10.2781706420002",
+              "1.2.246.562.10.278170642012",
+              "1.2.246.562.10.27817064201113"
+            ),
+            None,
+            List(),
+            List(
+              OrganisaationKoulutusToteutusHakukohde(
+                organisaatio_oid = Some("1.2.246.562.10.27817064201113"),
+                koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+                  hakukohdeNimi = Map(
+                    En -> "Toimipisteen 3 hakukohteen nimi en",
+                    Fi -> "Toimipisteen 3 hakukohteen nimi fi",
+                    Sv -> "Toimipisteen 3 hakukohteen nimi sv"
+                  ),
+                  hakukohdeOid = "1.2.246.562.20.00000000000000045673",
+                  koulutuksenTila = Some("arkistoitu"),
+                  toteutuksenTila = Some("julkaistu"),
+                  hakukohteenTila = Some("julkaistu"),
+                  aloituspaikat = Some(3),
+                  onValintakoe = Some(false)
+                )
+              )
+            )
+          )
+        ),
+        List(
+          OrganisaationKoulutusToteutusHakukohde(
+            organisaatio_oid = Some("1.2.246.562.10.278170642012"),
+            koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+              hakukohdeNimi = Map(
+                En -> "Oppilaitoksen 2 hakukohteen nimi en",
+                Fi -> "Oppilaitoksen 2 hakukohteen nimi fi",
+                Sv -> "Oppilaitoksen 2 hakukohteen nimi sv"
+              ),
+              hakukohdeOid = "1.2.246.562.20.000000000000000215651",
+              koulutuksenTila = Some("julkaistu"),
+              toteutuksenTila = Some("julkaistu"),
+              hakukohteenTila = Some("julkaistu"),
+              aloituspaikat = Some(8),
+              onValintakoe = Some(false)
+            )
+          )
+        )
+      )
+    )
+
+    val wb = ExcelWriter.writeRaportti(
+      hierarkiatWithHakukohteet,
+      KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
+      userLng,
+      OPPILAITOSRAPORTTI
+    )
+    val sheet = wb.getSheetAt(0)
+    // Parent organisaatio row with aloituspaikat sum
+    assert(sheet.getRow(1).getCell(0).getStringCellValue == "Oppilaitoksen 1 nimi sv")
+    checkAloituspaikatRowValidity(sheet, 1, 22)
+
+    assert(sheet.getRow(2).getCell(0).getStringCellValue == "Koulutustoimijan nimi sv")
+
+    // Oppilaitos 1 hakukohteet
+    assert(sheet.getRow(3).getCell(0).getStringCellValue == "Hakukohteen nimi sv")
+    assert(sheet.getRow(3).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000021565")
+    assert(sheet.getRow(3).getCell(2).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(3).getCell(3).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(3).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(3).getCell(5).getNumericCellValue == 8)
+    assert(sheet.getRow(3).getCell(6).getStringCellValue == "-")
+
+    // Hakukohde 2 result row
+    assert(sheet.getRow(4).getCell(0).getStringCellValue == "Hakukohteen 2 nimi sv")
+    assert(sheet.getRow(4).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000031232")
+    assert(sheet.getRow(4).getCell(2).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(4).getCell(3).getStringCellValue == "tallennettu")
+    assert(sheet.getRow(4).getCell(4).getStringCellValue == "tallennettu")
+    assert(sheet.getRow(4).getCell(5).getNumericCellValue == 5)
+    assert(sheet.getRow(4).getCell(6).getStringCellValue == "X")
+
+    // Oppilaitos 1:n toimipiste 1
+    assert(sheet.getRow(5).getCell(0).getStringCellValue == "Toimipisteen nimi sv")
+    checkAloituspaikatRowValidity(sheet, 5, 3)
+
+    // Toimipisteen hakukohde
+    assert(sheet.getRow(6).getCell(0).getStringCellValue == "Toimipisteen hakukohteen nimi sv")
+    assert(sheet.getRow(6).getCell(1).getStringCellValue == "1.2.246.562.20.0000000000000004567")
+    assert(sheet.getRow(6).getCell(2).getStringCellValue == "arkistoitu")
+    assert(sheet.getRow(6).getCell(3).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(6).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(6).getCell(5).getNumericCellValue == 3)
+    assert(sheet.getRow(6).getCell(6).getStringCellValue == "-")
+
+    // Oppilaitos 1:n toimipiste 2
+    assert(sheet.getRow(7).getCell(0).getStringCellValue == "Toimipisteen 2 nimi sv")
+    checkAloituspaikatRowValidity(sheet, 7, 6)
+
+    // Toimipisteen 2 hakukohde
+    assert(sheet.getRow(8).getCell(0).getStringCellValue == "Toimipisteen 2 hakukohteen nimi sv")
+    assert(sheet.getRow(8).getCell(1).getStringCellValue == "1.2.246.562.20.0000000000000004568")
+    assert(sheet.getRow(8).getCell(2).getStringCellValue == "arkistoitu")
+    assert(sheet.getRow(8).getCell(3).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(8).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(8).getCell(5).getNumericCellValue == 4)
+    assert(sheet.getRow(8).getCell(6).getStringCellValue == "X")
+
+    // Oppilaitos 1:n toimipisteen 2 alitoimipiste
+    assert(sheet.getRow(9).getCell(0).getStringCellValue == "Toimipisteen 2 alitoimipisteen nimi sv")
+    checkAloituspaikatRowValidity(sheet, 9, 2)
+
+    // Toimipisteen 2 alitoimipiste hakukohde
+    assert(sheet.getRow(10).getCell(0).getStringCellValue == "Toimipisteen 2 alitoimipisteen hakukohteen nimi sv")
+    assert(sheet.getRow(10).getCell(1).getStringCellValue == "1.2.246.562.20.000000000000000456811")
+    assert(sheet.getRow(10).getCell(2).getStringCellValue == "arkistoitu")
+    assert(sheet.getRow(10).getCell(3).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(10).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(10).getCell(5).getNumericCellValue == 2)
+    assert(sheet.getRow(10).getCell(6).getStringCellValue == "-")
+
+    // Oppilaitos 2
+    assert(sheet.getRow(11).getCell(0).getStringCellValue == "Oppilaitoksen 2 nimi sv")
+    checkAloituspaikatRowValidity(sheet, 11, 11)
+
+    assert(sheet.getRow(12).getCell(0).getStringCellValue == "Koulutustoimijan 2 nimi sv")
+
+    // Oppilaitos 2 hakukohde
+    assert(sheet.getRow(13).getCell(0).getStringCellValue == "Oppilaitoksen 2 hakukohteen nimi sv")
+    assert(sheet.getRow(13).getCell(1).getStringCellValue == "1.2.246.562.20.000000000000000215651")
+    assert(sheet.getRow(13).getCell(2).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(13).getCell(3).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(13).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(13).getCell(5).getNumericCellValue == 8)
+    assert(sheet.getRow(13).getCell(6).getStringCellValue == "-")
+
+    // Oppilaitos 2 toimipiste 3
+    assert(sheet.getRow(14).getCell(0).getStringCellValue == "Toimipisteen 3 nimi sv")
+    checkAloituspaikatRowValidity(sheet, 14, 3)
+
+    // Oppilaitos 2 hakukohde
+    assert(sheet.getRow(15).getCell(0).getStringCellValue == "Toimipisteen 3 hakukohteen nimi sv")
+    assert(sheet.getRow(15).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000045673")
+    assert(sheet.getRow(15).getCell(2).getStringCellValue == "arkistoitu")
+    assert(sheet.getRow(15).getCell(3).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(15).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(15).getCell(5).getNumericCellValue == 3)
+    assert(sheet.getRow(15).getCell(6).getStringCellValue == "-")
+
+    assert(sheet.getPhysicalNumberOfRows == 16)
+  }
+
+  it should "create a toimipisteraportti with three toimipiste and koulutustoimija name as a subheading" in {
+    val hierarkiatWithHakukohteet = List(
+      OrganisaatioHierarkiaWithHakukohteet(
+        "1.2.246.562.10.2781706420111",
+        Map(En -> "Toimipisteen nimi en", Fi -> "Toimipisteen nimi fi", Sv -> "Toimipisteen nimi sv"),
+        List("03"),
+        List(
+          "1.2.246.562.10.00000000001",
+          "1.2.246.562.10.2781706420000",
+          "1.2.246.562.10.278170642010",
+          "1.2.246.562.10.2781706420111"
+        ),
+        Some(
+          Organisaatio(
+            "1.2.246.562.10.2781706420000",
+            Map(
+              En -> "Koulutustoimijan nimi en",
+              Fi -> "Koulutustoimijan nimi fi",
+              Sv -> "Koulutustoimijan nimi sv"
+            ),
+            List("01")
+          )
+        ),
+        List(),
+        List(
+          OrganisaationKoulutusToteutusHakukohde(
+            organisaatio_oid = Some("1.2.246.562.10.2781706420111"),
+            koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+              hakukohdeNimi = Map(
+                En -> "Toimipisteen hakukohteen nimi en",
+                Fi -> "Toimipisteen hakukohteen nimi fi",
+                Sv -> "Toimipisteen hakukohteen nimi sv"
+              ),
+              hakukohdeOid = "1.2.246.562.20.0000000000000004567",
+              koulutuksenTila = Some("arkistoitu"),
+              toteutuksenTila = Some("julkaistu"),
+              hakukohteenTila = Some("julkaistu"),
+              aloituspaikat = Some(3),
+              onValintakoe = Some(false)
+            )
+          )
+        )
+      ),
+      OrganisaatioHierarkiaWithHakukohteet(
+        "1.2.246.562.10.2781706420132",
+        Map(En -> "Toimipisteen 2 nimi en", Fi -> "Toimipisteen 2 nimi fi", Sv -> "Toimipisteen 2 nimi sv"),
+        List("03"),
+        List(
+          "1.2.246.562.10.00000000001",
+          "1.2.246.562.10.2781706420000",
+          "1.2.246.562.10.278170642010",
+          "1.2.246.562.10.2781706420132"
+        ),
+        Some(
+          Organisaatio(
+            "1.2.246.562.10.2781706420000",
+            Map(
+              En -> "Koulutustoimijan 2 nimi en",
+              Fi -> "Koulutustoimijan 2 nimi fi",
+              Sv -> "Koulutustoimijan 2 nimi sv"
+            ),
+            List("01")
+          )
+        ),
+        List(
+          OrganisaatioHierarkiaWithHakukohteet(
+            "1.2.246.562.10.278170642013211",
+            Map(
+              En -> "Toimipisteen 2 alitoimipisteen nimi en",
+              Fi -> "Toimipisteen 2 alitoimipisteen nimi fi",
+              Sv -> "Toimipisteen 2 alitoimipisteen nimi sv"
+            ),
+            List("03"),
+            List(
+              "1.2.246.562.10.00000000001",
+              "1.2.246.562.10.2781706420000",
+              "1.2.246.562.10.278170642010",
+              "1.2.246.562.10.2781706420132",
+              "1.2.246.562.10.278170642013211"
+            ),
+            Some(
+              Organisaatio(
+                "1.2.246.562.10.2781706420000",
+                Map(
+                  En -> "Koulutustoimijan 2 nimi en",
+                  Fi -> "Koulutustoimijan 2 nimi fi",
+                  Sv -> "Koulutustoimijan 2 nimi sv"
+                ),
+                List("01")
+              )
+            ),
+            List(),
+            List(
+              OrganisaationKoulutusToteutusHakukohde(
+                organisaatio_oid = Some("1.2.246.562.10.278170642013211"),
+                koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+                  hakukohdeNimi = Map(
+                    En -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi en",
+                    Fi -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi fi",
+                    Sv -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi sv"
+                  ),
+                  hakukohdeOid = "1.2.246.562.20.000000000000000456811",
+                  koulutuksenTila = Some("arkistoitu"),
+                  toteutuksenTila = Some("julkaistu"),
+                  hakukohteenTila = Some("julkaistu"),
+                  aloituspaikat = Some(2),
+                  onValintakoe = Some(false)
+                )
+              )
+            )
+          )
+        ),
+        List(
+          OrganisaationKoulutusToteutusHakukohde(
+            organisaatio_oid = Some("1.2.246.562.10.2781706420132"),
+            koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
+              hakukohdeNimi = Map(
+                En -> "Toimipisteen 2 hakukohteen nimi en",
+                Fi -> "Toimipisteen 2 hakukohteen nimi fi",
+                Sv -> "Toimipisteen 2 hakukohteen nimi sv"
+              ),
+              hakukohdeOid = "1.2.246.562.20.0000000000000004568",
+              koulutuksenTila = Some("arkistoitu"),
+              toteutuksenTila = Some("julkaistu"),
+              hakukohteenTila = Some("julkaistu"),
+              aloituspaikat = Some(4),
+              onValintakoe = Some(true)
+            )
+          )
+        )
+      )
+    )
+
+    val wb = ExcelWriter.writeRaportti(
+      hierarkiatWithHakukohteet,
+      KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
+      userLng,
+      TOIMIPISTERAPORTTI
+    )
+    val sheet = wb.getSheetAt(0)
+    // Parent organisaatio row with aloituspaikat sum
+    assert(sheet.getRow(1).getCell(0).getStringCellValue == "Toimipisteen nimi sv")
+    checkAloituspaikatRowValidity(sheet, 1, 3)
+    assert(sheet.getRow(2).getCell(0).getStringCellValue == "Koulutustoimijan nimi sv")
+
+    assert(sheet.getRow(4).getCell(0).getStringCellValue == "Toimipisteen 2 nimi sv")
+    checkAloituspaikatRowValidity(sheet, 4, 6)
+    assert(sheet.getRow(5).getCell(0).getStringCellValue == "Koulutustoimijan 2 nimi sv")
+
+    assert(sheet.getRow(7).getCell(0).getStringCellValue == "Toimipisteen 2 alitoimipisteen nimi sv")
+    checkAloituspaikatRowValidity(sheet, 7, 2)
+    assert(sheet.getRow(8).getCell(0).getStringCellValue == "Koulutustoimijan 2 nimi sv")
+
+    assert(sheet.getPhysicalNumberOfRows == 10)
+  }
+
   "createResultRows" should "create a sheet with the column title row and two result rows for oppilaitos under koulutustoimija" in {
     val hierarkiatWithHakukohteet = List(
       OrganisaatioHierarkiaWithHakukohteet(
@@ -657,12 +1188,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
         ),
         List("01"),
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        None,
         List(
           OrganisaatioHierarkiaWithHakukohteet(
             "1.2.246.562.10.278170642010",
             Map(En -> "Oppilaitoksen nimi en", Fi -> "Oppilaitoksen nimi fi", Sv -> "Oppilaitoksen nimi sv"),
             List("02"),
             List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000", "1.2.246.562.10.278170642010"),
+            None,
             List(
               OrganisaatioHierarkiaWithHakukohteet(
                 "1.2.246.562.10.2781706420111",
@@ -674,6 +1207,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
                   "1.2.246.562.10.278170642010",
                   "1.2.246.562.10.2781706420111"
                 ),
+                None,
                 List(),
                 List(
                   OrganisaationKoulutusToteutusHakukohde(
@@ -704,6 +1238,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
                   "1.2.246.562.10.278170642010",
                   "1.2.246.562.10.2781706420132"
                 ),
+                None,
                 List(
                   OrganisaatioHierarkiaWithHakukohteet(
                     "1.2.246.562.10.278170642013211",
@@ -720,6 +1255,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
                       "1.2.246.562.10.2781706420132",
                       "1.2.246.562.10.278170642013211"
                     ),
+                    None,
                     List(),
                     List(
                       OrganisaationKoulutusToteutusHakukohde(
@@ -833,8 +1369,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
         cellStyle,
         cellStyle,
         font1,
+        font1,
         userLng,
-        raporttiColumnTitlesWithIndex
+        raporttiColumnTitlesWithIndex,
+        KOULUTUSTOIMIJARAPORTTI
       )
 
     // Parent organisaatio row with aloituspaikat sum

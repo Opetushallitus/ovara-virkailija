@@ -27,6 +27,10 @@ object Constants {
   )
 
   val OPH_PAAKAYTTAJA_OID = "1.2.246.562.10.00000000001"
+
+  val KOULUTUSTOIMIJARAPORTTI = "koulutustoimijaraportti"
+  val OPPILAITOSRAPORTTI = "oppilaitosraportti"
+  val TOIMIPISTERAPORTTI = "toimipisteraportti"
 }
 
 export Constants.*

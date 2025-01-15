@@ -1,7 +1,8 @@
 package fi.oph.ovara.backend.service
 
+import fi.oph.ovara.backend.domain.OrganisaatioHierarkia
 import fi.oph.ovara.backend.repository.{KoulutuksetToteutuksetHakukohteetRepository, OvaraDatabase}
-import fi.oph.ovara.backend.utils.Constants.{KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES, OPH_PAAKAYTTAJA_OID}
+import fi.oph.ovara.backend.utils.Constants.*
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter, OrganisaatioUtils}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,29 +38,41 @@ class KoulutuksetToteutuksetHakukohteetService(
       kayttooikeusOrganisaatiot.contains(OPH_PAAKAYTTAJA_OID)
     }
 
-    val hierarkiat =
+    def enrichHierarkiatWithKoulutustoimijaParent(oppilaitoshierarkiat: List[OrganisaatioHierarkia]) = {
+      for (hierarkia <- oppilaitoshierarkiat) yield {
+        val parentOids            = hierarkia.parent_oids
+        val parentKoulutustoimija = commonService.getDistinctKoulutustoimijat(parentOids).headOption
+        OrganisaatioUtils.addKoulutustoimijaParentToHierarkiaDescendants(hierarkia, parentKoulutustoimija)
+      }
+    }
+
+    val (hierarkiat, raporttityyppi) =
       if (toimipisteet.nonEmpty) {
-        commonService.getToimipistehierarkia(toimipisteet)
+        val toimipistehierarkiat = commonService.getToimipistehierarkiat(toimipisteet)
+        (enrichHierarkiatWithKoulutustoimijaParent(toimipistehierarkiat), TOIMIPISTERAPORTTI)
       } else if (oppilaitokset.nonEmpty) {
-        commonService.getOppilaitoshierarkia(oppilaitokset)
+        val oppilaitoshierarkiat = commonService.getOppilaitoshierarkiat(oppilaitokset)
+        (enrichHierarkiatWithKoulutustoimijaParent(oppilaitoshierarkiat), OPPILAITOSRAPORTTI)
       } else if (koulutustoimija.nonEmpty) {
-        koulutustoimija match {
+        val hierarkiat = koulutustoimija match {
           case Some(koulutustoimija) =>
             commonService.getKoulutustoimijahierarkia(List(koulutustoimija))
           case None => List()
         }
+        (hierarkiat, KOULUTUSTOIMIJARAPORTTI)
       } else {
         val koulutustoimijahierarkia = commonService.getKoulutustoimijahierarkia(kayttooikeusOrganisaatiot)
 
-        if (hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)) {
+        val hierarkiat = if (hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)) {
           koulutustoimijahierarkia
         } else {
-          val oppilaitoshierarkia = commonService.getOppilaitoshierarkia(oppilaitokset)
+          val oppilaitoshierarkia = commonService.getOppilaitoshierarkiat(oppilaitokset)
 
-          val toimipistehierarkia = commonService.getToimipistehierarkia(toimipisteet)
+          val toimipistehierarkia = commonService.getToimipistehierarkiat(toimipisteet)
 
           koulutustoimijahierarkia concat oppilaitoshierarkia concat toimipistehierarkia
         }
+        (hierarkiat, "koulutustoimijaraportti")
       }
 
     val hierarkiatWithExistingOrgs = hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
@@ -100,7 +113,8 @@ class KoulutuksetToteutuksetHakukohteetService(
     ExcelWriter.writeRaportti(
       organisaationKoulutuksetHakukohteetToteutukset,
       KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
-      userLng
+      userLng,
+      raporttityyppi
     )
   }
 }

@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.{Haku, OrganisaatioHierarkia}
+import fi.oph.ovara.backend.domain.{Haku, Organisaatio, OrganisaatioHierarkia}
 import fi.oph.ovara.backend.repository.{CommonRepository, OvaraDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, OrganisaatioUtils}
 import fi.oph.ovara.backend.utils.Constants.OPH_PAAKAYTTAJA_OID
@@ -38,9 +38,9 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     val kayttoOikeushierarkiat = if (organisaatiot.contains(OPH_PAAKAYTTAJA_OID)) {
       koulutustoimijahierarkia
     } else {
-      val oppilaitoshierarkia = getOppilaitoshierarkia(parentOids)
+      val oppilaitoshierarkia = getOppilaitoshierarkiat(parentOids)
 
-      val toimipistehierarkia = getToimipistehierarkia(parentOids)
+      val toimipistehierarkia = getToimipistehierarkiat(parentOids)
 
       koulutustoimijahierarkia concat oppilaitoshierarkia concat toimipistehierarkia
     }
@@ -48,7 +48,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     kayttoOikeushierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
   }
 
-  def getToimipistehierarkia(toimipisteet: List[String]): List[OrganisaatioHierarkia] = {
+  def getToimipistehierarkiat(toimipisteet: List[String]): List[OrganisaatioHierarkia] = {
     val hierarkiat = db.run(
       commonRepository.selectToimipisteDescendants(toimipisteet),
       "selectToimipisteDescendants"
@@ -57,7 +57,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
   }
 
-  def getOppilaitoshierarkia(oppilaitokset: List[String]): List[OrganisaatioHierarkia] = {
+  def getOppilaitoshierarkiat(oppilaitokset: List[String]): List[OrganisaatioHierarkia] = {
     val hierarkiat = db.run(
       commonRepository.selectOppilaitosDescendants(oppilaitokset),
       "selectOppilaitosDescendants"
@@ -73,5 +73,12 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     ).toList
 
     hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+  }
+  
+  def getDistinctKoulutustoimijat(organisaatioOids: List[String]): List[Organisaatio] = {
+    db.run(
+      commonRepository.selectDistinctKoulutustoimijat(organisaatioOids),
+      "selectDistinctKoulutustoimijat"
+    ).toList
   }
 }

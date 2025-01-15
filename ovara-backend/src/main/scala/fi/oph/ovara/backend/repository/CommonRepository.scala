@@ -33,6 +33,19 @@ class CommonRepository extends Extractors {
                 #$optionalOrganisaatiotClause""".as[Organisaatio]
   }
 
+  def selectDistinctKoulutustoimijat(
+      organisaatiot: List[String]
+  ): SqlStreamingAction[Vector[Organisaatio], Organisaatio, Effect] = {
+    val organisaatiotStr = organisaatiot.map(s => s"'$s'").mkString(",")
+    val optionalOrganisaatiotClause =
+      if (organisaatiotStr.isEmpty) "" else s"where org.organisaatio_oid in ($organisaatiotStr)"
+    sql"""select distinct *
+          from (select organisaatio_oid, organisaatio_nimi, organisaatiotyypit
+                from pub.pub_dim_organisaatio o
+                where organisaatiotyypit ?? '01') as org
+                #$optionalOrganisaatiotClause""".as[Organisaatio]
+  }
+
   def selectChildOrganisaatiot(
       organisaatiot: List[String]
   ): SqlStreamingAction[Vector[OrganisaatioParentChild], OrganisaatioParentChild, Effect] = {
@@ -61,7 +74,7 @@ class CommonRepository extends Extractors {
               tila,
               parent_oids,
               children"""
-  
+
   def selectKoulutustoimijaDescendants(
       koulutustoimijaOids: List[String]
   ): SqlStreamingAction[Vector[OrganisaatioHierarkia], OrganisaatioHierarkia, Effect] = {

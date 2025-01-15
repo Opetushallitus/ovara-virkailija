@@ -59,8 +59,34 @@ object ExcelWriter {
           aloituspaikatCell.setCellValue(aloituspaikat)
         case _ =>
       }
-
       updatedRowIndex
+    } else {
+      initialRowIndex
+    }
+  }
+
+  private def addOrgSubHeading(
+      sheet: XSSFSheet,
+      initialRowIndex: Int,
+      orgSubHeadingCellStyle: XSSFCellStyle,
+      organisaatioHierarkiaWithHakukohteet: OrganisaatioHierarkiaWithHakukohteet,
+      asiointikieli: String
+  ) = {
+    val hakukohteet = flattenHierarkiaHakukohteet(organisaatioHierarkiaWithHakukohteet)
+
+    if (hakukohteet.nonEmpty) {
+      organisaatioHierarkiaWithHakukohteet.koulutustoimijaParent match {
+        case Some(koulutustoimijaParent) =>
+          val orgSubHeadingRow = sheet.createRow(initialRowIndex)
+          val cell             = orgSubHeadingRow.createCell(0)
+          cell.setCellStyle(orgSubHeadingCellStyle)
+          val kielistettyNimi  = koulutustoimijaParent.organisaatio_nimi
+          val kielistettyValue = kielistettyNimi(Kieli.withName(asiointikieli))
+          cell.setCellValue(kielistettyValue)
+
+          initialRowIndex + 1
+        case _ => initialRowIndex
+      }
     } else {
       initialRowIndex
     }
@@ -115,14 +141,15 @@ object ExcelWriter {
       cellStyle: XSSFCellStyle,
       hakukohteenNimiTextCellStyle: XSSFCellStyle,
       headingFont: XSSFFont,
+      subHeadingFont: XSSFFont,
       asiointikieli: String,
-      raporttiColumnTitlesWithIndex: List[(String, Int)]
-  ): Unit = {
+      raporttiColumnTitlesWithIndex: List[(String, Int)],
+      raporttityyppi: String
+  ): Int = {
     var currentRowIndex = initialRowIndex
 
     if (hierarkiatWithHakukohteet.nonEmpty) {
       hierarkiatWithHakukohteet.foreach(orgHierarkiaWithResults => {
-
         var indent = 0
         if (orgHierarkiaWithResults.organisaatiotyypit.contains(OPPILAITOSORGANISAATIOTYYPPI)) {
           indent = 1
@@ -134,6 +161,12 @@ object ExcelWriter {
         indentedHeadingCellStyle.setFont(headingFont)
         indentedHeadingCellStyle.setAlignment(HorizontalAlignment.LEFT)
         indentedHeadingCellStyle.setIndention(indent.toShort)
+
+        val subHeadingCellStyle: XSSFCellStyle = workbook.createCellStyle()
+        subHeadingCellStyle.setFont(subHeadingFont)
+        subHeadingCellStyle.setAlignment(HorizontalAlignment.LEFT)
+        subHeadingCellStyle.setIndention(indent.toShort)
+
         val updatedRowIndex = createOrganisaatioHeadingRow(
           sheet = sheet,
           initialRowIndex = currentRowIndex,
@@ -144,6 +177,24 @@ object ExcelWriter {
           raporttiColumnTitlesWithIndex = raporttiColumnTitlesWithIndex
         )
         currentRowIndex = updatedRowIndex
+
+        if (
+          raporttityyppi == OPPILAITOSRAPORTTI && orgHierarkiaWithResults.organisaatiotyypit
+            .contains(OPPILAITOSORGANISAATIOTYYPPI)
+        ) {
+          val updatedRowIndex =
+            addOrgSubHeading(sheet, currentRowIndex, subHeadingCellStyle, orgHierarkiaWithResults, asiointikieli)
+          currentRowIndex = updatedRowIndex
+        }
+
+        if (
+          raporttityyppi == TOIMIPISTERAPORTTI && orgHierarkiaWithResults.organisaatiotyypit
+            .contains(TOIMIPISTEORGANISAATIOTYYPPI)
+        ) {
+          val updatedRowIndex =
+            addOrgSubHeading(sheet, currentRowIndex, subHeadingCellStyle, orgHierarkiaWithResults, asiointikieli)
+          currentRowIndex = updatedRowIndex
+        }
 
         orgHierarkiaWithResults.hakukohteet.zipWithIndex.foreach((hakukohde, resultRowIndex) => {
           currentRowIndex = createHakukohdeRow(
@@ -158,7 +209,7 @@ object ExcelWriter {
         })
 
         if (orgHierarkiaWithResults.children.nonEmpty) {
-          createResultRows(
+          val updatedRowIndex = createResultRows(
             workbook,
             sheet,
             orgHierarkiaWithResults.children,
@@ -167,18 +218,24 @@ object ExcelWriter {
             cellStyle,
             hakukohteenNimiTextCellStyle,
             headingFont,
+            subHeadingFont,
             asiointikieli,
-            raporttiColumnTitlesWithIndex
+            raporttiColumnTitlesWithIndex,
+            raporttityyppi
           )
+          currentRowIndex = updatedRowIndex
         }
       })
     }
+
+    currentRowIndex
   }
 
   def writeRaportti(
       hierarkiatWithResults: List[OrganisaatioHierarkiaWithHakukohteet],
       raporttiColumnTitles: Map[String, List[String]],
-      userLng: String
+      userLng: String,
+      raporttityyppi: String
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
@@ -189,7 +246,11 @@ object ExcelWriter {
       val hakukohteenNimiTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
       val dataformat: XSSFDataFormat                  = workbook.createDataFormat()
       val headingFont                                 = workbook.createFont()
+      val subHeadingFont                              = workbook.createFont()
       val bodyTextFont                                = workbook.createFont()
+
+      subHeadingFont.setFontHeightInPoints(9)
+      subHeadingFont.setItalic(true)
 
       headingFont.setFontHeightInPoints(12)
       headingFont.setBold(true)
@@ -229,8 +290,10 @@ object ExcelWriter {
         cellStyle = bodyTextCellStyle,
         hakukohteenNimiTextCellStyle = hakukohteenNimiTextCellStyle,
         headingFont = headingFont,
+        subHeadingFont = subHeadingFont,
         asiointikieli = userLng,
-        raporttiColumnTitlesWithIndex = raporttiColumnTitlesWithIndex
+        raporttiColumnTitlesWithIndex = raporttiColumnTitlesWithIndex,
+        raporttityyppi = raporttityyppi
       )
 
       // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan

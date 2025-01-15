@@ -27,6 +27,7 @@ object OrganisaatioUtils {
       hierarkia.organisaatio_nimi,
       hierarkia.organisaatiotyypit,
       hierarkia.parent_oids,
+      hierarkia.koulutustoimijaParent,
       childHierarkiat,
       kths
     )
@@ -49,7 +50,10 @@ object OrganisaatioUtils {
     }
   }
 
-  def getKayttooikeusDescendantAndSelfOids(hierarkia: OrganisaatioHierarkia, organisaatioOids: List[String]): List[String] = {
+  def getKayttooikeusDescendantAndSelfOids(
+      hierarkia: OrganisaatioHierarkia,
+      organisaatioOids: List[String]
+  ): List[String] = {
     val children   = hierarkia.children
     val parentOids = hierarkia.parent_oids
 
@@ -61,7 +65,7 @@ object OrganisaatioUtils {
       children.flatMap(child => getKayttooikeusDescendantAndSelfOids(child, organisaatioOids))
     }
   }
-  
+
   def filterExistingOrgs(hierarkia: OrganisaatioHierarkia): Option[OrganisaatioHierarkia] = {
     val children = hierarkia.children
 
@@ -72,4 +76,15 @@ object OrganisaatioUtils {
       Some(hierarkia.copy(children = filteredChildHierarkiat))
     }
   }
- }
+
+  def addKoulutustoimijaParentToHierarkiaDescendants(
+      organisaatioHierarkia: OrganisaatioHierarkia,
+      koulutustoimija: Option[Organisaatio]
+  ): OrganisaatioHierarkia = {
+    val childrenWithKoulutustoimija = organisaatioHierarkia.children.map(child =>
+      addKoulutustoimijaParentToHierarkiaDescendants(child, koulutustoimija)
+    )
+
+    organisaatioHierarkia.copy(koulutustoimijaParent = koulutustoimija, children = childrenWithKoulutustoimija)
+  }
+}

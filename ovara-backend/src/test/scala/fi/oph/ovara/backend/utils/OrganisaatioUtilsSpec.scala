@@ -18,6 +18,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         None,
         "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        None,
         List()
       )
 
@@ -37,6 +38,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         None,
         "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        None,
         List(
           OrganisaatioHierarkia(
             "1.2.246.562.10.93483820481",
@@ -45,6 +47,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
             Some("oppilaitostyyppi_21#1"),
             "AKTIIVINEN",
             List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+            None,
             List()
           )
         )
@@ -68,6 +71,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         None,
         "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        None,
         List(
           OrganisaatioHierarkia(
             "1.2.246.562.10.93483820481",
@@ -76,6 +80,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
             Some("oppilaitostyyppi_21#1"),
             "AKTIIVINEN",
             List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+            None,
             List()
           ),
           OrganisaatioHierarkia(
@@ -89,6 +94,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
             Some("oppilaitostyyppi_21#1"),
             "LAKKAUTETTU",
             List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+            None,
             List()
           )
         )
@@ -116,6 +122,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         None,
         "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        None,
         List(
           OrganisaatioHierarkia(
             "1.2.246.562.10.93483820481",
@@ -124,6 +131,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
             Some("oppilaitostyyppi_21#1"),
             "AKTIIVINEN",
             List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+            None,
             List(
               OrganisaatioHierarkia(
                 "1.2.246.562.10.10645749713",
@@ -141,6 +149,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                   "1.2.246.562.10.41253773158",
                   "1.2.246.562.10.93483820481"
                 ),
+                None,
                 List(
                   OrganisaatioHierarkia(
                     "1.2.246.562.10.1064574971333",
@@ -159,6 +168,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                       "1.2.246.562.10.41253773158",
                       "1.2.246.562.10.93483820481"
                     ),
+                    None,
                     List()
                   )
                 )
@@ -176,6 +186,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
             Some("oppilaitostyyppi_41#1"),
             "LAKKAUTETTU",
             List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+            None,
             List()
           )
         )
@@ -205,6 +216,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         None,
         "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        None,
         List()
       )
 
@@ -246,6 +258,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           ),
           List("01"),
           List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          None,
           List(),
           List(kth, kth2)
         )
@@ -265,6 +278,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         None,
         "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        None,
         List(
           OrganisaatioHierarkia(
             "1.2.246.562.10.10645749713",
@@ -282,6 +296,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
               "1.2.246.562.10.41253773158",
               "1.2.246.562.10.93483820481"
             ),
+            None,
             List()
           )
         )
@@ -325,6 +340,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           ),
           List("01"),
           List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          None,
           List(
             OrganisaatioHierarkiaWithHakukohteet(
               "1.2.246.562.10.10645749713",
@@ -340,6 +356,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                 "1.2.246.562.10.41253773158",
                 "1.2.246.562.10.93483820481"
               ),
+              None,
               List(),
               List(kth, kth2)
             )
@@ -362,6 +379,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         None,
         "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        None,
         List(
           OrganisaatioHierarkia(
             "1.2.246.562.10.10645749713",
@@ -378,6 +396,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
               "1.2.246.562.10.00000000001",
               "1.2.246.562.10.41253773158"
             ),
+            None,
             List(
               OrganisaatioHierarkia(
                 "1.2.246.562.10.10645749712223",
@@ -395,6 +414,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                   "1.2.246.562.10.00000000001",
                   "1.2.246.562.10.41253773158"
                 ),
+                None,
                 List(
                   OrganisaatioHierarkia(
                     "1.2.246.562.10.1064574971333",
@@ -413,6 +433,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                       "1.2.246.562.10.00000000001",
                       "1.2.246.562.10.41253773158"
                     ),
+                    None,
                     List()
                   )
                 )
@@ -500,6 +521,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           ),
           List("01"),
           List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          None,
           List(
             OrganisaatioHierarkiaWithHakukohteet(
               "1.2.246.562.10.10645749713",
@@ -514,6 +536,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                 "1.2.246.562.10.00000000001",
                 "1.2.246.562.10.41253773158"
               ),
+              None,
               List(
                 OrganisaatioHierarkiaWithHakukohteet(
                   "1.2.246.562.10.10645749712223",
@@ -529,6 +552,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                     "1.2.246.562.10.00000000001",
                     "1.2.246.562.10.41253773158"
                   ),
+                  None,
                   List(
                     OrganisaatioHierarkiaWithHakukohteet(
                       "1.2.246.562.10.1064574971333",
@@ -545,6 +569,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                         "1.2.246.562.10.00000000001",
                         "1.2.246.562.10.41253773158"
                       ),
+                      None,
                       List(),
                       List(alitoimipisteKth)
                     )
@@ -574,6 +599,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           None,
           "AKTIIVINEN",
           List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          None,
           List()
         )
       )
@@ -616,6 +642,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           ),
           List("01"),
           List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          None,
           List(),
           hakukohteet = List(kth, kth2)
         )
@@ -637,6 +664,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           None,
           "AKTIIVINEN",
           List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          None,
           List()
         )
       )
@@ -672,6 +700,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           ),
           List("01"),
           List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          None,
           List(),
           hakukohteet = List()
         )
@@ -693,6 +722,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           None,
           "AKTIIVINEN",
           List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          None,
           List(
             OrganisaatioHierarkia(
               "1.2.246.562.10.10645749713",
@@ -710,6 +740,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                 "1.2.246.562.10.41253773158",
                 "1.2.246.562.10.93483820481"
               ),
+              None,
               List()
             )
           )
@@ -754,6 +785,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           ),
           List("01"),
           List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          None,
           List(
             OrganisaatioHierarkiaWithHakukohteet(
               "1.2.246.562.10.10645749713",
@@ -769,6 +801,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                 "1.2.246.562.10.41253773158",
                 "1.2.246.562.10.93483820481"
               ),
+              None,
               List(),
               List(kth, kth2)
             )
@@ -792,6 +825,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         None,
         "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        None,
         List(
           OrganisaatioHierarkia(
             "1.2.246.562.10.93483820481",
@@ -800,6 +834,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
             Some("oppilaitostyyppi_21#1"),
             "AKTIIVINEN",
             List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+            None,
             List(
               OrganisaatioHierarkia(
                 "1.2.246.562.10.10645749713",
@@ -817,6 +852,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                   "1.2.246.562.10.41253773158",
                   "1.2.246.562.10.93483820481"
                 ),
+                None,
                 List(
                   OrganisaatioHierarkia(
                     "1.2.246.562.10.1064574971333",
@@ -835,6 +871,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                       "1.2.246.562.10.41253773158",
                       "1.2.246.562.10.93483820481"
                     ),
+                    None,
                     List()
                   )
                 )
@@ -852,6 +889,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
             Some("oppilaitostyyppi_41#1"),
             "LAKKAUTETTU",
             List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+            None,
             List()
           )
         )
@@ -877,6 +915,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         None,
         "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        None,
         List(
           OrganisaatioHierarkia(
             "1.2.246.562.10.93483820481",
@@ -885,6 +924,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
             Some("oppilaitostyyppi_21#1"),
             "AKTIIVINEN",
             List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+            None,
             List(
               OrganisaatioHierarkia(
                 "1.2.246.562.10.10645749713",
@@ -902,6 +942,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                   "1.2.246.562.10.41253773158",
                   "1.2.246.562.10.93483820481"
                 ),
+                None,
                 List(
                   OrganisaatioHierarkia(
                     "1.2.246.562.10.1064574971333",
@@ -920,6 +961,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                       "1.2.246.562.10.41253773158",
                       "1.2.246.562.10.93483820481"
                     ),
+                    None,
                     List()
                   )
                 )
@@ -937,6 +979,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
             Some("oppilaitostyyppi_41#1"),
             "LAKKAUTETTU",
             List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+            None,
             List()
           )
         )
@@ -966,6 +1009,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         None,
         "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        None,
         List(
           OrganisaatioHierarkia(
             "1.2.246.562.10.93483820481",
@@ -974,6 +1018,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
             Some("oppilaitostyyppi_41#1"),
             "AKTIIVINEN",
             List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+            None,
             List(
               OrganisaatioHierarkia(
                 "1.2.246.562.10.10645749713",
@@ -991,6 +1036,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                   "1.2.246.562.10.41253773158",
                   "1.2.246.562.10.93483820481"
                 ),
+                None,
                 List(
                   OrganisaatioHierarkia(
                     "1.2.246.562.10.1064574971333",
@@ -1009,6 +1055,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                       "1.2.246.562.10.41253773158",
                       "1.2.246.562.10.93483820481"
                     ),
+                    None,
                     List()
                   )
                 )
@@ -1026,6 +1073,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
             Some("oppilaitostyyppi_41#1"),
             "LAKKAUTETTU",
             List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+            None,
             List(
               OrganisaatioHierarkia(
                 "1.2.246.562.10.77504323534",
@@ -1043,6 +1091,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                   "1.2.246.562.10.41253773158",
                   "1.2.246.562.10.77504323534"
                 ),
+                None,
                 List()
               )
             )
@@ -1077,6 +1126,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         None,
         "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        None,
         List(
           OrganisaatioHierarkia(
             "1.2.246.562.10.93483820481",
@@ -1085,6 +1135,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
             Some("oppilaitostyyppi_41#1"),
             "AKTIIVINEN",
             List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+            None,
             List(
               OrganisaatioHierarkia(
                 "1.2.246.562.10.10645749713",
@@ -1102,6 +1153,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                   "1.2.246.562.10.41253773158",
                   "1.2.246.562.10.93483820481"
                 ),
+                None,
                 List(
                   OrganisaatioHierarkia(
                     "1.2.246.562.10.1064574971333",
@@ -1120,6 +1172,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                       "1.2.246.562.10.41253773158",
                       "1.2.246.562.10.93483820481"
                     ),
+                    None,
                     List()
                   )
                 )
@@ -1137,6 +1190,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
             Some("oppilaitostyyppi_41#1"),
             "POISTETTU",
             List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+            None,
             List(
               OrganisaatioHierarkia(
                 "1.2.246.562.10.77504323534",
@@ -1154,6 +1208,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                   "1.2.246.562.10.41253773158",
                   "1.2.246.562.10.77504323534"
                 ),
+                None,
                 List()
               )
             )
@@ -1174,6 +1229,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           None,
           "AKTIIVINEN",
           List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          None,
           List(
             OrganisaatioHierarkia(
               "1.2.246.562.10.93483820481",
@@ -1182,6 +1238,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
               Some("oppilaitostyyppi_41#1"),
               "AKTIIVINEN",
               List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+              None,
               List(
                 OrganisaatioHierarkia(
                   "1.2.246.562.10.10645749713",
@@ -1199,6 +1256,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                     "1.2.246.562.10.41253773158",
                     "1.2.246.562.10.93483820481"
                   ),
+                  None,
                   List(
                     OrganisaatioHierarkia(
                       "1.2.246.562.10.1064574971333",
@@ -1217,6 +1275,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                         "1.2.246.562.10.41253773158",
                         "1.2.246.562.10.93483820481"
                       ),
+                      None,
                       List()
                     )
                   )
@@ -1243,6 +1302,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         None,
         "AKTIIVINEN",
         List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+        None,
         List(
           OrganisaatioHierarkia(
             "1.2.246.562.10.93483820481",
@@ -1251,6 +1311,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
             Some("oppilaitostyyppi_41#1"),
             "AKTIIVINEN",
             List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+            None,
             List(
               OrganisaatioHierarkia(
                 "1.2.246.562.10.10645749713",
@@ -1268,6 +1329,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                   "1.2.246.562.10.41253773158",
                   "1.2.246.562.10.93483820481"
                 ),
+                None,
                 List(
                   OrganisaatioHierarkia(
                     "1.2.246.562.10.1064574971333",
@@ -1286,6 +1348,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                       "1.2.246.562.10.41253773158",
                       "1.2.246.562.10.93483820481"
                     ),
+                    None,
                     List()
                   )
                 )
@@ -1303,6 +1366,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
             Some("oppilaitostyyppi_41#1"),
             "LAKKAUTETTU",
             List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+            None,
             List(
               OrganisaatioHierarkia(
                 "1.2.246.562.10.77504323534",
@@ -1320,6 +1384,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                   "1.2.246.562.10.41253773158",
                   "1.2.246.562.10.77504323534"
                 ),
+                None,
                 List()
               )
             )
@@ -1340,6 +1405,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
           None,
           "AKTIIVINEN",
           List("1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+          None,
           List(
             OrganisaatioHierarkia(
               "1.2.246.562.10.93483820481",
@@ -1348,6 +1414,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
               Some("oppilaitostyyppi_41#1"),
               "AKTIIVINEN",
               List("1.2.246.562.10.41253773158", "1.2.246.562.10.00000000001", "1.2.246.562.10.93483820481"),
+              None,
               List(
                 OrganisaatioHierarkia(
                   "1.2.246.562.10.10645749713",
@@ -1365,6 +1432,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                     "1.2.246.562.10.41253773158",
                     "1.2.246.562.10.93483820481"
                   ),
+                  None,
                   List()
                 )
               )
@@ -1380,6 +1448,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
               Some("oppilaitostyyppi_41#1"),
               "LAKKAUTETTU",
               List("1.2.246.562.10.95915936017", "1.2.246.562.10.00000000001", "1.2.246.562.10.41253773158"),
+              None,
               List(
                 OrganisaatioHierarkia(
                   "1.2.246.562.10.77504323534",
@@ -1397,6 +1466,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
                     "1.2.246.562.10.41253773158",
                     "1.2.246.562.10.77504323534"
                   ),
+                  None,
                   List()
                 )
               )

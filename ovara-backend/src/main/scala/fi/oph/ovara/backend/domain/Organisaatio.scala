@@ -17,6 +17,7 @@ case class OrganisaatioHierarkia(
     oppilaitostyyppi: Option[String] = None,
     tila: String,
     parent_oids: List[String],
+    koulutustoimijaParent: Option[Organisaatio] = None,
     children: List[OrganisaatioHierarkia]
 )
 
@@ -25,6 +26,7 @@ case class OrganisaatioHierarkiaWithHakukohteet(
     organisaatio_nimi: Kielistetty,
     organisaatiotyypit: List[String],
     parent_oids: List[String],
+    koulutustoimijaParent: Option[Organisaatio] = None,
     children: List[OrganisaatioHierarkiaWithHakukohteet] = List(),
     hakukohteet: List[OrganisaationKoulutusToteutusHakukohde]
 )
