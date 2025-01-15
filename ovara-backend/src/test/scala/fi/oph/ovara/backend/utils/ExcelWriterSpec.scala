@@ -823,13 +823,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
     val raporttiColumnTitlesWithIndex = titles.zipWithIndex
 
-    val wb =
+    val wb: Unit =
       ExcelWriter.createResultRows(
         workbook,
         sheet,
         hierarkiatWithHakukohteet,
         0,
         headingCellStyle,
+        cellStyle,
         cellStyle,
         font1,
         userLng,

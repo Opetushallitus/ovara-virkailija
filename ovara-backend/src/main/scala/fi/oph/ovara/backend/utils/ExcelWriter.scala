@@ -71,6 +71,7 @@ object ExcelWriter {
       initialRowIndex: Int,
       resultRowIndex: Int,
       cellStyle: XSSFCellStyle,
+      hakukohteenNimiCellStyle: XSSFCellStyle,
       kth: KoulutusToteutusHakukohdeResult,
       asiointikieli: String
   ) = {
@@ -82,6 +83,11 @@ object ExcelWriter {
       kth.productElement(i) match {
         case kielistetty: Kielistetty =>
           val kielistettyValue = kielistetty(Kieli.withName(asiointikieli))
+
+          if (i == 0) {
+            cell.setCellStyle(hakukohteenNimiCellStyle)
+          }
+
           cell.setCellValue(kielistettyValue)
         case string: String =>
           cell.setCellValue(string)
@@ -107,6 +113,7 @@ object ExcelWriter {
       initialRowIndex: Int,
       headingCellStyle: XSSFCellStyle,
       cellStyle: XSSFCellStyle,
+      hakukohteenNimiTextCellStyle: XSSFCellStyle,
       headingFont: XSSFFont,
       asiointikieli: String,
       raporttiColumnTitlesWithIndex: List[(String, Int)]
@@ -139,9 +146,17 @@ object ExcelWriter {
         currentRowIndex = updatedRowIndex
 
         orgHierarkiaWithResults.hakukohteet.zipWithIndex.foreach((hakukohde, resultRowIndex) => {
-          currentRowIndex =
-            createHakukohdeRow(sheet, currentRowIndex, resultRowIndex, cellStyle, hakukohde._2, asiointikieli)
+          currentRowIndex = createHakukohdeRow(
+            sheet,
+            currentRowIndex,
+            resultRowIndex,
+            cellStyle,
+            hakukohteenNimiTextCellStyle,
+            hakukohde._2,
+            asiointikieli
+          )
         })
+
         if (orgHierarkiaWithResults.children.nonEmpty) {
           createResultRows(
             workbook,
@@ -150,6 +165,7 @@ object ExcelWriter {
             currentRowIndex,
             headingCellStyle,
             cellStyle,
+            hakukohteenNimiTextCellStyle,
             headingFont,
             asiointikieli,
             raporttiColumnTitlesWithIndex
@@ -167,12 +183,13 @@ object ExcelWriter {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
       LOG.info("Creating new excel from db results")
-      val sheet: XSSFSheet                 = workbook.createSheet()
-      val headingCellStyle: XSSFCellStyle  = workbook.createCellStyle()
-      val bodyTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
-      val dataformat: XSSFDataFormat       = workbook.createDataFormat()
-      val headingFont                      = workbook.createFont()
-      val bodyTextFont                     = workbook.createFont()
+      val sheet: XSSFSheet                            = workbook.createSheet()
+      val headingCellStyle: XSSFCellStyle             = workbook.createCellStyle()
+      val bodyTextCellStyle: XSSFCellStyle            = workbook.createCellStyle()
+      val hakukohteenNimiTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
+      val dataformat: XSSFDataFormat                  = workbook.createDataFormat()
+      val headingFont                                 = workbook.createFont()
+      val bodyTextFont                                = workbook.createFont()
 
       headingFont.setFontHeightInPoints(12)
       headingFont.setBold(true)
@@ -181,9 +198,13 @@ object ExcelWriter {
       headingCellStyle.setDataFormat(dataformat.getFormat("text"))
 
       bodyTextFont.setFontHeightInPoints(10)
+
       bodyTextCellStyle.setFont(bodyTextFont)
       bodyTextCellStyle.setAlignment(HorizontalAlignment.LEFT)
-      bodyTextCellStyle.setIndention(2.toShort)
+
+      hakukohteenNimiTextCellStyle.setFont(bodyTextFont)
+      hakukohteenNimiTextCellStyle.setAlignment(HorizontalAlignment.LEFT)
+      hakukohteenNimiTextCellStyle.setIndention(2.toShort)
 
       workbook.setSheetName(0, WorkbookUtil.createSafeSheetName("Yhteenveto")) //TODO: käännös
 
@@ -206,6 +227,7 @@ object ExcelWriter {
         initialRowIndex = currentRowIndex,
         headingCellStyle = headingCellStyle,
         cellStyle = bodyTextCellStyle,
+        hakukohteenNimiTextCellStyle = hakukohteenNimiTextCellStyle,
         headingFont = headingFont,
         asiointikieli = userLng,
         raporttiColumnTitlesWithIndex = raporttiColumnTitlesWithIndex
