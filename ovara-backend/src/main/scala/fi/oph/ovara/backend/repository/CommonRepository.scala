@@ -8,17 +8,17 @@ import slick.sql.SqlStreamingAction
 @Component
 class CommonRepository extends Extractors {
   def selectDistinctAlkamisvuodet(): SqlStreamingAction[Vector[String], String, Effect] = {
-    sql"""select distinct koulutuksen_alkamisvuosi
-          from pub.pub_dim_toteutus pdt
-          where koulutuksen_alkamisvuosi is not null""".as[String]
+    sql"""SELECT DISTINCT koulutuksen_alkamisvuosi
+          FROM pub.pub_dim_toteutus pdt
+          WHERE koulutuksen_alkamisvuosi IS NOT NULL""".as[String]
   }
 
   def selectDistinctExistingHaut(): SqlStreamingAction[Vector[Haku], Haku, Effect] = {
     val hakukohdekooditStr = ammatillisetHakukohdekoodit.map(s => s"'$s'").mkString(",")
-    sql"""select distinct haku_oid, haku_nimi
-          from pub.pub_dim_haku h
-          where kohdejoukko_koodi in (#$hakukohdekooditStr)
-          and h.tila != 'poistettu'""".as[Haku]
+    sql"""SELECT DISTINCT haku_oid, haku_nimi
+          FROM pub.pub_dim_haku h
+          WHERE kohdejoukko_koodi IN (#$hakukohdekooditStr)
+          AND h.tila != 'poistettu'""".as[Haku]
   }
 
   def selectDistinctOrganisaatiot(
@@ -27,9 +27,9 @@ class CommonRepository extends Extractors {
     val organisaatiotStr = organisaatiot.map(s => s"'$s'").mkString(",")
     val optionalOrganisaatiotClause =
       if (organisaatiotStr.isEmpty) "" else s"where org.organisaatio_oid in ($organisaatiotStr)"
-    sql"""select distinct *
-          from (select organisaatio_oid, organisaatio_nimi, organisaatiotyypit
-                from pub.pub_dim_organisaatio o) as org
+    sql"""SELECT DISTINCT *
+          FROM (SELECT organisaatio_oid, organisaatio_nimi, organisaatiotyypit
+                FROM pub.pub_dim_organisaatio o) AS org
                 #$optionalOrganisaatiotClause""".as[Organisaatio]
   }
 
@@ -39,10 +39,10 @@ class CommonRepository extends Extractors {
     val organisaatiotStr = organisaatiot.map(s => s"'$s'").mkString(",")
     val optionalOrganisaatiotClause =
       if (organisaatiotStr.isEmpty) "" else s"where org.organisaatio_oid in ($organisaatiotStr)"
-    sql"""select distinct *
-          from (select organisaatio_oid, organisaatio_nimi, organisaatiotyypit
-                from pub.pub_dim_organisaatio o
-                where organisaatiotyypit ?? '01') as org
+    sql"""SELECT DISTINCT *
+          FROM (SELECT organisaatio_oid, organisaatio_nimi, organisaatiotyypit
+                FROM pub.pub_dim_organisaatio o
+            WHERE organisaatiotyypit ?? '01') AS org
                 #$optionalOrganisaatiotClause""".as[Organisaatio]
   }
 
