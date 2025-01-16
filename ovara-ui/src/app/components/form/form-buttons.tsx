@@ -1,7 +1,6 @@
-import { forwardRef } from 'react';
 import { useTranslate } from '@tolgee/react';
 import { OphButton } from '@opetushallitus/oph-design-system';
-import { Box, Stack, type ButtonProps } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import { useSearchParams } from '@/app/hooks/useSearchParams';
 
 export const FormButtons = ({
@@ -51,17 +50,6 @@ export const TyhjennaHakuehdotButton = () => {
   );
 };
 
-export type DownloadButtonProps = Omit<ButtonProps, 'endIcon'> & {
-  download: boolean;
-};
-
-export const DownloadButton = forwardRef<
-  HTMLButtonElement,
-  DownloadButtonProps
->(function renderButton(props, ref) {
-  return <OphButton {...props} ref={ref} />;
-});
-
 export const MuodostaExcelButton = ({
   disabled,
   excelDownloadUrl,
@@ -71,14 +59,13 @@ export const MuodostaExcelButton = ({
 }) => {
   const { t } = useTranslate();
   return (
-    <DownloadButton
+    <OphButton
       variant="contained"
       type="submit"
       disabled={disabled}
       href={excelDownloadUrl}
-      download
     >
       {t('raportti.muodosta-raportti')}
-    </DownloadButton>
+    </OphButton>
   );
 };
