@@ -1,6 +1,6 @@
 'use client';
 import { OphSelect } from '@opetushallitus/oph-design-system';
-import { useTranslations } from 'next-intl';
+import { useTranslate } from '@tolgee/react';
 import { OvaraFormControl } from './ovara-form-control';
 import { SelectOption } from './multicombobox';
 import { SelectChangeEvent } from '@mui/material';
@@ -11,10 +11,11 @@ type LocalizedSelectProps = {
   options: Array<SelectOption>;
   onChange: (e: SelectChangeEvent) => void;
   required?: boolean;
+  value: string | undefined;
 };
 
 export const LocalizedSelect = (props: LocalizedSelectProps) => {
-  const t = useTranslations();
+  const { t } = useTranslate();
   const { required, label } = props;
 
   return (

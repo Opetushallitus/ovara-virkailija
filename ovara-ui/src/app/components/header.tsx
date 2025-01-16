@@ -5,12 +5,12 @@ import { Typography } from '@mui/material';
 import { PageContent } from './page-content';
 import { OphButton } from '@opetushallitus/oph-design-system';
 
-import { useTranslations } from 'next-intl';
+import { useTranslate } from '@tolgee/react';
 import { usePathname } from 'next/navigation';
 const DEFAULT_BOX_BORDER = `2px solid ${ophColors.grey100}`;
 
 export default function Header() {
-  const t = useTranslations('header');
+  const { t } = useTranslate();
   const currentRoute = usePathname();
   const isHome = currentRoute == '/';
   const headerTranslationKey = isHome
@@ -42,7 +42,7 @@ export default function Header() {
         )}
         <Typography variant="h1">
           {isHome ? '' : '> '}
-          {t(headerTranslationKey)}
+          {t(`header.${headerTranslationKey}`)}
         </Typography>
       </PageContent>
     </header>

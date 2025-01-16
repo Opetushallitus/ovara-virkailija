@@ -1,10 +1,10 @@
+'use client';
 import { Button, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { useTranslations } from 'next-intl';
+import { useTranslate } from '@tolgee/react';
 
 export default function Custom404() {
-  const tranlateError = useTranslations('error');
-  const tranlateYleinen = useTranslations('yleinen');
+  const { t } = useTranslate();
   return (
     <main>
       <Grid
@@ -25,9 +25,9 @@ export default function Custom404() {
           </Typography>
         </Grid>
         <Grid>
-          <Typography variant="h2">{tranlateError('404.otsikko')}</Typography>
+          <Typography variant="h2">{t('error.404.otsikko')}</Typography>
           <Typography variant="body1" component="p">
-            {tranlateError('404.teksti')}
+            {t('error.404.teksti')}
           </Typography>
         </Grid>
         <Grid>
@@ -43,10 +43,10 @@ export default function Custom404() {
             <Grid>
               <Button
                 variant="contained"
-                aria-label={tranlateYleinen('palaa-etusivulle')}
+                aria-label={t('yleinen.palaa-etusivulle')}
                 href="/"
               >
-                {tranlateYleinen('palaa-etusivulle')}
+                {t('yleinen.palaa-etusivulle')}
               </Button>
             </Grid>
           </Grid>

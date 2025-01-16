@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl';
+import { useTranslate } from '@tolgee/react';
 import { useSearchParams } from '@/app/hooks/useSearchParams';
 import { Box } from '@mui/material';
 import { isEmpty, isNullish } from 'remeda';
@@ -17,7 +17,7 @@ import {
 } from '@/app/lib/utils';
 
 export const OrganisaatioValikot = () => {
-  const t = useTranslations();
+  const { t } = useTranslate();
   const user = useAuthorizedUser();
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const organisaatiot = useFetchOrganisaatiohierarkiat();

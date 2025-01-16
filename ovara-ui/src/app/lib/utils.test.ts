@@ -5,7 +5,6 @@ import {
   getSortedKoulutuksenAlkamisKaudet,
   hasOvaraRole,
   hasOvaraToinenAsteRole,
-  removeDotsFromTranslations,
   getOppilaitoksetToShow,
   getToimipisteetToShow,
 } from './utils';
@@ -65,35 +64,6 @@ describe('getSortedKoulutuksenAlkamiskaudet', () => {
     ];
 
     expect(getSortedKoulutuksenAlkamisKaudet(alkamisvuodet)).toEqual(result);
-  });
-});
-
-describe('removeDotsFromTranslations', () => {
-  test('it should return lokalisoinnit in a next-intl approved format', () => {
-    const translations = {
-      'header.home': 'Opiskelijavalinnan raportointi',
-      'raporttilista.title': 'Raportti',
-      'raportti.radio-group.neutral': 'Ei merkitystä',
-      'raportti.radio-group.yes': 'Kyllä',
-      'raportti.radio-group.no': 'Ei',
-    };
-
-    const result = {
-      header: {
-        home: 'Opiskelijavalinnan raportointi',
-      },
-      raporttilista: {
-        title: 'Raportti',
-      },
-      raportti: {
-        'radio-group': {
-          neutral: 'Ei merkitystä',
-          yes: 'Kyllä',
-          no: 'Ei',
-        },
-      },
-    };
-    expect(removeDotsFromTranslations(translations)).toEqual(result);
   });
 });
 

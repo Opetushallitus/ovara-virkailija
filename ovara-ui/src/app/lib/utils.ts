@@ -1,5 +1,4 @@
 import { sort, isEmpty, uniqueBy, isNullish } from 'remeda';
-import { set } from 'lodash';
 import { OrganisaatioHierarkia } from './types/common';
 import {
   KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
@@ -21,7 +20,7 @@ export const getSortedKoulutuksenAlkamisKaudet = (
     : [];
 
   if (alkamisvuodetInts) {
-    const sortedAlkamiskaudet = sort(
+    const sortedAlkamiskaudet: KoulutuksenAlkaminen[] = sort(
       alkamisvuodetInts,
       (a, b) => b - a,
     ).flatMap((alkamisvuosi) => {
@@ -49,17 +48,6 @@ export const getSortedKoulutuksenAlkamisKaudet = (
 
   return [];
 };
-
-// next-intl ei salli pisteitä avaimissa
-// ks. https://github.com/amannn/next-intl/discussions/148#discussioncomment-4274218
-export function removeDotsFromTranslations(
-  translations: { [s: string]: string } | ArrayLike<string>,
-) {
-  return Object.entries(translations).reduce(
-    (acc, [key, value]) => set(acc, key, value),
-    {},
-  );
-}
 
 export const hasOvaraRole = (userRoles?: Array<string>) => {
   return userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA');

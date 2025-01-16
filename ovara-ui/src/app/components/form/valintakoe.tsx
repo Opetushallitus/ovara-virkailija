@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl';
+import { useTranslate } from '@tolgee/react';
 import { useSearchParams } from '@/app/hooks/useSearchParams';
 import {
   Box,
@@ -25,7 +25,7 @@ const OvaraRadioGroup = ({
   value,
   required,
 }: RadioGroupProps) => {
-  const t = useTranslations();
+  const { t } = useTranslate();
 
   return (
     <Box>
@@ -60,7 +60,7 @@ const OvaraRadioGroup = ({
 };
 
 export const Valintakoe = () => {
-  const t = useTranslations();
+  const { t } = useTranslate();
 
   const RADIOGROUP_OPTIONS = ['neutral', 'yes', 'no'];
 

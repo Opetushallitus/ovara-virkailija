@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslate } from '@tolgee/react';
 import { OphButton } from '@opetushallitus/oph-design-system';
 import { Box, Stack, type ButtonProps } from '@mui/material';
 import { useSearchParams } from '@/app/hooks/useSearchParams';
@@ -25,7 +25,7 @@ export const FormButtons = ({
 };
 
 export const TyhjennaHakuehdotButton = () => {
-  const t = useTranslations();
+  const { t } = useTranslate();
   const {
     setSelectedAlkamiskaudet,
     setSelectedHaut,
@@ -69,7 +69,7 @@ export const MuodostaExcelButton = ({
   disabled: boolean;
   excelDownloadUrl: string;
 }) => {
-  const t = useTranslations();
+  const { t } = useTranslate();
   return (
     <DownloadButton
       variant="contained"

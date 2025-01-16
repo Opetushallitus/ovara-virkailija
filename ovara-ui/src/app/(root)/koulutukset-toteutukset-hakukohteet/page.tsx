@@ -1,7 +1,7 @@
 'use client';
 import { OphTypography, ophColors } from '@opetushallitus/oph-design-system';
 import { MainContainer } from '@/app/components/main-container';
-import { useTranslations } from 'next-intl';
+import { useTranslate } from '@tolgee/react';
 
 import { KoulutuksenAlkaminen } from '@/app/components/form/koulutuksen-alkaminen';
 import { Haku } from '@/app/components/form/haku';
@@ -26,9 +26,8 @@ const FormBox = styled('form')(({ theme }) => ({
 }));
 
 export default function KoulutuksetToteutuksetHakukohteet() {
-  const t = useTranslations();
+  const { t } = useTranslate();
   const user = useAuthorizedUser();
-
   const hasToinenAsteRights = hasOvaraToinenAsteRole(user?.authorities);
   const queryParams = useSearchParams();
   const alkamiskausi = queryParams.get('alkamiskausi');
