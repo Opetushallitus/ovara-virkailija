@@ -1,8 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import {
-  getSortedKoulutuksenAlkamisKaudet,
-  removeDotsFromTranslations,
-} from './utils';
+import { getSortedKoulutuksenAlkamisKaudet } from './utils';
 
 describe('getSortedKoulutuksenAlkamiskaudet', () => {
   test('should return array with henkilokohtainen-suunnitelma if alkamisvuodet is undefined', () => {
@@ -55,34 +52,5 @@ describe('getSortedKoulutuksenAlkamiskaudet', () => {
     ];
 
     expect(getSortedKoulutuksenAlkamisKaudet(alkamisvuodet)).toEqual(result);
-  });
-});
-
-describe('removeDotsFromTranslations', () => {
-  test('it should return lokalisoinnit in a next-intl approved format', () => {
-    const translations = {
-      'header.home': 'Opiskelijavalinnan raportointi',
-      'raporttilista.title': 'Raportti',
-      'raportti.radio-group.neutral': 'Ei merkitystä',
-      'raportti.radio-group.yes': 'Kyllä',
-      'raportti.radio-group.no': 'Ei',
-    };
-
-    const result = {
-      header: {
-        home: 'Opiskelijavalinnan raportointi',
-      },
-      raporttilista: {
-        title: 'Raportti',
-      },
-      raportti: {
-        'radio-group': {
-          neutral: 'Ei merkitystä',
-          yes: 'Kyllä',
-          no: 'Ei',
-        },
-      },
-    };
-    expect(removeDotsFromTranslations(translations)).toEqual(result);
   });
 });

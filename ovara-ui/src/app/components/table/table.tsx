@@ -11,7 +11,7 @@ import {
   styled,
 } from '@mui/material';
 import { ophColors } from '@/app/theme';
-import { useTranslations } from 'next-intl';
+import { useTranslate } from '@tolgee/react';
 
 export const StyledTable = styled(Table)({
   width: '100%',
@@ -70,14 +70,14 @@ const TableWrapper = styled(Box)(({ theme }) => ({
 }));
 
 export const ListTable = ({ list, ...props }: ListTableProps) => {
-  const t = useTranslations('raporttilista');
+  const { t } = useTranslate();
 
   return (
     <TableWrapper>
       <StyledTable {...props}>
         <TableHead>
           <TableRow sx={{ borderBottom: `2px solid ${ophColors.grey200}` }}>
-            <StyledHeaderCell>{t('title')}</StyledHeaderCell>
+            <StyledHeaderCell>{t('raporttilista.title')}</StyledHeaderCell>
           </TableRow>
         </TableHead>
         <StyledTableBody>
@@ -86,7 +86,7 @@ export const ListTable = ({ list, ...props }: ListTableProps) => {
               <TableRow key={key}>
                 <StyledCell>
                   <Link href={`/${key}`} sx={{ textDecoration: 'none' }}>
-                    {t(key)}
+                    {t(`raporttilista.${key}`)}
                   </Link>
                 </StyledCell>
               </TableRow>

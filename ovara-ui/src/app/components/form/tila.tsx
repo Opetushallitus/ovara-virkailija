@@ -2,10 +2,10 @@ import { useSearchParams } from '@/app/hooks/useSearchParams';
 import { LocalizedSelect } from './localized-select';
 import { TILAT } from '@/app/lib/constants';
 import { SelectChangeEvent } from '@mui/material';
-import { useTranslations } from 'next-intl';
+import { useTranslate } from '@tolgee/react';
 import { isEmpty } from 'remeda';
 
-const tilat = (t: typeof useTranslations) => {
+const tilat = (t: (key: string) => string) => {
   return TILAT.map((tila) => {
     return {
       value: tila,
@@ -26,7 +26,7 @@ const changeTila = (
 };
 
 export const KoulutuksenTila = () => {
-  const t = useTranslations();
+  const { t } = useTranslate();
   const { selectedKoulutuksenTila, setSelectedKoulutuksenTila } =
     useSearchParams();
 
@@ -44,7 +44,7 @@ export const KoulutuksenTila = () => {
 };
 
 export const ToteutuksenTila = () => {
-  const t = useTranslations();
+  const { t } = useTranslate();
   const { selectedToteutuksenTila, setSelectedToteutuksenTila } =
     useSearchParams();
 
@@ -62,7 +62,7 @@ export const ToteutuksenTila = () => {
 };
 
 export const HakukohteenTila = () => {
-  const t = useTranslations();
+  const { t } = useTranslate();
   const { selectedHakukohteenTila, setSelectedHakukohteenTila } =
     useSearchParams();
 

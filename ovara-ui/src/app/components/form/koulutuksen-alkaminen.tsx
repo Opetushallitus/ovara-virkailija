@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslate } from '@tolgee/react';
 import { useFetchAlkamisvuodet } from '@/app/hooks/useFetchAlkamisvuodet';
 import { getSortedKoulutuksenAlkamisKaudet } from '@/app/lib/utils';
 import {
@@ -10,7 +10,7 @@ import { useSearchParams } from '@/app/hooks/useSearchParams';
 import { isEmpty } from 'remeda';
 
 export const KoulutuksenAlkaminen = () => {
-  const t = useTranslations();
+  const { t } = useTranslate();
   const alkamisvuodet = useFetchAlkamisvuodet();
   const sortedAlkamiskaudet = useMemo(
     () => getSortedKoulutuksenAlkamisKaudet(alkamisvuodet),
@@ -34,7 +34,7 @@ export const KoulutuksenAlkaminen = () => {
       label={`${t('raportti.alkamiskausi')}`}
       value={selectedAlkamiskaudet ?? []}
       options={sortedAlkamiskaudet?.map((kausi) => {
-        const alkamiskaudenNimi = `${t(kausi.alkamiskausinimi)}`;
+        const alkamiskaudenNimi = t(kausi.alkamiskausinimi);
         return {
           value: kausi.value,
           label: kausi.alkamisvuosi

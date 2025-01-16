@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { FetchError, PermissionError } from '../lib/common';
-import { useTranslations } from 'next-intl';
+import { useTranslate } from '@tolgee/react';
 
 export function ErrorView({
   error,
@@ -13,7 +13,7 @@ export function ErrorView({
     console.error(error);
   });
 
-  const t = useTranslations('error');
+  const { t } = useTranslate();
 
   if (error instanceof FetchError) {
     return (
@@ -22,7 +22,7 @@ export function ErrorView({
         <p>
           {t('virhekoodi')} {error.response.status}
         </p>
-        <button onClick={() => reset()}>{t('uudelleenyritys')}</button>
+        <button onClick={() => reset()}>{t('error.uudelleenyritys')}</button>
       </>
     );
   } else if (error instanceof PermissionError) {
@@ -31,7 +31,7 @@ export function ErrorView({
     return (
       <>
         <h1>{t('tuntematon')}</h1>
-        <button onClick={() => reset()}>{t('uudelleenyritys')}</button>
+        <button onClick={() => reset()}>{t('error.uudelleenyritys')}</button>
       </>
     );
   }

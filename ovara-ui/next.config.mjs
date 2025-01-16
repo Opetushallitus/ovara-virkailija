@@ -1,5 +1,3 @@
-import createNextIntlPlugin from 'next-intl/plugin';
-
 const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline';
@@ -49,6 +47,4 @@ export const nextConfig = {
   output: isStandalone ? 'standalone' : undefined,
 };
 
-const withNextIntl = createNextIntlPlugin();
-
-export default withNextIntl(nextConfig);
+export default nextConfig;

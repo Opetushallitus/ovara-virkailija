@@ -1,40 +1,42 @@
 'use client';
-import { NextIntlClientProvider } from 'next-intl';
-import { useFetchUser } from '../hooks/useFetchUser';
+import { useEffect } from 'react';
 import { configuration } from '@/app/lib/configuration';
-import { useFetchTranslations } from '../hooks/useFetchLokalisaatiot';
+import { Tolgee } from '@tolgee/web';
+import { BackendFetch, FormatSimple, TolgeeProvider } from '@tolgee/react';
+import Loading from '@/app/(root)/loading';
+import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 
 const REVALIDATE_TIME_SECONDS = 60 * 60 * 2;
 
-export async function fetchLokalisaatiot(lang: string) {
-  const url = `${configuration.virkailijaUrl}/lokalisointi/cxf/rest/v1/localisation?category=viestinvalitys&locale=`;
-  const res = await fetch(`${url}${lang}`, {
-    next: { revalidate: REVALIDATE_TIME_SECONDS },
-  });
-
-  return res.json();
-}
-
 const LocalizationContent = ({
-  lng,
+  language,
   children,
 }: {
   children: React.ReactNode;
-  lng?: string;
+  language: string;
 }) => {
-  const locale = lng ?? 'fi';
-  const messages = useFetchTranslations(locale) as IntlMessages;
-
-  const timeZone = 'Europe/Helsinki';
+  const tolgee = Tolgee()
+    .use(FormatSimple())
+    .use(
+      BackendFetch({
+        prefix: configuration.lokalisointiPrefix,
+        next: {
+          revalidate: REVALIDATE_TIME_SECONDS,
+        },
+      }),
+    )
+    .init({
+      language: language,
+      availableLanguages: ['fi', 'sv', 'en'],
+      defaultNs: 'ovara',
+      ns: ['ovara'],
+      projectId: 11100,
+    });
 
   return (
-    <NextIntlClientProvider
-      locale={locale}
-      messages={messages}
-      timeZone={timeZone}
-    >
+    <TolgeeProvider tolgee={tolgee} fallback={<Loading />}>
       {children}
-    </NextIntlClientProvider>
+    </TolgeeProvider>
   );
 };
 
@@ -43,8 +45,20 @@ export default function LocalizationProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const user = useFetchUser();
+  const user = useAuthorizedUser();
   const language = user?.asiointikieli;
 
-  return <LocalizationContent lng={language}>{children}</LocalizationContent>;
+  useEffect(() => {
+    if (language) {
+      document.documentElement.setAttribute('lang', language);
+    }
+  }, [language]);
+
+  if (!language) {
+    return <Loading />;
+  }
+
+  return (
+    <LocalizationContent language={language}>{children}</LocalizationContent>
+  );
 }
