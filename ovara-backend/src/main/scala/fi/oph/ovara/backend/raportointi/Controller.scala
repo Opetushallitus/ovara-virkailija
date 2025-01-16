@@ -74,9 +74,9 @@ class Controller(
       @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
       @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
       @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
-      @RequestParam("koulutuksenTila", required = false) koulutuksenTila: String,
-      @RequestParam("toteutuksenTila", required = false) toteutuksenTila: String,
-      @RequestParam("hakukohteenTila", required = false) hakukohteenTila: String,
+      @RequestParam("koulutuksen-tila", required = false) koulutuksenTila: String,
+      @RequestParam("toteutuksen-tila", required = false) toteutuksenTila: String,
+      @RequestParam("hakukohteen-tila", required = false) hakukohteenTila: String,
       @RequestParam("valintakoe", required = false) valintakoe: String,
       response: HttpServletResponse
   ): Unit = {
