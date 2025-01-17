@@ -1,5 +1,5 @@
 'use client';
-import { OphTypography, ophColors } from '@opetushallitus/oph-design-system';
+import { OphTypography } from '@opetushallitus/oph-design-system';
 import { MainContainer } from '@/app/components/main-container';
 import { useTranslate } from '@tolgee/react';
 
@@ -11,19 +11,14 @@ import {
   ToteutuksenTila,
 } from '@/app/components/form/tila';
 import { OrganisaatioValikot } from '@/app/components/form/organisaatiovalikot';
+import { FormBox } from '@/app/components/form/form-box';
 import { Valintakoe } from '@/app/components/form/valintakoe';
 import { FormButtons } from '@/app/components/form/form-buttons';
-import { Divider, styled } from '@mui/material';
+import { Divider } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
 import { configuration } from '@/app/lib/configuration';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { hasOvaraToinenAsteRole } from '@/app/lib/utils';
-
-const FormBox = styled('form')(({ theme }) => ({
-  border: `1px solid ${ophColors.grey100}`,
-  padding: theme.spacing(2.5),
-  width: '100%',
-}));
 
 export default function KoulutuksetToteutuksetHakukohteet() {
   const { t } = useTranslate();
