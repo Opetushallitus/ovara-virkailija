@@ -21,6 +21,21 @@ class CommonRepository extends Extractors {
           AND h.tila != 'poistettu'""".as[Haku]
   }
 
+  def selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(
+      orgs: List[String]
+  ): SqlStreamingAction[Vector[Hakukohde], Hakukohde, Effect] = {
+    val organisaatiotStr = orgs.map(s => s"'$s'").mkString(",")
+    val optionalOrganisaatiotClause = if (organisaatiotStr.isEmpty) {
+      ""
+    } else { s"AND h.jarjestyspaikka_oid in ($organisaatiotStr)" }
+
+    sql"""SELECT DISTINCT hakukohde_oid, hakukohde_nimi
+          FROM pub.pub_dim_hakukohde h
+          WHERE h.tila != 'poistettu'
+          #$optionalOrganisaatiotClause
+          """.as[Hakukohde]
+  }
+
   def selectDistinctOrganisaatiot(
       organisaatiot: List[String]
   ): SqlStreamingAction[Vector[Organisaatio], Organisaatio, Effect] = {

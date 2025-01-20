@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.{Haku, Organisaatio, OrganisaatioHierarkia}
+import fi.oph.ovara.backend.domain.{Haku, Hakukohde, Organisaatio, OrganisaatioHierarkia}
 import fi.oph.ovara.backend.repository.{CommonRepository, OvaraDatabase}
 import fi.oph.ovara.backend.utils.Constants.{
   KOULUTUSTOIMIJARAPORTTI,
@@ -23,6 +23,24 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
 
   def getHaut: Vector[Haku] = {
     db.run(commonRepository.selectDistinctExistingHaut(), "selectDistinctExistingHaut")
+  }
+
+  def getHakukohteet(oppilaitokset: List[String], toimipisteet: List[String]): Vector[Hakukohde] = {
+    val user                      = userService.getEnrichedUserDetails
+    val authorities               = user.authorities
+    val kayttooikeusOrganisaatiot = AuthoritiesUtil.getOrganisaatiot(authorities)
+
+    val allowedOrgOidsFromSelection =
+      getAllowedOrgsFromOrgSelection(kayttooikeusOrganisaatiot, oppilaitokset, toimipisteet)
+
+    if (allowedOrgOidsFromSelection.nonEmpty) {
+      db.run(
+        commonRepository.selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(allowedOrgOidsFromSelection),
+        "selectDistinctExistingHakukohteet"
+      )
+    } else {
+      Vector()
+    }
   }
 
   def getOrganisaatioHierarkiatWithUserRights: List[OrganisaatioHierarkia] = {
@@ -141,7 +159,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
         (hierarkiat, "koulutustoimijaraportti")
       }
 
-    val hierarkiatWithExistingOrgs = hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+    val hierarkiatWithExistingOrgs = OrganisaatioUtils.filterExistingOrgs(hierarkiat)
 
     val selectedOrgsDescendantOids =
       hierarkiatWithExistingOrgs.flatMap(hierarkia => OrganisaatioUtils.getDescendantOids(hierarkia)).distinct
@@ -158,5 +176,31 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
         raporttityyppi
       )
     }
+  }
+
+  def getAllowedOrgsFromOrgSelection(
+      kayttooikeusOrganisaatioOids: List[String],
+      oppilaitosOids: List[String],
+      toimipisteOids: List[String]
+  ): List[String] = {
+    val hierarkiat =
+      if (toimipisteOids.nonEmpty) {
+        getToimipistehierarkiat(toimipisteOids)
+      } else if (oppilaitosOids.nonEmpty) {
+        getOppilaitoshierarkiat(oppilaitosOids)
+      } else {
+        List()
+      }
+
+    val hierarkiatWithExistingOrgs = OrganisaatioUtils.filterExistingOrgs(hierarkiat)
+
+    val selectedOrgsDescendantOids =
+      hierarkiatWithExistingOrgs.flatMap(hierarkia => OrganisaatioUtils.getDescendantOids(hierarkia)).distinct
+
+    val childKayttooikeusOrgs = hierarkiatWithExistingOrgs.flatMap(hierarkia =>
+      OrganisaatioUtils.getKayttooikeusDescendantAndSelfOids(hierarkia, kayttooikeusOrganisaatioOids)
+    )
+
+    (childKayttooikeusOrgs intersect selectedOrgsDescendantOids).distinct
   }
 }

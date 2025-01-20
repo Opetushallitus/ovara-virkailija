@@ -20,6 +20,13 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   )
 
+  implicit val getHakukohdeResult: GetResult[Hakukohde] = GetResult(r =>
+    Hakukohde(
+      hakukohde_oid = r.nextString(),
+      hakukohde_nimi = extractKielistetty(r.nextStringOption())
+    )
+  )
+
   implicit val getOrganisaatioResult: GetResult[Organisaatio] = GetResult(r =>
     Organisaatio(
       organisaatio_oid = r.nextString(),
@@ -47,7 +54,7 @@ trait Extractors extends GenericOvaraJsonFormats {
   })
 
   implicit val getKoulutuksetToteutuksetHakukohteetResult: GetResult[OrganisaationKoulutusToteutusHakukohde] = {
-    GetResult(r =>
+    GetResult(r => {
       val kth = KoulutusToteutusHakukohdeResult(
         hakukohdeNimi = extractKielistetty(r.nextStringOption()),
         hakukohdeOid = r.nextString(),
@@ -57,7 +64,7 @@ trait Extractors extends GenericOvaraJsonFormats {
         aloituspaikat = r.nextIntOption(),
         onValintakoe = r.nextBooleanOption(),
         voiSuorittaaKaksoistutkinnon = r.nextBooleanOption(),
-        jarjestaaUrheilijanAmmKoulutusta = r.nextBooleanOption(),
+        jarjestaaUrheilijanAmmKoulutusta = r.nextBooleanOption()
       )
       val organisaatio_oid = r.nextStringOption()
 
@@ -65,7 +72,7 @@ trait Extractors extends GenericOvaraJsonFormats {
         organisaatio_oid = organisaatio_oid,
         koulutusToteutusHakukohde = kth
       )
-    )
+    })
   }
 
   implicit val getOrganisaatioHierarkiaResult: GetResult[OrganisaatioHierarkia] = GetResult(r =>
@@ -77,6 +84,18 @@ trait Extractors extends GenericOvaraJsonFormats {
       tila = r.nextString(),
       parent_oids = extractArray(r.nextStringOption()),
       children = r.nextStringOption().map(read[List[OrganisaatioHierarkia]]).getOrElse(List())
+    )
+  )
+
+  implicit val getHakijaResult: GetResult[Hakija] = GetResult(r =>
+    Hakija(
+      sukunimi = r.nextString(),
+      etunimet = r.nextString(),
+      henkiloOid = r.nextString(),
+      hakemusOid = r.nextString(),
+      lahiosoite = r.nextString(),
+      postinumero = r.nextString(),
+      postitoimipaikka = r.nextString()
     )
   )
 }

@@ -1,6 +1,7 @@
 package fi.oph.ovara.backend.utils
 
 import fi.oph.ovara.backend.domain.*
+import fi.oph.ovara.backend.service.CommonService
 
 object OrganisaatioUtils {
   def mapOrganisaationHakukohteetToParent(
@@ -75,6 +76,10 @@ object OrganisaatioUtils {
       val filteredChildHierarkiat = children.flatMap(child => filterExistingOrgs(child))
       Some(hierarkia.copy(children = filteredChildHierarkiat))
     }
+  }
+
+  def filterExistingOrgs(hierarkiat: List[OrganisaatioHierarkia]): List[OrganisaatioHierarkia] = {
+    hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
   }
 
   def addKoulutustoimijaParentToHierarkiaDescendants(
