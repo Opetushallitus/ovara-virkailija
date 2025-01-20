@@ -1,6 +1,5 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.OrganisaatioHierarkia
 import fi.oph.ovara.backend.repository.{KoulutuksetToteutuksetHakukohteetRepository, OvaraDatabase}
 import fi.oph.ovara.backend.utils.Constants.*
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter, OrganisaatioUtils}
@@ -34,60 +33,12 @@ class KoulutuksetToteutuksetHakukohteetService(
     val authorities               = user.authorities
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getOrganisaatiot(authorities)
 
-    def hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot: List[String]) = {
-      kayttooikeusOrganisaatiot.contains(OPH_PAAKAYTTAJA_OID)
-    }
-
-    def enrichHierarkiatWithKoulutustoimijaParent(oppilaitoshierarkiat: List[OrganisaatioHierarkia]) = {
-      for (hierarkia <- oppilaitoshierarkiat) yield {
-        val parentOids            = hierarkia.parent_oids
-        val parentKoulutustoimija = commonService.getDistinctKoulutustoimijat(parentOids).headOption
-        OrganisaatioUtils.addKoulutustoimijaParentToHierarkiaDescendants(hierarkia, parentKoulutustoimija)
-      }
-    }
-
-    val (hierarkiat, raporttityyppi) =
-      if (toimipisteet.nonEmpty) {
-        val toimipistehierarkiat = commonService.getToimipistehierarkiat(toimipisteet)
-        (enrichHierarkiatWithKoulutustoimijaParent(toimipistehierarkiat), TOIMIPISTERAPORTTI)
-      } else if (oppilaitokset.nonEmpty) {
-        val oppilaitoshierarkiat = commonService.getOppilaitoshierarkiat(oppilaitokset)
-        (enrichHierarkiatWithKoulutustoimijaParent(oppilaitoshierarkiat), OPPILAITOSRAPORTTI)
-      } else if (koulutustoimija.nonEmpty) {
-        val hierarkiat = koulutustoimija match {
-          case Some(koulutustoimija) =>
-            commonService.getKoulutustoimijahierarkia(List(koulutustoimija))
-          case None => List()
-        }
-        (hierarkiat, KOULUTUSTOIMIJARAPORTTI)
-      } else {
-        val koulutustoimijahierarkia = commonService.getKoulutustoimijahierarkia(kayttooikeusOrganisaatiot)
-
-        val hierarkiat = if (hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)) {
-          koulutustoimijahierarkia
-        } else {
-          val oppilaitoshierarkia = commonService.getOppilaitoshierarkiat(oppilaitokset)
-
-          val toimipistehierarkia = commonService.getToimipistehierarkiat(toimipisteet)
-
-          koulutustoimijahierarkia concat oppilaitoshierarkia concat toimipistehierarkia
-        }
-        (hierarkiat, "koulutustoimijaraportti")
-      }
-
-    val hierarkiatWithExistingOrgs = hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
-
-    val selectedOrgsDescendantOids =
-      hierarkiat.flatMap(hierarkia => OrganisaatioUtils.getDescendantOids(hierarkia)).distinct
-
-    val orgOidsForQuery = if (hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)) {
-      selectedOrgsDescendantOids
-    } else {
-      val childKayttooikeusOrgs = hierarkiat.flatMap(hierarkia =>
-        OrganisaatioUtils.getKayttooikeusDescendantAndSelfOids(hierarkia, kayttooikeusOrganisaatiot)
-      )
-      (childKayttooikeusOrgs intersect selectedOrgsDescendantOids).distinct
-    }
+    val (orgOidsForQuery, hierarkiat, raporttityyppi) = commonService.getAllowedOrgsFromOrgSelection(
+      kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
+      koulutustoimijaOid = koulutustoimija,
+      toimipisteOids = toimipisteet,
+      oppilaitosOids = oppilaitokset
+    )
 
     val queryResult = db.run(
       koulutuksetToteutuksetHakukohteetRepository.selectWithParams(
