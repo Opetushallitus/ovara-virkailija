@@ -24,6 +24,7 @@ export const MultiComboBox = ({
   label,
   value,
   required,
+  ...props
 }: MultiComboBoxProps) => {
   const { t } = useTranslate();
 
@@ -36,6 +37,7 @@ export const MultiComboBox = ({
 
   return (
     <OvaraFormControl
+      {...props}
       label={required ? `${label} *` : label}
       renderInput={() => (
         <Autocomplete
