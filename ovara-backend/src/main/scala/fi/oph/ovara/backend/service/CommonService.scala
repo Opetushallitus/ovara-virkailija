@@ -2,8 +2,13 @@ package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.domain.{Haku, Organisaatio, OrganisaatioHierarkia}
 import fi.oph.ovara.backend.repository.{CommonRepository, OvaraDatabase}
+import fi.oph.ovara.backend.utils.Constants.{
+  KOULUTUSTOIMIJARAPORTTI,
+  OPH_PAAKAYTTAJA_OID,
+  OPPILAITOSRAPORTTI,
+  TOIMIPISTERAPORTTI
+}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, OrganisaatioUtils}
-import fi.oph.ovara.backend.utils.Constants.OPH_PAAKAYTTAJA_OID
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -21,8 +26,8 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
   }
 
   def getOrganisaatioHierarkiatWithUserRights: List[OrganisaatioHierarkia] = {
-    val user                = userService.getEnrichedUserDetails
-    val organisaatiot       = AuthoritiesUtil.getOrganisaatiot(user.authorities)
+    val user          = userService.getEnrichedUserDetails
+    val organisaatiot = AuthoritiesUtil.getOrganisaatiot(user.authorities)
 
     val parentOids = if (organisaatiot.contains(OPH_PAAKAYTTAJA_OID)) {
       List(OPH_PAAKAYTTAJA_OID)
@@ -44,41 +49,114 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
 
       koulutustoimijahierarkia concat oppilaitoshierarkia concat toimipistehierarkia
     }
-    
+
     kayttoOikeushierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
   }
 
   def getToimipistehierarkiat(toimipisteet: List[String]): List[OrganisaatioHierarkia] = {
-    val hierarkiat = db.run(
-      commonRepository.selectToimipisteDescendants(toimipisteet),
-      "selectToimipisteDescendants"
-    ).toList
-    
+    val hierarkiat = db
+      .run(
+        commonRepository.selectToimipisteDescendants(toimipisteet),
+        "selectToimipisteDescendants"
+      )
+      .toList
+
     hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
   }
 
   def getOppilaitoshierarkiat(oppilaitokset: List[String]): List[OrganisaatioHierarkia] = {
-    val hierarkiat = db.run(
-      commonRepository.selectOppilaitosDescendants(oppilaitokset),
-      "selectOppilaitosDescendants"
-    ).toList
-    
+    val hierarkiat = db
+      .run(
+        commonRepository.selectOppilaitosDescendants(oppilaitokset),
+        "selectOppilaitosDescendants"
+      )
+      .toList
+
     hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
   }
 
   def getKoulutustoimijahierarkia(koulutustoimijat: List[String]): List[OrganisaatioHierarkia] = {
-    val hierarkiat = db.run(
-      commonRepository.selectKoulutustoimijaDescendants(koulutustoimijat),
-      "selectKoulutustoimijaDescendants"
-    ).toList
+    val hierarkiat = db
+      .run(
+        commonRepository.selectKoulutustoimijaDescendants(koulutustoimijat),
+        "selectKoulutustoimijaDescendants"
+      )
+      .toList
 
     hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
   }
-  
+
   def getDistinctKoulutustoimijat(organisaatioOids: List[String]): List[Organisaatio] = {
     db.run(
       commonRepository.selectDistinctKoulutustoimijat(organisaatioOids),
       "selectDistinctKoulutustoimijat"
     ).toList
+  }
+
+  private def hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot: List[String]) = {
+    kayttooikeusOrganisaatiot.contains(OPH_PAAKAYTTAJA_OID)
+  }
+
+  def getAllowedOrgsFromOrgSelection(
+      kayttooikeusOrganisaatioOids: List[String],
+      koulutustoimijaOid: Option[String],
+      toimipisteOids: List[String],
+      oppilaitosOids: List[String]
+  ): (List[String], List[OrganisaatioHierarkia], String) = {
+
+    def enrichHierarkiatWithKoulutustoimijaParent(oppilaitoshierarkiat: List[OrganisaatioHierarkia]) = {
+      for (hierarkia <- oppilaitoshierarkiat) yield {
+        val parentOids            = hierarkia.parent_oids
+        val parentKoulutustoimija = getDistinctKoulutustoimijat(parentOids).headOption
+        OrganisaatioUtils.addKoulutustoimijaParentToHierarkiaDescendants(hierarkia, parentKoulutustoimija)
+      }
+    }
+
+    val (hierarkiat, raporttityyppi) =
+      if (toimipisteOids.nonEmpty) {
+        val toimipistehierarkiat = getToimipistehierarkiat(toimipisteOids)
+        (enrichHierarkiatWithKoulutustoimijaParent(toimipistehierarkiat), TOIMIPISTERAPORTTI)
+      } else if (oppilaitosOids.nonEmpty) {
+        val oppilaitoshierarkiat = getOppilaitoshierarkiat(oppilaitosOids)
+        (enrichHierarkiatWithKoulutustoimijaParent(oppilaitoshierarkiat), OPPILAITOSRAPORTTI)
+      } else if (koulutustoimijaOid.nonEmpty) {
+        val hierarkiat = koulutustoimijaOid match {
+          case Some(koulutustoimija) =>
+            getKoulutustoimijahierarkia(List(koulutustoimija))
+          case None => List()
+        }
+        (hierarkiat, KOULUTUSTOIMIJARAPORTTI)
+      } else {
+        val koulutustoimijahierarkia = getKoulutustoimijahierarkia(kayttooikeusOrganisaatioOids)
+
+        val hierarkiat = if (hasOPHPaakayttajaRights(kayttooikeusOrganisaatioOids)) {
+          koulutustoimijahierarkia
+        } else {
+          val oppilaitoshierarkia = getOppilaitoshierarkiat(oppilaitosOids)
+
+          val toimipistehierarkia = getToimipistehierarkiat(toimipisteOids)
+
+          koulutustoimijahierarkia concat oppilaitoshierarkia concat toimipistehierarkia
+        }
+        (hierarkiat, "koulutustoimijaraportti")
+      }
+
+    val hierarkiatWithExistingOrgs = hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+
+    val selectedOrgsDescendantOids =
+      hierarkiatWithExistingOrgs.flatMap(hierarkia => OrganisaatioUtils.getDescendantOids(hierarkia)).distinct
+
+    if (hasOPHPaakayttajaRights(kayttooikeusOrganisaatioOids)) {
+      (selectedOrgsDescendantOids, hierarkiatWithExistingOrgs, raporttityyppi)
+    } else {
+      val childKayttooikeusOrgs = hierarkiatWithExistingOrgs.flatMap(hierarkia =>
+        OrganisaatioUtils.getKayttooikeusDescendantAndSelfOids(hierarkia, kayttooikeusOrganisaatioOids)
+      )
+      (
+        (childKayttooikeusOrgs intersect selectedOrgsDescendantOids).distinct,
+        hierarkiatWithExistingOrgs,
+        raporttityyppi
+      )
+    }
   }
 }
