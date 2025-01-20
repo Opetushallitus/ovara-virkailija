@@ -14,7 +14,7 @@ class CommonRepository extends Extractors {
   }
 
   def selectDistinctExistingHaut(): SqlStreamingAction[Vector[Haku], Haku, Effect] = {
-    val hakukohdekooditStr = ammatillisetHakukohdekoodit.map(s => s"'$s'").mkString(",")
+    val hakukohdekooditStr = toisenAsteenHaunKohdejoukkokoodit.map(s => s"'$s'").mkString(",")
     sql"""SELECT DISTINCT haku_oid, haku_nimi
           FROM pub.pub_dim_haku h
           WHERE kohdejoukko_koodi IN (#$hakukohdekooditStr)

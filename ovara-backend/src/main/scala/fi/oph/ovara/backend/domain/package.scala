@@ -3,7 +3,7 @@ package fi.oph.ovara.backend
 package object domain {
   type Kielistetty = Map[Kieli, String]
 
-  val ammatillisetHakukohdekoodit = List(
+  val toisenAsteenHaunKohdejoukkokoodit: List[String] = List(
     "10", // Aikuiskoulutus
     "19", // Aikuisten perusopetus
     "15", // Ammatillinen peruskoulutus erityisopetuksena
