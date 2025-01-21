@@ -1,4 +1,3 @@
-import { useFetchHaut } from '@/app/hooks/useFetchHaut';
 import {
   MultiComboBox,
   SelectOption,
@@ -7,13 +6,26 @@ import { useSearchParams } from '@/app/hooks/useSearchParams';
 import { isEmpty } from 'remeda';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
-import { LanguageCode } from '@/app/lib/types/common';
+import { Kielistetty, LanguageCode } from '@/app/lib/types/common';
+import { useQuery } from '@tanstack/react-query';
+import { doApiFetch } from '@/app/lib/ovara-backend/api';
+
+type Haku = {
+  haku_oid: string;
+  haku_nimi: Kielistetty;
+};
 
 export const Haku = () => {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const locale = (user?.asiointikieli ?? 'fi') as LanguageCode;
-  const haut = useFetchHaut() || [];
+
+  const { data } = useQuery({
+    queryKey: ['fetchHaut'],
+    queryFn: () => doApiFetch('haut'),
+  });
+
+  const haut: Haku[] = data || [];
 
   const { selectedHaut, setSelectedHaut } = useSearchParams();
 

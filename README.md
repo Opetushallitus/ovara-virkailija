@@ -56,9 +56,12 @@ Ovara-ui on toteutettu Next.js:llä.
 
 Luo lokaaliajoon `.env.development.local`-tiedosto, johon lisäät seuraavat ympäristömuuttujat niin että ne vastaavat lokaalin backendin konfiguraatiota:
 ````
-VIRKAILIJA_URL=https://virkailija.hahtuvaopintopolku.fi
+VIRKAILIJA_URL=https://virkailija.testiopintopolku.fi
+OVARA_BACKEND=https://localhost:8443
 APP_URL=https://localhost:3405
-OVARA_BACKEND=https://localhost:8443/ovara-backend
 ````
 
 Käyttöliittymän saa käynnistettyä komennolla `npm run dev`. Käyttöliittymä avautuu osoitteeseen: `https://localhost:3405`.
+
+Lokaaliympäristössä backendin ja käyttöliittymän käyttö https yli cas-autentikoinnilla ja sessiohallinnalla edellyttää sertifikaattien ja keystoren generointia.
+Nämä saa luotua ajamalla projektin juuressa skriptin `generate-keystore.sh`.
