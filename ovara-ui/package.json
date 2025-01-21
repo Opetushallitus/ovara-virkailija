@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "touch .env.development.local && NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" node --env-file=.env.development --env-file=.env.development.local dev-server.mjs",
+    "dev2": "NODE_OPTIONS='--inspect' next dev --experimental-https",
+    "dev": "touch .env.development.local && NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" node --env-file=.env.development.local dev-server.mjs",
     "build": "STANDALONE=true next build",
     "start": "next start",
     "lint": "next lint",
