@@ -15,6 +15,7 @@ type MultiComboBoxProps = {
   label: string;
   value: Array<string> | undefined;
   required?: boolean;
+  sx?: Record<string, string | number>;
 };
 
 export const MultiComboBox = ({
