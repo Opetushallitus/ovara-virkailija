@@ -30,7 +30,12 @@ export default function Hakijat() {
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const queryParams = useSearchParams();
   const organisaatiot = useFetchOrganisaatiohierarkiat();
+  const alkamiskausi = queryParams.get('alkamiskausi');
+  const haku = queryParams.get('haku');
+  const oppilaitos = queryParams.get('oppilaitos');
+  const toimipiste = queryParams.get('toimipiste');
 
+  const isDisabled = !(alkamiskausi && haku && (oppilaitos || toimipiste));
   return (
     <MainContainer>
       {hasToinenAsteRights ? (
@@ -61,7 +66,7 @@ export default function Hakijat() {
           <Markkinointilupa t={t} />
           <Julkaisulupa t={t} />
           <FormButtons
-            disabled={false}
+            disabled={isDisabled}
             excelDownloadUrl={
               `${configuration.ovaraBackendApiUrl}/hakijat?` + queryParams
             }
