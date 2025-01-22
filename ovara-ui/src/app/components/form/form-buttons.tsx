@@ -1,7 +1,7 @@
 import { useTranslate } from '@tolgee/react';
 import { OphButton } from '@opetushallitus/oph-design-system';
 import { Box, Stack } from '@mui/material';
-import { useSearchParams } from '@/app/hooks/useSearchParams';
+import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
 
 export const FormButtons = ({
   disabled,

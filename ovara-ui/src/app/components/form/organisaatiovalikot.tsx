@@ -1,5 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { useSearchParams } from '@/app/hooks/useSearchParams';
+import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
 import { Box } from '@mui/material';
 import { isEmpty, isNullish } from 'remeda';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';

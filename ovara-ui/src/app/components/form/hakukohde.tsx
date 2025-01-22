@@ -2,7 +2,7 @@ import {
   MultiComboBox,
   SelectOption,
 } from '@/app/components/form/multicombobox';
-import { useSearchParams } from '@/app/hooks/useSearchParams';
+import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
 import { isEmpty } from 'remeda';
 import { useFetchHakukohteet } from '@/app/hooks/useFetchHakukohteet';
 import { LanguageCode } from '@/app/lib/types/common';

@@ -1,4 +1,4 @@
-import { useSearchParams } from '@/app/hooks/useSearchParams';
+import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
 import { Box, SelectChangeEvent } from '@mui/material';
 import { OphCheckbox } from '@opetushallitus/oph-design-system';
 import { OvaraFormControl } from '@/app/components/form/ovara-form-control';

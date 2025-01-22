@@ -1,5 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { useSearchParams } from '@/app/hooks/useSearchParams';
+import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
 import { SelectChangeEvent } from '@mui/material';
 import { OvaraRadioGroup } from '@/app/components/form/ovara-radio-group';
 import { match } from 'ts-pattern';
