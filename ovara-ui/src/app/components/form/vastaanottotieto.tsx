@@ -1,4 +1,4 @@
-import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
+import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
 import { Box, SelectChangeEvent } from '@mui/material';
 import { OphCheckbox } from '@opetushallitus/oph-design-system';
 import { OvaraFormControl } from '@/app/components/form/ovara-form-control';
@@ -6,7 +6,7 @@ import { isEmpty, isNullish } from 'remeda';
 
 export const Vastaanottotieto = ({ t }: { t: (key: string) => string }) => {
   const { selectedVastaanottotieto, setSelectedVastaanottotieto } =
-    useSearchParams();
+    useHakijatSearchParams();
 
   console.log({ selectedVastaanottotieto });
   const includesVastaanottaneet = isNullish(selectedVastaanottotieto)
@@ -53,6 +53,7 @@ export const Vastaanottotieto = ({ t }: { t: (key: string) => string }) => {
             display: 'flex',
             flexDirection: 'row',
             columnGap: 2,
+            width: '100%',
           }}
         >
           <OphCheckbox

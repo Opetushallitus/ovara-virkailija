@@ -57,16 +57,6 @@ export const useSearchParams = () => {
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
-  const [selectedHakukohteet, setSelectedHakukohteet] = useQueryState(
-    'hakukohde',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
-
-  const [selectedVastaanottotieto, setSelectedVastaanottotieto] = useQueryState(
-    'vastaanottotieto',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
-
   return {
     selectedAlkamiskaudet,
     setSelectedAlkamiskaudet,
@@ -86,9 +76,5 @@ export const useSearchParams = () => {
     setSelectedHakukohteenTila,
     selectedValintakoe,
     setSelectedValintakoe,
-    selectedHakukohteet,
-    setSelectedHakukohteet,
-    selectedVastaanottotieto,
-    setSelectedVastaanottotieto,
   };
 };
