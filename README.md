@@ -64,4 +64,4 @@ APP_URL=https://localhost:3405
 Käyttöliittymän saa käynnistettyä komennolla `npm run dev`. Käyttöliittymä avautuu osoitteeseen: `https://localhost:3405`.
 
 Lokaaliympäristössä backendin ja käyttöliittymän käyttö https yli cas-autentikoinnilla ja sessiohallinnalla edellyttää sertifikaattien ja keystoren generointia.
-Nämä saa luotua ajamalla projektin juuressa skriptin `generate-keystore.sh`.
+Nämä saa luotua ajamalla projektin juuressa skriptin `generate-certs.sh`.
