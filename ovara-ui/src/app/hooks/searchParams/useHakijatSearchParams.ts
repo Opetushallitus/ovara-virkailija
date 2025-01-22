@@ -1,5 +1,10 @@
 'use client';
-import { parseAsArrayOf, parseAsString, useQueryState } from 'nuqs';
+import {
+  parseAsArrayOf,
+  parseAsBoolean,
+  parseAsString,
+  useQueryState,
+} from 'nuqs';
 import { DEFAULT_NUQS_OPTIONS } from '@/app/lib/constants';
 
 export const useHakijatSearchParams = () => {
@@ -13,10 +18,17 @@ export const useHakijatSearchParams = () => {
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
+  const [selectedMarkkinointilupa, setSelectedMarkkinointilupa] = useQueryState(
+    'markkinointilupa',
+    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
   return {
     selectedHakukohteet,
     setSelectedHakukohteet,
     selectedVastaanottotieto,
     setSelectedVastaanottotieto,
+    selectedMarkkinointilupa,
+    setSelectedMarkkinointilupa,
   };
 };

@@ -3,11 +3,10 @@ import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
 import { SelectChangeEvent } from '@mui/material';
 import { OvaraRadioGroup } from '@/app/components/form/ovara-radio-group';
 import { match } from 'ts-pattern';
+import { RADIOGROUP_OPTIONS } from '@/app/lib/constants';
 
 export const Valintakoe = () => {
   const { t } = useTranslate();
-
-  const RADIOGROUP_OPTIONS = ['neutral', 'yes', 'no'];
 
   const { selectedValintakoe, setSelectedValintakoe } = useSearchParams();
 

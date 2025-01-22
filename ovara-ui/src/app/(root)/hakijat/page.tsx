@@ -20,6 +20,7 @@ import {
 } from '@/app/components/form/organisaatiovalikot';
 import { Hakukohde } from '@/app/components/form/hakukohde';
 import { Vastaanottotieto } from '@/app/components/form/vastaanottotieto';
+import { Markkinointilupa } from '@/app/components/form/koulutusmarkkinointilupa';
 
 export default function Hakijat() {
   const { t } = useTranslate();
@@ -56,6 +57,7 @@ export default function Hakijat() {
           <Hakukohde locale={locale} t={t} />
           <Divider />
           <Vastaanottotieto t={t} />
+          <Markkinointilupa t={t} />
           <FormButtons
             disabled={false}
             excelDownloadUrl={

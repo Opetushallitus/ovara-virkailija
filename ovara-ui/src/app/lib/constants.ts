@@ -3,6 +3,8 @@ export const TOISEN_ASTEEN_RAPORTIT = [
   'hakijat',
 ];
 
+export const RADIOGROUP_OPTIONS = ['neutral', 'yes', 'no'];
+
 export const TILAT = ['julkaistu', 'luonnos', 'arkistoitu'];
 
 export const KOULUTUSTOIMIJAORGANISAATIOTYYPPI = '01';
