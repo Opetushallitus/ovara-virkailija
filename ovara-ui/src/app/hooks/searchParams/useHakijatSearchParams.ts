@@ -23,6 +23,11 @@ export const useHakijatSearchParams = () => {
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
+  const [selectedJulkaisulupa, setSelectedJulkaisulupa] = useQueryState(
+    'julkaisulupa',
+    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
   return {
     selectedHakukohteet,
     setSelectedHakukohteet,
@@ -30,5 +35,7 @@ export const useHakijatSearchParams = () => {
     setSelectedVastaanottotieto,
     selectedMarkkinointilupa,
     setSelectedMarkkinointilupa,
+    selectedJulkaisulupa,
+    setSelectedJulkaisulupa,
   };
 };
