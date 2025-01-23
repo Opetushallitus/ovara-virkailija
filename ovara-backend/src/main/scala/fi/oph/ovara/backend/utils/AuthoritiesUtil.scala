@@ -7,15 +7,14 @@ import scala.jdk.CollectionConverters.*
 import scala.util.matching.Regex
 
 object AuthoritiesUtil {
-  def getRaportointiAuthorities(allAuthorities: util.Collection[? <: GrantedAuthority]): List[String] = {
-    val raportointiAuthoritiesRegex: Regex = """ROLE_APP_RAPORTOINTI.*""".r
+  def getOvaraAuthorities(allAuthorities: util.Collection[? <: GrantedAuthority]): List[String] = {
+    val raportointiAuthoritiesRegex: Regex = """ROLE_APP_OVARA-VIRKAILIJA.*""".r
     allAuthorities.asScala.toList
       .flatMap(role => raportointiAuthoritiesRegex.findFirstIn(role.getAuthority))
   }
 
-  def getRaportointiOrganisaatiot(authorities: util.Collection[? <: GrantedAuthority]): List[String] = {
-    val raportointiAuthorities = getRaportointiAuthorities(authorities)
-    val raportointiOrganisaatiotRegex: Regex = """([0-9]\.?)+""".r
-    raportointiAuthorities.flatMap(role => raportointiOrganisaatiotRegex.findFirstIn(role))
+  def getOrganisaatiot(authorities: List[String]): List[String] = {
+    val raportointiOrganisaatiotRegex: Regex = """([0-9]\.?)+$""".r
+    authorities.flatMap(role => raportointiOrganisaatiotRegex.findFirstIn(role)).distinct
   }
 }

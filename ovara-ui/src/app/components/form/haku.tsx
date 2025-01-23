@@ -29,10 +29,7 @@ export const Haku = () => {
 
   const { selectedHaut, setSelectedHaut } = useSearchParams();
 
-  const changeAlkamiskaudet = (
-    _: React.SyntheticEvent,
-    value: Array<SelectOption>,
-  ) => {
+  const changeHaut = (_: React.SyntheticEvent, value: Array<SelectOption>) => {
     return setSelectedHaut(isEmpty(value) ? null : value?.map((v) => v.value));
   };
 
@@ -47,7 +44,7 @@ export const Haku = () => {
           label: haku.haku_nimi[locale] || '',
         };
       })}
-      onChange={changeAlkamiskaudet}
+      onChange={changeHaut}
       required={true}
     />
   );

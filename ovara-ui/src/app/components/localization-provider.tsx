@@ -12,8 +12,8 @@ const LocalizationContent = ({
   language,
   children,
 }: {
-  children: React.ReactNode;
   language: string;
+  children: React.ReactNode;
 }) => {
   const tolgee = Tolgee()
     .use(FormatSimple())

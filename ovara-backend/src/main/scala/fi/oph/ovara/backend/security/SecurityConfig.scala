@@ -57,10 +57,8 @@ class SecurityConfig  {
     s"$opintopolku_virkailija_domain/oppijanumerorekisteri-service",
     CALLER_ID,
     CALLER_ID,
-    "/j_spring_cas_security_check",
-
-  ).setJsessionName("JSESSIONID").build()
-  )
+    "/j_spring_cas_security_check"
+  ).setJsessionName("JSESSIONID").build())
 
   @Bean
   @SpringSessionDataSource

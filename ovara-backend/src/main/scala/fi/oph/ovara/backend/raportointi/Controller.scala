@@ -2,16 +2,12 @@ package fi.oph.ovara.backend.raportointi
 
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import fi.oph.ovara.backend.domain.{User, UserResponse}
-import fi.oph.ovara.backend.service.{CommonService, KoulutuksetToteutuksetHakukohteetService, OnrService}
-import fi.oph.ovara.backend.utils.AuthoritiesUtil
+import fi.oph.ovara.backend.domain.UserResponse
+import fi.oph.ovara.backend.service.{CommonService, KoulutuksetToteutuksetHakukohteetService, UserService}
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.{HttpHeaders, MediaType}
-import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.http.HttpHeaders
 import org.springframework.security.web.csrf.CsrfToken
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
 import org.springframework.web.servlet.view.RedirectView
@@ -23,9 +19,9 @@ import scala.jdk.CollectionConverters.*
 @RestController
 @RequestMapping(path = Array("api"))
 class Controller(
-    onrService: OnrService,
     commonService: CommonService,
-    koulutuksetToteutuksetHakukohteetService: KoulutuksetToteutuksetHakukohteetService
+    koulutuksetToteutuksetHakukohteetService: KoulutuksetToteutuksetHakukohteetService,
+    userService: UserService
 ) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[Controller]);
 
@@ -41,22 +37,15 @@ class Controller(
   def healthcheck = "Ovara application is running!"
 
   @GetMapping(path = Array("user"))
-  def user(@AuthenticationPrincipal userDetails: UserDetails): String = {
+  def user(): String = {
+    val enrichedUserDetails = userService.getEnrichedUserDetails
     mapper.writeValueAsString(
       UserResponse(
         user =
-          if (userDetails == null)
+          if (enrichedUserDetails == null)
             null
           else
-            val asiointikieli = onrService.getAsiointikieli(userDetails.getUsername) match
-              case Left(e) => None
-              case Right(v) => Some(v)
-
-            User(
-              userOid = userDetails.getUsername,
-              authorities = AuthoritiesUtil.getRaportointiAuthorities(userDetails.getAuthorities),
-              asiointikieli = asiointikieli
-            )
+            enrichedUserDetails
       )
     )
   }
@@ -73,24 +62,40 @@ class Controller(
   @GetMapping(path = Array("haut"))
   def haut: String = mapper.writeValueAsString(commonService.getHaut)
 
+  @GetMapping(path = Array("organisaatiot"))
+  def organisaatiot: String = mapper.writeValueAsString(commonService.getOrganisaatioHierarkiatWithUserRights)
+
+  // RAPORTIT
+
   @GetMapping(path = Array("koulutukset-toteutukset-hakukohteet"))
   def koulutukset_toteutukset_hakukohteet(
       @RequestParam("alkamiskausi") alkamiskausi: java.util.Collection[String],
       @RequestParam("haku") haku: java.util.Collection[String],
-      @RequestParam("koulutuksenTila", required = false) koulutuksenTila: String,
-      @RequestParam("toteutuksenTila", required = false) toteutuksenTila: String,
-      @RequestParam("hakukohteenTila", required = false) hakukohteenTila: String,
-      @RequestParam("valintakoe", required = false) valintakoe: Boolean,
+      @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
+      @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
+      @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
+      @RequestParam("koulutuksen-tila", required = false) koulutuksenTila: String,
+      @RequestParam("toteutuksen-tila", required = false) toteutuksenTila: String,
+      @RequestParam("hakukohteen-tila", required = false) hakukohteenTila: String,
+      @RequestParam("valintakoe", required = false) valintakoe: String,
       response: HttpServletResponse
   ): Unit = {
+    val maybeKoulutustoimija = Option(koulutustoimija)
     val maybeKoulutuksenTila = Option(koulutuksenTila)
     val maybeToteutuksenTila = Option(toteutuksenTila)
     val maybeHakukohteenTila = Option(hakukohteenTila)
-    val maybeValintakoe      = Option(valintakoe)
-    val wb = koulutuksetToteutuksetHakukohteetService.
-      get(
+    val maybeValintakoe = if (valintakoe == null) {
+      None
+    } else {
+      Option(valintakoe.toBoolean)
+    }
+
+    val wb = koulutuksetToteutuksetHakukohteetService.get(
       alkamiskausi.asScala.toList,
       haku.asScala.toList,
+      maybeKoulutustoimija,
+      if (oppilaitos == null) List() else oppilaitos.asScala.toList,
+      if (toimipiste == null) List() else toimipiste.asScala.toList,
       maybeKoulutuksenTila,
       maybeToteutuksenTila,
       maybeHakukohteenTila,
@@ -99,10 +104,13 @@ class Controller(
     try {
       LOG.info(s"Sending excel in the response")
       val date: LocalDateTime = LocalDateTime.now().withNano(0)
-      val dateTimeStr = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-      val out = response.getOutputStream
+      val dateTimeStr         = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+      val out                 = response.getOutputStream
       response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, s"attachment; filename=\"koulutukset-toteutukset-hakukohteet-$dateTimeStr.xlsx\"")
+      response.setHeader(
+        HttpHeaders.CONTENT_DISPOSITION,
+        s"attachment; filename=\"koulutukset-toteutukset-hakukohteet-$dateTimeStr.xlsx\""
+      )
       wb.write(out)
       out.close()
       wb.close()
