@@ -18,6 +18,7 @@ const app = next({
   hostname: 'localhost',
   port: port,
   env: process.env,
+  experimentalHttpsServer: true,
 });
 
 const handle = app.getRequestHandler();

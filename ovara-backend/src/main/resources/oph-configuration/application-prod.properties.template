@@ -3,6 +3,7 @@
 spring.datasource.url={{host_postgresql_ovara}}
 spring.datasource.username={{ovara_backend_postgresql_username}}
 spring.datasource.password={{ovara_backend_postgresql_password}}
+session.schema.name={{ovara_backend_session_schema}}
 
 # CAS
 opintopolku.virkailija.domain={{host_virkailija}}

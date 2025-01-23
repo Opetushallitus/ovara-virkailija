@@ -1,9 +1,10 @@
 package fi.oph.ovara.backend.security
 
+import com.zaxxer.hikari.HikariDataSource
 import fi.oph.ovara.backend.OvaraBackendApplication.CALLER_ID
 import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl
 import fi.vm.sade.javautils.nio.cas.{CasClient, CasClientBuilder, CasConfig}
-import org.apereo.cas.client.session.SingleSignOutFilter
+import org.apereo.cas.client.session.{SessionMappingStorage, SingleSignOutFilter}
 import org.apereo.cas.client.validation.{Cas20ServiceTicketValidator, TicketValidator}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.{Bean, Configuration}
@@ -19,10 +20,17 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.HttpStatusEntryPoint
+import org.springframework.security.web.context.{HttpSessionSecurityContextRepository, SecurityContextRepository}
+import org.springframework.session.jdbc.config.annotation.SpringSessionDataSource
+import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHttpSession
 
 @Configuration
 @EnableWebSecurity
+@EnableJdbcHttpSession(tableName = "VIRKAILIJA_SESSION")
 class SecurityConfig  {
+  private final val LOGIN_PATH = "/auth/login"
+  private final val SPRING_CAS_SECURITY_CHECK_PATH = "/j_spring_cas_security_check"
+
   @Value("${cas.url}")
   val cas_url: String = null
 
@@ -38,6 +46,9 @@ class SecurityConfig  {
   @Value("${ovara-backend.cas.password}")
   val cas_password: String = null
 
+  @Value("${session.schema.name}")
+  private val schema = null
+
   @Bean
   def createCasClient(): CasClient = CasClientBuilder.build(CasConfig.CasConfigBuilder(
     cas_username,
@@ -50,9 +61,30 @@ class SecurityConfig  {
   ).setJsessionName("JSESSIONID").build())
 
   @Bean
+  @SpringSessionDataSource
+  def sessionDatasource(@Value("${spring.datasource.url}") url: String,
+                        @Value("${spring.datasource.username}") username: String,
+                        @Value("${spring.datasource.password}") password: String,
+                        @Value("${session.schema.name}") schema: String): HikariDataSource = {
+    val config = new HikariDataSource()
+    config.setJdbcUrl(url)
+    config.setUsername(username)
+    config.setPassword(password)
+    config.addDataSourceProperty("currentSchema", schema)
+    config.setMaximumPoolSize(2)
+    config
+  }
+
+  @Bean
+  def securityContextRepository(): HttpSessionSecurityContextRepository = {
+    val httpSessionSecurityContextRepository = new HttpSessionSecurityContextRepository()
+    httpSessionSecurityContextRepository
+  }
+
+  @Bean
   def serviceProperties(): ServiceProperties = {
     val serviceProperties = ServiceProperties()
-    serviceProperties.setService(ovara_backend_url + "/auth/login")
+    serviceProperties.setService(ovara_backend_url + SPRING_CAS_SECURITY_CHECK_PATH)
     serviceProperties.setSendRenew(false)
     serviceProperties
   }
@@ -88,18 +120,27 @@ class SecurityConfig  {
   }
 
   @Bean
-  def casFilterChain(http: HttpSecurity, authenticationManager: AuthenticationManager, serviceProperties: ServiceProperties): SecurityFilterChain = {
+  def casAuthenticationFilter(authenticationManager: AuthenticationManager, serviceProperties: ServiceProperties, securityContextRepository: SecurityContextRepository): CasAuthenticationFilter = {
     val casAuthenticationFilter = CasAuthenticationFilter()
     casAuthenticationFilter.setAuthenticationManager(authenticationManager)
     casAuthenticationFilter.setServiceProperties(serviceProperties)
-    casAuthenticationFilter.setFilterProcessesUrl("/auth/login")
+    casAuthenticationFilter.setFilterProcessesUrl(SPRING_CAS_SECURITY_CHECK_PATH)
+    casAuthenticationFilter.setSecurityContextRepository(securityContextRepository)
+    casAuthenticationFilter
+  }
 
-    val singleSignOutFilter = new SingleSignOutFilter()
-
+  @Bean
+  def casFilterChain(http: HttpSecurity, authenticationFilter: CasAuthenticationFilter, sessionMappingStorage: SessionMappingStorage, securityContextRepository: SecurityContextRepository): SecurityFilterChain = {
     http
-      .securityMatcher("/auth/login")
-      .addFilter(casAuthenticationFilter)
-      .addFilterBefore(singleSignOutFilter, classOf[CasAuthenticationFilter])
+      .securityMatcher(LOGIN_PATH)
+      .addFilterAt(authenticationFilter, classOf[CasAuthenticationFilter])
+      .addFilterBefore(singleLogoutFilter(sessionMappingStorage), classOf[CasAuthenticationFilter])
+      .securityContext(securityContext => securityContext
+        .requireExplicitSave(true)
+        .securityContextRepository(securityContextRepository))
+      .logout(logout =>
+        logout.logoutUrl("/logout")
+          .deleteCookies("JSESSIONID"))
       .build()
   }
 
@@ -141,9 +182,21 @@ class SecurityConfig  {
   def apiLoginFilterChain(http: HttpSecurity, casAuthenticationEntryPoint: CasAuthenticationEntryPoint): SecurityFilterChain = {
     http
       .securityMatcher("/api/login")
-      .authorizeHttpRequests(requests => requests.anyRequest.fullyAuthenticated)
+      .authorizeHttpRequests(requests =>
+        requests.requestMatchers(SPRING_CAS_SECURITY_CHECK_PATH).permitAll() // päästetään läpi cas-logout
+        .anyRequest.fullyAuthenticated)
       .exceptionHandling(c => c.authenticationEntryPoint(casAuthenticationEntryPoint))
       .build()
+  }
+
+  //
+  // Käsitellään CASilta tuleva SLO-pyyntö
+  //
+  @Bean
+  def singleLogoutFilter(sessionMappingStorage: SessionMappingStorage): SingleSignOutFilter = {
+    val singleSignOutFilter: SingleSignOutFilter = new SingleSignOutFilter();
+    singleSignOutFilter.setIgnoreInitConfiguration(true);
+    singleSignOutFilter
   }
 
   @Bean
