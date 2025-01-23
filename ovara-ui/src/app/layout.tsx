@@ -7,6 +7,7 @@ import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { THEME_OVERRIDES } from '@/app/theme';
 import { AuthorizedUserProvider } from './contexts/AuthorizedUserProvider';
 import LocalizationProvider from './components/localization-provider';
+import ReactQueryClientProvider from '@/app/components/react-query-client-provider';
 
 export const metadata: Metadata = {
   title: 'Opiskelijavalinnan raportointi',
@@ -24,11 +25,13 @@ export default function RootLayout({
       <body>
         <AppRouterCacheProvider>
           <OphNextJsThemeProvider variant="oph" overrides={THEME_OVERRIDES}>
-            <AuthorizedUserProvider>
-              <LocalizationProvider>
-                <NuqsAdapter>{children}</NuqsAdapter>
-              </LocalizationProvider>
-            </AuthorizedUserProvider>
+            <ReactQueryClientProvider>
+              <AuthorizedUserProvider>
+                <LocalizationProvider>
+                  <NuqsAdapter>{children}</NuqsAdapter>
+                </LocalizationProvider>
+              </AuthorizedUserProvider>
+            </ReactQueryClientProvider>
           </OphNextJsThemeProvider>
         </AppRouterCacheProvider>
       </body>
