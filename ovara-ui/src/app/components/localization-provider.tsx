@@ -46,7 +46,7 @@ export default function LocalizationProvider({
   children: React.ReactNode;
 }) {
   const user = useAuthorizedUser();
-  const language = user?.asiointikieli;
+  const language = user?.asiointikieli ?? 'fi';
 
   useEffect(() => {
     if (language) {
