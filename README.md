@@ -65,3 +65,10 @@ Käyttöliittymän saa käynnistettyä komennolla `npm run dev`. Käyttöliittym
 
 Lokaaliympäristössä backendin ja käyttöliittymän käyttö https yli cas-autentikoinnilla ja sessiohallinnalla edellyttää sertifikaattien ja keystoren generointia.
 Nämä saa luotua ajamalla projektin juuressa skriptin `generate-certs.sh`.
+
+# Tietokanta
+
+Ovara-backendilla on ovasa-tietokannassa oma skeema ovara-virkailija jossa on mm. sessiohallintaan liittyvät taulut.
+
+Backendin tietokantamigraatiot on toteutettu [flywaylla](https://flywaydb.org/) ja ajetaan automaattisesti asennuksen
+yhteydessä. Migraatiotiedostot löytyvät kansiosta `ovara-backend/src/main/resources/db/migration`
