@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, Ser
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.UserResponse
 import fi.oph.ovara.backend.service.{CommonService, KoulutuksetToteutuksetHakukohteetService, UserService}
-import jakarta.servlet.http.HttpServletResponse
+import fi.oph.ovara.backend.utils.AuditLog
+import fi.oph.ovara.backend.utils.AuditOperation.KoulutuksetToteutuksetHakukohteet
+import fi.vm.sade.auditlog.{Changes, Target}
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -78,6 +81,7 @@ class Controller(
       @RequestParam("toteutuksen-tila", required = false) toteutuksenTila: String,
       @RequestParam("hakukohteen-tila", required = false) hakukohteenTila: String,
       @RequestParam("valintakoe", required = false) valintakoe: String,
+      request: HttpServletRequest,
       response: HttpServletResponse
   ): Unit = {
     val maybeKoulutustoimija = Option(koulutustoimija)
@@ -89,19 +93,33 @@ class Controller(
     } else {
       Option(valintakoe.toBoolean)
     }
+    val oppilaitosList = if (oppilaitos == null) List() else oppilaitos.asScala.toList
+    val toimipisteList = if (toimipiste == null) List() else toimipiste.asScala.toList
 
     val wb = koulutuksetToteutuksetHakukohteetService.get(
       alkamiskausi.asScala.toList,
       haku.asScala.toList,
       maybeKoulutustoimija,
-      if (oppilaitos == null) List() else oppilaitos.asScala.toList,
-      if (toimipiste == null) List() else toimipiste.asScala.toList,
+      oppilaitosList,
+      toimipisteList,
       maybeKoulutuksenTila,
       maybeToteutuksenTila,
       maybeHakukohteenTila,
       maybeValintakoe
     )
+    val raporttiParams = Map(
+      "alkamiskausi" -> alkamiskausi,
+      "haku" -> haku,
+      "koulutustoimija" -> maybeKoulutustoimija,
+      "oppilaitos" -> Option(oppilaitosList).filterNot(_.isEmpty),
+      "toimipiste" -> Option(toimipisteList).filterNot(_.isEmpty),
+      "koulutuksenTila" -> maybeKoulutuksenTila,
+      "toteutuksenTila" -> maybeToteutuksenTila,
+      "hakukohteenTila" -> maybeHakukohteenTila,
+      "valintakoe" -> maybeValintakoe
+    ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
     try {
+      AuditLog.logWithParams(request, KoulutuksetToteutuksetHakukohteet, raporttiParams)
       LOG.info(s"Sending excel in the response")
       val date: LocalDateTime = LocalDateTime.now().withNano(0)
       val dateTimeStr         = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
