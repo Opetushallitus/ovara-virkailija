@@ -8,6 +8,10 @@ import org.scalatest.flatspec.AnyFlatSpec
 class ExcelWriterSpec extends AnyFlatSpec {
   val userLng: String = "sv"
 
+  val translations: Map[String, String] = Map(
+    "raportti.yhteenveto" -> "Yhteenveto"
+  )
+
   def checkAloituspaikatRowValidity(sheet: XSSFSheet, rowNumber: Int, expected: Int): Unit = {
     for (i <- 1 until 5) {
       assert(sheet.getRow(rowNumber).getCell(i) == null)
@@ -429,7 +433,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         hierarkiatWithHakukohteet,
         KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
         userLng,
-        KOULUTUSTOIMIJARAPORTTI
+        KOULUTUSTOIMIJARAPORTTI,
+        translations
       )
     assert(wb.getNumberOfSheets == 1)
     assert(wb.getSheetName(0) == "Yhteenveto")
@@ -442,7 +447,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         hierarkiatWithHakukohteet,
         KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
         userLng,
-        KOULUTUSTOIMIJARAPORTTI
+        KOULUTUSTOIMIJARAPORTTI,
+        translations
       )
     assert(wb.getSheetAt(0).getRow(0).getCell(0).getStringCellValue == "Hakukohteen nimi SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(1).getStringCellValue == "Hakukohteen oid SV")
@@ -479,7 +485,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         hierarkiatWithHakukohteet,
         KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
         userLng,
-        KOULUTUSTOIMIJARAPORTTI
+        KOULUTUSTOIMIJARAPORTTI,
+        translations
       )
     val sheet = wb.getSheetAt(0)
     // Heading row
@@ -556,7 +563,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         hierarkiatWithHakukohteet,
         KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
         userLng,
-        KOULUTUSTOIMIJARAPORTTI
+        KOULUTUSTOIMIJARAPORTTI,
+        translations
       )
     val sheet = wb.getSheetAt(0)
     // Heading row
@@ -644,7 +652,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
       koulutustoimijaWithHakukohteet,
       KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
       userLng,
-      KOULUTUSTOIMIJARAPORTTI
+      KOULUTUSTOIMIJARAPORTTI,
+      translations
     )
     val sheet = wb.getSheetAt(0)
     // Parent organisaatio row with aloituspaikat sum
@@ -924,7 +933,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
       hierarkiatWithHakukohteet,
       KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
       userLng,
-      OPPILAITOSRAPORTTI
+      OPPILAITOSRAPORTTI,
+      translations
     )
     val sheet = wb.getSheetAt(0)
     // Parent organisaatio row with aloituspaikat sum
@@ -1158,7 +1168,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
       hierarkiatWithHakukohteet,
       KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
       userLng,
-      TOIMIPISTERAPORTTI
+      TOIMIPISTERAPORTTI,
+      translations
     )
     val sheet = wb.getSheetAt(0)
     // Parent organisaatio row with aloituspaikat sum

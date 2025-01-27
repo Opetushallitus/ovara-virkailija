@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component
 class KoulutuksetToteutuksetHakukohteetService(
     koulutuksetToteutuksetHakukohteetRepository: KoulutuksetToteutuksetHakukohteetRepository,
     userService: UserService,
-    commonService: CommonService
+    commonService: CommonService,
+    lokalisointiService: LokalisointiService
 ) {
 
   @Autowired
@@ -29,9 +30,10 @@ class KoulutuksetToteutuksetHakukohteetService(
       valintakoe: Option[Boolean]
   ): XSSFWorkbook = {
     val user                      = userService.getEnrichedUserDetails
-    val userLng                   = user.asiointikieli.getOrElse("fi")
+    val asiointikieli                   = user.asiointikieli.getOrElse("fi")
     val authorities               = user.authorities
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getOrganisaatiot(authorities)
+    val translations              = lokalisointiService.getOvaraTranslations(asiointikieli)
 
     val (orgOidsForQuery, hierarkiat, raporttityyppi) = commonService.getAllowedOrgsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
@@ -64,8 +66,9 @@ class KoulutuksetToteutuksetHakukohteetService(
     ExcelWriter.writeRaportti(
       organisaationKoulutuksetHakukohteetToteutukset,
       KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
-      userLng,
-      raporttityyppi
+      asiointikieli,
+      raporttityyppi,
+      translations
     )
   }
 }

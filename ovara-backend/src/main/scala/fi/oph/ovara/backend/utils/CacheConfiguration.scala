@@ -4,10 +4,12 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.cache.caffeine.CaffeineCacheManager
 import org.springframework.context.annotation.{Bean, Configuration}
+import org.springframework.scheduling.annotation.EnableScheduling
 
 import java.util.concurrent.TimeUnit
 
 @EnableCaching
+@EnableScheduling
 @Configuration
 class CacheConfiguration {
 

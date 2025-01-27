@@ -235,7 +235,8 @@ object ExcelWriter {
       hierarkiatWithResults: List[OrganisaatioHierarkiaWithHakukohteet],
       raporttiColumnTitles: Map[String, List[String]],
       userLng: String,
-      raporttityyppi: String
+      raporttityyppi: String,
+      translations: Map[String, String]
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
@@ -267,7 +268,10 @@ object ExcelWriter {
       hakukohteenNimiTextCellStyle.setAlignment(HorizontalAlignment.LEFT)
       hakukohteenNimiTextCellStyle.setIndention(2.toShort)
 
-      workbook.setSheetName(0, WorkbookUtil.createSafeSheetName("Yhteenveto")) //TODO: käännös
+      workbook.setSheetName(
+        0,
+        WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yhteenveto", "raportti.yhteenveto"))
+      )
 
       var currentRowIndex = 0
       val row             = sheet.createRow(currentRowIndex)
