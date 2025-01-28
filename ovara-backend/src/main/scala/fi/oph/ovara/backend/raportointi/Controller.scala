@@ -24,7 +24,8 @@ import scala.jdk.CollectionConverters.*
 class Controller(
     commonService: CommonService,
     koulutuksetToteutuksetHakukohteetService: KoulutuksetToteutuksetHakukohteetService,
-    userService: UserService
+    userService: UserService,
+    val auditLog: AuditLog = AuditLog
 ) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[Controller]);
 
@@ -107,9 +108,12 @@ class Controller(
       maybeHakukohteenTila,
       maybeValintakoe
     )
+    val alkamiskausiList = if (alkamiskausi == null) List() else alkamiskausi.asScala.toList
+    val hakuList = if (haku == null) List() else haku.asScala.toList
+
     val raporttiParams = Map(
-      "alkamiskausi" -> alkamiskausi,
-      "haku" -> haku,
+      "alkamiskausi" -> Option(alkamiskausiList).filterNot(_.isEmpty),
+      "haku" -> Option(hakuList).filterNot(_.isEmpty),
       "koulutustoimija" -> maybeKoulutustoimija,
       "oppilaitos" -> Option(oppilaitosList).filterNot(_.isEmpty),
       "toimipiste" -> Option(toimipisteList).filterNot(_.isEmpty),
@@ -119,7 +123,7 @@ class Controller(
       "valintakoe" -> maybeValintakoe
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
     try {
-      AuditLog.logWithParams(request, KoulutuksetToteutuksetHakukohteet, raporttiParams)
+      auditLog.logWithParams(request, KoulutuksetToteutuksetHakukohteet, raporttiParams)
       LOG.info(s"Sending excel in the response")
       val date: LocalDateTime = LocalDateTime.now().withNano(0)
       val dateTimeStr         = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)

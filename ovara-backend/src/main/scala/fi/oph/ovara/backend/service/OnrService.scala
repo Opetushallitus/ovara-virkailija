@@ -20,7 +20,7 @@ class OnrService {
 
   @Value("${opintopolku.virkailija.url}")
   val opintopolku_virkailija_domain: String = null
-  
+
   @Autowired
   private val client: CasClient = null
 
@@ -28,7 +28,7 @@ class OnrService {
   val cacheManager: CacheManager = null
 
   @Cacheable(value = Array("asiointikieli"))
-  def getAsiointikieli(personOid: String): Either[Throwable, String] =
+  def getAsiointikieli(personOid: String): Either[Throwable, String] = {
     val asiointikieliCache = cacheManager.getCache("asiointikieli")
     val cachedAsiointikieli = asiointikieliCache.get(personOid)
     if (cachedAsiointikieli != null) {
@@ -36,17 +36,19 @@ class OnrService {
     } else {
       LOG.info("Fetching asiointikieli from oppijanumerorekisteri")
       val url = s"$opintopolku_virkailija_domain/oppijanumerorekisteri-service/henkilo/$personOid/asiointiKieli"
-      fetch(url) match
+      fetch(url) match {
         case Left(e) => Left(e)
         case Right(o) => Right(o)
+      }
     }
+  }
 
   private def fetch(url: String): Either[Throwable, String] = {
     val req = new RequestBuilder()
       .setMethod("GET")
       .setUrl(url)
       .build()
-    try
+    try {
       val result = asScala(client.execute(req)).map {
         case r if r.getStatusCode == 200 =>
           Right(r.getResponseBody())
@@ -55,9 +57,10 @@ class OnrService {
           Left(new RuntimeException("Failed to fetch asiointikieli: " + r.getResponseBody()))
       }
       Await.result(result, Duration(10, TimeUnit.SECONDS))
-    catch
+    } catch {
       case e: Throwable =>
         Left(e)
+    }
   }
 
   @CachePut(Array("asiointikieli"))

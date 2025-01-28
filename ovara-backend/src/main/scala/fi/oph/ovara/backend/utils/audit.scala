@@ -38,7 +38,7 @@ class AuditLog(val logger: Logger) {
         throw AuditException(e.getMessage)
     }
   }
-  
+
   val mapper = {
     // luodaan objectmapper jonka pitäisi pystyä serialisoimaan "kaikki mahdollinen"
     val mapper = new ObjectMapper()
@@ -58,35 +58,44 @@ class AuditLog(val logger: Logger) {
     }
   }
 
-  def getUser(request: HttpServletRequest): User =
+  def getUser(request: HttpServletRequest): User = {
     val userOid = getCurrentPersonOid()
     val ip = getInetAddress(request)
     new User(userOid, ip, request.getSession(false).getId(), Option(request.getHeader("User-Agent")).getOrElse("Tuntematon user agent"))
+  }
 
-  def getCurrentPersonOid(): Oid =
+  def getCurrentPersonOid(): Oid = {
     val authentication: Authentication = SecurityContextHolder.getContext().getAuthentication()
-    if (authentication != null)
-      try
+    if (authentication != null) {
+      try {
         new Oid(authentication.getName())
-      catch
+      } catch {
         case e: Exception =>
           errorLogger.error(s"Käyttäjän oidin luonti epäonnistui: ${authentication.getName}")
           throw AuditException(e.getMessage)
-    null
+      }
+    } else {
+      null
+    }
+  }
 
-  def getInetAddress(request: HttpServletRequest): InetAddress =
+  def getInetAddress(request: HttpServletRequest): InetAddress = {
     InetAddress.getByName(HttpServletRequestUtils.getRemoteAddress(request))
-
-
+  }
 }
 
-
-trait AuditOperation(val name: String) extends Operation
+trait AuditOperation extends Operation {
+  val name: String
+}
 
 object AuditOperation {
-  case object Login extends AuditOperation("KIRJAUTUMINEN")
+  case object Login extends AuditOperation {
+    val name = "KIRJAUTUMINEN"
+  }
 
-  case object KoulutuksetToteutuksetHakukohteet extends AuditOperation("KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET")
+  case object KoulutuksetToteutuksetHakukohteet extends AuditOperation {
+    val name = "KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET"
+  }
 }
 
 case class AuditException(message: String) extends Exception(message)
