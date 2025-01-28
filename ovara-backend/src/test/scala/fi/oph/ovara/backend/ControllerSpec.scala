@@ -35,14 +35,14 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
 
     val controller = new Controller(mockCommonService, mockKoulutuksetToteutuksetHakukohteetService, mockUserService, mockAuditLog)
 
-    val alkamiskausi = List("2023").asJava
-    val haku = List("haku1").asJava
+    val alkamiskausi = List("2025_syksy").asJava
+    val haku = List("1.2.246.562.29.00000000000000049925").asJava
     val koulutustoimija = "koulutustoimija1"
     val oppilaitos = List("oppilaitos1").asJava
-    val toimipiste = List("toimipiste1").asJava
-    val koulutuksenTila = "tila1"
-    val toteutuksenTila = "tila2"
-    val hakukohteenTila = "tila3"
+    val toimipiste = null
+    val koulutuksenTila = "julkaistu"
+    val toteutuksenTila = "julkaistu"
+    val hakukohteenTila = "julkaistu"
     val valintakoe = "true"
 
     controller.koulutukset_toteutukset_hakukohteet(
@@ -75,14 +75,13 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
 
     val expectedMap = Map(
       "valintakoe" -> true,
-      "toteutuksenTila" -> "tila2",
+      "toteutuksenTila" -> "julkaistu",
       "koulutustoimija" -> "koulutustoimija1",
-      "haku" -> List("haku1"),
-      "toimipiste" -> List("toimipiste1"),
-      "koulutuksenTila" -> "tila1",
+      "haku" -> List("1.2.246.562.29.00000000000000049925"),
+      "koulutuksenTila" -> "julkaistu",
       "oppilaitos" -> List("oppilaitos1"),
-      "alkamiskausi" -> List("2023"),
-      "hakukohteenTila" -> "tila3"
+      "alkamiskausi" -> List("2025_syksy"),
+      "hakukohteenTila" -> "julkaistu"
     )
 
     // Compare the contents of actualMap with the expectedMap

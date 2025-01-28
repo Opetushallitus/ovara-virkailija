@@ -14,7 +14,7 @@ Backendiä ajetaan IDEA:ssa. Kehitysympäristön konfiguraatio määritellään 
 spring.datasource.url=jdbc:postgresql://localhost:5432/ovara
 spring.datasource.username=app
 spring.datasource.password=app
-session.schema.name=OVARA_VIRKAILIJA_SESSION
+session.schema.name=ovara_virkailija
 
 opintopolku.virkailija.url=https://virkailija.hahtuvaopintopolku.fi
 cas.url=${opintopolku.virkailija.url}/cas
