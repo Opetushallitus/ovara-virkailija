@@ -30,7 +30,7 @@ class KoulutuksetToteutuksetHakukohteetService(
       valintakoe: Option[Boolean]
   ): XSSFWorkbook = {
     val user                      = userService.getEnrichedUserDetails
-    val asiointikieli                   = user.asiointikieli.getOrElse("fi")
+    val asiointikieli             = user.asiointikieli.getOrElse("fi")
     val authorities               = user.authorities
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getOrganisaatiot(authorities)
     val translations              = lokalisointiService.getOvaraTranslations(asiointikieli)

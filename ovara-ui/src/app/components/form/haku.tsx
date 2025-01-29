@@ -7,8 +7,8 @@ import { isEmpty } from 'remeda';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { Kielistetty, LanguageCode } from '@/app/lib/types/common';
-import { useQuery } from '@tanstack/react-query';
-import { doApiFetch } from '@/app/lib/ovara-backend/api';
+import { useFetchHaut } from '@/app/hooks/useFetchHaut';
+import { useSearchParams as useQueryParams } from 'next/navigation';
 
 type Haku = {
   haku_oid: string;
@@ -20,14 +20,13 @@ export const Haku = () => {
   const user = useAuthorizedUser();
   const locale = (user?.asiointikieli ?? 'fi') as LanguageCode;
 
-  const { data } = useQuery({
-    queryKey: ['fetchHaut'],
-    queryFn: () => doApiFetch('haut'),
-  });
+  const { selectedHaut, setSelectedHaut } = useSearchParams();
+
+  const queryParams = useQueryParams();
+  const alkamiskausiQueryParams = queryParams.get('alkamiskausi');
+  const { data } = useFetchHaut(alkamiskausiQueryParams);
 
   const haut: Haku[] = data || [];
-
-  const { selectedHaut, setSelectedHaut } = useSearchParams();
 
   const changeHaut = (_: React.SyntheticEvent, value: Array<SelectOption>) => {
     return setSelectedHaut(isEmpty(value) ? null : value?.map((v) => v.value));

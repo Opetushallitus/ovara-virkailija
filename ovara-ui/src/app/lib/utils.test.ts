@@ -18,6 +18,10 @@ describe('getSortedKoulutuksenAlkamiskaudet', () => {
     const alkamisvuodet = null;
     expect(getSortedKoulutuksenAlkamisKaudet(alkamisvuodet)).toEqual([
       {
+        alkamiskausinimi: 'yleinen.ei_alkamiskautta',
+        value: 'ei_alkamiskautta',
+      },
+      {
         value: 'henkilokohtainen_suunnitelma',
         alkamiskausinimi: 'yleinen.henkilokohtainen-suunnitelma',
       },
@@ -28,8 +32,12 @@ describe('getSortedKoulutuksenAlkamiskaudet', () => {
     const alkamisvuodet = ['2024', '2021', '2022'];
     const result = [
       {
-        value: 'henkilokohtainen_suunnitelma',
+        alkamiskausinimi: 'yleinen.ei_alkamiskautta',
+        value: 'ei_alkamiskautta',
+      },
+      {
         alkamiskausinimi: 'yleinen.henkilokohtainen-suunnitelma',
+        value: 'henkilokohtainen_suunnitelma',
       },
       {
         alkamisvuosi: 2024,

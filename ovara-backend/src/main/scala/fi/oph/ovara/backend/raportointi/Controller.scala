@@ -3,7 +3,11 @@ package fi.oph.ovara.backend.raportointi
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.UserResponse
-import fi.oph.ovara.backend.service.{CommonService, KoulutuksetToteutuksetHakukohteetService, UserService}
+import fi.oph.ovara.backend.service.{
+  CommonService,
+  KoulutuksetToteutuksetHakukohteetService,
+  UserService
+}
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.poi.ss.usermodel.Workbook
 import org.slf4j.{Logger, LoggerFactory}
@@ -61,7 +65,14 @@ class Controller(
   def alkamisvuodet: String = mapper.writeValueAsString(commonService.getAlkamisvuodet)
 
   @GetMapping(path = Array("haut"))
-  def haut: String = mapper.writeValueAsString(commonService.getHaut)
+  def haut(
+      @RequestParam("alkamiskausi", required = false) alkamiskaudet: java.util.Collection[String]
+  ): String = {
+    val alkamiskaudetList =
+      if (alkamiskaudet == null) List() else alkamiskaudet.asScala.toList
+
+    mapper.writeValueAsString(commonService.getHaut(alkamiskaudetList))
+  }
 
   @GetMapping(path = Array("hakukohteet"))
   def hakukohteet(

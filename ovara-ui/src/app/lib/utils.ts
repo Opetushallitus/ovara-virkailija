@@ -43,6 +43,11 @@ export const getSortedKoulutuksenAlkamisKaudet = (
       alkamiskausinimi: 'yleinen.henkilokohtainen-suunnitelma',
     });
 
+    sortedAlkamiskaudet.unshift({
+      value: 'ei_alkamiskautta',
+      alkamiskausinimi: 'yleinen.ei_alkamiskautta',
+    });
+
     return sortedAlkamiskaudet;
   }
 

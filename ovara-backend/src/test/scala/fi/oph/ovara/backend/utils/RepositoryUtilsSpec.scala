@@ -8,7 +8,7 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.extractAlkamisvuosiKausiAndHenkkohtSuunnitelma(List("2023_syksy")) == (List(
         (2023, "kausi_s")
-      ), false)
+      ), false, false)
     )
   }
 
@@ -16,13 +16,13 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.extractAlkamisvuosiKausiAndHenkkohtSuunnitelma(
         List("2023_syksy", "2021_kevat", "not_alkamiskausi", "2020_syksy")
-      ) == (List((2023, "kausi_s"), (2021, "kausi_k"), (2020, "kausi_s")), false)
+      ) == (List((2023, "kausi_s"), (2021, "kausi_k"), (2020, "kausi_s")), false, false)
     )
   }
 
   it should "return empty list when no alkamiskaudet specified and false for henkilokohtainen suunnitelma" in {
     assert(
-      RepositoryUtils.extractAlkamisvuosiKausiAndHenkkohtSuunnitelma(List()) == (List(), false)
+      RepositoryUtils.extractAlkamisvuosiKausiAndHenkkohtSuunnitelma(List()) == (List(), false, false)
     )
   }
 
@@ -30,15 +30,22 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.extractAlkamisvuosiKausiAndHenkkohtSuunnitelma(
         List("henkilokohtainen_suunnitelma")
-      ) == (List(), true)
+      ) == (List(), true, false)
     )
   }
 
-  it should "return true for henkilokohtainen suunnitelma amongst alkamiskaudet and random string" in {
+  it should "return true for henkilokohtainen suunnitelma and ei_alkamiskautta amongst alkamiskaudet and random string" in {
     assert(
       RepositoryUtils.extractAlkamisvuosiKausiAndHenkkohtSuunnitelma(
-        List("2023_syksy", "2021_kevat", "henkilokohtainen_suunnitelma", "not_alkamiskausi", "2020_syksy")
-      ) == (List((2023, "kausi_s"), (2021, "kausi_k"), (2020, "kausi_s")), true)
+        List(
+          "2023_syksy",
+          "2021_kevat",
+          "henkilokohtainen_suunnitelma",
+          "not_alkamiskausi",
+          "ei_alkamiskautta",
+          "2020_syksy"
+        )
+      ) == (List((2023, "kausi_s"), (2021, "kausi_k"), (2020, "kausi_s")), true, true)
     )
   }
 
@@ -151,16 +158,16 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     )
   }
 
-  "makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery" should "return empty query str when alkamiskaudet is empty and 'henkilokohtainenSuunnitelma' is false" in {
+  "makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery" should "return empty query str when alkamiskaudet is empty and henkilokohtainenSuunnitelma and eiAlkamiskautta are false" in {
     assert(
-      RepositoryUtils.makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery((List(), false)) == ""
+      RepositoryUtils.makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery((List(), false, false)) == ""
     )
   }
 
-  it should "return AND query string for alkamiskaudet when 'henkilokohtainenSuunnitelma' is false" in {
+  it should "return AND query string for alkamiskaudet when henkilokohtainenSuunnitelma and eiAlkamiskautta are false" in {
     assert(
       RepositoryUtils.makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery(
-        (List((2023, "kausi_s"), (2021, "kausi_k")), false)
+        (List((2023, "kausi_s"), (2021, "kausi_k")), false, false)
       ) ==
         "AND (((t.koulutuksen_alkamisvuosi = 2023 AND t.koulutuksen_alkamiskausi_koodiuri LIKE 'kausi_s%') " +
         "OR (hk.koulutuksen_alkamisvuosi = 2023 AND hk.koulutuksen_alkamiskausi_koodiuri LIKE 'kausi_s%')) " +
@@ -171,7 +178,7 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
 
   it should "return AND query string for alkamiskaudet with OR query for henkilokohtainen suunnitelma when henkilokohtainenSuunnitelma is true" in {
     assert(
-      RepositoryUtils.makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery((List((2021, "kausi_k")), true)) ==
+      RepositoryUtils.makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery((List((2021, "kausi_k")), true, false)) ==
         "AND (((t.koulutuksen_alkamisvuosi = 2021 AND t.koulutuksen_alkamiskausi_koodiuri LIKE 'kausi_k%') " +
         "OR (hk.koulutuksen_alkamisvuosi = 2021 AND hk.koulutuksen_alkamiskausi_koodiuri LIKE 'kausi_k%')) " +
         "OR hk.koulutuksen_alkamiskausi_tyyppi = 'henkilokohtainen suunnitelma')"
@@ -180,8 +187,101 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
 
   it should "return AND query string for henkilokohtainen suunnitelma when henkilokohtainenSuunnitelma is true and alkamiskaudet is empty" in {
     assert(
-      RepositoryUtils.makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery((List(), true)) ==
+      RepositoryUtils.makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery((List(), true, false)) ==
         "AND (hk.koulutuksen_alkamiskausi_tyyppi = 'henkilokohtainen suunnitelma')"
+    )
+  }
+
+  //TODO: Testi eiAlkamiskautta
+
+  "makeHakuTableAlkamiskausiQueryStr" should "return full query string for one alkamiskausi" in {
+    assert(
+      RepositoryUtils.makeHakuTableAlkamiskausiQueryStr(
+        (2024, "kausi_s")
+      ) == "(alkamiskausi->>'koulutuksenAlkamisvuosi' = '2024' "
+        + "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s')"
+    )
+  }
+
+  "makeHakuQueryWithAlkamiskausiParams" should "return empty string if no alkamiskaudet defined" in {
+    assert(RepositoryUtils.makeHakuQueryWithAlkamiskausiParams((List(), false, false)) == "")
+  }
+
+  it should "return string with only henkilokohtainen suunnitelma clause" in {
+    assert(
+      RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
+        (List(), true, false)
+      ) == "AND alkamiskausi->>'type' = 'henkkoht'"
+    )
+  }
+
+  it should "return query string for syksy 2024 alkamiskausi" in {
+    assert(
+      RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
+        (List((2024, "kausi_s")), false, false)
+      ) == "AND (alkamiskausi->>'koulutuksenAlkamisvuosi' = '2024' " +
+        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s')"
+    )
+  }
+
+  it should "return query string for kevat 2021 alkamiskausi" in {
+    assert(
+      RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
+        (List((2021, "kausi_k")), false, false)
+      ) == "AND (alkamiskausi->>'koulutuksenAlkamisvuosi' = '2021' " +
+        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_k')"
+    )
+  }
+
+  it should "return query string for two alkamiskausi and henkilokohtainen suunnitelma" in {
+    assert(
+      RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
+        (List((2021, "kausi_k"), (2024, "kausi_s")), true, false)
+      ) == "AND alkamiskausi->>'type' = 'henkkoht' " +
+        // 2021_kevat haulla
+        "OR (alkamiskausi->>'koulutuksenAlkamisvuosi' = '2021' " +
+        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_k') " +
+        // 2024_syksy haulla
+        "OR (alkamiskausi->>'koulutuksenAlkamisvuosi' = '2024' " +
+        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s')"
+    )
+  }
+
+  it should "return query string for one alkamiskausi, henkilokohtainen suunnitelma and eiAlkamiskautta" in {
+    assert(
+      RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
+        (List((2024, "kausi_s")), true, true)
+      ) == "AND alkamiskausi->>'type' = 'henkkoht' " +
+        "OR koulutuksen_alkamiskausi IS NULL " +
+        "OR (alkamiskausi->>'koulutuksenAlkamisvuosi' = '2024' " +
+        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s')"
+    )
+  }
+
+  it should "return query string for only eiAlkamiskautta selection" in {
+    assert(
+      RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
+        (List(), false, true)
+      ) == "AND koulutuksen_alkamiskausi IS NULL"
+    )
+  }
+
+  it should "return query string for eiAlkamiskautta and henkilokohtainen suunnitelma selection" in {
+    assert(
+      RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
+        (List(), true, true)
+      ) == "AND alkamiskausi->>'type' = 'henkkoht' " +
+        "OR koulutuksen_alkamiskausi IS NULL"
+    )
+  }
+
+  it should "return query string for eiAlkamiskautta and one alkamiskausi selection" in {
+    assert(
+      RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
+        (List((2024, "kausi_s")), false, true)
+      ) == "AND koulutuksen_alkamiskausi IS NULL " +
+        "OR (alkamiskausi->>'koulutuksenAlkamisvuosi' = '2024' " +
+        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s')"
     )
   }
 }

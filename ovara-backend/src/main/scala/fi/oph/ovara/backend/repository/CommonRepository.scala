@@ -1,6 +1,7 @@
 package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.*
+import fi.oph.ovara.backend.utils.RepositoryUtils
 import org.springframework.stereotype.Component
 import slick.jdbc.PostgresProfile.api.*
 import slick.sql.SqlStreamingAction
@@ -13,12 +14,28 @@ class CommonRepository extends Extractors {
           WHERE koulutuksen_alkamisvuosi IS NOT NULL""".as[String]
   }
 
-  def selectDistinctExistingHaut(): SqlStreamingAction[Vector[Haku], Haku, Effect] = {
-    val hakukohdekooditStr = toisenAsteenHaunKohdejoukkokoodit.map(s => s"'$s'").mkString(",")
-    sql"""SELECT DISTINCT haku_oid, haku_nimi
-          FROM pub.pub_dim_haku h
-          WHERE kohdejoukko_koodi IN (#$hakukohdekooditStr)
-          AND h.tila != 'poistettu'""".as[Haku]
+  def selectDistinctExistingHaut(
+      alkamiskaudet: List[String] = List()
+  ): SqlStreamingAction[Vector[Haku], Haku, Effect] = {
+    val alkamiskaudetAndHenkKohtSuunnitelma =
+      RepositoryUtils.extractAlkamisvuosiKausiAndHenkkohtSuunnitelma(alkamiskaudet)
+
+    val alkamiskaudetQueryStr = if (alkamiskaudet.isEmpty) {
+      ""
+    } else {
+      RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(alkamiskaudetAndHenkKohtSuunnitelma)
+    }
+
+    sql"""SELECT DISTINCT h.haku_oid, h.haku_nimi
+                  FROM pub.pub_dim_haku h
+                  LEFT JOIN (
+                    SELECT haku_oid, jsonb_array_elements(koulutuksen_alkamiskausi) as alkamiskausi
+                    FROM pub.pub_dim_haku h
+                  ) alkamiskaudet
+                  ON h.haku_oid = alkamiskaudet.haku_oid
+                  WHERE h.haun_tyyppi = 'toinen_aste'
+                  AND h.tila != 'poistettu'
+                  #$alkamiskaudetQueryStr""".as[Haku]
   }
 
   def selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(
