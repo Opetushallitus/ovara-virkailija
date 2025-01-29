@@ -231,7 +231,34 @@ object ExcelWriter {
     currentRowIndex
   }
 
-  def writeRaportti(
+  private def createHeadingFont(workbook: XSSFWorkbook, headingCellStyle: XSSFCellStyle): XSSFFont = {
+    val headingFont                = workbook.createFont()
+    val dataformat: XSSFDataFormat = workbook.createDataFormat()
+    headingFont.setFontHeightInPoints(12)
+    headingFont.setBold(true)
+    headingCellStyle.setFont(headingFont)
+    headingCellStyle.setAlignment(HorizontalAlignment.LEFT)
+    headingCellStyle.setDataFormat(dataformat.getFormat("text"))
+    headingFont
+  }
+
+  private def createSubHeadingFont(workbook: XSSFWorkbook): XSSFFont = {
+    val subHeadingFont = workbook.createFont()
+    subHeadingFont.setFontHeightInPoints(9)
+    subHeadingFont.setItalic(true)
+    subHeadingFont
+  }
+
+  private def createBodyTextFont(workbook: XSSFWorkbook, bodyTextCellStyle: XSSFCellStyle): XSSFFont = {
+    val bodyTextFont = workbook.createFont()
+    bodyTextFont.setFontHeightInPoints(10)
+
+    bodyTextCellStyle.setFont(bodyTextFont)
+    bodyTextCellStyle.setAlignment(HorizontalAlignment.LEFT)
+    bodyTextFont
+  }
+
+  def writeKoulutuksetToteutuksetHakukohteetRaportti(
       hierarkiatWithResults: List[OrganisaatioHierarkiaWithHakukohteet],
       raporttiColumnTitles: Map[String, List[String]],
       userLng: String,
@@ -245,24 +272,10 @@ object ExcelWriter {
       val headingCellStyle: XSSFCellStyle             = workbook.createCellStyle()
       val bodyTextCellStyle: XSSFCellStyle            = workbook.createCellStyle()
       val hakukohteenNimiTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
-      val dataformat: XSSFDataFormat                  = workbook.createDataFormat()
-      val headingFont                                 = workbook.createFont()
-      val subHeadingFont                              = workbook.createFont()
-      val bodyTextFont                                = workbook.createFont()
 
-      subHeadingFont.setFontHeightInPoints(9)
-      subHeadingFont.setItalic(true)
-
-      headingFont.setFontHeightInPoints(12)
-      headingFont.setBold(true)
-      headingCellStyle.setFont(headingFont)
-      headingCellStyle.setAlignment(HorizontalAlignment.LEFT)
-      headingCellStyle.setDataFormat(dataformat.getFormat("text"))
-
-      bodyTextFont.setFontHeightInPoints(10)
-
-      bodyTextCellStyle.setFont(bodyTextFont)
-      bodyTextCellStyle.setAlignment(HorizontalAlignment.LEFT)
+      val headingFont    = createHeadingFont(workbook, headingCellStyle)
+      val subHeadingFont = createSubHeadingFont(workbook)
+      val bodyTextFont   = createBodyTextFont(workbook, bodyTextCellStyle)
 
       hakukohteenNimiTextCellStyle.setFont(bodyTextFont)
       hakukohteenNimiTextCellStyle.setAlignment(HorizontalAlignment.LEFT)
@@ -311,5 +324,33 @@ object ExcelWriter {
     }
 
     workbook
+  }
+
+  def writeHakijatRaportti(
+      hakijat: Map[String, Seq[Hakija]],
+      asiointikieli: String,
+      translations: Map[String, String]
+  ): XSSFWorkbook = {
+    val workbook: XSSFWorkbook = new XSSFWorkbook()
+    LOG.info("Creating new excel from db results")
+    val sheet: XSSFSheet = workbook.createSheet()
+    workbook.setSheetName(
+      0,
+      WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yhteenveto", "raportti.yhteenveto"))
+    )
+
+    val headingCellStyle: XSSFCellStyle  = workbook.createCellStyle()
+    val bodyTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
+
+    val headingFont  = createHeadingFont(workbook, headingCellStyle)
+    val bodyTextFont = createBodyTextFont(workbook, bodyTextCellStyle)
+
+    try {
+      workbook
+    } catch {
+      case e: Exception =>
+        LOG.error(s"Error creating excel: ${e.getMessage}")
+        throw e
+    }
   }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.UserResponse
 import fi.oph.ovara.backend.service.{
   CommonService,
+  HakijatService,
   KoulutuksetToteutuksetHakukohteetService,
   UserService
 }
@@ -26,6 +27,7 @@ import scala.jdk.CollectionConverters.*
 class Controller(
     commonService: CommonService,
     koulutuksetToteutuksetHakukohteetService: KoulutuksetToteutuksetHakukohteetService,
+    hakijatService: HakijatService,
     userService: UserService
 ) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[Controller]);
@@ -89,8 +91,7 @@ class Controller(
   def organisaatiot: String = mapper.writeValueAsString(commonService.getOrganisaatioHierarkiatWithUserRights)
 
   // RAPORTIT
-
-  def sendExcel(wb: Workbook, response: HttpServletResponse): Unit = {
+  private def sendExcel(wb: Workbook, response: HttpServletResponse): Unit = {
     try {
       LOG.info(s"Sending excel in the response")
       val date: LocalDateTime = LocalDateTime.now().withNano(0)
@@ -113,7 +114,6 @@ class Controller(
 
   @GetMapping(path = Array("koulutukset-toteutukset-hakukohteet"))
   def koulutukset_toteutukset_hakukohteet(
-      @RequestParam("alkamiskausi") alkamiskausi: java.util.Collection[String],
       @RequestParam("haku") haku: java.util.Collection[String],
       @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
       @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
@@ -135,7 +135,6 @@ class Controller(
     }
 
     val wb = koulutuksetToteutuksetHakukohteetService.get(
-      alkamiskausi.asScala.toList,
       haku.asScala.toList,
       maybeKoulutustoimija,
       if (oppilaitos == null) List() else oppilaitos.asScala.toList,
@@ -149,4 +148,39 @@ class Controller(
     sendExcel(wb, response)
   }
 
+  @GetMapping(path = Array("hakijat"))
+  def hakijat(
+      @RequestParam("haku") haku: java.util.Collection[String],
+      @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
+      @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
+      @RequestParam("hakukohde", required = false) hakukohde: java.util.Collection[String],
+      @RequestParam("vastaanottotieto", required = false) vastaanottotieto: java.util.Collection[String],
+      @RequestParam("markkinointilupa", required = false) markkinointilupa: String,
+      @RequestParam("julkaisulupa", required = false) julkaisulupa: String,
+      response: HttpServletResponse
+  ) = {
+    val maybeMarkkinointilupa = if (markkinointilupa == null) {
+      None
+    } else {
+      Option(markkinointilupa.toBoolean)
+    }
+
+    val maybeJulkaisulupa = if (julkaisulupa == null) {
+      None
+    } else {
+      Option(julkaisulupa.toBoolean)
+    }
+
+    val wb = hakijatService.get(
+      haku.asScala.toList,
+      if (oppilaitos == null) List() else oppilaitos.asScala.toList,
+      if (toimipiste == null) List() else toimipiste.asScala.toList,
+      if (hakukohde == null) List() else hakukohde.asScala.toList,
+      if (vastaanottotieto == null) List() else vastaanottotieto.asScala.toList,
+      maybeMarkkinointilupa,
+      maybeJulkaisulupa
+    )
+
+    //sendExcel(wb, response)
+  }
 }

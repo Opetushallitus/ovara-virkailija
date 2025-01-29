@@ -86,4 +86,26 @@ trait Extractors extends GenericOvaraJsonFormats {
       children = r.nextStringOption().map(read[List[OrganisaatioHierarkia]]).getOrElse(List())
     )
   )
+
+  implicit val getHakijaResult: GetResult[Hakija] = GetResult(r =>
+    Hakija(
+      hakijanNimi = r.nextString(),
+      turvakielto = r.nextBooleanOption(),
+      kansalaisuus = extractKielistetty(r.nextStringOption()),
+      henkiloOid = r.nextString(),
+      hakemusOid = r.nextString(),
+      hakukohteenNimi = extractKielistetty(r.nextStringOption()),
+      prioriteetti = r.nextInt(),
+      kaksoistutkintoKiinnostaa = r.nextBooleanOption(),
+      valinnanTila = r.nextString(),
+      soraTerveys = r.nextStringOption(),
+      soraAiempi = r.nextStringOption(),
+      markkinointilupa = r.nextBooleanOption(),
+      julkaisulupa = r.nextBooleanOption(),
+      sahkoinenViestintaLupa = r.nextBooleanOption(),
+      lahiosoite = r.nextString(),
+      postinumero = r.nextString(),
+      postitoimipaikka = r.nextString()
+    )
+  )
 }

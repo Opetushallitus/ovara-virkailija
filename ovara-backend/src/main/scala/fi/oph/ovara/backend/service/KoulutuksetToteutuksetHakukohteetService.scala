@@ -19,7 +19,6 @@ class KoulutuksetToteutuksetHakukohteetService(
   val db: OvaraDatabase = null
 
   def get(
-      alkamiskausi: List[String],
       haku: List[String],
       koulutustoimija: Option[String],
       oppilaitokset: List[String],
@@ -45,7 +44,6 @@ class KoulutuksetToteutuksetHakukohteetService(
     val queryResult = db.run(
       koulutuksetToteutuksetHakukohteetRepository.selectWithParams(
         orgOidsForQuery,
-        alkamiskausi,
         haku,
         koulutuksenTila,
         toteutuksenTila,
@@ -63,7 +61,7 @@ class KoulutuksetToteutuksetHakukohteetService(
         groupedQueryResult
       )
 
-    ExcelWriter.writeRaportti(
+    ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
       organisaationKoulutuksetHakukohteetToteutukset,
       KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
       asiointikieli,

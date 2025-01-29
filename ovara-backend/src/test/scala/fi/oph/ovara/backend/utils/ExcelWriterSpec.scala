@@ -429,7 +429,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
 
     val wb =
-      ExcelWriter.writeRaportti(
+      ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         hierarkiatWithHakukohteet,
         KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
         userLng,
@@ -443,7 +443,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "create one sheet with the column title row and no results" in {
     val hierarkiatWithHakukohteet = List()
     val wb =
-      ExcelWriter.writeRaportti(
+      ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         hierarkiatWithHakukohteet,
         KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
         userLng,
@@ -481,7 +481,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
 
     val wb =
-      ExcelWriter.writeRaportti(
+      ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         hierarkiatWithHakukohteet,
         KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
         userLng,
@@ -559,7 +559,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
 
     val wb =
-      ExcelWriter.writeRaportti(
+      ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         hierarkiatWithHakukohteet,
         KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
         userLng,
@@ -648,7 +648,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
     )
 
-    val wb = ExcelWriter.writeRaportti(
+    val wb = ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
       koulutustoimijaWithHakukohteet,
       KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
       userLng,
@@ -929,7 +929,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
     )
 
-    val wb = ExcelWriter.writeRaportti(
+    val wb = ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
       hierarkiatWithHakukohteet,
       KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
       userLng,
@@ -1164,7 +1164,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
     )
 
-    val wb = ExcelWriter.writeRaportti(
+    val wb = ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
       hierarkiatWithHakukohteet,
       KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
       userLng,
