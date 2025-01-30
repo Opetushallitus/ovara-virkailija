@@ -47,7 +47,7 @@
     <logger name="fi.vm.sade.java_utils.security.OpintopolkuCasAuthenticationFilter" level="error" />
 
     <!-- Auditlog  -->
-    <logger name="fi.oph.ovara.backend.utils.AuditLog" level="INFO" additivity="false">
+    <logger name="fi.oph.ovara.backend.utils.AuditLogger" level="INFO" additivity="false">
         <appender-ref ref="AUDIT" />
     </logger>
 
