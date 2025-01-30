@@ -15,7 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import java.net.InetAddress
 
 object AuditLogger extends Logger {
-  private val logger = LoggerFactory.getLogger(classOf[Audit])
+  private val logger = LoggerFactory.getLogger("fi.oph.ovara.backend.utils.AuditLog")
 
   override def log(msg: String): Unit = logger.info(msg)
 }
@@ -25,7 +25,7 @@ object AuditLog extends AuditLog(AuditLogger)
 class AuditLog(val logger: Logger) {
 
   val audit = new Audit(logger, "ovara-virkailija", ApplicationType.VIRKAILIJA)
-  private val errorLogger = LoggerFactory.getLogger(classOf[Audit])
+  private val errorLogger = LoggerFactory.getLogger(classOf[AuditLog])
 
   def logWithParams(request: HttpServletRequest, operation: Operation, raporttiParams: Map[String, Any]): Unit = {
     try {
