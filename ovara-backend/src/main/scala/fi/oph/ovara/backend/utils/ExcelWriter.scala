@@ -132,7 +132,7 @@ object ExcelWriter {
     initialRowIndex + 1
   }
 
-  def createResultRows(
+  def createKoulutuksetToteutuksetHakukohteetResultRows(
       workbook: XSSFWorkbook,
       sheet: XSSFSheet,
       hierarkiatWithHakukohteet: List[OrganisaatioHierarkiaWithHakukohteet],
@@ -209,7 +209,7 @@ object ExcelWriter {
         })
 
         if (orgHierarkiaWithResults.children.nonEmpty) {
-          val updatedRowIndex = createResultRows(
+          val updatedRowIndex = createKoulutuksetToteutuksetHakukohteetResultRows(
             workbook,
             sheet,
             orgHierarkiaWithResults.children,
@@ -298,7 +298,7 @@ object ExcelWriter {
         cell.setCellValue(title)
       }
 
-      createResultRows(
+      createKoulutuksetToteutuksetHakukohteetResultRows(
         workbook = workbook,
         sheet = sheet,
         hierarkiatWithHakukohteet = hierarkiatWithResults,

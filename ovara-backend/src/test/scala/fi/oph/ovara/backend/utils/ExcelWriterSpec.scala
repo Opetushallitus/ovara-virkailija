@@ -1371,7 +1371,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val raporttiColumnTitlesWithIndex = titles.zipWithIndex
 
     val wb: Unit =
-      ExcelWriter.createResultRows(
+      ExcelWriter.createKoulutuksetToteutuksetHakukohteetResultRows(
         workbook,
         sheet,
         hierarkiatWithHakukohteet,
