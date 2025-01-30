@@ -5,7 +5,13 @@ import {
 import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
 import { isEmpty } from 'remeda';
 import { useFetchHakukohteet } from '@/app/hooks/useFetchHakukohteet';
-import { LanguageCode } from '@/app/lib/types/common';
+import { Kielistetty, LanguageCode } from '@/app/lib/types/common';
+import { useSearchParams as useQueryParams } from 'next/navigation';
+
+type Hakukohde = {
+  hakukohde_oid: string;
+  hakukohde_nimi: Kielistetty;
+};
 
 export const Hakukohde = ({
   locale,
@@ -17,7 +23,11 @@ export const Hakukohde = ({
   const { selectedHakukohteet, setSelectedHakukohteet } =
     useHakijatSearchParams();
 
-  const hakukohteet = useFetchHakukohteet() || [];
+  const queryParams = useQueryParams();
+  const queryParamsStr = queryParams.toString();
+  const { data } = useFetchHakukohteet(queryParamsStr);
+
+  const hakukohteet: Array<Hakukohde> = data || [];
 
   const changeHakukohteet = (
     _: React.SyntheticEvent,

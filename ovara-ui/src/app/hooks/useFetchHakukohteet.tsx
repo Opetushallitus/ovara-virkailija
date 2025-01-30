@@ -1,30 +1,15 @@
-import { useEffect, useState } from 'react';
-import { apiFetch } from '@/app/lib/ovara-backend/api';
-import { Kielistetty } from '@/app/lib/types/common';
-import { useSearchParams } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { doApiFetch } from '@/app/lib/ovara-backend/api';
 
-type Hakukohde = {
-  hakukohde_oid: string;
-  hakukohde_nimi: Kielistetty;
+const fetchHakukohteet = (queryParamsStr: string | null) => {
+  return doApiFetch('hakukohteet', {
+    queryParams: queryParamsStr ? `?${queryParamsStr}` : null,
+  });
 };
 
-export function useFetchHakukohteet() {
-  const [hakukohteet, setHakukohteet] = useState<Array<Hakukohde> | null>(null);
-  const queryParams = useSearchParams();
-
-  useEffect(() => {
-    async function fetchHakukohteet() {
-      const response = await apiFetch('hakukohteet?' + queryParams);
-      if (response.status === 200) {
-        const hakukohteet = await response.json();
-        setHakukohteet(hakukohteet);
-      } else {
-        setHakukohteet(null);
-      }
-    }
-
-    fetchHakukohteet();
-  }, [queryParams]);
-
-  return hakukohteet;
-}
+export const useFetchHakukohteet = (queryParamsStr: string | null) => {
+  return useQuery({
+    queryKey: ['fetchHakukohteet', queryParamsStr],
+    queryFn: () => fetchHakukohteet(queryParamsStr),
+  });
+};

@@ -25,7 +25,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     db.run(commonRepository.selectDistinctExistingHaut(alkamiskaudet), "selectDistinctExistingHaut")
   }
 
-  def getHakukohteet(oppilaitokset: List[String], toimipisteet: List[String]): Vector[Hakukohde] = {
+  def getHakukohteet(oppilaitokset: List[String], toimipisteet: List[String], haut: List[String]): Vector[Hakukohde] = {
     val user                      = userService.getEnrichedUserDetails
     val authorities               = user.authorities
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getOrganisaatiot(authorities)
@@ -35,7 +35,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
 
     if (allowedOrgOidsFromSelection.nonEmpty) {
       db.run(
-        commonRepository.selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(allowedOrgOidsFromSelection),
+        commonRepository.selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(allowedOrgOidsFromSelection, haut),
         "selectDistinctExistingHakukohteet"
       )
     } else {

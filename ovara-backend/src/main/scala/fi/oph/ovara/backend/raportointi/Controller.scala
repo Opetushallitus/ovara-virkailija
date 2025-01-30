@@ -79,11 +79,13 @@ class Controller(
   @GetMapping(path = Array("hakukohteet"))
   def hakukohteet(
       @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
-      @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String]
+      @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
+      @RequestParam("haku", required = false) haku: java.util.Collection[String]
   ): String = mapper.writeValueAsString(
     commonService.getHakukohteet(
       if (oppilaitos == null) List() else oppilaitos.asScala.toList,
-      if (toimipiste == null) List() else toimipiste.asScala.toList
+      if (toimipiste == null) List() else toimipiste.asScala.toList,
+      if (haku == null) List() else haku.asScala.toList,
     )
   )
 
