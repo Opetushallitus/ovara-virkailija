@@ -15,7 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import java.net.InetAddress
 
 object AuditLogger extends Logger {
-  private val logger = LoggerFactory.getLogger("fi.oph.ovara.backend.utils.AuditLog")
+  private val logger = LoggerFactory.getLogger(classOf[Audit])
 
   override def log(msg: String): Unit = logger.info(msg)
 }
