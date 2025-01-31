@@ -17,14 +17,22 @@ class HakijatRepository extends Extractors {
       hakukohteet: List[String],
       vastaanottotieto: List[String],
       markkinointilupa: Option[Boolean],
-      julkaisulupa: Option[Boolean],
+      julkaisulupa: Option[Boolean]
   ): SqlStreamingAction[Vector[Hakija], Hakija, Effect] = {
-    val hakuStr = RepositoryUtils.makeListOfValuesQueryStr(haut)
+    val hakuStr                     = RepositoryUtils.makeListOfValuesQueryStr(haut)
     val raportointiorganisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusOrganisaatiot)
+
+    val hakukohteetStr = RepositoryUtils.makeListOfValuesQueryStr(hakukohteet)
+    val optionalHakukohteetQueryStr = if (hakukohteetStr.isEmpty) {
+      ""
+    } else {
+      s"AND hk.hakukohde_oid in (#$hakukohteetStr)"
+    }
+
     sql"""SELECT concat_ws(',', hlo.sukunimi, hlo.etunimet), hlo.turvakielto,
                 hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid,
-                hk.hakukohde_nimi, ht.hakutoivenumero, ht2.kaksoistutkinto_kiinnostaa,
-                vt.valinnantila, ht2.sora_aiempi, ht2.sora_terveys, hlo.koulutusmarkkinointilupa, hlo.valintatuloksen_julkaisulupa,
+                hk.hakukohde_nimi, hk.hakukohde_oid, ht.hakutoivenumero, ht2.kaksoistutkinto_kiinnostaa,
+                vt.valinnan_tila, ht2.sora_aiempi, ht2.sora_terveys, hlo.koulutusmarkkinointilupa, hlo.valintatuloksen_julkaisulupa,
                 hlo.sahkoinenviestintalupa, hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka
           FROM pub.pub_dim_henkilo hlo
           JOIN pub.pub_fct_hakemus hakemus
@@ -38,10 +46,10 @@ class HakijatRepository extends Extractors {
           JOIN pub.pub_dim_organisaatio o
           ON hk.jarjestyspaikka_oid = o.organisaatio_oid
           LEFT JOIN pub.pub_dim_valinnantulos vt
-          ON hakemus.hakemus_oid = vt.hakemus_oid
-          --tarpeeksi ehtoja tai muuten tukehtuu tulosten määrään
+          ON hakemus.hakemus_oid = vt.hakemus_oid AND hk.hakukohde_oid = vt.hakukohde_oid
           WHERE hakemus.haku_oid in (#$hakuStr)
           AND hk.jarjestyspaikka_oid IN (#$raportointiorganisaatiotStr)
+          #$optionalHakukohteetQueryStr
           """.as[Hakija]
   }
 }
