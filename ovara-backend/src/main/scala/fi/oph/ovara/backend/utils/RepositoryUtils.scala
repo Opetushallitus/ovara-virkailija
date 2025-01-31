@@ -5,14 +5,17 @@ import scala.util.matching.Regex
 object RepositoryUtils {
   def extractAlkamisvuosiKausiAndHenkkohtSuunnitelma(alkamiskaudet: List[String]): (List[(Int, String)], Boolean) = {
     val alkamiskausiRegex: Regex = """(\d{4})_([a-z]+)""".r
-    val alkamiskaudetAndVuodet = alkamiskaudet.flatMap(alkamiskausi =>
-      for alkamiskausiMatches <- alkamiskausiRegex.findAllMatchIn(alkamiskausi) yield
-        val kausi = alkamiskausiMatches.group(2) match
+    val alkamiskaudetAndVuodet = alkamiskaudet.flatMap { alkamiskausi =>
+      for {
+        alkamiskausiMatches <- alkamiskausiRegex.findAllMatchIn(alkamiskausi)
+      } yield {
+        val kausi = alkamiskausiMatches.group(2) match {
           case "syksy" => "kausi_s"
           case "kevat" => "kausi_k"
-
+        }
         (alkamiskausiMatches.group(1).toInt, kausi)
-    )
+      }
+    }
     val henkilokohtainenSuunnitelma = alkamiskaudet.contains("henkilokohtainen_suunnitelma")
 
     (alkamiskaudetAndVuodet, henkilokohtainenSuunnitelma)
@@ -23,29 +26,35 @@ object RepositoryUtils {
   }
 
   def makeEqualsQueryStrOfOptional(operator: String, fieldName: String, value: Option[String]): String = {
-    value match
+    value match {
       case Some(v) => s"$operator $fieldName = '$v'"
       case None => ""
+    }
   }
 
   def makeEqualsQueryStrOfOptionalBoolean(operator: String, fieldName: String, value: Option[Boolean]): String = {
-    value match
+    value match {
       case Some(v) => s"$operator $fieldName = $v"
       case None => ""
+    }
   }
 
   def makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery(alkamiskaudetAndHenkkohtSuunnitelma: (List[(Int, String)], Boolean)): String = {
     val alkamiskaudet = alkamiskaudetAndHenkkohtSuunnitelma._1
     val henkkohtSuunnitelma = alkamiskaudetAndHenkkohtSuunnitelma._2
 
-    if (alkamiskaudet.isEmpty & !henkkohtSuunnitelma) {
+    if (alkamiskaudet.isEmpty && !henkkohtSuunnitelma) {
       ""
     } else {
-      val henkkohtSuunnitelmaQueryStr = if henkkohtSuunnitelma then makeOptionalHenkilokohtainenSuunnitelmaQuery(henkkohtSuunnitelma) else ""
+      val henkkohtSuunnitelmaQueryStr = if (henkkohtSuunnitelma) {
+        makeOptionalHenkilokohtainenSuunnitelmaQuery(henkkohtSuunnitelma)
+      } else {
+        ""
+      }
 
-      val andOrOrQueryStr = if (henkkohtSuunnitelma & alkamiskaudet.isEmpty) {
+      val andOrOrQueryStr = if (henkkohtSuunnitelma && alkamiskaudet.isEmpty) {
         s"$henkkohtSuunnitelmaQueryStr"
-      } else if (henkkohtSuunnitelma & alkamiskaudet.nonEmpty) {
+      } else if (henkkohtSuunnitelma && alkamiskaudet.nonEmpty) {
         s" OR $henkkohtSuunnitelmaQueryStr"
       } else {
         ""
@@ -64,7 +73,7 @@ object RepositoryUtils {
     if (alkamiskaudet.isEmpty) {
       ""
     } else {
-        s"${alkamiskaudet.map(alkamiskausi => makeAlkamiskausiQueryStr(tableNames = tableNames, alkamiskausi = alkamiskausi)).mkString(" OR ")}"
+      s"${alkamiskaudet.map(alkamiskausi => makeAlkamiskausiQueryStr(tableNames = tableNames, alkamiskausi = alkamiskausi)).mkString(" OR ")}"
     }
   }
 
@@ -76,6 +85,10 @@ object RepositoryUtils {
   }
 
   def makeOptionalHenkilokohtainenSuunnitelmaQuery(henkkohtSuunnitelma: Boolean): String = {
-    if henkkohtSuunnitelma then "hk.koulutuksen_alkamiskausi_tyyppi = 'henkilokohtainen suunnitelma'" else ""
+    if (henkkohtSuunnitelma) {
+      "hk.koulutuksen_alkamiskausi_tyyppi = 'henkilokohtainen suunnitelma'"
+    } else {
+      ""
+    }
   }
 }

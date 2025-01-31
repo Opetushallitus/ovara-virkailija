@@ -32,5 +32,3 @@ object Constants {
   val OPPILAITOSRAPORTTI = "oppilaitosraportti"
   val TOIMIPISTERAPORTTI = "toimipisteraportti"
 }
-
-export Constants.*

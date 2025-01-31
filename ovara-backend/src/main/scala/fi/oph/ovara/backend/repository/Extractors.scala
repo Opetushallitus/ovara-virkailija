@@ -37,17 +37,17 @@ trait Extractors extends GenericOvaraJsonFormats {
       )
 
     val parentOid = r.nextString()
-    val child_oid = r.nextString()
+    val childOid = r.nextString()
 
     OrganisaatioParentChild(
       parent_oid = parentOid,
-      child_oid = child_oid,
-      organisaatio = extractOrganisaatio(child_oid, r)
+      child_oid = childOid,
+      organisaatio = extractOrganisaatio(childOid, r)
     )
   })
 
   implicit val getKoulutuksetToteutuksetHakukohteetResult: GetResult[OrganisaationKoulutusToteutusHakukohde] = {
-    GetResult(r =>
+    GetResult(r => {
       val kth = KoulutusToteutusHakukohdeResult(
         hakukohdeNimi = extractKielistetty(r.nextStringOption()),
         hakukohdeOid = r.nextString(),
@@ -57,15 +57,15 @@ trait Extractors extends GenericOvaraJsonFormats {
         aloituspaikat = r.nextIntOption(),
         onValintakoe = r.nextBooleanOption(),
         voiSuorittaaKaksoistutkinnon = r.nextBooleanOption(),
-        jarjestaaUrheilijanAmmKoulutusta = r.nextBooleanOption(),
+        jarjestaaUrheilijanAmmKoulutusta = r.nextBooleanOption()
       )
-      val organisaatio_oid = r.nextStringOption()
+      val organisaatioOid = r.nextStringOption()
 
       OrganisaationKoulutusToteutusHakukohde(
-        organisaatio_oid = organisaatio_oid,
+        organisaatio_oid = organisaatioOid,
         koulutusToteutusHakukohde = kth
       )
-    )
+    })
   }
 
   implicit val getOrganisaatioHierarkiaResult: GetResult[OrganisaatioHierarkia] = GetResult(r =>

@@ -30,14 +30,43 @@
         <scala.version>3.5.0</scala.version>
         <java.cas.version>1.2.1-SNAPSHOT</java.cas.version>
         <scalatest.version>3.2.19</scalatest.version>
+        <flyway.version>11.2.0</flyway.version>
 
     </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>5.0.1</version> <!-- Add your preferred version -->
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>2.6.0</version>
+            </dependency>
+            <!-- Riippuvuuskonfliktit -->
+            <dependency>
+                <groupId>org.checkerframework</groupId>
+                <artifactId>checker-qual</artifactId>
+                <version>3.42.0</version>
+            </dependency>
+            <!-- Scala -->
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala3-library_3</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+            <!-- Commons IO -->
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.16.1</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala3-library_3</artifactId>
-            <version>${scala.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -66,6 +95,18 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>${flyway.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+            <version>${flyway.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -83,7 +124,6 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.6.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -95,13 +135,10 @@
             <version>3.5.0-M5</version>
         </dependency>
         <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-        </dependency>
-        <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>java-cas</artifactId>
             <version>${java.cas.version}</version>
+            <!-- exclude pakko tehdä koska muuten valuu ylimääräinen lokitusimplementaatio -->
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -113,6 +150,16 @@
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>opintopolku-user-details-service</artifactId>
             <version>0.5.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>fi.vm.sade.java-utils</groupId>
+            <artifactId>java-http</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>fi.vm.sade</groupId>
+            <artifactId>auditlogger</artifactId>
+            <version>9.2.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -248,7 +295,31 @@
                     </execution>
                 </executions>
             </plugin>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce-rules</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[3.6.3,)</version>
+                                </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>${java.version}</version>
+                                </requireJavaVersion>
+                                <dependencyConvergence/>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
