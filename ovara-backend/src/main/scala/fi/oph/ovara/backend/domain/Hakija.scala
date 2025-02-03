@@ -1,16 +1,16 @@
 package fi.oph.ovara.backend.domain
 
 case class Hakija(
-    hakijanNimi: String,
+    hakija: String,
     turvakielto: Option[Boolean],
     kansalaisuus: Kielistetty,
-    henkiloOid: String,
+    oppijanumero: String,
     hakemusOid: String,
     hakukohteenNimi: Kielistetty,
     hakukohdeOid: String,
     prioriteetti: Int,
     kaksoistutkintoKiinnostaa: Option[Boolean],
-    valinnanTila: String,
+    valintatieto: String,
     soraAiempi: Option[Boolean],
     soraTerveys: Option[Boolean],
     markkinointilupa: Option[Boolean],

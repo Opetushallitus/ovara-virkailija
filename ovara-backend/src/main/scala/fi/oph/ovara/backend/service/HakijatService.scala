@@ -54,8 +54,8 @@ class HakijatService(
       julkaisulupa = julkaisulupa
     )
 
-    val queryResult = db.run(query, "hakijatRepository.selectWithParams")
-    val groupedByHloOid = queryResult.groupBy(_.henkiloOid)
+    val queryResult     = db.run(query, "hakijatRepository.selectWithParams")
+    val groupedByHloOid = queryResult.groupBy(_.oppijanumero)
 
     ExcelWriter.writeHakijatRaportti(
       groupedByHloOid,

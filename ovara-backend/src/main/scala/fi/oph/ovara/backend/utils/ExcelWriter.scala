@@ -392,7 +392,7 @@ object ExcelWriter {
               val kielistettyValue = kielistetty(Kieli.withName(asiointikieli))
               cell.setCellValue(kielistettyValue)
             case string: String =>
-              val value = if (List("valinnanTila").contains(fieldName)) {
+              val value = if (List("valintatieto").contains(fieldName)) {
                 translations.getOrElse(s"raportti.$string", s"raportti.$string")
               } else {
                 string
