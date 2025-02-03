@@ -60,6 +60,13 @@ export const hasOvaraToinenAsteRole = (userRoles?: Array<string>) => {
   );
 };
 
+export const hasOvaraOpoRole = (userRoles?: Array<string>) => {
+  return (
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPO') ||
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA')
+  );
+};
+
 export const findOrganisaatiotWithOrganisaatiotyyppi = (
   hierarkia: OrganisaatioHierarkia,
   organisaatiotyyppi: string,
