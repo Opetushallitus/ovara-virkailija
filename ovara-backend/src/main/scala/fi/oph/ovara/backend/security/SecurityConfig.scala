@@ -2,6 +2,7 @@ package fi.oph.ovara.backend.security
 
 import com.zaxxer.hikari.HikariDataSource
 import fi.oph.ovara.backend.OvaraBackendApplication.CALLER_ID
+import fi.oph.ovara.backend.utils.AuditLog
 import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl
 import fi.vm.sade.javautils.nio.cas.{CasClient, CasClientBuilder, CasConfig}
 import org.apereo.cas.client.session.{SessionMappingStorage, SingleSignOutFilter}
@@ -49,6 +50,9 @@ class SecurityConfig  {
   @Value("${session.schema.name}")
   private val schema = null
 
+  @Bean
+  def auditLog(): AuditLog = AuditLog
+  
   @Bean
   def createCasClient(): CasClient = CasClientBuilder.build(CasConfig.CasConfigBuilder(
     cas_username,

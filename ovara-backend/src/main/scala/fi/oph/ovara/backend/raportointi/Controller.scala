@@ -9,7 +9,9 @@ import fi.oph.ovara.backend.service.{
   KoulutuksetToteutuksetHakukohteetService,
   UserService
 }
-import jakarta.servlet.http.HttpServletResponse
+import fi.oph.ovara.backend.utils.AuditLog
+import fi.oph.ovara.backend.utils.AuditOperation.KoulutuksetToteutuksetHakukohteet
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.apache.poi.ss.usermodel.Workbook
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
@@ -28,7 +30,8 @@ class Controller(
     commonService: CommonService,
     koulutuksetToteutuksetHakukohteetService: KoulutuksetToteutuksetHakukohteetService,
     hakijatService: HakijatService,
-    userService: UserService
+    userService: UserService,
+    val auditLog: AuditLog = AuditLog
 ) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[Controller]);
 
@@ -85,7 +88,7 @@ class Controller(
     commonService.getHakukohteet(
       if (oppilaitos == null) List() else oppilaitos.asScala.toList,
       if (toimipiste == null) List() else toimipiste.asScala.toList,
-      if (haku == null) List() else haku.asScala.toList,
+      if (haku == null) List() else haku.asScala.toList
     )
   )
 
@@ -93,8 +96,16 @@ class Controller(
   def organisaatiot: String = mapper.writeValueAsString(commonService.getOrganisaatioHierarkiatWithUserRights)
 
   // RAPORTIT
-  private def sendExcel(wb: Workbook, response: HttpServletResponse, id: String): Unit = {
+
+  private def sendExcel(
+      wb: Workbook,
+      response: HttpServletResponse,
+      request: HttpServletRequest,
+      id: String,
+      raporttiParamsForLogs: Map[String, Any]
+  ): Unit = {
     try {
+      auditLog.logWithParams(request, KoulutuksetToteutuksetHakukohteet, raporttiParamsForLogs)
       LOG.info(s"Sending excel in the response")
       val date: LocalDateTime = LocalDateTime.now().withNano(0)
       val dateTimeStr         = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
@@ -102,7 +113,7 @@ class Controller(
       response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
       response.setHeader(
         HttpHeaders.CONTENT_DISPOSITION,
-        s"attachment; filename=\"$id-$dateTimeStr.xlsx\""
+        s"attachment; filename=$id-$dateTimeStr.xlsx"
       )
       wb.write(out)
       out.close()
@@ -116,6 +127,7 @@ class Controller(
 
   @GetMapping(path = Array("koulutukset-toteutukset-hakukohteet"))
   def koulutukset_toteutukset_hakukohteet(
+      @RequestParam("alkamiskausi") alkamiskausi: java.util.Collection[String],
       @RequestParam("haku") haku: java.util.Collection[String],
       @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
       @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
@@ -124,6 +136,7 @@ class Controller(
       @RequestParam("toteutuksen-tila", required = false) toteutuksenTila: String,
       @RequestParam("hakukohteen-tila", required = false) hakukohteenTila: String,
       @RequestParam("valintakoe", required = false) valintakoe: String,
+      request: HttpServletRequest,
       response: HttpServletResponse
   ): Unit = {
     val maybeKoulutustoimija = Option(koulutustoimija)
@@ -135,19 +148,35 @@ class Controller(
     } else {
       Option(valintakoe.toBoolean)
     }
+    val oppilaitosList   = if (oppilaitos == null) List() else oppilaitos.asScala.toList
+    val toimipisteList   = if (toimipiste == null) List() else toimipiste.asScala.toList
+    val alkamiskausiList = if (alkamiskausi == null) List() else alkamiskausi.asScala.toList
+    val hakuList         = if (haku == null) List() else haku.asScala.toList
 
     val wb = koulutuksetToteutuksetHakukohteetService.get(
-      haku.asScala.toList,
+      hakuList,
       maybeKoulutustoimija,
-      if (oppilaitos == null) List() else oppilaitos.asScala.toList,
-      if (toimipiste == null) List() else toimipiste.asScala.toList,
+      oppilaitosList,
+      toimipisteList,
       maybeKoulutuksenTila,
       maybeToteutuksenTila,
       maybeHakukohteenTila,
       maybeValintakoe
     )
 
-    sendExcel(wb, response, "koulutukset-toteutukset-hakukohteet")
+    val raporttiParams = Map(
+      "alkamiskausi"    -> Option(alkamiskausiList).filterNot(_.isEmpty),
+      "haku"            -> Option(hakuList).filterNot(_.isEmpty),
+      "koulutustoimija" -> maybeKoulutustoimija,
+      "oppilaitos"      -> Option(oppilaitosList).filterNot(_.isEmpty),
+      "toimipiste"      -> Option(toimipisteList).filterNot(_.isEmpty),
+      "koulutuksenTila" -> maybeKoulutuksenTila,
+      "toteutuksenTila" -> maybeToteutuksenTila,
+      "hakukohteenTila" -> maybeHakukohteenTila,
+      "valintakoe"      -> maybeValintakoe
+    ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
+
+    sendExcel(wb, response, request, "koulutukset-toteutukset-hakukohteet", raporttiParams)
   }
 
   @GetMapping(path = Array("hakijat"))
@@ -159,8 +188,15 @@ class Controller(
       @RequestParam("vastaanottotieto", required = false) vastaanottotieto: java.util.Collection[String],
       @RequestParam("markkinointilupa", required = false) markkinointilupa: String,
       @RequestParam("julkaisulupa", required = false) julkaisulupa: String,
+      request: HttpServletRequest,
       response: HttpServletResponse
-  ) = {
+  ): Unit = {
+    val hakuList             = if (haku == null) List() else haku.asScala.toList
+    val oppilaitosList       = if (oppilaitos == null) List() else oppilaitos.asScala.toList
+    val toimipisteList       = if (toimipiste == null) List() else toimipiste.asScala.toList
+    val hakukohdeList        = if (hakukohde == null) List() else hakukohde.asScala.toList
+    val vastaanottotietoList = if (vastaanottotieto == null) List() else vastaanottotieto.asScala.toList
+
     val maybeMarkkinointilupa = if (markkinointilupa == null) {
       None
     } else {
@@ -174,15 +210,25 @@ class Controller(
     }
 
     val wb = hakijatService.get(
-      haku.asScala.toList,
-      if (oppilaitos == null) List() else oppilaitos.asScala.toList,
-      if (toimipiste == null) List() else toimipiste.asScala.toList,
-      if (hakukohde == null) List() else hakukohde.asScala.toList,
-      if (vastaanottotieto == null) List() else vastaanottotieto.asScala.toList,
+      hakuList,
+      oppilaitosList,
+      toimipisteList,
+      hakukohdeList,
+      vastaanottotietoList,
       maybeMarkkinointilupa,
       maybeJulkaisulupa
     )
 
-    sendExcel(wb, response, "hakijat")
+    val raporttiParams = Map(
+      "haku"             -> Option(hakuList).filterNot(_.isEmpty),
+      "oppilaitos"       -> Option(oppilaitosList).filterNot(_.isEmpty),
+      "toimipiste"       -> Option(toimipisteList).filterNot(_.isEmpty),
+      "hakukohde"        -> Option(hakukohdeList).filterNot(_.isEmpty),
+      "vastaanottotieto" -> Option(vastaanottotietoList).filterNot(_.isEmpty),
+      "markkinointilupa" -> maybeMarkkinointilupa,
+      "julkaisulupa"     -> maybeJulkaisulupa
+    ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
+
+    sendExcel(wb, response, request, "hakijat", raporttiParams)
   }
 }

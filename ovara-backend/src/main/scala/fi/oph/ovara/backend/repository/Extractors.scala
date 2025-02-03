@@ -44,12 +44,12 @@ trait Extractors extends GenericOvaraJsonFormats {
       )
 
     val parentOid = r.nextString()
-    val child_oid = r.nextString()
+    val childOid = r.nextString()
 
     OrganisaatioParentChild(
       parent_oid = parentOid,
-      child_oid = child_oid,
-      organisaatio = extractOrganisaatio(child_oid, r)
+      child_oid = childOid,
+      organisaatio = extractOrganisaatio(childOid, r)
     )
   })
 
@@ -66,10 +66,10 @@ trait Extractors extends GenericOvaraJsonFormats {
         voiSuorittaaKaksoistutkinnon = r.nextBooleanOption(),
         jarjestaaUrheilijanAmmKoulutusta = r.nextBooleanOption()
       )
-      val organisaatio_oid = r.nextStringOption()
+      val organisaatioOid = r.nextStringOption()
 
       OrganisaationKoulutusToteutusHakukohde(
-        organisaatio_oid = organisaatio_oid,
+        organisaatio_oid = organisaatioOid,
         koulutusToteutusHakukohde = kth
       )
     })

@@ -7,15 +7,17 @@ object RepositoryUtils {
       alkamiskaudet: List[String]
   ): (List[(Int, String)], Boolean, Boolean) = {
     val alkamiskausiRegex: Regex = """(\d{4})_([a-z]+)""".r
-    val alkamiskaudetAndVuodet = alkamiskaudet.flatMap(alkamiskausi =>
-      for (alkamiskausiMatches <- alkamiskausiRegex.findAllMatchIn(alkamiskausi)) yield {
+    val alkamiskaudetAndVuodet = alkamiskaudet.flatMap { alkamiskausi =>
+      for {
+        alkamiskausiMatches <- alkamiskausiRegex.findAllMatchIn(alkamiskausi)
+      } yield {
         val kausi = alkamiskausiMatches.group(2) match {
           case "syksy" => "kausi_s"
           case "kevat" => "kausi_k"
         }
         (alkamiskausiMatches.group(1).toInt, kausi)
       }
-    )
+    }
     val henkilokohtainenSuunnitelma = alkamiskaudet.contains("henkilokohtainen_suunnitelma")
     val eiAlkamiskautta             = alkamiskaudet.contains("ei_alkamiskautta")
 
@@ -47,7 +49,7 @@ object RepositoryUtils {
     val alkamiskaudet       = alkamiskaudetAndHenkkohtSuunnitelma._1
     val henkkohtSuunnitelma = alkamiskaudetAndHenkkohtSuunnitelma._2
 
-    if (alkamiskaudet.isEmpty & !henkkohtSuunnitelma) {
+    if (alkamiskaudet.isEmpty && !henkkohtSuunnitelma) {
       ""
     } else {
       val henkkohtSuunnitelmaQueryStr = if (henkkohtSuunnitelma) {
@@ -56,9 +58,9 @@ object RepositoryUtils {
         ""
       }
 
-      val andOrOrQueryStr = if (henkkohtSuunnitelma & alkamiskaudet.isEmpty) {
+      val andOrOrQueryStr = if (henkkohtSuunnitelma && alkamiskaudet.isEmpty) {
         s"$henkkohtSuunnitelmaQueryStr"
-      } else if (henkkohtSuunnitelma & alkamiskaudet.nonEmpty) {
+      } else if (henkkohtSuunnitelma && alkamiskaudet.nonEmpty) {
         s" OR $henkkohtSuunnitelmaQueryStr"
       } else {
         ""
