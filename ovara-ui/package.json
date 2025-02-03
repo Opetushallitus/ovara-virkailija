@@ -8,7 +8,6 @@
     "start": "next start",
     "lint": "next lint",
     "prepare": "cd .. && husky ovara-ui/.husky",
-    "create-dev-certs": "mkdir -p certificates && cd certificates && mkcert localhost && mkcert -install",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc"
