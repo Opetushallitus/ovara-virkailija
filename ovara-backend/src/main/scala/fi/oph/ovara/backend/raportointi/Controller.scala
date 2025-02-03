@@ -93,7 +93,7 @@ class Controller(
   def organisaatiot: String = mapper.writeValueAsString(commonService.getOrganisaatioHierarkiatWithUserRights)
 
   // RAPORTIT
-  private def sendExcel(wb: Workbook, response: HttpServletResponse): Unit = {
+  private def sendExcel(wb: Workbook, response: HttpServletResponse, id: String): Unit = {
     try {
       LOG.info(s"Sending excel in the response")
       val date: LocalDateTime = LocalDateTime.now().withNano(0)
@@ -102,7 +102,7 @@ class Controller(
       response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
       response.setHeader(
         HttpHeaders.CONTENT_DISPOSITION,
-        s"attachment; filename=\"koulutukset-toteutukset-hakukohteet-$dateTimeStr.xlsx\""
+        s"attachment; filename=\"$id-$dateTimeStr.xlsx\""
       )
       wb.write(out)
       out.close()
@@ -147,7 +147,7 @@ class Controller(
       maybeValintakoe
     )
 
-    sendExcel(wb, response)
+    sendExcel(wb, response, "koulutukset-toteutukset-hakukohteet")
   }
 
   @GetMapping(path = Array("hakijat"))
@@ -183,6 +183,6 @@ class Controller(
       maybeJulkaisulupa
     )
 
-    //sendExcel(wb, response)
+    sendExcel(wb, response, "hakijat")
   }
 }

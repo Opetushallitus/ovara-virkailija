@@ -326,6 +326,27 @@ object ExcelWriter {
     workbook
   }
 
+  def createHakijaHeadingRow(
+      sheet: XSSFSheet,
+      asiontikieli: String,
+      translations: Map[String, String],
+      currentRowIndex: Int,
+      hakijatResult: Map[String, Seq[Hakija]],
+      fieldNames: List[String],
+      headingCellStyle: XSSFCellStyle
+  ): Int = {
+    val headingRow = sheet.createRow(currentRowIndex)
+    fieldNames.zipWithIndex.foreach((fieldName, index) => {
+      val headingCell = headingRow.createCell(index)
+      headingCell.setCellStyle(headingCellStyle)
+      val translationKey = s"raportti.$fieldName"
+      val translation    = translations.getOrElse(translationKey, translationKey)
+      headingCell.setCellValue(translation)
+    })
+
+    currentRowIndex + 1
+  }
+
   def writeHakijatRaportti(
       hakijat: Map[String, Seq[Hakija]],
       asiointikieli: String,
@@ -344,6 +365,77 @@ object ExcelWriter {
 
     val headingFont  = createHeadingFont(workbook, headingCellStyle)
     val bodyTextFont = createBodyTextFont(workbook, bodyTextCellStyle)
+
+    var currentRowIndex = 0
+
+    val fieldNames: List[String] = classOf[Hakija].getDeclaredFields.map(_.getName).toList
+    val fieldNamesWithIndex      = fieldNames.zipWithIndex
+
+    currentRowIndex =
+      createHakijaHeadingRow(sheet, asiointikieli, translations, currentRowIndex, hakijat, fieldNames, headingCellStyle)
+
+    hakijat.foreach((hakijaOid, hakutoiveet) => {
+      hakutoiveet.foreach(hakutoive => {
+        val hakijanHakutoiveRow = sheet.createRow(currentRowIndex)
+        currentRowIndex = currentRowIndex + 1
+
+        for (i <- 0 until hakutoive.productArity) yield {
+          val fieldName = fieldNamesWithIndex.find((name, index) => i == index) match {
+            case Some((name, i)) => name
+            case None            => ""
+          }
+
+          val cell = hakijanHakutoiveRow.createCell(i)
+          cell.setCellStyle(bodyTextCellStyle)
+          hakutoive.productElement(i) match {
+            case kielistetty: Kielistetty =>
+              val kielistettyValue = kielistetty(Kieli.withName(asiointikieli))
+              cell.setCellValue(kielistettyValue)
+            case string: String =>
+              val value = if (List("valinnanTila").contains(fieldName)) {
+                translations.getOrElse(s"raportti.$string", s"raportti.$string")
+              } else {
+                string
+              }
+
+              cell.setCellValue(value)
+            case Some(s: String) =>
+              cell.setCellValue(s)
+            case Some(int: Int) =>
+              cell.setCellValue(int)
+            case int: Int =>
+              cell.setCellValue(int)
+            case Some(b: Boolean) =>
+              val value =
+                if (
+                  List(
+                    "turvakielto",
+                    "kaksoistutkintoKiinnostaa",
+                    "soraAiempi",
+                    "soraTerveys",
+                    "markkinointilupa",
+                    "julkaisulupa",
+                    "sahkoinenViestintaLupa"
+                  ).contains(fieldName)
+                ) {
+                  if (b) translations.getOrElse("raportti.kylla", "raportti.kylla")
+                  else translations.getOrElse("raportti.ei", "raportti.ei")
+                } else {
+                  if (b) "X" else "-"
+                }
+
+              cell.setCellValue(value)
+            case _ =>
+              cell.setCellValue("-")
+          }
+        }
+      })
+    })
+
+    // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
+    fieldNamesWithIndex.foreach { case (title, index) =>
+      sheet.autoSizeColumn(index)
+    }
 
     try {
       workbook

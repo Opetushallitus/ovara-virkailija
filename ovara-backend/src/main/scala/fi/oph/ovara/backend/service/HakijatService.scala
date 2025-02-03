@@ -2,6 +2,7 @@ package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.repository.{HakijatRepository, OvaraDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.{Component, Service}
@@ -27,7 +28,7 @@ class HakijatService(
       vastaanottotieto: List[String],
       markkinointilupa: Option[Boolean],
       julkaisulupa: Option[Boolean]
-  ) = {
+  ): XSSFWorkbook = {
     val user          = userService.getEnrichedUserDetails
     val asiointikieli = user.asiointikieli.getOrElse("fi")
 
@@ -52,14 +53,8 @@ class HakijatService(
       markkinointilupa = markkinointilupa,
       julkaisulupa = julkaisulupa
     )
-    println(query)
 
-    val queryResult =
-      db.run(query, "hakijatRepository.selectWithParams")
-
-    println("queryResult")
-    println(queryResult)
-
+    val queryResult = db.run(query, "hakijatRepository.selectWithParams")
     val groupedByHloOid = queryResult.groupBy(_.henkiloOid)
 
     ExcelWriter.writeHakijatRaportti(

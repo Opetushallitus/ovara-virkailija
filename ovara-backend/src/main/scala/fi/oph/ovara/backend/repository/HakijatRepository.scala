@@ -26,7 +26,7 @@ class HakijatRepository extends Extractors {
     val optionalHakukohteetQueryStr = if (hakukohteetStr.isEmpty) {
       ""
     } else {
-      s"AND hk.hakukohde_oid in (#$hakukohteetStr)"
+      s"AND hk.hakukohde_oid in ($hakukohteetStr)"
     }
 
     sql"""SELECT concat_ws(',', hlo.sukunimi, hlo.etunimet), hlo.turvakielto,

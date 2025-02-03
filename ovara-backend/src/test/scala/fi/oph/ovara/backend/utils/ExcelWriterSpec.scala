@@ -5,11 +5,24 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment
 import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFSheet, XSSFWorkbook}
 import org.scalatest.flatspec.AnyFlatSpec
 
+import scala.collection.immutable.HashMap
+
 class ExcelWriterSpec extends AnyFlatSpec {
   val userLng: String = "sv"
 
   val translations: Map[String, String] = Map(
-    "raportti.yhteenveto" -> "Yhteenveto"
+    "raportti.yhteenveto"                -> "Yhteenveto SV",
+    "raportti.hakijanNimi"               -> "Hakija SV",
+    "raportti.turvakielto"               -> "Turvakielto SV",
+    "raportti.kansalaisuus"              -> "Kansalaisuus SV",
+    "raportti.hakukohteenNimi"           -> "Hakukohde SV",
+    "raportti.kaksoistutkintoKiinnostaa" -> "Kaksoistutkinto kiinnostaa SV",
+    "raportti.markkinointilupa"          -> "LupaMark SV",
+    "raportti.kylla"                     -> "Ja",
+    "raportti.ei"                        -> "Nej",
+    "raportti.HYLATTY"                   -> "Hylatty SV",
+    "raportti.HYVAKSYTTY"                -> "Hyvaksytty SV",
+    "raportti.PERUUNTUNUT"                -> "Peruuntunut SV",
   )
 
   def checkAloituspaikatRowValidity(sheet: XSSFSheet, rowNumber: Int, expected: Int): Unit = {
@@ -437,7 +450,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         translations
       )
     assert(wb.getNumberOfSheets == 1)
-    assert(wb.getSheetName(0) == "Yhteenveto")
+    assert(wb.getSheetName(0) == "Yhteenveto SV")
   }
 
   it should "create one sheet with the column title row and no results" in {
@@ -1483,5 +1496,278 @@ class ExcelWriterSpec extends AnyFlatSpec {
     //assert(sheet.getRow(10).getCell(8) == null)
 
     assert(sheet.getPhysicalNumberOfRows == 11)
+  }
+
+  "createHakijatHeadingRow" should "create heading row with translated column names or translation keys for hakijat raportti" in {
+    val hakijatQueryResult: Map[String, Seq[Hakija]] = Map()
+    val wb: XSSFWorkbook                             = new XSSFWorkbook()
+    val sheet: XSSFSheet                             = wb.createSheet()
+    val headingCellStyle: XSSFCellStyle              = wb.createCellStyle()
+
+    val fieldNames: List[String] = classOf[Hakija].getDeclaredFields.map(_.getName).toList
+    ExcelWriter.createHakijaHeadingRow(
+      sheet,
+      userLng,
+      translations,
+      0,
+      hakijatQueryResult,
+      fieldNames,
+      headingCellStyle
+    )
+
+    assert(wb.getSheetAt(0).getRow(0).getCell(0).getStringCellValue == "Hakija SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(1).getStringCellValue == "Turvakielto SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(2).getStringCellValue == "Kansalaisuus SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(3).getStringCellValue == "raportti.henkiloOid")
+    assert(wb.getSheetAt(0).getRow(0).getCell(4).getStringCellValue == "raportti.hakemusOid")
+    assert(wb.getSheetAt(0).getRow(0).getCell(5).getStringCellValue == "Hakukohde SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(6).getStringCellValue == "raportti.hakukohdeOid")
+    assert(wb.getSheetAt(0).getRow(0).getCell(7).getStringCellValue == "raportti.prioriteetti")
+    assert(wb.getSheetAt(0).getRow(0).getCell(8).getStringCellValue == "Kaksoistutkinto kiinnostaa SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(9).getStringCellValue == "raportti.valinnanTila")
+    assert(wb.getSheetAt(0).getRow(0).getCell(10).getStringCellValue == "raportti.soraAiempi")
+    assert(wb.getSheetAt(0).getRow(0).getCell(11).getStringCellValue == "raportti.soraTerveys")
+    assert(wb.getSheetAt(0).getRow(0).getCell(12).getStringCellValue == "LupaMark SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(13).getStringCellValue == "raportti.julkaisulupa")
+    assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "raportti.sahkoinenViestintaLupa")
+    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "raportti.lahiosoite")
+    assert(wb.getSheetAt(0).getRow(0).getCell(16).getStringCellValue == "raportti.postinumero")
+    assert(wb.getSheetAt(0).getRow(0).getCell(17).getStringCellValue == "raportti.postitoimipaikka")
+
+    assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 1)
+    assert(wb.getSheetAt(0).getRow(1) == null)
+  }
+
+  "writeHakijatRaportti" should "create one sheet with a sheet name, heading row and no results" in {
+    val hakijatQueryResult: Map[String, Seq[Hakija]] = Map()
+    val wb =
+      ExcelWriter.writeHakijatRaportti(
+        hakijatQueryResult,
+        userLng,
+        translations
+      )
+
+    assert(wb.getNumberOfSheets == 1)
+    assert(wb.getSheetName(0) == "Yhteenveto SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(0).getStringCellValue == "Hakija SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(1).getStringCellValue == "Turvakielto SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(2).getStringCellValue == "Kansalaisuus SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(3).getStringCellValue == "raportti.henkiloOid")
+    assert(wb.getSheetAt(0).getRow(0).getCell(4).getStringCellValue == "raportti.hakemusOid")
+    assert(wb.getSheetAt(0).getRow(0).getCell(5).getStringCellValue == "Hakukohde SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(6).getStringCellValue == "raportti.hakukohdeOid")
+    assert(wb.getSheetAt(0).getRow(0).getCell(7).getStringCellValue == "raportti.prioriteetti")
+    assert(wb.getSheetAt(0).getRow(0).getCell(8).getStringCellValue == "Kaksoistutkinto kiinnostaa SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(9).getStringCellValue == "raportti.valinnanTila")
+    assert(wb.getSheetAt(0).getRow(0).getCell(10).getStringCellValue == "raportti.soraAiempi")
+    assert(wb.getSheetAt(0).getRow(0).getCell(11).getStringCellValue == "raportti.soraTerveys")
+    assert(wb.getSheetAt(0).getRow(0).getCell(12).getStringCellValue == "LupaMark SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(13).getStringCellValue == "raportti.julkaisulupa")
+    assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "raportti.sahkoinenViestintaLupa")
+    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "raportti.lahiosoite")
+    assert(wb.getSheetAt(0).getRow(0).getCell(16).getStringCellValue == "raportti.postinumero")
+    assert(wb.getSheetAt(0).getRow(0).getCell(17).getStringCellValue == "raportti.postitoimipaikka")
+
+    assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 1)
+    assert(wb.getSheetAt(0).getRow(1) == null)
+  }
+
+  it should "return excel with one result row in addition to heading row" in {
+    val hakijatResult =
+      HashMap(
+        "1.2.246.562.24.30646006111" -> Vector(
+          Hakija(
+            "Rautiainen-Testi,Dina Testi",
+            Some(false),
+            Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+            "1.2.246.562.24.30646006111",
+            "1.2.246.562.11.00000000000002179045",
+            Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv -> "Hakukohde 1 SV"),
+            "1.2.246.562.20.00000000000000038597",
+            2,
+            Some(true),
+            "HYLATTY",
+            Some(false),
+            Some(false),
+            Some(false),
+            Some(true),
+            None,
+            "Rämsöönranta 368",
+            "00100",
+            "HELSINKI"
+          )
+        )
+      )
+
+    val wb =
+      ExcelWriter.writeHakijatRaportti(
+        hakijatResult,
+        userLng,
+        translations
+      )
+
+    assert(wb.getNumberOfSheets == 1)
+    assert(wb.getSheetAt(0).getRow(1) != null)
+
+    assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Rautiainen-Testi,Dina Testi")
+    assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "Finland")
+    assert(wb.getSheetAt(0).getRow(1).getCell(3).getStringCellValue == "1.2.246.562.24.30646006111")
+    assert(wb.getSheetAt(0).getRow(1).getCell(4).getStringCellValue == "1.2.246.562.11.00000000000002179045")
+    assert(wb.getSheetAt(0).getRow(1).getCell(5).getStringCellValue == "Hakukohde 1 SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(6).getStringCellValue == "1.2.246.562.20.00000000000000038597")
+    assert(wb.getSheetAt(0).getRow(1).getCell(7).getNumericCellValue == 2)
+    assert(wb.getSheetAt(0).getRow(1).getCell(8).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(1).getCell(9).getStringCellValue == "Hylatty SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(10).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(1).getCell(11).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(1).getCell(12).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(1).getCell(13).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(1).getCell(14).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(1).getCell(15).getStringCellValue == "Rämsöönranta 368")
+    assert(wb.getSheetAt(0).getRow(1).getCell(16).getStringCellValue == "00100")
+    assert(wb.getSheetAt(0).getRow(1).getCell(17).getStringCellValue == "HELSINKI")
+    assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 2)
+    assert(wb.getSheetAt(0).getRow(2) == null)
+  }
+
+  it should "return excel with three result rows: two for one hakija and one for another hakija" in {
+    val hakijatResult =
+      HashMap(
+        "1.2.246.562.24.30646006111" -> Vector(
+          Hakija(
+            "Rautiainen-Testi,Dina Testi",
+            Some(false),
+            Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+            "1.2.246.562.24.30646006111",
+            "1.2.246.562.11.00000000000002179045",
+            Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv -> "Hakukohde 1 SV"),
+            "1.2.246.562.20.00000000000000038597",
+            2,
+            Some(true),
+            "HYLATTY",
+            Some(false),
+            Some(false),
+            Some(false),
+            Some(true),
+            None,
+            "Rämsöönranta 368",
+            "00100",
+            "HELSINKI"
+          ),
+          Hakija(
+            "Rautiainen-Testi,Dina Testi",
+            Some(false),
+            Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+            "1.2.246.562.24.30646006111",
+            "1.2.246.562.11.00000000000002112891",
+            Map(En -> "Hakukohde 2 EN", Fi -> "Hakukohde 2", Sv -> "Hakukohde 2 SV"),
+            "1.2.246.562.20.00000000000000038597",
+            1,
+            Some(true),
+            "HYVAKSYTTY",
+            Some(false),
+            Some(false),
+            Some(true),
+            Some(true),
+            None,
+            "Rämsöönranta 368",
+            "00100",
+            "HELSINKI"
+          )
+        ),
+        "1.2.246.562.24.18441866015" -> Vector(
+          Hakija(
+            "Lehto-Testi,Vikke Testi",
+            Some(false),
+            Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+            "1.2.246.562.24.18441866015",
+            "1.2.246.562.11.00000000000002126102",
+            Map(En -> "Hakukohde 3 EN", Fi -> "Hakukohde 3", Sv -> "Hakukohde 3 SV"),
+            "1.2.246.562.20.00000000000000038597",
+            1,
+            Some(true),
+            "PERUUNTUNUT",
+            Some(false),
+            Some(false),
+            Some(false),
+            Some(true),
+            Some(true),
+            "Laholanaukio 834",
+            "00100",
+            "HELSINKI"
+          )
+        )
+      )
+
+    val wb =
+      ExcelWriter.writeHakijatRaportti(
+        hakijatResult,
+        userLng,
+        translations
+      )
+
+    assert(wb.getNumberOfSheets == 1)
+    assert(wb.getSheetAt(0).getRow(1) != null)
+
+    assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Rautiainen-Testi,Dina Testi")
+    assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "Finland")
+    assert(wb.getSheetAt(0).getRow(1).getCell(3).getStringCellValue == "1.2.246.562.24.30646006111")
+    assert(wb.getSheetAt(0).getRow(1).getCell(4).getStringCellValue == "1.2.246.562.11.00000000000002179045")
+    assert(wb.getSheetAt(0).getRow(1).getCell(5).getStringCellValue == "Hakukohde 1 SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(6).getStringCellValue == "1.2.246.562.20.00000000000000038597")
+    assert(wb.getSheetAt(0).getRow(1).getCell(7).getNumericCellValue == 2)
+    assert(wb.getSheetAt(0).getRow(1).getCell(8).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(1).getCell(9).getStringCellValue == "Hylatty SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(10).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(1).getCell(11).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(1).getCell(12).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(1).getCell(13).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(1).getCell(14).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(1).getCell(15).getStringCellValue == "Rämsöönranta 368")
+    assert(wb.getSheetAt(0).getRow(1).getCell(16).getStringCellValue == "00100")
+    assert(wb.getSheetAt(0).getRow(1).getCell(17).getStringCellValue == "HELSINKI")
+
+    assert(wb.getSheetAt(0).getRow(2).getCell(0).getStringCellValue == "Rautiainen-Testi,Dina Testi")
+    assert(wb.getSheetAt(0).getRow(2).getCell(1).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(2).getCell(2).getStringCellValue == "Finland")
+    assert(wb.getSheetAt(0).getRow(2).getCell(3).getStringCellValue == "1.2.246.562.24.30646006111")
+    assert(wb.getSheetAt(0).getRow(2).getCell(4).getStringCellValue == "1.2.246.562.11.00000000000002112891")
+    assert(wb.getSheetAt(0).getRow(2).getCell(5).getStringCellValue == "Hakukohde 2 SV")
+    assert(wb.getSheetAt(0).getRow(2).getCell(6).getStringCellValue == "1.2.246.562.20.00000000000000038597")
+    assert(wb.getSheetAt(0).getRow(2).getCell(7).getNumericCellValue == 1)
+    assert(wb.getSheetAt(0).getRow(2).getCell(8).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(2).getCell(9).getStringCellValue == "Hyvaksytty SV")
+    assert(wb.getSheetAt(0).getRow(2).getCell(10).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(2).getCell(11).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(2).getCell(12).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(2).getCell(13).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(2).getCell(14).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(15).getStringCellValue == "Rämsöönranta 368")
+    assert(wb.getSheetAt(0).getRow(2).getCell(16).getStringCellValue == "00100")
+    assert(wb.getSheetAt(0).getRow(2).getCell(17).getStringCellValue == "HELSINKI")
+
+    assert(wb.getSheetAt(0).getRow(3).getCell(0).getStringCellValue == "Lehto-Testi,Vikke Testi")
+    assert(wb.getSheetAt(0).getRow(3).getCell(1).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(3).getCell(2).getStringCellValue == "Finland")
+    assert(wb.getSheetAt(0).getRow(3).getCell(3).getStringCellValue == "1.2.246.562.24.18441866015")
+    assert(wb.getSheetAt(0).getRow(3).getCell(4).getStringCellValue == "1.2.246.562.11.00000000000002126102")
+    assert(wb.getSheetAt(0).getRow(3).getCell(5).getStringCellValue == "Hakukohde 3 SV")
+    assert(wb.getSheetAt(0).getRow(3).getCell(6).getStringCellValue == "1.2.246.562.20.00000000000000038597")
+    assert(wb.getSheetAt(0).getRow(3).getCell(7).getNumericCellValue == 1)
+    assert(wb.getSheetAt(0).getRow(3).getCell(8).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(3).getCell(9).getStringCellValue == "Peruuntunut SV")
+    assert(wb.getSheetAt(0).getRow(3).getCell(10).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(3).getCell(11).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(3).getCell(12).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(3).getCell(13).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(3).getCell(14).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(3).getCell(15).getStringCellValue == "Laholanaukio 834")
+    assert(wb.getSheetAt(0).getRow(3).getCell(16).getStringCellValue == "00100")
+    assert(wb.getSheetAt(0).getRow(3).getCell(17).getStringCellValue == "HELSINKI")
+
+    assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 4)
+    assert(wb.getSheetAt(0).getRow(5) == null)
   }
 }
