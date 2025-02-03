@@ -8,7 +8,6 @@ export const Vastaanottotieto = ({ t }: { t: (key: string) => string }) => {
   const { selectedVastaanottotieto, setSelectedVastaanottotieto } =
     useHakijatSearchParams();
 
-  console.log({ selectedVastaanottotieto });
   const includesVastaanottaneet = isNullish(selectedVastaanottotieto)
     ? false
     : selectedVastaanottotieto?.includes('vastaanottaneet');
@@ -17,9 +16,9 @@ export const Vastaanottotieto = ({ t }: { t: (key: string) => string }) => {
     ? false
     : selectedVastaanottotieto?.includes('peruneet');
 
-  const includesPeruttu = isNullish(selectedVastaanottotieto)
+  const includesPeruuntunut = isNullish(selectedVastaanottotieto)
     ? false
-    : selectedVastaanottotieto?.includes('peruttu');
+    : selectedVastaanottotieto?.includes('peruuntunut');
 
   const changeVastaanottaneetSelection = (
     e: SelectChangeEvent,
@@ -73,10 +72,12 @@ export const Vastaanottotieto = ({ t }: { t: (key: string) => string }) => {
             label={t('raportti.peruneet')}
           />
           <OphCheckbox
-            id={'peruttu'}
-            checked={includesPeruttu}
-            onChange={(e) => changeVastaanottaneetSelection(e, includesPeruttu)}
-            label={t('raportti.peruttu')}
+            id={'peruuntunut'}
+            checked={includesPeruuntunut}
+            onChange={(e) =>
+              changeVastaanottaneetSelection(e, includesPeruuntunut)
+            }
+            label={t('raportti.peruuntunut')}
           />
         </Box>
       )}
