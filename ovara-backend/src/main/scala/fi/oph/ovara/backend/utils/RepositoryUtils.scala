@@ -28,6 +28,15 @@ object RepositoryUtils {
     s"${values.map(s => s"'$s'").mkString(", ")}"
   }
 
+  def makeOptionalListOfValuesQueryStr(operator: String, columnName: String, values: List[String]): String = {
+    val valuesStr = makeListOfValuesQueryStr(values)
+    if (valuesStr.isEmpty) {
+      ""
+    } else {
+      s"$operator $columnName in ($valuesStr)"
+    }
+  }
+
   def makeEqualsQueryStrOfOptional(operator: String, fieldName: String, value: Option[String]): String = {
     value match {
       case Some(v) => s"$operator $fieldName = '$v'"

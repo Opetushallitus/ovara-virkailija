@@ -22,11 +22,6 @@ class HakijatRepository extends Extractors {
     val hakuStr                     = RepositoryUtils.makeListOfValuesQueryStr(haut)
     val raportointiorganisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusOrganisaatiot)
 
-    val hakukohteetStr = RepositoryUtils.makeListOfValuesQueryStr(hakukohteet)
-    val optionalHakukohteetQueryStr = if (hakukohteetStr.isEmpty) {
-      ""
-    } else {
-      s"AND hk.hakukohde_oid in ($hakukohteetStr)"
     }
 
     sql"""SELECT concat_ws(',', hlo.sukunimi, hlo.etunimet), hlo.turvakielto,
@@ -49,7 +44,7 @@ class HakijatRepository extends Extractors {
           ON hakemus.hakemus_oid = vt.hakemus_oid AND hk.hakukohde_oid = vt.hakukohde_oid
           WHERE hakemus.haku_oid in (#$hakuStr)
           AND hk.jarjestyspaikka_oid IN (#$raportointiorganisaatiotStr)
-          #$optionalHakukohteetQueryStr
+          #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hk.hakukohde_oid", hakukohteet)}
           """.as[Hakija]
   }
 }
