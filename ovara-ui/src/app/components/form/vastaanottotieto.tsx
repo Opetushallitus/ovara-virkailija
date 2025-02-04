@@ -24,11 +24,13 @@ export const Vastaanottotieto = ({ t }: { t: (key: string) => string }) => {
     e: SelectChangeEvent,
     includesValue: boolean,
   ) => {
-    const id = e.target.id;
+    const target = e.target as HTMLInputElement;
+    const { id } = target;
     let newValue = null;
 
     if (includesValue) {
-      newValue = selectedVastaanottotieto.filter((value) => id !== value);
+      newValue =
+        selectedVastaanottotieto?.filter((value) => id !== value) || null;
     } else {
       if (isNullish(selectedVastaanottotieto)) {
         newValue = [id];
@@ -37,7 +39,9 @@ export const Vastaanottotieto = ({ t }: { t: (key: string) => string }) => {
       }
     }
 
-    setSelectedVastaanottotieto(isEmpty(newValue) ? null : newValue);
+    setSelectedVastaanottotieto(
+      isNullish(newValue) || isEmpty(newValue) ? null : newValue,
+    );
   };
 
   return (
