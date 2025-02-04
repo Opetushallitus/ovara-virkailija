@@ -392,14 +392,15 @@ object ExcelWriter {
             case kielistetty: Kielistetty =>
               val kielistettyValue = kielistetty(Kieli.withName(asiointikieli))
               cell.setCellValue(kielistettyValue)
-            case string: String if List("valintatieto").contains(fieldName) =>
-              val upperCaseStr = string.toUpperCase
-              val translation = translations.getOrElse(s"raportti.$upperCaseStr", s"raportti.$upperCaseStr")
+            case s: String if List("valintatieto").contains(fieldName) =>
+              val lowerCaseStr = s.toLowerCase
+              val translation = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
               cell.setCellValue(translation)
             case s: String =>
               cell.setCellValue(s)
             case Some(s: String) if List("vastaanottotieto").contains(fieldName) =>
-              val translation = translations.getOrElse(s"raportti.$s", s"raportti.$s")
+              val lowerCaseStr = s.toLowerCase
+              val translation = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
               cell.setCellValue(translation)
             case Some(s: String) =>
               cell.setCellValue(s)

@@ -21,10 +21,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     "raportti.markkinointilupa"              -> "LupaMark SV",
     "raportti.kylla"                         -> "Ja",
     "raportti.ei"                            -> "Nej",
-    "raportti.HYLATTY"                       -> "Hylatty SV",
-    "raportti.HYVAKSYTTY"                    -> "Hyvaksytty SV",
-    "raportti.PERUUNTUNUT"                   -> "Peruuntunut SV",
-    "raportti.EI_VASTAANOTETTU_MAARA_AIKANA" -> "Ei vastaanotettu SV"
+    "raportti.hylatty"                       -> "Hylatty SV",
+    "raportti.hyvaksytty"                    -> "Hyvaksytty SV",
+    "raportti.peruuntunut"                   -> "Peruuntunut SV",
+    "raportti.ei_vastaanotettu_maara_aikana" -> "Ei vastaanotettu SV"
   )
 
   def checkAloituspaikatRowValidity(sheet: XSSFSheet, rowNumber: Int, expected: Int): Unit = {
@@ -1749,7 +1749,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(2).getCell(7).getNumericCellValue == 1)
     assert(wb.getSheetAt(0).getRow(2).getCell(8).getStringCellValue == "Ja")
     assert(wb.getSheetAt(0).getRow(2).getCell(9).getStringCellValue == "Hyvaksytty SV")
-    assert(wb.getSheetAt(0).getRow(2).getCell(10).getStringCellValue == "raportti.PERUNUT")
+    assert(wb.getSheetAt(0).getRow(2).getCell(10).getStringCellValue == "raportti.perunut")
     assert(wb.getSheetAt(0).getRow(2).getCell(11).getStringCellValue == "Nej")
     assert(wb.getSheetAt(0).getRow(2).getCell(12).getStringCellValue == "Nej")
     assert(wb.getSheetAt(0).getRow(2).getCell(13).getStringCellValue == "Ja")
@@ -1769,7 +1769,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(3).getCell(7).getNumericCellValue == 1)
     assert(wb.getSheetAt(0).getRow(3).getCell(8).getStringCellValue == "Ja")
     assert(wb.getSheetAt(0).getRow(3).getCell(9).getStringCellValue == "Peruuntunut SV")
-    assert(wb.getSheetAt(0).getRow(2).getCell(10).getStringCellValue == "raportti.PERUNUT")
+    assert(wb.getSheetAt(0).getRow(2).getCell(10).getStringCellValue == "raportti.perunut")
     assert(wb.getSheetAt(0).getRow(3).getCell(11).getStringCellValue == "Nej")
     assert(wb.getSheetAt(0).getRow(3).getCell(12).getStringCellValue == "Nej")
     assert(wb.getSheetAt(0).getRow(3).getCell(13).getStringCellValue == "Nej")
