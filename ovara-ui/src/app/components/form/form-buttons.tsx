@@ -1,7 +1,6 @@
 import { useTranslate } from '@tolgee/react';
 import { OphButton } from '@opetushallitus/oph-design-system';
 import { Box, Stack } from '@mui/material';
-import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
 
 type ExcelDownloadButton = {
   disabled: boolean;
@@ -11,11 +10,16 @@ type ExcelDownloadButton = {
 export const FormButtons = ({
   disabled,
   downloadExcel,
-}: ExcelDownloadButton) => {
+  fieldsToClear,
+}: {
+  disabled: boolean;
+  downloadExcel: () => void;
+  fieldsToClear: Array<() => void>;
+}) => {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'end' }}>
       <Stack direction="row" spacing={2}>
-        <TyhjennaHakuehdotButton />
+        <TyhjennaHakuehdotButton fieldsToClear={fieldsToClear} />
         <MuodostaExcelButton
           disabled={disabled}
           downloadExcel={downloadExcel}
@@ -25,24 +29,15 @@ export const FormButtons = ({
   );
 };
 
-export const TyhjennaHakuehdotButton = () => {
+export const TyhjennaHakuehdotButton = ({
+  fieldsToClear,
+}: {
+  fieldsToClear: Array<() => void>;
+}) => {
   const { t } = useTranslate();
-  const {
-    setSelectedAlkamiskaudet,
-    setSelectedHaut,
-    setSelectedKoulutuksenTila,
-    setSelectedToteutuksenTila,
-    setSelectedHakukohteenTila,
-    setSelectedValintakoe,
-  } = useSearchParams();
 
   const emptySearchParams = () => {
-    setSelectedAlkamiskaudet(null);
-    setSelectedHaut(null);
-    setSelectedKoulutuksenTila(null);
-    setSelectedToteutuksenTila(null);
-    setSelectedHakukohteenTila(null);
-    setSelectedValintakoe(null);
+    fieldsToClear.forEach((clearField) => clearField());
   };
 
   return (

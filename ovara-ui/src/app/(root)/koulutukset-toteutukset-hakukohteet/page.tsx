@@ -21,15 +21,26 @@ import { hasOvaraToinenAsteRole } from '@/app/lib/utils';
 import { useState } from 'react';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { downloadExcel } from '@/app/components/form/utils';
+import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 
 export default function KoulutuksetToteutuksetHakukohteet() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const hasToinenAsteRights = hasOvaraToinenAsteRole(user?.authorities);
-  const queryParams = useSearchParams();
-  const alkamiskausi = queryParams.get('alkamiskausi');
-  const haku = queryParams.get('haku');
+  const {
+    selectedAlkamiskaudet,
+    setSelectedAlkamiskaudet,
+    selectedHaut,
+    setSelectedHaut,
+    setSelectedKoulutustoimija,
+    setSelectedOppilaitokset,
+    setSelectedToimipisteet,
+    setSelectedKoulutuksenTila,
+    setSelectedToteutuksenTila,
+    setSelectedHakukohteenTila,
+    setSelectedValintakoe,
+  } = useCommonSearchParams();
 
   const [isLoading, setIsLoading] = useState(false);
   const queryParamsStr = useSearchParams().toString();
@@ -49,7 +60,7 @@ export default function KoulutuksetToteutuksetHakukohteet() {
           <Valintakoe />
           <Divider />
           <FormButtons
-            disabled={!alkamiskausi || !haku}
+            disabled={!selectedAlkamiskaudet || !selectedHaut}
             downloadExcel={() =>
               downloadExcel(
                 'koulutukset-toteutukset-hakukohteet',
@@ -57,6 +68,17 @@ export default function KoulutuksetToteutuksetHakukohteet() {
                 setIsLoading,
               )
             }
+            fieldsToClear={[
+              () => setSelectedAlkamiskaudet(null),
+              () => setSelectedHaut(null),
+              () => setSelectedKoulutustoimija(null),
+              () => setSelectedOppilaitokset(null),
+              () => setSelectedToimipisteet(null),
+              () => setSelectedKoulutuksenTila(null),
+              () => setSelectedToteutuksenTila(null),
+              () => setSelectedHakukohteenTila(null),
+              () => setSelectedValintakoe(null),
+            ]}
           />
         </FormBox>
       ) : null}

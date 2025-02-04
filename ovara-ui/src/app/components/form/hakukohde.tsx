@@ -1,8 +1,8 @@
 import { MultiComboBox } from '@/app/components/form/multicombobox';
-import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
 import { useFetchHakukohteet } from '@/app/hooks/useFetchHakukohteet';
 import { Kielistetty, LanguageCode } from '@/app/lib/types/common';
 import { useSearchParams as useQueryParams } from 'next/navigation';
+import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { changeMultiComboBoxSelection } from './utils';
 import { isNullish } from 'remeda';
 
@@ -19,7 +19,7 @@ export const Hakukohde = ({
   t: (key: string) => string;
 }) => {
   const { selectedHakukohteet, setSelectedHakukohteet } =
-    useHakijatSearchParams();
+    useCommonSearchParams();
 
   const queryParams = useQueryParams();
   const haku = queryParams.get('haku');

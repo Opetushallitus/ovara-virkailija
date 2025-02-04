@@ -1,6 +1,7 @@
 export const TOISEN_ASTEEN_RAPORTIT = [
   'koulutukset-toteutukset-hakukohteet',
   'hakijat',
+  'hakeneet-hyvaksytyt-vastaanottaneet',
 ];
 
 export const RADIOGROUP_OPTIONS = ['neutral', 'yes', 'no'];
