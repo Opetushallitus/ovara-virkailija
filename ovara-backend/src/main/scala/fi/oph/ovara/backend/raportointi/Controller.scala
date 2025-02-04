@@ -95,6 +95,9 @@ class Controller(
   @GetMapping(path = Array("organisaatiot"))
   def organisaatiot: String = mapper.writeValueAsString(commonService.getOrganisaatioHierarkiatWithUserRights)
 
+  @GetMapping(path = Array("harkinnanvaraisuudet"))
+  def harkinnanvaraisuudet: String = mapper.writeValueAsString(commonService.getHarkinnanvaraisuudet)
+
   // RAPORTIT
 
   private def sendExcel(

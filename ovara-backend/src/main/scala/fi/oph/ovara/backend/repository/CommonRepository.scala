@@ -14,6 +14,14 @@ class CommonRepository extends Extractors {
           WHERE koulutuksen_alkamisvuosi IS NOT NULL""".as[String]
   }
 
+  def selectDistinctHarkinnanvaraisuudet(): SqlStreamingAction[Vector[String], String, Effect] = {
+    sql"""SELECT DISTINCT harkinnanvaraisuuden_syy
+          FROM pub.pub_dim_hakutoive_toinen_aste
+          WHERE harkinnanvaraisuuden_syy IS NOT NULL
+          AND harkinnanvaraisuuden_syy NOT LIKE 'EI_HARKINNANVARAINEN%'
+          AND harkinnanvaraisuuden_syy NOT LIKE 'SURE%'""".as[String]
+  }
+
   def selectDistinctExistingHaut(
       alkamiskaudet: List[String] = List()
   ): SqlStreamingAction[Vector[Haku], Haku, Effect] = {

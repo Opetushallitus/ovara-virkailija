@@ -43,6 +43,10 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     }
   }
 
+  def getHarkinnanvaraisuudet: Vector[String] = {
+    db.run(commonRepository.selectDistinctHarkinnanvaraisuudet(), "selectDistinctHarkinnanvaraisuudet")
+  }
+
   def getOrganisaatioHierarkiatWithUserRights: List[OrganisaatioHierarkia] = {
     val user          = userService.getEnrichedUserDetails
     val organisaatiot = AuthoritiesUtil.getOrganisaatiot(user.authorities)

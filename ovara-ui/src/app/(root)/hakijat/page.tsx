@@ -22,6 +22,7 @@ import { Hakukohde } from '@/app/components/form/hakukohde';
 import { Vastaanottotieto } from '@/app/components/form/vastaanottotieto';
 import { Markkinointilupa } from '@/app/components/form/markkinointilupa';
 import { Julkaisulupa } from '@/app/components/form/julkaisulupa';
+import { Harkinnanvaraisuus } from '@/app/components/form/harkinnanvaraisuus';
 
 export default function Hakijat() {
   const { t } = useTranslate();
@@ -63,6 +64,7 @@ export default function Hakijat() {
           <Hakukohde locale={locale} t={t} />
           <Divider />
           <Vastaanottotieto t={t} />
+          <Harkinnanvaraisuus t={t} />
           <Markkinointilupa t={t} />
           <Julkaisulupa t={t} />
           <FormButtons
