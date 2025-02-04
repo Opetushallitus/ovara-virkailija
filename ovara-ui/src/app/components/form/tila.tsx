@@ -1,4 +1,4 @@
-import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
+import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { LocalizedSelect } from './localized-select';
 import { TILAT } from '@/app/lib/constants';
 import { SelectChangeEvent } from '@mui/material';
@@ -28,7 +28,7 @@ const changeTila = (
 export const KoulutuksenTila = () => {
   const { t } = useTranslate();
   const { selectedKoulutuksenTila, setSelectedKoulutuksenTila } =
-    useSearchParams();
+    useCommonSearchParams();
 
   const id = 'koulutuksen-tila';
 
@@ -46,7 +46,7 @@ export const KoulutuksenTila = () => {
 export const ToteutuksenTila = () => {
   const { t } = useTranslate();
   const { selectedToteutuksenTila, setSelectedToteutuksenTila } =
-    useSearchParams();
+    useCommonSearchParams();
 
   const id = 'toteutuksen-tila';
 
@@ -64,7 +64,7 @@ export const ToteutuksenTila = () => {
 export const HakukohteenTila = () => {
   const { t } = useTranslate();
   const { selectedHakukohteenTila, setSelectedHakukohteenTila } =
-    useSearchParams();
+    useCommonSearchParams();
 
   const id = 'hakukohteen-tila';
 

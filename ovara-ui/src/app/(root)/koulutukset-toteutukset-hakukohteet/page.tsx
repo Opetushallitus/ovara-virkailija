@@ -19,14 +19,26 @@ import { useSearchParams } from 'next/navigation';
 import { configuration } from '@/app/lib/configuration';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { hasOvaraToinenAsteRole } from '@/app/lib/utils';
+import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 
 export default function KoulutuksetToteutuksetHakukohteet() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const hasToinenAsteRights = hasOvaraToinenAsteRole(user?.authorities);
   const queryParams = useSearchParams();
-  const alkamiskausi = queryParams.get('alkamiskausi');
-  const haku = queryParams.get('haku');
+  const {
+    selectedAlkamiskaudet,
+    setSelectedAlkamiskaudet,
+    selectedHaut,
+    setSelectedHaut,
+    setSelectedKoulutustoimija,
+    setSelectedOppilaitokset,
+    setSelectedToimipisteet,
+    setSelectedKoulutuksenTila,
+    setSelectedToteutuksenTila,
+    setSelectedHakukohteenTila,
+    setSelectedValintakoe,
+  } = useCommonSearchParams();
 
   return (
     <MainContainer>
@@ -42,11 +54,22 @@ export default function KoulutuksetToteutuksetHakukohteet() {
           <Valintakoe />
           <Divider />
           <FormButtons
-            disabled={!alkamiskausi || !haku}
+            disabled={!selectedAlkamiskaudet || !selectedHaut}
             excelDownloadUrl={
               `${configuration.ovaraBackendApiUrl}/koulutukset-toteutukset-hakukohteet?` +
               queryParams
             }
+            fieldsToClear={[
+              () => setSelectedAlkamiskaudet(null),
+              () => setSelectedHaut(null),
+              () => setSelectedKoulutustoimija(null),
+              () => setSelectedOppilaitokset(null),
+              () => setSelectedToimipisteet(null),
+              () => setSelectedKoulutuksenTila(null),
+              () => setSelectedToteutuksenTila(null),
+              () => setSelectedHakukohteenTila(null),
+              () => setSelectedValintakoe(null),
+            ]}
           />
         </FormBox>
       ) : null}

@@ -1,5 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
+import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { Box } from '@mui/material';
 import { isEmpty, isNullish } from 'remeda';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
@@ -46,7 +46,7 @@ export const OrganisaatioValikot = () => {
     setSelectedOppilaitokset,
     selectedToimipisteet,
     setSelectedToimipisteet,
-  } = useSearchParams();
+  } = useCommonSearchParams();
 
   const koulutustoimija_id = 'koulutustoimija';
   const oppilaitos_id = 'oppilaitos';
@@ -130,7 +130,7 @@ export const OppilaitosValikko = ({
     selectedOppilaitokset,
     setSelectedOppilaitokset,
     selectedKoulutustoimija,
-  } = useSearchParams();
+  } = useCommonSearchParams();
 
   const oppilaitokset = getOppilaitoksetToShow(
     organisaatiot,
@@ -173,7 +173,7 @@ export const ToimipisteValikko = ({
     setSelectedToimipisteet,
     selectedOppilaitokset,
     selectedKoulutustoimija,
-  } = useSearchParams();
+  } = useCommonSearchParams();
 
   const toimipisteet = getToimipisteetToShow(
     organisaatiot,

@@ -3,58 +3,40 @@ import { OphTypography } from '@opetushallitus/oph-design-system';
 import { MainContainer } from '@/app/components/main-container';
 import { FormBox } from '@/app/components/form/form-box';
 import { FormButtons } from '@/app/components/form/form-buttons';
-import { Box, Divider } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { hasOvaraToinenAsteRole } from '@/app/lib/utils';
 import { useSearchParams } from 'next/navigation';
 import { configuration } from '@/app/lib/configuration';
 import { LanguageCode } from '@/app/lib/types/common';
-import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
 
 import { KoulutuksenAlkaminen } from '@/app/components/form/koulutuksen-alkaminen';
 import { Haku } from '@/app/components/form/haku';
-import {
-  OppilaitosValikko,
-  ToimipisteValikko,
-} from '@/app/components/form/organisaatiovalikot';
+import { OrganisaatioValikot } from '@/app/components/form/organisaatiovalikot';
 import { Hakukohde } from '@/app/components/form/hakukohde';
-import { Vastaanottotieto } from '@/app/components/form/vastaanottotieto';
-import { Markkinointilupa } from '@/app/components/form/markkinointilupa';
-import { Julkaisulupa } from '@/app/components/form/julkaisulupa';
-import { Harkinnanvaraisuus } from '@/app/components/form/harkinnanvaraisuus';
+import { Tulostustapa } from '@/app/components/form/tulostustapa';
+import { Opetuskieli } from '@/app/components/form/opetuskieli';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
-import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
+import { useHakeneetSearchParams } from '@/app/hooks/searchParams/useHakeneetSearchParams';
 
-export default function Hakijat() {
+export default function Hakutilasto() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const hasToinenAsteRights = hasOvaraToinenAsteRole(user?.authorities);
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const queryParams = useSearchParams();
-  const organisaatiot = useFetchOrganisaatiohierarkiat();
+
+  const isDisabled = true;
+
   const {
-    selectedAlkamiskaudet,
     setSelectedAlkamiskaudet,
-    selectedHaut,
     setSelectedHaut,
-    selectedOppilaitokset,
-    selectedToimipisteet,
     setSelectedOppilaitokset,
     setSelectedToimipisteet,
     setSelectedHakukohteet,
   } = useCommonSearchParams();
-  const {
-    setSelectedJulkaisulupa,
-    setSelectedMarkkinointilupa,
-    setSelectedVastaanottotieto,
-  } = useHakijatSearchParams();
-
-  const isDisabled = !(
-    selectedAlkamiskaudet &&
-    selectedHaut &&
-    (selectedOppilaitokset || selectedToimipisteet)
-  );
+  const { setSelectedTulostustapa, setSelectedOpetuskieli } =
+    useHakeneetSearchParams();
   return (
     <MainContainer>
       {hasToinenAsteRights ? (
@@ -62,29 +44,10 @@ export default function Hakijat() {
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
           <KoulutuksenAlkaminen />
           <Haku />
-          <Divider />
-          <OphTypography>
-            {t('raportti.oppilaitos-tai-toimipiste')}
-          </OphTypography>
-          <Box>
-            <OppilaitosValikko
-              locale={locale}
-              organisaatiot={organisaatiot}
-              t={t}
-            />
-            <ToimipisteValikko
-              locale={locale}
-              organisaatiot={organisaatiot}
-              t={t}
-            />
-          </Box>
-          <Divider />
+          <Tulostustapa />
+          <OrganisaatioValikot />
           <Hakukohde locale={locale} t={t} />
-          <Divider />
-          <Vastaanottotieto t={t} />
-          <Harkinnanvaraisuus t={t} />
-          <Markkinointilupa t={t} />
-          <Julkaisulupa t={t} />
+          <Opetuskieli />
           <FormButtons
             disabled={isDisabled}
             excelDownloadUrl={
@@ -95,10 +58,9 @@ export default function Hakijat() {
               () => setSelectedHaut(null),
               () => setSelectedOppilaitokset(null),
               () => setSelectedToimipisteet(null),
+              () => setSelectedTulostustapa(null),
+              () => setSelectedOpetuskieli(null),
               () => setSelectedHakukohteet(null),
-              () => setSelectedVastaanottotieto(null),
-              () => setSelectedMarkkinointilupa(null),
-              () => setSelectedJulkaisulupa(null),
             ]}
           />
         </FormBox>

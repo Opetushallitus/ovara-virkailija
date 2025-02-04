@@ -1,5 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
+import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { OvaraRadioGroup } from '@/app/components/form/ovara-radio-group';
 import { RADIOGROUP_OPTIONS } from '@/app/lib/constants';
 import {
@@ -10,7 +10,7 @@ import {
 export const Valintakoe = () => {
   const { t } = useTranslate();
 
-  const { selectedValintakoe, setSelectedValintakoe } = useSearchParams();
+  const { selectedValintakoe, setSelectedValintakoe } = useCommonSearchParams();
 
   return (
     <OvaraRadioGroup

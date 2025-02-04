@@ -5,7 +5,7 @@ import {
   MultiComboBox,
   SelectOption,
 } from '@/app/components/form/multicombobox';
-import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
+import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { isEmpty } from 'remeda';
 import { useQuery } from '@tanstack/react-query';
 import { doApiFetch } from '@/app/lib/ovara-backend/api';
@@ -23,7 +23,8 @@ export const KoulutuksenAlkaminen = () => {
     [alkamisvuodet],
   );
 
-  const { selectedAlkamiskaudet, setSelectedAlkamiskaudet } = useSearchParams();
+  const { selectedAlkamiskaudet, setSelectedAlkamiskaudet } =
+    useCommonSearchParams();
 
   const changeAlkamiskaudet = (
     _: React.SyntheticEvent,

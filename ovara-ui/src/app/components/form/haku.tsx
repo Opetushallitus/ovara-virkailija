@@ -2,7 +2,7 @@ import {
   MultiComboBox,
   SelectOption,
 } from '@/app/components/form/multicombobox';
-import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
+import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { isEmpty } from 'remeda';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
@@ -20,7 +20,7 @@ export const Haku = () => {
   const user = useAuthorizedUser();
   const locale = (user?.asiointikieli ?? 'fi') as LanguageCode;
 
-  const { selectedHaut, setSelectedHaut } = useSearchParams();
+  const { selectedHaut, setSelectedHaut } = useCommonSearchParams();
 
   const queryParams = useQueryParams();
   const alkamiskausiQueryParams = queryParams.get('alkamiskausi');

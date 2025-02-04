@@ -5,13 +5,9 @@ import {
   parseAsString,
   useQueryState,
 } from 'nuqs';
+import { DEFAULT_NUQS_OPTIONS } from '@/app/lib/constants';
 
-export const DEFAULT_NUQS_OPTIONS = {
-  history: 'push',
-  clearOnDefault: true,
-} as const;
-
-export const useSearchParams = () => {
+export const useCommonSearchParams = () => {
   const [selectedAlkamiskaudet, setSelectedAlkamiskaudet] = useQueryState(
     'alkamiskausi',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
@@ -57,6 +53,11 @@ export const useSearchParams = () => {
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
+  const [selectedHakukohteet, setSelectedHakukohteet] = useQueryState(
+    'hakukohde',
+    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
   const [selectedHarkinnanvaraisuus, setSelectedHarkinnanvaraisuus] =
     useQueryState(
       'harkinnanvaraisuus',
@@ -82,6 +83,8 @@ export const useSearchParams = () => {
     setSelectedHakukohteenTila,
     selectedValintakoe,
     setSelectedValintakoe,
+    selectedHakukohteet,
+    setSelectedHakukohteet,
     selectedHarkinnanvaraisuus,
     setSelectedHarkinnanvaraisuus,
   };

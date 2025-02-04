@@ -4,7 +4,7 @@ _default:
     just --list --unsorted
 
 ssh-to-remote-db-in-pallero:
-    ssh -N -L 5433:rds-privatelink.ovara.testiopintopolku.fi:5432 pallero-bastion
+    ssh -N -L 5435:rds-privatelink.ovara.testiopintopolku.fi:5432 pallero-bastion
 
 
 
