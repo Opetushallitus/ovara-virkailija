@@ -392,39 +392,37 @@ object ExcelWriter {
             case kielistetty: Kielistetty =>
               val kielistettyValue = kielistetty(Kieli.withName(asiointikieli))
               cell.setCellValue(kielistettyValue)
-            case string: String =>
-              val value = if (List("valintatieto").contains(fieldName)) {
-                translations.getOrElse(s"raportti.$string", s"raportti.$string")
-              } else {
-                string
-              }
-
-              cell.setCellValue(value)
+            case string: String if List("valintatieto").contains(fieldName) =>
+              val upperCaseStr = string.toUpperCase
+              val translation = translations.getOrElse(s"raportti.$upperCaseStr", s"raportti.$upperCaseStr")
+              cell.setCellValue(translation)
+            case s: String =>
+              cell.setCellValue(s)
+            case Some(s: String) if List("vastaanottotieto").contains(fieldName) =>
+              val translation = translations.getOrElse(s"raportti.$s", s"raportti.$s")
+              cell.setCellValue(translation)
             case Some(s: String) =>
               cell.setCellValue(s)
             case Some(int: Int) =>
               cell.setCellValue(int)
             case int: Int =>
               cell.setCellValue(int)
+            case Some(b: Boolean)
+                if List(
+                  "turvakielto",
+                  "kaksoistutkintoKiinnostaa",
+                  "soraAiempi",
+                  "soraTerveys",
+                  "markkinointilupa",
+                  "julkaisulupa",
+                  "sahkoinenViestintaLupa"
+                ).contains(fieldName) =>
+              val translation =
+                if (b) translations.getOrElse("raportti.kylla", "raportti.kylla")
+                else translations.getOrElse("raportti.ei", "raportti.ei")
+              cell.setCellValue(translation)
             case Some(b: Boolean) =>
-              val value =
-                if (
-                  List(
-                    "turvakielto",
-                    "kaksoistutkintoKiinnostaa",
-                    "soraAiempi",
-                    "soraTerveys",
-                    "markkinointilupa",
-                    "julkaisulupa",
-                    "sahkoinenViestintaLupa"
-                  ).contains(fieldName)
-                ) {
-                  if (b) translations.getOrElse("raportti.kylla", "raportti.kylla")
-                  else translations.getOrElse("raportti.ei", "raportti.ei")
-                } else {
-                  if (b) "X" else "-"
-                }
-
+              val value = if (b) "X" else "-"
               cell.setCellValue(value)
             case _ =>
               cell.setCellValue("-")

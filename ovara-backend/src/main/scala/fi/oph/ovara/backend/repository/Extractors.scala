@@ -99,6 +99,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       prioriteetti = r.nextInt(),
       kaksoistutkintoKiinnostaa = r.nextBooleanOption(),
       valintatieto = r.nextString(),
+      vastaanottotieto = r.nextStringOption(),
       soraTerveys = r.nextBooleanOption(),
       soraAiempi = r.nextBooleanOption(),
       markkinointilupa = r.nextBooleanOption(),

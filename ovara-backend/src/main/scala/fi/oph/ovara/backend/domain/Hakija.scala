@@ -11,6 +11,7 @@ case class Hakija(
     prioriteetti: Int,
     kaksoistutkintoKiinnostaa: Option[Boolean],
     valintatieto: String,
+    vastaanottotieto: Option[String],
     soraAiempi: Option[Boolean],
     soraTerveys: Option[Boolean],
     markkinointilupa: Option[Boolean],
