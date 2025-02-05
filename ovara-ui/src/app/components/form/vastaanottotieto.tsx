@@ -1,48 +1,14 @@
 import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
-import { Box, SelectChangeEvent } from '@mui/material';
+import { Box } from '@mui/material';
 import { OphCheckbox } from '@opetushallitus/oph-design-system';
 import { OvaraFormControl } from '@/app/components/form/ovara-form-control';
-import { isEmpty, isNullish } from 'remeda';
+import { changeChecked, isChecked } from './utils';
 
 export const Vastaanottotieto = ({ t }: { t: (key: string) => string }) => {
   const { selectedVastaanottotieto, setSelectedVastaanottotieto } =
     useHakijatSearchParams();
 
-  const includesVastaanottaneet = isNullish(selectedVastaanottotieto)
-    ? false
-    : selectedVastaanottotieto?.includes('vastaanottaneet');
-
-  const includesPeruneet = isNullish(selectedVastaanottotieto)
-    ? false
-    : selectedVastaanottotieto?.includes('peruneet');
-
-  const includesPeruuntunut = isNullish(selectedVastaanottotieto)
-    ? false
-    : selectedVastaanottotieto?.includes('peruuntunut');
-
-  const changeVastaanottaneetSelection = (
-    e: SelectChangeEvent,
-    includesValue: boolean,
-  ) => {
-    const target = e.target as HTMLInputElement;
-    const { id } = target;
-    let newValue = null;
-
-    if (includesValue) {
-      newValue =
-        selectedVastaanottotieto?.filter((value) => id !== value) || null;
-    } else {
-      if (isNullish(selectedVastaanottotieto)) {
-        newValue = [id];
-      } else {
-        newValue = selectedVastaanottotieto?.concat([id]);
-      }
-    }
-
-    setSelectedVastaanottotieto(
-      isNullish(newValue) || isEmpty(newValue) ? null : newValue,
-    );
-  };
+  const vastaanottoSelection = ['vastaanottaneet', 'peruneet', 'peruuntunut'];
 
   return (
     <OvaraFormControl
@@ -59,30 +25,24 @@ export const Vastaanottotieto = ({ t }: { t: (key: string) => string }) => {
             width: '100%',
           }}
         >
-          <OphCheckbox
-            id={'vastaanottaneet'}
-            checked={includesVastaanottaneet}
-            onChange={(e) =>
-              changeVastaanottaneetSelection(e, includesVastaanottaneet)
-            }
-            label={t(`raportti.vastaanottaneet`)}
-          />
-          <OphCheckbox
-            id={'peruneet'}
-            checked={includesPeruneet}
-            onChange={(e) =>
-              changeVastaanottaneetSelection(e, includesPeruneet)
-            }
-            label={t('raportti.peruneet')}
-          />
-          <OphCheckbox
-            id={'peruuntunut'}
-            checked={includesPeruuntunut}
-            onChange={(e) =>
-              changeVastaanottaneetSelection(e, includesPeruuntunut)
-            }
-            label={t('raportti.peruuntunut')}
-          />
+          {vastaanottoSelection.map((vastaanottotieto) => {
+            return (
+              <OphCheckbox
+                key={vastaanottotieto}
+                id={vastaanottotieto}
+                checked={isChecked(vastaanottotieto, selectedVastaanottotieto)}
+                onChange={(e) =>
+                  changeChecked(
+                    e,
+                    vastaanottotieto,
+                    selectedVastaanottotieto,
+                    setSelectedVastaanottotieto,
+                  )
+                }
+                label={t(`raportti.${vastaanottotieto}`)}
+              />
+            );
+          })}
         </Box>
       )}
     />
