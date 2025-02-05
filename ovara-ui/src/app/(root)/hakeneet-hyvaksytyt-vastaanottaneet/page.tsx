@@ -18,6 +18,9 @@ import { Tulostustapa } from '@/app/components/form/tulostustapa';
 import { Opetuskieli } from '@/app/components/form/opetuskieli';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { useHakeneetSearchParams } from '@/app/hooks/searchParams/useHakeneetSearchParams';
+import { Divider } from '@mui/material';
+import { NaytaHakutoiveet } from '@/app/components/form/nayta-hakutoiveet';
+import { Sukupuoli } from '@/app/components/form/sukupuoli';
 
 export default function Hakutilasto() {
   const { t } = useTranslate();
@@ -35,8 +38,11 @@ export default function Hakutilasto() {
     setSelectedToimipisteet,
     setSelectedHakukohteet,
   } = useCommonSearchParams();
-  const { setSelectedTulostustapa, setSelectedOpetuskieli } =
-    useHakeneetSearchParams();
+  const {
+    setSelectedTulostustapa,
+    setSelectedOpetuskieli,
+    setSelectedSukupuoli,
+  } = useHakeneetSearchParams();
   return (
     <MainContainer>
       {hasToinenAsteRights ? (
@@ -48,6 +54,9 @@ export default function Hakutilasto() {
           <OrganisaatioValikot />
           <Hakukohde locale={locale} t={t} />
           <Opetuskieli />
+          <Divider />
+          <NaytaHakutoiveet t={t} />
+          <Sukupuoli t={t} />
           <FormButtons
             disabled={isDisabled}
             excelDownloadUrl={
@@ -61,6 +70,7 @@ export default function Hakutilasto() {
               () => setSelectedTulostustapa(null),
               () => setSelectedOpetuskieli(null),
               () => setSelectedHakukohteet(null),
+              () => setSelectedSukupuoli(null),
             ]}
           />
         </FormBox>

@@ -90,7 +90,7 @@ export default function Hakijat() {
             />
           </Box>
           <Divider />
-          <Hakukohde locale={locale} t={t} />
+          <Hakukohde locale={locale} t={t} sx={{ paddingTop: 0 }} />
           <Pohjakoulutus locale={locale} t={t} />
           <Divider />
           <Valintatieto t={t} />

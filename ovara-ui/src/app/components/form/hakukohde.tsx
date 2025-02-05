@@ -14,9 +14,11 @@ type Hakukohde = {
 export const Hakukohde = ({
   locale,
   t,
+  ...props
 }: {
   locale: LanguageCode;
   t: (key: string) => string;
+  [key: string]: unknown;
 }) => {
   const { selectedHakukohteet, setSelectedHakukohteet } =
     useCommonSearchParams();
@@ -32,7 +34,6 @@ export const Hakukohde = ({
 
   return (
     <MultiComboBox
-      sx={{ paddingTop: 0 }}
       id={'hakukohde'}
       label={t('raportti.hakukohde')}
       value={selectedHakukohteet ?? []}
@@ -47,6 +48,7 @@ export const Hakukohde = ({
       onChange={(e, value) =>
         changeMultiComboBoxSelection(e, value, setSelectedHakukohteet)
       }
+      {...props}
     />
   );
 };
