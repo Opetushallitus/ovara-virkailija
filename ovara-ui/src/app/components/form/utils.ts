@@ -1,6 +1,7 @@
 import { SelectChangeEvent } from '@mui/material';
 import { match } from 'ts-pattern';
 import { isEmpty, isNullish } from 'remeda';
+import { apiFetch } from '@/app/lib/ovara-backend/api';
 
 export const changeRadioGroupSelection = (
   e: SelectChangeEvent,
@@ -55,4 +56,34 @@ export const changeChecked = (
   }
 
   setSelected(isNullish(newValue) || isEmpty(newValue) ? null : newValue);
+};
+
+// https://stackoverflow.com/a/59940621
+// https://www.stefanjudis.com/snippets/how-trigger-file-downloads-with-javascript/
+export const downloadExcel = async (
+  raporttiEndpoint: string,
+  queryParamsStr: string,
+  setIsLoading: (v: boolean) => void,
+) => {
+  setIsLoading(true);
+  const response = await apiFetch(raporttiEndpoint, {
+    queryParams: `?${queryParamsStr}`,
+  });
+
+  const contentDisposition = response.headers.get('content-disposition')!;
+  const filename = contentDisposition.match(/.*filename=(.*)/)![1];
+
+  const link = document.createElement('a');
+  link.style.display = 'none';
+  link.href = URL.createObjectURL(await response.blob());
+  link.download = filename;
+
+  document.body.appendChild(link);
+  link.click();
+  setIsLoading(false);
+
+  setTimeout(() => {
+    URL.revokeObjectURL(link.href);
+    link.remove();
+  });
 };

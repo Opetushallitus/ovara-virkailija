@@ -8,7 +8,6 @@ import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { hasOvaraToinenAsteRole } from '@/app/lib/utils';
 import { useSearchParams } from 'next/navigation';
-import { configuration } from '@/app/lib/configuration';
 import { LanguageCode } from '@/app/lib/types/common';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
 
@@ -23,6 +22,10 @@ import { Vastaanottotieto } from '@/app/components/form/vastaanottotieto';
 import { Markkinointilupa } from '@/app/components/form/markkinointilupa';
 import { Julkaisulupa } from '@/app/components/form/julkaisulupa';
 import { Harkinnanvaraisuus } from '@/app/components/form/harkinnanvaraisuus';
+import { useSearchParams as useQueryParams } from 'next/navigation';
+import { useState } from 'react';
+import { SpinnerModal } from '@/app/components/form/spinner-modal';
+import { downloadExcel } from '@/app/components/form/utils';
 
 export default function Hakijat() {
   const { t } = useTranslate();
@@ -37,10 +40,15 @@ export default function Hakijat() {
   const toimipiste = queryParams.get('toimipiste');
 
   const isDisabled = !(alkamiskausi && haku && (oppilaitos || toimipiste));
+
+  const [isLoading, setIsLoading] = useState(false);
+  const queryParamsStr = useQueryParams().toString();
+
   return (
     <MainContainer>
       {hasToinenAsteRights ? (
         <FormBox>
+          {isLoading && <SpinnerModal open={isLoading} />}
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
           <KoulutuksenAlkaminen />
           <Haku />
@@ -69,8 +77,8 @@ export default function Hakijat() {
           <Julkaisulupa t={t} />
           <FormButtons
             disabled={isDisabled}
-            excelDownloadUrl={
-              `${configuration.ovaraBackendApiUrl}/hakijat?` + queryParams
+            downloadExcel={() =>
+              downloadExcel('hakijat', queryParamsStr, setIsLoading)
             }
           />
         </FormBox>

@@ -118,6 +118,7 @@ class Controller(
         HttpHeaders.CONTENT_DISPOSITION,
         s"attachment; filename=$id-$dateTimeStr.xlsx"
       )
+      response.setHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Content-Disposition")
       wb.write(out)
       out.close()
       wb.close()
