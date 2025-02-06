@@ -154,3 +154,10 @@ export const getToimipisteetToShow = (
     });
   }
 };
+
+export const getHarkinnanvaraisuusTranslationKey = (
+  harkinnanvaraisuuden_syy: string,
+) => {
+  const match = harkinnanvaraisuuden_syy.match(/(ATARU)_(\w*)/);
+  return match?.[2].toLowerCase() ?? '';
+};

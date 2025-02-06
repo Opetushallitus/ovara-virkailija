@@ -7,6 +7,7 @@ import {
   hasOvaraToinenAsteRole,
   getOppilaitoksetToShow,
   getToimipisteetToShow,
+  getHarkinnanvaraisuusTranslationKey,
 } from './utils';
 import {
   KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
@@ -620,5 +621,23 @@ describe('getToimipisteetToShow', () => {
     expect(
       getToimipisteetToShow(hierarkiat, [], '1.2.246.562.10.10063814452'),
     ).toEqual([toimipiste1_1]);
+  });
+});
+
+describe('getHarkinnanvaraisuusTranslationKey', () => {
+  test('should remove ATARU_ prefix from key and make it lower case', () => {
+    expect(
+      getHarkinnanvaraisuusTranslationKey(
+        'ATARU_KOULUTODISTUSTEN_VERTAILUVAIKEUDET',
+      ),
+    ).toEqual('koulutodistusten_vertailuvaikeudet');
+  });
+
+  test('should return empty string if no match', () => {
+    expect(
+      getHarkinnanvaraisuusTranslationKey(
+        'SURE_KOULUTODISTUSTEN_VERTAILUVAIKEUDET',
+      ),
+    ).toEqual('');
   });
 });

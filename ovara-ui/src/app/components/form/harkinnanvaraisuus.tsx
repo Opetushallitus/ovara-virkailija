@@ -5,6 +5,7 @@ import { Box } from '@mui/material';
 import { OphCheckbox } from '@opetushallitus/oph-design-system';
 import { OvaraFormControl } from '@/app/components/form/ovara-form-control';
 import { isChecked, changeChecked } from '@/app/components/form/utils';
+import { getHarkinnanvaraisuusTranslationKey } from '@/app/lib/utils';
 
 export const Harkinnanvaraisuus = ({ t }: { t: (key: string) => string }) => {
   const { data: harkinnanvaraisuudet } = useQuery({
@@ -26,6 +27,7 @@ export const Harkinnanvaraisuus = ({ t }: { t: (key: string) => string }) => {
         <Box
           sx={{
             columns: 2,
+            width: '100%',
           }}
         >
           {harkinnanvaraisuudet?.map((harkinnanvaraisuus: string) => {
@@ -45,7 +47,9 @@ export const Harkinnanvaraisuus = ({ t }: { t: (key: string) => string }) => {
                       setSelectedHarkinnanvaraisuus,
                     )
                   }
-                  label={t(`raportti.${harkinnanvaraisuus}`)}
+                  label={t(
+                    `raportti.${getHarkinnanvaraisuusTranslationKey(harkinnanvaraisuus)}`,
+                  )}
                 />
               </Box>
             );

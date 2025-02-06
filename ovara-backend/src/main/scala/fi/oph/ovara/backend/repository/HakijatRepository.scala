@@ -16,6 +16,7 @@ class HakijatRepository extends Extractors {
       toimipisteet: List[String],
       hakukohteet: List[String],
       vastaanottotieto: List[String],
+      harkinnanvaraisuudet: List[String],
       markkinointilupa: Option[Boolean],
       julkaisulupa: Option[Boolean]
   ): SqlStreamingAction[Vector[Hakija], Hakija, Effect] = {
@@ -30,13 +31,14 @@ class HakijatRepository extends Extractors {
       }
     }
     val vastaanottotiedotAsDbValues = mapVastaanottotiedotToDbValues(vastaanottotieto)
+    val harkinnanvaraisuudetWithSureValues = RepositoryUtils.enrichHarkinnanvaraisuudet(harkinnanvaraisuudet)
 
     sql"""SELECT concat_ws(',', hlo.sukunimi, hlo.etunimet), hlo.turvakielto,
-                hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid,
-                hk.hakukohde_nimi, hk.hakukohde_oid, ht.hakutoivenumero, ht2.kaksoistutkinto_kiinnostaa,
-                vt.valinnan_tila, ht.vastaanottotieto, ht2.sora_aiempi, ht2.sora_terveys, hlo.koulutusmarkkinointilupa, 
-                hlo.valintatuloksen_julkaisulupa, hlo.sahkoinenviestintalupa, 
-                hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka
+                 hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid,
+                 hk.hakukohde_nimi, hk.hakukohde_oid, ht.hakutoivenumero, ht2.kaksoistutkinto_kiinnostaa,
+                 vt.valinnan_tila, ht.vastaanottotieto, ht2.harkinnanvaraisuuden_syy, ht2.sora_aiempi, ht2.sora_terveys, hlo.koulutusmarkkinointilupa,
+                 hlo.valintatuloksen_julkaisulupa, hlo.sahkoinenviestintalupa,
+                 hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka
           FROM pub.pub_dim_henkilo hlo
           JOIN pub.pub_fct_hakemus hakemus
           ON hlo.hakemus_oid = hakemus.hakemus_oid
@@ -50,12 +52,12 @@ class HakijatRepository extends Extractors {
           ON hk.jarjestyspaikka_oid = o.organisaatio_oid
           LEFT JOIN pub.pub_dim_valinnantulos vt
           ON hakemus.hakemus_oid = vt.hakemus_oid AND hk.hakukohde_oid = vt.hakukohde_oid
-          WHERE hakemus.haku_oid in (#$hakuStr)
+          WHERE hakemus.haku_oid IN (#$hakuStr)
           AND hk.jarjestyspaikka_oid IN (#$raportointiorganisaatiotStr)
           #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hk.hakukohde_oid", hakukohteet)}
           #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.vastaanottotieto", vastaanottotiedotAsDbValues)}
           #${RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "hlo.koulutusmarkkinointilupa", markkinointilupa)}
           #${RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "hlo.valintatuloksen_julkaisulupa", julkaisulupa)}
-          """.as[Hakija]
+          #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht2.harkinnanvaraisuuden_syy", harkinnanvaraisuudetWithSureValues)}""".as[Hakija]
   }
 }

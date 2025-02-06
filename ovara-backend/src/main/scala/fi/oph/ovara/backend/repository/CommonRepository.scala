@@ -19,7 +19,8 @@ class CommonRepository extends Extractors {
           FROM pub.pub_dim_hakutoive_toinen_aste
           WHERE harkinnanvaraisuuden_syy IS NOT NULL
           AND harkinnanvaraisuuden_syy NOT LIKE 'EI_HARKINNANVARAINEN%'
-          AND harkinnanvaraisuuden_syy NOT LIKE 'SURE%'""".as[String]
+          AND harkinnanvaraisuuden_syy NOT LIKE 'SURE%'
+          AND harkinnanvaraisuuden_syy NOT LIKE '%ULKOMAILLA_OPISKELTU'""".as[String]
   }
 
   def selectDistinctExistingHaut(

@@ -26,6 +26,7 @@ class HakijatService(
       toimipisteet: List[String],
       hakukohteet: List[String],
       vastaanottotieto: List[String],
+      harkinnanvaraisuudet: List[String],
       markkinointilupa: Option[Boolean],
       julkaisulupa: Option[Boolean]
   ): XSSFWorkbook = {
@@ -50,6 +51,7 @@ class HakijatService(
       toimipisteet = toimipisteet,
       hakukohteet = hakukohteet,
       vastaanottotieto = vastaanottotieto,
+      harkinnanvaraisuudet = harkinnanvaraisuudet,
       markkinointilupa = markkinointilupa,
       julkaisulupa = julkaisulupa
     )

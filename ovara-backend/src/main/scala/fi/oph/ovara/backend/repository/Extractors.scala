@@ -100,6 +100,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       kaksoistutkintoKiinnostaa = r.nextBooleanOption(),
       valintatieto = r.nextString(),
       vastaanottotieto = r.nextStringOption(),
+      harkinnanvaraisuus = r.nextStringOption(),
       soraTerveys = r.nextBooleanOption(),
       soraAiempi = r.nextBooleanOption(),
       markkinointilupa = r.nextBooleanOption(),

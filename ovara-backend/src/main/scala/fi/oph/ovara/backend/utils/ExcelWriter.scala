@@ -7,6 +7,8 @@ import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.xssf.usermodel.*
 import org.slf4j.{Logger, LoggerFactory}
 
+import scala.util.matching.Regex
+
 object ExcelWriter {
 
   val LOG: Logger = LoggerFactory.getLogger("ExcelWriter")
@@ -394,14 +396,33 @@ object ExcelWriter {
               cell.setCellValue(kielistettyValue)
             case s: String if List("valintatieto").contains(fieldName) =>
               val lowerCaseStr = s.toLowerCase
-              val translation = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+              val translation  = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
               cell.setCellValue(translation)
             case s: String =>
               cell.setCellValue(s)
             case Some(s: String) if List("vastaanottotieto").contains(fieldName) =>
               val lowerCaseStr = s.toLowerCase
-              val translation = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+              val translation  = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
               cell.setCellValue(translation)
+            case Some(s: String) if List("harkinnanvaraisuus").contains(fieldName) =>
+              val value = if (s.startsWith("EI_HARKINNANVARAINEN")) {
+                "-"
+              } else {
+                val r: Regex = "(ATARU|SURE)_(\\w*)".r
+                val group = for (m <- r.findFirstMatchIn(s)) yield m.group(2)
+                group match {
+                  case Some(m) =>
+                    val value = if (m == "ULKOMAILLA_OPISKELTU") {
+                      "KOULUTODISTUSTEN_VERTAILUVAIKEUDET"
+                    } else {
+                      m
+                    }
+                    val lowerCaseStr = value.toLowerCase
+                    translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+                  case None => "-"
+                }
+              }
+              cell.setCellValue(value)
             case Some(s: String) =>
               cell.setCellValue(s)
             case Some(int: Int) =>

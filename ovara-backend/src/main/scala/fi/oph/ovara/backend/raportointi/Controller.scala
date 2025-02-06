@@ -190,16 +190,18 @@ class Controller(
       @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
       @RequestParam("hakukohde", required = false) hakukohde: java.util.Collection[String],
       @RequestParam("vastaanottotieto", required = false) vastaanottotieto: java.util.Collection[String],
+      @RequestParam("harkinnanvaraisuus", required = false) harkinnanvaraisuus: java.util.Collection[String],
       @RequestParam("markkinointilupa", required = false) markkinointilupa: String,
       @RequestParam("julkaisulupa", required = false) julkaisulupa: String,
       request: HttpServletRequest,
       response: HttpServletResponse
   ): Unit = {
-    val hakuList             = if (haku == null) List() else haku.asScala.toList
-    val oppilaitosList       = if (oppilaitos == null) List() else oppilaitos.asScala.toList
-    val toimipisteList       = if (toimipiste == null) List() else toimipiste.asScala.toList
-    val hakukohdeList        = if (hakukohde == null) List() else hakukohde.asScala.toList
-    val vastaanottotietoList = if (vastaanottotieto == null) List() else vastaanottotieto.asScala.toList
+    val hakuList               = if (haku == null) List() else haku.asScala.toList
+    val oppilaitosList         = if (oppilaitos == null) List() else oppilaitos.asScala.toList
+    val toimipisteList         = if (toimipiste == null) List() else toimipiste.asScala.toList
+    val hakukohdeList          = if (hakukohde == null) List() else hakukohde.asScala.toList
+    val vastaanottotietoList   = if (vastaanottotieto == null) List() else vastaanottotieto.asScala.toList
+    val harkinnanvaraisuusList = if (harkinnanvaraisuus == null) List() else harkinnanvaraisuus.asScala.toList
 
     val maybeMarkkinointilupa = if (markkinointilupa == null) {
       None
@@ -219,6 +221,7 @@ class Controller(
       toimipisteList,
       hakukohdeList,
       vastaanottotietoList,
+      harkinnanvaraisuusList,
       maybeMarkkinointilupa,
       maybeJulkaisulupa
     )

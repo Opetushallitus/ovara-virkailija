@@ -166,4 +166,23 @@ object RepositoryUtils {
       s"$eiAlkamiskauttaQueryStr" +
       s"$alkamiskaudetQueryStr"
   }
+
+  def enrichHarkinnanvaraisuudet(harkinnanvaraisuudet: List[String]): List[String] = {
+    harkinnanvaraisuudet.flatMap(harkinnanvaraisuus => {
+      if (List("ATARU_EI_PAATTOTODISTUSTA", "ATARU_YKS_MAT_AI").contains(harkinnanvaraisuus)) {
+        val r: Regex = "ATARU(_\\w*)".r
+        val group    = for (m <- r.findFirstMatchIn(harkinnanvaraisuus)) yield m.group(1)
+        val value    = group.getOrElse("")
+        if (value.nonEmpty) {
+          s"SURE$value" :: List(harkinnanvaraisuus)
+        } else {
+          List(harkinnanvaraisuus)
+        }
+      } else if (harkinnanvaraisuus == "ATARU_KOULUTODISTUSTEN_VERTAILUVAIKEUDET") {
+        s"ATARU_ULKOMAILLA_OPISKELTU" :: List(harkinnanvaraisuus)
+      } else {
+        List(harkinnanvaraisuus)
+      }
+    })
+  }
 }
