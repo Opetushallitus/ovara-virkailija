@@ -98,6 +98,9 @@ class Controller(
   @GetMapping(path = Array("harkinnanvaraisuudet"))
   def harkinnanvaraisuudet: String = mapper.writeValueAsString(commonService.getHarkinnanvaraisuudet)
 
+  @GetMapping(path = Array("valintatiedot"))
+  def valintatiedot: String = mapper.writeValueAsString(commonService.getValintatiedot)
+
   // RAPORTIT
 
   private def sendExcel(

@@ -155,9 +155,11 @@ export const getToimipisteetToShow = (
   }
 };
 
-export const getHarkinnanvaraisuusTranslationKey = (
+export const getHarkinnanvaraisuusTranslation = (
   harkinnanvaraisuuden_syy: string,
+  t: (s: string) => string,
 ) => {
   const match = harkinnanvaraisuuden_syy.match(/(ATARU)_(\w*)/);
-  return match?.[2].toLowerCase() ?? '';
+  const lowerCaseMatch = match?.[2].toLowerCase();
+  return lowerCaseMatch ? t(`raportti.${lowerCaseMatch}`) : t('');
 };

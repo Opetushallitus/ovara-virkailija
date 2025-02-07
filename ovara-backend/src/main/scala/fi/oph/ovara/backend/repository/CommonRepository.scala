@@ -73,6 +73,12 @@ class CommonRepository extends Extractors {
           """.as[Hakukohde]
   }
 
+  def selectDistinctValintatiedot: SqlStreamingAction[Vector[String], String, Effect] = {
+    sql"""SELECT DISTINCT pdv.valinnan_tila
+          FROM pub.pub_dim_valinnantulos pdv;
+       """.as[String]
+  }
+
   def selectDistinctOrganisaatiot(
       organisaatiot: List[String]
   ): SqlStreamingAction[Vector[Organisaatio], Organisaatio, Effect] = {

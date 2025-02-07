@@ -7,7 +7,7 @@ import {
   hasOvaraToinenAsteRole,
   getOppilaitoksetToShow,
   getToimipisteetToShow,
-  getHarkinnanvaraisuusTranslationKey,
+  getHarkinnanvaraisuusTranslation,
 } from './utils';
 import {
   KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
@@ -592,7 +592,7 @@ describe('getOppilaitoksetToShow', () => {
 
 describe('getToimipisteetToShow', () => {
   test('should return all toimipisteet in hierarkia as no toimipiste has been selected', () => {
-    expect(getToimipisteetToShow(hierarkiat, null)).toEqual([
+    expect(getToimipisteetToShow(hierarkiat, null, null)).toEqual([
       toimipiste1_1,
       toimipiste2_1_1,
       toimipiste2_2_1,
@@ -604,16 +604,17 @@ describe('getToimipisteetToShow', () => {
 
   test('should return only selected toimipiste', () => {
     expect(
-      getToimipisteetToShow(hierarkiat, ['1.2.246.562.10.208433283510']),
+      getToimipisteetToShow(hierarkiat, ['1.2.246.562.10.208433283510'], null),
     ).toEqual([toimipiste2_2_1, toimipiste2_2_2, toimipiste2_2_3]);
   });
 
   test('should return toimipisteet under oppilaitos2_1 and oppilaitos2_3 when selected', () => {
     expect(
-      getToimipisteetToShow(hierarkiat, [
-        '1.2.246.562.10.10281960954',
-        '1.2.246.562.10.2084332835113',
-      ]),
+      getToimipisteetToShow(
+        hierarkiat,
+        ['1.2.246.562.10.10281960954', '1.2.246.562.10.2084332835113'],
+        null,
+      ),
     ).toEqual([toimipiste2_1_1, toimipiste2_3_1]);
   });
 
@@ -624,19 +625,25 @@ describe('getToimipisteetToShow', () => {
   });
 });
 
-describe('getHarkinnanvaraisuusTranslationKey', () => {
+describe('getHarkinnanvaraisuusTranslation', () => {
+  const mockT = (value: string) => {
+    return value;
+  };
+
   test('should remove ATARU_ prefix from key and make it lower case', () => {
     expect(
-      getHarkinnanvaraisuusTranslationKey(
+      getHarkinnanvaraisuusTranslation(
         'ATARU_KOULUTODISTUSTEN_VERTAILUVAIKEUDET',
+        mockT,
       ),
-    ).toEqual('koulutodistusten_vertailuvaikeudet');
+    ).toEqual('raportti.koulutodistusten_vertailuvaikeudet');
   });
 
   test('should return empty string if no match', () => {
     expect(
-      getHarkinnanvaraisuusTranslationKey(
+      getHarkinnanvaraisuusTranslation(
         'SURE_KOULUTODISTUSTEN_VERTAILUVAIKEUDET',
+        mockT,
       ),
     ).toEqual('');
   });

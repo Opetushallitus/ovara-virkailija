@@ -35,7 +35,8 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
 
     if (allowedOrgOidsFromSelection.nonEmpty) {
       db.run(
-        commonRepository.selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(allowedOrgOidsFromSelection, haut),
+        commonRepository
+          .selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(allowedOrgOidsFromSelection, haut),
         "selectDistinctExistingHakukohteet"
       )
     } else {
@@ -45,6 +46,10 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
 
   def getHarkinnanvaraisuudet: Vector[String] = {
     db.run(commonRepository.selectDistinctHarkinnanvaraisuudet(), "selectDistinctHarkinnanvaraisuudet")
+  }
+
+  def getValintatiedot: Vector[String] = {
+    db.run(commonRepository.selectDistinctValintatiedot, "selectDistinctValintatiedot")
   }
 
   def getOrganisaatioHierarkiatWithUserRights: List[OrganisaatioHierarkia] = {

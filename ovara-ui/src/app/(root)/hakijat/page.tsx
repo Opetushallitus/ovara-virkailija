@@ -26,6 +26,7 @@ import { useSearchParams as useQueryParams } from 'next/navigation';
 import { useState } from 'react';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { downloadExcel } from '@/app/components/form/utils';
+import { Valintatieto } from '@/app/components/form/valintatieto';
 
 export default function Hakijat() {
   const { t } = useTranslate();
@@ -71,6 +72,7 @@ export default function Hakijat() {
           <Divider />
           <Hakukohde locale={locale} t={t} />
           <Divider />
+          <Valintatieto t={t} />
           <Vastaanottotieto t={t} />
           <Harkinnanvaraisuus t={t} />
           <Markkinointilupa t={t} />
