@@ -1,6 +1,6 @@
 export type LanguageCode = 'fi' | 'sv' | 'en';
 
-export type Kielistetty<T = string> = Partial<Record<LanguageCode, T>>;
+export type Kielistetty<T = string> = Record<LanguageCode, T>;
 
 export type User = {
   userOid: string;

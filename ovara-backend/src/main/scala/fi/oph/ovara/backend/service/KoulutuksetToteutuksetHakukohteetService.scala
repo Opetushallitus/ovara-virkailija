@@ -11,14 +11,14 @@ import org.springframework.stereotype.Component
 class KoulutuksetToteutuksetHakukohteetService(
     koulutuksetToteutuksetHakukohteetRepository: KoulutuksetToteutuksetHakukohteetRepository,
     userService: UserService,
-    commonService: CommonService
+    commonService: CommonService,
+    lokalisointiService: LokalisointiService
 ) {
 
   @Autowired
   val db: OvaraDatabase = null
 
   def get(
-      alkamiskausi: List[String],
       haku: List[String],
       koulutustoimija: Option[String],
       oppilaitokset: List[String],
@@ -29,9 +29,10 @@ class KoulutuksetToteutuksetHakukohteetService(
       valintakoe: Option[Boolean]
   ): XSSFWorkbook = {
     val user                      = userService.getEnrichedUserDetails
-    val userLng                   = user.asiointikieli.getOrElse("fi")
+    val asiointikieli             = user.asiointikieli.getOrElse("fi")
     val authorities               = user.authorities
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getOrganisaatiot(authorities)
+    val translations              = lokalisointiService.getOvaraTranslations(asiointikieli)
 
     val (orgOidsForQuery, hierarkiat, raporttityyppi) = commonService.getAllowedOrgsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
@@ -43,7 +44,6 @@ class KoulutuksetToteutuksetHakukohteetService(
     val queryResult = db.run(
       koulutuksetToteutuksetHakukohteetRepository.selectWithParams(
         orgOidsForQuery,
-        alkamiskausi,
         haku,
         koulutuksenTila,
         toteutuksenTila,
@@ -61,11 +61,12 @@ class KoulutuksetToteutuksetHakukohteetService(
         groupedQueryResult
       )
 
-    ExcelWriter.writeRaportti(
+    ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
       organisaationKoulutuksetHakukohteetToteutukset,
       KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
-      userLng,
-      raporttityyppi
+      asiointikieli,
+      raporttityyppi,
+      translations
     )
   }
 }

@@ -1,4 +1,4 @@
-package fi.oph.ovara.backend;
+package fi.oph.ovara.backend
 
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -21,7 +21,9 @@ class OvaraBackendApplication {
 
   @Bean
   def applicationRunner(): ApplicationRunner =
-    (args: ApplicationArguments) => LOG.info("STARTED OVARA APPLICATION RUNNER")
+    (args: ApplicationArguments) => {
+      LOG.info("STARTED OVARA APPLICATION RUNNER")
+    }
 
   @Profile(Array("dev"))
   @Bean

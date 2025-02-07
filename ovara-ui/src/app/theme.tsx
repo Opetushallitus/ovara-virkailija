@@ -1,5 +1,5 @@
 'use client';
-import { forwardRef } from 'react';
+import { ComponentRef, ComponentType, forwardRef } from 'react';
 import { ophColors } from '@opetushallitus/oph-design-system';
 import { styled as muiStyled, ThemeOptions } from '@mui/material/styles';
 import { shouldForwardProp } from '@mui/system/createStyled';
@@ -60,13 +60,14 @@ export const THEME_OVERRIDES: ThemeOptions = {
 
 // MUI:sta (Emotionista) puuttuu styled-componentsin .attrs
 // Tällä voi asettaa oletus-propsit ilman, että tarvii luoda välikomponenttia
-export function withDefaultProps<P>(
-  Component: React.ComponentType<P>,
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export function withDefaultProps<P extends React.ComponentPropsWithoutRef<any>>(
+  Component: ComponentType<P>,
   defaultProps: Partial<P>,
   displayName = 'ComponentWithDefaultProps',
 ) {
   const ComponentWithDefaultProps = forwardRef<
-    React.ComponentRef<React.ComponentType<P>>,
+    ComponentRef<ComponentType<P>>,
     P
   >((props, ref) => <Component {...defaultProps} {...props} ref={ref} />);
 

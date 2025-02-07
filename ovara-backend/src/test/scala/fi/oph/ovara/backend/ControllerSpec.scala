@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.google.gson.{JsonObject, JsonParser, JsonPrimitive}
 import fi.oph.ovara.backend.raportointi.Controller
-import fi.oph.ovara.backend.service.{CommonService, KoulutuksetToteutuksetHakukohteetService, UserService}
+import fi.oph.ovara.backend.service.{CommonService, HakijatService, KoulutuksetToteutuksetHakukohteetService, UserService}
 import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation}
 import fi.vm.sade.auditlog.{Audit, Changes, Logger, Target, User}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
@@ -22,6 +22,7 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
     val mockCommonService = mock(classOf[CommonService])
     val mockKoulutuksetToteutuksetHakukohteetService = mock(classOf[KoulutuksetToteutuksetHakukohteetService])
     val mockUserService = mock(classOf[UserService])
+    val mockHakijatService = mock(classOf[HakijatService])
     val mockRequest = mock(classOf[HttpServletRequest])
     val mockResponse = mock(classOf[HttpServletResponse])
     val mockAudit = mock(classOf[Audit])
@@ -33,7 +34,7 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
       override def getUser(request: HttpServletRequest): User = mockUser
     }
 
-    val controller = new Controller(mockCommonService, mockKoulutuksetToteutuksetHakukohteetService, mockUserService, mockAuditLog)
+    val controller = new Controller(mockCommonService, mockKoulutuksetToteutuksetHakukohteetService, mockHakijatService, mockUserService, mockAuditLog)
 
     val alkamiskausi = List("2025_syksy").asJava
     val haku = List("1.2.246.562.29.00000000000000049925").asJava

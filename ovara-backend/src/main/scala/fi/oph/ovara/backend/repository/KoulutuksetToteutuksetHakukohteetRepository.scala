@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.domain.{KoulutusToteutusHakukohdeResult, OrganisaationKoulutusToteutusHakukohde}
+import fi.oph.ovara.backend.domain.OrganisaationKoulutusToteutusHakukohde
 import fi.oph.ovara.backend.utils.RepositoryUtils
 import org.springframework.stereotype.Component
 import slick.jdbc.PostgresProfile.api.*
@@ -9,8 +9,7 @@ import slick.sql.SqlStreamingAction
 @Component
 class KoulutuksetToteutuksetHakukohteetRepository extends Extractors {
   def selectWithParams(
-      kayttooikeusOrganisaatiot: List[String],
-      alkamiskausi: List[String],
+      selectedKayttooikeusOrganisaatiot: List[String],
       haku: List[String],
       koulutuksenTila: Option[String],
       toteutuksenTila: Option[String],
@@ -19,11 +18,7 @@ class KoulutuksetToteutuksetHakukohteetRepository extends Extractors {
   ): SqlStreamingAction[Vector[
     OrganisaationKoulutusToteutusHakukohde
   ], OrganisaationKoulutusToteutusHakukohde, Effect] = {
-    val alkamiskaudetAndHenkKohtSuunnitelma =
-      RepositoryUtils.extractAlkamisvuosiKausiAndHenkkohtSuunnitelma(alkamiskausi)
-    val alkamiskaudet               = alkamiskaudetAndHenkKohtSuunnitelma._1
-    val henkilokohtainenSuunnitelma = alkamiskaudetAndHenkKohtSuunnitelma._2
-    val raportointiorganisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusOrganisaatiot)
+    val raportointiorganisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(selectedKayttooikeusOrganisaatiot)
     sql"""SELECT hk.hakukohde_nimi,
                  hk.hakukohde_oid,
                  k.tila AS koulutuksen_tila,
@@ -45,7 +40,6 @@ class KoulutuksetToteutuksetHakukohteetRepository extends Extractors {
           ON jarjestyspaikka_oid = o.organisaatio_oid
           WHERE h.haku_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(haku)})
           AND (hk.jarjestyspaikka_oid IN (#$raportointiorganisaatiotStr))
-          #${RepositoryUtils.makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery(alkamiskaudetAndHenkKohtSuunnitelma)}
           #${RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "k.tila", koulutuksenTila)}
           #${RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "t.tila", toteutuksenTila)}
           #${RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "hk.tila", hakukohteenTila)}

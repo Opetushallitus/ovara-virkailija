@@ -25,6 +25,7 @@ export const OvaraFormControl = ({
 }) => {
   const id = useId();
   const labelId = `OvaraFormControl-${id}-label`;
+  const { sx } = props;
   return (
     <FormControl
       {...props}
@@ -32,6 +33,7 @@ export const OvaraFormControl = ({
         flexDirection: 'row',
         paddingTop: '20px',
         width: '100%',
+        ...sx,
       }}
     >
       {label && (

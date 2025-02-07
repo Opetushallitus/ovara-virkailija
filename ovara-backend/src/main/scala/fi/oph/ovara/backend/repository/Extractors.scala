@@ -20,6 +20,13 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   )
 
+  implicit val getHakukohdeResult: GetResult[Hakukohde] = GetResult(r =>
+    Hakukohde(
+      hakukohde_oid = r.nextString(),
+      hakukohde_nimi = extractKielistetty(r.nextStringOption())
+    )
+  )
+
   implicit val getOrganisaatioResult: GetResult[Organisaatio] = GetResult(r =>
     Organisaatio(
       organisaatio_oid = r.nextString(),
@@ -77,6 +84,31 @@ trait Extractors extends GenericOvaraJsonFormats {
       tila = r.nextString(),
       parent_oids = extractArray(r.nextStringOption()),
       children = r.nextStringOption().map(read[List[OrganisaatioHierarkia]]).getOrElse(List())
+    )
+  )
+
+  implicit val getHakijaResult: GetResult[Hakija] = GetResult(r =>
+    Hakija(
+      hakija = r.nextString(),
+      turvakielto = r.nextBooleanOption(),
+      kansalaisuus = extractKielistetty(r.nextStringOption()),
+      oppijanumero = r.nextString(),
+      hakemusOid = r.nextString(),
+      hakukohteenNimi = extractKielistetty(r.nextStringOption()),
+      hakukohdeOid = r.nextString(),
+      prioriteetti = r.nextInt(),
+      kaksoistutkintoKiinnostaa = r.nextBooleanOption(),
+      valintatieto = r.nextString(),
+      vastaanottotieto = r.nextStringOption(),
+      harkinnanvaraisuus = r.nextStringOption(),
+      soraAiempi = r.nextBooleanOption(),
+      soraTerveys = r.nextBooleanOption(),
+      markkinointilupa = r.nextBooleanOption(),
+      julkaisulupa = r.nextBooleanOption(),
+      sahkoinenViestintaLupa = r.nextBooleanOption(),
+      lahiosoite = r.nextString(),
+      postinumero = r.nextString(),
+      postitoimipaikka = r.nextString()
     )
   )
 }

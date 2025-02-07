@@ -5,7 +5,7 @@ import {
   MultiComboBox,
   SelectOption,
 } from '@/app/components/form/multicombobox';
-import { useSearchParams } from '@/app/hooks/useSearchParams';
+import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
 import { isEmpty } from 'remeda';
 import { useQuery } from '@tanstack/react-query';
 import { doApiFetch } from '@/app/lib/ovara-backend/api';

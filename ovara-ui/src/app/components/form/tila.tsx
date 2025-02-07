@@ -1,4 +1,4 @@
-import { useSearchParams } from '@/app/hooks/useSearchParams';
+import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
 import { LocalizedSelect } from './localized-select';
 import { TILAT } from '@/app/lib/constants';
 import { SelectChangeEvent } from '@mui/material';
