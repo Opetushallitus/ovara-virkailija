@@ -194,6 +194,7 @@ class Controller(
       @RequestParam("hakukohde", required = false) hakukohde: java.util.Collection[String],
       @RequestParam("vastaanottotieto", required = false) vastaanottotieto: java.util.Collection[String],
       @RequestParam("harkinnanvaraisuus", required = false) harkinnanvaraisuus: java.util.Collection[String],
+      @RequestParam("kaksoistutkinto", required = false) kaksoistutkinto: String,
       @RequestParam("markkinointilupa", required = false) markkinointilupa: String,
       @RequestParam("julkaisulupa", required = false) julkaisulupa: String,
       request: HttpServletRequest,
@@ -205,6 +206,12 @@ class Controller(
     val hakukohdeList          = if (hakukohde == null) List() else hakukohde.asScala.toList
     val vastaanottotietoList   = if (vastaanottotieto == null) List() else vastaanottotieto.asScala.toList
     val harkinnanvaraisuusList = if (harkinnanvaraisuus == null) List() else harkinnanvaraisuus.asScala.toList
+
+    val maybeKaksoistutkintoKiinnostaa = if (kaksoistutkinto == null) {
+      None
+    } else {
+      Option(kaksoistutkinto.toBoolean)
+    }
 
     val maybeMarkkinointilupa = if (markkinointilupa == null) {
       None
@@ -225,6 +232,7 @@ class Controller(
       hakukohdeList,
       vastaanottotietoList,
       harkinnanvaraisuusList,
+      maybeKaksoistutkintoKiinnostaa,
       maybeMarkkinointilupa,
       maybeJulkaisulupa
     )

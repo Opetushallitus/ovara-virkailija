@@ -33,6 +33,11 @@ export const useHakijatSearchParams = () => {
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
+  const [selectedKaksoistutkinto, setSelectedKaksoistutkinto] = useQueryState(
+    'kaksoistutkinto',
+    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
   return {
     selectedHakukohteet,
     setSelectedHakukohteet,
@@ -44,5 +49,7 @@ export const useHakijatSearchParams = () => {
     setSelectedJulkaisulupa,
     selectedValintatieto,
     setSelectedValintatieto,
+    selectedKaksoistutkinto,
+    setSelectedKaksoistutkinto,
   };
 };

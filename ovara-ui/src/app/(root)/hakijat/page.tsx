@@ -27,6 +27,7 @@ import { useState } from 'react';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { downloadExcel } from '@/app/components/form/utils';
 import { Valintatieto } from '@/app/components/form/valintatieto';
+import { Kaksoistutkinto } from '@/app/components/form/kaksoistutkinto';
 
 export default function Hakijat() {
   const { t } = useTranslate();
@@ -75,6 +76,7 @@ export default function Hakijat() {
           <Valintatieto t={t} />
           <Vastaanottotieto t={t} />
           <Harkinnanvaraisuus t={t} />
+          <Kaksoistutkinto t={t} />
           <Markkinointilupa t={t} />
           <Julkaisulupa t={t} />
           <FormButtons
