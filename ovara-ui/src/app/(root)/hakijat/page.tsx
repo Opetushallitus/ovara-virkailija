@@ -28,6 +28,7 @@ import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { downloadExcel } from '@/app/components/form/utils';
 import { Valintatieto } from '@/app/components/form/valintatieto';
 import { Kaksoistutkinto } from '@/app/components/form/kaksoistutkinto';
+import { SoraTerveys } from '@/app/components/form/soraTerveys';
 
 export default function Hakijat() {
   const { t } = useTranslate();
@@ -77,6 +78,7 @@ export default function Hakijat() {
           <Vastaanottotieto t={t} />
           <Harkinnanvaraisuus t={t} />
           <Kaksoistutkinto t={t} />
+          <SoraTerveys t={t} />
           <Markkinointilupa t={t} />
           <Julkaisulupa t={t} />
           <FormButtons

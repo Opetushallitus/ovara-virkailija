@@ -38,6 +38,11 @@ export const useHakijatSearchParams = () => {
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
+  const [selectedSoraTerveys, setSelectedSoraTerveys] = useQueryState(
+    'soraterveys',
+    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
   return {
     selectedHakukohteet,
     setSelectedHakukohteet,
@@ -51,5 +56,7 @@ export const useHakijatSearchParams = () => {
     setSelectedValintatieto,
     selectedKaksoistutkinto,
     setSelectedKaksoistutkinto,
+    selectedSoraTerveys,
+    setSelectedSoraTerveys,
   };
 };

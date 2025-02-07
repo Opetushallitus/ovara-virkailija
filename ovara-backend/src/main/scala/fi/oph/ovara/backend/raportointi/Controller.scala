@@ -195,6 +195,7 @@ class Controller(
       @RequestParam("vastaanottotieto", required = false) vastaanottotieto: java.util.Collection[String],
       @RequestParam("harkinnanvaraisuus", required = false) harkinnanvaraisuus: java.util.Collection[String],
       @RequestParam("kaksoistutkinto", required = false) kaksoistutkinto: String,
+      @RequestParam("soraterveys", required = false) soraterveys: String,
       @RequestParam("markkinointilupa", required = false) markkinointilupa: String,
       @RequestParam("julkaisulupa", required = false) julkaisulupa: String,
       request: HttpServletRequest,
@@ -207,23 +208,18 @@ class Controller(
     val vastaanottotietoList   = if (vastaanottotieto == null) List() else vastaanottotieto.asScala.toList
     val harkinnanvaraisuusList = if (harkinnanvaraisuus == null) List() else harkinnanvaraisuus.asScala.toList
 
-    val maybeKaksoistutkintoKiinnostaa = if (kaksoistutkinto == null) {
-      None
-    } else {
-      Option(kaksoistutkinto.toBoolean)
+    def strToOptionBoolean(str: String) = {
+      if (str == null) {
+        None
+      } else {
+        Option(str.toBoolean)
+      }
     }
 
-    val maybeMarkkinointilupa = if (markkinointilupa == null) {
-      None
-    } else {
-      Option(markkinointilupa.toBoolean)
-    }
-
-    val maybeJulkaisulupa = if (julkaisulupa == null) {
-      None
-    } else {
-      Option(julkaisulupa.toBoolean)
-    }
+    val maybeKaksoistutkintoKiinnostaa = strToOptionBoolean(kaksoistutkinto)
+    val maybeSoraTerveys               = strToOptionBoolean(soraterveys)
+    val maybeMarkkinointilupa          = strToOptionBoolean(markkinointilupa)
+    val maybeJulkaisulupa              = strToOptionBoolean(julkaisulupa)
 
     val wb = hakijatService.get(
       hakuList,
@@ -233,18 +229,22 @@ class Controller(
       vastaanottotietoList,
       harkinnanvaraisuusList,
       maybeKaksoistutkintoKiinnostaa,
+      maybeSoraTerveys,
       maybeMarkkinointilupa,
       maybeJulkaisulupa
     )
 
     val raporttiParams = Map(
-      "haku"             -> Option(hakuList).filterNot(_.isEmpty),
-      "oppilaitos"       -> Option(oppilaitosList).filterNot(_.isEmpty),
-      "toimipiste"       -> Option(toimipisteList).filterNot(_.isEmpty),
-      "hakukohde"        -> Option(hakukohdeList).filterNot(_.isEmpty),
-      "vastaanottotieto" -> Option(vastaanottotietoList).filterNot(_.isEmpty),
-      "markkinointilupa" -> maybeMarkkinointilupa,
-      "julkaisulupa"     -> maybeJulkaisulupa
+      "haku"               -> Option(hakuList).filterNot(_.isEmpty),
+      "oppilaitos"         -> Option(oppilaitosList).filterNot(_.isEmpty),
+      "toimipiste"         -> Option(toimipisteList).filterNot(_.isEmpty),
+      "hakukohde"          -> Option(hakukohdeList).filterNot(_.isEmpty),
+      "vastaanottotieto"   -> Option(vastaanottotietoList).filterNot(_.isEmpty),
+      "harkinnanvaraisuus" -> Option(harkinnanvaraisuusList).filterNot(_.isEmpty),
+      "kaksoistutkinto"    -> maybeKaksoistutkintoKiinnostaa,
+      "soraTerveys"        -> maybeSoraTerveys,
+      "markkinointilupa"   -> maybeMarkkinointilupa,
+      "julkaisulupa"       -> maybeJulkaisulupa
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
     sendExcel(wb, response, request, "hakijat", raporttiParams)

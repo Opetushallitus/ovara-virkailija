@@ -18,6 +18,7 @@ class HakijatRepository extends Extractors {
       vastaanottotieto: List[String],
       harkinnanvaraisuudet: List[String],
       kaksoistutkintoKiinnostaa: Option[Boolean],
+      soraTerveys: Option[Boolean],
       markkinointilupa: Option[Boolean],
       julkaisulupa: Option[Boolean]
   ): SqlStreamingAction[Vector[Hakija], Hakija, Effect] = {
@@ -27,11 +28,11 @@ class HakijatRepository extends Extractors {
     def mapVastaanottotiedotToDbValues(vastaanottotiedot: List[String]) = {
       vastaanottotiedot.flatMap {
         case "vastaanottaneet" => Some("VASTAANOTTANUT_SITOVASTI")
-        case s: String => Some(s.toUpperCase)
-        case null => None
+        case s: String         => Some(s.toUpperCase)
+        case null              => None
       }
     }
-    val vastaanottotiedotAsDbValues = mapVastaanottotiedotToDbValues(vastaanottotieto)
+    val vastaanottotiedotAsDbValues        = mapVastaanottotiedotToDbValues(vastaanottotieto)
     val harkinnanvaraisuudetWithSureValues = RepositoryUtils.enrichHarkinnanvaraisuudet(harkinnanvaraisuudet)
 
     sql"""SELECT concat_ws(',', hlo.sukunimi, hlo.etunimet), hlo.turvakielto,
@@ -58,6 +59,7 @@ class HakijatRepository extends Extractors {
           #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hk.hakukohde_oid", hakukohteet)}
           #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.vastaanottotieto", vastaanottotiedotAsDbValues)}
           #${RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "ht2.kaksoistutkinto_kiinnostaa", kaksoistutkintoKiinnostaa)}
+          #${RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "ht2.sora_terveys", soraTerveys)}
           #${RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "hlo.koulutusmarkkinointilupa", markkinointilupa)}
           #${RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "hlo.valintatuloksen_julkaisulupa", julkaisulupa)}
           #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht2.harkinnanvaraisuuden_syy", harkinnanvaraisuudetWithSureValues)}""".as[Hakija]
