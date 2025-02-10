@@ -195,6 +195,7 @@ class Controller(
       @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
       @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
       @RequestParam("hakukohde", required = false) hakukohde: java.util.Collection[String],
+      @RequestParam("valintatieto", required = false) valintatieto: java.util.Collection[String],
       @RequestParam("vastaanottotieto", required = false) vastaanottotieto: java.util.Collection[String],
       @RequestParam("harkinnanvaraisuus", required = false) harkinnanvaraisuus: java.util.Collection[String],
       @RequestParam("kaksoistutkinto", required = false) kaksoistutkinto: String,
@@ -209,6 +210,7 @@ class Controller(
     val oppilaitosList         = if (oppilaitos == null) List() else oppilaitos.asScala.toList
     val toimipisteList         = if (toimipiste == null) List() else toimipiste.asScala.toList
     val hakukohdeList          = if (hakukohde == null) List() else hakukohde.asScala.toList
+    val valintatietoList       = if (valintatieto == null) List() else valintatieto.asScala.toList
     val vastaanottotietoList   = if (vastaanottotieto == null) List() else vastaanottotieto.asScala.toList
     val harkinnanvaraisuusList = if (harkinnanvaraisuus == null) List() else harkinnanvaraisuus.asScala.toList
 
@@ -231,6 +233,7 @@ class Controller(
       oppilaitosList,
       toimipisteList,
       hakukohdeList,
+      valintatietoList,
       vastaanottotietoList,
       harkinnanvaraisuusList,
       maybeKaksoistutkintoKiinnostaa,

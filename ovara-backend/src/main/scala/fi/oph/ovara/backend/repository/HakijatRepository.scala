@@ -15,6 +15,7 @@ class HakijatRepository extends Extractors {
       oppilaitokset: List[String],
       toimipisteet: List[String],
       hakukohteet: List[String],
+      valintatieto: List[String],
       vastaanottotieto: List[String],
       harkinnanvaraisuudet: List[String],
       kaksoistutkintoKiinnostaa: Option[Boolean],
@@ -35,6 +36,30 @@ class HakijatRepository extends Extractors {
     }
     val vastaanottotiedotAsDbValues        = mapVastaanottotiedotToDbValues(vastaanottotieto)
     val harkinnanvaraisuudetWithSureValues = RepositoryUtils.enrichHarkinnanvaraisuudet(harkinnanvaraisuudet)
+    val optionalHakukohdeQuery =
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hk.hakukohde_oid", hakukohteet)
+    val optionalValintatietoQuery =
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "vt.valinnan_tila", valintatieto)
+    val optionalVastaanottotietoQuery =
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.vastaanottotieto", vastaanottotiedotAsDbValues)
+    val optionalKaksoistutkintoQuery = RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean(
+      "AND",
+      "ht2.kaksoistutkinto_kiinnostaa",
+      kaksoistutkintoKiinnostaa
+    )
+    val optionalSoraTerveysKyselyQuery =
+      RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "ht2.sora_terveys", soraTerveys)
+    val optionalSoraAiempiQuery =
+      RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "ht2.sora_aiempi", soraAiempi)
+    val optionalMarkkinointilupaQuery =
+      RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "hlo.koulutusmarkkinointilupa", markkinointilupa)
+    val optionalJulkaisulupaQuery =
+      RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "hlo.valintatuloksen_julkaisulupa", julkaisulupa)
+    val optionalHarkinnanvaraisuusQuery = RepositoryUtils.makeOptionalListOfValuesQueryStr(
+      "AND",
+      "ht2.harkinnanvaraisuuden_syy",
+      harkinnanvaraisuudetWithSureValues
+    )
 
     sql"""SELECT concat_ws(',', hlo.sukunimi, hlo.etunimet), hlo.turvakielto,
                  hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid,
@@ -57,13 +82,14 @@ class HakijatRepository extends Extractors {
           ON hakemus.hakemus_oid = vt.hakemus_oid AND hk.hakukohde_oid = vt.hakukohde_oid
           WHERE hakemus.haku_oid IN (#$hakuStr)
           AND hk.jarjestyspaikka_oid IN (#$raportointiorganisaatiotStr)
-          #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hk.hakukohde_oid", hakukohteet)}
-          #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.vastaanottotieto", vastaanottotiedotAsDbValues)}
-          #${RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "ht2.kaksoistutkinto_kiinnostaa", kaksoistutkintoKiinnostaa)}
-          #${RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "ht2.sora_terveys", soraTerveys)}
-          #${RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "ht2.sora_aiempi", soraAiempi)}
-          #${RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "hlo.koulutusmarkkinointilupa", markkinointilupa)}
-          #${RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "hlo.valintatuloksen_julkaisulupa", julkaisulupa)}
-          #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht2.harkinnanvaraisuuden_syy", harkinnanvaraisuudetWithSureValues)}""".as[Hakija]
+          #$optionalHakukohdeQuery
+          #$optionalValintatietoQuery
+          #$optionalVastaanottotietoQuery
+          #$optionalKaksoistutkintoQuery
+          #$optionalSoraTerveysKyselyQuery
+          #$optionalSoraAiempiQuery
+          #$optionalMarkkinointilupaQuery
+          #$optionalJulkaisulupaQuery
+          #$optionalHarkinnanvaraisuusQuery""".as[Hakija]
   }
 }
