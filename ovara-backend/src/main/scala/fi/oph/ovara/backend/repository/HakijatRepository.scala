@@ -19,6 +19,7 @@ class HakijatRepository extends Extractors {
       harkinnanvaraisuudet: List[String],
       kaksoistutkintoKiinnostaa: Option[Boolean],
       soraTerveys: Option[Boolean],
+      soraAiempi: Option[Boolean],
       markkinointilupa: Option[Boolean],
       julkaisulupa: Option[Boolean]
   ): SqlStreamingAction[Vector[Hakija], Hakija, Effect] = {
@@ -60,6 +61,7 @@ class HakijatRepository extends Extractors {
           #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.vastaanottotieto", vastaanottotiedotAsDbValues)}
           #${RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "ht2.kaksoistutkinto_kiinnostaa", kaksoistutkintoKiinnostaa)}
           #${RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "ht2.sora_terveys", soraTerveys)}
+          #${RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "ht2.sora_aiempi", soraAiempi)}
           #${RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "hlo.koulutusmarkkinointilupa", markkinointilupa)}
           #${RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "hlo.valintatuloksen_julkaisulupa", julkaisulupa)}
           #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht2.harkinnanvaraisuuden_syy", harkinnanvaraisuudetWithSureValues)}""".as[Hakija]

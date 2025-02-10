@@ -198,7 +198,8 @@ class Controller(
       @RequestParam("vastaanottotieto", required = false) vastaanottotieto: java.util.Collection[String],
       @RequestParam("harkinnanvaraisuus", required = false) harkinnanvaraisuus: java.util.Collection[String],
       @RequestParam("kaksoistutkinto", required = false) kaksoistutkinto: String,
-      @RequestParam("soraterveys", required = false) soraterveys: String,
+      @RequestParam("sora_terveys", required = false) soraterveys: String,
+      @RequestParam("sora_aiempi", required = false) soraAiempi: String,
       @RequestParam("markkinointilupa", required = false) markkinointilupa: String,
       @RequestParam("julkaisulupa", required = false) julkaisulupa: String,
       request: HttpServletRequest,
@@ -221,6 +222,7 @@ class Controller(
 
     val maybeKaksoistutkintoKiinnostaa = strToOptionBoolean(kaksoistutkinto)
     val maybeSoraTerveys               = strToOptionBoolean(soraterveys)
+    val maybeSoraAiempi                = strToOptionBoolean(soraAiempi)
     val maybeMarkkinointilupa          = strToOptionBoolean(markkinointilupa)
     val maybeJulkaisulupa              = strToOptionBoolean(julkaisulupa)
 
@@ -233,6 +235,7 @@ class Controller(
       harkinnanvaraisuusList,
       maybeKaksoistutkintoKiinnostaa,
       maybeSoraTerveys,
+      maybeSoraAiempi,
       maybeMarkkinointilupa,
       maybeJulkaisulupa
     )
@@ -246,6 +249,7 @@ class Controller(
       "harkinnanvaraisuus" -> Option(harkinnanvaraisuusList).filterNot(_.isEmpty),
       "kaksoistutkinto"    -> maybeKaksoistutkintoKiinnostaa,
       "soraTerveys"        -> maybeSoraTerveys,
+      "soraAiempi"         -> maybeSoraAiempi,
       "markkinointilupa"   -> maybeMarkkinointilupa,
       "julkaisulupa"       -> maybeJulkaisulupa
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit

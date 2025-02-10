@@ -29,6 +29,7 @@ import { downloadExcel } from '@/app/components/form/utils';
 import { Valintatieto } from '@/app/components/form/valintatieto';
 import { Kaksoistutkinto } from '@/app/components/form/kaksoistutkinto';
 import { SoraTerveys } from '@/app/components/form/soraTerveys';
+import { SoraAiempi } from '@/app/components/form/soraAiempi';
 
 export default function Hakijat() {
   const { t } = useTranslate();
@@ -79,6 +80,7 @@ export default function Hakijat() {
           <Harkinnanvaraisuus t={t} />
           <Kaksoistutkinto t={t} />
           <SoraTerveys t={t} />
+          <SoraAiempi t={t} />
           <Markkinointilupa t={t} />
           <Julkaisulupa t={t} />
           <FormButtons
