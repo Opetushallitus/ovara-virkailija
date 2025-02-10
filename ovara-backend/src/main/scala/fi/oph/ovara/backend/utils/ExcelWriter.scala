@@ -254,6 +254,13 @@ object ExcelWriter {
     subHeadingFont
   }
 
+  private def createSummaryRowFont(workbook: XSSFWorkbook): XSSFFont = {
+    val subHeadingFont = workbook.createFont()
+    subHeadingFont.setFontHeightInPoints(10)
+    subHeadingFont.setBold(true)
+    subHeadingFont
+  }
+
   private def createBodyTextFont(workbook: XSSFWorkbook, bodyTextCellStyle: XSSFCellStyle): XSSFFont = {
     val bodyTextFont = workbook.createFont()
     bodyTextFont.setFontHeightInPoints(10)
@@ -462,6 +469,111 @@ object ExcelWriter {
     // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
     fieldNamesWithIndex.foreach { case (title, index) =>
       sheet.autoSizeColumn(index)
+    }
+
+    try {
+      workbook
+    } catch {
+      case e: Exception =>
+        LOG.error(s"Error creating excel: ${e.getMessage}")
+        throw e
+    }
+  }
+
+  def writeHakeneetHyvaksytytVastaanottaneetRaportti(
+                            asiointikieli: String,
+                            translations: Map[String, String]
+                          ): XSSFWorkbook = {
+    val workbook: XSSFWorkbook = new XSSFWorkbook()
+    LOG.info("Creating new HakeneetHyvaksytytVastaanottaneet excel from db results")
+    val sheet: XSSFSheet = workbook.createSheet()
+    workbook.setSheetName(
+      0,
+      WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yhteenveto", "raportti.yhteenveto"))
+    )
+
+    val headingCellStyle: XSSFCellStyle = workbook.createCellStyle()
+    val bodyTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
+    val summaryCellStyle: XSSFCellStyle = workbook.createCellStyle()
+
+    val headingFont = createHeadingFont(workbook, headingCellStyle)
+    val bodyTextFont = createBodyTextFont(workbook, bodyTextCellStyle)
+    val summaryFont = createSummaryRowFont(workbook)
+
+    summaryCellStyle.setFont(summaryFont)
+    summaryCellStyle.setAlignment(HorizontalAlignment.RIGHT)
+
+    var currentRowIndex = 0
+
+    val titles = HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES.get(asiointikieli).getOrElse(HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES.get("fi").get)
+    val headingRow = sheet.createRow(currentRowIndex)
+    titles.zipWithIndex.foreach((fieldName, index) => {
+      val headingCell = headingRow.createCell(index)
+      headingCell.setCellStyle(headingCellStyle)
+      val translationKey = s"raportti.$fieldName"
+      val translation = translations.getOrElse(translationKey, translationKey)
+      headingCell.setCellValue(translation)
+    })
+
+    currentRowIndex += 1
+    // Mock data
+    val mockData = HakeneetHyvaksytytVastaanottaneetResult(
+      hakukohdeNimi = Map(Fi -> "Mock Hakukohde"),
+      hakijat = 100,
+      ensisijaiset = 50,
+      varasijalla = 1,
+      hyvaksytyt = 30,
+      vastaanottaneet = 25,
+      lasna = 20,
+      poissa = 5,
+      ilmoittautuneetYhteensa = 25,
+      aloituspaikat = 30
+    )
+    // tilastorivit
+    val dataRow = sheet.createRow(currentRowIndex)
+    val data = List(
+      mockData.hakukohdeNimi(Kieli.withName(asiointikieli)),
+      mockData.hakijat.toString,
+      mockData.ensisijaiset.toString,
+      mockData.varasijalla.toString,
+      mockData.hyvaksytyt.toString,
+      mockData.vastaanottaneet.toString,
+      mockData.lasna.toString,
+      mockData.poissa.toString,
+      mockData.ilmoittautuneetYhteensa.toString,
+      mockData.aloituspaikat.toString
+    )
+    data.zipWithIndex.foreach { case (value, index) =>
+      val cell = dataRow.createCell(index)
+      cell.setCellStyle(bodyTextCellStyle)
+      cell.setCellValue(value)
+    }
+
+    currentRowIndex += 1
+
+    // yhteensä-rivi mock
+    val summaryRow = sheet.createRow(currentRowIndex)
+    val summaryData = List(
+      "Yhteensä",
+      mockData.hakijat.toString,
+      mockData.ensisijaiset.toString,
+      mockData.varasijalla.toString,
+      mockData.hyvaksytyt.toString,
+      mockData.vastaanottaneet.toString,
+      mockData.lasna.toString,
+      mockData.poissa.toString,
+      mockData.ilmoittautuneetYhteensa.toString,
+      mockData.aloituspaikat.toString
+    )
+
+    summaryData.zipWithIndex.foreach { case (value, index) =>
+      val cell = summaryRow.createCell(index)
+      if (index == 0) {
+        cell.setCellStyle(summaryCellStyle)
+      } else {
+        cell.setCellStyle(bodyTextCellStyle)
+      }
+      cell.setCellValue(value)
     }
 
     try {

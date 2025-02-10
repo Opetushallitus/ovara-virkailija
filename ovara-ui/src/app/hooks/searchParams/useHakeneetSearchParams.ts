@@ -20,7 +20,7 @@ export const useHakeneetSearchParams = () => {
 
   const [selectedSukupuoli, setSelectedSukupuoli] = useQueryState(
     'sukupuoli',
-    DEFAULT_NUQS_OPTIONS,
+    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
   return {

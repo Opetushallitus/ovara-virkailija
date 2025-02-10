@@ -50,6 +50,7 @@ export default function Hakijat() {
     setSelectedOppilaitokset,
     setSelectedToimipisteet,
     setSelectedHakukohteet,
+    setSelectedHarkinnanvaraisuus,
   } = useCommonSearchParams();
   const {
     setSelectedJulkaisulupa,
@@ -116,6 +117,7 @@ export default function Hakijat() {
               () => setSelectedVastaanottotieto(null),
               () => setSelectedMarkkinointilupa(null),
               () => setSelectedJulkaisulupa(null),
+              () => setSelectedHarkinnanvaraisuus(null),
             ]}
           />
         </FormBox>

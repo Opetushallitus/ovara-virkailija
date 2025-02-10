@@ -21,6 +21,7 @@ import { useHakeneetSearchParams } from '@/app/hooks/searchParams/useHakeneetSea
 import { Divider } from '@mui/material';
 import { NaytaHakutoiveet } from '@/app/components/form/nayta-hakutoiveet';
 import { Sukupuoli } from '@/app/components/form/sukupuoli';
+import { Harkinnanvaraisuus } from '@/app/components/form/harkinnanvaraisuus';
 
 export default function Hakutilasto() {
   const { t } = useTranslate();
@@ -29,20 +30,27 @@ export default function Hakutilasto() {
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const queryParams = useSearchParams();
 
-  const isDisabled = true;
-
   const {
+    selectedAlkamiskaudet,
     setSelectedAlkamiskaudet,
+    selectedHaut,
     setSelectedHaut,
     setSelectedOppilaitokset,
     setSelectedToimipisteet,
     setSelectedHakukohteet,
   } = useCommonSearchParams();
   const {
+    selectedTulostustapa,
     setSelectedTulostustapa,
     setSelectedOpetuskieli,
     setSelectedSukupuoli,
   } = useHakeneetSearchParams();
+
+  const isDisabled = !(
+    selectedAlkamiskaudet &&
+    selectedHaut &&
+    selectedTulostustapa
+  );
   return (
     <MainContainer>
       {hasToinenAsteRights ? (
@@ -54,13 +62,15 @@ export default function Hakutilasto() {
           <OrganisaatioValikot />
           <Hakukohde locale={locale} t={t} />
           <Opetuskieli />
+          <Harkinnanvaraisuus t={t} />
           <Divider />
           <NaytaHakutoiveet t={t} />
           <Sukupuoli t={t} />
           <FormButtons
             disabled={isDisabled}
             excelDownloadUrl={
-              `${configuration.ovaraBackendApiUrl}/hakijat?` + queryParams
+              `${configuration.ovaraBackendApiUrl}/hakeneet-hyvaksytyt-vastaanottaneet?` +
+              queryParams
             }
             fieldsToClear={[
               () => setSelectedAlkamiskaudet(null),

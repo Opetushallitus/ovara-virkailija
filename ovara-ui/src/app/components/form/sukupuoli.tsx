@@ -11,7 +11,7 @@ export const Sukupuoli = ({ t }: { t: (key: string) => string }) => {
 
   return (
     <OvaraRadioGroup
-      label={t(`raportti.nayta-hakutoiveet`)}
+      label={t(`raportti.sukupuoli`)}
       options={SUKUPUOLET}
       value={getSelectedRadioGroupValue(selectedSukupuoli)}
       onChange={(e) => changeRadioGroupSelection(e, setSelectedSukupuoli)}
