@@ -52,6 +52,10 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     db.run(commonRepository.selectDistinctValintatiedot, "selectDistinctValintatiedot")
   }
 
+  def getVastaanottotiedot: Vector[String] = {
+    db.run(commonRepository.selectDistinctVastaanottotiedot, "selectDistinctVastaanottotiedot")
+  }
+
   def getOrganisaatioHierarkiatWithUserRights: List[OrganisaatioHierarkia] = {
     val user          = userService.getEnrichedUserDetails
     val organisaatiot = AuthoritiesUtil.getOrganisaatiot(user.authorities)

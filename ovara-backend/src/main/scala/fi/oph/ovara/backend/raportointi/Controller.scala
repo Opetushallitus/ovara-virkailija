@@ -101,6 +101,9 @@ class Controller(
   @GetMapping(path = Array("valintatiedot"))
   def valintatiedot: String = mapper.writeValueAsString(commonService.getValintatiedot)
 
+  @GetMapping(path = Array("vastaanottotiedot"))
+  def vastaanottotiedot: String = mapper.writeValueAsString(commonService.getVastaanottotiedot)
+
   // RAPORTIT
 
   private def sendExcel(

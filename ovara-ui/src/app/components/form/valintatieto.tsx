@@ -12,15 +12,10 @@ export const Valintatieto = ({ t }: { t: (key: string) => string }) => {
   const { selectedValintatieto, setSelectedValintatieto } =
     useHakijatSearchParams();
 
-  // TODO: Poista tämä sitten kun kannasta tulee pelkkiä upper case arvoja
-  const correctedValintatiedot = valintatiedot?.filter(
-    (valintatieto) => valintatieto === valintatieto.toUpperCase(),
-  );
-
   return (
     <OvaraCheckboxGroup
       id={'valintatieto'}
-      options={correctedValintatiedot}
+      options={valintatiedot}
       selectedValues={selectedValintatieto}
       setSelectedValues={setSelectedValintatieto}
       t={t}
