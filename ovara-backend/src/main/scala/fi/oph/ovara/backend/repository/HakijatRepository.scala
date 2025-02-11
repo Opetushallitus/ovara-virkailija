@@ -27,13 +27,15 @@ class HakijatRepository extends Extractors {
     val hakuStr                     = RepositoryUtils.makeListOfValuesQueryStr(haut)
     val raportointiorganisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusOrganisaatiot)
 
-    def mapVastaanottotiedotToDbValues(vastaanottotiedot: List[String]) = {
+    def mapVastaanottotiedotToDbValues(vastaanottotiedot: List[String]): List[String] = {
       vastaanottotiedot.flatMap {
-        case "vastaanottaneet" => Some("VASTAANOTTANUT_SITOVASTI")
-        case s: String         => Some(s.toUpperCase)
-        case null              => None
+        case s: String if s == "PERUNUT"        => s :: List("EI_VASTAANOTETTU_MAARA_AIKANA")
+        case s: String if s == "VASTAANOTTANUT" => List(s"${s}_SITOVASTI")
+        case s: String                          => List(s)
+        case null                               => List()
       }
     }
+
     val vastaanottotiedotAsDbValues        = mapVastaanottotiedotToDbValues(vastaanottotieto)
     val harkinnanvaraisuudetWithSureValues = RepositoryUtils.enrichHarkinnanvaraisuudet(harkinnanvaraisuudet)
     val optionalHakukohdeQuery =
