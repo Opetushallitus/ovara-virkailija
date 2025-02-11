@@ -1,9 +1,5 @@
 import { OvaraRadioGroup } from '@/app/components/form/ovara-radio-group';
 import { SUKUPUOLET } from '@/app/lib/constants';
-import {
-  changeRadioGroupSelection,
-  getSelectedRadioGroupValue,
-} from '@/app/components/form/utils';
 import { useHakeneetSearchParams } from '@/app/hooks/searchParams/useHakeneetSearchParams';
 
 export const Sukupuoli = ({ t }: { t: (key: string) => string }) => {
@@ -13,8 +9,8 @@ export const Sukupuoli = ({ t }: { t: (key: string) => string }) => {
     <OvaraRadioGroup
       label={t(`raportti.sukupuoli`)}
       options={SUKUPUOLET}
-      value={getSelectedRadioGroupValue(selectedSukupuoli)}
-      onChange={(e) => changeRadioGroupSelection(e, setSelectedSukupuoli)}
+      value={selectedSukupuoli}
+      onChange={(e) => setSelectedSukupuoli(e.target.value)}
     />
   );
 };

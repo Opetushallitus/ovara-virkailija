@@ -7,7 +7,6 @@ import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { hasOvaraToinenAsteRole } from '@/app/lib/utils';
 import { useSearchParams } from 'next/navigation';
-import { configuration } from '@/app/lib/configuration';
 import { LanguageCode } from '@/app/lib/types/common';
 
 import { KoulutuksenAlkaminen } from '@/app/components/form/koulutuksen-alkaminen';
@@ -22,6 +21,9 @@ import { Divider } from '@mui/material';
 import { NaytaHakutoiveet } from '@/app/components/form/nayta-hakutoiveet';
 import { Sukupuoli } from '@/app/components/form/sukupuoli';
 import { Harkinnanvaraisuus } from '@/app/components/form/harkinnanvaraisuus';
+import { downloadExcel } from '@/app/components/form/utils';
+import { useState } from 'react';
+import { SpinnerModal } from '@/app/components/form/spinner-modal';
 
 export default function Hakutilasto() {
   const { t } = useTranslate();
@@ -51,10 +53,13 @@ export default function Hakutilasto() {
     selectedHaut &&
     selectedTulostustapa
   );
+  const [isLoading, setIsLoading] = useState(false);
+  const queryParamsStr = queryParams.toString();
   return (
     <MainContainer>
       {hasToinenAsteRights ? (
         <FormBox>
+          {isLoading && <SpinnerModal open={isLoading} />}
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
           <KoulutuksenAlkaminen />
           <Haku />
@@ -68,9 +73,12 @@ export default function Hakutilasto() {
           <Sukupuoli t={t} />
           <FormButtons
             disabled={isDisabled}
-            excelDownloadUrl={
-              `${configuration.ovaraBackendApiUrl}/hakeneet-hyvaksytyt-vastaanottaneet?` +
-              queryParams
+            downloadExcel={() =>
+              downloadExcel(
+                'hakeneet-hyvaksytyt-vastaanottaneet',
+                queryParamsStr,
+                setIsLoading,
+              )
             }
             fieldsToClear={[
               () => setSelectedAlkamiskaudet(null),

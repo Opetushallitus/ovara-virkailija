@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component
 import slick.jdbc.PostgresProfile.api.*
 import slick.sql.SqlStreamingAction
 
+
 @Component
 class CommonRepository extends Extractors {
   def selectDistinctAlkamisvuodet(): SqlStreamingAction[Vector[String], String, Effect] = {
@@ -92,6 +93,12 @@ class CommonRepository extends Extractors {
           FROM pub.pub_dim_hakutoive ht
           WHERE ht.vastaanottotieto IS NOT NULL
        """.as[String]
+  }
+
+  def selectDistinctOpetuskielet: SqlStreamingAction[Vector[Opetuskieli], Opetuskieli, Effect] = {
+    sql"""SELECT DISTINCT ook.koodiarvo, ook.nimi_fi, ook.nimi_sv, ook.nimi_en
+          FROM pub.pub_dim_koodisto_oppilaitoksenopetuskieli ook;
+       """.as[Opetuskieli]
   }
 
   def selectDistinctOrganisaatiot(

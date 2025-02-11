@@ -8,26 +8,26 @@ export const useHakeneetSearchParams = () => {
     DEFAULT_NUQS_OPTIONS,
   );
 
-  const [selectedOpetuskieli, setSelectedOpetuskieli] = useQueryState(
+  const [selectedOpetuskielet, setSelectedOpetuskielet] = useQueryState(
     'opetuskieli',
     DEFAULT_NUQS_OPTIONS,
   );
 
   const [selectedNaytaHakutoiveet, setSelectedNaytaHakutoiveet] = useQueryState(
-    'naytahakutoiveet',
+    'nayta-hakutoiveet',
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
   const [selectedSukupuoli, setSelectedSukupuoli] = useQueryState(
     'sukupuoli',
-    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
+    DEFAULT_NUQS_OPTIONS,
   );
 
   return {
     selectedTulostustapa,
     setSelectedTulostustapa,
-    selectedOpetuskieli,
-    setSelectedOpetuskieli,
+    selectedOpetuskielet,
+    setSelectedOpetuskielet,
     selectedNaytaHakutoiveet,
     setSelectedNaytaHakutoiveet,
     selectedSukupuoli,

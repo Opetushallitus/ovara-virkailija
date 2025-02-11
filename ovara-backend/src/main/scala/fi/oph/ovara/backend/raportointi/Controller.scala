@@ -106,6 +106,10 @@ class Controller(
   @GetMapping(path = Array("vastaanottotiedot"))
   def vastaanottotiedot: String = mapper.writeValueAsString(commonService.getVastaanottotiedot)
 
+  @GetMapping(path = Array("opetuskielet"))
+  def opetuskielet: String = mapper.writeValueAsString(commonService.getOpetuskielet)
+
+
   // RAPORTIT
 
   private def sendExcel(
@@ -281,8 +285,8 @@ class Controller(
                                            @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
                                            @RequestParam("hakukohde", required = false) hakukohde: java.util.Collection[String],
                                            @RequestParam("opetuskieli", required = false) opetuskieli: java.util.Collection[String],
-                                           @RequestParam("harkinnanvaraisuudet", required = false) harkinnanvaraisuudet: java.util.Collection[String],
-                                           @RequestParam("naytaHakutoiveet", required = false) naytaHakutoiveet: String,
+                                           @RequestParam("harkinnanvaraisuus", required = false) harkinnanvaraisuudet: java.util.Collection[String],
+                                           @RequestParam("nayta-hakutoiveet", required = false) naytaHakutoiveet: String,
                                            @RequestParam("sukupuoli", required = false) sukupuoli: String,
                                            request: HttpServletRequest,
                                            response: HttpServletResponse
