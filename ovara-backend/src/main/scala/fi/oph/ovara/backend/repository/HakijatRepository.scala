@@ -64,7 +64,7 @@ class HakijatRepository extends Extractors {
     sql"""SELECT concat_ws(',', hlo.sukunimi, hlo.etunimet), hlo.turvakielto,
                  hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid,
                  hk.hakukohde_nimi, hk.hakukohde_oid, ht.hakutoivenumero, ht2.kaksoistutkinto_kiinnostaa,
-                 vt.valinnan_tila, ht.vastaanottotieto, ht2.harkinnanvaraisuuden_syy, ht2.sora_aiempi, ht2.sora_terveys, hlo.koulutusmarkkinointilupa,
+                 ht.valintatapajonot->0->>'valinnan_tila' AS valinnan_tila, ht.vastaanottotieto, ht2.harkinnanvaraisuuden_syy, ht2.sora_aiempi, ht2.sora_terveys, hlo.koulutusmarkkinointilupa,
                  hlo.valintatuloksen_julkaisulupa, hlo.sahkoinenviestintalupa,
                  hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka
           FROM pub.pub_dim_henkilo hlo
@@ -78,8 +78,6 @@ class HakijatRepository extends Extractors {
           ON ht.hakukohde_oid = hk.hakukohde_oid
           JOIN pub.pub_dim_organisaatio o
           ON hk.jarjestyspaikka_oid = o.organisaatio_oid
-          LEFT JOIN pub.pub_dim_valinnantulos vt
-          ON hakemus.hakemus_oid = vt.hakemus_oid AND hk.hakukohde_oid = vt.hakukohde_oid
           WHERE hakemus.haku_oid IN (#$hakuStr)
           AND hk.jarjestyspaikka_oid IN (#$raportointiorganisaatiotStr)
           #$optionalHakukohdeQuery
