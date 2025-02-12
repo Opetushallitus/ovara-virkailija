@@ -1,14 +1,11 @@
-import {
-  MultiComboBox,
-  SelectOption,
-} from '@/app/components/form/multicombobox';
+import { MultiComboBox } from '@/app/components/form/multicombobox';
 import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
-import { isEmpty } from 'remeda';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { Kielistetty, LanguageCode } from '@/app/lib/types/common';
 import { useFetchHaut } from '@/app/hooks/useFetchHaut';
 import { useSearchParams as useQueryParams } from 'next/navigation';
+import { changeMultiComboBoxSelection } from './utils';
 
 type Haku = {
   haku_oid: string;
@@ -28,10 +25,6 @@ export const Haku = () => {
 
   const haut: Haku[] = data || [];
 
-  const changeHaut = (_: React.SyntheticEvent, value: Array<SelectOption>) => {
-    return setSelectedHaut(isEmpty(value) ? null : value?.map((v) => v.value));
-  };
-
   return (
     <MultiComboBox
       id={'haku'}
@@ -43,7 +36,9 @@ export const Haku = () => {
           label: haku.haku_nimi[locale] || '',
         };
       })}
-      onChange={changeHaut}
+      onChange={(e, value) =>
+        changeMultiComboBoxSelection(e, value, setSelectedHaut)
+      }
       required={true}
     />
   );

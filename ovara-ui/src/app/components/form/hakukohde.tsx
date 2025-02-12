@@ -1,12 +1,9 @@
-import {
-  MultiComboBox,
-  SelectOption,
-} from '@/app/components/form/multicombobox';
+import { MultiComboBox } from '@/app/components/form/multicombobox';
 import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
-import { isEmpty } from 'remeda';
 import { useFetchHakukohteet } from '@/app/hooks/useFetchHakukohteet';
 import { Kielistetty, LanguageCode } from '@/app/lib/types/common';
 import { useSearchParams as useQueryParams } from 'next/navigation';
+import { changeMultiComboBoxSelection } from './utils';
 
 type Hakukohde = {
   hakukohde_oid: string;
@@ -29,15 +26,6 @@ export const Hakukohde = ({
 
   const hakukohteet: Array<Hakukohde> = data || [];
 
-  const changeHakukohteet = (
-    _: React.SyntheticEvent,
-    value: Array<SelectOption>,
-  ) => {
-    return setSelectedHakukohteet(
-      isEmpty(value) ? null : value?.map((v) => v.value),
-    );
-  };
-
   return (
     <MultiComboBox
       sx={{ paddingTop: 0 }}
@@ -52,7 +40,9 @@ export const Hakukohde = ({
             '',
         };
       })}
-      onChange={changeHakukohteet}
+      onChange={(e, value) =>
+        changeMultiComboBoxSelection(e, value, setSelectedHakukohteet)
+      }
     />
   );
 };
