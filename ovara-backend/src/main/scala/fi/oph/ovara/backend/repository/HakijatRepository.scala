@@ -36,12 +36,22 @@ class HakijatRepository extends Extractors {
       }
     }
 
+    def mapValintatiedotToDbValues(valintatiedot: List[String]): List[String] = {
+      valintatiedot.flatMap {
+        case s: String if s == "HYVAKSYTTY" =>
+          s :: List("HARKINNANVARAISESTI_HYVAKSYTTY", "VARASIJALTA_HYVAKSYTTY", "PERUNUT", "PERUUTETTU")
+        case s: String => List(s)
+        case null      => List()
+      }
+    }
+
     val vastaanottotiedotAsDbValues        = mapVastaanottotiedotToDbValues(vastaanottotieto)
+    val valintatiedotAsDbValues            = mapValintatiedotToDbValues(valintatieto)
     val harkinnanvaraisuudetWithSureValues = RepositoryUtils.enrichHarkinnanvaraisuudet(harkinnanvaraisuudet)
     val optionalHakukohdeQuery =
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hk.hakukohde_oid", hakukohteet)
     val optionalValintatietoQuery =
-      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "vt.valinnan_tila", valintatieto)
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.valintatapajonot->0->>'valinnan_tila'", valintatiedotAsDbValues)
     val optionalVastaanottotietoQuery =
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.vastaanottotieto", vastaanottotiedotAsDbValues)
     val optionalKaksoistutkintoQuery = RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean(
