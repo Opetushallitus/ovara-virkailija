@@ -10,6 +10,7 @@ case class Hakija(
     hakukohdeOid: String,
     prioriteetti: Int,
     kaksoistutkintoKiinnostaa: Option[Boolean],
+    urheilijatutkintoKiinnostaa: Option[Boolean],
     valintatieto: String,
     vastaanottotieto: Option[String],
     harkinnanvaraisuus: Option[String],

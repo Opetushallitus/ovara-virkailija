@@ -38,6 +38,12 @@ export const useHakijatSearchParams = () => {
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
+  const [selectedUrheilijatutkinto, setSelectedUrheilijatutkinto] =
+    useQueryState(
+      'urheilijatutkinto',
+      parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
+    );
+
   const [selectedSoraTerveys, setSelectedSoraTerveys] = useQueryState(
     'sora_terveys',
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
@@ -61,6 +67,8 @@ export const useHakijatSearchParams = () => {
     setSelectedValintatieto,
     selectedKaksoistutkinto,
     setSelectedKaksoistutkinto,
+    selectedUrheilijatutkinto,
+    setSelectedUrheilijatutkinto,
     selectedSoraTerveys,
     setSelectedSoraTerveys,
     selectedSoraAiempi,

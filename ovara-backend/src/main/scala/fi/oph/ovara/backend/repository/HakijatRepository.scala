@@ -19,6 +19,7 @@ class HakijatRepository extends Extractors {
       vastaanottotieto: List[String],
       harkinnanvaraisuudet: List[String],
       kaksoistutkintoKiinnostaa: Option[Boolean],
+      urheilijatutkintoKiinnostaa: Option[Boolean],
       soraTerveys: Option[Boolean],
       soraAiempi: Option[Boolean],
       markkinointilupa: Option[Boolean],
@@ -59,6 +60,11 @@ class HakijatRepository extends Extractors {
       "ht2.kaksoistutkinto_kiinnostaa",
       kaksoistutkintoKiinnostaa
     )
+    val optionalUrheilijatutkintoQuery = RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean(
+      "AND",
+      "ht2.urheilijatutkinto_kiinnostaa",
+      urheilijatutkintoKiinnostaa
+    )
     val optionalSoraTerveysKyselyQuery =
       RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "ht2.sora_terveys", soraTerveys)
     val optionalSoraAiempiQuery =
@@ -75,7 +81,7 @@ class HakijatRepository extends Extractors {
 
     sql"""SELECT concat_ws(',', hlo.sukunimi, hlo.etunimet), hlo.turvakielto,
                  hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid,
-                 hk.hakukohde_nimi, hk.hakukohde_oid, ht.hakutoivenumero, ht2.kaksoistutkinto_kiinnostaa,
+                 hk.hakukohde_nimi, hk.hakukohde_oid, ht.hakutoivenumero, ht2.kaksoistutkinto_kiinnostaa, ht2.urheilijatutkinto_kiinnostaa,
                  ht.valintatapajonot->0->>'valinnan_tila' AS valinnan_tila, ht.vastaanottotieto, ht2.harkinnanvaraisuuden_syy, ht2.sora_aiempi, ht2.sora_terveys, hlo.koulutusmarkkinointilupa,
                  hlo.valintatuloksen_julkaisulupa, hlo.sahkoinenviestintalupa,
                  hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka
@@ -96,6 +102,7 @@ class HakijatRepository extends Extractors {
           #$optionalValintatietoQuery
           #$optionalVastaanottotietoQuery
           #$optionalKaksoistutkintoQuery
+          #$optionalUrheilijatutkintoQuery
           #$optionalSoraTerveysKyselyQuery
           #$optionalSoraAiempiQuery
           #$optionalMarkkinointilupaQuery

@@ -30,6 +30,7 @@ import { Valintatieto } from '@/app/components/form/valintatieto';
 import { Kaksoistutkinto } from '@/app/components/form/kaksoistutkinto';
 import { SoraTerveys } from '@/app/components/form/soraTerveys';
 import { SoraAiempi } from '@/app/components/form/soraAiempi';
+import { Urheilijatutkinto } from '@/app/components/form/Urheilijatutkinto';
 
 export default function Hakijat() {
   const { t } = useTranslate();
@@ -79,6 +80,7 @@ export default function Hakijat() {
           <Vastaanottotieto t={t} />
           <Harkinnanvaraisuus t={t} />
           <Kaksoistutkinto t={t} />
+          <Urheilijatutkinto t={t} />
           <SoraTerveys t={t} />
           <SoraAiempi t={t} />
           <Markkinointilupa t={t} />

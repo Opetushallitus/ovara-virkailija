@@ -199,6 +199,7 @@ class Controller(
       @RequestParam("vastaanottotieto", required = false) vastaanottotieto: java.util.Collection[String],
       @RequestParam("harkinnanvaraisuus", required = false) harkinnanvaraisuus: java.util.Collection[String],
       @RequestParam("kaksoistutkinto", required = false) kaksoistutkinto: String,
+      @RequestParam("urheilijatutkinto", required = false) urheilijatutkinto: String,
       @RequestParam("sora_terveys", required = false) soraterveys: String,
       @RequestParam("sora_aiempi", required = false) soraAiempi: String,
       @RequestParam("markkinointilupa", required = false) markkinointilupa: String,
@@ -222,11 +223,12 @@ class Controller(
       }
     }
 
-    val maybeKaksoistutkintoKiinnostaa = strToOptionBoolean(kaksoistutkinto)
-    val maybeSoraTerveys               = strToOptionBoolean(soraterveys)
-    val maybeSoraAiempi                = strToOptionBoolean(soraAiempi)
-    val maybeMarkkinointilupa          = strToOptionBoolean(markkinointilupa)
-    val maybeJulkaisulupa              = strToOptionBoolean(julkaisulupa)
+    val maybeKaksoistutkintoKiinnostaa   = strToOptionBoolean(kaksoistutkinto)
+    val maybeUrheilijatutkintoKiinnostaa = strToOptionBoolean(urheilijatutkinto)
+    val maybeSoraTerveys                 = strToOptionBoolean(soraterveys)
+    val maybeSoraAiempi                  = strToOptionBoolean(soraAiempi)
+    val maybeMarkkinointilupa            = strToOptionBoolean(markkinointilupa)
+    val maybeJulkaisulupa                = strToOptionBoolean(julkaisulupa)
 
     val wb = hakijatService.get(
       hakuList,
@@ -237,6 +239,7 @@ class Controller(
       vastaanottotietoList,
       harkinnanvaraisuusList,
       maybeKaksoistutkintoKiinnostaa,
+      maybeUrheilijatutkintoKiinnostaa,
       maybeSoraTerveys,
       maybeSoraAiempi,
       maybeMarkkinointilupa,

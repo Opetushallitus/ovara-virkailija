@@ -433,6 +433,7 @@ object ExcelWriter {
                 if List(
                   "turvakielto",
                   "kaksoistutkintoKiinnostaa",
+                  "urheilijatutkintoKiinnostaa",
                   "soraAiempi",
                   "soraTerveys",
                   "markkinointilupa",
