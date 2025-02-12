@@ -16,8 +16,8 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     db.run(commonRepository.selectDistinctAlkamisvuodet(), "selectDistinctAlkamisvuodet")
   }
 
-  def getHaut(alkamiskaudet: List[String]): Vector[Haku] = {
-    db.run(commonRepository.selectDistinctExistingHaut(alkamiskaudet), "selectDistinctExistingHaut")
+  def getHaut(alkamiskaudet: List[String], haunTyyppi: String): Vector[Haku] = {
+    db.run(commonRepository.selectDistinctExistingHaut(alkamiskaudet, haunTyyppi), "selectDistinctExistingHaut")
   }
 
   def getHakukohteet(oppilaitokset: List[String], toimipisteet: List[String], haut: List[String]): Vector[Hakukohde] = {

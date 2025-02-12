@@ -1,7 +1,5 @@
 import { MultiComboBox } from '@/app/components/form/multicombobox';
 import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
-import { useTranslate } from '@tolgee/react';
-import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { Kielistetty, LanguageCode } from '@/app/lib/types/common';
 import { useFetchHaut } from '@/app/hooks/useFetchHaut';
 import { useSearchParams as useQueryParams } from 'next/navigation';
@@ -12,16 +10,20 @@ type Haku = {
   haku_nimi: Kielistetty;
 };
 
-export const Haku = () => {
-  const { t } = useTranslate();
-  const user = useAuthorizedUser();
-  const locale = (user?.asiointikieli ?? 'fi') as LanguageCode;
-
+export const Haku = ({
+  locale,
+  t,
+}: {
+  locale: LanguageCode;
+  t: (key: string) => string;
+}) => {
   const { selectedHaut, setSelectedHaut } = useSearchParams();
 
   const queryParams = useQueryParams();
-  const alkamiskausiQueryParams = queryParams.get('alkamiskausi');
-  const { data } = useFetchHaut(alkamiskausiQueryParams);
+  const queryParamsStr = queryParams.toString();
+  const queryParamsWithHauntyyppi = new URLSearchParams(queryParamsStr);
+  queryParamsWithHauntyyppi.set('haun_tyyppi', 'toinen_aste');
+  const { data } = useFetchHaut(queryParamsWithHauntyyppi.toString());
 
   const haut: Haku[] = data || [];
 

@@ -1,11 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { doApiFetch } from '@/app/lib/ovara-backend/api';
 
-const fetchHaut = (alkamiskaudetQueryParams: string | null) => {
+const fetchHaut = (queryParamsStr: string | null) => {
   return doApiFetch('haut', {
-    queryParams: alkamiskaudetQueryParams
-      ? `?alkamiskausi=${alkamiskaudetQueryParams}`
-      : null,
+    queryParams: queryParamsStr ? `?${queryParamsStr}` : null,
   });
 };
 

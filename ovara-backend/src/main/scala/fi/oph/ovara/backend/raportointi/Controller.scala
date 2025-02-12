@@ -71,12 +71,15 @@ class Controller(
 
   @GetMapping(path = Array("haut"))
   def haut(
-      @RequestParam("alkamiskausi", required = false) alkamiskaudet: java.util.Collection[String]
+      @RequestParam("alkamiskausi", required = false) alkamiskaudet: java.util.Collection[String],
+      @RequestParam("haun_tyyppi", required = false) haun_tyyppi: String
   ): String = {
     val alkamiskaudetList =
       if (alkamiskaudet == null) List() else alkamiskaudet.asScala.toList
 
-    mapper.writeValueAsString(commonService.getHaut(alkamiskaudetList))
+    val haunTyyppi = if (haun_tyyppi == null) "" else haun_tyyppi
+
+    mapper.writeValueAsString(commonService.getHaut(alkamiskaudetList, haunTyyppi))
   }
 
   @GetMapping(path = Array("hakukohteet"))

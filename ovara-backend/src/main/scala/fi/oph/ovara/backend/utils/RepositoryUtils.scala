@@ -145,7 +145,7 @@ object RepositoryUtils {
       ) {
         ""
       } else {
-        "AND "
+        "AND ("
       }
 
     val alkamiskaudetAndVuodet = alkamiskaudetAndHenkKohtSuunnitelma._1
@@ -162,9 +162,13 @@ object RepositoryUtils {
       }
     }
 
+    if (operator.isEmpty) {
+      ""
+    } else {
     s"$operator$hlokohtSuunnitelmaQueryStr" +
       s"$eiAlkamiskauttaQueryStr" +
-      s"$alkamiskaudetQueryStr"
+      s"$alkamiskaudetQueryStr)"
+    }
   }
 
   def enrichHarkinnanvaraisuudet(harkinnanvaraisuudet: List[String]): List[String] = {

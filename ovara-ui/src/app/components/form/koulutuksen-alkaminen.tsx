@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { useTranslate } from '@tolgee/react';
 import { getSortedKoulutuksenAlkamisKaudet } from '@/app/lib/utils';
 import { MultiComboBox } from '@/app/components/form/multicombobox';
 import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
@@ -7,9 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { doApiFetch } from '@/app/lib/ovara-backend/api';
 import { changeMultiComboBoxSelection } from './utils';
 
-export const KoulutuksenAlkaminen = () => {
-  const { t } = useTranslate();
-
+export const KoulutuksenAlkaminen = ({ t }: { t: (key: string) => string }) => {
   const { data } = useQuery({
     queryKey: ['fetchAlkamisvuodet'],
     queryFn: () => doApiFetch('alkamisvuodet'),

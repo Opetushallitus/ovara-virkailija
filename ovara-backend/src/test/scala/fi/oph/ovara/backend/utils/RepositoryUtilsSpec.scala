@@ -211,7 +211,7 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List(), true, false)
-      ) == "AND alkamiskausi->>'type' = 'henkkoht'"
+      ) == "AND (alkamiskausi->>'type' = 'henkkoht')"
     )
   }
 
@@ -219,8 +219,8 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List((2024, "kausi_s")), false, false)
-      ) == "AND (alkamiskausi->>'koulutuksenAlkamisvuosi' = '2024' " +
-        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s')"
+      ) == "AND ((alkamiskausi->>'koulutuksenAlkamisvuosi' = '2024' " +
+        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s'))"
     )
   }
 
@@ -228,8 +228,8 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List((2021, "kausi_k")), false, false)
-      ) == "AND (alkamiskausi->>'koulutuksenAlkamisvuosi' = '2021' " +
-        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_k')"
+      ) == "AND ((alkamiskausi->>'koulutuksenAlkamisvuosi' = '2021' " +
+        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_k'))"
     )
   }
 
@@ -237,13 +237,13 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List((2021, "kausi_k"), (2024, "kausi_s")), true, false)
-      ) == "AND alkamiskausi->>'type' = 'henkkoht' " +
+      ) == "AND (alkamiskausi->>'type' = 'henkkoht' " +
         // 2021_kevat haulla
         "OR (alkamiskausi->>'koulutuksenAlkamisvuosi' = '2021' " +
         "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_k') " +
         // 2024_syksy haulla
         "OR (alkamiskausi->>'koulutuksenAlkamisvuosi' = '2024' " +
-        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s')"
+        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s'))"
     )
   }
 
@@ -251,10 +251,10 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List((2024, "kausi_s")), true, true)
-      ) == "AND alkamiskausi->>'type' = 'henkkoht' " +
+      ) == "AND (alkamiskausi->>'type' = 'henkkoht' " +
         "OR koulutuksen_alkamiskausi IS NULL " +
         "OR (alkamiskausi->>'koulutuksenAlkamisvuosi' = '2024' " +
-        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s')"
+        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s'))"
     )
   }
 
@@ -262,7 +262,7 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List(), false, true)
-      ) == "AND koulutuksen_alkamiskausi IS NULL"
+      ) == "AND (koulutuksen_alkamiskausi IS NULL)"
     )
   }
 
@@ -270,8 +270,8 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List(), true, true)
-      ) == "AND alkamiskausi->>'type' = 'henkkoht' " +
-        "OR koulutuksen_alkamiskausi IS NULL"
+      ) == "AND (alkamiskausi->>'type' = 'henkkoht' " +
+        "OR koulutuksen_alkamiskausi IS NULL)"
     )
   }
 
@@ -279,9 +279,9 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List((2024, "kausi_s")), false, true)
-      ) == "AND koulutuksen_alkamiskausi IS NULL " +
+      ) == "AND (koulutuksen_alkamiskausi IS NULL " +
         "OR (alkamiskausi->>'koulutuksenAlkamisvuosi' = '2024' " +
-        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s')"
+        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s'))"
     )
   }
 
@@ -297,22 +297,25 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
 
   it should "add both SURE_EI_PAATTOTODISTUSTA and SURE_YKS_MAT_AI to harkinnanvaraisuudet when ATARU_EI_PAATTOTODISTUSTA and ATARU_YKS_MAT_AI are selected" in {
     assert(
-      RepositoryUtils.enrichHarkinnanvaraisuudet(List("ATARU_OPPIMISVAIKEUDET", "ATARU_YKS_MAT_AI", "ATARU_EI_PAATTOTODISTUSTA")) == List(
+      RepositoryUtils.enrichHarkinnanvaraisuudet(
+        List("ATARU_OPPIMISVAIKEUDET", "ATARU_YKS_MAT_AI", "ATARU_EI_PAATTOTODISTUSTA")
+      ) == List(
         "ATARU_OPPIMISVAIKEUDET",
         "SURE_YKS_MAT_AI",
         "ATARU_YKS_MAT_AI",
         "SURE_EI_PAATTOTODISTUSTA",
-        "ATARU_EI_PAATTOTODISTUSTA",
-
+        "ATARU_EI_PAATTOTODISTUSTA"
       )
     )
   }
   it should "add ATARU_ULKOMAILLA_OPISKELTU to harkinnanvaraisuudet when ATARU_KOULUTODISTUSTEN_VERTAILUVAIKEUDET is selected" in {
     assert(
-      RepositoryUtils.enrichHarkinnanvaraisuudet(List("ATARU_OPPIMISVAIKEUDET", "ATARU_KOULUTODISTUSTEN_VERTAILUVAIKEUDET")) == List(
+      RepositoryUtils.enrichHarkinnanvaraisuudet(
+        List("ATARU_OPPIMISVAIKEUDET", "ATARU_KOULUTODISTUSTEN_VERTAILUVAIKEUDET")
+      ) == List(
         "ATARU_OPPIMISVAIKEUDET",
         "ATARU_ULKOMAILLA_OPISKELTU",
-        "ATARU_KOULUTODISTUSTEN_VERTAILUVAIKEUDET",
+        "ATARU_KOULUTODISTUSTEN_VERTAILUVAIKEUDET"
       )
     )
   }

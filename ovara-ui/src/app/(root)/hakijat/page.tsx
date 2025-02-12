@@ -56,8 +56,8 @@ export default function Hakijat() {
         <FormBox>
           {isLoading && <SpinnerModal open={isLoading} />}
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
-          <KoulutuksenAlkaminen />
-          <Haku />
+          <KoulutuksenAlkaminen t={t} />
+          <Haku locale={locale} t={t} />
           <Divider />
           <OphTypography>
             {t('raportti.oppilaitos-tai-toimipiste')}

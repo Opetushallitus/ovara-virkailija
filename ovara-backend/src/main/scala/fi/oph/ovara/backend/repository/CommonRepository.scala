@@ -24,7 +24,8 @@ class CommonRepository extends Extractors {
   }
 
   def selectDistinctExistingHaut(
-      alkamiskaudet: List[String] = List()
+      alkamiskaudet: List[String] = List(),
+      haunTyyppi: String = "toinen_aste"
   ): SqlStreamingAction[Vector[Haku], Haku, Effect] = {
     val alkamiskaudetAndHenkKohtSuunnitelma =
       RepositoryUtils.extractAlkamisvuosiKausiAndHenkkohtSuunnitelma(alkamiskaudet)
@@ -39,10 +40,10 @@ class CommonRepository extends Extractors {
                   FROM pub.pub_dim_haku h
                   LEFT JOIN (
                     SELECT haku_oid, jsonb_array_elements(koulutuksen_alkamiskausi) as alkamiskausi
-                    FROM pub.pub_dim_haku h
+                    FROM pub.pub_dim_haku h2
                   ) alkamiskaudet
                   ON h.haku_oid = alkamiskaudet.haku_oid
-                  WHERE h.haun_tyyppi = 'toinen_aste'
+                  WHERE h.haun_tyyppi = $haunTyyppi
                   AND h.tila != 'poistettu'
                   #$alkamiskaudetQueryStr""".as[Haku]
   }
