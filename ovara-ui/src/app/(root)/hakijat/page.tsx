@@ -31,6 +31,7 @@ import { Kaksoistutkinto } from '@/app/components/form/kaksoistutkinto';
 import { SoraTerveys } from '@/app/components/form/soraTerveys';
 import { SoraAiempi } from '@/app/components/form/soraAiempi';
 import { Urheilijatutkinto } from '@/app/components/form/Urheilijatutkinto';
+import { Pohjakoulutus } from '@/app/components/form/pohjakoulutus';
 
 export default function Hakijat() {
   const { t } = useTranslate();
@@ -75,6 +76,7 @@ export default function Hakijat() {
           </Box>
           <Divider />
           <Hakukohde locale={locale} t={t} />
+          <Pohjakoulutus locale={locale} t={t} />
           <Divider />
           <Valintatieto t={t} />
           <Vastaanottotieto t={t} />

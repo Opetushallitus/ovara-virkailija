@@ -15,6 +15,7 @@ class HakijatRepository extends Extractors {
       oppilaitokset: List[String],
       toimipisteet: List[String],
       hakukohteet: List[String],
+      pohjakoulutukset: List[String],
       valintatieto: List[String],
       vastaanottotieto: List[String],
       harkinnanvaraisuudet: List[String],

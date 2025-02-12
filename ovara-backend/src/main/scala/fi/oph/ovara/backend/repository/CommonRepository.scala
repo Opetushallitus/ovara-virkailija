@@ -73,6 +73,12 @@ class CommonRepository extends Extractors {
           """.as[Hakukohde]
   }
 
+  def selectToisenAsteenPohjakoulutukset = {
+    sql"""SELECT pk.koodiarvo, pk.koodinimi
+          FROM pub.pub_dim_koodisto_2asteenpohjakoulutus2021 pk
+          """.as[Koodi]
+  }
+
   def selectDistinctValintatiedot: SqlStreamingAction[Vector[String], String, Effect] = {
     sql"""SELECT DISTINCT v.valinnan_tila
           FROM pub.pub_dim_valinnantulos v

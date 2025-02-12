@@ -1,3 +1,4 @@
+import { SelectOption } from '@/app/components/form/multicombobox';
 import { SelectChangeEvent } from '@mui/material';
 import { match } from 'ts-pattern';
 import { isEmpty, isNullish } from 'remeda';
@@ -56,6 +57,14 @@ export const changeChecked = (
   }
 
   setSelected(isNullish(newValue) || isEmpty(newValue) ? null : newValue);
+};
+
+export const changeMultiComboBoxSelection = (
+  _: React.SyntheticEvent,
+  value: Array<SelectOption>,
+  setSelected: (v: Array<string> | null) => void,
+) => {
+  return setSelected(isEmpty(value) ? null : value?.map((v) => v.value));
 };
 
 // https://stackoverflow.com/a/59940621

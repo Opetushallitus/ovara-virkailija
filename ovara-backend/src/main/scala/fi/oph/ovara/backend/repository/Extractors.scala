@@ -20,6 +20,13 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   )
 
+  implicit val getKoodiResult: GetResult[Koodi] = GetResult(r =>
+    Koodi(
+      koodiarvo = r.nextString(),
+      koodinimi = extractKielistetty(r.nextStringOption())
+    )
+  )
+
   implicit val getHakukohdeResult: GetResult[Hakukohde] = GetResult(r =>
     Hakukohde(
       hakukohde_oid = r.nextString(),

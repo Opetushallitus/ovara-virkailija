@@ -14,6 +14,7 @@ import org.mockito.Mockito.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+import java.util
 import scala.jdk.CollectionConverters.*
 
 class ControllerSpec extends AnyFlatSpec with Matchers {
@@ -40,7 +41,7 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
     val haku = List("1.2.246.562.29.00000000000000049925").asJava
     val koulutustoimija = "koulutustoimija1"
     val oppilaitos = List("oppilaitos1").asJava
-    val toimipiste = null
+    val toimipiste: util.Collection[String] = null
     val koulutuksenTila = "julkaistu"
     val toteutuksenTila = "julkaistu"
     val hakukohteenTila = "julkaistu"
