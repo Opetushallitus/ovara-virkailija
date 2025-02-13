@@ -13,6 +13,7 @@ case class Hakija(
     urheilijatutkintoKiinnostaa: Option[Boolean],
     valintatieto: String,
     varasija: Option[String],
+    kokonaispisteet: Option[String],
     vastaanottotieto: Option[String],
     harkinnanvaraisuus: Option[String],
     soraAiempi: Option[Boolean],
