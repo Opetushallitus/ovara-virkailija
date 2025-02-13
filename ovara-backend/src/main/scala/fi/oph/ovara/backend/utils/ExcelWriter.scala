@@ -392,7 +392,11 @@ object ExcelWriter {
           cell.setCellStyle(bodyTextCellStyle)
           hakutoive.productElement(i) match {
             case kielistetty: Kielistetty =>
-              val kielistettyValue = kielistetty(Kieli.withName(asiointikieli))
+              val kielistettyValue = kielistetty.get(Kieli.withName(asiointikieli)) match {
+                case Some(value) => value
+                case None        => "-"
+              }
+
               cell.setCellValue(kielistettyValue)
             case s: String if List("valintatieto").contains(fieldName) =>
               val lowerCaseStr = s.toLowerCase
@@ -409,7 +413,7 @@ object ExcelWriter {
                 "-"
               } else {
                 val r: Regex = "(ATARU|SURE)_(\\w*)".r
-                val group = for (m <- r.findFirstMatchIn(s)) yield m.group(2)
+                val group    = for (m <- r.findFirstMatchIn(s)) yield m.group(2)
                 group match {
                   case Some(m) =>
                     val value = if (m == "ULKOMAILLA_OPISKELTU") {

@@ -14,6 +14,7 @@ case class Hakija(
     valintatieto: String,
     varasija: Option[String],
     kokonaispisteet: Option[String],
+    hylkTaiPerSyy: Kielistetty,
     vastaanottotieto: Option[String],
     harkinnanvaraisuus: Option[String],
     soraAiempi: Option[Boolean],

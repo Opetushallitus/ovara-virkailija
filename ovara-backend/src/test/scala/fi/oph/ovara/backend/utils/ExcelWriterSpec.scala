@@ -25,7 +25,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
     "raportti.hyvaksytty"                    -> "Hyvaksytty SV",
     "raportti.peruuntunut"                   -> "Peruuntunut SV",
     "raportti.ei_vastaanotettu_maara_aikana" -> "Ei vastaanotettu SV",
-    "raportti.kokonaispisteet"               -> "Kokonaispisteet SV"
+    "raportti.kokonaispisteet"               -> "Kokonaispisteet SV",
+    "raportti.hylkTaiPerSyy"                 -> "Hylkäämisen tai peruuntumisen syy SV"
   )
 
   def checkAloituspaikatRowValidity(sheet: XSSFSheet, rowNumber: Int, expected: Int): Unit = {
@@ -1531,16 +1532,17 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(0).getCell(10).getStringCellValue == "raportti.valintatieto")
     assert(wb.getSheetAt(0).getRow(0).getCell(11).getStringCellValue == "raportti.varasija")
     assert(wb.getSheetAt(0).getRow(0).getCell(12).getStringCellValue == "Kokonaispisteet SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(13).getStringCellValue == "raportti.vastaanottotieto")
-    assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "raportti.harkinnanvaraisuus")
-    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "raportti.soraAiempi")
-    assert(wb.getSheetAt(0).getRow(0).getCell(16).getStringCellValue == "raportti.soraTerveys")
-    assert(wb.getSheetAt(0).getRow(0).getCell(17).getStringCellValue == "LupaMark SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(18).getStringCellValue == "raportti.julkaisulupa")
-    assert(wb.getSheetAt(0).getRow(0).getCell(19).getStringCellValue == "raportti.sahkoinenViestintaLupa")
-    assert(wb.getSheetAt(0).getRow(0).getCell(20).getStringCellValue == "raportti.lahiosoite")
-    assert(wb.getSheetAt(0).getRow(0).getCell(21).getStringCellValue == "raportti.postinumero")
-    assert(wb.getSheetAt(0).getRow(0).getCell(22).getStringCellValue == "raportti.postitoimipaikka")
+    assert(wb.getSheetAt(0).getRow(0).getCell(13).getStringCellValue == "Hylkäämisen tai peruuntumisen syy SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "raportti.vastaanottotieto")
+    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "raportti.harkinnanvaraisuus")
+    assert(wb.getSheetAt(0).getRow(0).getCell(16).getStringCellValue == "raportti.soraAiempi")
+    assert(wb.getSheetAt(0).getRow(0).getCell(17).getStringCellValue == "raportti.soraTerveys")
+    assert(wb.getSheetAt(0).getRow(0).getCell(18).getStringCellValue == "LupaMark SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(19).getStringCellValue == "raportti.julkaisulupa")
+    assert(wb.getSheetAt(0).getRow(0).getCell(20).getStringCellValue == "raportti.sahkoinenViestintaLupa")
+    assert(wb.getSheetAt(0).getRow(0).getCell(21).getStringCellValue == "raportti.lahiosoite")
+    assert(wb.getSheetAt(0).getRow(0).getCell(22).getStringCellValue == "raportti.postinumero")
+    assert(wb.getSheetAt(0).getRow(0).getCell(23).getStringCellValue == "raportti.postitoimipaikka")
 
     assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 1)
     assert(wb.getSheetAt(0).getRow(1) == null)
@@ -1570,16 +1572,17 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(0).getCell(10).getStringCellValue == "raportti.valintatieto")
     assert(wb.getSheetAt(0).getRow(0).getCell(11).getStringCellValue == "raportti.varasija")
     assert(wb.getSheetAt(0).getRow(0).getCell(12).getStringCellValue == "Kokonaispisteet SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(13).getStringCellValue == "raportti.vastaanottotieto")
-    assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "raportti.harkinnanvaraisuus")
-    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "raportti.soraAiempi")
-    assert(wb.getSheetAt(0).getRow(0).getCell(16).getStringCellValue == "raportti.soraTerveys")
-    assert(wb.getSheetAt(0).getRow(0).getCell(17).getStringCellValue == "LupaMark SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(18).getStringCellValue == "raportti.julkaisulupa")
-    assert(wb.getSheetAt(0).getRow(0).getCell(19).getStringCellValue == "raportti.sahkoinenViestintaLupa")
-    assert(wb.getSheetAt(0).getRow(0).getCell(20).getStringCellValue == "raportti.lahiosoite")
-    assert(wb.getSheetAt(0).getRow(0).getCell(21).getStringCellValue == "raportti.postinumero")
-    assert(wb.getSheetAt(0).getRow(0).getCell(22).getStringCellValue == "raportti.postitoimipaikka")
+    assert(wb.getSheetAt(0).getRow(0).getCell(13).getStringCellValue == "Hylkäämisen tai peruuntumisen syy SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "raportti.vastaanottotieto")
+    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "raportti.harkinnanvaraisuus")
+    assert(wb.getSheetAt(0).getRow(0).getCell(16).getStringCellValue == "raportti.soraAiempi")
+    assert(wb.getSheetAt(0).getRow(0).getCell(17).getStringCellValue == "raportti.soraTerveys")
+    assert(wb.getSheetAt(0).getRow(0).getCell(18).getStringCellValue == "LupaMark SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(19).getStringCellValue == "raportti.julkaisulupa")
+    assert(wb.getSheetAt(0).getRow(0).getCell(20).getStringCellValue == "raportti.sahkoinenViestintaLupa")
+    assert(wb.getSheetAt(0).getRow(0).getCell(21).getStringCellValue == "raportti.lahiosoite")
+    assert(wb.getSheetAt(0).getRow(0).getCell(22).getStringCellValue == "raportti.postinumero")
+    assert(wb.getSheetAt(0).getRow(0).getCell(23).getStringCellValue == "raportti.postitoimipaikka")
 
     assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 1)
     assert(wb.getSheetAt(0).getRow(1) == null)
@@ -1603,6 +1606,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
             "HYLATTY",
             None,
             None,
+            Map(En -> "", Fi -> "Hylätty harkinnanvaraisessa valinnassa", Sv -> ""),
             Some("EI_VASTAANOTETTU_MAARA_AIKANA"),
             Some("ATARU_OPPIMISVAIKEUDET"),
             Some(false),
@@ -1640,16 +1644,17 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1).getCell(10).getStringCellValue == "Hylatty SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(11).getStringCellValue == "-")
     assert(wb.getSheetAt(0).getRow(1).getCell(12).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(1).getCell(13).getStringCellValue == "Ei vastaanotettu SV")
-    assert(wb.getSheetAt(0).getRow(1).getCell(14).getStringCellValue == "raportti.oppimisvaikeudet")
-    assert(wb.getSheetAt(0).getRow(1).getCell(15).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(1).getCell(13).getStringCellValue == "")
+    assert(wb.getSheetAt(0).getRow(1).getCell(14).getStringCellValue == "Ei vastaanotettu SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(15).getStringCellValue == "raportti.oppimisvaikeudet")
     assert(wb.getSheetAt(0).getRow(1).getCell(16).getStringCellValue == "Nej")
     assert(wb.getSheetAt(0).getRow(1).getCell(17).getStringCellValue == "Nej")
-    assert(wb.getSheetAt(0).getRow(1).getCell(18).getStringCellValue == "Ja")
-    assert(wb.getSheetAt(0).getRow(1).getCell(19).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(1).getCell(20).getStringCellValue == "Rämsöönranta 368")
-    assert(wb.getSheetAt(0).getRow(1).getCell(21).getStringCellValue == "00100")
-    assert(wb.getSheetAt(0).getRow(1).getCell(22).getStringCellValue == "HELSINKI")
+    assert(wb.getSheetAt(0).getRow(1).getCell(18).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(1).getCell(19).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(1).getCell(20).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(1).getCell(21).getStringCellValue == "Rämsöönranta 368")
+    assert(wb.getSheetAt(0).getRow(1).getCell(22).getStringCellValue == "00100")
+    assert(wb.getSheetAt(0).getRow(1).getCell(23).getStringCellValue == "HELSINKI")
     assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 2)
     assert(wb.getSheetAt(0).getRow(2) == null)
   }
@@ -1672,6 +1677,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
             "HYLATTY",
             Some("3"),
             Some("8.5"),
+            Map(En -> "", Fi -> "Hylätty harkinnanvaraisessa valinnassa", Sv -> ""),
             None,
             None,
             Some(false),
@@ -1697,6 +1703,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
             "HYVAKSYTTY",
             Some("8"),
             None,
+            Map(),
             Some("PERUNUT"),
             Some("ATARU_ULKOMAILLA_OPISKELTU"),
             Some(false),
@@ -1724,6 +1731,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
             "PERUUNTUNUT",
             None,
             Some("5.6"),
+            Map(
+              En -> "Cancelled, waiting list selection has ended",
+              Fi -> "Peruuntunut, varasijatäyttö päättynyt",
+              Sv -> "Annullerad, besättning av reservplatser har upphört"
+            ),
             Some("PERUNUT"),
             Some("SURE_YKS_MAT_AI"),
             Some(false),
@@ -1761,16 +1773,17 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1).getCell(10).getStringCellValue == "Hylatty SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(11).getStringCellValue == "3")
     assert(wb.getSheetAt(0).getRow(1).getCell(12).getStringCellValue == "8.5")
-    assert(wb.getSheetAt(0).getRow(1).getCell(13).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(1).getCell(13).getStringCellValue == "")
     assert(wb.getSheetAt(0).getRow(1).getCell(14).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(1).getCell(15).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(1).getCell(15).getStringCellValue == "-")
     assert(wb.getSheetAt(0).getRow(1).getCell(16).getStringCellValue == "Nej")
     assert(wb.getSheetAt(0).getRow(1).getCell(17).getStringCellValue == "Nej")
-    assert(wb.getSheetAt(0).getRow(1).getCell(18).getStringCellValue == "Ja")
-    assert(wb.getSheetAt(0).getRow(1).getCell(19).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(1).getCell(20).getStringCellValue == "Rämsöönranta 368")
-    assert(wb.getSheetAt(0).getRow(1).getCell(21).getStringCellValue == "00100")
-    assert(wb.getSheetAt(0).getRow(1).getCell(22).getStringCellValue == "HELSINKI")
+    assert(wb.getSheetAt(0).getRow(1).getCell(18).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(1).getCell(19).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(1).getCell(20).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(1).getCell(21).getStringCellValue == "Rämsöönranta 368")
+    assert(wb.getSheetAt(0).getRow(1).getCell(22).getStringCellValue == "00100")
+    assert(wb.getSheetAt(0).getRow(1).getCell(23).getStringCellValue == "HELSINKI")
 
     assert(wb.getSheetAt(0).getRow(2).getCell(0).getStringCellValue == "Rautiainen-Testi,Dina Testi")
     assert(wb.getSheetAt(0).getRow(2).getCell(1).getStringCellValue == "Nej")
@@ -1785,16 +1798,17 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(2).getCell(10).getStringCellValue == "Hyvaksytty SV")
     assert(wb.getSheetAt(0).getRow(2).getCell(11).getStringCellValue == "8")
     assert(wb.getSheetAt(0).getRow(2).getCell(12).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(2).getCell(13).getStringCellValue == "raportti.perunut")
-    assert(wb.getSheetAt(0).getRow(2).getCell(14).getStringCellValue == "raportti.koulutodistusten_vertailuvaikeudet")
-    assert(wb.getSheetAt(0).getRow(2).getCell(15).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(2).getCell(13).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(14).getStringCellValue == "raportti.perunut")
+    assert(wb.getSheetAt(0).getRow(2).getCell(15).getStringCellValue == "raportti.koulutodistusten_vertailuvaikeudet")
     assert(wb.getSheetAt(0).getRow(2).getCell(16).getStringCellValue == "Nej")
-    assert(wb.getSheetAt(0).getRow(2).getCell(17).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(2).getCell(17).getStringCellValue == "Nej")
     assert(wb.getSheetAt(0).getRow(2).getCell(18).getStringCellValue == "Ja")
-    assert(wb.getSheetAt(0).getRow(2).getCell(19).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(2).getCell(20).getStringCellValue == "Rämsöönranta 368")
-    assert(wb.getSheetAt(0).getRow(2).getCell(21).getStringCellValue == "00100")
-    assert(wb.getSheetAt(0).getRow(2).getCell(22).getStringCellValue == "HELSINKI")
+    assert(wb.getSheetAt(0).getRow(2).getCell(19).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(2).getCell(20).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(21).getStringCellValue == "Rämsöönranta 368")
+    assert(wb.getSheetAt(0).getRow(2).getCell(22).getStringCellValue == "00100")
+    assert(wb.getSheetAt(0).getRow(2).getCell(23).getStringCellValue == "HELSINKI")
 
     assert(wb.getSheetAt(0).getRow(3).getCell(0).getStringCellValue == "Lehto-Testi,Vikke Testi")
     assert(wb.getSheetAt(0).getRow(3).getCell(1).getStringCellValue == "Nej")
@@ -1809,16 +1823,17 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(3).getCell(10).getStringCellValue == "Peruuntunut SV")
     assert(wb.getSheetAt(0).getRow(3).getCell(11).getStringCellValue == "-")
     assert(wb.getSheetAt(0).getRow(3).getCell(12).getStringCellValue == "5.6")
-    assert(wb.getSheetAt(0).getRow(3).getCell(13).getStringCellValue == "raportti.perunut")
-    assert(wb.getSheetAt(0).getRow(3).getCell(14).getStringCellValue == "raportti.yks_mat_ai")
-    assert(wb.getSheetAt(0).getRow(3).getCell(15).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(3).getCell(13).getStringCellValue == "Annullerad, besättning av reservplatser har upphört")
+    assert(wb.getSheetAt(0).getRow(3).getCell(14).getStringCellValue == "raportti.perunut")
+    assert(wb.getSheetAt(0).getRow(3).getCell(15).getStringCellValue == "raportti.yks_mat_ai")
     assert(wb.getSheetAt(0).getRow(3).getCell(16).getStringCellValue == "Nej")
     assert(wb.getSheetAt(0).getRow(3).getCell(17).getStringCellValue == "Nej")
-    assert(wb.getSheetAt(0).getRow(3).getCell(18).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(3).getCell(18).getStringCellValue == "Nej")
     assert(wb.getSheetAt(0).getRow(3).getCell(19).getStringCellValue == "Ja")
-    assert(wb.getSheetAt(0).getRow(3).getCell(20).getStringCellValue == "Laholanaukio 834")
-    assert(wb.getSheetAt(0).getRow(3).getCell(21).getStringCellValue == "00100")
-    assert(wb.getSheetAt(0).getRow(3).getCell(22).getStringCellValue == "HELSINKI")
+    assert(wb.getSheetAt(0).getRow(3).getCell(20).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(3).getCell(21).getStringCellValue == "Laholanaukio 834")
+    assert(wb.getSheetAt(0).getRow(3).getCell(22).getStringCellValue == "00100")
+    assert(wb.getSheetAt(0).getRow(3).getCell(23).getStringCellValue == "HELSINKI")
 
     assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 4)
     assert(wb.getSheetAt(0).getRow(5) == null)
