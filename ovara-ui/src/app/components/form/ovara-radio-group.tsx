@@ -14,6 +14,7 @@ type RadioGroupProps = {
   label: string;
   value: string;
   required?: boolean;
+  labels?: { [key: string]: string };
 };
 
 export const OvaraRadioGroup = ({
@@ -22,6 +23,7 @@ export const OvaraRadioGroup = ({
   label,
   value,
   required,
+  labels,
 }: RadioGroupProps) => {
   const { t } = useTranslate();
 
@@ -45,7 +47,11 @@ export const OvaraRadioGroup = ({
                     key={option}
                     value={option}
                     control={<Radio />}
-                    label={t(`raportti.radio-group.${option}`)}
+                    label={
+                      labels
+                        ? labels[option]
+                        : t(`raportti.radio-group.${option}`)
+                    }
                   />
                 );
               })}

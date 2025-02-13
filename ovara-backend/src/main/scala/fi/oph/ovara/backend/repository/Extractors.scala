@@ -148,4 +148,20 @@ trait Extractors extends GenericOvaraJsonFormats {
       postitoimipaikka = r.nextString()
     )
   )
+
+  implicit val getHakeneetHyvaksytytVastaanottaneetResult: GetResult[HakeneetHyvaksytytVastaanottaneet] = GetResult(r =>
+    HakeneetHyvaksytytVastaanottaneet(
+      hakukohdeOid = r.nextString(),
+      hakukohdeNimi = extractKielistetty(r.nextStringOption()),
+      hakijat = r.nextInt(),
+      ensisijaisia = r.nextInt(),
+      varasija = r.nextInt(),
+      hyvaksytyt = r.nextInt(),
+      vastaanottaneet = r.nextInt(),
+      lasna = r.nextInt(),
+      poissa = r.nextInt(),
+      ilmYht = r.nextInt(),
+      aloituspaikat = r.nextInt()
+    )
+  )
 }

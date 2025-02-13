@@ -5,11 +5,18 @@ import { useHakeneetSearchParams } from '@/app/hooks/searchParams/useHakeneetSea
 export const Sukupuoli = ({ t }: { t: (key: string) => string }) => {
   const { selectedSukupuoli, setSelectedSukupuoli } = useHakeneetSearchParams();
 
+  const sukupuoliLabels = {
+    neutral: t('raportti.sukupuoli.neutral'),
+    '1': t('raportti.sukupuoli.mies'),
+    '2': t('raportti.sukupuoli.nainen'),
+  };
+
   return (
     <OvaraRadioGroup
       label={t(`raportti.sukupuoli`)}
       options={SUKUPUOLET}
       value={selectedSukupuoli}
+      labels={sukupuoliLabels}
       onChange={(e) => setSelectedSukupuoli(e.target.value)}
     />
   );

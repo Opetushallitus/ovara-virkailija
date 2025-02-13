@@ -294,11 +294,7 @@ class Controller(
     val maybeKoulutustoimija = Option(koulutustoimija)
     val maybeTulostustapa = Option(tulostustapa)
     val naytaHakutoiveetBool = Option(naytaHakutoiveet).exists(_.toBoolean)
-    val maybeSukupuoli = if (sukupuoli == null) {
-      None
-    } else {
-      Option(sukupuoli.toBoolean)
-    }
+    val maybeSukupuoli: Option[String] = if (sukupuoli == "neutral") None else Option(sukupuoli)
     val alkamiskausiList = if (alkamiskausi == null) List() else alkamiskausi.asScala.toList
     val hakuList = if (haku == null) List() else haku.asScala.toList
     val oppilaitosList = if (oppilaitos == null) List() else oppilaitos.asScala.toList
@@ -315,8 +311,8 @@ class Controller(
       hakukohdeList,
       opetuskieliList,
       harkinnanvaraisuusList,
-      naytaHakutoiveetBool,
-      maybeSukupuoli
+      maybeSukupuoli,
+      naytaHakutoiveetBool
     )
 
     val raporttiParams = Map(

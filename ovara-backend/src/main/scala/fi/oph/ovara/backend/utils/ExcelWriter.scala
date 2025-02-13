@@ -482,7 +482,8 @@ object ExcelWriter {
 
   def writeHakeneetHyvaksytytVastaanottaneetRaportti(
                             asiointikieli: String,
-                            translations: Map[String, String]
+                            translations: Map[String, String],
+                            data: List[HakeneetHyvaksytytVastaanottaneet]
                           ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new HakeneetHyvaksytytVastaanottaneet excel from db results")
@@ -516,54 +517,33 @@ object ExcelWriter {
     })
 
     currentRowIndex += 1
-    // Mock data
-    val mockData = HakeneetHyvaksytytVastaanottaneetResult(
-      hakukohdeNimi = Map(Fi -> "Mock Hakukohde"),
-      hakijat = 100,
-      ensisijaiset = 50,
-      varasijalla = 1,
-      hyvaksytyt = 30,
-      vastaanottaneet = 25,
-      lasna = 20,
-      poissa = 5,
-      ilmoittautuneetYhteensa = 25,
-      aloituspaikat = 30
-    )
-    // tilastorivit
-    val dataRow = sheet.createRow(currentRowIndex)
-    val data = List(
-      mockData.hakukohdeNimi(Kieli.withName(asiointikieli)),
-      mockData.hakijat.toString,
-      mockData.ensisijaiset.toString,
-      mockData.varasijalla.toString,
-      mockData.hyvaksytyt.toString,
-      mockData.vastaanottaneet.toString,
-      mockData.lasna.toString,
-      mockData.poissa.toString,
-      mockData.ilmoittautuneetYhteensa.toString,
-      mockData.aloituspaikat.toString
-    )
-    data.zipWithIndex.foreach { case (value, index) =>
-      val cell = dataRow.createCell(index)
-      cell.setCellStyle(bodyTextCellStyle)
-      cell.setCellValue(value)
+    
+    data.foreach { item =>
+      val dataRow = sheet.createRow(currentRowIndex)
+      val rowData = List(
+        item.hakukohdeNimi(Kieli.withName(asiointikieli)),
+        item.hakijat.toString,
+        item.ensisijaisia.toString,
+        item.varasija.toString,
+        item.hyvaksytyt.toString,
+        item.vastaanottaneet.toString,
+        item.lasna.toString,
+        item.poissa.toString,
+        item.ilmYht.toString,
+        item.aloituspaikat.toString
+      )
+      rowData.zipWithIndex.foreach { case (value, index) =>
+        val cell = dataRow.createCell(index)
+        cell.setCellStyle(bodyTextCellStyle)
+        cell.setCellValue(value)
+      }
+      currentRowIndex += 1
     }
 
-    currentRowIndex += 1
-
-    // yhteensä-rivi mock
+    // yhteensä-rivi 
     val summaryRow = sheet.createRow(currentRowIndex)
     val summaryData = List(
-      "Yhteensä",
-      mockData.hakijat.toString,
-      mockData.ensisijaiset.toString,
-      mockData.varasijalla.toString,
-      mockData.hyvaksytyt.toString,
-      mockData.vastaanottaneet.toString,
-      mockData.lasna.toString,
-      mockData.poissa.toString,
-      mockData.ilmoittautuneetYhteensa.toString,
-      mockData.aloituspaikat.toString
+      "Yhteensä", data.map(_.hakijat).sum.toString
     )
 
     summaryData.zipWithIndex.foreach { case (value, index) =>
