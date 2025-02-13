@@ -7,6 +7,8 @@ import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.xssf.usermodel.*
 import org.slf4j.{Logger, LoggerFactory}
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import scala.util.matching.Regex
 
 object ExcelWriter {
@@ -396,8 +398,10 @@ object ExcelWriter {
                 case Some(value) => value
                 case None        => "-"
               }
-
               cell.setCellValue(kielistettyValue)
+            case Some(d: LocalDate) =>
+              val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+              cell.setCellValue(d.format(formatter))
             case s: String if List("valintatieto").contains(fieldName) =>
               val lowerCaseStr = s.toLowerCase
               val translation  = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")

@@ -1,5 +1,7 @@
 package fi.oph.ovara.backend.domain
 
+import java.time.LocalDate
+
 case class Hakija(
     hakija: String,
     turvakielto: Option[Boolean],
@@ -16,6 +18,7 @@ case class Hakija(
     kokonaispisteet: Option[String],
     hylkTaiPerSyy: Kielistetty,
     vastaanottotieto: Option[String],
+    viimVastaanottopaiva: Option[LocalDate],
     harkinnanvaraisuus: Option[String],
     soraAiempi: Option[Boolean],
     soraTerveys: Option[Boolean],

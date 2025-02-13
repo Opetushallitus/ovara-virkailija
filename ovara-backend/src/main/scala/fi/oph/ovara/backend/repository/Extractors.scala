@@ -51,7 +51,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       )
 
     val parentOid = r.nextString()
-    val childOid = r.nextString()
+    val childOid  = r.nextString()
 
     OrganisaatioParentChild(
       parent_oid = parentOid,
@@ -111,6 +111,12 @@ trait Extractors extends GenericOvaraJsonFormats {
       kokonaispisteet = r.nextStringOption(),
       hylkTaiPerSyy = extractKielistetty(r.nextStringOption()),
       vastaanottotieto = r.nextStringOption(),
+      viimVastaanottopaiva = {
+        r.nextDateOption() match {
+          case Some(date) => Some(date.toLocalDate)
+          case None       => None
+        }
+      },
       harkinnanvaraisuus = r.nextStringOption(),
       soraAiempi = r.nextBooleanOption(),
       soraTerveys = r.nextBooleanOption(),
