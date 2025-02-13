@@ -53,7 +53,11 @@ class HakijatRepository extends Extractors {
     val optionalHakukohdeQuery =
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hk.hakukohde_oid", hakukohteet)
     val optionalValintatietoQuery =
-      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.valintatapajonot->0->>'valinnan_tila'", valintatiedotAsDbValues)
+      RepositoryUtils.makeOptionalListOfValuesQueryStr(
+        "AND",
+        "ht.valintatapajonot->0->>'valinnan_tila'",
+        valintatiedotAsDbValues
+      )
     val optionalVastaanottotietoQuery =
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.vastaanottotieto", vastaanottotiedotAsDbValues)
     val optionalKaksoistutkintoQuery = RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean(
@@ -83,7 +87,8 @@ class HakijatRepository extends Extractors {
     sql"""SELECT concat_ws(',', hlo.sukunimi, hlo.etunimet), hlo.turvakielto,
                  hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid,
                  hk.hakukohde_nimi, hk.hakukohde_oid, ht.hakutoivenumero, ht2.kaksoistutkinto_kiinnostaa, ht2.urheilijatutkinto_kiinnostaa,
-                 ht.valintatapajonot->0->>'valinnan_tila' AS valinnan_tila, ht.vastaanottotieto, ht2.harkinnanvaraisuuden_syy, ht2.sora_aiempi, ht2.sora_terveys, hlo.koulutusmarkkinointilupa,
+                 ht.valintatapajonot->0->>'valinnan_tila' AS valinnan_tila, ht.valintatapajonot->0->'varasijan_numero' as varasija, ht.vastaanottotieto,
+                 ht2.harkinnanvaraisuuden_syy, ht2.sora_aiempi, ht2.sora_terveys, hlo.koulutusmarkkinointilupa,
                  hlo.valintatuloksen_julkaisulupa, hlo.sahkoinenviestintalupa,
                  hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka
           FROM pub.pub_dim_henkilo hlo

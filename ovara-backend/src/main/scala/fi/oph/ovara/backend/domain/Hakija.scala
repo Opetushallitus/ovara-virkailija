@@ -12,6 +12,7 @@ case class Hakija(
     kaksoistutkintoKiinnostaa: Option[Boolean],
     urheilijatutkintoKiinnostaa: Option[Boolean],
     valintatieto: String,
+    varasija: Option[String],
     vastaanottotieto: Option[String],
     harkinnanvaraisuus: Option[String],
     soraAiempi: Option[Boolean],
