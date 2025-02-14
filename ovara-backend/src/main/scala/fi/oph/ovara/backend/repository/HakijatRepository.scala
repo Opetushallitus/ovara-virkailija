@@ -93,17 +93,13 @@ class HakijatRepository extends Extractors {
                  hlo.valintatuloksen_julkaisulupa, hlo.sahkoinenviestintalupa,
                  hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka
           FROM pub.pub_dim_henkilo hlo
-          JOIN pub.pub_fct_hakemus hakemus
-          ON hlo.hakemus_oid = hakemus.hakemus_oid
           JOIN pub.pub_dim_hakutoive ht
           ON ht.henkilo_oid = hlo.henkilo_oid
           JOIN pub.pub_dim_hakutoive_toinen_aste ht2
           ON ht.hakutoive_id = ht2.hakutoive_id
           JOIN pub.pub_dim_hakukohde hk
           ON ht.hakukohde_oid = hk.hakukohde_oid
-          JOIN pub.pub_dim_organisaatio o
-          ON hk.jarjestyspaikka_oid = o.organisaatio_oid
-          WHERE hakemus.haku_oid IN (#$hakuStr)
+          WHERE ht.haku_oid IN (#$hakuStr)
           AND hk.jarjestyspaikka_oid IN (#$raportointiorganisaatiotStr)
           #$optionalHakukohdeQuery
           #$optionalValintatietoQuery
