@@ -118,6 +118,7 @@ trait Extractors extends GenericOvaraJsonFormats {
           case None       => None
         }
       },
+      ilmoittautuminen = r.nextStringOption(),
       harkinnanvaraisuus = r.nextStringOption(),
       soraAiempi = r.nextBooleanOption(),
       soraTerveys = r.nextBooleanOption(),

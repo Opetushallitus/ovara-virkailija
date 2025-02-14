@@ -2,6 +2,34 @@ package fi.oph.ovara.backend.domain
 
 import java.time.LocalDate
 
+abstract class HakijaBase {
+  val turvakielto: Option[Boolean]
+  val kansalaisuus: Kielistetty
+  val oppijanumero: String
+  val hakemusOid: String
+  val hakukohteenNimi: Kielistetty
+  val hakukohdeOid: String
+  val prioriteetti: Int
+  val kaksoistutkintoKiinnostaa: Option[Boolean]
+  val urheilijatutkintoKiinnostaa: Option[Boolean]
+  val valintatieto: String
+  val varasija: Option[String]
+  val kokonaispisteet: Option[String]
+  val hylkTaiPerSyy: Kielistetty
+  val vastaanottotieto: Option[String]
+  val viimVastaanottopaiva: Option[LocalDate]
+  val ilmoittautuminen: Option[String]
+  val harkinnanvaraisuus: Option[String]
+  val soraAiempi: Option[Boolean]
+  val soraTerveys: Option[Boolean]
+  val markkinointilupa: Option[Boolean]
+  val julkaisulupa: Option[Boolean]
+  val sahkoinenViestintaLupa: Option[Boolean]
+  val lahiosoite: String
+  val postinumero: String
+  val postitoimipaikka: String
+}
+
 case class Hakija(
     hakijanSukunimi: String,
     hakijanEtunimi: String,
@@ -20,6 +48,7 @@ case class Hakija(
     hylkTaiPerSyy: Kielistetty,
     vastaanottotieto: Option[String],
     viimVastaanottopaiva: Option[LocalDate],
+    ilmoittautuminen: Option[String],
     harkinnanvaraisuus: Option[String],
     soraAiempi: Option[Boolean],
     soraTerveys: Option[Boolean],
@@ -29,7 +58,7 @@ case class Hakija(
     lahiosoite: String,
     postinumero: String,
     postitoimipaikka: String
-)
+) extends HakijaBase
 
 case class HakijaWithCombinedNimi(
     hakija: String,
@@ -48,6 +77,7 @@ case class HakijaWithCombinedNimi(
     hylkTaiPerSyy: Kielistetty,
     vastaanottotieto: Option[String],
     viimVastaanottopaiva: Option[LocalDate],
+    ilmoittautuminen: Option[String],
     harkinnanvaraisuus: Option[String],
     soraAiempi: Option[Boolean],
     soraTerveys: Option[Boolean],
@@ -57,7 +87,7 @@ case class HakijaWithCombinedNimi(
     lahiosoite: String,
     postinumero: String,
     postitoimipaikka: String
-)
+) extends HakijaBase
 
 object HakijaWithCombinedNimi {
   def apply(hakija: Hakija): HakijaWithCombinedNimi = {
@@ -78,6 +108,7 @@ object HakijaWithCombinedNimi {
       hylkTaiPerSyy = hakija.hylkTaiPerSyy,
       vastaanottotieto = hakija.vastaanottotieto,
       viimVastaanottopaiva = hakija.viimVastaanottopaiva,
+      ilmoittautuminen = hakija.ilmoittautuminen,
       harkinnanvaraisuus = hakija.harkinnanvaraisuus,
       soraAiempi = hakija.soraAiempi,
       soraTerveys = hakija.soraTerveys,

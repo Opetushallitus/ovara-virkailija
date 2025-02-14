@@ -406,7 +406,7 @@ object ExcelWriter {
             cell.setCellValue(translation)
           case s: String =>
             cell.setCellValue(s)
-          case Some(s: String) if List("vastaanottotieto").contains(fieldName) =>
+          case Some(s: String) if List("vastaanottotieto", "ilmoittautuminen").contains(fieldName) =>
             val lowerCaseStr = s.toLowerCase
             val translation  = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
             cell.setCellValue(translation)
