@@ -96,7 +96,8 @@ trait Extractors extends GenericOvaraJsonFormats {
 
   implicit val getHakijaResult: GetResult[Hakija] = GetResult(r =>
     Hakija(
-      hakija = r.nextString(),
+      hakijanSukunimi = r.nextString(),
+      hakijanEtunimi = r.nextString(),
       turvakielto = r.nextBooleanOption(),
       kansalaisuus = extractKielistetty(r.nextStringOption()),
       oppijanumero = r.nextString(),

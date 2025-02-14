@@ -84,7 +84,7 @@ class HakijatRepository extends Extractors {
       harkinnanvaraisuudetWithSureValues
     )
 
-    sql"""SELECT concat_ws(',', hlo.sukunimi, hlo.etunimet), hlo.turvakielto,
+    sql"""SELECT hlo.sukunimi, hlo.etunimet, hlo.turvakielto,
                  hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid,
                  hk.hakukohde_nimi, hk.hakukohde_oid, ht.hakutoivenumero, ht2.kaksoistutkinto_kiinnostaa, ht2.urheilijatutkinto_kiinnostaa,
                  ht.valintatapajonot->0->>'valinnan_tila' AS valinnan_tila, ht.valintatapajonot->0->>'varasijan_numero' as varasija,
@@ -114,6 +114,7 @@ class HakijatRepository extends Extractors {
           #$optionalSoraAiempiQuery
           #$optionalMarkkinointilupaQuery
           #$optionalJulkaisulupaQuery
-          #$optionalHarkinnanvaraisuusQuery""".as[Hakija]
+          #$optionalHarkinnanvaraisuusQuery
+          """.as[Hakija]
   }
 }

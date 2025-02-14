@@ -7,7 +7,6 @@ import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFSheet, XSSFWorkbook}
 import org.scalatest.flatspec.AnyFlatSpec
 
 import java.time.LocalDate
-import scala.collection.immutable.HashMap
 
 class ExcelWriterSpec extends AnyFlatSpec {
   val userLng: String = "sv"
@@ -1337,7 +1336,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
                   toteutuksenTila = Some("julkaistu"),
                   hakukohteenTila = Some("julkaistu"),
                   aloituspaikat = Some(8),
-                  onValintakoe = Some(false)
+                  onValintakoe = Some(false),
+                  voiSuorittaaKaksoistutkinnon = Some(true),
+                  jarjestaaUrheilijanAmmKoulutusta = Some(true)
                 )
               ),
               OrganisaationKoulutusToteutusHakukohde(
@@ -1419,7 +1420,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(1).getCell(6).getStringCellValue == "-")
     assert(sheet.getRow(1).getCell(7).getStringCellValue == "-")
     assert(sheet.getRow(1).getCell(8).getStringCellValue == "-")
-    //assert(sheet.getRow(1).getCell(9) == null)
+    assert(sheet.getRow(1).getCell(9) == null)
 
     // Oppilaitos row
     assert(sheet.getRow(2).getCell(0).getStringCellValue == "Oppilaitoksen nimi sv")
@@ -1435,8 +1436,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(3).getCell(4).getStringCellValue == "julkaistu")
     assert(sheet.getRow(3).getCell(5).getNumericCellValue == 8)
     assert(sheet.getRow(3).getCell(6).getStringCellValue == "-")
-    assert(sheet.getRow(3).getCell(7).getStringCellValue == "-")
-    //assert(sheet.getRow(3).getCell(8) == null)
+    assert(sheet.getRow(3).getCell(7).getStringCellValue == "X")
+    assert(sheet.getRow(3).getCell(8).getStringCellValue == "X")
+    assert(sheet.getRow(3).getCell(9) == null)
 
     // Hakukohde 2 result row
     assert(sheet.getRow(4).getCell(0).getStringCellValue == "Hakukohteen 2 nimi sv")
@@ -1447,7 +1449,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(4).getCell(5).getNumericCellValue == 5)
     assert(sheet.getRow(4).getCell(6).getStringCellValue == "X")
     assert(sheet.getRow(4).getCell(7).getStringCellValue == "-")
-    //assert(sheet.getRow(4).getCell(8) == null)
+    assert(sheet.getRow(4).getCell(8).getStringCellValue == "-")
+    assert(sheet.getRow(4).getCell(9) == null)
 
     // Toimipisteen row
     assert(sheet.getRow(5).getCell(0).getStringCellValue == "Toimipisteen nimi sv")
@@ -1464,7 +1467,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(6).getCell(5).getNumericCellValue == 3)
     assert(sheet.getRow(6).getCell(6).getStringCellValue == "-")
     assert(sheet.getRow(6).getCell(7).getStringCellValue == "-")
-    //assert(sheet.getRow(6).getCell(8) == null)
+    assert(sheet.getRow(6).getCell(8).getStringCellValue == "-")
+    assert(sheet.getRow(6).getCell(9) == null)
 
     // Toimipiste 2 row
     assert(sheet.getRow(7).getCell(0).getStringCellValue == "Toimipisteen 2 nimi sv")
@@ -1481,7 +1485,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(8).getCell(5).getNumericCellValue == 4)
     assert(sheet.getRow(8).getCell(6).getStringCellValue == "X")
     assert(sheet.getRow(8).getCell(7).getStringCellValue == "-")
-    //assert(sheet.getRow(8).getCell(8) == null)
+    assert(sheet.getRow(8).getCell(8).getStringCellValue == "-")
+    assert(sheet.getRow(8).getCell(9) == null)
 
     // Toimipisteen 2 alitoimipiste row
     assert(sheet.getRow(9).getCell(0).getStringCellValue == "Toimipisteen 2 alitoimipisteen nimi sv")
@@ -1498,7 +1503,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(10).getCell(5).getNumericCellValue == 2)
     assert(sheet.getRow(10).getCell(6).getStringCellValue == "-")
     assert(sheet.getRow(10).getCell(7).getStringCellValue == "-")
-    //assert(sheet.getRow(10).getCell(8) == null)
+    assert(sheet.getRow(10).getCell(8).getStringCellValue == "-")
+    assert(sheet.getRow(10).getCell(9) == null)
 
     assert(sheet.getPhysicalNumberOfRows == 11)
   }
@@ -1509,13 +1515,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val sheet: XSSFSheet                             = wb.createSheet()
     val headingCellStyle: XSSFCellStyle              = wb.createCellStyle()
 
-    val fieldNames: List[String] = classOf[Hakija].getDeclaredFields.map(_.getName).toList
+    val fieldNames: List[String] = classOf[HakijaWithCombinedNimi].getDeclaredFields.map(_.getName).toList
     ExcelWriter.createHakijaHeadingRow(
       sheet,
       userLng,
       translations,
       0,
-      hakijatQueryResult,
       fieldNames,
       headingCellStyle
     )
@@ -1551,7 +1556,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   "writeHakijatRaportti" should "create one sheet with a sheet name, heading row and no results" in {
-    val hakijatQueryResult: Map[String, Seq[Hakija]] = Map()
+    val hakijatQueryResult = Vector()
     val wb =
       ExcelWriter.writeHakijatRaportti(
         hakijatQueryResult,
@@ -1592,38 +1597,35 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   it should "return excel with one result row in addition to heading row" in {
-    val hakijatResult =
-      HashMap(
-        "1.2.246.562.24.30646006111" -> Vector(
-          Hakija(
-            "Rautiainen-Testi,Dina Testi",
-            Some(false),
-            Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-            "1.2.246.562.24.30646006111",
-            "1.2.246.562.11.00000000000002179045",
-            Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv -> "Hakukohde 1 SV"),
-            "1.2.246.562.20.00000000000000038597",
-            2,
-            Some(true),
-            None,
-            "HYLATTY",
-            None,
-            None,
-            Map(En -> "", Fi -> "Hylätty harkinnanvaraisessa valinnassa", Sv -> ""),
-            Some("EI_VASTAANOTETTU_MAARA_AIKANA"),
-            None,
-            Some("ATARU_OPPIMISVAIKEUDET"),
-            Some(false),
-            Some(false),
-            Some(false),
-            Some(true),
-            None,
-            "Rämsöönranta 368",
-            "00100",
-            "HELSINKI"
-          )
-        )
+    val hakijatResult = Vector(
+      HakijaWithCombinedNimi(
+        "Rautiainen-Testi, Dina Testi",
+        Some(false),
+        Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+        "1.2.246.562.24.30646006111",
+        "1.2.246.562.11.00000000000002179045",
+        Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv -> "Hakukohde 1 SV"),
+        "1.2.246.562.20.00000000000000038597",
+        2,
+        Some(true),
+        None,
+        "HYLATTY",
+        None,
+        None,
+        Map(En -> "", Fi -> "Hylätty harkinnanvaraisessa valinnassa", Sv -> ""),
+        Some("EI_VASTAANOTETTU_MAARA_AIKANA"),
+        None,
+        Some("ATARU_OPPIMISVAIKEUDET"),
+        Some(false),
+        Some(false),
+        Some(false),
+        Some(true),
+        None,
+        "Rämsöönranta 368",
+        "00100",
+        "HELSINKI"
       )
+    )
 
     val wb =
       ExcelWriter.writeHakijatRaportti(
@@ -1635,7 +1637,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getNumberOfSheets == 1)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
-    assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Rautiainen-Testi,Dina Testi")
+    assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Rautiainen-Testi, Dina Testi")
     assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "Nej")
     assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "Finland")
     assert(wb.getSheetAt(0).getRow(1).getCell(3).getStringCellValue == "1.2.246.562.24.30646006111")
@@ -1666,95 +1668,91 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
   it should "return excel with three result rows: two for one hakija and one for another hakija" in {
     val hakijatResult =
-      HashMap(
-        "1.2.246.562.24.30646006111" -> Vector(
-          Hakija(
-            "Rautiainen-Testi,Dina Testi",
-            Some(false),
-            Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-            "1.2.246.562.24.30646006111",
-            "1.2.246.562.11.00000000000002179045",
-            Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv -> "Hakukohde 1 SV"),
-            "1.2.246.562.20.00000000000000038597",
-            2,
-            Some(true),
-            Some(false),
-            "HYLATTY",
-            Some("3"),
-            Some("8.5"),
-            Map(En -> "", Fi -> "Hylätty harkinnanvaraisessa valinnassa", Sv -> ""),
-            None,
-            None,
-            None,
-            Some(false),
-            Some(false),
-            Some(false),
-            Some(true),
-            None,
-            "Rämsöönranta 368",
-            "00100",
-            "HELSINKI"
-          ),
-          Hakija(
-            "Rautiainen-Testi,Dina Testi",
-            Some(false),
-            Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-            "1.2.246.562.24.30646006111",
-            "1.2.246.562.11.00000000000002112891",
-            Map(En -> "Hakukohde 2 EN", Fi -> "Hakukohde 2", Sv -> "Hakukohde 2 SV"),
-            "1.2.246.562.20.00000000000000038597",
-            1,
-            Some(true),
-            Some(true),
-            "HYVAKSYTTY",
-            Some("8"),
-            None,
-            Map(),
-            Some("PERUNUT"),
-            None,
-            Some("ATARU_ULKOMAILLA_OPISKELTU"),
-            Some(false),
-            Some(false),
-            Some(true),
-            Some(true),
-            None,
-            "Rämsöönranta 368",
-            "00100",
-            "HELSINKI"
-          )
+      Vector(
+        HakijaWithCombinedNimi(
+          "Rautiainen-Testi, Dina Testi",
+          Some(false),
+          Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+          "1.2.246.562.24.30646006111",
+          "1.2.246.562.11.00000000000002179045",
+          Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv -> "Hakukohde 1 SV"),
+          "1.2.246.562.20.00000000000000038597",
+          2,
+          Some(true),
+          Some(false),
+          "HYLATTY",
+          Some("3"),
+          Some("8.5"),
+          Map(En -> "", Fi -> "Hylätty harkinnanvaraisessa valinnassa", Sv -> ""),
+          None,
+          None,
+          None,
+          Some(false),
+          Some(false),
+          Some(false),
+          Some(true),
+          None,
+          "Rämsöönranta 368",
+          "00100",
+          "HELSINKI"
         ),
-        "1.2.246.562.24.18441866015" -> Vector(
-          Hakija(
-            "Lehto-Testi,Vikke Testi",
-            Some(false),
-            Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-            "1.2.246.562.24.18441866015",
-            "1.2.246.562.11.00000000000002126102",
-            Map(En -> "Hakukohde 3 EN", Fi -> "Hakukohde 3", Sv -> "Hakukohde 3 SV"),
-            "1.2.246.562.20.00000000000000038597",
-            1,
-            Some(true),
-            Some(false),
-            "PERUUNTUNUT",
-            None,
-            Some("5.6"),
-            Map(
-              En -> "Cancelled, waiting list selection has ended",
-              Fi -> "Peruuntunut, varasijatäyttö päättynyt",
-              Sv -> "Annullerad, besättning av reservplatser har upphört"
-            ),
-            Some("PERUNUT"),
-            Some(LocalDate.parse("2024-06-26")),
-            Some("SURE_YKS_MAT_AI"),
-            Some(false),
-            Some(false),
-            Some(false),
-            Some(true),
-            Some(true),
-            "Laholanaukio 834",
-            "00100",
-            "HELSINKI"
-          )
+        HakijaWithCombinedNimi(
+          "Rautiainen-Testi, Dina Testi",
+          Some(false),
+          Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+          "1.2.246.562.24.30646006111",
+          "1.2.246.562.11.00000000000002112891",
+          Map(En -> "Hakukohde 2 EN", Fi -> "Hakukohde 2", Sv -> "Hakukohde 2 SV"),
+          "1.2.246.562.20.00000000000000038597",
+          1,
+          Some(true),
+          Some(true),
+          "HYVAKSYTTY",
+          Some("8"),
+          None,
+          Map(),
+          Some("PERUNUT"),
+          None,
+          Some("ATARU_ULKOMAILLA_OPISKELTU"),
+          Some(false),
+          Some(false),
+          Some(true),
+          Some(true),
+          None,
+          "Rämsöönranta 368",
+          "00100",
+          "HELSINKI"
+        ),
+        HakijaWithCombinedNimi(
+          "Lehto-Testi, Vikke Testi",
+          Some(false),
+          Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+          "1.2.246.562.24.18441866015",
+          "1.2.246.562.11.00000000000002126102",
+          Map(En -> "Hakukohde 3 EN", Fi -> "Hakukohde 3", Sv -> "Hakukohde 3 SV"),
+          "1.2.246.562.20.00000000000000038597",
+          1,
+          Some(true),
+          Some(false),
+          "PERUUNTUNUT",
+          None,
+          Some("5.6"),
+          Map(
+            En -> "Cancelled, waiting list selection has ended",
+            Fi -> "Peruuntunut, varasijatäyttö päättynyt",
+            Sv -> "Annullerad, besättning av reservplatser har upphört"
+          ),
+          Some("PERUNUT"),
+          Some(LocalDate.parse("2024-06-26")),
+          Some("SURE_YKS_MAT_AI"),
+          Some(false),
+          Some(false),
+          Some(false),
+          Some(true),
+          Some(true),
+          "Laholanaukio 834",
+          "00100",
+          "HELSINKI"
         )
       )
 
@@ -1768,7 +1766,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getNumberOfSheets == 1)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
-    assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Rautiainen-Testi,Dina Testi")
+    assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Rautiainen-Testi, Dina Testi")
     assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "Nej")
     assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "Finland")
     assert(wb.getSheetAt(0).getRow(1).getCell(3).getStringCellValue == "1.2.246.562.24.30646006111")
@@ -1794,7 +1792,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1).getCell(23).getStringCellValue == "00100")
     assert(wb.getSheetAt(0).getRow(1).getCell(24).getStringCellValue == "HELSINKI")
 
-    assert(wb.getSheetAt(0).getRow(2).getCell(0).getStringCellValue == "Rautiainen-Testi,Dina Testi")
+    assert(wb.getSheetAt(0).getRow(2).getCell(0).getStringCellValue == "Rautiainen-Testi, Dina Testi")
     assert(wb.getSheetAt(0).getRow(2).getCell(1).getStringCellValue == "Nej")
     assert(wb.getSheetAt(0).getRow(2).getCell(2).getStringCellValue == "Finland")
     assert(wb.getSheetAt(0).getRow(2).getCell(3).getStringCellValue == "1.2.246.562.24.30646006111")
@@ -1820,7 +1818,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(2).getCell(23).getStringCellValue == "00100")
     assert(wb.getSheetAt(0).getRow(2).getCell(24).getStringCellValue == "HELSINKI")
 
-    assert(wb.getSheetAt(0).getRow(3).getCell(0).getStringCellValue == "Lehto-Testi,Vikke Testi")
+    assert(wb.getSheetAt(0).getRow(3).getCell(0).getStringCellValue == "Lehto-Testi, Vikke Testi")
     assert(wb.getSheetAt(0).getRow(3).getCell(1).getStringCellValue == "Nej")
     assert(wb.getSheetAt(0).getRow(3).getCell(2).getStringCellValue == "Finland")
     assert(wb.getSheetAt(0).getRow(3).getCell(3).getStringCellValue == "1.2.246.562.24.18441866015")
@@ -1833,7 +1831,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(3).getCell(10).getStringCellValue == "Peruuntunut SV")
     assert(wb.getSheetAt(0).getRow(3).getCell(11).getStringCellValue == "-")
     assert(wb.getSheetAt(0).getRow(3).getCell(12).getStringCellValue == "5.6")
-    assert(wb.getSheetAt(0).getRow(3).getCell(13).getStringCellValue == "Annullerad, besättning av reservplatser har upphört")
+    assert(
+      wb.getSheetAt(0).getRow(3).getCell(13).getStringCellValue == "Annullerad, besättning av reservplatser har upphört"
+    )
     assert(wb.getSheetAt(0).getRow(3).getCell(14).getStringCellValue == "raportti.perunut")
     assert(wb.getSheetAt(0).getRow(3).getCell(15).getStringCellValue == "26.06.2024")
     assert(wb.getSheetAt(0).getRow(3).getCell(16).getStringCellValue == "raportti.yks_mat_ai")

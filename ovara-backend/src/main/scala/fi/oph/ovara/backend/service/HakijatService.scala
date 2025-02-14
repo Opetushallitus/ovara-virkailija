@@ -1,5 +1,6 @@
 package fi.oph.ovara.backend.service
 
+import fi.oph.ovara.backend.domain.HakijaWithCombinedNimi
 import fi.oph.ovara.backend.repository.{HakijatRepository, OvaraDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -68,11 +69,13 @@ class HakijatService(
       julkaisulupa = julkaisulupa
     )
 
-    val queryResult     = db.run(query, "hakijatRepository.selectWithParams")
-    val groupedByHloOid = queryResult.groupBy(_.oppijanumero)
+    val queryResult = db.run(query, "hakijatRepository.selectWithParams")
+    val sorted =
+      queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi, resultRow.hakijanEtunimi, resultRow.oppijanumero))
+    val sortedListwithCombinedNimi = sorted.map(sortedResult => HakijaWithCombinedNimi(sortedResult))
 
     ExcelWriter.writeHakijatRaportti(
-      groupedByHloOid,
+      sortedListwithCombinedNimi,
       asiointikieli,
       translations
     )
