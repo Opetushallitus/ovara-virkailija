@@ -85,7 +85,7 @@ class HakijatRepository extends Extractors {
     )
 
     sql"""SELECT hlo.sukunimi, hlo.etunimet, hlo.turvakielto,
-                 hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid,
+                 hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid, hk.oppilaitos, hk.toimipiste,
                  hk.hakukohde_nimi, hk.hakukohde_oid, ht.hakutoivenumero, ht2.kaksoistutkinto_kiinnostaa, ht2.urheilijatutkinto_kiinnostaa,
                  ht.valintatapajonot->0->>'valinnan_tila' AS valinnan_tila, ht.valintatapajonot->0->>'varasijan_numero' as varasija,
                  ht.valintatapajonot->0->>'pisteet' as kokonaispisteet, ht.valintatapajonot->0->>'valinnantilan_kuvauksen_teksti' as hylk_tai_per_syy,

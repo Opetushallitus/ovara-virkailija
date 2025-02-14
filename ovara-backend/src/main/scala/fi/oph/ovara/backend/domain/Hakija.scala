@@ -7,6 +7,8 @@ abstract class HakijaBase {
   val kansalaisuus: Kielistetty
   val oppijanumero: String
   val hakemusOid: String
+  val oppilaitos: Kielistetty
+  val toimipiste: Kielistetty
   val hakukohteenNimi: Kielistetty
   val hakukohdeOid: String
   val prioriteetti: Int
@@ -37,6 +39,8 @@ case class Hakija(
     kansalaisuus: Kielistetty,
     oppijanumero: String,
     hakemusOid: String,
+    oppilaitos: Kielistetty,
+    toimipiste: Kielistetty,
     hakukohteenNimi: Kielistetty,
     hakukohdeOid: String,
     prioriteetti: Int,
@@ -66,6 +70,8 @@ case class HakijaWithCombinedNimi(
     kansalaisuus: Kielistetty,
     oppijanumero: String,
     hakemusOid: String,
+    oppilaitos: Kielistetty,
+    toimipiste: Kielistetty,
     hakukohteenNimi: Kielistetty,
     hakukohdeOid: String,
     prioriteetti: Int,
@@ -97,6 +103,8 @@ object HakijaWithCombinedNimi {
       kansalaisuus = hakija.kansalaisuus,
       oppijanumero = hakija.oppijanumero,
       hakemusOid = hakija.hakemusOid,
+      oppilaitos = hakija.oppilaitos,
+      toimipiste = hakija.toimipiste,
       hakukohteenNimi = hakija.hakukohteenNimi,
       hakukohdeOid = hakija.hakukohdeOid,
       prioriteetti = hakija.prioriteetti,
