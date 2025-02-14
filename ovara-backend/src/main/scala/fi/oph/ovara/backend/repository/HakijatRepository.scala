@@ -41,7 +41,7 @@ class HakijatRepository extends Extractors {
     def mapValintatiedotToDbValues(valintatiedot: List[String]): List[String] = {
       valintatiedot.flatMap {
         case s: String if s == "HYVAKSYTTY" =>
-          s :: List("HARKINNANVARAISESTI_HYVAKSYTTY", "VARASIJALTA_HYVAKSYTTY", "PERUNUT", "PERUUTETTU")
+          s :: List("HYVAKSYTTY_HARKINNANVARAISESTI", "VARASIJALTA_HYVAKSYTTY", "PERUNUT", "PERUUTETTU")
         case s: String => List(s)
         case null      => List()
       }
