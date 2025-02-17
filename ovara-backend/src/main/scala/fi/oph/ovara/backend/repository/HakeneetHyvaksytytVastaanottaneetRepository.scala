@@ -23,14 +23,17 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     val raportointiorganisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(selectedKayttooikeusOrganisaatiot)
     val harkinnanvaraisuudetWithSureValues = RepositoryUtils.enrichHarkinnanvaraisuudet(harkinnanvaraisuudet)
 
-    sql"""SELECT t.hakukohde_oid, t.hakukohde_nimi, SUM(t.hakijat) AS hakijat, SUM(t.ensisijaisia) AS ensisijaisia, SUM(t.varasija) AS varasija, SUM(t.hyvaksytyt) AS hyvaksytyt,
-    SUM(t.vastaanottaneet) AS vastaanottaneet, SUM(t.lasna) AS lasna, SUM(t.poissa) AS poissa, SUM(t.ilm_yht) AS ilm_yht, SUM(t.aloituspaikat) AS aloituspaikat
+    sql"""SELECT t.hakukohde_oid, t.hakukohde_nimi, h.organisaatio_nimi, SUM(t.hakijat) AS hakijat, SUM(t.ensisijaisia) AS ensisijaisia, SUM(t.varasija) AS varasija, SUM(t.hyvaksytyt) AS hyvaksytyt,
+    SUM(t.vastaanottaneet) AS vastaanottaneet, SUM(t.lasna) AS lasna, SUM(t.poissa) AS poissa, SUM(t.ilm_yht) AS ilm_yht, MIN(t.aloituspaikat) AS aloituspaikat
     FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
+    JOIN pub.pub_dim_hakukohde h
+    ON t.hakukohde_oid = h.hakukohde_oid
     WHERE t.haku_oid IN (#$hakuStr)
     AND t.organisaatio_oid IN (#$raportointiorganisaatiotStr)
     #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.hakukohde_oid", hakukohteet)}
+    #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.oppilaitoksen_opetuskieli", opetuskielet)}
     #${RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "t.sukupuoli", sukupuoli)}
     #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.harkinnanvaraisuuden_syy", harkinnanvaraisuudetWithSureValues)}
-    GROUP BY t.hakukohde_oid, t.hakukohde_nimi""".as[HakeneetHyvaksytytVastaanottaneet]
+    GROUP BY t.hakukohde_oid, t.hakukohde_nimi, h.organisaatio_nimi""".as[HakeneetHyvaksytytVastaanottaneet]
   }
 }

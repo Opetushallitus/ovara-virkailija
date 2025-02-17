@@ -43,32 +43,19 @@ object Constants {
     )
   )
 
-  val HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES: Map[String, List[String]] = Map(
-    "fi" -> List(
-      "Hakukohde",
-      "Hakijat yht.",
-      "Hakijoista ensisijaisia",
-      "Varasijalla",
-      "Hyväksytyt",
-      "Vastaanottaneet",
-      "Läsnä",
-      "Poissa",
-      "Ilmoittautunet yhteensä",
-      "Aloituspaikat",
-    ),
-    "sv" -> List(
-      "Hakukohde",
-      "Hakijat yht.",
-      "Hakijoista ensisijaisia",
-      "Varasijalla",
-      "Hyväksytyt",
-      "Vastaanottaneet",
-      "Läsnä",
-      "Poissa",
-      "Ilmoittautunet yhteensä",
-      "Aloituspaikat",
+  val HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES: List[String] =
+    List(
+      "hakukohde",
+      "hakijat-yht",
+      "ensisijaisia",
+      "varasija",
+      "hyvaksytyt",
+      "vastaanottaneet",
+      "lasna",
+      "poissa",
+      "ilm-yht",
+      "aloituspaikat",
     )
-  )
 
   val OPH_PAAKAYTTAJA_OID = "1.2.246.562.10.00000000001"
 

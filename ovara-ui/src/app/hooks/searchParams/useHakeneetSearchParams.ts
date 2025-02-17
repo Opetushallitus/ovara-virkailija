@@ -1,5 +1,10 @@
 'use client';
-import { parseAsBoolean, useQueryState } from 'nuqs';
+import {
+  parseAsArrayOf,
+  parseAsBoolean,
+  parseAsString,
+  useQueryState,
+} from 'nuqs';
 import { DEFAULT_NUQS_OPTIONS } from '@/app/lib/constants';
 
 export const useHakeneetSearchParams = () => {
@@ -10,7 +15,7 @@ export const useHakeneetSearchParams = () => {
 
   const [selectedOpetuskielet, setSelectedOpetuskielet] = useQueryState(
     'opetuskieli',
-    DEFAULT_NUQS_OPTIONS,
+    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
   const [selectedNaytaHakutoiveet, setSelectedNaytaHakutoiveet] = useQueryState(

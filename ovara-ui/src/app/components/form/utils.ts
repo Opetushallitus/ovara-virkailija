@@ -75,9 +75,13 @@ export const downloadExcel = async (
   setIsLoading: (v: boolean) => void,
 ) => {
   setIsLoading(true);
-  const response = await apiFetch(raporttiEndpoint, {
-    queryParams: `?${queryParamsStr}`,
-  });
+  const response = await apiFetch(
+    raporttiEndpoint,
+    {
+      queryParams: `?${queryParamsStr}`,
+    },
+    'no-store',
+  );
 
   const contentDisposition = response.headers.get('content-disposition')!;
   const filename = contentDisposition.match(/.*filename=(.*)/)![1];

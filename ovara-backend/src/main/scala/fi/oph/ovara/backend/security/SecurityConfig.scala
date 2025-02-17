@@ -134,9 +134,27 @@ class SecurityConfig  {
   }
 
   @Bean
-  def casFilterChain(http: HttpSecurity, authenticationFilter: CasAuthenticationFilter, sessionMappingStorage: SessionMappingStorage, securityContextRepository: SecurityContextRepository): SecurityFilterChain = {
+  def casFilterChain(http: HttpSecurity, authenticationFilter: CasAuthenticationFilter, sessionMappingStorage: SessionMappingStorage, securityContextRepository: SecurityContextRepository, casAuthenticationEntryPoint: CasAuthenticationEntryPoint): SecurityFilterChain = {
+    val SWAGGER_WHITELIST = List(
+      "/swagger-resources",
+      "/swagger-resources/**",
+      "/swagger-ui.html",
+      "/swagger-ui/**"
+    )
+
     http
-      .securityMatcher(LOGIN_PATH)
+      .securityMatcher("/**")
+      .authorizeHttpRequests(requests => requests
+        .requestMatchers("/api/healthcheck", "/api/csrf").permitAll()
+        .requestMatchers(SWAGGER_WHITELIST: _*).permitAll()
+        .anyRequest().fullyAuthenticated()
+      )
+      .csrf(csrf => csrf
+        .ignoringRequestMatchers("/api/healthcheck", "/api/csrf")
+      )
+      .exceptionHandling(exceptionHandling =>
+        exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+      )
       .addFilterAt(authenticationFilter, classOf[CasAuthenticationFilter])
       .addFilterBefore(singleLogoutFilter(sessionMappingStorage), classOf[CasAuthenticationFilter])
       .securityContext(securityContext => securityContext
@@ -148,41 +166,9 @@ class SecurityConfig  {
       .build()
   }
 
-  @Bean
-  def apiDefaultFilterChain(http: HttpSecurity): SecurityFilterChain = {
-    http
-      .securityMatcher("/api/**")
-      .authorizeHttpRequests(requests => requests.anyRequest.fullyAuthenticated)
-      .exceptionHandling(exceptionHandling =>
-        exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-      )
-      .build()
-  }
-
-  @Bean
-  @Order(3)
-  def healthcheckFilterChain(http: HttpSecurity): SecurityFilterChain = {
-    http
-      .securityMatcher("/api/healthcheck")
-      .authorizeHttpRequests(requests => requests.anyRequest.permitAll)
-      .csrf(c => c.disable)
-      .build()
-  }
 
   @Bean
   @Order(1)
-  def csrfFilterChain(http: HttpSecurity): SecurityFilterChain = {
-    http
-      .securityMatcher("/api/csrf")
-      .authorizeHttpRequests(requests => requests.anyRequest.permitAll)
-      .exceptionHandling(exceptionHandling =>
-        exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-      )
-      .build()
-  }
-
-  @Bean
-  @Order(2)
   def apiLoginFilterChain(http: HttpSecurity, casAuthenticationEntryPoint: CasAuthenticationEntryPoint): SecurityFilterChain = {
     http
       .securityMatcher("/api/login")
@@ -203,18 +189,4 @@ class SecurityConfig  {
     singleSignOutFilter
   }
 
-  @Bean
-  def swaggerFilterChain(http: HttpSecurity): SecurityFilterChain = {
-    val SWAGGER_WHITELIST = List(
-      "/swagger-resources",
-      "/swagger-resources/**",
-      "/swagger-ui.html",
-      "/swagger-ui/**"
-    )
-
-    http
-    .securityMatcher(SWAGGER_WHITELIST*)
-      .authorizeHttpRequests(requests => requests.anyRequest().permitAll())
-      .build()
-  }
 }

@@ -338,7 +338,7 @@ object ExcelWriter {
     workbook
   }
 
-  def createHakijaHeadingRow(
+  def createHeadingRow(
       sheet: XSSFSheet,
       asiontikieli: String,
       translations: Map[String, String],
@@ -383,7 +383,7 @@ object ExcelWriter {
     val fieldNamesWithIndex      = fieldNames.zipWithIndex
 
     currentRowIndex =
-      createHakijaHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNames, headingCellStyle)
+      createHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNames, headingCellStyle)
 
     hakijat.foreach(hakutoive => {
       val hakijanHakutoiveRow = sheet.createRow(currentRowIndex)
@@ -504,25 +504,20 @@ object ExcelWriter {
     summaryCellStyle.setFont(summaryFont)
     summaryCellStyle.setAlignment(HorizontalAlignment.RIGHT)
 
+    bodyTextCellStyle.setWrapText(true)
+
     var currentRowIndex = 0
 
-    val titles = HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES.get(asiointikieli).getOrElse(HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES.get("fi").get)
-    val headingRow = sheet.createRow(currentRowIndex)
-    titles.zipWithIndex.foreach((fieldName, index) => {
-      val headingCell = headingRow.createCell(index)
-      headingCell.setCellStyle(headingCellStyle)
-      val translationKey = s"raportti.$fieldName"
-      val translation = translations.getOrElse(translationKey, translationKey)
-      headingCell.setCellValue(translation)
-    })
+    val fieldNames = HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES
+    val fieldNamesWithIndex = fieldNames.zipWithIndex
 
-    currentRowIndex += 1
-    
+    currentRowIndex =
+      createHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNames, headingCellStyle)
+
     data.foreach { item =>
       val dataRow = sheet.createRow(currentRowIndex)
       val rowData = List(
-        item.hakukohdeNimi(Kieli.withName(asiointikieli)),
-        item.hakijat.toString,
+        s"${item.organisaatioNimi(Kieli.withName(asiointikieli))}\n${item.hakukohdeNimi(Kieli.withName(asiointikieli))}",        item.hakijat.toString,
         item.ensisijaisia.toString,
         item.varasija.toString,
         item.hyvaksytyt.toString,
@@ -540,7 +535,7 @@ object ExcelWriter {
       currentRowIndex += 1
     }
 
-    // yhteensä-rivi 
+    // yhteensä-rivi
     val summaryRow = sheet.createRow(currentRowIndex)
     val summaryData = List(
       "Yhteensä", data.map(_.hakijat).sum.toString
@@ -554,6 +549,11 @@ object ExcelWriter {
         cell.setCellStyle(bodyTextCellStyle)
       }
       cell.setCellValue(value)
+    }
+
+    // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
+    fieldNamesWithIndex.foreach { case (title, index) =>
+      sheet.autoSizeColumn(index)
     }
 
     try {

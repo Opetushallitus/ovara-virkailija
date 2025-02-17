@@ -9,8 +9,8 @@ async function csrfToken() {
     const response = await fetch(`${configuration.ovaraBackendApiUrl}/csrf`, {
       credentials: 'include',
     });
-
-    _csrfToken = await response?.json();
+    const data = await response.json();
+    _csrfToken = data.token;
   }
 
   return _csrfToken;
@@ -21,7 +21,11 @@ type Options = {
   queryParams?: string | null;
 };
 
-export async function apiFetch(resource: string, options?: Options) {
+export async function apiFetch(
+  resource: string,
+  options?: Options,
+  cache?: string,
+) {
   try {
     const queryParams = options?.queryParams ? options.queryParams : '';
     const response = await fetch(
@@ -32,16 +36,10 @@ export async function apiFetch(resource: string, options?: Options) {
         headers: {
           ...options?.headers,
           'X-CSRF-TOKEN': await csrfToken(),
-          cache: 'force-cache',
+          cache: cache ?? 'force-cache',
         },
       },
     );
-    if (isUnauthenticated(response)) {
-      redirectToLogin();
-    }
-    if (response.status === 403) {
-      return Promise.reject(new PermissionError());
-    }
     return response.status >= 400
       ? Promise.reject(new FetchError(response, (await response.text()) ?? ''))
       : Promise.resolve(response);
@@ -80,9 +78,13 @@ const responseToData = async (res: Response) => {
   }
 };
 
-export const doApiFetch = async (resource: string, options?: Options) => {
+export const doApiFetch = async (
+  resource: string,
+  options?: Options,
+  cache?: string,
+) => {
   try {
-    const response = await apiFetch(resource, options);
+    const response = await apiFetch(resource, options, cache);
     const responseUrl = new URL(response.url);
     if (
       isRedirected(response) &&
@@ -92,6 +94,14 @@ export const doApiFetch = async (resource: string, options?: Options) => {
     }
     return responseToData(response);
   } catch (error: unknown) {
+    if (error instanceof FetchError) {
+      if (isUnauthenticated(error.response)) {
+        redirectToLogin();
+      }
+      if (error.response.status === 403) {
+        return Promise.reject(new PermissionError());
+      }
+    }
     return Promise.reject(error);
   }
 };

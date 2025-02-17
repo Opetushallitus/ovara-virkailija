@@ -3,6 +3,7 @@ package fi.oph.ovara.backend.domain
 case class HakeneetHyvaksytytVastaanottaneet(
                                                     hakukohdeOid: String,
                                                     hakukohdeNimi: Kielistetty,
+                                                    organisaatioNimi: Kielistetty,
                                                     hakijat: Int,
                                                     ensisijaisia: Int,
                                                     varasija: Int,

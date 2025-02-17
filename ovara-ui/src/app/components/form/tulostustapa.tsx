@@ -37,6 +37,7 @@ export const Tulostustapa = () => {
       value={selectedTulostustapa ?? ''}
       options={tulostustavat(t)}
       onChange={changeTulostustapa}
+      required={true}
     />
   );
 };

@@ -39,7 +39,7 @@ export const OrganisaatioValikot = () => {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
-  const organisaatiot = useFetchOrganisaatiohierarkiat();
+  const organisaatiot = useFetchOrganisaatiohierarkiat().data;
 
   const {
     selectedKoulutustoimija,

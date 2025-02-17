@@ -39,7 +39,7 @@ export default function Hakijat() {
   const user = useAuthorizedUser();
   const hasToinenAsteRights = hasOvaraToinenAsteRole(user?.authorities);
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
-  const organisaatiot = useFetchOrganisaatiohierarkiat();
+  const organisaatiot = useFetchOrganisaatiohierarkiat().data;
   const {
     selectedAlkamiskaudet,
     setSelectedAlkamiskaudet,

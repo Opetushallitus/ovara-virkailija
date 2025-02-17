@@ -44,7 +44,7 @@ export default function Hakutilasto() {
   const {
     selectedTulostustapa,
     setSelectedTulostustapa,
-    setSelectedOpetuskieli,
+    setSelectedOpetuskielet,
     setSelectedSukupuoli,
   } = useHakeneetSearchParams();
 
@@ -86,7 +86,7 @@ export default function Hakutilasto() {
               () => setSelectedOppilaitokset(null),
               () => setSelectedToimipisteet(null),
               () => setSelectedTulostustapa(null),
-              () => setSelectedOpetuskieli(null),
+              () => setSelectedOpetuskielet(null),
               () => setSelectedHakukohteet(null),
               () => setSelectedSukupuoli(null),
             ]}
