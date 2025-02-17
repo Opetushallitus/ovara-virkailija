@@ -11,9 +11,11 @@ type Haku = {
 };
 
 export const Haku = ({
+  haunTyyppi,
   locale,
   t,
 }: {
+  haunTyyppi: string;
   locale: LanguageCode;
   t: (key: string) => string;
 }) => {
@@ -22,7 +24,7 @@ export const Haku = ({
   const queryParams = useQueryParams();
   const queryParamsStr = queryParams.toString();
   const queryParamsWithHauntyyppi = new URLSearchParams(queryParamsStr);
-  queryParamsWithHauntyyppi.set('haun_tyyppi', 'toinen_aste');
+  queryParamsWithHauntyyppi.set('haun_tyyppi', haunTyyppi);
   const { data } = useFetchHaut(queryParamsWithHauntyyppi.toString());
 
   const haut: Haku[] = data || [];
