@@ -16,7 +16,7 @@ class CommonRepository extends Extractors {
 
   def selectDistinctHarkinnanvaraisuudet(): SqlStreamingAction[Vector[String], String, Effect] = {
     sql"""SELECT DISTINCT harkinnanvaraisuuden_syy
-          FROM pub.pub_dim_hakutoive_toinen_aste
+          FROM pub.pub_fct_raportti_hakijat_toinen_aste
           WHERE harkinnanvaraisuuden_syy IS NOT NULL
           AND harkinnanvaraisuuden_syy NOT LIKE 'EI_HARKINNANVARAINEN%'
           AND harkinnanvaraisuuden_syy NOT LIKE 'SURE%'
