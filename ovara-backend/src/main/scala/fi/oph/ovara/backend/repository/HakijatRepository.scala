@@ -85,7 +85,7 @@ class HakijatRepository extends Extractors {
     )
 
     sql"""SELECT hlo.sukunimi, hlo.etunimet, hlo.turvakielto,
-                 hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid, hk.oppilaitos, hk.toimipiste,
+                 hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid, hk.oppilaitos_nimi, hk.toimipiste_nimi,
                  hk.hakukohde_nimi, hk.hakukohde_oid, ht.hakutoivenumero, ht2.kaksoistutkinto_kiinnostaa, ht2.urheilijatutkinto_kiinnostaa,
                  ht.valintatapajonot->0->>'valinnan_tila' AS valinnan_tila, ht.valintatapajonot->0->>'varasijan_numero' as varasija,
                  ht.valintatapajonot->0->>'pisteet' as kokonaispisteet, ht.valintatapajonot->0->>'valinnantilan_kuvauksen_teksti' as hylk_tai_per_syy,
@@ -95,7 +95,7 @@ class HakijatRepository extends Extractors {
           FROM pub.pub_dim_henkilo hlo
           JOIN pub.pub_dim_hakutoive ht
           ON ht.henkilo_oid = hlo.henkilo_oid
-          JOIN pub.pub_dim_hakutoive_toinen_aste ht2
+          JOIN pub.pub_fct_raportti_hakijat_toinen_aste ht2
           ON ht.hakutoive_id = ht2.hakutoive_id
           JOIN pub.pub_dim_hakukohde hk
           ON ht.hakukohde_oid = hk.hakukohde_oid
