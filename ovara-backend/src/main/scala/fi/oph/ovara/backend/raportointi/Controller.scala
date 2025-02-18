@@ -299,9 +299,9 @@ class Controller(
     val hakuList = if (haku == null) List() else haku.asScala.toList
     val oppilaitosList = if (oppilaitos == null) List() else oppilaitos.asScala.toList
     val toimipisteList = if (toimipiste == null) List() else toimipiste.asScala.toList
-    val hakukohdeList        = if (hakukohde == null) List() else hakukohde.asScala.toList
-    val opetuskieliList        = if (opetuskieli == null) List() else opetuskieli.asScala.toList
-    val harkinnanvaraisuusList        = if (harkinnanvaraisuudet == null) List() else harkinnanvaraisuudet.asScala.toList
+    val hakukohdeList = if (hakukohde == null) List() else hakukohde.asScala.toList
+    val opetuskieliList = if (opetuskieli == null) List() else opetuskieli.asScala.toList.map("oppilaitoksenopetuskieli_" + _)
+    val harkinnanvaraisuusList = if (harkinnanvaraisuudet == null) List() else harkinnanvaraisuudet.asScala.toList
 
     val wb = hakeneetHyvaksytytVastaanottaneetService.get(
       hakuList,

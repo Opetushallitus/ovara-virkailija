@@ -516,8 +516,11 @@ object ExcelWriter {
 
     data.foreach { item =>
       val dataRow = sheet.createRow(currentRowIndex)
+      val organisaatioNimi = item.organisaatioNimi(Kieli.withName(asiointikieli))
+      val hakukohdeNimi = Option(item.hakukohdeNimi(Kieli.withName(asiointikieli))).getOrElse("")
       val rowData = List(
-        s"${item.organisaatioNimi(Kieli.withName(asiointikieli))}\n${item.hakukohdeNimi(Kieli.withName(asiointikieli))}",        item.hakijat.toString,
+        s"$organisaatioNimi\n$hakukohdeNimi",
+        item.hakijat.toString,
         item.ensisijaisia.toString,
         item.varasija.toString,
         item.hyvaksytyt.toString,
