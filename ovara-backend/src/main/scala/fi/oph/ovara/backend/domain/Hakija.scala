@@ -24,6 +24,7 @@ abstract class HakijaBase {
   val harkinnanvaraisuus: Option[String]
   val soraAiempi: Option[Boolean]
   val soraTerveys: Option[Boolean]
+  val pohjakoulutus: Kielistetty
   val markkinointilupa: Option[Boolean]
   val julkaisulupa: Option[Boolean]
   val sahkoinenViestintaLupa: Option[Boolean]
@@ -56,6 +57,7 @@ case class Hakija(
     harkinnanvaraisuus: Option[String],
     soraAiempi: Option[Boolean],
     soraTerveys: Option[Boolean],
+    pohjakoulutus: Kielistetty,
     markkinointilupa: Option[Boolean],
     julkaisulupa: Option[Boolean],
     sahkoinenViestintaLupa: Option[Boolean],
@@ -87,6 +89,7 @@ case class HakijaWithCombinedNimi(
     harkinnanvaraisuus: Option[String],
     soraAiempi: Option[Boolean],
     soraTerveys: Option[Boolean],
+    pohjakoulutus: Kielistetty,
     markkinointilupa: Option[Boolean],
     julkaisulupa: Option[Boolean],
     sahkoinenViestintaLupa: Option[Boolean],
@@ -120,6 +123,7 @@ object HakijaWithCombinedNimi {
       harkinnanvaraisuus = hakija.harkinnanvaraisuus,
       soraAiempi = hakija.soraAiempi,
       soraTerveys = hakija.soraTerveys,
+      pohjakoulutus = hakija.pohjakoulutus,
       markkinointilupa = hakija.markkinointilupa,
       julkaisulupa = hakija.julkaisulupa,
       sahkoinenViestintaLupa = hakija.sahkoinenViestintaLupa,

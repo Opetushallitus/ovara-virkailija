@@ -52,6 +52,8 @@ class HakijatRepository extends Extractors {
     val harkinnanvaraisuudetWithSureValues = RepositoryUtils.enrichHarkinnanvaraisuudet(harkinnanvaraisuudet)
     val optionalHakukohdeQuery =
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hk.hakukohde_oid", hakukohteet)
+    val optionalPohjakoulutusQuery =
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht2.pohjakoulutus", pohjakoulutukset)
     val optionalValintatietoQuery =
       RepositoryUtils.makeOptionalListOfValuesQueryStr(
         "AND",
@@ -89,9 +91,9 @@ class HakijatRepository extends Extractors {
                  hk.hakukohde_nimi, hk.hakukohde_oid, ht.hakutoivenumero, ht2.kaksoistutkinto_kiinnostaa, ht2.urheilijatutkinto_kiinnostaa,
                  ht.valintatapajonot->0->>'valinnan_tila' AS valinnan_tila, ht.valintatapajonot->0->>'varasijan_numero' as varasija,
                  ht.valintatapajonot->0->>'pisteet' as kokonaispisteet, ht.valintatapajonot->0->>'valinnantilan_kuvauksen_teksti' as hylk_tai_per_syy,
-                 ht.vastaanottotieto, ht.viimeinen_vastaanottopaiva, ht.ilmoittautumisen_tila, ht2.harkinnanvaraisuuden_syy, ht2.sora_aiempi, ht2.sora_terveys, hlo.koulutusmarkkinointilupa,
-                 hlo.valintatuloksen_julkaisulupa, hlo.sahkoinenviestintalupa,
-                 hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka
+                 ht.vastaanottotieto, ht.viimeinen_vastaanottopaiva, ht.ilmoittautumisen_tila, ht2.harkinnanvaraisuuden_syy,
+                 ht2.sora_aiempi, ht2.sora_terveys, ht2.pohjakoulutus_nimi, hlo.koulutusmarkkinointilupa,
+                 hlo.valintatuloksen_julkaisulupa, hlo.sahkoinenviestintalupa, hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka
           FROM pub.pub_dim_henkilo hlo
           JOIN pub.pub_dim_hakutoive ht
           ON ht.henkilo_oid = hlo.henkilo_oid
@@ -102,6 +104,7 @@ class HakijatRepository extends Extractors {
           WHERE ht.haku_oid IN (#$hakuStr)
           AND hk.jarjestyspaikka_oid IN (#$raportointiorganisaatiotStr)
           #$optionalHakukohdeQuery
+          #$optionalPohjakoulutusQuery
           #$optionalValintatietoQuery
           #$optionalVastaanottotietoQuery
           #$optionalKaksoistutkintoQuery
