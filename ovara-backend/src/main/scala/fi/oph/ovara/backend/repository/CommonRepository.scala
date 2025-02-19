@@ -101,6 +101,38 @@ class CommonRepository extends Extractors {
        """.as[Opetuskieli]
   }
 
+  def selectDistinctKoulutusalat1(): SqlStreamingAction[Vector[Koulutusala], Koulutusala, Effect] = {
+    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso1 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso1_nimi as nimi
+                  FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
+            WHERE kansallinenkoulutusluokitus2016koulutusalataso1 IS NOT NULL""".as[Koulutusala]
+  }
+
+  def selectDistinctKoulutusalat2(koulutusalat1: List[String]): SqlStreamingAction[Vector[Koulutusala], Koulutusala, Effect] = {
+    val koulutusala1Str = RepositoryUtils.makeListOfValuesQueryStr(koulutusalat1)
+    val koulutusala1QueryStr = if (koulutusala1Str.isEmpty) {
+      ""
+    } else {
+      s"AND k.kansallinenkoulutusluokitus2016koulutusalataso1 in ($koulutusala1Str)"
+    }
+    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso2 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso2_nimi as nimi
+                  FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
+            WHERE kansallinenkoulutusluokitus2016koulutusalataso2 IS NOT NULL
+            #$koulutusala1QueryStr""".as[Koulutusala]
+  }
+
+  def selectDistinctKoulutusalat3(koulutusalat2: List[String]): SqlStreamingAction[Vector[Koulutusala], Koulutusala, Effect] = {
+    val koulutusala2Str = RepositoryUtils.makeListOfValuesQueryStr(koulutusalat2)
+    val koulutusala2QueryStr = if (koulutusala2Str.isEmpty) {
+      ""
+    } else {
+      s"AND k.kansallinenkoulutusluokitus2016koulutusalataso2 in ($koulutusala2Str)"
+    }
+    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso3 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso3_nimi as nimi
+                  FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
+            WHERE kansallinenkoulutusluokitus2016koulutusalataso3 IS NOT NULL
+            #$koulutusala2QueryStr""".as[Koulutusala]
+  }
+
   def selectDistinctOrganisaatiot(
       organisaatiot: List[String]
   ): SqlStreamingAction[Vector[Organisaatio], Organisaatio, Effect] = {

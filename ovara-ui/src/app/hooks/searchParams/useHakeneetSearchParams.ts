@@ -18,6 +18,21 @@ export const useHakeneetSearchParams = () => {
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
+  const [selectedKoulutusalat1, setSelectedKoulutusalat1] = useQueryState(
+    'koulutusala1',
+    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
+  const [selectedKoulutusalat2, setSelectedKoulutusalat2] = useQueryState(
+    'koulutusala2',
+    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
+  const [selectedKoulutusalat3, setSelectedKoulutusalat3] = useQueryState(
+    'koulutusala3',
+    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
   const [selectedNaytaHakutoiveet, setSelectedNaytaHakutoiveet] = useQueryState(
     'nayta-hakutoiveet',
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
@@ -33,6 +48,12 @@ export const useHakeneetSearchParams = () => {
     setSelectedTulostustapa,
     selectedOpetuskielet,
     setSelectedOpetuskielet,
+    selectedKoulutusalat1,
+    setSelectedKoulutusalat1,
+    selectedKoulutusalat2,
+    setSelectedKoulutusalat2,
+    selectedKoulutusalat3,
+    setSelectedKoulutusalat3,
     selectedNaytaHakutoiveet,
     setSelectedNaytaHakutoiveet,
     selectedSukupuoli,

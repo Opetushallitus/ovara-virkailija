@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.{Haku, Hakukohde, Koodi, Opetuskieli, Organisaatio, OrganisaatioHierarkia}
+import fi.oph.ovara.backend.domain.{Haku, Hakukohde, Opetuskieli, Organisaatio, OrganisaatioHierarkia}
 import fi.oph.ovara.backend.repository.{CommonRepository, OvaraDatabase}
 import fi.oph.ovara.backend.utils.Constants.{
   KOULUTUSTOIMIJARAPORTTI,
@@ -62,6 +62,18 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
 
   def getOpetuskielet: Vector[Opetuskieli] = {
     db.run(commonRepository.selectDistinctOpetuskielet, "selectDistinctOpetuskielet")
+  }
+
+  def getKoulutusalat1: Vector[Koulutusala] = {
+    db.run(commonRepository.selectDistinctKoulutusalat1(), "selectDistinctKoulutusalat1")
+  }
+
+  def getKoulutusalat2(koulutusalat1: List[String]): Vector[Koulutusala] = {
+    db.run(commonRepository.selectDistinctKoulutusalat2(koulutusalat1), "selectDistinctKoulutusalat2")
+  }
+
+  def getKoulutusalat3(koulutusalat2: List[String]): Vector[Koulutusala] = {
+    db.run(commonRepository.selectDistinctKoulutusalat3(koulutusalat2), "selectDistinctKoulutusalat3")
   }
 
   def getOrganisaatioHierarkiatWithUserRights: List[OrganisaatioHierarkia] = {

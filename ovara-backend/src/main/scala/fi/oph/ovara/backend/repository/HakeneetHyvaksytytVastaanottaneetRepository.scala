@@ -3,7 +3,6 @@ package fi.oph.ovara.backend.repository
 import fi.oph.ovara.backend.domain.HakeneetHyvaksytytVastaanottaneet
 import fi.oph.ovara.backend.utils.RepositoryUtils
 import org.springframework.stereotype.Component
-import slick.dbio.Effect
 import slick.sql.SqlStreamingAction
 import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api.*
@@ -15,6 +14,9 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                         selectedKayttooikeusOrganisaatiot: List[String],
                         haut: List[String],
                         hakukohteet: List[String],
+                        koulutusalat1: List[String],
+                        koulutusalat2: List[String],
+                        koulutusalat3: List[String],
                         opetuskielet: List[String],
                         harkinnanvaraisuudet: List[String],
                         sukupuoli: Option[String],
@@ -38,6 +40,9 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     WHERE h.haku_oid IN (#$hakuStr)
     #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.jarjestyspaikka_oid", selectedKayttooikeusOrganisaatiot)}
     #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.hakukohde_oid", hakukohteet)}
+    #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_1", koulutusalat1)}
+    #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_2", koulutusalat2)}
+    #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_3", koulutusalat3)}
     #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.harkinnanvaraisuuden_syy", harkinnanvaraisuudetWithSureValues)}
     #$opetuskieletFilter
     GROUP BY t.hakukohde_oid, h.hakukohde_nimi, h.organisaatio_nimi""".as[HakeneetHyvaksytytVastaanottaneet]

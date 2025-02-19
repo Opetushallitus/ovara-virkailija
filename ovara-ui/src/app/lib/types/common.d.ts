@@ -8,6 +8,11 @@ export type User = {
   asiointikieli: string;
 };
 
+type Koulutusala = {
+  koodiarvo: string;
+  nimi: Kielistetty;
+};
+
 type Organisaatio = {
   organisaatio_oid: string;
   organisaatio_nimi: Kielistetty;

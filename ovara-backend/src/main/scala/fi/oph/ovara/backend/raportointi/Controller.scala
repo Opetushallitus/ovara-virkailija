@@ -109,6 +109,17 @@ class Controller(
   @GetMapping(path = Array("opetuskielet"))
   def opetuskielet: String = mapper.writeValueAsString(commonService.getOpetuskielet)
 
+  @GetMapping(path = Array("koulutusalat1"))
+  def koulutusalat1: String = mapper.writeValueAsString(commonService.getKoulutusalat1)
+
+  @GetMapping(path = Array("koulutusalat2"))
+  def koulutusalat2(@RequestParam("koulutusalat1", required = false) koulutusalat1: java.util.Collection[String]): String = 
+    mapper.writeValueAsString(commonService.getKoulutusalat2(if (koulutusalat1 == null) List() else koulutusalat1.asScala.toList)
+  )
+
+  @GetMapping(path = Array("koulutusalat3"))
+  def koulutusalat3(@RequestParam("koulutusalat2", required = false) koulutusalat2: java.util.Collection[String]): String = 
+    mapper.writeValueAsString(commonService.getKoulutusalat3(if (koulutusalat2 == null) List() else koulutusalat2.asScala.toList))
 
   // RAPORTIT
 
@@ -284,6 +295,9 @@ class Controller(
                                            @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
                                            @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
                                            @RequestParam("hakukohde", required = false) hakukohde: java.util.Collection[String],
+                                           @RequestParam("koulutusala1", required = false) koulutusala1: java.util.Collection[String],
+                                           @RequestParam("koulutusala2", required = false) koulutusala2: java.util.Collection[String],
+                                           @RequestParam("koulutusala3", required = false) koulutusala3: java.util.Collection[String],
                                            @RequestParam("opetuskieli", required = false) opetuskieli: java.util.Collection[String],
                                            @RequestParam("harkinnanvaraisuus", required = false) harkinnanvaraisuudet: java.util.Collection[String],
                                            @RequestParam("nayta-hakutoiveet", required = false) naytaHakutoiveet: String,
@@ -300,6 +314,9 @@ class Controller(
     val oppilaitosList = if (oppilaitos == null) List() else oppilaitos.asScala.toList
     val toimipisteList = if (toimipiste == null) List() else toimipiste.asScala.toList
     val hakukohdeList = if (hakukohde == null) List() else hakukohde.asScala.toList
+    val koulutusala1List = if (koulutusala1 == null) List() else koulutusala1.asScala.toList
+    val koulutusala2List = if (koulutusala2 == null) List() else koulutusala2.asScala.toList
+    val koulutusala3List = if (koulutusala3 == null) List() else koulutusala3.asScala.toList
     val opetuskieliList = if (opetuskieli == null) List() else opetuskieli.asScala.toList.map("oppilaitoksenopetuskieli_" + _)
     val harkinnanvaraisuusList = if (harkinnanvaraisuudet == null) List() else harkinnanvaraisuudet.asScala.toList
 
@@ -309,6 +326,9 @@ class Controller(
       oppilaitosList,
       toimipisteList,
       hakukohdeList,
+      koulutusala1List,
+      koulutusala2List,
+      koulutusala3List,
       opetuskieliList,
       harkinnanvaraisuusList,
       maybeSukupuoli,
@@ -322,6 +342,9 @@ class Controller(
       "oppilaitos" -> Option(oppilaitosList).filterNot(_.isEmpty),
       "toimipiste" -> Option(toimipisteList).filterNot(_.isEmpty),
       "hakukohde"        -> Option(hakukohdeList).filterNot(_.isEmpty),
+      "koulutusala1"        -> Option(koulutusala1).filterNot(_.isEmpty),
+      "koulutusala2"        -> Option(koulutusala2).filterNot(_.isEmpty),
+      "koulutusala3"        -> Option(koulutusala3).filterNot(_.isEmpty),
       "opetuskieli" -> Option(opetuskieliList).filterNot(_.isEmpty),
       "harkinnanvaraisuudet" -> Option(harkinnanvaraisuusList).filterNot(_.isEmpty),
       "naytaHakutoiveet" -> naytaHakutoiveetBool,

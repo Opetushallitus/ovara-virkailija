@@ -24,6 +24,7 @@ import { Harkinnanvaraisuus } from '@/app/components/form/harkinnanvaraisuus';
 import { downloadExcel } from '@/app/components/form/utils';
 import { useState } from 'react';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
+import { KoulutusalaValikot } from '@/app/components/form/koulutusalavalikot';
 
 export default function Hakutilasto() {
   const { t } = useTranslate();
@@ -66,6 +67,7 @@ export default function Hakutilasto() {
           <Tulostustapa />
           <OrganisaatioValikot />
           <Hakukohde locale={locale} t={t} />
+          <KoulutusalaValikot />
           <Opetuskieli />
           <Harkinnanvaraisuus t={t} />
           <Divider />
