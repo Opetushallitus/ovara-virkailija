@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.{Haku, Hakukohde, Koodi, Organisaatio, OrganisaatioHierarkia}
+import fi.oph.ovara.backend.domain.*
 import fi.oph.ovara.backend.repository.{CommonRepository, OvaraDatabase}
 import fi.oph.ovara.backend.utils.Constants.{
   KOULUTUSTOIMIJARAPORTTI,
@@ -37,7 +37,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       db.run(
         commonRepository
           .selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(allowedOrgOidsFromSelection, haut),
-        "selectDistinctExistingHakukohteet"
+        "selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja"
       )
     } else {
       Vector()
