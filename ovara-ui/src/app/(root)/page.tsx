@@ -17,16 +17,20 @@ export default function Home() {
   const hasOvaraUserRights = hasOvaraRole(userRoles);
   const hasToinenAsteRights = hasOvaraToinenAsteRole(userRoles);
   const hasKkRights = hasOvaraKkRole(userRoles);
+
+  const hasToinenAsteAndKKRights = hasToinenAsteRights && hasKkRights;
   return (
     <MainContainer>
       {hasOvaraUserRights ? (
         <ListTable
           list={
-            hasToinenAsteRights
-              ? TOISEN_ASTEEN_RAPORTIT
-              : hasKkRights
-                ? KK_RAPORTIT
-                : []
+            hasToinenAsteAndKKRights
+              ? [...TOISEN_ASTEEN_RAPORTIT, ...KK_RAPORTIT]
+              : hasToinenAsteRights
+                ? TOISEN_ASTEEN_RAPORTIT
+                : hasKkRights
+                  ? KK_RAPORTIT
+                  : []
           }
         />
       ) : null}
