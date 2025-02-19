@@ -7,9 +7,13 @@ const fetchHakukohteet = (queryParamsStr: string | null) => {
   });
 };
 
-export const useFetchHakukohteet = (queryParamsStr: string | null) => {
+export const useFetchHakukohteet = (
+  queryParamsStr: string | null,
+  fetchEnabled: boolean,
+) => {
   return useQuery({
     queryKey: ['fetchHakukohteet', queryParamsStr],
     queryFn: () => fetchHakukohteet(queryParamsStr),
+    enabled: fetchEnabled,
   });
 };

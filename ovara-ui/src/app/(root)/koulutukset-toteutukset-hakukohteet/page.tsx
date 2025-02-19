@@ -2,7 +2,7 @@
 import { OphTypography } from '@opetushallitus/oph-design-system';
 import { MainContainer } from '@/app/components/main-container';
 import { useTranslate } from '@tolgee/react';
-
+import { LanguageCode } from '@/app/lib/types/common';
 import { KoulutuksenAlkaminen } from '@/app/components/form/koulutuksen-alkaminen';
 import { Haku } from '@/app/components/form/haku';
 import {
@@ -25,6 +25,7 @@ import { downloadExcel } from '@/app/components/form/utils';
 export default function KoulutuksetToteutuksetHakukohteet() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
+  const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const hasToinenAsteRights = hasOvaraToinenAsteRole(user?.authorities);
   const queryParams = useSearchParams();
   const alkamiskausi = queryParams.get('alkamiskausi');
@@ -39,8 +40,8 @@ export default function KoulutuksetToteutuksetHakukohteet() {
         <FormBox>
           {isLoading && <SpinnerModal open={isLoading} />}
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
-          <KoulutuksenAlkaminen />
-          <Haku />
+          <KoulutuksenAlkaminen t={t} />
+          <Haku t={t} locale={locale} haunTyyppi="toinen_aste" />
           <OrganisaatioValikot />
           <KoulutuksenTila />
           <ToteutuksenTila />

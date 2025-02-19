@@ -4,6 +4,7 @@ import { Kielistetty, LanguageCode } from '@/app/lib/types/common';
 import { useFetchHaut } from '@/app/hooks/useFetchHaut';
 import { useSearchParams as useQueryParams } from 'next/navigation';
 import { changeMultiComboBoxSelection } from './utils';
+import { isNullish } from 'remeda';
 
 type Haku = {
   haku_oid: string;
@@ -22,10 +23,17 @@ export const Haku = ({
   const { selectedHaut, setSelectedHaut } = useSearchParams();
 
   const queryParams = useQueryParams();
+  const alkamiskausi = queryParams.get('alkamiskausi');
+  const fetchEnabled = !isNullish(alkamiskausi);
+
   const queryParamsStr = queryParams.toString();
   const queryParamsWithHauntyyppi = new URLSearchParams(queryParamsStr);
   queryParamsWithHauntyyppi.set('haun_tyyppi', haunTyyppi);
-  const { data } = useFetchHaut(queryParamsWithHauntyyppi.toString());
+
+  const { data } = useFetchHaut(
+    queryParamsWithHauntyyppi.toString(),
+    fetchEnabled,
+  );
 
   const haut: Haku[] = data || [];
 

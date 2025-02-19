@@ -7,9 +7,13 @@ const fetchHaut = (queryParamsStr: string | null) => {
   });
 };
 
-export const useFetchHaut = (alkamiskaudetQueryParams: string | null) => {
+export const useFetchHaut = (
+  alkamiskaudetQueryParams: string | null,
+  fetchEnabled: boolean,
+) => {
   return useQuery({
     queryKey: ['fetchHaut', alkamiskaudetQueryParams],
     queryFn: () => fetchHaut(alkamiskaudetQueryParams),
+    enabled: fetchEnabled,
   });
 };
