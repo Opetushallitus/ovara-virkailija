@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.{Haku, Hakukohde, Opetuskieli, Organisaatio, OrganisaatioHierarkia}
+import fi.oph.ovara.backend.domain.{Haku, Hakukohde, Koodi, Koulutusala, Opetuskieli, Organisaatio, OrganisaatioHierarkia}
 import fi.oph.ovara.backend.repository.{CommonRepository, OvaraDatabase}
 import fi.oph.ovara.backend.utils.Constants.{
   KOULUTUSTOIMIJARAPORTTI,
