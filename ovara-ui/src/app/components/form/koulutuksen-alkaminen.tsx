@@ -22,7 +22,7 @@ export const KoulutuksenAlkaminen = ({ t }: { t: (key: string) => string }) => {
   return (
     <MultiComboBox
       id={'alkamiskaudet'}
-      label={`${t('raportti.alkamiskausi')}`}
+      label={t('raportti.alkamiskausi')}
       value={selectedAlkamiskaudet ?? []}
       options={sortedAlkamiskaudet?.map((kausi) => {
         const alkamiskaudenNimi = t(kausi.alkamiskausinimi);
