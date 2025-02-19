@@ -52,7 +52,7 @@ class CommonRepository extends Extractors {
       orgs: List[String],
       haut: List[String]
   ): SqlStreamingAction[Vector[Hakukohde], Hakukohde, Effect] = {
-    val organisaatiotStr = orgs.map(s => s"'$s'").mkString(",")
+    val organisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(orgs)
     val organisaatiotQueryStr = if (organisaatiotStr.isEmpty) {
       ""
     } else { s"AND hk.jarjestyspaikka_oid in ($organisaatiotStr)" }
