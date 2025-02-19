@@ -26,22 +26,16 @@ object Constants {
     )
   )
 
-  val HAKUTOIVEET_TITLES: Map[String, List[String]] = Map(
-    "fi" -> List(
-      "Toive 1",
-      "Toive 2",
-      "Toive 3",
-      "Toive 4",
-      "Toive 5",
-    ),
-    "sv" -> List(
-      "Toive 1",
-      "Toive 2",
-      "Toive 3",
-      "Toive 4",
-      "Toive 5",
+  val HAKUTOIVEET_TITLES: List[String] =
+    List(
+      "toive1",
+      "toive2",
+      "toive3",
+      "toive4",
+      "toive5",
+      "toive6",
+      "toive7"
     )
-  )
 
   val HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES: List[String] =
     List(

@@ -483,7 +483,8 @@ object ExcelWriter {
   def writeHakeneetHyvaksytytVastaanottaneetRaportti(
                             asiointikieli: String,
                             translations: Map[String, String],
-                            data: List[HakeneetHyvaksytytVastaanottaneet]
+                            data: List[HakeneetHyvaksytytVastaanottaneet],
+                            naytaHakutoiveet: Boolean
                           ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new HakeneetHyvaksytytVastaanottaneet excel from db results")
@@ -508,7 +509,11 @@ object ExcelWriter {
 
     var currentRowIndex = 0
 
-    val fieldNames = HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES
+    val fieldNames =
+      if(naytaHakutoiveet)
+        HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES ++ HAKUTOIVEET_TITLES
+      else
+        HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES
     val fieldNamesWithIndex = fieldNames.zipWithIndex
 
     currentRowIndex =
@@ -529,7 +534,19 @@ object ExcelWriter {
         item.poissa.toString,
         item.ilmYht.toString,
         item.aloituspaikat.toString
-      )
+      ) ++ (if (naytaHakutoiveet) {
+        List(
+          item.toive1.toString,
+          item.toive2.toString,
+          item.toive3.toString,
+          item.toive4.toString,
+          item.toive5.toString,
+          item.toive6.toString,
+          item.toive7.toString
+        )
+      } else {
+        List()
+      })
       rowData.zipWithIndex.foreach { case (value, index) =>
         val cell = dataRow.createCell(index)
         cell.setCellStyle(bodyTextCellStyle)

@@ -62,7 +62,8 @@ class HakeneetHyvaksytytVastaanottaneetService(
     ExcelWriter.writeHakeneetHyvaksytytVastaanottaneetRaportti(
       asiointikieli,
       translations,
-      queryResult.toList
+      queryResult.toList,
+      naytaHakutoiveet
     )
   }
 

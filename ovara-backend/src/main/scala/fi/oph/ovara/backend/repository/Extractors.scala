@@ -169,7 +169,14 @@ trait Extractors extends GenericOvaraJsonFormats {
       lasna = r.nextInt(),
       poissa = r.nextInt(),
       ilmYht = r.nextInt(),
-      aloituspaikat = r.nextInt()
+      aloituspaikat = r.nextInt(),
+      toive1 = r.nextInt(),
+      toive2 = r.nextInt(),
+      toive3 = r.nextInt(), 
+      toive4 = r.nextInt(), 
+      toive5 = r.nextInt(), 
+      toive6 = r.nextInt(), 
+      toive7 = r.nextInt(),
     )
   )
 }

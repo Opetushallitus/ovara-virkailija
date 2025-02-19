@@ -12,7 +12,14 @@ case class HakeneetHyvaksytytVastaanottaneet(
                                                     lasna: Int,
                                                     poissa: Int,
                                                     ilmYht: Int,
-                                                    aloituspaikat: Int) {
+                                                    aloituspaikat: Int,
+                                                    toive1: Int,
+                                                    toive2: Int,
+                                                    toive3: Int,
+                                                    toive4: Int,
+                                                    toive5: Int,
+                                                    toive6: Int,
+                                                    toive7: Int) {
 }
 
 case class HakeneetHyvaksytytVastaanottaneetSummary(yhteensa: Int,
