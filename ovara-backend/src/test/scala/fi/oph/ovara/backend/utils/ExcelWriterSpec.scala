@@ -1511,10 +1511,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   "createHakijatHeadingRow" should "create heading row with translated column names or translation keys for hakijat raportti" in {
-    val hakijatQueryResult: Map[String, Seq[Hakija]] = Map()
-    val wb: XSSFWorkbook                             = new XSSFWorkbook()
-    val sheet: XSSFSheet                             = wb.createSheet()
-    val headingCellStyle: XSSFCellStyle              = wb.createCellStyle()
+    val hakijatQueryResult: Map[String, Seq[ToisenAsteenHakija]] = Map()
+    val wb: XSSFWorkbook                                         = new XSSFWorkbook()
+    val sheet: XSSFSheet                                         = wb.createSheet()
+    val headingCellStyle: XSSFCellStyle                          = wb.createCellStyle()
 
     val fieldNames: List[String] = classOf[HakijaWithCombinedNimi].getDeclaredFields.map(_.getName).toList
     ExcelWriter.createHakijaHeadingRow(

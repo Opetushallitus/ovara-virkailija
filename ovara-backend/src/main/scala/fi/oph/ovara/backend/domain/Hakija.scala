@@ -2,7 +2,7 @@ package fi.oph.ovara.backend.domain
 
 import java.time.LocalDate
 
-abstract class HakijaBase {
+abstract class Hakija {
   val kansalaisuus: Kielistetty
   val oppijanumero: String
   val hakemusOid: String
@@ -22,7 +22,7 @@ abstract class HakijaBase {
   val postitoimipaikka: String
 }
 
-case class Hakija(
+case class ToisenAsteenHakija(
     hakijanSukunimi: String,
     hakijanEtunimi: String,
     turvakielto: Option[Boolean],
@@ -53,7 +53,7 @@ case class Hakija(
     lahiosoite: String,
     postinumero: String,
     postitoimipaikka: String
-) extends HakijaBase
+) extends Hakija
 
 case class HakijaWithCombinedNimi(
     hakija: String,
@@ -85,10 +85,10 @@ case class HakijaWithCombinedNimi(
     lahiosoite: String,
     postinumero: String,
     postitoimipaikka: String
-) extends HakijaBase
+) extends Hakija
 
 object HakijaWithCombinedNimi {
-  def apply(hakija: Hakija): HakijaWithCombinedNimi = {
+  def apply(hakija: ToisenAsteenHakija): HakijaWithCombinedNimi = {
     new HakijaWithCombinedNimi(
       hakija = s"${hakija.hakijanSukunimi}, ${hakija.hakijanEtunimi}",
       turvakielto = hakija.turvakielto,
@@ -146,7 +146,7 @@ case class KkHakija(
     lahiosoite: String,
     postinumero: String,
     postitoimipaikka: String
-) extends HakijaBase
+) extends Hakija
 
 case class KkHakijaWithCombinedNimi(
     hakija: String,
@@ -170,7 +170,7 @@ case class KkHakijaWithCombinedNimi(
     lahiosoite: String,
     postinumero: String,
     postitoimipaikka: String
-) extends HakijaBase
+) extends Hakija
 
 object KkHakijaWithCombinedNimi {
   def apply(hakija: KkHakija): KkHakijaWithCombinedNimi = {
