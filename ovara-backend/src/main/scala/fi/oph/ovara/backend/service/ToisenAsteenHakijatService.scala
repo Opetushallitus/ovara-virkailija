@@ -77,7 +77,8 @@ class ToisenAsteenHakijatService(
     ExcelWriter.writeToisenAsteenHakijatRaportti(
       sortedListwithCombinedNimi,
       asiointikieli,
-      translations
+      translations,
+      "toinen aste"
     )
   }
 }
