@@ -3,12 +3,7 @@ package fi.oph.ovara.backend.raportointi
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.UserResponse
-import fi.oph.ovara.backend.service.{
-  CommonService,
-  HakijatService,
-  KoulutuksetToteutuksetHakukohteetService,
-  UserService
-}
+import fi.oph.ovara.backend.service.*
 import fi.oph.ovara.backend.utils.AuditLog
 import fi.oph.ovara.backend.utils.AuditOperation.KoulutuksetToteutuksetHakukohteet
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
@@ -30,6 +25,7 @@ class Controller(
     commonService: CommonService,
     koulutuksetToteutuksetHakukohteetService: KoulutuksetToteutuksetHakukohteetService,
     hakijatService: HakijatService,
+    kkHakijatService: KkHakijatService,
     userService: UserService,
     val auditLog: AuditLog = AuditLog
 ) {
@@ -270,6 +266,58 @@ class Controller(
       "soraAiempi"         -> maybeSoraAiempi,
       "markkinointilupa"   -> maybeMarkkinointilupa,
       "julkaisulupa"       -> maybeJulkaisulupa
+    ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
+
+    sendExcel(wb, response, request, "hakijat", raporttiParams)
+  }
+
+  @GetMapping(path = Array("kk-hakijat"))
+  def kk_hakijat(
+      @RequestParam("haku") haku: java.util.Collection[String],
+      @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
+      @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
+      @RequestParam("hakukohde", required = false) hakukohde: java.util.Collection[String],
+      @RequestParam("valintatieto", required = false) valintatieto: java.util.Collection[String],
+      @RequestParam("vastaanottotieto", required = false) vastaanottotieto: java.util.Collection[String],
+      @RequestParam("markkinointilupa", required = false) markkinointilupa: String,
+      request: HttpServletRequest,
+      response: HttpServletResponse
+  ): Unit = {
+    val hakuList             = if (haku == null) List() else haku.asScala.toList
+    val oppilaitosList       = if (oppilaitos == null) List() else oppilaitos.asScala.toList
+    val toimipisteList       = if (toimipiste == null) List() else toimipiste.asScala.toList
+    val hakukohdeList        = if (hakukohde == null) List() else hakukohde.asScala.toList
+    val valintatietoList     = if (valintatieto == null) List() else valintatieto.asScala.toList
+    val vastaanottotietoList = if (vastaanottotieto == null) List() else vastaanottotieto.asScala.toList
+
+    def strToOptionBoolean(str: String) = {
+      if (str == null) {
+        None
+      } else {
+        Option(str.toBoolean)
+      }
+    }
+
+    val maybeMarkkinointilupa = strToOptionBoolean(markkinointilupa)
+
+    val wb = kkHakijatService.get(
+      hakuList,
+      oppilaitosList,
+      toimipisteList,
+      hakukohdeList,
+      valintatietoList,
+      vastaanottotietoList,
+      maybeMarkkinointilupa
+    )
+
+    val raporttiParams = Map(
+      "haku"             -> Option(hakuList).filterNot(_.isEmpty),
+      "oppilaitos"       -> Option(oppilaitosList).filterNot(_.isEmpty),
+      "toimipiste"       -> Option(toimipisteList).filterNot(_.isEmpty),
+      "hakukohde"        -> Option(hakukohdeList).filterNot(_.isEmpty),
+      "valintatieto"     -> Option(vastaanottotietoList).filterNot(_.isEmpty),
+      "vastaanottotieto" -> Option(vastaanottotietoList).filterNot(_.isEmpty),
+      "markkinointilupa" -> maybeMarkkinointilupa
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
     sendExcel(wb, response, request, "hakijat", raporttiParams)

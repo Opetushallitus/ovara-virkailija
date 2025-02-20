@@ -75,7 +75,7 @@ export default function Hakijat() {
           <FormButtons
             disabled={isDisabled}
             downloadExcel={() =>
-              downloadExcel('hakijat', queryParamsStr, setIsLoading)
+              downloadExcel('kk-hakijat', queryParamsStr, setIsLoading)
             }
           />
         </FormBox>

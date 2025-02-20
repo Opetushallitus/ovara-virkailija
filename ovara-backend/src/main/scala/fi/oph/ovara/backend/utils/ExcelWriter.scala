@@ -352,9 +352,10 @@ object ExcelWriter {
   }
 
   def writeHakijatRaportti(
-      hakijat: Seq[HakijaWithCombinedNimi],
+      hakijat: Seq[HakijaWithCombinedNimi | KkHakijaWithCombinedNimi],
       asiointikieli: String,
-      translations: Map[String, String]
+      translations: Map[String, String],
+      id: String
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new excel from db results")
@@ -372,8 +373,10 @@ object ExcelWriter {
 
     var currentRowIndex = 0
 
-    val fieldNames: List[String] = classOf[HakijaWithCombinedNimi].getDeclaredFields.map(_.getName).toList
-    val fieldNamesWithIndex      = fieldNames.zipWithIndex
+    val c = if (id == "korkeakoulu") classOf[KkHakijaWithCombinedNimi] else classOf[HakijaWithCombinedNimi]
+
+    val fieldNames          = c.getDeclaredFields.map(_.getName).toList
+    val fieldNamesWithIndex = fieldNames.zipWithIndex
 
     currentRowIndex =
       createHakijaHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNames, headingCellStyle)
@@ -444,7 +447,8 @@ object ExcelWriter {
                 "soraTerveys",
                 "markkinointilupa",
                 "julkaisulupa",
-                "sahkoinenViestintaLupa"
+                "sahkoinenViestintaLupa",
+                "ensikertalainen"
               ).contains(fieldName) =>
             val translation =
               if (b) translations.getOrElse("raportti.kylla", "raportti.kylla")
