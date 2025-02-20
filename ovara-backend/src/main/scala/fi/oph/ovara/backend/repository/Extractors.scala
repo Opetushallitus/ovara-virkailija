@@ -12,7 +12,7 @@ trait Extractors extends GenericOvaraJsonFormats {
   private def extractArray(json: Option[String]): List[String] = {
     json.map(read[List[String]]).getOrElse(List())
   }
-  
+
   implicit val getHakuResult: GetResult[Haku] = GetResult(r =>
     Haku(
       haku_oid = r.nextString(),
@@ -94,6 +94,13 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   )
 
+  def getNextDateOption(r: PositionedResult) = {
+    r.nextDateOption() match {
+      case Some(date) => Some(date.toLocalDate)
+      case None       => None
+    }
+  }
+
   implicit val getHakijaResult: GetResult[Hakija] = GetResult(r =>
     Hakija(
       hakijanSukunimi = r.nextString(),
@@ -127,6 +134,33 @@ trait Extractors extends GenericOvaraJsonFormats {
       pohjakoulutus = extractKielistetty(r.nextStringOption()),
       markkinointilupa = r.nextBooleanOption(),
       julkaisulupa = r.nextBooleanOption(),
+      sahkoinenViestintaLupa = r.nextBooleanOption(),
+      lahiosoite = r.nextString(),
+      postinumero = r.nextString(),
+      postitoimipaikka = r.nextString()
+    )
+  )
+
+  implicit val getKkHakijaResult: GetResult[KkHakija] = GetResult(r =>
+    KkHakija(
+      hakijanSukunimi = r.nextString(),
+      hakijanEtunimi = r.nextString(),
+      hetu = r.nextStringOption(),
+      syntymaAika = getNextDateOption(r),
+      kansalaisuus = extractKielistetty(r.nextStringOption()),
+      oppijanumero = r.nextString(),
+      hakemusOid = r.nextString(),
+      toimipiste = extractKielistetty(r.nextStringOption()),
+      hakukohteenNimi = extractKielistetty(r.nextStringOption()),
+      hakukohdeOid = r.nextString(),
+      prioriteetti = r.nextInt(),
+      valintatieto = r.nextString(),
+      vastaanottotieto = r.nextStringOption(),
+      viimVastaanottopaiva = getNextDateOption(r),
+      ensikertalainen = r.nextBooleanOption(),
+      ilmoittautuminen = r.nextStringOption(),
+      julkaisulupa = r.nextBooleanOption(),
+      markkinointilupa = r.nextBooleanOption(),
       sahkoinenViestintaLupa = r.nextBooleanOption(),
       lahiosoite = r.nextString(),
       postinumero = r.nextString(),
