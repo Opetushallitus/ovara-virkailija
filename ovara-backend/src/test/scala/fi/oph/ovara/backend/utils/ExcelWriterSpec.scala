@@ -1517,7 +1517,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val headingCellStyle: XSSFCellStyle              = wb.createCellStyle()
 
     val fieldNames: List[String] = classOf[HakijaWithCombinedNimi].getDeclaredFields.map(_.getName).toList
-    ExcelWriter.HeadingRow(
+    ExcelWriter.createHeadingRow(
       sheet,
       userLng,
       translations,
