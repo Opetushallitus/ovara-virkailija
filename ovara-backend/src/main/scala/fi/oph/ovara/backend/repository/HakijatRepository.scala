@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.domain.Hakija
+import fi.oph.ovara.backend.domain.ToisenAsteenHakija
 import fi.oph.ovara.backend.utils.RepositoryUtils
 import org.springframework.stereotype.Component
 import slick.dbio.Effect
@@ -25,7 +25,7 @@ class HakijatRepository extends Extractors {
       soraAiempi: Option[Boolean],
       markkinointilupa: Option[Boolean],
       julkaisulupa: Option[Boolean]
-  ): SqlStreamingAction[Vector[Hakija], Hakija, Effect] = {
+  ): SqlStreamingAction[Vector[ToisenAsteenHakija], ToisenAsteenHakija, Effect] = {
     val hakuStr                     = RepositoryUtils.makeListOfValuesQueryStr(haut)
     val raportointiorganisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusOrganisaatiot)
 
@@ -114,6 +114,6 @@ class HakijatRepository extends Extractors {
           #$optionalMarkkinointilupaQuery
           #$optionalJulkaisulupaQuery
           #$optionalHarkinnanvaraisuusQuery
-          """.as[Hakija]
+          """.as[ToisenAsteenHakija]
   }
 }
