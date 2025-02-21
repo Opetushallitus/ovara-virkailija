@@ -22,26 +22,8 @@ class KkHakijatRepository extends Extractors {
     val hakuStr                     = RepositoryUtils.makeListOfValuesQueryStr(haut)
     val raportointiorganisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusOrganisaatiot)
 
-    def mapVastaanottotiedotToDbValues(vastaanottotiedot: List[String]): List[String] = {
-      vastaanottotiedot.flatMap {
-        case s: String if s == "PERUNUT"        => s :: List("EI_VASTAANOTETTU_MAARA_AIKANA")
-        case s: String if s == "VASTAANOTTANUT" => List(s"${s}_SITOVASTI")
-        case s: String                          => List(s)
-        case null                               => List()
-      }
-    }
-
-    def mapValintatiedotToDbValues(valintatiedot: List[String]): List[String] = {
-      valintatiedot.flatMap {
-        case s: String if s == "HYVAKSYTTY" =>
-          s :: List("HYVAKSYTTY_HARKINNANVARAISESTI", "VARASIJALTA_HYVAKSYTTY", "PERUNUT", "PERUUTETTU")
-        case s: String => List(s)
-        case null      => List()
-      }
-    }
-
-    val vastaanottotiedotAsDbValues = mapVastaanottotiedotToDbValues(vastaanottotieto)
-    val valintatiedotAsDbValues     = mapValintatiedotToDbValues(valintatieto)
+    val vastaanottotiedotAsDbValues = RepositoryUtils.mapVastaanottotiedotToDbValues(vastaanottotieto)
+    val valintatiedotAsDbValues     = RepositoryUtils.mapValintatiedotToDbValues(valintatieto)
     val optionalHakukohdeQuery =
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hk.hakukohde_oid", hakukohteet)
     val optionalValintatietoQuery =
