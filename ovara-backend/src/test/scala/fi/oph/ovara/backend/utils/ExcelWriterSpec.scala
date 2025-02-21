@@ -1910,7 +1910,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(5) == null)
   }
 
-  "writeKkHakijatRaportti" should "return excel with three result rows: two for one hakija and one for another hakija" in {
+  it should "return excel with two result rows for kk-hakijat" in {
     val kkHakijatResult =
       Vector(
         KkHakijaWithCombinedNimi(
@@ -1933,6 +1933,29 @@ class ExcelWriterSpec extends AnyFlatSpec {
           julkaisulupa = Some(true),
           sahkoinenViestintaLupa = Some(true),
           lahiosoite = "Rämsöönranta 368",
+          postinumero = "00100",
+          postitoimipaikka = "HELSINKI"
+        ),
+        KkHakijaWithCombinedNimi(
+          hakija = "Lehto-Testi, Vikke Testi",
+          hetu = Some("04041990-345K"),
+          syntymaAika = Some(LocalDate.parse("1990-04-04")),
+          kansalaisuus = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+          oppijanumero = "1.2.246.562.24.18441866015",
+          hakemusOid = "1.2.246.562.11.00000000000002126102",
+          toimipiste = Map(En -> "Toimipiste 2 en", Fi -> "Toimipiste 2 fi", Sv -> "Toimipiste 2 sv"),
+          hakukohteenNimi = Map(En -> "Hakukohde 2 EN", Fi -> "Hakukohde 2", Sv -> "Hakukohde 2 SV"),
+          hakukohdeOid = "1.2.246.562.20.00000000000000038597",
+          prioriteetti = 1,
+          valintatieto = "HYLATTY",
+          vastaanottotieto = None,
+          viimVastaanottopaiva = Some(LocalDate.parse("2024-06-26")),
+          ensikertalainen = Some(false),
+          ilmoittautuminen = None,
+          markkinointilupa = Some(true),
+          julkaisulupa = Some(true),
+          sahkoinenViestintaLupa = Some(true),
+          lahiosoite = "Laholanaukio 834",
           postinumero = "00100",
           postitoimipaikka = "HELSINKI"
         )
@@ -1971,7 +1994,29 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1).getCell(19).getStringCellValue == "00100")
     assert(wb.getSheetAt(0).getRow(1).getCell(20).getStringCellValue == "HELSINKI")
 
-    assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 2)
-    assert(wb.getSheetAt(0).getRow(3) == null)
+    assert(wb.getSheetAt(0).getRow(2).getCell(0).getStringCellValue == "Lehto-Testi, Vikke Testi")
+    assert(wb.getSheetAt(0).getRow(2).getCell(1).getStringCellValue == "04041990-345K")
+    assert(wb.getSheetAt(0).getRow(2).getCell(2).getStringCellValue == "04.04.1990")
+    assert(wb.getSheetAt(0).getRow(2).getCell(3).getStringCellValue == "Finland")
+    assert(wb.getSheetAt(0).getRow(2).getCell(4).getStringCellValue == "1.2.246.562.24.18441866015")
+    assert(wb.getSheetAt(0).getRow(2).getCell(5).getStringCellValue == "1.2.246.562.11.00000000000002126102")
+    assert(wb.getSheetAt(0).getRow(2).getCell(6).getStringCellValue == "Toimipiste 2 sv")
+    assert(wb.getSheetAt(0).getRow(2).getCell(7).getStringCellValue == "Hakukohde 2 SV")
+    assert(wb.getSheetAt(0).getRow(2).getCell(8).getStringCellValue == "1.2.246.562.20.00000000000000038597")
+    assert(wb.getSheetAt(0).getRow(2).getCell(9).getNumericCellValue == 1)
+    assert(wb.getSheetAt(0).getRow(2).getCell(10).getStringCellValue == "Hylatty SV")
+    assert(wb.getSheetAt(0).getRow(2).getCell(11).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(12).getStringCellValue == "26.06.2024")
+    assert(wb.getSheetAt(0).getRow(2).getCell(13).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(2).getCell(14).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(15).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(2).getCell(16).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(2).getCell(17).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(2).getCell(18).getStringCellValue == "Laholanaukio 834")
+    assert(wb.getSheetAt(0).getRow(2).getCell(19).getStringCellValue == "00100")
+    assert(wb.getSheetAt(0).getRow(2).getCell(20).getStringCellValue == "HELSINKI")
+
+    assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 3)
+    assert(wb.getSheetAt(0).getRow(4) == null)
   }
 }
