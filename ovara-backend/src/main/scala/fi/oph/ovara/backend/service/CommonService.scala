@@ -2,7 +2,12 @@ package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.domain.{Haku, Hakukohde, Koodi, Organisaatio, OrganisaatioHierarkia}
 import fi.oph.ovara.backend.repository.{CommonRepository, OvaraDatabase}
-import fi.oph.ovara.backend.utils.Constants.{KOULUTUSTOIMIJARAPORTTI, OPH_PAAKAYTTAJA_OID, OPPILAITOSRAPORTTI, TOIMIPISTERAPORTTI}
+import fi.oph.ovara.backend.utils.Constants.{
+  KOULUTUSTOIMIJARAPORTTI,
+  OPH_PAAKAYTTAJA_OID,
+  OPPILAITOSRAPORTTI,
+  TOIMIPISTERAPORTTI
+}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, OrganisaatioUtils}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -38,7 +43,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       Vector()
     }
   }
-  
+
   def getPohjakoulutukset: Seq[Koodi] = {
     db.run(commonRepository.selectToisenAsteenPohjakoulutukset, "selectToisenAsteenPohjakoulutukset")
   }
