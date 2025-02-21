@@ -44,7 +44,6 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
       mockAuditLog
     )
 
-    val alkamiskausi                        = List("2025_syksy").asJava
     val haku                                = List("1.2.246.562.29.00000000000000049925").asJava
     val koulutustoimija                     = "koulutustoimija1"
     val oppilaitos                          = List("oppilaitos1").asJava
@@ -55,7 +54,6 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
     val valintakoe                          = "true"
 
     controller.koulutukset_toteutukset_hakukohteet(
-      alkamiskausi,
       haku,
       koulutustoimija,
       oppilaitos,
@@ -89,7 +87,6 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
       "haku"            -> List("1.2.246.562.29.00000000000000049925"),
       "koulutuksenTila" -> "julkaistu",
       "oppilaitos"      -> List("oppilaitos1"),
-      "alkamiskausi"    -> List("2025_syksy"),
       "hakukohteenTila" -> "julkaistu"
     )
 

@@ -39,6 +39,14 @@ class Controller(
   mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
   mapper.configure(SerializationFeature.INDENT_OUTPUT, true)
 
+  private def strToOptionBoolean(str: String) = {
+    if (str == null) {
+      None
+    } else {
+      Option(str.toBoolean)
+    }
+  }
+
   @GetMapping(path = Array("healthcheck"))
   def healthcheck = "Ovara application is running!"
 
@@ -139,7 +147,6 @@ class Controller(
 
   @GetMapping(path = Array("koulutukset-toteutukset-hakukohteet"))
   def koulutukset_toteutukset_hakukohteet(
-      @RequestParam("alkamiskausi") alkamiskausi: java.util.Collection[String],
       @RequestParam("haku") haku: java.util.Collection[String],
       @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
       @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
@@ -162,7 +169,6 @@ class Controller(
     }
     val oppilaitosList   = if (oppilaitos == null) List() else oppilaitos.asScala.toList
     val toimipisteList   = if (toimipiste == null) List() else toimipiste.asScala.toList
-    val alkamiskausiList = if (alkamiskausi == null) List() else alkamiskausi.asScala.toList
     val hakuList         = if (haku == null) List() else haku.asScala.toList
 
     val wb = koulutuksetToteutuksetHakukohteetService.get(
@@ -177,7 +183,6 @@ class Controller(
     )
 
     val raporttiParams = Map(
-      "alkamiskausi"    -> Option(alkamiskausiList).filterNot(_.isEmpty),
       "haku"            -> Option(hakuList).filterNot(_.isEmpty),
       "koulutustoimija" -> maybeKoulutustoimija,
       "oppilaitos"      -> Option(oppilaitosList).filterNot(_.isEmpty),
@@ -218,14 +223,6 @@ class Controller(
     val valintatietoList       = if (valintatieto == null) List() else valintatieto.asScala.toList
     val vastaanottotietoList   = if (vastaanottotieto == null) List() else vastaanottotieto.asScala.toList
     val harkinnanvaraisuusList = if (harkinnanvaraisuus == null) List() else harkinnanvaraisuus.asScala.toList
-
-    def strToOptionBoolean(str: String) = {
-      if (str == null) {
-        None
-      } else {
-        Option(str.toBoolean)
-      }
-    }
 
     val maybeKaksoistutkintoKiinnostaa   = strToOptionBoolean(kaksoistutkinto)
     val maybeUrheilijatutkintoKiinnostaa = strToOptionBoolean(urheilijatutkinto)
@@ -289,14 +286,6 @@ class Controller(
     val hakukohdeList        = if (hakukohde == null) List() else hakukohde.asScala.toList
     val valintatietoList     = if (valintatieto == null) List() else valintatieto.asScala.toList
     val vastaanottotietoList = if (vastaanottotieto == null) List() else vastaanottotieto.asScala.toList
-
-    def strToOptionBoolean(str: String) = {
-      if (str == null) {
-        None
-      } else {
-        Option(str.toBoolean)
-      }
-    }
 
     val maybeMarkkinointilupa = strToOptionBoolean(markkinointilupa)
 
