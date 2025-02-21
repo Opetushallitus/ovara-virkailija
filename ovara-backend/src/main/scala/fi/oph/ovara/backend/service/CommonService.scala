@@ -43,7 +43,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       Vector()
     }
   }
-  
+
   def getPohjakoulutukset: Seq[Koodi] = {
     db.run(commonRepository.selectToisenAsteenPohjakoulutukset, "selectToisenAsteenPohjakoulutukset")
   }
