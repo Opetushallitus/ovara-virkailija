@@ -51,35 +51,6 @@ object RepositoryUtils {
     }
   }
 
-  //TODO: Jos tätä tarvitaan queryn muodostukseen, otettava huomioon kolmas param eiAlkamiskautta
-  def makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery(
-      alkamiskaudetAndHenkkohtSuunnitelma: (List[(Int, String)], Boolean, Boolean)
-  ): String = {
-    val alkamiskaudet       = alkamiskaudetAndHenkkohtSuunnitelma._1
-    val henkkohtSuunnitelma = alkamiskaudetAndHenkkohtSuunnitelma._2
-
-    if (alkamiskaudet.isEmpty && !henkkohtSuunnitelma) {
-      ""
-    } else {
-      val henkkohtSuunnitelmaQueryStr = if (henkkohtSuunnitelma) {
-        makeOptionalHenkilokohtainenSuunnitelmaQuery(henkkohtSuunnitelma)
-      } else {
-        ""
-      }
-
-      val andOrOrQueryStr = if (henkkohtSuunnitelma && alkamiskaudet.isEmpty) {
-        s"$henkkohtSuunnitelmaQueryStr"
-      } else if (henkkohtSuunnitelma && alkamiskaudet.nonEmpty) {
-        s" OR $henkkohtSuunnitelmaQueryStr"
-      } else {
-        ""
-      }
-
-      s"AND (${makeAlkamiskaudetQueryStr(List("t", "hk"), alkamiskaudetAndHenkkohtSuunnitelma._1)}" +
-        s"$andOrOrQueryStr)"
-    }
-  }
-
   def makeAlkamiskaudetQueryStr(tableNames: List[String], alkamiskaudet: List[(Int, String)]): String = {
     def hasMoreThanOne(alkamiskaudet: List[(Int, String)]) = {
       alkamiskaudet.size > 1

@@ -158,42 +158,6 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     )
   }
 
-  "makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery" should "return empty query str when alkamiskaudet is empty and henkilokohtainenSuunnitelma and eiAlkamiskautta are false" in {
-    assert(
-      RepositoryUtils.makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery((List(), false, false)) == ""
-    )
-  }
-
-  it should "return AND query string for alkamiskaudet when henkilokohtainenSuunnitelma and eiAlkamiskautta are false" in {
-    assert(
-      RepositoryUtils.makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery(
-        (List((2023, "kausi_s"), (2021, "kausi_k")), false, false)
-      ) ==
-        "AND (((t.koulutuksen_alkamisvuosi = 2023 AND t.koulutuksen_alkamiskausi_koodiuri LIKE 'kausi_s%') " +
-        "OR (hk.koulutuksen_alkamisvuosi = 2023 AND hk.koulutuksen_alkamiskausi_koodiuri LIKE 'kausi_s%')) " +
-        "OR ((t.koulutuksen_alkamisvuosi = 2021 AND t.koulutuksen_alkamiskausi_koodiuri LIKE 'kausi_k%') " +
-        "OR (hk.koulutuksen_alkamisvuosi = 2021 AND hk.koulutuksen_alkamiskausi_koodiuri LIKE 'kausi_k%')))"
-    )
-  }
-
-  it should "return AND query string for alkamiskaudet with OR query for henkilokohtainen suunnitelma when henkilokohtainenSuunnitelma is true" in {
-    assert(
-      RepositoryUtils.makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery((List((2021, "kausi_k")), true, false)) ==
-        "AND (((t.koulutuksen_alkamisvuosi = 2021 AND t.koulutuksen_alkamiskausi_koodiuri LIKE 'kausi_k%') " +
-        "OR (hk.koulutuksen_alkamisvuosi = 2021 AND hk.koulutuksen_alkamiskausi_koodiuri LIKE 'kausi_k%')) " +
-        "OR hk.koulutuksen_alkamiskausi_tyyppi = 'henkilokohtainen suunnitelma')"
-    )
-  }
-
-  it should "return AND query string for henkilokohtainen suunnitelma when henkilokohtainenSuunnitelma is true and alkamiskaudet is empty" in {
-    assert(
-      RepositoryUtils.makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery((List(), true, false)) ==
-        "AND (hk.koulutuksen_alkamiskausi_tyyppi = 'henkilokohtainen suunnitelma')"
-    )
-  }
-
-  //TODO: Testi eiAlkamiskautta
-
   "makeHakuTableAlkamiskausiQueryStr" should "return full query string for one alkamiskausi" in {
     assert(
       RepositoryUtils.makeHakuTableAlkamiskausiQueryStr(
