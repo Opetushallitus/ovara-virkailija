@@ -160,4 +160,20 @@ object RepositoryUtils {
       }
     })
   }
+
+  def mapVastaanottotiedotToDbValues(vastaanottotiedot: List[String]): List[String] = {
+    vastaanottotiedot.flatMap {
+      case s: String if s == "PERUNUT" => s :: List("EI_VASTAANOTETTU_MAARA_AIKANA")
+      case s: String if s == "VASTAANOTTANUT" => List(s"${s}_SITOVASTI")
+      case s: String => List(s)
+    }
+  }
+
+  def mapValintatiedotToDbValues(valintatiedot: List[String]): List[String] = {
+    valintatiedot.flatMap {
+      case s: String if s == "HYVAKSYTTY" =>
+        s :: List("HYVAKSYTTY_HARKINNANVARAISESTI", "VARASIJALTA_HYVAKSYTTY", "PERUNUT", "PERUUTETTU")
+      case s: String => List(s)
+    }
+  }
 }
