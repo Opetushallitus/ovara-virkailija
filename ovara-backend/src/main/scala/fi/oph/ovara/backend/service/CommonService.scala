@@ -9,7 +9,12 @@ import fi.oph.ovara.backend.utils.Constants.{
   TOIMIPISTERAPORTTI
 }
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, OrganisaatioUtils}
+import org.springframework.cache.annotation.{CacheEvict, Cacheable}
+import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.CacheManager
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
@@ -17,8 +22,20 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
   @Autowired
   val db: OvaraDatabase = null
 
+  @Autowired
+  val cacheManager: CacheManager = null
+
+  val LOG: Logger = LoggerFactory.getLogger(classOf[LokalisointiService])
+
+  @Cacheable(value = Array("alkamisvuodet"), key = "#root.methodName")
   def getAlkamisvuodet: Vector[String] = {
     db.run(commonRepository.selectDistinctAlkamisvuodet(), "selectDistinctAlkamisvuodet")
+  }
+
+  @CacheEvict(value = Array("alkamisvuodet"), allEntries = true)
+  @Scheduled(fixedRateString = "${caching.spring.alkamisvuodetTTL}")
+  def emptyAlkamisvuodetCache(): Unit = {
+    LOG.info("Emptying alkamisvuodet cache")
   }
 
   def getHaut(alkamiskaudet: List[String], haunTyyppi: String): Vector[Haku] = {
