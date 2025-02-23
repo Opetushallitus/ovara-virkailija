@@ -355,7 +355,8 @@ object ExcelWriter {
       hakijat: Seq[HakijaWithCombinedNimi | KkHakijaWithCombinedNimi],
       asiointikieli: String,
       translations: Map[String, String],
-      id: String
+      id: String,
+      naytaYoArvosanat: Option[Boolean] = None
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new excel from db results")
@@ -381,6 +382,7 @@ object ExcelWriter {
     currentRowIndex =
       createHakijaHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNames, headingCellStyle)
 
+    // TODO: päätellään täällä näytetäänkö yo, hetu, osoite raporttityypin ja
     hakijat.foreach(hakutoive => {
       val hakijanHakutoiveRow = sheet.createRow(currentRowIndex)
       currentRowIndex = currentRowIndex + 1
