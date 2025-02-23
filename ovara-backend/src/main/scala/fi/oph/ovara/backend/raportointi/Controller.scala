@@ -197,9 +197,9 @@ class Controller(
     } else {
       Option(valintakoe.toBoolean)
     }
-    val oppilaitosList   = if (oppilaitos == null) List() else oppilaitos.asScala.toList
-    val toimipisteList   = if (toimipiste == null) List() else toimipiste.asScala.toList
-    val hakuList         = if (haku == null) List() else haku.asScala.toList
+    val oppilaitosList = if (oppilaitos == null) List() else oppilaitos.asScala.toList
+    val toimipisteList = if (toimipiste == null) List() else toimipiste.asScala.toList
+    val hakuList       = if (haku == null) List() else haku.asScala.toList
 
     val wb = koulutuksetToteutuksetHakukohteetService.get(
       hakuList,
@@ -307,6 +307,7 @@ class Controller(
       @RequestParam("valintatieto", required = false) valintatieto: java.util.Collection[String],
       @RequestParam("vastaanottotieto", required = false) vastaanottotieto: java.util.Collection[String],
       @RequestParam("markkinointilupa", required = false) markkinointilupa: String,
+      @RequestParam("nayta-yo-arvosanat", required = true) naytaYoArvosanat: String,
       request: HttpServletRequest,
       response: HttpServletResponse
   ): Unit = {
@@ -326,7 +327,8 @@ class Controller(
       hakukohdeList,
       valintatietoList,
       vastaanottotietoList,
-      maybeMarkkinointilupa
+      maybeMarkkinointilupa,
+      naytaYoArvosanat.toBoolean,
     )
 
     val raporttiParams = Map(
@@ -336,7 +338,8 @@ class Controller(
       "hakukohde"        -> Option(hakukohdeList).filterNot(_.isEmpty),
       "valintatieto"     -> Option(vastaanottotietoList).filterNot(_.isEmpty),
       "vastaanottotieto" -> Option(vastaanottotietoList).filterNot(_.isEmpty),
-      "markkinointilupa" -> maybeMarkkinointilupa
+      "markkinointilupa" -> maybeMarkkinointilupa,
+      "naytaYoArvosanat" -> naytaYoArvosanat,
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
     sendExcel(wb, response, request, "hakijat", raporttiParams)

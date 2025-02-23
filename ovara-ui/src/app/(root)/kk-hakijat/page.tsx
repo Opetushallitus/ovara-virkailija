@@ -25,6 +25,8 @@ import { useState } from 'react';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { downloadExcel } from '@/app/components/form/utils';
 import { Valintatieto } from '@/app/components/form/valintatieto';
+import { NaytaYoArvosanat } from '@/app/components/form/nayta';
+import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
 
 export default function Hakijat() {
   const { t } = useTranslate();
@@ -38,10 +40,17 @@ export default function Hakijat() {
   const oppilaitos = queryParams.get('oppilaitos');
   const toimipiste = queryParams.get('toimipiste');
 
-  const isDisabled = !(alkamiskausi && haku && (oppilaitos || toimipiste));
+  const { selectedYoArvosanat } = useHakijatSearchParams();
 
-  const [isLoading, setIsLoading] = useState(false);
   const queryParamsStr = useQueryParams().toString();
+  const queryParamsWithDefaults = new URLSearchParams(queryParamsStr);
+  queryParamsWithDefaults.set(
+    'nayta-yo-arvosanat',
+    selectedYoArvosanat.toString(),
+  );
+
+  const isDisabled = !(alkamiskausi && haku && (oppilaitos || toimipiste));
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <MainContainer>
@@ -72,10 +81,15 @@ export default function Hakijat() {
           <Valintatieto t={t} />
           <Vastaanottotieto t={t} />
           <Markkinointilupa t={t} />
+          <NaytaYoArvosanat t={t} />
           <FormButtons
             disabled={isDisabled}
             downloadExcel={() =>
-              downloadExcel('kk-hakijat', queryParamsStr, setIsLoading)
+              downloadExcel(
+                'kk-hakijat',
+                queryParamsWithDefaults.toString(),
+                setIsLoading,
+              )
             }
           />
         </FormBox>

@@ -28,14 +28,15 @@ class KkHakijatService(
       hakukohteet: List[String],
       valintatieto: List[String],
       vastaanottotieto: List[String],
-      markkinointilupa: Option[Boolean]
+      markkinointilupa: Option[Boolean],
+      naytaYoArvosanat: Boolean,
   ): XSSFWorkbook = {
     val user          = userService.getEnrichedUserDetails
     val asiointikieli = user.asiointikieli.getOrElse("fi")
 
     val translations = lokalisointiService.getOvaraTranslations(asiointikieli)
 
-    val authorities = user.authorities
+    val authorities               = user.authorities
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getOrganisaatiot(authorities)
 
     val orgOidsForQuery = commonService.getAllowedOrgsFromOrgSelection(
@@ -52,7 +53,8 @@ class KkHakijatService(
       hakukohteet = hakukohteet,
       valintatieto = valintatieto,
       vastaanottotieto = vastaanottotieto,
-      markkinointilupa = markkinointilupa
+      markkinointilupa = markkinointilupa,
+      naytaYoArvosanat = naytaYoArvosanat
     )
 
     val queryResult = db.run(query, "hakijatRepository.selectWithParams")

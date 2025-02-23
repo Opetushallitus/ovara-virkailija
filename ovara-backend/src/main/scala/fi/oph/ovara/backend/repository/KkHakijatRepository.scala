@@ -17,7 +17,8 @@ class KkHakijatRepository extends Extractors {
       hakukohteet: List[String],
       valintatieto: List[String],
       vastaanottotieto: List[String],
-      markkinointilupa: Option[Boolean]
+      markkinointilupa: Option[Boolean],
+      naytaYoArvosanat: Boolean
   ): SqlStreamingAction[Vector[KkHakija], KkHakija, Effect] = {
     val hakuStr                     = RepositoryUtils.makeListOfValuesQueryStr(haut)
     val raportointiorganisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusOrganisaatiot)
@@ -37,6 +38,7 @@ class KkHakijatRepository extends Extractors {
     val optionalMarkkinointilupaQuery =
       RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "hlo.koulutusmarkkinointilupa", markkinointilupa)
 
+    //TODO: palautetaan yo-arvosanat
     sql"""SELECT hlo.sukunimi, hlo.etunimet, hlo.hetu, hlo.syntymaaika,
                  hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid, hk.toimipiste_nimi,
                  hk.hakukohde_nimi, hk.hakukohde_oid, ht.hakutoivenumero,
