@@ -31,7 +31,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getOrganisaatiot(authorities)
 
     val allowedOrgOidsFromSelection =
-      getAllowedOrgsFromOrgSelection(kayttooikeusOrganisaatiot, oppilaitokset, toimipisteet)
+      getAllowedOrgOidsFromOrgSelection(kayttooikeusOrganisaatiot, oppilaitokset, toimipisteet)
 
     if (allowedOrgOidsFromSelection.nonEmpty) {
       db.run(
@@ -219,16 +219,19 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     }
   }
 
-  def getAllowedOrgsFromOrgSelection(
+  def getAllowedOrgOidsFromOrgSelection(
       kayttooikeusOrganisaatioOids: List[String],
       oppilaitosOids: List[String],
-      toimipisteOids: List[String]
+      toimipisteOids: List[String],
+      koulutustoimijaOid: Option[String] = None,
   ): List[String] = {
     val hierarkiat =
       if (toimipisteOids.nonEmpty) {
         getToimipistehierarkiat(toimipisteOids)
       } else if (oppilaitosOids.nonEmpty) {
         getOppilaitoshierarkiat(oppilaitosOids)
+      } else if (koulutustoimijaOid.isDefined) {
+        getKoulutustoimijahierarkia(List(koulutustoimijaOid.get))  
       } else {
         List()
       }

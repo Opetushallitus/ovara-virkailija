@@ -558,8 +558,29 @@ object ExcelWriter {
     // yhteensä-rivi
     val summaryRow = sheet.createRow(currentRowIndex)
     val summaryData = List(
-      "Yhteensä", data.map(_.hakijat).sum.toString
-    )
+      "Yhteensä",
+      data.map(_.hakijat).sum.toString,
+      data.map(_.ensisijaisia).sum.toString,
+      data.map(_.varasija).sum.toString,
+      data.map(_.hyvaksytyt).sum.toString,
+      data.map(_.vastaanottaneet).sum.toString,
+      data.map(_.lasna).sum.toString,
+      data.map(_.poissa).sum.toString,
+      data.map(_.ilmYht).sum.toString,
+      data.map(_.aloituspaikat).sum.toString
+    ) ++ (if (naytaHakutoiveet) {
+      List(
+        data.map(_.toive1).sum.toString,
+        data.map(_.toive2).sum.toString,
+        data.map(_.toive3).sum.toString,
+        data.map(_.toive4).sum.toString,
+        data.map(_.toive5).sum.toString,
+        data.map(_.toive6).sum.toString,
+        data.map(_.toive7).sum.toString
+      )
+    } else {
+      List()
+    })
 
     summaryData.zipWithIndex.foreach { case (value, index) =>
       val cell = summaryRow.createCell(index)

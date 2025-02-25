@@ -41,10 +41,11 @@ class HakeneetHyvaksytytVastaanottaneetService(
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getOrganisaatiot(authorities)
     val translations = lokalisointiService.getOvaraTranslations(asiointikieli)
 
-    val orgOidsForQuery = commonService.getAllowedOrgsFromOrgSelection(
+    val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
       toimipisteOids = toimipisteet,
-      oppilaitosOids = oppilaitokset
+      oppilaitosOids = oppilaitokset,
+      koulutustoimijaOid = koulutustoimija
     )
 
     val query = hakeneetHyvaksytytVastaanottaneetRepository.selectWithParams(
