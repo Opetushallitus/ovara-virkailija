@@ -20,6 +20,20 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   )
 
+  implicit val getKoodiResult: GetResult[Koodi] = GetResult(r =>
+    Koodi(
+      koodiarvo = r.nextString(),
+      koodinimi = extractKielistetty(r.nextStringOption())
+    )
+  )
+
+  implicit val getHakukohdeResult: GetResult[Hakukohde] = GetResult(r =>
+    Hakukohde(
+      hakukohde_oid = r.nextString(),
+      hakukohde_nimi = extractKielistetty(r.nextStringOption())
+    )
+  )
+
   implicit val getOrganisaatioResult: GetResult[Organisaatio] = GetResult(r =>
     Organisaatio(
       organisaatio_oid = r.nextString(),
@@ -37,7 +51,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       )
 
     val parentOid = r.nextString()
-    val childOid = r.nextString()
+    val childOid  = r.nextString()
 
     OrganisaatioParentChild(
       parent_oid = parentOid,
@@ -77,6 +91,46 @@ trait Extractors extends GenericOvaraJsonFormats {
       tila = r.nextString(),
       parent_oids = extractArray(r.nextStringOption()),
       children = r.nextStringOption().map(read[List[OrganisaatioHierarkia]]).getOrElse(List())
+    )
+  )
+
+  implicit val getHakijaResult: GetResult[Hakija] = GetResult(r =>
+    Hakija(
+      hakijanSukunimi = r.nextString(),
+      hakijanEtunimi = r.nextString(),
+      turvakielto = r.nextBooleanOption(),
+      kansalaisuus = extractKielistetty(r.nextStringOption()),
+      oppijanumero = r.nextString(),
+      hakemusOid = r.nextString(),
+      oppilaitos = extractKielistetty(r.nextStringOption()),
+      toimipiste = extractKielistetty(r.nextStringOption()),
+      hakukohteenNimi = extractKielistetty(r.nextStringOption()),
+      hakukohdeOid = r.nextString(),
+      prioriteetti = r.nextInt(),
+      kaksoistutkintoKiinnostaa = r.nextBooleanOption(),
+      urheilijatutkintoKiinnostaa = r.nextBooleanOption(),
+      valintatieto = r.nextString(),
+      varasija = r.nextStringOption(),
+      kokonaispisteet = r.nextStringOption(),
+      hylkTaiPerSyy = extractKielistetty(r.nextStringOption()),
+      vastaanottotieto = r.nextStringOption(),
+      viimVastaanottopaiva = {
+        r.nextDateOption() match {
+          case Some(date) => Some(date.toLocalDate)
+          case None       => None
+        }
+      },
+      ilmoittautuminen = r.nextStringOption(),
+      harkinnanvaraisuus = r.nextStringOption(),
+      soraAiempi = r.nextBooleanOption(),
+      soraTerveys = r.nextBooleanOption(),
+      pohjakoulutus = extractKielistetty(r.nextStringOption()),
+      markkinointilupa = r.nextBooleanOption(),
+      julkaisulupa = r.nextBooleanOption(),
+      sahkoinenViestintaLupa = r.nextBooleanOption(),
+      lahiosoite = r.nextString(),
+      postinumero = r.nextString(),
+      postitoimipaikka = r.nextString()
     )
   )
 }

@@ -35,5 +35,6 @@ build/
 .mise.toml
 
 src/main/resources/oph-configuration/application-dev.properties
+src/main/resources/localhost-keystore.p12
 
 ovara.dump

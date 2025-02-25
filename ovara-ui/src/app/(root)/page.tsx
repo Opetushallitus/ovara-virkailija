@@ -14,7 +14,6 @@ export default function Home() {
   const hasToinenAsteRights = hasOvaraToinenAsteRole(userRoles);
   return (
     <MainContainer>
-      {user ? <p>Welcome, {user.userOid}!</p> : null}
       {hasOvaraUserRights ? (
         <ListTable list={hasToinenAsteRights ? TOISEN_ASTEEN_RAPORTIT : []} />
       ) : null}

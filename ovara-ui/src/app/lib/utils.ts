@@ -43,6 +43,11 @@ export const getSortedKoulutuksenAlkamisKaudet = (
       alkamiskausinimi: 'yleinen.henkilokohtainen-suunnitelma',
     });
 
+    sortedAlkamiskaudet.unshift({
+      value: 'ei_alkamiskautta',
+      alkamiskausinimi: 'yleinen.ei_alkamiskautta',
+    });
+
     return sortedAlkamiskaudet;
   }
 
@@ -148,4 +153,13 @@ export const getToimipisteetToShow = (
       return o.parent_oids.some((oid) => selectedOppilaitosOids?.includes(oid));
     });
   }
+};
+
+export const getHarkinnanvaraisuusTranslation = (
+  harkinnanvaraisuuden_syy: string,
+  t: (s: string) => string,
+) => {
+  const match = harkinnanvaraisuuden_syy.match(/(ATARU)_(\w*)/);
+  const lowerCaseMatch = match?.[2].toLowerCase();
+  return lowerCaseMatch ? t(`raportti.${lowerCaseMatch}`) : t('');
 };

@@ -7,6 +7,10 @@ import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.xssf.usermodel.*
 import org.slf4j.{Logger, LoggerFactory}
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import scala.util.matching.Regex
+
 object ExcelWriter {
 
   val LOG: Logger = LoggerFactory.getLogger("ExcelWriter")
@@ -133,7 +137,7 @@ object ExcelWriter {
     initialRowIndex + 1
   }
 
-  def createResultRows(
+  def createKoulutuksetToteutuksetHakukohteetResultRows(
       workbook: XSSFWorkbook,
       sheet: XSSFSheet,
       hierarkiatWithHakukohteet: List[OrganisaatioHierarkiaWithHakukohteet],
@@ -210,7 +214,7 @@ object ExcelWriter {
         })
 
         if (orgHierarkiaWithResults.children.nonEmpty) {
-          val updatedRowIndex = createResultRows(
+          val updatedRowIndex = createKoulutuksetToteutuksetHakukohteetResultRows(
             workbook,
             sheet,
             orgHierarkiaWithResults.children,
@@ -232,11 +236,39 @@ object ExcelWriter {
     currentRowIndex
   }
 
-  def writeRaportti(
+  private def createHeadingFont(workbook: XSSFWorkbook, headingCellStyle: XSSFCellStyle): XSSFFont = {
+    val headingFont                = workbook.createFont()
+    val dataformat: XSSFDataFormat = workbook.createDataFormat()
+    headingFont.setFontHeightInPoints(12)
+    headingFont.setBold(true)
+    headingCellStyle.setFont(headingFont)
+    headingCellStyle.setAlignment(HorizontalAlignment.LEFT)
+    headingCellStyle.setDataFormat(dataformat.getFormat("text"))
+    headingFont
+  }
+
+  private def createSubHeadingFont(workbook: XSSFWorkbook): XSSFFont = {
+    val subHeadingFont = workbook.createFont()
+    subHeadingFont.setFontHeightInPoints(9)
+    subHeadingFont.setItalic(true)
+    subHeadingFont
+  }
+
+  private def createBodyTextFont(workbook: XSSFWorkbook, bodyTextCellStyle: XSSFCellStyle): XSSFFont = {
+    val bodyTextFont = workbook.createFont()
+    bodyTextFont.setFontHeightInPoints(10)
+
+    bodyTextCellStyle.setFont(bodyTextFont)
+    bodyTextCellStyle.setAlignment(HorizontalAlignment.LEFT)
+    bodyTextFont
+  }
+
+  def writeKoulutuksetToteutuksetHakukohteetRaportti(
       hierarkiatWithResults: List[OrganisaatioHierarkiaWithHakukohteet],
       raporttiColumnTitles: Map[String, List[String]],
       userLng: String,
-      raporttityyppi: String
+      raporttityyppi: String,
+      translations: Map[String, String]
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
@@ -245,30 +277,19 @@ object ExcelWriter {
       val headingCellStyle: XSSFCellStyle             = workbook.createCellStyle()
       val bodyTextCellStyle: XSSFCellStyle            = workbook.createCellStyle()
       val hakukohteenNimiTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
-      val dataformat: XSSFDataFormat                  = workbook.createDataFormat()
-      val headingFont                                 = workbook.createFont()
-      val subHeadingFont                              = workbook.createFont()
-      val bodyTextFont                                = workbook.createFont()
 
-      subHeadingFont.setFontHeightInPoints(9)
-      subHeadingFont.setItalic(true)
-
-      headingFont.setFontHeightInPoints(12)
-      headingFont.setBold(true)
-      headingCellStyle.setFont(headingFont)
-      headingCellStyle.setAlignment(HorizontalAlignment.LEFT)
-      headingCellStyle.setDataFormat(dataformat.getFormat("text"))
-
-      bodyTextFont.setFontHeightInPoints(10)
-
-      bodyTextCellStyle.setFont(bodyTextFont)
-      bodyTextCellStyle.setAlignment(HorizontalAlignment.LEFT)
+      val headingFont    = createHeadingFont(workbook, headingCellStyle)
+      val subHeadingFont = createSubHeadingFont(workbook)
+      val bodyTextFont   = createBodyTextFont(workbook, bodyTextCellStyle)
 
       hakukohteenNimiTextCellStyle.setFont(bodyTextFont)
       hakukohteenNimiTextCellStyle.setAlignment(HorizontalAlignment.LEFT)
       hakukohteenNimiTextCellStyle.setIndention(2.toShort)
 
-      workbook.setSheetName(0, WorkbookUtil.createSafeSheetName("Yhteenveto")) //TODO: käännös
+      workbook.setSheetName(
+        0,
+        WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yhteenveto", "raportti.yhteenveto"))
+      )
 
       var currentRowIndex = 0
       val row             = sheet.createRow(currentRowIndex)
@@ -282,7 +303,7 @@ object ExcelWriter {
         cell.setCellValue(title)
       }
 
-      createResultRows(
+      createKoulutuksetToteutuksetHakukohteetResultRows(
         workbook = workbook,
         sheet = sheet,
         hierarkiatWithHakukohteet = hierarkiatWithResults,
@@ -308,5 +329,147 @@ object ExcelWriter {
     }
 
     workbook
+  }
+
+  def createHakijaHeadingRow(
+      sheet: XSSFSheet,
+      asiontikieli: String,
+      translations: Map[String, String],
+      currentRowIndex: Int,
+      fieldNames: List[String],
+      headingCellStyle: XSSFCellStyle
+  ): Int = {
+    val headingRow = sheet.createRow(currentRowIndex)
+    fieldNames.zipWithIndex.foreach((fieldName, index) => {
+      val headingCell = headingRow.createCell(index)
+      headingCell.setCellStyle(headingCellStyle)
+      val translationKey = s"raportti.$fieldName"
+      val translation    = translations.getOrElse(translationKey, translationKey)
+      headingCell.setCellValue(translation)
+    })
+
+    currentRowIndex + 1
+  }
+
+  def writeHakijatRaportti(
+      hakijat: Seq[HakijaWithCombinedNimi],
+      asiointikieli: String,
+      translations: Map[String, String]
+  ): XSSFWorkbook = {
+    val workbook: XSSFWorkbook = new XSSFWorkbook()
+    LOG.info("Creating new excel from db results")
+    val sheet: XSSFSheet = workbook.createSheet()
+    workbook.setSheetName(
+      0,
+      WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yhteenveto", "raportti.yhteenveto"))
+    )
+
+    val headingCellStyle: XSSFCellStyle  = workbook.createCellStyle()
+    val bodyTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
+
+    val headingFont  = createHeadingFont(workbook, headingCellStyle)
+    val bodyTextFont = createBodyTextFont(workbook, bodyTextCellStyle)
+
+    var currentRowIndex = 0
+
+    val fieldNames: List[String] = classOf[HakijaWithCombinedNimi].getDeclaredFields.map(_.getName).toList
+    val fieldNamesWithIndex      = fieldNames.zipWithIndex
+
+    currentRowIndex =
+      createHakijaHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNames, headingCellStyle)
+
+    hakijat.foreach(hakutoive => {
+      val hakijanHakutoiveRow = sheet.createRow(currentRowIndex)
+      currentRowIndex = currentRowIndex + 1
+
+      for (i <- 0 until hakutoive.productArity) yield {
+        val fieldName = fieldNamesWithIndex.find((name, index) => i == index) match {
+          case Some((name, i)) => name
+          case None            => ""
+        }
+
+        val cell = hakijanHakutoiveRow.createCell(i)
+        cell.setCellStyle(bodyTextCellStyle)
+        hakutoive.productElement(i) match {
+          case kielistetty: Kielistetty =>
+            val kielistettyValue = kielistetty.get(Kieli.withName(asiointikieli)) match {
+              case Some(value) => value
+              case None        => "-"
+            }
+            cell.setCellValue(kielistettyValue)
+          case Some(d: LocalDate) =>
+            val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+            cell.setCellValue(d.format(formatter))
+          case s: String if List("valintatieto").contains(fieldName) =>
+            val lowerCaseStr = s.toLowerCase
+            val translation  = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+            cell.setCellValue(translation)
+          case s: String =>
+            cell.setCellValue(s)
+          case Some(s: String) if List("vastaanottotieto", "ilmoittautuminen").contains(fieldName) =>
+            val lowerCaseStr = s.toLowerCase
+            val translation  = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+            cell.setCellValue(translation)
+          case Some(s: String) if List("harkinnanvaraisuus").contains(fieldName) =>
+            val value = if (s.startsWith("EI_HARKINNANVARAINEN")) {
+              "-"
+            } else {
+              val r: Regex = "(ATARU|SURE)_(\\w*)".r
+              val group    = for (m <- r.findFirstMatchIn(s)) yield m.group(2)
+              group match {
+                case Some(m) =>
+                  val value = if (m == "ULKOMAILLA_OPISKELTU") {
+                    "KOULUTODISTUSTEN_VERTAILUVAIKEUDET"
+                  } else {
+                    m
+                  }
+                  val lowerCaseStr = value.toLowerCase
+                  translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+                case None => "-"
+              }
+            }
+            cell.setCellValue(value)
+          case Some(s: String) =>
+            cell.setCellValue(s)
+          case Some(int: Int) =>
+            cell.setCellValue(int)
+          case int: Int =>
+            cell.setCellValue(int)
+          case Some(b: Boolean)
+              if List(
+                "turvakielto",
+                "kaksoistutkintoKiinnostaa",
+                "urheilijatutkintoKiinnostaa",
+                "soraAiempi",
+                "soraTerveys",
+                "markkinointilupa",
+                "julkaisulupa",
+                "sahkoinenViestintaLupa"
+              ).contains(fieldName) =>
+            val translation =
+              if (b) translations.getOrElse("raportti.kylla", "raportti.kylla")
+              else translations.getOrElse("raportti.ei", "raportti.ei")
+            cell.setCellValue(translation)
+          case Some(b: Boolean) =>
+            val value = if (b) "X" else "-"
+            cell.setCellValue(value)
+          case _ =>
+            cell.setCellValue("-")
+        }
+      }
+    })
+
+    // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
+    fieldNamesWithIndex.foreach { case (title, index) =>
+      sheet.autoSizeColumn(index)
+    }
+
+    try {
+      workbook
+    } catch {
+      case e: Exception =>
+        LOG.error(s"Error creating excel: ${e.getMessage}")
+        throw e
+    }
   }
 }

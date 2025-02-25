@@ -16,13 +16,16 @@ async function csrfToken() {
   return _csrfToken;
 }
 
-export async function apiFetch(
-  resource: string,
-  options?: { headers?: object },
-) {
+type Options = {
+  headers?: object;
+  queryParams?: string | null;
+};
+
+export async function apiFetch(resource: string, options?: Options) {
   try {
+    const queryParams = options?.queryParams ? options.queryParams : '';
     const response = await fetch(
-      `${configuration.ovaraBackendApiUrl}/${resource}`,
+      `${configuration.ovaraBackendApiUrl}/${resource}${queryParams}`,
       {
         ...options,
         credentials: 'include',
@@ -77,10 +80,7 @@ const responseToData = async (res: Response) => {
   }
 };
 
-export const doApiFetch = async (
-  resource: string,
-  options?: { headers?: object },
-) => {
+export const doApiFetch = async (resource: string, options?: Options) => {
   try {
     const response = await apiFetch(resource, options);
     const responseUrl = new URL(response.url);

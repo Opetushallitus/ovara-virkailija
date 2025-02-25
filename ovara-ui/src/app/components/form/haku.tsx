@@ -1,37 +1,39 @@
-import {
-  MultiComboBox,
-  SelectOption,
-} from '@/app/components/form/multicombobox';
-import { useSearchParams } from '@/app/hooks/useSearchParams';
-import { isEmpty } from 'remeda';
-import { useTranslate } from '@tolgee/react';
-import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
+import { MultiComboBox } from '@/app/components/form/multicombobox';
+import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
 import { Kielistetty, LanguageCode } from '@/app/lib/types/common';
-import { useQuery } from '@tanstack/react-query';
-import { doApiFetch } from '@/app/lib/ovara-backend/api';
+import { useFetchHaut } from '@/app/hooks/useFetchHaut';
+import { useSearchParams as useQueryParams } from 'next/navigation';
+import { changeMultiComboBoxSelection } from './utils';
+import { isNullish } from 'remeda';
 
 type Haku = {
   haku_oid: string;
   haku_nimi: Kielistetty;
 };
 
-export const Haku = () => {
-  const { t } = useTranslate();
-  const user = useAuthorizedUser();
-  const locale = (user?.asiointikieli ?? 'fi') as LanguageCode;
-
-  const { data } = useQuery({
-    queryKey: ['fetchHaut'],
-    queryFn: () => doApiFetch('haut'),
-  });
-
-  const haut: Haku[] = data || [];
-
+export const Haku = ({
+  locale,
+  t,
+}: {
+  locale: LanguageCode;
+  t: (key: string) => string;
+}) => {
   const { selectedHaut, setSelectedHaut } = useSearchParams();
 
-  const changeHaut = (_: React.SyntheticEvent, value: Array<SelectOption>) => {
-    return setSelectedHaut(isEmpty(value) ? null : value?.map((v) => v.value));
-  };
+  const queryParams = useQueryParams();
+  const alkamiskausi = queryParams.get('alkamiskausi');
+  const fetchEnabled = !isNullish(alkamiskausi);
+
+  const queryParamsStr = queryParams.toString();
+  const queryParamsWithHauntyyppi = new URLSearchParams(queryParamsStr);
+  queryParamsWithHauntyyppi.set('haun_tyyppi', 'toinen_aste');
+
+  const { data } = useFetchHaut(
+    queryParamsWithHauntyyppi.toString(),
+    fetchEnabled,
+  );
+
+  const haut: Haku[] = data || [];
 
   return (
     <MultiComboBox
@@ -44,7 +46,9 @@ export const Haku = () => {
           label: haku.haku_nimi[locale] || '',
         };
       })}
-      onChange={changeHaut}
+      onChange={(e, value) =>
+        changeMultiComboBoxSelection(e, value, setSelectedHaut)
+      }
       required={true}
     />
   );

@@ -7,6 +7,7 @@ import {
   hasOvaraToinenAsteRole,
   getOppilaitoksetToShow,
   getToimipisteetToShow,
+  getHarkinnanvaraisuusTranslation,
 } from './utils';
 import {
   KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
@@ -18,6 +19,10 @@ describe('getSortedKoulutuksenAlkamiskaudet', () => {
     const alkamisvuodet = null;
     expect(getSortedKoulutuksenAlkamisKaudet(alkamisvuodet)).toEqual([
       {
+        alkamiskausinimi: 'yleinen.ei_alkamiskautta',
+        value: 'ei_alkamiskautta',
+      },
+      {
         value: 'henkilokohtainen_suunnitelma',
         alkamiskausinimi: 'yleinen.henkilokohtainen-suunnitelma',
       },
@@ -28,8 +33,12 @@ describe('getSortedKoulutuksenAlkamiskaudet', () => {
     const alkamisvuodet = ['2024', '2021', '2022'];
     const result = [
       {
-        value: 'henkilokohtainen_suunnitelma',
+        alkamiskausinimi: 'yleinen.ei_alkamiskautta',
+        value: 'ei_alkamiskautta',
+      },
+      {
         alkamiskausinimi: 'yleinen.henkilokohtainen-suunnitelma',
+        value: 'henkilokohtainen_suunnitelma',
       },
       {
         alkamisvuosi: 2024,
@@ -583,7 +592,7 @@ describe('getOppilaitoksetToShow', () => {
 
 describe('getToimipisteetToShow', () => {
   test('should return all toimipisteet in hierarkia as no toimipiste has been selected', () => {
-    expect(getToimipisteetToShow(hierarkiat, null)).toEqual([
+    expect(getToimipisteetToShow(hierarkiat, null, null)).toEqual([
       toimipiste1_1,
       toimipiste2_1_1,
       toimipiste2_2_1,
@@ -595,16 +604,17 @@ describe('getToimipisteetToShow', () => {
 
   test('should return only selected toimipiste', () => {
     expect(
-      getToimipisteetToShow(hierarkiat, ['1.2.246.562.10.208433283510']),
+      getToimipisteetToShow(hierarkiat, ['1.2.246.562.10.208433283510'], null),
     ).toEqual([toimipiste2_2_1, toimipiste2_2_2, toimipiste2_2_3]);
   });
 
   test('should return toimipisteet under oppilaitos2_1 and oppilaitos2_3 when selected', () => {
     expect(
-      getToimipisteetToShow(hierarkiat, [
-        '1.2.246.562.10.10281960954',
-        '1.2.246.562.10.2084332835113',
-      ]),
+      getToimipisteetToShow(
+        hierarkiat,
+        ['1.2.246.562.10.10281960954', '1.2.246.562.10.2084332835113'],
+        null,
+      ),
     ).toEqual([toimipiste2_1_1, toimipiste2_3_1]);
   });
 
@@ -612,5 +622,29 @@ describe('getToimipisteetToShow', () => {
     expect(
       getToimipisteetToShow(hierarkiat, [], '1.2.246.562.10.10063814452'),
     ).toEqual([toimipiste1_1]);
+  });
+});
+
+describe('getHarkinnanvaraisuusTranslation', () => {
+  const mockT = (value: string) => {
+    return value;
+  };
+
+  test('should remove ATARU_ prefix from key and make it lower case', () => {
+    expect(
+      getHarkinnanvaraisuusTranslation(
+        'ATARU_KOULUTODISTUSTEN_VERTAILUVAIKEUDET',
+        mockT,
+      ),
+    ).toEqual('raportti.koulutodistusten_vertailuvaikeudet');
+  });
+
+  test('should return empty string if no match', () => {
+    expect(
+      getHarkinnanvaraisuusTranslation(
+        'SURE_KOULUTODISTUSTEN_VERTAILUVAIKEUDET',
+        mockT,
+      ),
+    ).toEqual('');
   });
 });

@@ -1,6 +1,7 @@
 package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.*
+import fi.oph.ovara.backend.utils.RepositoryUtils
 import org.springframework.stereotype.Component
 import slick.jdbc.PostgresProfile.api.*
 import slick.sql.SqlStreamingAction
@@ -13,12 +14,84 @@ class CommonRepository extends Extractors {
           WHERE koulutuksen_alkamisvuosi IS NOT NULL""".as[String]
   }
 
-  def selectDistinctExistingHaut(): SqlStreamingAction[Vector[Haku], Haku, Effect] = {
-    val hakukohdekooditStr = ammatillisetHakukohdekoodit.map(s => s"'$s'").mkString(",")
-    sql"""SELECT DISTINCT haku_oid, haku_nimi
-          FROM pub.pub_dim_haku h
-          WHERE kohdejoukko_koodi IN (#$hakukohdekooditStr)
-          AND h.tila != 'poistettu'""".as[Haku]
+  def selectDistinctHarkinnanvaraisuudet(): SqlStreamingAction[Vector[String], String, Effect] = {
+    sql"""SELECT DISTINCT harkinnanvaraisuuden_syy
+          FROM pub.pub_fct_raportti_hakijat_toinen_aste
+          WHERE harkinnanvaraisuuden_syy IS NOT NULL
+          AND harkinnanvaraisuuden_syy NOT LIKE 'EI_HARKINNANVARAINEN%'
+          AND harkinnanvaraisuuden_syy NOT LIKE 'SURE%'
+          AND harkinnanvaraisuuden_syy NOT LIKE '%ULKOMAILLA_OPISKELTU'""".as[String]
+  }
+
+  def selectDistinctExistingHaut(
+      alkamiskaudet: List[String] = List(),
+      haunTyyppi: String = "toinen_aste"
+  ): SqlStreamingAction[Vector[Haku], Haku, Effect] = {
+    val alkamiskaudetAndHenkKohtSuunnitelma =
+      RepositoryUtils.extractAlkamisvuosiKausiAndHenkkohtSuunnitelma(alkamiskaudet)
+
+    val alkamiskaudetQueryStr = if (alkamiskaudet.isEmpty) {
+      ""
+    } else {
+      RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(alkamiskaudetAndHenkKohtSuunnitelma)
+    }
+
+    sql"""SELECT DISTINCT h.haku_oid, h.haku_nimi
+                  FROM pub.pub_dim_haku h
+                  LEFT JOIN (
+                    SELECT haku_oid, jsonb_array_elements(koulutuksen_alkamiskausi) as alkamiskausi
+                    FROM pub.pub_dim_haku h2
+                  ) alkamiskaudet
+                  ON h.haku_oid = alkamiskaudet.haku_oid
+                  WHERE h.haun_tyyppi = $haunTyyppi
+                  AND h.tila != 'poistettu'
+                  #$alkamiskaudetQueryStr""".as[Haku]
+  }
+
+  def selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(
+      orgs: List[String],
+      haut: List[String]
+  ): SqlStreamingAction[Vector[Hakukohde], Hakukohde, Effect] = {
+    val organisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(orgs)
+    val organisaatiotQueryStr = if (organisaatiotStr.isEmpty) {
+      ""
+    } else { s"AND hk.jarjestyspaikka_oid in ($organisaatiotStr)" }
+
+    val hautStr = RepositoryUtils.makeListOfValuesQueryStr(haut)
+    val hautQueryStr = if (hautStr.isEmpty) {
+      ""
+    } else {
+      s"AND h.haku_oid in ($hautStr)"
+    }
+
+    sql"""SELECT DISTINCT hk.hakukohde_oid, hk.hakukohde_nimi
+          FROM pub.pub_dim_hakukohde hk
+          JOIN pub.pub_dim_haku h
+          ON hk.haku_oid = h.haku_oid
+          WHERE hk.tila != 'poistettu'
+          #$organisaatiotQueryStr
+          #$hautQueryStr
+          """.as[Hakukohde]
+  }
+
+  def selectToisenAsteenPohjakoulutukset = {
+    sql"""SELECT pk.koodiarvo, pk.koodinimi
+          FROM pub.pub_dim_koodisto_2asteenpohjakoulutus2021 pk
+          """.as[Koodi]
+  }
+
+  def selectDistinctValintatiedot: SqlStreamingAction[Vector[String], String, Effect] = {
+    sql"""SELECT DISTINCT v.valinnan_tila
+          FROM pub.pub_dim_valinnantulos v
+          WHERE v.valinnan_tila IS NOT NULL
+       """.as[String]
+  }
+
+  def selectDistinctVastaanottotiedot: SqlStreamingAction[Vector[String], String, Effect] = {
+    sql"""SELECT DISTINCT ht.vastaanottotieto
+          FROM pub.pub_dim_hakutoive ht
+          WHERE ht.vastaanottotieto IS NOT NULL
+       """.as[String]
   }
 
   def selectDistinctOrganisaatiot(

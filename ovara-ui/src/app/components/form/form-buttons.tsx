@@ -1,22 +1,24 @@
 import { useTranslate } from '@tolgee/react';
 import { OphButton } from '@opetushallitus/oph-design-system';
 import { Box, Stack } from '@mui/material';
-import { useSearchParams } from '@/app/hooks/useSearchParams';
+import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
+
+type ExcelDownloadButton = {
+  disabled: boolean;
+  downloadExcel: () => void;
+};
 
 export const FormButtons = ({
   disabled,
-  excelDownloadUrl,
-}: {
-  disabled: boolean;
-  excelDownloadUrl: string;
-}) => {
+  downloadExcel,
+}: ExcelDownloadButton) => {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'end' }}>
       <Stack direction="row" spacing={2}>
         <TyhjennaHakuehdotButton />
         <MuodostaExcelButton
           disabled={disabled}
-          excelDownloadUrl={excelDownloadUrl}
+          downloadExcel={downloadExcel}
         />
       </Stack>
     </Box>
@@ -52,18 +54,16 @@ export const TyhjennaHakuehdotButton = () => {
 
 export const MuodostaExcelButton = ({
   disabled,
-  excelDownloadUrl,
-}: {
-  disabled: boolean;
-  excelDownloadUrl: string;
-}) => {
+  downloadExcel,
+}: ExcelDownloadButton) => {
   const { t } = useTranslate();
+
   return (
     <OphButton
       variant="contained"
-      type="submit"
+      type="button"
       disabled={disabled}
-      href={excelDownloadUrl}
+      onClick={downloadExcel}
     >
       {t('raportti.muodosta-raportti')}
     </OphButton>

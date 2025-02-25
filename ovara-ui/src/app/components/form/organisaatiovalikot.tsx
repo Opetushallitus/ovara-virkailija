@@ -1,5 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { useSearchParams } from '@/app/hooks/useSearchParams';
+import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
 import { Box } from '@mui/material';
 import { isEmpty, isNullish } from 'remeda';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
@@ -15,6 +15,25 @@ import {
   getOppilaitoksetToShow,
   getToimipisteetToShow,
 } from '@/app/lib/utils';
+
+const getOrganisaatioOptions = (
+  locale: string,
+  orgs: Array<OrganisaatioHierarkia>,
+) => {
+  if (isNullish(orgs)) {
+    return [];
+  } else {
+    return orgs.map((org) => {
+      return {
+        value: org.organisaatio_oid,
+        // TODO: Jos org tila jätetään labeliin, täytyy lisätä käännös
+        label:
+          `${org.organisaatio_nimi[locale as LanguageCode]} (${org.tila})` ||
+          '',
+      };
+    });
+  }
+};
 
 export const OrganisaatioValikot = () => {
   const { t } = useTranslate();
@@ -73,43 +92,115 @@ export const OrganisaatioValikot = () => {
     );
   };
 
-  const getOrganisaatioOptions = (orgs: Array<OrganisaatioHierarkia>) => {
-    if (isNullish(orgs)) {
-      return [];
-    } else {
-      return orgs.map((org) => {
-        return {
-          value: org.organisaatio_oid,
-          // TODO: Jos org tila jätetään labeliin, täytyy lisätä käännös
-          label: `${org.organisaatio_nimi[locale]} (${org.tila})` || '',
-        };
-      });
-    }
-  };
-
   return (
     <Box>
       <ComboBox
         id={koulutustoimija_id}
         label={t(`raportti.${koulutustoimija_id}`)}
         value={selectedKoulutustoimija ?? ''}
-        options={getOrganisaatioOptions(koulutustoimijat)}
+        options={getOrganisaatioOptions(locale, koulutustoimijat)}
         onChange={changeKoulutustoimija}
       />
       <MultiComboBox
         id={oppilaitos_id}
         label={t(`raportti.${oppilaitos_id}`)}
         value={selectedOppilaitokset ?? []}
-        options={getOrganisaatioOptions(oppilaitokset)}
+        options={getOrganisaatioOptions(locale, oppilaitokset)}
         onChange={changeOppilaitokset}
       />
       <MultiComboBox
         id={toimipiste_id}
         label={t(`raportti.${toimipiste_id}`)}
         value={selectedToimipisteet ?? []}
-        options={getOrganisaatioOptions(toimipisteet)}
+        options={getOrganisaatioOptions(locale, toimipisteet)}
         onChange={changeToimipisteet}
       />
     </Box>
+  );
+};
+
+export const OppilaitosValikko = ({
+  locale,
+  organisaatiot,
+  t,
+}: {
+  locale: string;
+  organisaatiot: Array<OrganisaatioHierarkia> | null;
+  t: (key: string) => string;
+}) => {
+  const {
+    selectedOppilaitokset,
+    setSelectedOppilaitokset,
+    selectedKoulutustoimija,
+  } = useSearchParams();
+
+  const oppilaitokset = getOppilaitoksetToShow(
+    organisaatiot,
+    selectedKoulutustoimija,
+  );
+
+  const changeOppilaitokset = (
+    _: React.SyntheticEvent,
+    value: Array<SelectOption>,
+  ) => {
+    return setSelectedOppilaitokset(
+      isEmpty(value) ? null : value?.map((v) => v.value),
+    );
+  };
+
+  const oppilaitos_id = 'oppilaitos';
+
+  return (
+    <MultiComboBox
+      id={oppilaitos_id}
+      label={t(`raportti.${oppilaitos_id}`)}
+      value={selectedOppilaitokset ?? []}
+      options={getOrganisaatioOptions(locale, oppilaitokset)}
+      onChange={changeOppilaitokset}
+    />
+  );
+};
+
+export const ToimipisteValikko = ({
+  locale,
+  organisaatiot,
+  t,
+}: {
+  locale: string;
+  organisaatiot: Array<OrganisaatioHierarkia> | null;
+  t: (key: string) => string;
+}) => {
+  const {
+    selectedToimipisteet,
+    setSelectedToimipisteet,
+    selectedOppilaitokset,
+    selectedKoulutustoimija,
+  } = useSearchParams();
+
+  const toimipisteet = getToimipisteetToShow(
+    organisaatiot,
+    selectedOppilaitokset,
+    selectedKoulutustoimija,
+  );
+
+  const changeToimipisteet = (
+    _: React.SyntheticEvent,
+    value: Array<SelectOption>,
+  ) => {
+    return setSelectedToimipisteet(
+      isEmpty(value) ? null : value?.map((v) => v.value),
+    );
+  };
+
+  const toimipiste_id = 'toimipiste';
+
+  return (
+    <MultiComboBox
+      id={toimipiste_id}
+      label={t(`raportti.${toimipiste_id}`)}
+      value={selectedToimipisteet ?? []}
+      options={getOrganisaatioOptions(locale, toimipisteet)}
+      onChange={changeToimipisteet}
+    />
   );
 };

@@ -1,18 +1,12 @@
 import { useMemo } from 'react';
-import { useTranslate } from '@tolgee/react';
 import { getSortedKoulutuksenAlkamisKaudet } from '@/app/lib/utils';
-import {
-  MultiComboBox,
-  SelectOption,
-} from '@/app/components/form/multicombobox';
-import { useSearchParams } from '@/app/hooks/useSearchParams';
-import { isEmpty } from 'remeda';
+import { MultiComboBox } from '@/app/components/form/multicombobox';
+import { useSearchParams } from '@/app/hooks/searchParams/useSearchParams';
 import { useQuery } from '@tanstack/react-query';
 import { doApiFetch } from '@/app/lib/ovara-backend/api';
+import { changeMultiComboBoxSelection } from './utils';
 
-export const KoulutuksenAlkaminen = () => {
-  const { t } = useTranslate();
-
+export const KoulutuksenAlkaminen = ({ t }: { t: (key: string) => string }) => {
   const { data } = useQuery({
     queryKey: ['fetchAlkamisvuodet'],
     queryFn: () => doApiFetch('alkamisvuodet'),
@@ -25,19 +19,10 @@ export const KoulutuksenAlkaminen = () => {
 
   const { selectedAlkamiskaudet, setSelectedAlkamiskaudet } = useSearchParams();
 
-  const changeAlkamiskaudet = (
-    _: React.SyntheticEvent,
-    value: Array<SelectOption>,
-  ) => {
-    return setSelectedAlkamiskaudet(
-      isEmpty(value) ? null : value?.map((v) => v.value),
-    );
-  };
-
   return (
     <MultiComboBox
       id={'alkamiskaudet'}
-      label={`${t('raportti.alkamiskausi')}`}
+      label={t('raportti.alkamiskausi')}
       value={selectedAlkamiskaudet ?? []}
       options={sortedAlkamiskaudet?.map((kausi) => {
         const alkamiskaudenNimi = t(kausi.alkamiskausinimi);
@@ -48,7 +33,9 @@ export const KoulutuksenAlkaminen = () => {
             : `${alkamiskaudenNimi}`,
         };
       })}
-      onChange={changeAlkamiskaudet}
+      onChange={(e, value) =>
+        changeMultiComboBoxSelection(e, value, setSelectedAlkamiskaudet)
+      }
       required={true}
     />
   );
