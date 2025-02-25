@@ -1,31 +1,15 @@
-import { Koulutusala, LanguageCode } from '@/app/lib/types/common';
-import { isEmpty, isNullish } from 'remeda';
+import { Koodi, LanguageCode } from '@/app/lib/types/common';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
-import {
-  MultiComboBox,
-  SelectOption,
-} from '@/app/components/form/multicombobox';
+import { MultiComboBox } from '@/app/components/form/multicombobox';
 import { Box } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { doApiFetch } from '@/app/lib/ovara-backend/api';
 import { useHakeneetSearchParams } from '@/app/hooks/searchParams/useHakeneetSearchParams';
-
-const getKoulutusalaOptions = (
-  locale: string,
-  koulutusalat: Array<Koulutusala>,
-) => {
-  if (isNullish(koulutusalat)) {
-    return [];
-  } else {
-    return koulutusalat.map((koulutusala) => {
-      return {
-        value: koulutusala.koodiarvo,
-        label: `${koulutusala.nimi[locale]}` || '',
-      };
-    });
-  }
-};
+import {
+  changeMultiComboBoxSelection,
+  getKoodiOptions,
+} from '@/app/components/form/utils';
 
 export const KoulutusalaValikot = () => {
   const { t } = useTranslate();
@@ -66,63 +50,42 @@ export const KoulutusalaValikot = () => {
       }),
   });
 
-  const koulutusalat1: Array<Koulutusala> = koulutusalat1data.data || [];
-  const koulutusalat2: Array<Koulutusala> = koulutusalat2data.data || [];
-  const koulutusalat3: Array<Koulutusala> = koulutusalat3data.data || [];
+  const koulutusalat1: Array<Koodi> = koulutusalat1data.data || [];
+  const koulutusalat2: Array<Koodi> = koulutusalat2data.data || [];
+  const koulutusalat3: Array<Koodi> = koulutusalat3data.data || [];
 
   const koulutusalat1_id = 'koulutusalat1';
   const koulutusalat2_id = 'koulutusalat2';
   const koulutusalat3_id = 'koulutusalat3';
-
-  const changeKoulutusalat1 = (
-    _: React.SyntheticEvent,
-    value: Array<SelectOption>,
-  ) => {
-    return setSelectedKoulutusalat1(
-      isEmpty(value) ? null : value?.map((v) => v.value),
-    );
-  };
-
-  const changeKoulutusalat2 = (
-    _: React.SyntheticEvent,
-    value: Array<SelectOption>,
-  ) => {
-    return setSelectedKoulutusalat2(
-      isEmpty(value) ? null : value?.map((v) => v.value),
-    );
-  };
-
-  const changeKoulutusalat3 = (
-    _: React.SyntheticEvent,
-    value: Array<SelectOption>,
-  ) => {
-    return setSelectedKoulutusalat3(
-      isEmpty(value) ? null : value?.map((v) => v.value),
-    );
-  };
 
   return (
     <Box>
       <MultiComboBox
         id={koulutusalat1_id}
         label={t(`raportti.${koulutusalat1_id}`)}
-        value={selectedKoulutusalat1 ?? ''}
-        options={getKoulutusalaOptions(locale, koulutusalat1)}
-        onChange={changeKoulutusalat1}
+        value={selectedKoulutusalat1 ?? []}
+        options={getKoodiOptions(locale, koulutusalat1)}
+        onChange={(e, value) =>
+          changeMultiComboBoxSelection(e, value, setSelectedKoulutusalat1)
+        }
       />
       <MultiComboBox
         id={koulutusalat2_id}
         label={t(`raportti.${koulutusalat2_id}`)}
         value={selectedKoulutusalat2 ?? []}
-        options={getKoulutusalaOptions(locale, koulutusalat2)}
-        onChange={changeKoulutusalat2}
+        options={getKoodiOptions(locale, koulutusalat2)}
+        onChange={(e, value) =>
+          changeMultiComboBoxSelection(e, value, setSelectedKoulutusalat2)
+        }
       />
       <MultiComboBox
         id={koulutusalat3_id}
         label={t(`raportti.${koulutusalat3_id}`)}
         value={selectedKoulutusalat3 ?? []}
-        options={getKoulutusalaOptions(locale, koulutusalat3)}
-        onChange={changeKoulutusalat3}
+        options={getKoodiOptions(locale, koulutusalat3)}
+        onChange={(e, value) =>
+          changeMultiComboBoxSelection(e, value, setSelectedKoulutusalat3)
+        }
       />
     </Box>
   );

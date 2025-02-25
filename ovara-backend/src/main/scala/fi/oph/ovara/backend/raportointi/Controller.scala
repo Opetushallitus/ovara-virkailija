@@ -109,6 +109,12 @@ class Controller(
   @GetMapping(path = Array("opetuskielet"))
   def opetuskielet: String = mapper.writeValueAsString(commonService.getOpetuskielet)
 
+  @GetMapping(path = Array("maakunnat"))
+  def maakunnat: String = mapper.writeValueAsString(commonService.getMaakunnat)
+
+  @GetMapping(path = Array("kunnat"))
+  def kunnat(@RequestParam("maakunnat", required = false) maakunnat: java.util.Collection[String]): String = mapper.writeValueAsString(commonService.getKunnat(if (maakunnat == null) List() else maakunnat.asScala.toList))
+
   @GetMapping(path = Array("koulutusalat1"))
   def koulutusalat1: String = mapper.writeValueAsString(commonService.getKoulutusalat1)
 
@@ -299,6 +305,8 @@ class Controller(
                                            @RequestParam("koulutusala2", required = false) koulutusala2: java.util.Collection[String],
                                            @RequestParam("koulutusala3", required = false) koulutusala3: java.util.Collection[String],
                                            @RequestParam("opetuskieli", required = false) opetuskieli: java.util.Collection[String],
+                                           @RequestParam("maakunta", required = false) maakunta: java.util.Collection[String],
+                                           @RequestParam("kunta", required = false) kunta: java.util.Collection[String],
                                            @RequestParam("harkinnanvaraisuus", required = false) harkinnanvaraisuudet: java.util.Collection[String],
                                            @RequestParam("nayta-hakutoiveet", required = false) naytaHakutoiveet: String,
                                            @RequestParam("sukupuoli", required = false) sukupuoli: String,
@@ -317,6 +325,8 @@ class Controller(
     val koulutusala1List = if (koulutusala1 == null) List() else koulutusala1.asScala.toList
     val koulutusala2List = if (koulutusala2 == null) List() else koulutusala2.asScala.toList
     val koulutusala3List = if (koulutusala3 == null) List() else koulutusala3.asScala.toList
+    val maakuntaList = if (maakunta == null) List() else maakunta.asScala.toList.map("maakunta_" + _)
+    val kuntaList = if (kunta == null) List() else kunta.asScala.toList.map("kunta_" + _)
     val opetuskieliList = if (opetuskieli == null) List() else opetuskieli.asScala.toList.map("oppilaitoksenopetuskieli_" + _)
     val harkinnanvaraisuusList = if (harkinnanvaraisuudet == null) List() else harkinnanvaraisuudet.asScala.toList
 
@@ -330,6 +340,8 @@ class Controller(
       koulutusala2List,
       koulutusala3List,
       opetuskieliList,
+      maakuntaList,
+      kuntaList,
       harkinnanvaraisuusList,
       maybeSukupuoli,
       naytaHakutoiveetBool
@@ -346,12 +358,14 @@ class Controller(
       "koulutusala2"        -> Option(koulutusala2).filterNot(_.isEmpty),
       "koulutusala3"        -> Option(koulutusala3).filterNot(_.isEmpty),
       "opetuskieli" -> Option(opetuskieliList).filterNot(_.isEmpty),
+      "maakunta" -> Option(maakuntaList).filterNot(_.isEmpty),
+      "kunta" -> Option(kuntaList).filterNot(_.isEmpty),
       "harkinnanvaraisuudet" -> Option(harkinnanvaraisuusList).filterNot(_.isEmpty),
       "naytaHakutoiveet" -> naytaHakutoiveetBool,
       "sukupuoli" -> maybeSukupuoli
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
-    sendExcel(wb, response, request, "koulutukset-toteutukset-hakukohteet", raporttiParams)
+    sendExcel(wb, response, request, "hakeneet-hyvaksytyt-vastaanottaneet", raporttiParams)
   }
 
 }

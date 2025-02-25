@@ -3,6 +3,7 @@ import { SelectChangeEvent } from '@mui/material';
 import { match } from 'ts-pattern';
 import { isEmpty, isNullish } from 'remeda';
 import { apiFetch } from '@/app/lib/ovara-backend/api';
+import { Koodi, LanguageCode } from '@/app/lib/types/common';
 
 export const changeRadioGroupSelection = (
   e: SelectChangeEvent,
@@ -65,6 +66,19 @@ export const changeMultiComboBoxSelection = (
   setSelected: (v: Array<string> | null) => void,
 ) => {
   return setSelected(isEmpty(value) ? null : value?.map((v) => v.value));
+};
+
+export const getKoodiOptions = (locale: string, koodit: Array<Koodi>) => {
+  if (isNullish(koodit)) {
+    return [];
+  } else {
+    return koodit.map((koodi) => {
+      return {
+        value: koodi.koodiarvo,
+        label: koodi.koodinimi[locale as LanguageCode] || '',
+      };
+    });
+  }
 };
 
 // https://stackoverflow.com/a/59940621

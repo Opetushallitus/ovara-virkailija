@@ -8,9 +8,9 @@ export type User = {
   asiointikieli: string;
 };
 
-type Koulutusala = {
+type Koodi = {
   koodiarvo: string;
-  nimi: Kielistetty;
+  koodinimi: Kielistetty;
 };
 
 type Organisaatio = {

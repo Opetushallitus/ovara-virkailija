@@ -18,6 +18,8 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                         koulutusalat2: List[String],
                         koulutusalat3: List[String],
                         opetuskielet: List[String],
+                        maakunnat: List[String],
+                        kunnat: List[String],
                         harkinnanvaraisuudet: List[String],
                         sukupuoli: Option[String],
                       ): SqlStreamingAction[Vector[HakeneetHyvaksytytVastaanottaneet], HakeneetHyvaksytytVastaanottaneet, Effect] = {
@@ -44,6 +46,8 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_1", koulutusalat1)}
     #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_2", koulutusalat2)}
     #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_3", koulutusalat3)}
+    #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintimaakunta", maakunnat)}
+    #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintikunta", kunnat)}
     #${RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.harkinnanvaraisuuden_syy", harkinnanvaraisuudetWithSureValues)}
     #$opetuskieletFilter
     GROUP BY t.hakukohde_oid, h.hakukohde_nimi, h.organisaatio_nimi""".as[HakeneetHyvaksytytVastaanottaneet]

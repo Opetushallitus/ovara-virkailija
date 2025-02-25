@@ -29,6 +29,8 @@ class HakeneetHyvaksytytVastaanottaneetService(
            koulutusalat2: List[String],
            koulutusalat3: List[String],
            opetuskielet: List[String],
+           maakunnat: List[String],
+           kunnat: List[String],
            harkinnanvaraisuudet: List[String],
            sukupuoli: Option[String],
            naytaHakutoiveet: Boolean
@@ -53,6 +55,8 @@ class HakeneetHyvaksytytVastaanottaneetService(
       koulutusalat2 = koulutusalat2,
       koulutusalat3 = koulutusalat3,
       opetuskielet = opetuskielet,
+      maakunnat = maakunnat,
+      kunnat = kunnat,
       harkinnanvaraisuudet = harkinnanvaraisuudet,
       sukupuoli = sukupuoli
     )

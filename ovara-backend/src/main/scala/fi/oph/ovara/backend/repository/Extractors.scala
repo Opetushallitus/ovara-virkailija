@@ -13,28 +13,6 @@ trait Extractors extends GenericOvaraJsonFormats {
     json.map(read[List[String]]).getOrElse(List())
   }
   
-  private def mapKielistetty(nimiFi: String, nimiSv: String, nimiEn: String): Kielistetty = {
-    Map(
-      Fi -> nimiFi,
-      Sv -> nimiSv,
-      En -> nimiEn
-    )
-  }
-
-  implicit val getOpetuskieliResult: GetResult[Opetuskieli] = GetResult(r =>
-    Opetuskieli(
-      koodiarvo = r.nextString(),
-      nimi = mapKielistetty(r.nextString(), r.nextString(), r.nextString())
-    )
-  )
-
-  implicit val getKoulutusalaResult: GetResult[Koulutusala] = GetResult(r =>
-    Koulutusala(
-      koodiarvo = r.nextString(),
-      nimi = extractKielistetty(r.nextStringOption())
-    )
-  )
-  
   implicit val getHakuResult: GetResult[Haku] = GetResult(r =>
     Haku(
       haku_oid = r.nextString(),

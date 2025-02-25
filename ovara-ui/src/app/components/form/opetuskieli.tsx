@@ -1,23 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { doApiFetch } from '@/app/lib/ovara-backend/api';
-import { Kielistetty } from '@/app/lib/types/common';
-import {
-  MultiComboBox,
-  SelectOption,
-} from '@/app/components/form/multicombobox';
-import { isEmpty } from 'remeda';
+import { Koodi } from '@/app/lib/types/common';
+import { MultiComboBox } from '@/app/components/form/multicombobox';
 import { useAsiointiKieli } from '@/app/hooks/useAsiointikieli';
 import { useTranslate } from '@tolgee/react';
 import { useHakeneetSearchParams } from '@/app/hooks/searchParams/useHakeneetSearchParams';
+import {
+  changeMultiComboBoxSelection,
+  getKoodiOptions,
+} from '@/app/components/form/utils';
 
-type Opetuskieli = {
-  koodiarvo: string;
-  nimi: Kielistetty;
-};
-
-const getSortedOpetuskielet = (
-  opetuskielet: Array<Opetuskieli>,
-): Array<Opetuskieli> => {
+const getSortedOpetuskielet = (opetuskielet: Array<Koodi>): Array<Koodi> => {
   return opetuskielet.sort((a, b) => a.koodiarvo.localeCompare(b.koodiarvo));
 };
 
@@ -32,30 +25,18 @@ export const Opetuskieli = () => {
     queryFn: () => doApiFetch('opetuskielet'),
   });
 
-  const opetuskielet: Array<Opetuskieli> = data || [];
+  const opetuskielet: Array<Koodi> = data || [];
   const sortedOpetuskielet = getSortedOpetuskielet(opetuskielet);
-
-  const changeOpetuskielet = (
-    _: React.SyntheticEvent,
-    value: Array<SelectOption>,
-  ) => {
-    return setSelectedOpetuskielet(
-      isEmpty(value) ? null : value?.map((v) => v.value),
-    );
-  };
 
   return (
     <MultiComboBox
       id={'opetuskielet'}
       label={`${t('raportti.opetuskieli')}`}
       value={selectedOpetuskielet ?? []}
-      options={sortedOpetuskielet?.map((opetuskieli) => {
-        return {
-          value: opetuskieli?.koodiarvo,
-          label: opetuskieli?.nimi[locale],
-        };
-      })}
-      onChange={changeOpetuskielet}
+      options={getKoodiOptions(locale, sortedOpetuskielet)}
+      onChange={(e, value) =>
+        changeMultiComboBoxSelection(e, value, setSelectedOpetuskielet)
+      }
       required={false}
     />
   );

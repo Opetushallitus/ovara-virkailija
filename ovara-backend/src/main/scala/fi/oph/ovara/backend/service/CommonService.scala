@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.{Haku, Hakukohde, Koodi, Koulutusala, Opetuskieli, Organisaatio, OrganisaatioHierarkia}
+import fi.oph.ovara.backend.domain.{Haku, Hakukohde, Koodi, Organisaatio, OrganisaatioHierarkia}
 import fi.oph.ovara.backend.repository.{CommonRepository, OvaraDatabase}
 import fi.oph.ovara.backend.utils.Constants.{
   KOULUTUSTOIMIJARAPORTTI,
@@ -60,19 +60,27 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     db.run(commonRepository.selectDistinctVastaanottotiedot, "selectDistinctVastaanottotiedot")
   }
 
-  def getOpetuskielet: Vector[Opetuskieli] = {
+  def getOpetuskielet: Vector[Koodi] = {
     db.run(commonRepository.selectDistinctOpetuskielet, "selectDistinctOpetuskielet")
   }
 
-  def getKoulutusalat1: Vector[Koulutusala] = {
+  def getMaakunnat: Vector[Koodi] = {
+    db.run(commonRepository.selectDistinctMaakunnat, "selectDistinctMaakunnat")
+  }
+
+  def getKunnat(maakunnat: List[String]): Vector[Koodi] = {
+    db.run(commonRepository.selectDistinctKunnat(maakunnat), "selectDistinctKunnat")
+  }
+
+  def getKoulutusalat1: Vector[Koodi] = {
     db.run(commonRepository.selectDistinctKoulutusalat1(), "selectDistinctKoulutusalat1")
   }
 
-  def getKoulutusalat2(koulutusalat1: List[String]): Vector[Koulutusala] = {
+  def getKoulutusalat2(koulutusalat1: List[String]): Vector[Koodi] = {
     db.run(commonRepository.selectDistinctKoulutusalat2(koulutusalat1), "selectDistinctKoulutusalat2")
   }
 
-  def getKoulutusalat3(koulutusalat2: List[String]): Vector[Koulutusala] = {
+  def getKoulutusalat3(koulutusalat2: List[String]): Vector[Koodi] = {
     db.run(commonRepository.selectDistinctKoulutusalat3(koulutusalat2), "selectDistinctKoulutusalat3")
   }
 

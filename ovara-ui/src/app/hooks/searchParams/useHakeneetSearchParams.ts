@@ -18,6 +18,16 @@ export const useHakeneetSearchParams = () => {
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
+  const [selectedMaakunnat, setSelectedMaakunnat] = useQueryState(
+    'maakunta',
+    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
+  const [selectedKunnat, setSelectedKunnat] = useQueryState(
+    'kunta',
+    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
   const [selectedKoulutusalat1, setSelectedKoulutusalat1] = useQueryState(
     'koulutusala1',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
@@ -48,6 +58,10 @@ export const useHakeneetSearchParams = () => {
     setSelectedTulostustapa,
     selectedOpetuskielet,
     setSelectedOpetuskielet,
+    selectedMaakunnat,
+    setSelectedMaakunnat,
+    selectedKunnat,
+    setSelectedKunnat,
     selectedKoulutusalat1,
     setSelectedKoulutusalat1,
     selectedKoulutusalat2,

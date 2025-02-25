@@ -66,6 +66,18 @@ Käyttöliittymän saa käynnistettyä komennolla `npm run dev`. Käyttöliittym
 Lokaaliympäristössä backendin ja käyttöliittymän käyttö https yli cas-autentikoinnilla ja sessiohallinnalla edellyttää sertifikaattien ja keystoren generointia.
 Nämä saa luotua ajamalla projektin juuressa skriptin `generate-certs.sh`.
 
+## Deploy
+
+Asenna ensin sovelluksen riippuvuudet ja buildaa next.js sovellus:
+````
+    npm ci
+    SKIP_TYPECHECK=true npm run build
+````
+Deploy onnistuu komennolla:
+````
+    SKIP_TYPECHECK=true ./deploy.sh untuva deploy -d
+````
+
 # Tietokanta
 
 Ovara-backendilla on ovara-tietokannassa oma skeema ovara-virkailija jossa on mm. sessiohallintaan liittyvät taulut.
