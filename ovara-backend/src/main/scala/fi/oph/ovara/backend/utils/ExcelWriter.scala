@@ -483,8 +483,9 @@ object ExcelWriter {
   def writeHakeneetHyvaksytytVastaanottaneetRaportti(
                             asiointikieli: String,
                             translations: Map[String, String],
-                            data: List[HakeneetHyvaksytytVastaanottaneet],
-                            naytaHakutoiveet: Boolean
+                            data: List[HakeneetHyvaksytytVastaanottaneetResult],
+                            yksittaisetHakijat: Int,
+                            naytaHakutoiveet: Boolean,
                           ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new HakeneetHyvaksytytVastaanottaneet excel from db results")
@@ -521,10 +522,8 @@ object ExcelWriter {
 
     data.foreach { item =>
       val dataRow = sheet.createRow(currentRowIndex)
-      val organisaatioNimi = item.organisaatioNimi(Kieli.withName(asiointikieli))
-      val hakukohdeNimi = Option(item.hakukohdeNimi(Kieli.withName(asiointikieli))).getOrElse("")
       val rowData = List(
-        s"$organisaatioNimi\n$hakukohdeNimi",
+        item.otsikko(Kieli.withName(asiointikieli)),
         item.hakijat.toString,
         item.ensisijaisia.toString,
         item.varasija.toString,
@@ -558,7 +557,7 @@ object ExcelWriter {
     // yhteensä-rivi
     val summaryRow = sheet.createRow(currentRowIndex)
     val summaryData = List(
-      "Yhteensä",
+      translations.getOrElse("raportti.yhteensa", "raportti.yhteensa"),
       data.map(_.hakijat).sum.toString,
       data.map(_.ensisijaisia).sum.toString,
       data.map(_.varasija).sum.toString,
@@ -584,6 +583,25 @@ object ExcelWriter {
 
     summaryData.zipWithIndex.foreach { case (value, index) =>
       val cell = summaryRow.createCell(index)
+      if (index == 0) {
+        cell.setCellStyle(summaryCellStyle)
+      } else {
+        cell.setCellStyle(bodyTextCellStyle)
+      }
+      cell.setCellValue(value)
+    }
+
+    currentRowIndex += 1
+
+    // yksittäiset hakijat -rivi
+    val hakijatSummaryRow = sheet.createRow(currentRowIndex)
+    val hakijatSummaryData = List(
+      translations.getOrElse("raportti.yksittaiset-hakijat", "raportti.yksittaiset-hakijat"),
+      yksittaisetHakijat.toString,
+    )
+
+    hakijatSummaryData.zipWithIndex.foreach { case (value, index) =>
+      val cell = hakijatSummaryRow.createCell(index)
       if (index == 0) {
         cell.setCellStyle(summaryCellStyle)
       } else {

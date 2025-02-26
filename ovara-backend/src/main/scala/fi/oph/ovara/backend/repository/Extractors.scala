@@ -134,9 +134,8 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   )
 
-  implicit val getHakeneetHyvaksytytVastaanottaneetResult: GetResult[HakeneetHyvaksytytVastaanottaneet] = GetResult(r =>
-    HakeneetHyvaksytytVastaanottaneet(
-      hakukohdeOid = r.nextString(),
+  implicit val getHakeneetHyvaksytytVastaanottaneetHakukohteittainResult: GetResult[HakeneetHyvaksytytVastaanottaneetHakukohteittain] = GetResult(r =>
+    HakeneetHyvaksytytVastaanottaneetHakukohteittain(
       hakukohdeNimi = extractKielistetty(r.nextStringOption()),
       organisaatioNimi = extractKielistetty(r.nextStringOption()),
       hakijat = r.nextInt(),
@@ -150,11 +149,34 @@ trait Extractors extends GenericOvaraJsonFormats {
       aloituspaikat = r.nextInt(),
       toive1 = r.nextInt(),
       toive2 = r.nextInt(),
-      toive3 = r.nextInt(), 
-      toive4 = r.nextInt(), 
-      toive5 = r.nextInt(), 
-      toive6 = r.nextInt(), 
+      toive3 = r.nextInt(),
+      toive4 = r.nextInt(),
+      toive5 = r.nextInt(),
+      toive6 = r.nextInt(),
       toive7 = r.nextInt(),
     )
   )
+
+  implicit val getHakeneetHyvaksytytVastaanottaneetResult: GetResult[HakeneetHyvaksytytVastaanottaneetResult] = GetResult(r =>
+    HakeneetHyvaksytytVastaanottaneetResult(
+      otsikko = extractKielistetty(r.nextStringOption()),
+      hakijat = r.nextInt(),
+      ensisijaisia = r.nextInt(),
+      varasija = r.nextInt(),
+      hyvaksytyt = r.nextInt(),
+      vastaanottaneet = r.nextInt(),
+      lasna = r.nextInt(),
+      poissa = r.nextInt(),
+      ilmYht = r.nextInt(),
+      aloituspaikat = r.nextInt(),
+      toive1 = r.nextInt(),
+      toive2 = r.nextInt(),
+      toive3 = r.nextInt(),
+      toive4 = r.nextInt(),
+      toive5 = r.nextInt(),
+      toive6 = r.nextInt(),
+      toive7 = r.nextInt(),
+    )
+  )
+
 }

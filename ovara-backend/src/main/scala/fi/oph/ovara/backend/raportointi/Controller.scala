@@ -314,7 +314,7 @@ class Controller(
                                            response: HttpServletResponse
                                          ): Unit = {
     val maybeKoulutustoimija = Option(koulutustoimija)
-    val maybeTulostustapa = Option(tulostustapa)
+    val tulostustapaValinta = Option(tulostustapa).getOrElse("hakukohteittain")
     val naytaHakutoiveetBool = Option(naytaHakutoiveet).exists(_.toBoolean)
     val maybeSukupuoli: Option[String] = if (sukupuoli == "neutral") None else Option(sukupuoli)
     val alkamiskausiList = if (alkamiskausi == null) List() else alkamiskausi.asScala.toList
@@ -332,6 +332,7 @@ class Controller(
 
     val wb = hakeneetHyvaksytytVastaanottaneetService.get(
       hakuList,
+      tulostustapaValinta,
       maybeKoulutustoimija,
       oppilaitosList,
       toimipisteList,

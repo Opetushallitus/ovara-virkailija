@@ -1,7 +1,7 @@
 package fi.oph.ovara.backend.service
 
+import fi.oph.ovara.backend.domain.HakeneetHyvaksytytVastaanottaneetResult
 import fi.oph.ovara.backend.repository.{HakeneetHyvaksytytVastaanottaneetRepository, OvaraDatabase}
-import fi.oph.ovara.backend.utils.Constants.HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,6 +21,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
   
   def get(
            haku: List[String],
+           tulostustapa: String,
            koulutustoimija: Option[String],
            oppilaitokset: List[String],
            toimipisteet: List[String],
@@ -48,7 +49,39 @@ class HakeneetHyvaksytytVastaanottaneetService(
       koulutustoimijaOid = koulutustoimija
     )
 
-    val query = hakeneetHyvaksytytVastaanottaneetRepository.selectWithParams(
+    val queryResult = tulostustapa match
+      case "hakukohteittain" =>
+        val query = hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams(
+          selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
+          haut = haku,
+          hakukohteet = hakukohteet,
+          koulutusalat1 = koulutusalat1,
+          koulutusalat2 = koulutusalat2,
+          koulutusalat3 = koulutusalat3,
+          opetuskielet = opetuskielet,
+          maakunnat = maakunnat,
+          kunnat = kunnat,
+          harkinnanvaraisuudet = harkinnanvaraisuudet,
+          sukupuoli = sukupuoli
+        )
+        db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams").map(r => HakeneetHyvaksytytVastaanottaneetResult(r))
+      case _ =>
+        val query = hakeneetHyvaksytytVastaanottaneetRepository.selectKoulutusaloittainWithParams(
+          selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
+          haut = haku,
+          hakukohteet = hakukohteet,
+          koulutusalat1 = koulutusalat1,
+          koulutusalat2 = koulutusalat2,
+          koulutusalat3 = koulutusalat3,
+          opetuskielet = opetuskielet,
+          maakunnat = maakunnat,
+          kunnat = kunnat,
+          harkinnanvaraisuudet = harkinnanvaraisuudet,
+          sukupuoli = sukupuoli
+        )
+        db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectKoulutusaloittainWithParams")
+    
+    val sumQuery = hakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaHakukohteittainWithParams(
       selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
       haut = haku,
       hakukohteet = hakukohteet,
@@ -61,14 +94,15 @@ class HakeneetHyvaksytytVastaanottaneetService(
       harkinnanvaraisuudet = harkinnanvaraisuudet,
       sukupuoli = sukupuoli
     )
-
-    val queryResult = db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectWithParams")
+    
+    val sumQueryResult = db.run(sumQuery, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaHakukohteittainWithParams")
     
     ExcelWriter.writeHakeneetHyvaksytytVastaanottaneetRaportti(
       asiointikieli,
       translations,
       queryResult.toList,
-      naytaHakutoiveet
+      sumQueryResult,
+      naytaHakutoiveet,
     )
   }
 
