@@ -38,8 +38,8 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
     val controller = new Controller(
       mockCommonService,
       mockKoulutuksetToteutuksetHakukohteetService,
-      mockHakeneetHyvaksytytVastaanottaneetService,
       mockHakijatService,
+      mockHakeneetHyvaksytytVastaanottaneetService,
       mockUserService,
       mockAuditLog
     )
