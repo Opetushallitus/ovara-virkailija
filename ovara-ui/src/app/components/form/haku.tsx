@@ -6,6 +6,7 @@ import { Kielistetty, LanguageCode } from '@/app/lib/types/common';
 import { useFetchHaut } from '@/app/hooks/useFetchHaut';
 import { useSearchParams } from 'next/navigation';
 import { changeMultiComboBoxSelection } from '@/app/components/form/utils';
+import { isNullish } from 'remeda';
 
 type Haku = {
   haku_oid: string;
@@ -17,13 +18,17 @@ export const Haku = () => {
   const user = useAuthorizedUser();
   const locale = (user?.asiointikieli ?? 'fi') as LanguageCode;
 
-  const { selectedHaut, setSelectedHaut } = useCommonSearchParams();
-
+  const { selectedHaut, setSelectedHaut, selectedAlkamiskaudet } =
+    useCommonSearchParams();
+  const fetchEnabled = !isNullish(selectedAlkamiskaudet);
   const queryParams = useSearchParams();
   const queryParamsStr = queryParams.toString();
   const queryParamsWithHauntyyppi = new URLSearchParams(queryParamsStr);
   queryParamsWithHauntyyppi.set('haun_tyyppi', 'toinen_aste');
-  const { data } = useFetchHaut(queryParamsWithHauntyyppi.toString(), fetchEnabled,);
+  const { data } = useFetchHaut(
+    queryParamsWithHauntyyppi.toString(),
+    fetchEnabled,
+  );
 
   const haut: Haku[] = data || [];
 

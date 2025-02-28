@@ -60,7 +60,7 @@ case class HakeneetHyvaksytytVastaanottaneetResult(
 
 object HakeneetHyvaksytytVastaanottaneetResult {
   def apply(hakukohteittain: HakeneetHyvaksytytVastaanottaneetHakukohteittain): HakeneetHyvaksytytVastaanottaneetResult = {
-    val combinedName: Kielistetty = hakukohteittain.hakukohdeNimi ++ hakukohteittain.organisaatioNimi
+    val combinedName: Kielistetty = mergeKielistetty(hakukohteittain.hakukohdeNimi, hakukohteittain.organisaatioNimi)
     new HakeneetHyvaksytytVastaanottaneetResult(
       otsikko = combinedName,
       hakijat = hakukohteittain.hakijat,
@@ -80,5 +80,11 @@ object HakeneetHyvaksytytVastaanottaneetResult {
       toive6 = hakukohteittain.toive6,
       toive7 = hakukohteittain.toive7
     )
+  }
+
+  def mergeKielistetty(a: Kielistetty, b: Kielistetty): Kielistetty = {
+    (a.keys ++ b.keys).map { key =>
+      key -> List(a.getOrElse(key, ""), b.getOrElse(key, "")).filter(_.nonEmpty).mkString("\n")
+    }.toMap
   }
 }

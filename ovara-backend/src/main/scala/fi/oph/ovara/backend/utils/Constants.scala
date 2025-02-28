@@ -39,7 +39,7 @@ object Constants {
 
   val HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES: List[String] =
     List(
-      "hakukohde",
+      "otsikko",
       "hakijat-yht",
       "ensisijaisia",
       "varasija",
