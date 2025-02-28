@@ -2142,7 +2142,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(headingRow.getCell(7).getStringCellValue == "Poissa SV")
     assert(headingRow.getCell(8).getStringCellValue == "IlmYht SV")
     assert(headingRow.getCell(9).getStringCellValue == "Aloituspaikat SV")
-    assert(headingRow.getCell(10).getStringCellValue == null)
+    assert(headingRow.getLastCellNum == 10)
+    assert(headingRow.getCell(10) == null)
 
     // Datarivit
     assert(sheet.getRow(1).getCell(0).getStringCellValue == "Grundexamen inom fordonsbranschen\nOSAO, Haukiputaan yksikkö")
@@ -2155,14 +2156,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(1).getCell(7).getStringCellValue == "0")
     assert(sheet.getRow(1).getCell(8).getStringCellValue == "0")
     assert(sheet.getRow(1).getCell(9).getStringCellValue == "100")
-    assert(sheet.getRow(1).getCell(10).getStringCellValue == null)
-
+    assert(sheet.getRow(1).getCell(10) == null)
     // summarivit
-    assert(sheet.getRow(4).getCell(0).getStringCellValue == "Yhteensä SV")
-    assert(sheet.getRow(4).getCell(1).getStringCellValue == "354")
-    assert(sheet.getRow(5).getCell(0).getStringCellValue == "Yksittäiset hakijat SV")
-    assert(sheet.getRow(5).getCell(1).getStringCellValue == "300")
-    assert(sheet.getPhysicalNumberOfRows == 6)
+    assert(sheet.getRow(2).getCell(0).getStringCellValue == "Yhteensä SV")
+    assert(sheet.getRow(2).getCell(1).getStringCellValue == "354")
+    assert(sheet.getRow(3).getCell(0).getStringCellValue == "Yksittäiset hakijat SV")
+    assert(sheet.getRow(3).getCell(1).getStringCellValue == "300")
+    assert(sheet.getPhysicalNumberOfRows == 4)
 
   }
 
