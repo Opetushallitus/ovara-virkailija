@@ -8,7 +8,6 @@ abstract class Hakija {
   val hakemusOid: String
   val toimipiste: Kielistetty
   val hakukohteenNimi: Kielistetty
-  val hakukohdeOid: String
   val prioriteetti: Int
   val valintatieto: String
   val vastaanottotieto: Option[String]
@@ -32,7 +31,6 @@ case class ToisenAsteenHakija(
     oppilaitos: Kielistetty,
     toimipiste: Kielistetty,
     hakukohteenNimi: Kielistetty,
-    hakukohdeOid: String,
     prioriteetti: Int,
     kaksoistutkintoKiinnostaa: Option[Boolean],
     urheilijatutkintoKiinnostaa: Option[Boolean],
@@ -64,7 +62,6 @@ case class HakijaWithCombinedNimi(
     oppilaitos: Kielistetty,
     toimipiste: Kielistetty,
     hakukohteenNimi: Kielistetty,
-    hakukohdeOid: String,
     prioriteetti: Int,
     kaksoistutkintoKiinnostaa: Option[Boolean],
     urheilijatutkintoKiinnostaa: Option[Boolean],
@@ -98,7 +95,6 @@ object HakijaWithCombinedNimi {
       oppilaitos = hakija.oppilaitos,
       toimipiste = hakija.toimipiste,
       hakukohteenNimi = hakija.hakukohteenNimi,
-      hakukohdeOid = hakija.hakukohdeOid,
       prioriteetti = hakija.prioriteetti,
       kaksoistutkintoKiinnostaa = hakija.kaksoistutkintoKiinnostaa,
       urheilijatutkintoKiinnostaa = hakija.urheilijatutkintoKiinnostaa,
@@ -133,7 +129,6 @@ case class KkHakija(
     hakemusOid: String,
     toimipiste: Kielistetty,
     hakukohteenNimi: Kielistetty,
-    hakukohdeOid: String,
     prioriteetti: Int,
     valintatieto: String,
     vastaanottotieto: Option[String],
@@ -157,7 +152,6 @@ case class KkHakijaWithCombinedNimi(
     hakemusOid: String,
     toimipiste: Kielistetty,
     hakukohteenNimi: Kielistetty,
-    hakukohdeOid: String,
     prioriteetti: Int,
     valintatieto: String,
     vastaanottotieto: Option[String],
@@ -183,7 +177,6 @@ object KkHakijaWithCombinedNimi {
       hakemusOid = hakija.hakemusOid,
       toimipiste = hakija.toimipiste,
       hakukohteenNimi = hakija.hakukohteenNimi,
-      hakukohdeOid = hakija.hakukohdeOid,
       prioriteetti = hakija.prioriteetti,
       valintatieto = hakija.valintatieto,
       vastaanottotieto = hakija.vastaanottotieto,

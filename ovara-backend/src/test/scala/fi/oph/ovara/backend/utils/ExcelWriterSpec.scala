@@ -1586,7 +1586,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
       ExcelWriter.writeHakijatRaportti(
         hakijatQueryResult,
         userLng,
-        translations
+        translations,
+        "toinen aste"
       )
 
     assert(wb.getNumberOfSheets == 1)
@@ -1668,7 +1669,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
       ExcelWriter.writeHakijatRaportti(
         hakijatResult,
         userLng,
-        translations
+        translations,
+        "toinen aste"
       )
 
     assert(wb.getNumberOfSheets == 1)
@@ -1716,9 +1718,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
           Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
           "1.2.246.562.24.30646006111",
           "1.2.246.562.11.00000000000002179045",
-          Map(En -> "Oppilaitos 1 en", Fi  -> "Oppilaitos 1 fi", Sv -> "Oppilaitos 1 sv"),
-          Map(En -> "Toimipiste 1 en", Fi  -> "Toimipiste 1 fi", Sv -> "Toimipiste 1 sv"),
-          Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv   -> "Hakukohde 1 SV"),
+          Map(En -> "Oppilaitos 1 en", Fi -> "Oppilaitos 1 fi", Sv -> "Oppilaitos 1 sv"),
+          Map(En -> "Toimipiste 1 en", Fi -> "Toimipiste 1 fi", Sv -> "Toimipiste 1 sv"),
+          Map(En -> "Hakukohde 1 EN", Fi  -> "Hakukohde 1", Sv     -> "Hakukohde 1 SV"),
           "1.2.246.562.20.00000000000000038597",
           2,
           Some(true),
@@ -1751,9 +1753,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
           Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
           "1.2.246.562.24.30646006111",
           "1.2.246.562.11.00000000000002112891",
-          Map(En -> "Oppilaitos 2 en", Fi  -> "Oppilaitos 2 fi", Sv -> "Oppilaitos 2 sv"),
-          Map(En -> "Toimipiste 2 en", Fi  -> "Toimipiste 2 fi", Sv -> "Toimipiste 2 sv"),
-          Map(En -> "Hakukohde 2 EN", Fi -> "Hakukohde 2", Sv   -> "Hakukohde 2 SV"),
+          Map(En -> "Oppilaitos 2 en", Fi -> "Oppilaitos 2 fi", Sv -> "Oppilaitos 2 sv"),
+          Map(En -> "Toimipiste 2 en", Fi -> "Toimipiste 2 fi", Sv -> "Toimipiste 2 sv"),
+          Map(En -> "Hakukohde 2 EN", Fi  -> "Hakukohde 2", Sv     -> "Hakukohde 2 SV"),
           "1.2.246.562.20.00000000000000038597",
           1,
           Some(true),
@@ -1786,9 +1788,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
           Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
           "1.2.246.562.24.18441866015",
           "1.2.246.562.11.00000000000002126102",
-          Map(En -> "Oppilaitos 3 en", Fi  -> "Oppilaitos 3 fi", Sv -> "Oppilaitos 3 sv"),
-          Map(En -> "Toimipiste 3 en", Fi  -> "Toimipiste 3 fi", Sv -> "Toimipiste 3 sv"),
-          Map(En -> "Hakukohde 3 EN", Fi -> "Hakukohde 3", Sv   -> "Hakukohde 3 SV"),
+          Map(En -> "Oppilaitos 3 en", Fi -> "Oppilaitos 3 fi", Sv -> "Oppilaitos 3 sv"),
+          Map(En -> "Toimipiste 3 en", Fi -> "Toimipiste 3 fi", Sv -> "Toimipiste 3 sv"),
+          Map(En -> "Hakukohde 3 EN", Fi  -> "Hakukohde 3", Sv     -> "Hakukohde 3 SV"),
           "1.2.246.562.20.00000000000000038597",
           1,
           Some(true),
@@ -1825,7 +1827,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
       ExcelWriter.writeHakijatRaportti(
         hakijatResult,
         userLng,
-        translations
+        translations,
+        "toinen aste"
       )
 
     assert(wb.getNumberOfSheets == 1)
@@ -2261,15 +2264,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
       translations = translations,
       data = data,
       yksittaisetHakijat = 450,
-      naytaHakutoiveet = true,
-      tulostustapa = "hakukohteittain"
+      naytaHakutoiveet = true
     )
 
     assert(workbook.getNumberOfSheets == 1)
     val sheet = workbook.getSheetAt(0)
     // Otsikkorivi
     val headingRow = sheet.getRow(0)
-    assert(headingRow.getCell(0).getStringCellValue == "Hakukohde SV")
+    assert(headingRow.getCell(0).getStringCellValue == "Otsikko SV")
     assert(headingRow.getCell(1).getStringCellValue == "Hakijat SV")
     assert(headingRow.getCell(2).getStringCellValue == "Ensisijaisia SV")
     assert(headingRow.getCell(3).getStringCellValue == "Varasija SV")
@@ -2353,80 +2355,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
   }
 
-  it should "return excel with correct tulostustapa heading" in {
-    val data = List(
-      HakeneetHyvaksytytVastaanottaneetResult(
-        otsikko = Map(
-          En -> "OSAO, Haukiputaan yksikkö",
-          Fi -> "OSAO, Haukiputaan yksikkö",
-          Sv -> "OSAO, Haukiputaan yksikkö"
-        ),
-        hakijat = 354,
-        ensisijaisia = 95,
-        varasija = 354,
-        hyvaksytyt = 100,
-        vastaanottaneet = 0,
-        lasna = 0,
-        poissa = 0,
-        ilmYht = 0,
-        aloituspaikat = 100,
-        toive1 = 95,
-        toive2 = 91,
-        toive3 = 76,
-        toive4 = 45,
-        toive5 = 25,
-        toive6 = 11,
-        toive7 = 11
-      ),
-    )
-
-    val workbook = ExcelWriter.writeHakeneetHyvaksytytVastaanottaneetRaportti(
-      asiointikieli = "sv",
-      translations = translations,
-      data = data,
-      yksittaisetHakijat = 300,
-      naytaHakutoiveet = false,
-      tulostustapa = "oppilaitoksittain"
-    )
-
-    assert(workbook.getNumberOfSheets == 1)
-    val sheet = workbook.getSheetAt(0)
-    // Otsikkorivi
-    val headingRow = sheet.getRow(0)
-    assert(headingRow.getCell(0).getStringCellValue == "Oppilaitos SV")
-    assert(headingRow.getCell(1).getStringCellValue == "Hakijat SV")
-    assert(headingRow.getCell(2).getStringCellValue == "Ensisijaisia SV")
-    assert(headingRow.getCell(3).getStringCellValue == "Varasija SV")
-    assert(headingRow.getCell(4).getStringCellValue == "Hyväksytyt SV")
-    assert(headingRow.getCell(5).getStringCellValue == "Vastaanottaneet SV")
-    assert(headingRow.getCell(6).getStringCellValue == "Läsnä SV")
-    assert(headingRow.getCell(7).getStringCellValue == "Poissa SV")
-    assert(headingRow.getCell(8).getStringCellValue == "IlmYht SV")
-    assert(headingRow.getCell(9).getStringCellValue == "Aloituspaikat SV")
-    assert(headingRow.getLastCellNum == 10)
-    assert(headingRow.getCell(10) == null)
-
-    // Datarivit
-    assert(sheet.getRow(1).getCell(0).getStringCellValue == "OSAO, Haukiputaan yksikkö")
-    assert(sheet.getRow(1).getCell(1).getStringCellValue == "354")
-    assert(sheet.getRow(1).getCell(2).getStringCellValue == "95")
-    assert(sheet.getRow(1).getCell(3).getStringCellValue == "354")
-    assert(sheet.getRow(1).getCell(4).getStringCellValue == "100")
-    assert(sheet.getRow(1).getCell(5).getStringCellValue == "0")
-    assert(sheet.getRow(1).getCell(6).getStringCellValue == "0")
-    assert(sheet.getRow(1).getCell(7).getStringCellValue == "0")
-    assert(sheet.getRow(1).getCell(8).getStringCellValue == "0")
-    assert(sheet.getRow(1).getCell(9).getStringCellValue == "100")
-    assert(sheet.getRow(1).getCell(10) == null)
-    // summarivit
-    assert(sheet.getRow(2).getCell(0).getStringCellValue == "Yhteensä SV")
-    assert(sheet.getRow(2).getCell(1).getStringCellValue == "354")
-    assert(sheet.getRow(3).getCell(0).getStringCellValue == "Yksittäiset hakijat SV")
-    assert(sheet.getRow(3).getCell(1).getStringCellValue == "300")
-    assert(sheet.getPhysicalNumberOfRows == 4)
-
-  }
-
   it should "return excel without Toive sarakkeet if naytaHakutoiveet is false" in {
     val data = List(
       HakeneetHyvaksytytVastaanottaneetResult(
@@ -2459,15 +2387,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
       translations = translations,
       data = data,
       yksittaisetHakijat = 300,
-      naytaHakutoiveet = false,
-      tulostustapa = "hakukohteittain"
+      naytaHakutoiveet = false
     )
 
     assert(workbook.getNumberOfSheets == 1)
     val sheet = workbook.getSheetAt(0)
     // Otsikkorivi
     val headingRow = sheet.getRow(0)
-    assert(headingRow.getCell(0).getStringCellValue == "Hakukohde SV")
+    assert(headingRow.getCell(0).getStringCellValue == "Otsikko SV")
     assert(headingRow.getCell(1).getStringCellValue == "Hakijat SV")
     assert(headingRow.getCell(2).getStringCellValue == "Ensisijaisia SV")
     assert(headingRow.getCell(3).getStringCellValue == "Varasija SV")
