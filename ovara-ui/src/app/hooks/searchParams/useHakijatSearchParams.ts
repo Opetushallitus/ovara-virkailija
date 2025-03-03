@@ -54,12 +54,12 @@ export const useHakijatSearchParams = () => {
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
-  const [selectedYoArvosanat, setSelectedYoArvosanat] = useQueryState(
+  const [selectedNaytaYoArvosanat, setSelectedNaytaYoArvosanat] = useQueryState(
     'nayta-yo-arvosanat',
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS).withDefault(true),
   );
 
-  const [selectedHetu, setSelectedHetu] = useQueryState(
+  const [selectedNaytaHetu, setSelectedNaytaHetu] = useQueryState(
     'nayta-hetu',
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS).withDefault(true),
   );
@@ -83,9 +83,9 @@ export const useHakijatSearchParams = () => {
     setSelectedSoraTerveys,
     selectedSoraAiempi,
     setSelectedSoraAiempi,
-    selectedYoArvosanat,
-    setSelectedYoArvosanat,
-    selectedHetu,
-    setSelectedHetu,
+    selectedNaytaYoArvosanat,
+    setSelectedNaytaYoArvosanat,
+    selectedNaytaHetu,
+    setSelectedNaytaHetu,
   };
 };

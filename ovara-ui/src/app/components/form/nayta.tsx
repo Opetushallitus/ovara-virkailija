@@ -7,28 +7,30 @@ import {
 } from '@/app/components/form/utils';
 
 export const NaytaYoArvosanat = ({ t }: { t: (key: string) => string }) => {
-  const { selectedYoArvosanat, setSelectedYoArvosanat } =
+  const { selectedNaytaYoArvosanat, setSelectedNaytaYoArvosanat } =
     useHakijatSearchParams();
 
   return (
     <OvaraRadioGroup
       label={t(`raportti.nayta-yo-arvosanat`)}
       options={YES_NO_RADIOGROUP_OPTIONS}
-      value={getSelectedRadioGroupValue(selectedYoArvosanat)}
-      onChange={(e) => changeRadioGroupSelection(e, setSelectedYoArvosanat)}
+      value={getSelectedRadioGroupValue(selectedNaytaYoArvosanat)}
+      onChange={(e) =>
+        changeRadioGroupSelection(e, setSelectedNaytaYoArvosanat)
+      }
     />
   );
 };
 
 export const NaytaHetu = ({ t }: { t: (key: string) => string }) => {
-  const { selectedHetu, setSelectedHetu } = useHakijatSearchParams();
+  const { selectedNaytaHetu, setSelectedNaytaHetu } = useHakijatSearchParams();
 
   return (
     <OvaraRadioGroup
       label={t(`raportti.nayta-hetu`)}
       options={YES_NO_RADIOGROUP_OPTIONS}
-      value={getSelectedRadioGroupValue(selectedHetu)}
-      onChange={(e) => changeRadioGroupSelection(e, setSelectedHetu)}
+      value={getSelectedRadioGroupValue(selectedNaytaHetu)}
+      onChange={(e) => changeRadioGroupSelection(e, setSelectedNaytaHetu)}
     />
   );
 };
