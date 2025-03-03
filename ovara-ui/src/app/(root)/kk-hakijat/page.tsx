@@ -39,17 +39,17 @@ export default function Hakijat() {
   const oppilaitos = queryParams.get('oppilaitos');
   const toimipiste = queryParams.get('toimipiste');
 
-  const { selectedYoArvosanat } = useHakijatSearchParams();
-  const { selectedHetu } = useHakijatSearchParams();
+  const { selectedNaytaYoArvosanat } = useHakijatSearchParams();
+  const { selectedNaytaHetu } = useHakijatSearchParams();
 
   const queryParamsStr = useQueryParams().toString();
   const queryParamsWithDefaults = new URLSearchParams(queryParamsStr);
   queryParamsWithDefaults.set(
     'nayta-yo-arvosanat',
-    selectedYoArvosanat.toString(),
+    selectedNaytaYoArvosanat.toString(),
   );
 
-  queryParamsWithDefaults.set('nayta-hetu', selectedHetu.toString());
+  queryParamsWithDefaults.set('nayta-hetu', selectedNaytaHetu.toString());
 
   const isDisabled = !(alkamiskausi && haku && (oppilaitos || toimipiste));
   const [isLoading, setIsLoading] = useState(false);
