@@ -381,247 +381,106 @@ object ExcelWriter {
 
     var currentRowIndex = 0
 
-    val c = if (id == "korkeakoulu") classOf[KkHakijaWithCombinedNimi] else classOf[HakijaWithCombinedNimi]
+    val optionallyShowableFields = List("hetu")
 
+    val naytaHetu = maybeNaytaHetu.getOrElse(false)
+
+    val c                   = if (id == "korkeakoulu") classOf[KkHakijaWithCombinedNimi] else classOf[HakijaWithCombinedNimi]
     val fieldNames          = c.getDeclaredFields.map(_.getName).toList
+    val fieldNamesToShow = fieldNames.filter(fieldName => {
+       !optionallyShowableFields.contains(fieldName) || fieldName == "hetu" && naytaHetu
+    })
     val fieldNamesWithIndex = fieldNames.zipWithIndex
 
     currentRowIndex =
       createHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNames, headingCellStyle)
 
-    // TODO: päätellään täällä näytetäänkö yo, hetu, osoite raporttityypin ja
+    // TODO: päätellään täällä näytetäänkö yo, osoite flagin perusteella
     hakijat.foreach(hakutoive => {
       val hakijanHakutoiveRow = sheet.createRow(currentRowIndex)
       currentRowIndex = currentRowIndex + 1
 
-      for (i <- 0 until hakutoive.productArity) yield {
-        val fieldName = fieldNamesWithIndex.find((name, index) => i == index) match {
-          case Some((name, i)) => name
-          case None            => ""
-        }
+      var numberOfSkippedFields = 0
+      var cellIndex             = 0
+      for ((fieldName, i) <- fieldNamesWithIndex) yield {
+        if (optionallyShowableFields.contains(fieldName) && !naytaHetu) {
+          numberOfSkippedFields = numberOfSkippedFields + 1
+        } else {
+          cellIndex = i - numberOfSkippedFields
 
-        val cell = hakijanHakutoiveRow.createCell(i)
-        cell.setCellStyle(bodyTextCellStyle)
-        hakutoive.productElement(i) match {
-          case kielistetty: Kielistetty =>
-            val kielistettyValue = kielistetty.get(Kieli.withName(asiointikieli)) match {
-              case Some(value) => value
-              case None        => "-"
-            }
-            cell.setCellValue(kielistettyValue)
-          case Some(d: LocalDate) =>
-            val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-            cell.setCellValue(d.format(formatter))
-          case s: String if List("valintatieto").contains(fieldName) =>
-            val lowerCaseStr = s.toLowerCase
-            val translation  = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
-            cell.setCellValue(translation)
-          case s: String =>
-            cell.setCellValue(s)
-          case Some(s: String) if List("vastaanottotieto", "ilmoittautuminen").contains(fieldName) =>
-            val lowerCaseStr = s.toLowerCase
-            val translation  = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
-            cell.setCellValue(translation)
-          case Some(s: String) if List("harkinnanvaraisuus").contains(fieldName) =>
-            val value = if (s.startsWith("EI_HARKINNANVARAINEN")) {
-              "-"
-            } else {
-              val r: Regex = "(ATARU|SURE)_(\\w*)".r
-              val group    = for (m <- r.findFirstMatchIn(s)) yield m.group(2)
-              group match {
-                case Some(m) =>
-                  val value = if (m == "ULKOMAILLA_OPISKELTU") {
-                    "KOULUTODISTUSTEN_VERTAILUVAIKEUDET"
-                  } else {
-                    m
-                  }
-                  val lowerCaseStr = value.toLowerCase
-                  translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
-                case None => "-"
+          val cell = hakijanHakutoiveRow.createCell(cellIndex)
+          cell.setCellStyle(bodyTextCellStyle)
+
+          hakutoive.productElement(i) match {
+            case kielistetty: Kielistetty =>
+              val kielistettyValue = kielistetty.get(Kieli.withName(asiointikieli)) match {
+                case Some(value) => value
+                case None        => "-"
               }
-            }
-            cell.setCellValue(value)
-          case Some(s: String) =>
-            cell.setCellValue(s)
-          case Some(int: Int) =>
-            cell.setCellValue(int)
-          case int: Int =>
-            cell.setCellValue(int)
-          case Some(b: Boolean)
-              if List(
-                "turvakielto",
-                "kaksoistutkintoKiinnostaa",
-                "urheilijatutkintoKiinnostaa",
-                "soraAiempi",
-                "soraTerveys",
-                "markkinointilupa",
-                "julkaisulupa",
-                "sahkoinenViestintaLupa",
-                "ensikertalainen"
-              ).contains(fieldName) =>
-            val translation =
-              if (b) translations.getOrElse("raportti.kylla", "raportti.kylla")
-              else translations.getOrElse("raportti.ei", "raportti.ei")
-            cell.setCellValue(translation)
-          case Some(b: Boolean) =>
-            val value = if (b) "X" else "-"
-            cell.setCellValue(value)
-          case _ =>
-            cell.setCellValue("-")
+              cell.setCellValue(kielistettyValue)
+            case Some(d: LocalDate) =>
+              val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+              cell.setCellValue(d.format(formatter))
+            case s: String if List("valintatieto").contains(fieldName) =>
+              val lowerCaseStr = s.toLowerCase
+              val translation  = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+              cell.setCellValue(translation)
+            case s: String =>
+              cell.setCellValue(s)
+            case Some(s: String) if List("vastaanottotieto", "ilmoittautuminen").contains(fieldName) =>
+              val lowerCaseStr = s.toLowerCase
+              val translation  = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+              cell.setCellValue(translation)
+            case Some(s: String) if List("harkinnanvaraisuus").contains(fieldName) =>
+              val value = if (s.startsWith("EI_HARKINNANVARAINEN")) {
+                "-"
+              } else {
+                val r: Regex = "(ATARU|SURE)_(\\w*)".r
+                val group    = for (m <- r.findFirstMatchIn(s)) yield m.group(2)
+                group match {
+                  case Some(m) =>
+                    val value = if (m == "ULKOMAILLA_OPISKELTU") {
+                      "KOULUTODISTUSTEN_VERTAILUVAIKEUDET"
+                    } else {
+                      m
+                    }
+                    val lowerCaseStr = value.toLowerCase
+                    translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+                  case None => "-"
+                }
+              }
+              cell.setCellValue(value)
+            case Some(s: String) =>
+              cell.setCellValue(s)
+            case Some(int: Int) =>
+              cell.setCellValue(int)
+            case int: Int =>
+              cell.setCellValue(int)
+            case Some(b: Boolean)
+                if List(
+                  "turvakielto",
+                  "kaksoistutkintoKiinnostaa",
+                  "urheilijatutkintoKiinnostaa",
+                  "soraAiempi",
+                  "soraTerveys",
+                  "markkinointilupa",
+                  "julkaisulupa",
+                  "sahkoinenViestintaLupa",
+                  "ensikertalainen"
+                ).contains(fieldName) =>
+              val translation =
+                if (b) translations.getOrElse("raportti.kylla", "raportti.kylla")
+                else translations.getOrElse("raportti.ei", "raportti.ei")
+              cell.setCellValue(translation)
+            case Some(b: Boolean) =>
+              val value = if (b) "X" else "-"
+              cell.setCellValue(value)
+            case _ =>
+              cell.setCellValue("-")
+          }
         }
       }
     })
-
-    // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
-    fieldNamesWithIndex.foreach { case (title, index) =>
-      sheet.autoSizeColumn(index)
-    }
-
-    try {
-      workbook
-    } catch {
-      case e: Exception =>
-        LOG.error(s"Error creating excel: ${e.getMessage}")
-        throw e
-    }
-  }
-
-  def writeHakeneetHyvaksytytVastaanottaneetRaportti(
-                            asiointikieli: String,
-                            translations: Map[String, String],
-                            data: List[HakeneetHyvaksytytVastaanottaneetResult],
-                            yksittaisetHakijat: Int,
-                            naytaHakutoiveet: Boolean,
-                            tulostustapa: String
-                          ): XSSFWorkbook = {
-    val workbook: XSSFWorkbook = new XSSFWorkbook()
-    LOG.info("Creating new HakeneetHyvaksytytVastaanottaneet excel from db results")
-    val sheet: XSSFSheet = workbook.createSheet()
-    workbook.setSheetName(
-      0,
-      WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yhteenveto", "raportti.yhteenveto"))
-    )
-
-    val headingCellStyle: XSSFCellStyle = workbook.createCellStyle()
-    val bodyTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
-    val summaryCellStyle: XSSFCellStyle = workbook.createCellStyle()
-
-    val headingFont = createHeadingFont(workbook, headingCellStyle)
-    val bodyTextFont = createBodyTextFont(workbook, bodyTextCellStyle)
-    val summaryFont = createSummaryRowFont(workbook)
-
-    summaryCellStyle.setFont(summaryFont)
-    summaryCellStyle.setAlignment(HorizontalAlignment.RIGHT)
-
-    bodyTextCellStyle.setWrapText(true)
-
-    var currentRowIndex = 0
-
-    val otsikko = tulostustapa match
-      case "hakukohteittain" => "hakukohde"
-      case "oppilaitoksittain" => "oppilaitos"
-      case "toimipisteittain" => "toimipiste"
-      case "koulutustoimijoittain" => "koulutustoimija"
-      case "koulutusaloittain" => "koulutusala"
-    val fieldNames =
-      if(naytaHakutoiveet)
-        List(otsikko) ++ HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES ++ HAKUTOIVEET_TITLES
-      else
-        List(otsikko) ++ HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES
-    val fieldNamesWithIndex = fieldNames.zipWithIndex
-
-    currentRowIndex =
-      createHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNames, headingCellStyle)
-
-    data.foreach { item =>
-      val dataRow = sheet.createRow(currentRowIndex)
-      val rowData = List(
-        item.otsikko(Kieli.withName(asiointikieli)),
-        item.hakijat.toString,
-        item.ensisijaisia.toString,
-        item.varasija.toString,
-        item.hyvaksytyt.toString,
-        item.vastaanottaneet.toString,
-        item.lasna.toString,
-        item.poissa.toString,
-        item.ilmYht.toString,
-        item.aloituspaikat.toString
-      ) ++ (if (naytaHakutoiveet) {
-        List(
-          item.toive1.toString,
-          item.toive2.toString,
-          item.toive3.toString,
-          item.toive4.toString,
-          item.toive5.toString,
-          item.toive6.toString,
-          item.toive7.toString
-        )
-      } else {
-        List()
-      })
-      rowData.zipWithIndex.foreach { case (value, index) =>
-        val cell = dataRow.createCell(index)
-        cell.setCellStyle(bodyTextCellStyle)
-        cell.setCellValue(value)
-      }
-      currentRowIndex += 1
-    }
-
-    // yhteensä-rivi
-    val summaryRow = sheet.createRow(currentRowIndex)
-    val summaryData = List(
-      translations.getOrElse("raportti.yhteensa", "raportti.yhteensa"),
-      data.map(_.hakijat).sum.toString,
-      data.map(_.ensisijaisia).sum.toString,
-      data.map(_.varasija).sum.toString,
-      data.map(_.hyvaksytyt).sum.toString,
-      data.map(_.vastaanottaneet).sum.toString,
-      data.map(_.lasna).sum.toString,
-      data.map(_.poissa).sum.toString,
-      data.map(_.ilmYht).sum.toString,
-      data.map(_.aloituspaikat).sum.toString
-    ) ++ (if (naytaHakutoiveet) {
-      List(
-        data.map(_.toive1).sum.toString,
-        data.map(_.toive2).sum.toString,
-        data.map(_.toive3).sum.toString,
-        data.map(_.toive4).sum.toString,
-        data.map(_.toive5).sum.toString,
-        data.map(_.toive6).sum.toString,
-        data.map(_.toive7).sum.toString
-      )
-    } else {
-      List()
-    })
-
-    summaryData.zipWithIndex.foreach { case (value, index) =>
-      val cell = summaryRow.createCell(index)
-      if (index == 0) {
-        cell.setCellStyle(summaryCellStyle)
-      } else {
-        cell.setCellStyle(bodyTextCellStyle)
-      }
-      cell.setCellValue(value)
-    }
-
-    currentRowIndex += 1
-
-    // yksittäiset hakijat -rivi
-    val hakijatSummaryRow = sheet.createRow(currentRowIndex)
-    val hakijatSummaryData = List(
-      translations.getOrElse("raportti.yksittaiset-hakijat", "raportti.yksittaiset-hakijat"),
-      yksittaisetHakijat.toString,
-    )
-
-    hakijatSummaryData.zipWithIndex.foreach { case (value, index) =>
-      val cell = hakijatSummaryRow.createCell(index)
-      if (index == 0) {
-        cell.setCellStyle(summaryCellStyle)
-      } else {
-        cell.setCellStyle(bodyTextCellStyle)
-      }
-      cell.setCellValue(value)
-    }
 
     // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
     fieldNamesWithIndex.foreach { case (title, index) =>

@@ -17,8 +17,7 @@ class KkHakijatRepository extends Extractors {
       hakukohteet: List[String],
       valintatieto: List[String],
       vastaanottotieto: List[String],
-      markkinointilupa: Option[Boolean],
-      naytaYoArvosanat: Boolean
+      markkinointilupa: Option[Boolean]
   ): SqlStreamingAction[Vector[KkHakija], KkHakija, Effect] = {
     val hakuStr                     = RepositoryUtils.makeListOfValuesQueryStr(haut)
     val raportointiorganisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusOrganisaatiot)

@@ -59,6 +59,11 @@ export const useHakijatSearchParams = () => {
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS).withDefault(true),
   );
 
+  const [selectedHetu, setSelectedHetu] = useQueryState(
+    'nayta-hetu',
+    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS).withDefault(true),
+  );
+
   return {
     selectedPohjakoulutukset,
     setSelectedPohjakoulutukset,
@@ -80,5 +85,7 @@ export const useHakijatSearchParams = () => {
     setSelectedSoraAiempi,
     selectedYoArvosanat,
     setSelectedYoArvosanat,
+    selectedHetu,
+    setSelectedHetu,
   };
 };
