@@ -364,7 +364,8 @@ object ExcelWriter {
       translations: Map[String, String],
       id: String,
       maybeNaytaYoArvosanat: Option[Boolean] = None,
-      maybeNaytaHetu: Option[Boolean] = None
+      maybeNaytaHetu: Option[Boolean] = None,
+      maybeNaytaPostiosoite: Option[Boolean] = None
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new excel from db results")
@@ -382,21 +383,30 @@ object ExcelWriter {
 
     var currentRowIndex = 0
 
-    val optionallyShowableFields = List("hetu")
+    val postiosoiteFields        = List("lahiosoite", "postinumero", "postitoimipaikka")
+    val optionallyShowableFields = List("hetu") ::: postiosoiteFields
 
-    val naytaHetu = maybeNaytaHetu.getOrElse(false)
+    val naytaHetu        = maybeNaytaHetu.getOrElse(false)
+    val naytaPostiosoite = maybeNaytaPostiosoite.getOrElse(false)
 
-    val c                   = if (id == "korkeakoulu") classOf[KkHakijaWithCombinedNimi] else classOf[HakijaWithCombinedNimi]
-    val fieldNames          = c.getDeclaredFields.map(_.getName).toList
-    val fieldNamesToShow = fieldNames.filter(fieldName => {
-       !optionallyShowableFields.contains(fieldName) || fieldName == "hetu" && naytaHetu
-    })
+    val c          = if (id == "korkeakoulu") classOf[KkHakijaWithCombinedNimi] else classOf[HakijaWithCombinedNimi]
+    val fieldNames = c.getDeclaredFields.map(_.getName).toList
+    val fieldNamesToShow = if (id == "korkeakoulu") {
+      fieldNames.filter(fieldName => {
+        !optionallyShowableFields.contains(fieldName) ||
+          fieldName == "hetu" && naytaHetu ||
+          postiosoiteFields.contains(
+            fieldName
+          ) && naytaPostiosoite
+      })
+    } else {
+      fieldNames
+    }
     val fieldNamesWithIndex = fieldNames.zipWithIndex
 
     currentRowIndex =
       createHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNamesToShow, headingCellStyle)
 
-    // TODO: päätellään täällä näytetäänkö yo, osoite flagin perusteella
     hakijat.foreach(hakutoive => {
       val hakijanHakutoiveRow = sheet.createRow(currentRowIndex)
       currentRowIndex = currentRowIndex + 1
@@ -404,7 +414,7 @@ object ExcelWriter {
       var numberOfSkippedFields = 0
       var cellIndex             = 0
       for ((fieldName, i) <- fieldNamesWithIndex) yield {
-        if (optionallyShowableFields.contains(fieldName) && !naytaHetu) {
+        if (id == "korkeakoulu" && optionallyShowableFields.contains(fieldName) && !naytaHetu) {
           numberOfSkippedFields = numberOfSkippedFields + 1
         } else {
           cellIndex = i - numberOfSkippedFields

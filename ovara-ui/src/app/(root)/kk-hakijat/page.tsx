@@ -24,7 +24,11 @@ import { useState } from 'react';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { downloadExcel } from '@/app/components/form/utils';
 import { Valintatieto } from '@/app/components/form/valintatieto';
-import { NaytaYoArvosanat, NaytaHetu } from '@/app/components/form/nayta';
+import {
+  NaytaYoArvosanat,
+  NaytaHetu,
+  NaytaPostiosoite,
+} from '@/app/components/form/nayta';
 import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
 
 export default function Hakijat() {
@@ -39,8 +43,11 @@ export default function Hakijat() {
   const oppilaitos = queryParams.get('oppilaitos');
   const toimipiste = queryParams.get('toimipiste');
 
-  const { selectedNaytaYoArvosanat } = useHakijatSearchParams();
-  const { selectedNaytaHetu } = useHakijatSearchParams();
+  const {
+    selectedNaytaYoArvosanat,
+    selectedNaytaHetu,
+    selectedNaytaPostiosoite,
+  } = useHakijatSearchParams();
 
   const queryParamsStr = useQueryParams().toString();
   const queryParamsWithDefaults = new URLSearchParams(queryParamsStr);
@@ -48,8 +55,11 @@ export default function Hakijat() {
     'nayta-yo-arvosanat',
     selectedNaytaYoArvosanat.toString(),
   );
-
   queryParamsWithDefaults.set('nayta-hetu', selectedNaytaHetu.toString());
+  queryParamsWithDefaults.set(
+    'nayta-postiosoite',
+    selectedNaytaPostiosoite.toString(),
+  );
 
   const isDisabled = !(alkamiskausi && haku && (oppilaitos || toimipiste));
   const [isLoading, setIsLoading] = useState(false);
@@ -85,6 +95,7 @@ export default function Hakijat() {
           <Markkinointilupa t={t} />
           <NaytaYoArvosanat t={t} />
           <NaytaHetu t={t} />
+          <NaytaPostiosoite t={t} />
           <FormButtons
             disabled={isDisabled}
             downloadExcel={() =>
