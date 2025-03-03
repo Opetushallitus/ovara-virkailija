@@ -337,7 +337,7 @@ class Controller(
       "naytaHetu"        -> naytaHetu
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
-    sendExcel(wb, response, request, "hakijat", raporttiParams)
+    sendExcel(wb, response, request, "kk-hakijat", raporttiParams)
   }
 
   @GetMapping(path = Array("hakeneet-hyvaksytyt-vastaanottaneet"))
