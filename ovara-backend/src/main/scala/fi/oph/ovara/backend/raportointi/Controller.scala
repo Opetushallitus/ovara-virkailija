@@ -3,7 +3,7 @@ package fi.oph.ovara.backend.raportointi
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.UserResponse
-import fi.oph.ovara.backend.service.{CommonService, HakeneetHyvaksytytVastaanottaneetService, HakijatService, KoulutuksetToteutuksetHakukohteetService, UserService}
+import fi.oph.ovara.backend.service.*
 import fi.oph.ovara.backend.utils.AuditLog
 import fi.oph.ovara.backend.utils.AuditOperation.KoulutuksetToteutuksetHakukohteet
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
@@ -26,6 +26,7 @@ class Controller(
     koulutuksetToteutuksetHakukohteetService: KoulutuksetToteutuksetHakukohteetService,
     hakijatService: HakijatService,
     hakeneetHyvaksytytVastaanottaneetService: HakeneetHyvaksytytVastaanottaneetService,
+    kkHakijatService: KkHakijatService,
     userService: UserService,
     val auditLog: AuditLog = AuditLog
 ) {
@@ -38,6 +39,14 @@ class Controller(
   mapper.registerModule(DefaultScalaModule)
   mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
   mapper.configure(SerializationFeature.INDENT_OUTPUT, true)
+
+  private def strToOptionBoolean(str: String) = {
+    if (str == null) {
+      None
+    } else {
+      Option(str.toBoolean)
+    }
+  }
 
   @GetMapping(path = Array("healthcheck"))
   def healthcheck = "Ovara application is running!"
@@ -160,7 +169,6 @@ class Controller(
 
   @GetMapping(path = Array("koulutukset-toteutukset-hakukohteet"))
   def koulutukset_toteutukset_hakukohteet(
-      @RequestParam("alkamiskausi") alkamiskausi: java.util.Collection[String],
       @RequestParam("haku") haku: java.util.Collection[String],
       @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
       @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
@@ -181,10 +189,9 @@ class Controller(
     } else {
       Option(valintakoe.toBoolean)
     }
-    val oppilaitosList   = if (oppilaitos == null) List() else oppilaitos.asScala.toList
-    val toimipisteList   = if (toimipiste == null) List() else toimipiste.asScala.toList
-    val alkamiskausiList = if (alkamiskausi == null) List() else alkamiskausi.asScala.toList
-    val hakuList         = if (haku == null) List() else haku.asScala.toList
+    val oppilaitosList = if (oppilaitos == null) List() else oppilaitos.asScala.toList
+    val toimipisteList = if (toimipiste == null) List() else toimipiste.asScala.toList
+    val hakuList       = if (haku == null) List() else haku.asScala.toList
 
     val wb = koulutuksetToteutuksetHakukohteetService.get(
       hakuList,
@@ -198,7 +205,6 @@ class Controller(
     )
 
     val raporttiParams = Map(
-      "alkamiskausi"    -> Option(alkamiskausiList).filterNot(_.isEmpty),
       "haku"            -> Option(hakuList).filterNot(_.isEmpty),
       "koulutustoimija" -> maybeKoulutustoimija,
       "oppilaitos"      -> Option(oppilaitosList).filterNot(_.isEmpty),
@@ -239,14 +245,6 @@ class Controller(
     val valintatietoList       = if (valintatieto == null) List() else valintatieto.asScala.toList
     val vastaanottotietoList   = if (vastaanottotieto == null) List() else vastaanottotieto.asScala.toList
     val harkinnanvaraisuusList = if (harkinnanvaraisuus == null) List() else harkinnanvaraisuus.asScala.toList
-
-    def strToOptionBoolean(str: String) = {
-      if (str == null) {
-        None
-      } else {
-        Option(str.toBoolean)
-      }
-    }
 
     val maybeKaksoistutkintoKiinnostaa   = strToOptionBoolean(kaksoistutkinto)
     val maybeUrheilijatutkintoKiinnostaa = strToOptionBoolean(urheilijatutkinto)
@@ -369,4 +367,56 @@ class Controller(
     sendExcel(wb, response, request, "hakeneet-hyvaksytyt-vastaanottaneet", raporttiParams)
   }
 
+  @GetMapping(path = Array("kk-hakijat"))
+  def kk_hakijat(
+      @RequestParam("haku") haku: java.util.Collection[String],
+      @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
+      @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
+      @RequestParam("hakukohde", required = false) hakukohde: java.util.Collection[String],
+      @RequestParam("valintatieto", required = false) valintatieto: java.util.Collection[String],
+      @RequestParam("vastaanottotieto", required = false) vastaanottotieto: java.util.Collection[String],
+      @RequestParam("markkinointilupa", required = false) markkinointilupa: String,
+      @RequestParam("nayta-yo-arvosanat", required = true) naytaYoArvosanat: String,
+      @RequestParam("nayta-hetu", required = true) naytaHetu: String,
+      @RequestParam("nayta-postiosoite", required = true) naytaPostiosoite: String,
+      request: HttpServletRequest,
+      response: HttpServletResponse
+  ): Unit = {
+    val hakuList             = if (haku == null) List() else haku.asScala.toList
+    val oppilaitosList       = if (oppilaitos == null) List() else oppilaitos.asScala.toList
+    val toimipisteList       = if (toimipiste == null) List() else toimipiste.asScala.toList
+    val hakukohdeList        = if (hakukohde == null) List() else hakukohde.asScala.toList
+    val valintatietoList     = if (valintatieto == null) List() else valintatieto.asScala.toList
+    val vastaanottotietoList = if (vastaanottotieto == null) List() else vastaanottotieto.asScala.toList
+
+    val maybeMarkkinointilupa = strToOptionBoolean(markkinointilupa)
+
+    val wb = kkHakijatService.get(
+      hakuList,
+      oppilaitosList,
+      toimipisteList,
+      hakukohdeList,
+      valintatietoList,
+      vastaanottotietoList,
+      maybeMarkkinointilupa,
+      naytaYoArvosanat.toBoolean,
+      naytaHetu.toBoolean,
+      naytaPostiosoite.toBoolean
+    )
+
+    val raporttiParams = Map(
+      "haku"             -> Option(hakuList).filterNot(_.isEmpty),
+      "oppilaitos"       -> Option(oppilaitosList).filterNot(_.isEmpty),
+      "toimipiste"       -> Option(toimipisteList).filterNot(_.isEmpty),
+      "hakukohde"        -> Option(hakukohdeList).filterNot(_.isEmpty),
+      "valintatieto"     -> Option(vastaanottotietoList).filterNot(_.isEmpty),
+      "vastaanottotieto" -> Option(vastaanottotietoList).filterNot(_.isEmpty),
+      "markkinointilupa" -> maybeMarkkinointilupa,
+      "naytaYoArvosanat" -> naytaYoArvosanat,
+      "naytaHetu"        -> naytaHetu,
+      "naytaPostiosoite" -> naytaPostiosoite
+    ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
+
+    sendExcel(wb, response, request, "kk-hakijat", raporttiParams)
+  }
 }

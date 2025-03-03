@@ -5,7 +5,7 @@ import { FormButtons } from '@/app/components/form/form-buttons';
 import { Box, Divider } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
-import { hasOvaraToinenAsteRole } from '@/app/lib/utils';
+import { hasOvaraKkRole } from '@/app/lib/utils';
 import { useSearchParams } from 'next/navigation';
 import { LanguageCode } from '@/app/lib/types/common';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
@@ -19,63 +19,62 @@ import {
 import { Hakukohde } from '@/app/components/form/hakukohde';
 import { Vastaanottotieto } from '@/app/components/form/vastaanottotieto';
 import { Markkinointilupa } from '@/app/components/form/markkinointilupa';
-import { Julkaisulupa } from '@/app/components/form/julkaisulupa';
-import { Harkinnanvaraisuus } from '@/app/components/form/harkinnanvaraisuus';
+import { useSearchParams as useQueryParams } from 'next/navigation';
 import { useState } from 'react';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { downloadExcel } from '@/app/components/form/utils';
 import { Valintatieto } from '@/app/components/form/valintatieto';
-import { Kaksoistutkinto } from '@/app/components/form/kaksoistutkinto';
-import { SoraTerveys } from '@/app/components/form/soraTerveys';
-import { SoraAiempi } from '@/app/components/form/soraAiempi';
-import { Urheilijatutkinto } from '@/app/components/form/Urheilijatutkinto';
-import { Pohjakoulutus } from '@/app/components/form/pohjakoulutus';
-import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
+import {
+  NaytaYoArvosanat,
+  NaytaHetu,
+  NaytaPostiosoite,
+} from '@/app/components/form/nayta';
 import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
 
 export default function Hakijat() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
-  const hasToinenAsteRights = hasOvaraToinenAsteRole(user?.authorities);
+  const hasKkRights = hasOvaraKkRole(user?.authorities);
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
-  const organisaatiot = useFetchOrganisaatiohierarkiat().data;
+  const queryParams = useSearchParams();
+  const organisaatiot = useFetchOrganisaatiohierarkiat();
+  const alkamiskausi = queryParams.get('alkamiskausi');
+  const haku = queryParams.get('haku');
+  const oppilaitos = queryParams.get('oppilaitos');
+  const toimipiste = queryParams.get('toimipiste');
+
   const {
-    selectedAlkamiskaudet,
-    setSelectedAlkamiskaudet,
-    selectedHaut,
-    setSelectedHaut,
-    selectedOppilaitokset,
-    selectedToimipisteet,
-    setSelectedOppilaitokset,
-    setSelectedToimipisteet,
-    setSelectedHakukohteet,
-    setSelectedHarkinnanvaraisuus,
-  } = useCommonSearchParams();
-  const {
-    setSelectedJulkaisulupa,
-    setSelectedMarkkinointilupa,
-    setSelectedVastaanottotieto,
+    selectedNaytaYoArvosanat,
+    selectedNaytaHetu,
+    selectedNaytaPostiosoite,
   } = useHakijatSearchParams();
 
-  const isDisabled = !(
-    selectedAlkamiskaudet &&
-    selectedHaut &&
-    (selectedOppilaitokset || selectedToimipisteet)
+  const queryParamsStr = useQueryParams().toString();
+  const queryParamsWithDefaults = new URLSearchParams(queryParamsStr);
+  queryParamsWithDefaults.set(
+    'nayta-yo-arvosanat',
+    selectedNaytaYoArvosanat.toString(),
   );
+  queryParamsWithDefaults.set('nayta-hetu', selectedNaytaHetu.toString());
+  queryParamsWithDefaults.set(
+    'nayta-postiosoite',
+    selectedNaytaPostiosoite.toString(),
+  );
+
+  const isDisabled = !(alkamiskausi && haku && (oppilaitos || toimipiste));
   const [isLoading, setIsLoading] = useState(false);
-  const queryParamsStr = useSearchParams().toString();
 
   return (
     <Box>
-      {hasToinenAsteRights ? (
+      {hasKkRights ? (
         <FormBox>
           {isLoading && <SpinnerModal open={isLoading} />}
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
           <KoulutuksenAlkaminen t={t} />
-          <Haku haunTyyppi={'toinen_aste'} locale={locale} t={t} />
+          <Haku haunTyyppi={'korkeakoulu'} locale={locale} t={t} />
           <Divider />
           <OphTypography>
-            {t('raportti.oppilaitos-tai-toimipiste')}
+            {t('raportti.vahintaan-yksi-vaihtoehdoista')}
           </OphTypography>
           <Box>
             <OppilaitosValikko
@@ -90,34 +89,22 @@ export default function Hakijat() {
             />
           </Box>
           <Divider />
-          <Hakukohde locale={locale} t={t} sx={{ paddingTop: 0 }} />
-          <Pohjakoulutus locale={locale} t={t} />
-          <Divider />
+          <Hakukohde locale={locale} t={t} />
           <Valintatieto t={t} />
           <Vastaanottotieto t={t} />
-          <Harkinnanvaraisuus t={t} />
-          <Kaksoistutkinto t={t} />
-          <Urheilijatutkinto t={t} />
-          <SoraTerveys t={t} />
-          <SoraAiempi t={t} />
           <Markkinointilupa t={t} />
-          <Julkaisulupa t={t} />
+          <NaytaYoArvosanat t={t} />
+          <NaytaHetu t={t} />
+          <NaytaPostiosoite t={t} />
           <FormButtons
             disabled={isDisabled}
             downloadExcel={() =>
-              downloadExcel('hakijat', queryParamsStr, setIsLoading)
+              downloadExcel(
+                'kk-hakijat',
+                queryParamsWithDefaults.toString(),
+                setIsLoading,
+              )
             }
-            fieldsToClear={[
-              () => setSelectedAlkamiskaudet(null),
-              () => setSelectedHaut(null),
-              () => setSelectedOppilaitokset(null),
-              () => setSelectedToimipisteet(null),
-              () => setSelectedHakukohteet(null),
-              () => setSelectedVastaanottotieto(null),
-              () => setSelectedMarkkinointilupa(null),
-              () => setSelectedJulkaisulupa(null),
-              () => setSelectedHarkinnanvaraisuus(null),
-            ]}
           />
         </FormBox>
       ) : null}

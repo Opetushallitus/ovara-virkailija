@@ -51,35 +51,6 @@ object RepositoryUtils {
     }
   }
 
-  //TODO: Jos tätä tarvitaan queryn muodostukseen, otettava huomioon kolmas param eiAlkamiskautta
-  def makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery(
-      alkamiskaudetAndHenkkohtSuunnitelma: (List[(Int, String)], Boolean, Boolean)
-  ): String = {
-    val alkamiskaudet       = alkamiskaudetAndHenkkohtSuunnitelma._1
-    val henkkohtSuunnitelma = alkamiskaudetAndHenkkohtSuunnitelma._2
-
-    if (alkamiskaudet.isEmpty && !henkkohtSuunnitelma) {
-      ""
-    } else {
-      val henkkohtSuunnitelmaQueryStr = if (henkkohtSuunnitelma) {
-        makeOptionalHenkilokohtainenSuunnitelmaQuery(henkkohtSuunnitelma)
-      } else {
-        ""
-      }
-
-      val andOrOrQueryStr = if (henkkohtSuunnitelma && alkamiskaudet.isEmpty) {
-        s"$henkkohtSuunnitelmaQueryStr"
-      } else if (henkkohtSuunnitelma && alkamiskaudet.nonEmpty) {
-        s" OR $henkkohtSuunnitelmaQueryStr"
-      } else {
-        ""
-      }
-
-      s"AND (${makeAlkamiskaudetQueryStr(List("t", "hk"), alkamiskaudetAndHenkkohtSuunnitelma._1)}" +
-        s"$andOrOrQueryStr)"
-    }
-  }
-
   def makeAlkamiskaudetQueryStr(tableNames: List[String], alkamiskaudet: List[(Int, String)]): String = {
     def hasMoreThanOne(alkamiskaudet: List[(Int, String)]) = {
       alkamiskaudet.size > 1
@@ -188,5 +159,21 @@ object RepositoryUtils {
         List(harkinnanvaraisuus)
       }
     })
+  }
+
+  def mapVastaanottotiedotToDbValues(vastaanottotiedot: List[String]): List[String] = {
+    vastaanottotiedot.flatMap {
+      case s: String if s == "PERUNUT" => s :: List("EI_VASTAANOTETTU_MAARA_AIKANA")
+      case s: String if s == "VASTAANOTTANUT" => List(s"${s}_SITOVASTI")
+      case s: String => List(s)
+    }
+  }
+
+  def mapValintatiedotToDbValues(valintatiedot: List[String]): List[String] = {
+    valintatiedot.flatMap {
+      case s: String if s == "HYVAKSYTTY" =>
+        s :: List("HYVAKSYTTY_HARKINNANVARAISESTI", "VARASIJALTA_HYVAKSYTTY", "PERUNUT", "PERUUTETTU")
+      case s: String => List(s)
+    }
   }
 }

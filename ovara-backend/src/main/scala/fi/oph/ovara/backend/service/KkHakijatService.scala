@@ -1,7 +1,7 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.HakijaWithCombinedNimi
-import fi.oph.ovara.backend.repository.{HakijatRepository, OvaraDatabase}
+import fi.oph.ovara.backend.domain.KkHakijaWithCombinedNimi
+import fi.oph.ovara.backend.repository.{KkHakijatRepository, OvaraDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
@@ -10,8 +10,8 @@ import org.springframework.stereotype.{Component, Service}
 
 @Component
 @Service
-class HakijatService(
-    hakijatRepository: HakijatRepository,
+class KkHakijatService(
+    kkHakijatRepository: KkHakijatRepository,
     userService: UserService,
     commonService: CommonService,
     lokalisointiService: LokalisointiService
@@ -26,16 +26,12 @@ class HakijatService(
       oppilaitokset: List[String],
       toimipisteet: List[String],
       hakukohteet: List[String],
-      pohjakoulutukset: List[String],
       valintatieto: List[String],
       vastaanottotieto: List[String],
-      harkinnanvaraisuudet: List[String],
-      kaksoistutkintoKiinnostaa: Option[Boolean],
-      urheilijatutkintoKiinnostaa: Option[Boolean],
-      soraTerveys: Option[Boolean],
-      soraAiempi: Option[Boolean],
       markkinointilupa: Option[Boolean],
-      julkaisulupa: Option[Boolean]
+      naytaYoArvosanat: Boolean,
+      naytaHetu: Boolean,
+      naytaPostiosoite: Boolean
   ): XSSFWorkbook = {
     val user          = userService.getEnrichedUserDetails
     val asiointikieli = user.asiointikieli.getOrElse("fi")
@@ -48,37 +44,34 @@ class HakijatService(
     val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
       toimipisteOids = toimipisteet,
-      oppilaitosOids = oppilaitokset
+      oppilaitosOids = oppilaitokset,
+      koulutustoimijaOid = None
     )
 
-    val query = hakijatRepository.selectWithParams(
+    val query = kkHakijatRepository.selectWithParams(
       kayttooikeusOrganisaatiot = orgOidsForQuery,
       haut = haku,
       oppilaitokset = oppilaitokset,
       toimipisteet = toimipisteet,
       hakukohteet = hakukohteet,
-      pohjakoulutukset,
       valintatieto = valintatieto,
       vastaanottotieto = vastaanottotieto,
-      harkinnanvaraisuudet = harkinnanvaraisuudet,
-      kaksoistutkintoKiinnostaa = kaksoistutkintoKiinnostaa,
-      urheilijatutkintoKiinnostaa = urheilijatutkintoKiinnostaa,
-      soraTerveys = soraTerveys,
-      soraAiempi = soraAiempi,
       markkinointilupa = markkinointilupa,
-      julkaisulupa = julkaisulupa
     )
 
-    val queryResult = db.run(query, "hakijatRepository.selectWithParams")
+    val queryResult = db.run(query, "kkHakijatRepository.selectWithParams")
     val sorted =
       queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi, resultRow.hakijanEtunimi, resultRow.oppijanumero))
-    val sortedListwithCombinedNimi = sorted.map(sortedResult => HakijaWithCombinedNimi(sortedResult))
+    val sortedListwithCombinedNimi = sorted.map(sortedResult => KkHakijaWithCombinedNimi(sortedResult))
 
     ExcelWriter.writeHakijatRaportti(
       sortedListwithCombinedNimi,
       asiointikieli,
       translations,
-      "toinen aste"
+      "korkeakoulu",
+      Some(naytaYoArvosanat),
+      Some(naytaHetu),
+      Some(naytaPostiosoite)
     )
   }
 }

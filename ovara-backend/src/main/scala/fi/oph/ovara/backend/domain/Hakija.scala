@@ -2,29 +2,17 @@ package fi.oph.ovara.backend.domain
 
 import java.time.LocalDate
 
-abstract class HakijaBase {
-  val turvakielto: Option[Boolean]
+abstract class Hakija {
   val kansalaisuus: Kielistetty
   val oppijanumero: String
   val hakemusOid: String
-  val oppilaitos: Kielistetty
   val toimipiste: Kielistetty
   val hakukohteenNimi: Kielistetty
-  val hakukohdeOid: String
   val prioriteetti: Int
-  val kaksoistutkintoKiinnostaa: Option[Boolean]
-  val urheilijatutkintoKiinnostaa: Option[Boolean]
   val valintatieto: String
-  val varasija: Option[String]
-  val kokonaispisteet: Option[String]
-  val hylkTaiPerSyy: Kielistetty
   val vastaanottotieto: Option[String]
   val viimVastaanottopaiva: Option[LocalDate]
   val ilmoittautuminen: Option[String]
-  val harkinnanvaraisuus: Option[String]
-  val soraAiempi: Option[Boolean]
-  val soraTerveys: Option[Boolean]
-  val pohjakoulutus: Kielistetty
   val markkinointilupa: Option[Boolean]
   val julkaisulupa: Option[Boolean]
   val sahkoinenViestintaLupa: Option[Boolean]
@@ -33,7 +21,7 @@ abstract class HakijaBase {
   val postitoimipaikka: String
 }
 
-case class Hakija(
+case class ToisenAsteenHakija(
     hakijanSukunimi: String,
     hakijanEtunimi: String,
     turvakielto: Option[Boolean],
@@ -43,7 +31,6 @@ case class Hakija(
     oppilaitos: Kielistetty,
     toimipiste: Kielistetty,
     hakukohteenNimi: Kielistetty,
-    hakukohdeOid: String,
     prioriteetti: Int,
     kaksoistutkintoKiinnostaa: Option[Boolean],
     urheilijatutkintoKiinnostaa: Option[Boolean],
@@ -64,7 +51,7 @@ case class Hakija(
     lahiosoite: String,
     postinumero: String,
     postitoimipaikka: String
-) extends HakijaBase
+) extends Hakija
 
 case class HakijaWithCombinedNimi(
     hakija: String,
@@ -75,7 +62,6 @@ case class HakijaWithCombinedNimi(
     oppilaitos: Kielistetty,
     toimipiste: Kielistetty,
     hakukohteenNimi: Kielistetty,
-    hakukohdeOid: String,
     prioriteetti: Int,
     kaksoistutkintoKiinnostaa: Option[Boolean],
     urheilijatutkintoKiinnostaa: Option[Boolean],
@@ -96,10 +82,10 @@ case class HakijaWithCombinedNimi(
     lahiosoite: String,
     postinumero: String,
     postitoimipaikka: String
-) extends HakijaBase
+) extends Hakija
 
 object HakijaWithCombinedNimi {
-  def apply(hakija: Hakija): HakijaWithCombinedNimi = {
+  def apply(hakija: ToisenAsteenHakija): HakijaWithCombinedNimi = {
     new HakijaWithCombinedNimi(
       hakija = s"${hakija.hakijanSukunimi}, ${hakija.hakijanEtunimi}",
       turvakielto = hakija.turvakielto,
@@ -109,7 +95,6 @@ object HakijaWithCombinedNimi {
       oppilaitos = hakija.oppilaitos,
       toimipiste = hakija.toimipiste,
       hakukohteenNimi = hakija.hakukohteenNimi,
-      hakukohdeOid = hakija.hakukohdeOid,
       prioriteetti = hakija.prioriteetti,
       kaksoistutkintoKiinnostaa = hakija.kaksoistutkintoKiinnostaa,
       urheilijatutkintoKiinnostaa = hakija.urheilijatutkintoKiinnostaa,
@@ -124,6 +109,80 @@ object HakijaWithCombinedNimi {
       soraAiempi = hakija.soraAiempi,
       soraTerveys = hakija.soraTerveys,
       pohjakoulutus = hakija.pohjakoulutus,
+      markkinointilupa = hakija.markkinointilupa,
+      julkaisulupa = hakija.julkaisulupa,
+      sahkoinenViestintaLupa = hakija.sahkoinenViestintaLupa,
+      lahiosoite = hakija.lahiosoite,
+      postinumero = hakija.postinumero,
+      postitoimipaikka = hakija.postitoimipaikka
+    )
+  }
+}
+
+case class KkHakija(
+    hakijanSukunimi: String,
+    hakijanEtunimi: String,
+    hetu: Option[String],
+    syntymaAika: Option[LocalDate],
+    kansalaisuus: Kielistetty,
+    oppijanumero: String,
+    hakemusOid: String,
+    toimipiste: Kielistetty,
+    hakukohteenNimi: Kielistetty,
+    prioriteetti: Int,
+    valintatieto: String,
+    vastaanottotieto: Option[String],
+    viimVastaanottopaiva: Option[LocalDate],
+    ensikertalainen: Option[Boolean],
+    ilmoittautuminen: Option[String],
+    julkaisulupa: Option[Boolean],
+    markkinointilupa: Option[Boolean],
+    sahkoinenViestintaLupa: Option[Boolean],
+    lahiosoite: String,
+    postinumero: String,
+    postitoimipaikka: String
+) extends Hakija
+
+case class KkHakijaWithCombinedNimi(
+    hakija: String,
+    hetu: Option[String],
+    syntymaAika: Option[LocalDate],
+    kansalaisuus: Kielistetty,
+    oppijanumero: String,
+    hakemusOid: String,
+    toimipiste: Kielistetty,
+    hakukohteenNimi: Kielistetty,
+    prioriteetti: Int,
+    valintatieto: String,
+    vastaanottotieto: Option[String],
+    viimVastaanottopaiva: Option[LocalDate],
+    ensikertalainen: Option[Boolean],
+    ilmoittautuminen: Option[String],
+    julkaisulupa: Option[Boolean],
+    markkinointilupa: Option[Boolean],
+    sahkoinenViestintaLupa: Option[Boolean],
+    lahiosoite: String,
+    postinumero: String,
+    postitoimipaikka: String
+) extends Hakija
+
+object KkHakijaWithCombinedNimi {
+  def apply(hakija: KkHakija): KkHakijaWithCombinedNimi = {
+    new KkHakijaWithCombinedNimi(
+      hakija = s"${hakija.hakijanSukunimi}, ${hakija.hakijanEtunimi}",
+      hetu = hakija.hetu,
+      syntymaAika = hakija.syntymaAika,
+      kansalaisuus = hakija.kansalaisuus,
+      oppijanumero = hakija.oppijanumero,
+      hakemusOid = hakija.hakemusOid,
+      toimipiste = hakija.toimipiste,
+      hakukohteenNimi = hakija.hakukohteenNimi,
+      prioriteetti = hakija.prioriteetti,
+      valintatieto = hakija.valintatieto,
+      vastaanottotieto = hakija.vastaanottotieto,
+      viimVastaanottopaiva = hakija.viimVastaanottopaiva,
+      ensikertalainen = hakija.ensikertalainen,
+      ilmoittautuminen = hakija.ilmoittautuminen,
       markkinointilupa = hakija.markkinointilupa,
       julkaisulupa = hakija.julkaisulupa,
       sahkoinenViestintaLupa = hakija.sahkoinenViestintaLupa,

@@ -26,7 +26,7 @@ class CommonRepository extends Extractors {
 
   def selectDistinctExistingHaut(
       alkamiskaudet: List[String] = List(),
-      haunTyyppi: String = "toinen_aste"
+      haunTyyppi: String
   ): SqlStreamingAction[Vector[Haku], Haku, Effect] = {
     val alkamiskaudetAndHenkKohtSuunnitelma =
       RepositoryUtils.extractAlkamisvuosiKausiAndHenkkohtSuunnitelma(alkamiskaudet)
