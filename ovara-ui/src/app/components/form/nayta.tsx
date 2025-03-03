@@ -34,3 +34,19 @@ export const NaytaHetu = ({ t }: { t: (key: string) => string }) => {
     />
   );
 };
+
+export const NaytaPostiosoite = ({ t }: { t: (key: string) => string }) => {
+  const { selectedNaytaPostiosoite, setSelectedNaytaPostiosoite } =
+    useHakijatSearchParams();
+
+  return (
+    <OvaraRadioGroup
+      label={t(`raportti.nayta-postiosoite`)}
+      options={YES_NO_RADIOGROUP_OPTIONS}
+      value={getSelectedRadioGroupValue(selectedNaytaPostiosoite)}
+      onChange={(e) =>
+        changeRadioGroupSelection(e, setSelectedNaytaPostiosoite)
+      }
+    />
+  );
+};

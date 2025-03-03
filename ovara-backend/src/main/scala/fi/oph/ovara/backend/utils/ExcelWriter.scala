@@ -363,7 +363,9 @@ object ExcelWriter {
       asiointikieli: String,
       translations: Map[String, String],
       id: String,
-      naytaYoArvosanat: Option[Boolean] = None
+      maybeNaytaYoArvosanat: Option[Boolean] = None,
+      maybeNaytaHetu: Option[Boolean] = None,
+      maybeNaytaPostiosoite: Option[Boolean] = None
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new excel from db results")
@@ -381,19 +383,29 @@ object ExcelWriter {
 
     var currentRowIndex = 0
 
-    val optionallyShowableFields = List("hetu")
+    val postiosoiteFields        = List("lahiosoite", "postinumero", "postitoimipaikka")
+    val optionallyShowableFields = List("hetu") ::: postiosoiteFields
 
-    val naytaHetu = maybeNaytaHetu.getOrElse(false)
+    val naytaHetu        = maybeNaytaHetu.getOrElse(false)
+    val naytaPostiosoite = maybeNaytaPostiosoite.getOrElse(false)
 
-    val c                   = if (id == "korkeakoulu") classOf[KkHakijaWithCombinedNimi] else classOf[HakijaWithCombinedNimi]
-    val fieldNames          = c.getDeclaredFields.map(_.getName).toList
-    val fieldNamesToShow = fieldNames.filter(fieldName => {
-       !optionallyShowableFields.contains(fieldName) || fieldName == "hetu" && naytaHetu
-    })
+    val c          = if (id == "korkeakoulu") classOf[KkHakijaWithCombinedNimi] else classOf[HakijaWithCombinedNimi]
+    val fieldNames = c.getDeclaredFields.map(_.getName).toList
+    val fieldNamesToShow = if (id == "korkeakoulu") {
+      fieldNames.filter(fieldName => {
+        !optionallyShowableFields.contains(fieldName) ||
+          fieldName == "hetu" && naytaHetu ||
+          postiosoiteFields.contains(
+            fieldName
+          ) && naytaPostiosoite
+      })
+    } else {
+      fieldNames
+    }
     val fieldNamesWithIndex = fieldNames.zipWithIndex
 
     currentRowIndex =
-      createHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNames, headingCellStyle)
+      createHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNamesToShow, headingCellStyle)
 
     // TODO: päätellään täällä näytetäänkö yo, osoite flagin perusteella
     hakijat.foreach(hakutoive => {
@@ -403,7 +415,7 @@ object ExcelWriter {
       var numberOfSkippedFields = 0
       var cellIndex             = 0
       for ((fieldName, i) <- fieldNamesWithIndex) yield {
-        if (optionallyShowableFields.contains(fieldName) && !naytaHetu) {
+        if (id == "korkeakoulu" && optionallyShowableFields.contains(fieldName) && !naytaHetu) {
           numberOfSkippedFields = numberOfSkippedFields + 1
         } else {
           cellIndex = i - numberOfSkippedFields
@@ -481,6 +493,150 @@ object ExcelWriter {
         }
       }
     })
+
+    // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
+    fieldNamesWithIndex.foreach { case (title, index) =>
+      sheet.autoSizeColumn(index)
+    }
+
+    try {
+      workbook
+    } catch {
+      case e: Exception =>
+        LOG.error(s"Error creating excel: ${e.getMessage}")
+        throw e
+    }
+  }
+
+  def writeHakeneetHyvaksytytVastaanottaneetRaportti(
+                            asiointikieli: String,
+                            translations: Map[String, String],
+                            data: List[HakeneetHyvaksytytVastaanottaneetResult],
+                            yksittaisetHakijat: Int,
+                            naytaHakutoiveet: Boolean,
+                          ): XSSFWorkbook = {
+    val workbook: XSSFWorkbook = new XSSFWorkbook()
+    LOG.info("Creating new HakeneetHyvaksytytVastaanottaneet excel from db results")
+    val sheet: XSSFSheet = workbook.createSheet()
+    workbook.setSheetName(
+      0,
+      WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yhteenveto", "raportti.yhteenveto"))
+    )
+
+    val headingCellStyle: XSSFCellStyle = workbook.createCellStyle()
+    val bodyTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
+    val summaryCellStyle: XSSFCellStyle = workbook.createCellStyle()
+
+    val headingFont = createHeadingFont(workbook, headingCellStyle)
+    val bodyTextFont = createBodyTextFont(workbook, bodyTextCellStyle)
+    val summaryFont = createSummaryRowFont(workbook)
+
+    summaryCellStyle.setFont(summaryFont)
+    summaryCellStyle.setAlignment(HorizontalAlignment.RIGHT)
+
+    bodyTextCellStyle.setWrapText(true)
+
+    var currentRowIndex = 0
+
+    val fieldNames =
+      if(naytaHakutoiveet)
+        HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES ++ HAKUTOIVEET_TITLES
+      else
+        HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES
+    val fieldNamesWithIndex = fieldNames.zipWithIndex
+
+    currentRowIndex =
+      createHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNames, headingCellStyle)
+
+    data.foreach { item =>
+      val dataRow = sheet.createRow(currentRowIndex)
+      val rowData = List(
+        item.otsikko(Kieli.withName(asiointikieli)),
+        item.hakijat.toString,
+        item.ensisijaisia.toString,
+        item.varasija.toString,
+        item.hyvaksytyt.toString,
+        item.vastaanottaneet.toString,
+        item.lasna.toString,
+        item.poissa.toString,
+        item.ilmYht.toString,
+        item.aloituspaikat.toString
+      ) ++ (if (naytaHakutoiveet) {
+        List(
+          item.toive1.toString,
+          item.toive2.toString,
+          item.toive3.toString,
+          item.toive4.toString,
+          item.toive5.toString,
+          item.toive6.toString,
+          item.toive7.toString
+        )
+      } else {
+        List()
+      })
+      rowData.zipWithIndex.foreach { case (value, index) =>
+        val cell = dataRow.createCell(index)
+        cell.setCellStyle(bodyTextCellStyle)
+        cell.setCellValue(value)
+      }
+      currentRowIndex += 1
+    }
+
+    // yhteensä-rivi
+    val summaryRow = sheet.createRow(currentRowIndex)
+    val summaryData = List(
+      translations.getOrElse("raportti.yhteensa", "raportti.yhteensa"),
+      data.map(_.hakijat).sum.toString,
+      data.map(_.ensisijaisia).sum.toString,
+      data.map(_.varasija).sum.toString,
+      data.map(_.hyvaksytyt).sum.toString,
+      data.map(_.vastaanottaneet).sum.toString,
+      data.map(_.lasna).sum.toString,
+      data.map(_.poissa).sum.toString,
+      data.map(_.ilmYht).sum.toString,
+      data.map(_.aloituspaikat).sum.toString
+    ) ++ (if (naytaHakutoiveet) {
+      List(
+        data.map(_.toive1).sum.toString,
+        data.map(_.toive2).sum.toString,
+        data.map(_.toive3).sum.toString,
+        data.map(_.toive4).sum.toString,
+        data.map(_.toive5).sum.toString,
+        data.map(_.toive6).sum.toString,
+        data.map(_.toive7).sum.toString
+      )
+    } else {
+      List()
+    })
+
+    summaryData.zipWithIndex.foreach { case (value, index) =>
+      val cell = summaryRow.createCell(index)
+      if (index == 0) {
+        cell.setCellStyle(summaryCellStyle)
+      } else {
+        cell.setCellStyle(bodyTextCellStyle)
+      }
+      cell.setCellValue(value)
+    }
+
+    currentRowIndex += 1
+
+    // yksittäiset hakijat -rivi
+    val hakijatSummaryRow = sheet.createRow(currentRowIndex)
+    val hakijatSummaryData = List(
+      translations.getOrElse("raportti.yksittaiset-hakijat", "raportti.yksittaiset-hakijat"),
+      yksittaisetHakijat.toString,
+    )
+
+    hakijatSummaryData.zipWithIndex.foreach { case (value, index) =>
+      val cell = hakijatSummaryRow.createCell(index)
+      if (index == 0) {
+        cell.setCellStyle(summaryCellStyle)
+      } else {
+        cell.setCellStyle(bodyTextCellStyle)
+      }
+      cell.setCellValue(value)
+    }
 
     // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
     fieldNamesWithIndex.foreach { case (title, index) =>
