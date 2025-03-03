@@ -19,3 +19,16 @@ export const NaytaYoArvosanat = ({ t }: { t: (key: string) => string }) => {
     />
   );
 };
+
+export const NaytaHetu = ({ t }: { t: (key: string) => string }) => {
+  const { selectedHetu, setSelectedHetu } = useHakijatSearchParams();
+
+  return (
+    <OvaraRadioGroup
+      label={t(`raportti.nayta-hetu`)}
+      options={YES_NO_RADIOGROUP_OPTIONS}
+      value={getSelectedRadioGroupValue(selectedHetu)}
+      onChange={(e) => changeRadioGroupSelection(e, setSelectedHetu)}
+    />
+  );
+};

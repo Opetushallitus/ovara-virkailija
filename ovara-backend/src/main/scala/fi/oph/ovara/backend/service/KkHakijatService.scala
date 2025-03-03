@@ -30,6 +30,7 @@ class KkHakijatService(
       vastaanottotieto: List[String],
       markkinointilupa: Option[Boolean],
       naytaYoArvosanat: Boolean,
+      naytaHetu: Boolean
   ): XSSFWorkbook = {
     val user          = userService.getEnrichedUserDetails
     val asiointikieli = user.asiointikieli.getOrElse("fi")
@@ -54,10 +55,9 @@ class KkHakijatService(
       valintatieto = valintatieto,
       vastaanottotieto = vastaanottotieto,
       markkinointilupa = markkinointilupa,
-      naytaYoArvosanat = naytaYoArvosanat
     )
 
-    val queryResult = db.run(query, "hakijatRepository.selectWithParams")
+    val queryResult = db.run(query, "kkHakijatRepository.selectWithParams")
     val sorted =
       queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi, resultRow.hakijanEtunimi, resultRow.oppijanumero))
     val sortedListwithCombinedNimi = sorted.map(sortedResult => KkHakijaWithCombinedNimi(sortedResult))
@@ -66,7 +66,9 @@ class KkHakijatService(
       sortedListwithCombinedNimi,
       asiointikieli,
       translations,
-      "korkeakoulu"
+      "korkeakoulu",
+      Some(naytaYoArvosanat),
+      Some(naytaHetu)
     )
   }
 }
