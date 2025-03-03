@@ -1,6 +1,5 @@
 'use client';
 import { OphTypography } from '@opetushallitus/oph-design-system';
-import { MainContainer } from '@/app/components/main-container';
 import { FormBox } from '@/app/components/form/form-box';
 import { FormButtons } from '@/app/components/form/form-buttons';
 import { Box, Divider } from '@mui/material';
@@ -51,7 +50,7 @@ export default function Hakijat() {
   const queryParamsStr = useQueryParams().toString();
 
   return (
-    <MainContainer>
+    <Box>
       {hasToinenAsteRights ? (
         <FormBox>
           {isLoading && <SpinnerModal open={isLoading} />}
@@ -95,6 +94,6 @@ export default function Hakijat() {
           />
         </FormBox>
       ) : null}
-    </MainContainer>
+    </Box>
   );
 }

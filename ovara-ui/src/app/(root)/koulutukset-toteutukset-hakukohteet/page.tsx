@@ -1,6 +1,5 @@
 'use client';
 import { OphTypography } from '@opetushallitus/oph-design-system';
-import { MainContainer } from '@/app/components/main-container';
 import { useTranslate } from '@tolgee/react';
 import { LanguageCode } from '@/app/lib/types/common';
 import { KoulutuksenAlkaminen } from '@/app/components/form/koulutuksen-alkaminen';
@@ -14,7 +13,7 @@ import { OrganisaatioValikot } from '@/app/components/form/organisaatiovalikot';
 import { FormBox } from '@/app/components/form/form-box';
 import { Valintakoe } from '@/app/components/form/valintakoe';
 import { FormButtons } from '@/app/components/form/form-buttons';
-import { Divider } from '@mui/material';
+import { Box, Divider } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { hasOvaraToinenAsteRole } from '@/app/lib/utils';
@@ -46,7 +45,7 @@ export default function KoulutuksetToteutuksetHakukohteet() {
   const queryParamsStr = useSearchParams().toString();
 
   return (
-    <MainContainer>
+    <Box>
       {hasToinenAsteRights ? (
         <FormBox>
           {isLoading && <SpinnerModal open={isLoading} />}
@@ -82,6 +81,6 @@ export default function KoulutuksetToteutuksetHakukohteet() {
           />
         </FormBox>
       ) : null}
-    </MainContainer>
+    </Box>
   );
 }

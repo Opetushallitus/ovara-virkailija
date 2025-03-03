@@ -1,6 +1,5 @@
 'use client';
 import { OphTypography } from '@opetushallitus/oph-design-system';
-import { MainContainer } from '@/app/components/main-container';
 import { FormBox } from '@/app/components/form/form-box';
 import { FormButtons } from '@/app/components/form/form-buttons';
 import { Box, Divider } from '@mui/material';
@@ -56,7 +55,7 @@ export default function Hakijat() {
   const [isLoading, setIsLoading] = useState(false);
 
   return (
-    <MainContainer>
+    <Box>
       {hasKkRights ? (
         <FormBox>
           {isLoading && <SpinnerModal open={isLoading} />}
@@ -98,6 +97,6 @@ export default function Hakijat() {
           />
         </FormBox>
       ) : null}
-    </MainContainer>
+    </Box>
   );
 }
