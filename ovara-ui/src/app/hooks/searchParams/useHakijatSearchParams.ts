@@ -69,6 +69,11 @@ export const useHakijatSearchParams = () => {
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS).withDefault(true),
   );
 
+  const [selectedNaytaPostiosoite, setSelectedNaytaPostiosoite] = useQueryState(
+    'nayta-postiosoite',
+    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS).withDefault(true),
+  );
+
   return {
     selectedHakukohteet,
     setSelectedHakukohteet,
@@ -94,5 +99,7 @@ export const useHakijatSearchParams = () => {
     setSelectedNaytaYoArvosanat,
     selectedNaytaHetu,
     setSelectedNaytaHetu,
+    selectedNaytaPostiosoite,
+    setSelectedNaytaPostiosoite,
   };
 };

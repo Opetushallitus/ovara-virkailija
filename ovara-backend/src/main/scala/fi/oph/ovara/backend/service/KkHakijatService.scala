@@ -30,7 +30,8 @@ class KkHakijatService(
       vastaanottotieto: List[String],
       markkinointilupa: Option[Boolean],
       naytaYoArvosanat: Boolean,
-      naytaHetu: Boolean
+      naytaHetu: Boolean,
+      naytaPostiosoite: Boolean
   ): XSSFWorkbook = {
     val user          = userService.getEnrichedUserDetails
     val asiointikieli = user.asiointikieli.getOrElse("fi")
@@ -68,7 +69,8 @@ class KkHakijatService(
       translations,
       "korkeakoulu",
       Some(naytaYoArvosanat),
-      Some(naytaHetu)
+      Some(naytaHetu),
+      Some(naytaPostiosoite)
     )
   }
 }

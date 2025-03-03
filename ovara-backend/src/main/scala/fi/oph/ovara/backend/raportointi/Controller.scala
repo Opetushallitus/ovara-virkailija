@@ -279,6 +279,7 @@ class Controller(
       @RequestParam("markkinointilupa", required = false) markkinointilupa: String,
       @RequestParam("nayta-yo-arvosanat", required = true) naytaYoArvosanat: String,
       @RequestParam("nayta-hetu", required = true) naytaHetu: String,
+      @RequestParam("nayta-postiosoite", required = true) naytaPostiosoite: String,
       request: HttpServletRequest,
       response: HttpServletResponse
   ): Unit = {
@@ -300,7 +301,8 @@ class Controller(
       vastaanottotietoList,
       maybeMarkkinointilupa,
       naytaYoArvosanat.toBoolean,
-      naytaHetu.toBoolean
+      naytaHetu.toBoolean,
+      naytaPostiosoite.toBoolean
     )
 
     val raporttiParams = Map(
@@ -312,7 +314,8 @@ class Controller(
       "vastaanottotieto" -> Option(vastaanottotietoList).filterNot(_.isEmpty),
       "markkinointilupa" -> maybeMarkkinointilupa,
       "naytaYoArvosanat" -> naytaYoArvosanat,
-      "naytaHetu"        -> naytaHetu
+      "naytaHetu"        -> naytaHetu,
+      "naytaPostiosoite" -> naytaPostiosoite
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
     sendExcel(wb, response, request, "kk-hakijat", raporttiParams)
