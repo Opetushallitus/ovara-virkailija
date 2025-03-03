@@ -48,7 +48,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getOrganisaatiot(authorities)
 
     val allowedOrgOidsFromSelection =
-      getAllowedOrgsFromOrgSelection(kayttooikeusOrganisaatiot, oppilaitokset, toimipisteet)
+      getAllowedOrgOidsFromOrgSelection(kayttooikeusOrganisaatiot, oppilaitokset, toimipisteet)
 
     if (allowedOrgOidsFromSelection.nonEmpty) {
       db.run(
@@ -75,6 +75,30 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
 
   def getVastaanottotiedot: Vector[String] = {
     db.run(commonRepository.selectDistinctVastaanottotiedot, "selectDistinctVastaanottotiedot")
+  }
+
+  def getOpetuskielet: Vector[Koodi] = {
+    db.run(commonRepository.selectDistinctOpetuskielet, "selectDistinctOpetuskielet")
+  }
+
+  def getMaakunnat: Vector[Koodi] = {
+    db.run(commonRepository.selectDistinctMaakunnat, "selectDistinctMaakunnat")
+  }
+
+  def getKunnat(maakunnat: List[String]): Vector[Koodi] = {
+    db.run(commonRepository.selectDistinctKunnat(maakunnat), "selectDistinctKunnat")
+  }
+
+  def getKoulutusalat1: Vector[Koodi] = {
+    db.run(commonRepository.selectDistinctKoulutusalat1(), "selectDistinctKoulutusalat1")
+  }
+
+  def getKoulutusalat2(koulutusalat1: List[String]): Vector[Koodi] = {
+    db.run(commonRepository.selectDistinctKoulutusalat2(koulutusalat1), "selectDistinctKoulutusalat2")
+  }
+
+  def getKoulutusalat3(koulutusalat2: List[String]): Vector[Koodi] = {
+    db.run(commonRepository.selectDistinctKoulutusalat3(koulutusalat2), "selectDistinctKoulutusalat3")
   }
 
   def getOrganisaatioHierarkiatWithUserRights: List[OrganisaatioHierarkia] = {
@@ -212,16 +236,19 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     }
   }
 
-  def getAllowedOrgsFromOrgSelection(
+  def getAllowedOrgOidsFromOrgSelection(
       kayttooikeusOrganisaatioOids: List[String],
       oppilaitosOids: List[String],
-      toimipisteOids: List[String]
+      toimipisteOids: List[String],
+      koulutustoimijaOid: Option[String] = None,
   ): List[String] = {
     val hierarkiat =
       if (toimipisteOids.nonEmpty) {
         getToimipistehierarkiat(toimipisteOids)
       } else if (oppilaitosOids.nonEmpty) {
         getOppilaitoshierarkiat(oppilaitosOids)
+      } else if (koulutustoimijaOid.isDefined) {
+        getKoulutustoimijahierarkia(List(koulutustoimijaOid.get))  
       } else {
         List()
       }

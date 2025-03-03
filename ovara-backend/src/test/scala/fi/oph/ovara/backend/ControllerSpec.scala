@@ -24,6 +24,7 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
     val mockUserService                              = mock(classOf[UserService])
     val mockHakijatService                           = mock(classOf[HakijatService])
     val mockKkHakijatService                         = mock(classOf[KkHakijatService])
+    val mockHakeneetHyvaksytytVastaanottaneetService = mock(classOf[HakeneetHyvaksytytVastaanottaneetService])
     val mockRequest                                  = mock(classOf[HttpServletRequest])
     val mockResponse                                 = mock(classOf[HttpServletResponse])
     val mockAudit                                    = mock(classOf[Audit])
@@ -40,6 +41,7 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
       mockKoulutuksetToteutuksetHakukohteetService,
       mockHakijatService,
       mockKkHakijatService,
+      mockHakeneetHyvaksytytVastaanottaneetService,
       mockUserService,
       mockAuditLog
     )
