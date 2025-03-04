@@ -134,73 +134,68 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   )
 
-  implicit val getHakeneetHyvaksytytVastaanottaneetHakukohteittainResult: GetResult[HakeneetHyvaksytytVastaanottaneetHakukohteittain] = GetResult(r =>
+  def extractHakeneetHyvaksytytVastaanottaneetCommonFields(r: PositionedResult): (Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int) = {
+    (
+      r.nextInt(), // hakijat
+      r.nextInt(), // ensisijaisia
+      r.nextInt(), // varasija
+      r.nextInt(), // hyvaksytyt
+      r.nextInt(), // vastaanottaneet
+      r.nextInt(), // lasna
+      r.nextInt(), // poissa
+      r.nextInt(), // ilmYht
+      r.nextInt(), // aloituspaikat
+      r.nextInt(), // toive1
+      r.nextInt(), // toive2
+      r.nextInt(), // toive3
+      r.nextInt(), // toive4
+      r.nextInt(), // toive5
+      r.nextInt(), // toive6
+      r.nextInt() // toive7
+    )
+  }
+
+  implicit val getHakeneetHyvaksytytVastaanottaneetHakukohteittainResult: GetResult[HakeneetHyvaksytytVastaanottaneetHakukohteittain] = GetResult { r =>
+    val hakukohdeNimi = extractKielistetty(r.nextStringOption())
+    val organisaatioNimi = extractKielistetty(r.nextStringOption())
+    val commonFields = extractHakeneetHyvaksytytVastaanottaneetCommonFields(r)
+
     HakeneetHyvaksytytVastaanottaneetHakukohteittain(
-      hakukohdeNimi = extractKielistetty(r.nextStringOption()),
-      organisaatioNimi = extractKielistetty(r.nextStringOption()),
-      hakijat = r.nextInt(),
-      ensisijaisia = r.nextInt(),
-      varasija = r.nextInt(),
-      hyvaksytyt = r.nextInt(),
-      vastaanottaneet = r.nextInt(),
-      lasna = r.nextInt(),
-      poissa = r.nextInt(),
-      ilmYht = r.nextInt(),
-      aloituspaikat = r.nextInt(),
-      toive1 = r.nextInt(),
-      toive2 = r.nextInt(),
-      toive3 = r.nextInt(),
-      toive4 = r.nextInt(),
-      toive5 = r.nextInt(),
-      toive6 = r.nextInt(),
-      toive7 = r.nextInt(),
+      hakukohdeNimi = hakukohdeNimi,
+      organisaatioNimi = organisaatioNimi,
+      commonFields._1, commonFields._2, commonFields._3, commonFields._4, commonFields._5,
+      commonFields._6, commonFields._7, commonFields._8, commonFields._9,
+      commonFields._10, commonFields._11, commonFields._12, commonFields._13,
+      commonFields._14, commonFields._15, commonFields._16
     )
-  )
+  }
 
-  implicit val getHakeneetHyvaksytytVastaanottaneetToimipisteittainResult: GetResult[HakeneetHyvaksytytVastaanottaneetToimipisteittain] = GetResult(r =>
+  implicit val getHakeneetHyvaksytytVastaanottaneetToimipisteittainResult: GetResult[HakeneetHyvaksytytVastaanottaneetToimipisteittain] = GetResult { r =>
+    val toimipiste = r.nextString()
+    val organisaatioNimi = extractKielistetty(r.nextStringOption())
+    val commonFields = extractHakeneetHyvaksytytVastaanottaneetCommonFields(r)
+
     HakeneetHyvaksytytVastaanottaneetToimipisteittain(
-      toimipiste = r.nextString(),
-      organisaatioNimi = extractKielistetty(r.nextStringOption()),
-      hakijat = r.nextInt(),
-      ensisijaisia = r.nextInt(),
-      varasija = r.nextInt(),
-      hyvaksytyt = r.nextInt(),
-      vastaanottaneet = r.nextInt(),
-      lasna = r.nextInt(),
-      poissa = r.nextInt(),
-      ilmYht = r.nextInt(),
-      aloituspaikat = r.nextInt(),
-      toive1 = r.nextInt(),
-      toive2 = r.nextInt(),
-      toive3 = r.nextInt(),
-      toive4 = r.nextInt(),
-      toive5 = r.nextInt(),
-      toive6 = r.nextInt(),
-      toive7 = r.nextInt(),
+      toimipiste = toimipiste,
+      organisaatioNimi = organisaatioNimi,
+      commonFields._1, commonFields._2, commonFields._3, commonFields._4, commonFields._5,
+      commonFields._6, commonFields._7, commonFields._8, commonFields._9,
+      commonFields._10, commonFields._11, commonFields._12, commonFields._13,
+      commonFields._14, commonFields._15, commonFields._16
     )
-  )
+  }
 
+  implicit val getHakeneetHyvaksytytVastaanottaneetResult: GetResult[HakeneetHyvaksytytVastaanottaneetResult] = GetResult { r =>
+    val otsikko = extractKielistetty(r.nextStringOption())
+    val commonFields = extractHakeneetHyvaksytytVastaanottaneetCommonFields(r)
 
-  implicit val getHakeneetHyvaksytytVastaanottaneetResult: GetResult[HakeneetHyvaksytytVastaanottaneetResult] = GetResult(r =>
     HakeneetHyvaksytytVastaanottaneetResult(
-      otsikko = extractKielistetty(r.nextStringOption()),
-      hakijat = r.nextInt(),
-      ensisijaisia = r.nextInt(),
-      varasija = r.nextInt(),
-      hyvaksytyt = r.nextInt(),
-      vastaanottaneet = r.nextInt(),
-      lasna = r.nextInt(),
-      poissa = r.nextInt(),
-      ilmYht = r.nextInt(),
-      aloituspaikat = r.nextInt(),
-      toive1 = r.nextInt(),
-      toive2 = r.nextInt(),
-      toive3 = r.nextInt(),
-      toive4 = r.nextInt(),
-      toive5 = r.nextInt(),
-      toive6 = r.nextInt(),
-      toive7 = r.nextInt(),
+      otsikko = otsikko,
+      commonFields._1, commonFields._2, commonFields._3, commonFields._4, commonFields._5,
+      commonFields._6, commonFields._7, commonFields._8, commonFields._9,
+      commonFields._10, commonFields._11, commonFields._12, commonFields._13,
+      commonFields._14, commonFields._15, commonFields._16
     )
-  )
+  }
 
 }
