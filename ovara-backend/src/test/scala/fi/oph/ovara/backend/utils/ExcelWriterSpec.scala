@@ -2028,6 +2028,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(headingRow.getCell(14).getStringCellValue == "Toive5 SV")
     assert(headingRow.getCell(15).getStringCellValue == "Toive6 SV")
     assert(headingRow.getCell(16).getStringCellValue == "Toive7 SV")
+    assert(headingRow.getCell(17) == null)
 
     // Datarivit
     assert(sheet.getRow(1).getCell(0).getStringCellValue == "Grundexamen inom fordonsbranschen\nOSAO, Haukiputaan yksikkö")
@@ -2047,6 +2048,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(1).getCell(14).getStringCellValue == "25")
     assert(sheet.getRow(1).getCell(15).getStringCellValue == "11")
     assert(sheet.getRow(1).getCell(16).getStringCellValue == "11")
+    assert(sheet.getRow(1).getCell(17) == null)
 
     assert(sheet.getRow(2).getCell(0).getStringCellValue == "Grundexamen inom fordonsbranschen\nOSAO, Muhoksen yksikkö")
     assert(sheet.getRow(2).getCell(1).getStringCellValue == "148")

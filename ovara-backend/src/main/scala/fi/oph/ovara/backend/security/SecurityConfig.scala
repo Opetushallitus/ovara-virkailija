@@ -29,7 +29,6 @@ import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHtt
 @EnableWebSecurity
 @EnableJdbcHttpSession(tableName = "VIRKAILIJA_SESSION")
 class SecurityConfig  {
-  private final val LOGIN_PATH = "/auth/login"
   private final val SPRING_CAS_SECURITY_CHECK_PATH = "/j_spring_cas_security_check"
 
   @Value("${cas.url}")
@@ -146,7 +145,7 @@ class SecurityConfig  {
       .securityMatcher("/**")
       .authorizeHttpRequests(requests => requests
         .requestMatchers("/api/healthcheck", "/api/csrf").permitAll()
-        .requestMatchers(SWAGGER_WHITELIST: _*).permitAll()
+        .requestMatchers(SWAGGER_WHITELIST*).permitAll()
         .anyRequest().fullyAuthenticated()
       )
       .csrf(csrf => csrf

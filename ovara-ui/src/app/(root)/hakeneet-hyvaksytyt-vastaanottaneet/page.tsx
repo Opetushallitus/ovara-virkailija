@@ -39,9 +39,11 @@ export default function Hakutilasto() {
     setSelectedAlkamiskaudet,
     selectedHaut,
     setSelectedHaut,
+    setSelectedKoulutustoimija,
     setSelectedOppilaitokset,
     setSelectedToimipisteet,
     setSelectedHakukohteet,
+    setSelectedHarkinnanvaraisuus,
   } = useCommonSearchParams();
   const {
     setSelectedKoulutusalat1,
@@ -74,13 +76,13 @@ export default function Hakutilasto() {
           <Tulostustapa />
           <OrganisaatioValikot />
           <Hakukohde locale={locale} t={t} />
+          <Opetuskieli />
           <KoulutusalaValikot />
           <MaakuntaKuntaValikot />
-          <Opetuskieli />
           <Harkinnanvaraisuus t={t} />
           <Divider />
-          <NaytaHakutoiveet t={t} />
           <Sukupuoli t={t} />
+          <NaytaHakutoiveet t={t} />
           <FormButtons
             disabled={isDisabled}
             downloadExcel={() =>
@@ -93,6 +95,7 @@ export default function Hakutilasto() {
             fieldsToClear={[
               () => setSelectedAlkamiskaudet(null),
               () => setSelectedHaut(null),
+              () => setSelectedKoulutustoimija(null),
               () => setSelectedOppilaitokset(null),
               () => setSelectedToimipisteet(null),
               () => setSelectedTulostustapa(null),
@@ -104,6 +107,7 @@ export default function Hakutilasto() {
               () => setSelectedNaytaHakutoiveet(null),
               () => setSelectedOpetuskielet(null),
               () => setSelectedHakukohteet(null),
+              () => setSelectedHarkinnanvaraisuus(null),
               () => setSelectedSukupuoli(null),
             ]}
           />
