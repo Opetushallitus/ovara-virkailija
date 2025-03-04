@@ -65,7 +65,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
           sukupuoli = sukupuoli
         )
         db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams").map(r => HakeneetHyvaksytytVastaanottaneetResult(r))
-      case _ =>
+      case "koulutusaloittain" =>
         val query = hakeneetHyvaksytytVastaanottaneetRepository.selectKoulutusaloittainWithParams(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
           haut = haku,
@@ -80,8 +80,39 @@ class HakeneetHyvaksytytVastaanottaneetService(
           sukupuoli = sukupuoli
         )
         db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectKoulutusaloittainWithParams")
+      case "toimipisteittain" =>
+        val query = hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams(
+          selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
+          haut = haku,
+          hakukohteet = hakukohteet,
+          koulutusalat1 = koulutusalat1,
+          koulutusalat2 = koulutusalat2,
+          koulutusalat3 = koulutusalat3,
+          opetuskielet = opetuskielet,
+          maakunnat = maakunnat,
+          kunnat = kunnat,
+          harkinnanvaraisuudet = harkinnanvaraisuudet,
+          sukupuoli = sukupuoli
+        )
+        db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams").map(r => HakeneetHyvaksytytVastaanottaneetResult(r))
+      case _ =>
+        val query = hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams(
+          selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
+          haut = haku,
+          hakukohteet = hakukohteet,
+          koulutusalat1 = koulutusalat1,
+          koulutusalat2 = koulutusalat2,
+          koulutusalat3 = koulutusalat3,
+          opetuskielet = opetuskielet,
+          maakunnat = maakunnat,
+          kunnat = kunnat,
+          harkinnanvaraisuudet = harkinnanvaraisuudet,
+          sukupuoli = sukupuoli,
+          organisaatiotaso = tulostustapa
+        )
+        db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams")
     
-    val sumQuery = hakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaHakukohteittainWithParams(
+    val sumQuery = hakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams(
       selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
       haut = haku,
       hakukohteet = hakukohteet,

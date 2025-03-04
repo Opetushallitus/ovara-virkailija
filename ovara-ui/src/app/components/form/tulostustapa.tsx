@@ -7,7 +7,7 @@ const tulostustavat = (t: (key: string) => string) => {
   const tavat = [
     'koulutustoimijoittain',
     'oppilaitoksittain',
-    'toimipisteittäin',
+    'toimipisteittain',
     'koulutusaloittain',
     'hakukohteittain',
   ];
