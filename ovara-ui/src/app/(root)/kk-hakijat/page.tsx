@@ -31,7 +31,7 @@ import {
 } from '@/app/components/form/nayta';
 import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
 
-export default function Hakijat() {
+export default function KkHakijat() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const hasKkRights = hasOvaraKkRole(user?.authorities);
