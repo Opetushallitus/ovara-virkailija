@@ -14,7 +14,7 @@ const tulostustavat = (t: (key: string) => string) => {
   return tavat.map((tulostustapa) => {
     return {
       value: tulostustapa,
-      label: t(`yleinen.tulostustapa.${tulostustapa}`),
+      label: t(`raportti.tulostustapa.${tulostustapa}`),
     };
   });
 };

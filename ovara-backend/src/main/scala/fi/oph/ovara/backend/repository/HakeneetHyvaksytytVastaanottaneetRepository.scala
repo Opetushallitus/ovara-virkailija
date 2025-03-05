@@ -131,16 +131,16 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       opetuskielet, maakunnat, kunnat, harkinnanvaraisuudet, sukupuoli
     )
 
-    sql"""SELECT ka.kansallinenkoulutusluokitus2016koulutusalataso1_nimi as otsikko, SUM(DISTINCT t.hakijat) AS hakijat, SUM(DISTINCT t.ensisijaisia) AS ensisijaisia, SUM(DISTINCT t.varasija) AS varasija, SUM(DISTINCT t.hyvaksytyt) AS hyvaksytyt,
-    SUM(DISTINCT t.vastaanottaneet) AS vastaanottaneet, SUM(DISTINCT t.lasna) AS lasna, SUM(DISTINCT t.poissa) AS poissa, SUM(DISTINCT t.ilm_yht) AS ilm_yht, MIN(DISTINCT t.aloituspaikat) AS aloituspaikat,
-    SUM(DISTINCT t.toive_1) AS toive1, SUM(DISTINCT t.toive_2) AS toive2, SUM(DISTINCT t.toive_3) AS toive3, SUM(DISTINCT t.toive_4) AS toive4, SUM(DISTINCT t.toive_5) AS toive5, SUM(DISTINCT t.toive_6) AS toive6, SUM(DISTINCT t.toive_7) AS toive7
+    sql"""SELECT ka.koodinimi as otsikko, SUM(t.hakijat) AS hakijat, SUM(t.ensisijaisia) AS ensisijaisia, SUM(t.varasija) AS varasija, SUM(t.hyvaksytyt) AS hyvaksytyt,
+    SUM(t.vastaanottaneet) AS vastaanottaneet, SUM(t.lasna) AS lasna, SUM(t.poissa) AS poissa, SUM(t.ilm_yht) AS ilm_yht, SUM(DISTINCT t.aloituspaikat) AS aloituspaikat,
+    SUM(t.toive_1) AS toive1, SUM(t.toive_2) AS toive2, SUM(t.toive_3) AS toive3, SUM(t.toive_4) AS toive4, SUM(t.toive_5) AS toive5, SUM(t.toive_6) AS toive6, SUM(t.toive_7) AS toive7
     FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
     JOIN pub.pub_dim_hakukohde h
     ON t.hakukohde_oid = h.hakukohde_oid
-    JOIN pub.pub_dim_koodisto_koulutus_alat_ja_asteet ka
-    ON t.koulutusalataso_1 = ka.kansallinenkoulutusluokitus2016koulutusalataso1
+    JOIN pub.pub_dim_koodisto_koulutusalataso1 ka
+    ON t.koulutusalataso_1 = ka.koodiarvo
     WHERE #$filters
-    GROUP BY ka.kansallinenkoulutusluokitus2016koulutusalataso1_nimi""".as[HakeneetHyvaksytytVastaanottaneetResult]
+    GROUP BY ka.koodinimi""".as[HakeneetHyvaksytytVastaanottaneetResult]
   }
 
   def selectOrganisaatioittainWithParams(
