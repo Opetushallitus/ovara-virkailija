@@ -14,16 +14,20 @@ import { Haku } from '@/app/components/form/haku';
 import { OrganisaatioValikot } from '@/app/components/form/organisaatiovalikot';
 import { Hakukohde } from '@/app/components/form/hakukohde';
 import { Tulostustapa } from '@/app/components/form/tulostustapa';
+import { Opetuskieli } from '@/app/components/form/opetuskieli';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { useHakeneetSearchParams } from '@/app/hooks/searchParams/useHakeneetSearchParams';
 import { Divider } from '@mui/material';
 import { NaytaHakutoiveet } from '@/app/components/form/nayta-hakutoiveet';
 import { Sukupuoli } from '@/app/components/form/sukupuoli';
+import { Harkinnanvaraisuus } from '@/app/components/form/harkinnanvaraisuus';
 import { downloadExcel } from '@/app/components/form/utils';
 import { useState } from 'react';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
+import { KoulutusalaValikot } from '@/app/components/form/koulutusalavalikot';
+import { MaakuntaKuntaValikot } from '@/app/components/form/maakunta-kunta';
 
-export default function Hakutilasto() {
+export default function KkHakutilasto() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const hasToinenAsteRights = hasOvaraToinenAsteRole(user?.authorities);
@@ -39,11 +43,18 @@ export default function Hakutilasto() {
     setSelectedOppilaitokset,
     setSelectedToimipisteet,
     setSelectedHakukohteet,
+    setSelectedHarkinnanvaraisuus,
   } = useCommonSearchParams();
   const {
+    setSelectedKoulutusalat1,
+    setSelectedKoulutusalat2,
+    setSelectedKoulutusalat3,
+    setSelectedMaakunnat,
+    setSelectedKunnat,
     setSelectedNaytaHakutoiveet,
     selectedTulostustapa,
     setSelectedTulostustapa,
+    setSelectedOpetuskielet,
     setSelectedSukupuoli,
   } = useHakeneetSearchParams();
 
@@ -61,13 +72,17 @@ export default function Hakutilasto() {
           {isLoading && <SpinnerModal open={isLoading} />}
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
           <KoulutuksenAlkaminen />
-          <Haku haunTyyppi={'toinen_aste'} />
-          <Tulostustapa />
+          <Haku />
+          <Tulostustapa kk={true} />
           <OrganisaatioValikot />
           <Hakukohde locale={locale} t={t} />
+          <Opetuskieli />
+          <KoulutusalaValikot />
+          <MaakuntaKuntaValikot />
+          <Harkinnanvaraisuus t={t} />
           <Divider />
-          <Sukupuoli />
-          <NaytaHakutoiveet />
+          <Sukupuoli t={t} />
+          <NaytaHakutoiveet t={t} />
           <FormButtons
             disabled={isDisabled}
             downloadExcel={() =>
@@ -84,8 +99,15 @@ export default function Hakutilasto() {
               () => setSelectedOppilaitokset(null),
               () => setSelectedToimipisteet(null),
               () => setSelectedTulostustapa(null),
+              () => setSelectedKoulutusalat1(null),
+              () => setSelectedKoulutusalat2(null),
+              () => setSelectedKoulutusalat3(null),
+              () => setSelectedMaakunnat(null),
+              () => setSelectedKunnat(null),
               () => setSelectedNaytaHakutoiveet(null),
+              () => setSelectedOpetuskielet(null),
               () => setSelectedHakukohteet(null),
+              () => setSelectedHarkinnanvaraisuus(null),
               () => setSelectedSukupuoli(null),
             ]}
           />
