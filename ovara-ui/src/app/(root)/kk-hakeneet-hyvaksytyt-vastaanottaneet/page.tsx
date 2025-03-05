@@ -26,6 +26,7 @@ import { useState } from 'react';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { KoulutusalaValikot } from '@/app/components/form/koulutusalavalikot';
 import { MaakuntaKuntaValikot } from '@/app/components/form/maakunta-kunta';
+import { Kansalaisuus } from '@/app/components/form/kansalaisuus';
 
 export default function KkHakutilasto() {
   const { t } = useTranslate();
@@ -81,8 +82,9 @@ export default function KkHakutilasto() {
           <MaakuntaKuntaValikot />
           <Harkinnanvaraisuus t={t} />
           <Divider />
-          <Sukupuoli t={t} />
-          <NaytaHakutoiveet t={t} />
+          <Kansalaisuus />
+          <Sukupuoli />
+          <NaytaHakutoiveet />
           <FormButtons
             disabled={isDisabled}
             downloadExcel={() =>
