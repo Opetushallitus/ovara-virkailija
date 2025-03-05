@@ -3,14 +3,31 @@ import { useTranslate } from '@tolgee/react';
 import { LocalizedSelect } from '@/app/components/form/localized-select';
 import { useHakeneetSearchParams } from '@/app/hooks/searchParams/useHakeneetSearchParams';
 
-const tulostustavat = (t: (key: string) => string) => {
-  const tavat = [
-    'koulutustoimijoittain',
-    'oppilaitoksittain',
-    'toimipisteittain',
-    'koulutusaloittain',
-    'hakukohteittain',
-  ];
+const tulostustavat = ({
+  t,
+  kk,
+}: {
+  t: (key: string) => string;
+  kk?: boolean;
+}) => {
+  const tavat = kk
+    ? [
+        'koulutustoimijoittain',
+        'oppilaitoksittain',
+        'toimipisteittain',
+        'okmohjauksenaloittain',
+        'hauittain',
+        'hakukohteittain',
+        'hakukohderyhmittain',
+        'kansalaisuuksittain',
+      ]
+    : [
+        'koulutustoimijoittain',
+        'oppilaitoksittain',
+        'toimipisteittain',
+        'koulutusaloittain',
+        'hakukohteittain',
+      ];
   return tavat.map((tulostustapa) => {
     return {
       value: tulostustapa,
@@ -19,7 +36,7 @@ const tulostustavat = (t: (key: string) => string) => {
   });
 };
 
-export const Tulostustapa = () => {
+export const Tulostustapa = ({ kk }: { kk?: boolean }) => {
   const { t } = useTranslate();
   const { selectedTulostustapa, setSelectedTulostustapa } =
     useHakeneetSearchParams();
@@ -35,7 +52,7 @@ export const Tulostustapa = () => {
       id={id}
       label={t(`raportti.${id}`)}
       value={selectedTulostustapa ?? ''}
-      options={tulostustavat(t)}
+      options={tulostustavat({ t, kk })}
       onChange={changeTulostustapa}
       required={true}
     />
