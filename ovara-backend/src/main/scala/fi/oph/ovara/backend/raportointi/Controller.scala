@@ -161,6 +161,8 @@ class Controller(
       commonService.getHakukohderyhmat(if (haut == null) List() else haut.asScala.toList)
     )
 
+  @GetMapping(path = Array("okm-ohjauksen-alat"))
+  def okmOhjauksenAlat: String = mapper.writeValueAsString(commonService.getOkmOhjauksenAlat)
   // RAPORTIT
 
   private def sendExcel(
