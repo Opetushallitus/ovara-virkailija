@@ -66,8 +66,8 @@ export default function Hakutilasto() {
           <OrganisaatioValikot />
           <Hakukohde locale={locale} t={t} />
           <Divider />
-          <Sukupuoli t={t} />
-          <NaytaHakutoiveet t={t} />
+          <Sukupuoli />
+          <NaytaHakutoiveet />
           <FormButtons
             disabled={isDisabled}
             downloadExcel={() =>

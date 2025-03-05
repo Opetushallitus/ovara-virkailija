@@ -5,6 +5,7 @@ import {
   OPPILAITOSORGANISAATIOTYYPPI,
   TOIMIPISTEORGANISAATIOTYYPPI,
 } from './constants';
+import { match } from 'ts-pattern';
 
 export type KoulutuksenAlkaminen = {
   alkamiskausinimi: string;
@@ -169,4 +170,14 @@ export const getHarkinnanvaraisuusTranslation = (
   const match = harkinnanvaraisuuden_syy.match(/(ATARU)_(\w*)/);
   const lowerCaseMatch = match?.[2].toLowerCase();
   return lowerCaseMatch ? t(`raportti.${lowerCaseMatch}`) : t('');
+};
+
+export const getKansalaisuusTranslation = (
+  kansalaisuus: string,
+  t: (s: string) => string,
+) => {
+  return match(kansalaisuus)
+    .with('1', () => t('raportti.kansalaisuus.suomi'))
+    .with('2', () => t('raportti.kansalaisuus.eu-eta'))
+    .otherwise(() => t('raportti.kansalaisuus.muu'));
 };
