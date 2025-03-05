@@ -5,8 +5,10 @@ import {
   getSelectedRadioGroupValue,
 } from '@/app/components/form/utils';
 import { useHakeneetSearchParams } from '@/app/hooks/searchParams/useHakeneetSearchParams';
+import { useTranslate } from '@tolgee/react';
 
-export const NaytaHakutoiveet = ({ t }: { t: (key: string) => string }) => {
+export const NaytaHakutoiveet = () => {
+  const { t } = useTranslate();
   const { selectedNaytaHakutoiveet, setSelectedNaytaHakutoiveet } =
     useHakeneetSearchParams();
 

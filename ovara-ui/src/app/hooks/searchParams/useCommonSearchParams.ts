@@ -64,6 +64,11 @@ export const useCommonSearchParams = () => {
       parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
     );
 
+  const [selectedKansalaisuus, setSelectedKansalaisuus] = useQueryState(
+    'kansalaisuus',
+    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
   const emptyAllCommonParams = () => {
     setSelectedAlkamiskaudet(null);
     setSelectedHaut(null);
@@ -76,6 +81,7 @@ export const useCommonSearchParams = () => {
     setSelectedValintakoe(null);
     setSelectedHakukohteet(null);
     setSelectedHarkinnanvaraisuus(null);
+    setSelectedKansalaisuus(null);
   };
 
   return {
@@ -101,6 +107,8 @@ export const useCommonSearchParams = () => {
     setSelectedHakukohteet,
     selectedHarkinnanvaraisuus,
     setSelectedHarkinnanvaraisuus,
+    selectedKansalaisuus,
+    setSelectedKansalaisuus,
     emptyAllCommonParams,
   };
 };

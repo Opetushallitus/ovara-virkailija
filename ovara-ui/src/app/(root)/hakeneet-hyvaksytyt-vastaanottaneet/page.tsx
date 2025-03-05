@@ -81,8 +81,8 @@ export default function Hakutilasto() {
           <MaakuntaKuntaValikot />
           <Harkinnanvaraisuus t={t} />
           <Divider />
-          <Sukupuoli t={t} />
-          <NaytaHakutoiveet t={t} />
+          <Sukupuoli />
+          <NaytaHakutoiveet />
           <FormButtons
             disabled={isDisabled}
             downloadExcel={() =>
