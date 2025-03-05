@@ -25,27 +25,20 @@ export const styled: typeof muiStyled = (
 
 export const THEME_OVERRIDES: ThemeOptions = {
   components: {
-    MuiInputBase: {
-      styleOverrides: {
-        root: {
-          borderColor: ophColors.grey800,
-          borderRadius: '2px',
-        },
-      },
-    },
-    MuiLink: {
-      styleOverrides: {
-        root: {
-          textDecoration: 'none',
-          '&:hover, &:focus': {
-            textDecoration: 'underline',
-          },
-        },
+    MuiCircularProgress: {
+      defaultProps: {
+        size: 50,
+        thickness: 4.5,
       },
     },
     MuiChip: {
       styleOverrides: {
         root: { borderRadius: 'unset', fontSize: '1rem' },
+      },
+    },
+    MuiButton: {
+      defaultProps: {
+        loadingPosition: 'start',
       },
     },
     MuiDivider: {

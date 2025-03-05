@@ -11,10 +11,13 @@ class JdbcSessionMappingStorage(sessionRepository: SessionRepository[Session], s
 
   val LOG = LoggerFactory.getLogger(classOf[JdbcSessionMappingStorage])
 
+  val mappingTableName = s"${schema}.virkailija_cas_client_session"
+  val sessionTableName = s"${schema}.virkailija_session"
   @Override
   def removeSessionByMappingId(mappingId: String): HttpSession = {
-    val query = sql"SELECT session_id FROM #$schema.cas_client_session WHERE mapping_id = $mappingId".as[String].headOption
-    val sessionIdOpt = ovaraDatabase.run(query, "removeSessionByMappingId")
+    LOG.debug(s"Poistetaan sessiomappaus cas tiketillä $mappingId")
+    val query = sql"""SELECT virkailija_session_id FROM #$mappingTableName WHERE mapped_ticket_id = $mappingId""".as[String].headOption
+    val sessionIdOpt = ovaraDatabase.run(query, "selectSessionIdByMappingId")
 
     sessionIdOpt
       .flatMap(sessionId => Option(sessionRepository.findById(sessionId)))
@@ -24,19 +27,22 @@ class JdbcSessionMappingStorage(sessionRepository: SessionRepository[Session], s
 
   @Override
   def removeBySessionById(sessionId: String): Unit = {
-    val sql = sqlu"DELETE FROM #$schema.cas_client_session WHERE session_id = $sessionId"
+    LOG.debug(s"Poistetaan sessiomappaus session id:llä $sessionId")
+    val sql = sqlu"""DELETE FROM #$mappingTableName WHERE virkailija_session_id = $sessionId"""
     ovaraDatabase.run(sql, "removeBySessionById")
   }
 
   @Override
   def addSessionById(mappingId: String, session: HttpSession): Unit = {
-    val sql = sqlu"INSERT INTO #$schema.cas_client_session (mapping_id, session_id) VALUES ($mappingId, ${session.getId}) ON CONFLICT (mapping_id) DO NOTHING"
+    LOG.debug(s"Lisätään sessiomappaus, mappingId: $mappingId, sessionId: ${session.getId}")
+    val sql = sqlu"""INSERT INTO #$mappingTableName (mapped_ticket_id, virkailija_session_id) VALUES ($mappingId, ${session.getId}) ON CONFLICT (mapped_ticket_id) DO NOTHING"""
     ovaraDatabase.run(sql, "addSessionById")
   }
 
   @Override
   def clean(): Unit = {
-    val sql = sqlu"DELETE FROM #$schema.cas_client_session WHERE session_id NOT IN (SELECT session_id FROM spring_session)"
+    LOG.debug("Siivotaan sessiomappaukset joille ei löydy sessiota")
+    val sql = sqlu"""DELETE FROM #$mappingTableName WHERE virkailija_session_id NOT IN (SELECT session_id FROM #$sessionTableName)"""
     ovaraDatabase.run(sql, "clean")
   }
 
