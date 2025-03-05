@@ -72,7 +72,7 @@ export default function Hakutilasto() {
           {isLoading && <SpinnerModal open={isLoading} />}
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
           <KoulutuksenAlkaminen />
-          <Haku />
+          <Haku haunTyyppi={'toinen_aste'} />
           <Tulostustapa />
           <OrganisaatioValikot />
           <Hakukohde locale={locale} t={t} />
