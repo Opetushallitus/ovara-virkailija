@@ -136,6 +136,8 @@ class Controller(
   def koulutusalat3(@RequestParam("koulutusalat2", required = false) koulutusalat2: java.util.Collection[String]): String = 
     mapper.writeValueAsString(commonService.getKoulutusalat3(if (koulutusalat2 == null) List() else koulutusalat2.asScala.toList))
 
+  @GetMapping(path = Array("okm-ohjauksen-alat"))
+  def okmOhjauksenAlat: String = mapper.writeValueAsString(commonService.getOkmOhjauksenAlat)
   // RAPORTIT
 
   private def sendExcel(

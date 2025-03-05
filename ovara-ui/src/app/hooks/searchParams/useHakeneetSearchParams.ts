@@ -53,6 +53,26 @@ export const useHakeneetSearchParams = () => {
     DEFAULT_NUQS_OPTIONS,
   );
 
+  const [selectedTutkinnonTaso, setSelectedTutkinnonTaso] = useQueryState(
+    'tutkinnon-taso',
+    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
+  const [selectedAidinkieli, setSelectedAidinkieli] = useQueryState(
+    'aidinkieli',
+    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
+  const [selectedEnsikertalainen, setSelectedEnsikertalainen] = useQueryState(
+    'ensikertalainen',
+    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
+  const [selectedOkmOhjauksenAla, setSelectedOkmOhjauksenAla] = useQueryState(
+    'okm-ohjauksen-ala',
+    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
   return {
     selectedTulostustapa,
     setSelectedTulostustapa,
@@ -72,5 +92,13 @@ export const useHakeneetSearchParams = () => {
     setSelectedNaytaHakutoiveet,
     selectedSukupuoli,
     setSelectedSukupuoli,
+    selectedTutkinnonTaso,
+    setSelectedTutkinnonTaso,
+    selectedAidinkieli,
+    setSelectedAidinkieli,
+    selectedEnsikertalainen,
+    setSelectedEnsikertalainen,
+    selectedOkmOhjauksenAla,
+    setSelectedOkmOhjauksenAla,
   };
 };
