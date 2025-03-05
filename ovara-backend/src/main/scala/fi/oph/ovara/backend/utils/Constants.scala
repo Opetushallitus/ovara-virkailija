@@ -56,4 +56,6 @@ object Constants {
   val KOULUTUSTOIMIJARAPORTTI = "koulutustoimijaraportti"
   val OPPILAITOSRAPORTTI = "oppilaitosraportti"
   val TOIMIPISTERAPORTTI = "toimipisteraportti"
+
+  val POSTIOSOITEFIELDS = List("lahiosoite", "postinumero", "postitoimipaikka")
 }

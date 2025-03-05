@@ -358,6 +358,17 @@ object ExcelWriter {
     currentRowIndex + 1
   }
 
+  def shouldSkipCreatingCell(
+      raporttiId: String,
+      fieldName: String,
+      naytaHetu: Boolean,
+      naytaPostiosoite: Boolean
+  ): Boolean = {
+    raporttiId == "korkeakoulu" &&
+    ((fieldName == "hetu" && !naytaHetu) ||
+      (POSTIOSOITEFIELDS.contains(fieldName) && !naytaPostiosoite))
+  }
+
   def writeHakijatRaportti(
       hakijat: Seq[HakijaWithCombinedNimi | KkHakijaWithCombinedNimi],
       asiointikieli: String,
@@ -383,19 +394,18 @@ object ExcelWriter {
 
     var currentRowIndex = 0
 
-    val postiosoiteFields        = List("lahiosoite", "postinumero", "postitoimipaikka")
-    val optionallyShowableFields = List("hetu") ::: postiosoiteFields
+    val optionallyShowableFields = List("hetu") ::: POSTIOSOITEFIELDS
 
     val naytaHetu        = maybeNaytaHetu.getOrElse(false)
     val naytaPostiosoite = maybeNaytaPostiosoite.getOrElse(false)
 
-    val c          = if (id == "korkeakoulu") classOf[KkHakijaWithCombinedNimi] else classOf[HakijaWithCombinedNimi]
-    val fieldNames = c.getDeclaredFields.map(_.getName).toList
+    val hakijaClass = if (id == "korkeakoulu") classOf[KkHakijaWithCombinedNimi] else classOf[HakijaWithCombinedNimi]
+    val fieldNames  = hakijaClass.getDeclaredFields.map(_.getName).toList
     val fieldNamesToShow = if (id == "korkeakoulu") {
       fieldNames.filter(fieldName => {
         !optionallyShowableFields.contains(fieldName) ||
           fieldName == "hetu" && naytaHetu ||
-          postiosoiteFields.contains(
+          POSTIOSOITEFIELDS.contains(
             fieldName
           ) && naytaPostiosoite
       })
@@ -414,7 +424,7 @@ object ExcelWriter {
       var numberOfSkippedFields = 0
       var cellIndex             = 0
       for ((fieldName, i) <- fieldNamesWithIndex) yield {
-        if (id == "korkeakoulu" && optionallyShowableFields.contains(fieldName) && !naytaHetu) {
+        if (shouldSkipCreatingCell(id, fieldName, naytaHetu, naytaPostiosoite)) {
           numberOfSkippedFields = numberOfSkippedFields + 1
         } else {
           cellIndex = i - numberOfSkippedFields

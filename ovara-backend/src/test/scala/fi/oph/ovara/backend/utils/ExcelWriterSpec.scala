@@ -2406,4 +2406,218 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
   }
 
+  it should "return excel with one result row for kk-hakijat with hetu but without postiosoite" in {
+    val kkHakijatResult =
+      Vector(
+        KkHakijaWithCombinedNimi(
+          hakija = "Rautiainen-Testi, Dina Testi",
+          hetu = Some("120393-129E"),
+          syntymaAika = Some(LocalDate.parse("1993-03-12")),
+          kansalaisuus = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+          oppijanumero = "1.2.246.562.24.30646006111",
+          hakemusOid = "1.2.246.562.11.00000000000002179045",
+          toimipiste = Map(En -> "Toimipiste 1 en", Fi -> "Toimipiste 1 fi", Sv -> "Toimipiste 1 sv"),
+          hakukohteenNimi = Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv -> "Hakukohde 1 SV"),
+          prioriteetti = 2,
+          valintatieto = "HYVAKSYTTY",
+          vastaanottotieto = Some("PERUNUT"),
+          viimVastaanottopaiva = Some(LocalDate.parse("2024-06-26")),
+          ensikertalainen = Some(true),
+          ilmoittautuminen = Some("LASNA_KOKO_LUKUVUOSI"),
+          markkinointilupa = Some(true),
+          julkaisulupa = Some(true),
+          sahkoinenViestintaLupa = Some(true),
+          lahiosoite = "Rämsöönranta 368",
+          postinumero = "00100",
+          postitoimipaikka = "HELSINKI"
+        )
+      )
+
+    val wb =
+      ExcelWriter.writeHakijatRaportti(
+        kkHakijatResult,
+        userLng,
+        translations,
+        "korkeakoulu",
+        None,
+        Some(true),
+        Some(false)
+      )
+
+    assert(wb.getNumberOfSheets == 1)
+    assert(wb.getSheetAt(0).getRow(1) != null)
+
+    assert(wb.getSheetAt(0).getRow(0).getCell(0).getStringCellValue == "Hakija SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(1).getStringCellValue == "raportti.hetu")
+    assert(wb.getSheetAt(0).getRow(0).getCell(2).getStringCellValue == "raportti.syntymaAika")
+    assert(wb.getSheetAt(0).getRow(0).getCell(3).getStringCellValue == "Kansalaisuus SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(4).getStringCellValue == "raportti.oppijanumero")
+    assert(wb.getSheetAt(0).getRow(0).getCell(5).getStringCellValue == "raportti.hakemusOid")
+    assert(wb.getSheetAt(0).getRow(0).getCell(6).getStringCellValue == "Toimipiste SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(7).getStringCellValue == "Hakukohde SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(8).getStringCellValue == "raportti.prioriteetti")
+    assert(wb.getSheetAt(0).getRow(0).getCell(9).getStringCellValue == "raportti.valintatieto")
+    assert(wb.getSheetAt(0).getRow(0).getCell(10).getStringCellValue == "raportti.vastaanottotieto")
+    assert(wb.getSheetAt(0).getRow(0).getCell(11).getStringCellValue == "raportti.viimVastaanottopaiva")
+    assert(wb.getSheetAt(0).getRow(0).getCell(12).getStringCellValue == "raportti.ensikertalainen")
+    assert(wb.getSheetAt(0).getRow(0).getCell(13).getStringCellValue == "raportti.ilmoittautuminen")
+    assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "raportti.julkaisulupa")
+    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "LupaMark SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(16).getStringCellValue == "raportti.sahkoinenViestintaLupa")
+    assert(wb.getSheetAt(0).getRow(0).getCell(17) == null)
+
+    assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Rautiainen-Testi, Dina Testi")
+    assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "120393-129E")
+    assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "12.03.1993")
+    assert(wb.getSheetAt(0).getRow(1).getCell(3).getStringCellValue == "Finland")
+    assert(wb.getSheetAt(0).getRow(1).getCell(4).getStringCellValue == "1.2.246.562.24.30646006111")
+    assert(wb.getSheetAt(0).getRow(1).getCell(5).getStringCellValue == "1.2.246.562.11.00000000000002179045")
+    assert(wb.getSheetAt(0).getRow(1).getCell(6).getStringCellValue == "Toimipiste 1 sv")
+    assert(wb.getSheetAt(0).getRow(1).getCell(7).getStringCellValue == "Hakukohde 1 SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(8).getNumericCellValue == 2)
+    assert(wb.getSheetAt(0).getRow(1).getCell(9).getStringCellValue == "Hyvaksytty SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(10).getStringCellValue == "raportti.perunut")
+    assert(wb.getSheetAt(0).getRow(1).getCell(11).getStringCellValue == "26.06.2024")
+    assert(wb.getSheetAt(0).getRow(1).getCell(12).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(1).getCell(13).getStringCellValue == "raportti.lasna_koko_lukuvuosi")
+    assert(wb.getSheetAt(0).getRow(1).getCell(14).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(1).getCell(15).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(1).getCell(16).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(1).getCell(17) == null)
+
+    assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 2)
+    assert(wb.getSheetAt(0).getRow(4) == null)
+  }
+
+  "shouldSkipCreatingCell" should "return false for hetu if raportti is NOT korkeakouluraportti" in {
+    assert(
+      !ExcelWriter.shouldSkipCreatingCell(
+        raporttiId = "toinen aste",
+        fieldName = "hetu",
+        naytaHetu = true,
+        naytaPostiosoite = true
+      )
+    )
+  }
+
+  it should "return false for lahiosoite if raportti is NOT korkeakouluraportti" in {
+    assert(
+      !ExcelWriter.shouldSkipCreatingCell(
+        raporttiId = "toinen aste",
+        fieldName = "lahiosoite",
+        naytaHetu = true,
+        naytaPostiosoite = true
+      )
+    )
+  }
+
+  it should "return false for postinumero if raportti is NOT korkeakouluraportti" in {
+    assert(
+      !ExcelWriter.shouldSkipCreatingCell(
+        raporttiId = "toinen aste",
+        fieldName = "postinumero",
+        naytaHetu = true,
+        naytaPostiosoite = true
+      )
+    )
+  }
+
+  it should "return false for postitoimipaikka if raportti is NOT korkeakouluraportti" in {
+    assert(
+      !ExcelWriter.shouldSkipCreatingCell(
+        raporttiId = "toinen aste",
+        fieldName = "postitoimipaikka",
+        naytaHetu = true,
+        naytaPostiosoite = true
+      )
+    )
+  }
+
+  it should "return false for hetu if raportti is korkeakouluraportti and naytaHetu is true" in {
+    assert(
+      !ExcelWriter.shouldSkipCreatingCell(
+        raporttiId = "korkeakoulu",
+        fieldName = "hetu",
+        naytaHetu = true,
+        naytaPostiosoite = false
+      )
+    )
+  }
+
+  it should "return true for hetu if raportti is korkeakouluraportti and naytaHetu is false" in {
+    assert(
+      ExcelWriter.shouldSkipCreatingCell(
+        raporttiId = "korkeakoulu",
+        fieldName = "hetu",
+        naytaHetu = false,
+        naytaPostiosoite = false
+      )
+    )
+  }
+
+  it should "return false for lahiosoite if raportti is korkeakouluraportti and naytaPostiosoite is true" in {
+    assert(
+      !ExcelWriter.shouldSkipCreatingCell(
+        raporttiId = "korkeakoulu",
+        fieldName = "lahiosoite",
+        naytaHetu = false,
+        naytaPostiosoite = true
+      )
+    )
+  }
+
+  it should "return true for lahiosoite if raportti is korkeakouluraportti and naytaPostiosoite is false" in {
+    assert(
+      ExcelWriter.shouldSkipCreatingCell(
+        raporttiId = "korkeakoulu",
+        fieldName = "lahiosoite",
+        naytaHetu = false,
+        naytaPostiosoite = false
+      )
+    )
+  }
+
+  it should "return false for postinumero if raportti is korkeakouluraportti and naytaPostiosoite is true" in {
+    assert(
+      !ExcelWriter.shouldSkipCreatingCell(
+        raporttiId = "korkeakoulu",
+        fieldName = "postinumero",
+        naytaHetu = false,
+        naytaPostiosoite = true
+      )
+    )
+  }
+
+  it should "return true for postinumero if raportti is korkeakouluraportti and naytaPostiosoite is false" in {
+    assert(
+      ExcelWriter.shouldSkipCreatingCell(
+        raporttiId = "korkeakoulu",
+        fieldName = "postinumero",
+        naytaHetu = false,
+        naytaPostiosoite = false
+      )
+    )
+  }
+
+  it should "return false for postitoimipaikka if raportti is korkeakouluraportti and naytaPostiosoite is true" in {
+    assert(
+      !ExcelWriter.shouldSkipCreatingCell(
+        raporttiId = "korkeakoulu",
+        fieldName = "postitoimipaikka",
+        naytaHetu = false,
+        naytaPostiosoite = true
+      )
+    )
+  }
+
+  it should "return true for postitoimipaikka if raportti is korkeakouluraportti and naytaPostiosoite is false" in {
+    assert(
+      ExcelWriter.shouldSkipCreatingCell(
+        raporttiId = "korkeakoulu",
+        fieldName = "postitoimipaikka",
+        naytaHetu = false,
+        naytaPostiosoite = false
+      )
+    )
+  }
 }
