@@ -49,7 +49,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     "raportti.toive6"                        -> "Toive6 SV",
     "raportti.toive7"                        -> "Toive7 SV",
     "raportti.yhteensa"                      -> "Yhteensä SV",
-    "raportti.yksittaiset-hakijat"           -> "Yksittäiset hakijat SV"
+    "raportti.yksittaiset-hakijat"           -> "Yksittäiset hakijat SV",
   )
 
   def checkAloituspaikatRowValidity(sheet: XSSFSheet, rowNumber: Int, expected: Int): Unit = {
@@ -451,7 +451,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(currentRowIndex == 0)
   }
 
-  "writeKoulutuksetToteutuksetHakukohteetRaportti" should "create one sheet and set 'Yhteenveto' as the name of the sheet" in {
+  "writeExcel" should "create one sheet and set 'Yhteenveto' as the name of the sheet" in {
     val hierarkiatWithHakukohteet = List(
       OrganisaatioHierarkiaWithHakukohteet(
         "1.2.246.562.10.41253773158",
@@ -1228,7 +1228,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getPhysicalNumberOfRows == 10)
   }
 
-  "createKoulutuksetToteutuksetHakukohteetResultRows" should "create a sheet with the column title row and two result rows for oppilaitos under koulutustoimija" in {
+  "createResultRows" should "create a sheet with the column title row and two result rows for oppilaitos under koulutustoimija" in {
     val hierarkiatWithHakukohteet = List(
       OrganisaatioHierarkiaWithHakukohteet(
         "1.2.246.562.10.2781706420000",
@@ -1533,10 +1533,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   "createHeadingRow" should "create heading row with translated column names or translation keys for hakijat raportti" in {
-    val hakijatQueryResult: Map[String, Seq[ToisenAsteenHakija]] = Map()
-    val wb: XSSFWorkbook                                         = new XSSFWorkbook()
-    val sheet: XSSFSheet                                         = wb.createSheet()
-    val headingCellStyle: XSSFCellStyle                          = wb.createCellStyle()
+    val hakijatQueryResult: Map[String, Seq[Hakija]] = Map()
+    val wb: XSSFWorkbook                             = new XSSFWorkbook()
+    val sheet: XSSFSheet                             = wb.createSheet()
+    val headingCellStyle: XSSFCellStyle              = wb.createCellStyle()
 
     val fieldNames: List[String] = classOf[HakijaWithCombinedNimi].getDeclaredFields.map(_.getName).toList
     ExcelWriter.createHeadingRow(
