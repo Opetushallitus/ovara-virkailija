@@ -37,7 +37,7 @@ export default function KkHakijat() {
   const hasKkRights = hasOvaraKkRole(user?.authorities);
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const queryParams = useSearchParams();
-  const organisaatiot = useFetchOrganisaatiohierarkiat();
+  const { data: organisaatiot } = useFetchOrganisaatiohierarkiat();
   const alkamiskausi = queryParams.get('alkamiskausi');
   const haku = queryParams.get('haku');
   const oppilaitos = queryParams.get('oppilaitos');
@@ -70,8 +70,8 @@ export default function KkHakijat() {
         <FormBox>
           {isLoading && <SpinnerModal open={isLoading} />}
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
-          <KoulutuksenAlkaminen t={t} />
-          <Haku haunTyyppi={'korkeakoulu'} locale={locale} t={t} />
+          <KoulutuksenAlkaminen />
+          <Haku haunTyyppi={'korkeakoulu'} />
           <Divider />
           <OphTypography>
             {t('raportti.vahintaan-yksi-vaihtoehdoista')}

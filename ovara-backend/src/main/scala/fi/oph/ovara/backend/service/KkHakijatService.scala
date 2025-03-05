@@ -41,7 +41,7 @@ class KkHakijatService(
     val authorities               = user.authorities
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getOrganisaatiot(authorities)
 
-    val orgOidsForQuery = commonService.getAllowedOrgsFromOrgSelection(
+    val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
       toimipisteOids = toimipisteet,
       oppilaitosOids = oppilaitokset
