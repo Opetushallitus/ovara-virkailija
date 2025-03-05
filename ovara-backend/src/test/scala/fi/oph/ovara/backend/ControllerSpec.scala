@@ -3,12 +3,7 @@ package fi.oph.ovara.backend
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.raportointi.Controller
-import fi.oph.ovara.backend.service.{
-  CommonService,
-  HakijatService,
-  KoulutuksetToteutuksetHakukohteetService,
-  UserService
-}
+import fi.oph.ovara.backend.service.{CommonService, HakeneetHyvaksytytVastaanottaneetService, HakijatService, KoulutuksetToteutuksetHakukohteetService, UserService}
 import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation}
 import fi.vm.sade.auditlog.*
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
@@ -28,6 +23,7 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
     val mockKoulutuksetToteutuksetHakukohteetService = mock(classOf[KoulutuksetToteutuksetHakukohteetService])
     val mockUserService                              = mock(classOf[UserService])
     val mockHakijatService                           = mock(classOf[HakijatService])
+    val mockHakeneetHyvaksytytVastaanottaneetService = mock(classOf[HakeneetHyvaksytytVastaanottaneetService])
     val mockRequest                                  = mock(classOf[HttpServletRequest])
     val mockResponse                                 = mock(classOf[HttpServletResponse])
     val mockAudit                                    = mock(classOf[Audit])
@@ -43,6 +39,7 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
       mockCommonService,
       mockKoulutuksetToteutuksetHakukohteetService,
       mockHakijatService,
+      mockHakeneetHyvaksytytVastaanottaneetService,
       mockUserService,
       mockAuditLog
     )

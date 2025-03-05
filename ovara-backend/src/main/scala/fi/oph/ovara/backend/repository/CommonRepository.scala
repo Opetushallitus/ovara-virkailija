@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component
 import slick.jdbc.PostgresProfile.api.*
 import slick.sql.SqlStreamingAction
 
+
 @Component
 class CommonRepository extends Extractors {
   def selectDistinctAlkamisvuodet(): SqlStreamingAction[Vector[String], String, Effect] = {
@@ -92,6 +93,65 @@ class CommonRepository extends Extractors {
           FROM pub.pub_dim_hakutoive ht
           WHERE ht.vastaanottotieto IS NOT NULL
        """.as[String]
+  }
+
+  def selectDistinctOpetuskielet: SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
+    sql"""SELECT DISTINCT ook.koodiarvo, ook.koodinimi
+          FROM pub.pub_dim_koodisto_oppilaitoksenopetuskieli ook
+       """.as[Koodi]
+  }
+
+  def selectDistinctMaakunnat: SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
+    sql"""SELECT DISTINCT mk.koodiarvo, mk.koodinimi
+          FROM pub.pub_dim_koodisto_maakunta mk
+       """.as[Koodi]
+  }
+
+  def selectDistinctKunnat(maakunnat: List[String]): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
+    val maakunnatStr = RepositoryUtils.makeListOfValuesQueryStr(maakunnat)
+    val maakunnatQueryStr = if (maakunnatStr.isEmpty) {
+      ""
+    } else {
+      s"AND km.maakunta_koodiarvo in ($maakunnatStr)"
+    }
+    sql"""SELECT DISTINCT k.koodiarvo, k.koodinimi
+          FROM pub.pub_dim_koodisto_kunta k
+          JOIN pub.pub_dim_koodisto_kunta_maakunta km
+          ON k.koodiarvo = km.kunta_koodiarvo
+          WHERE k.koodiarvo IS NOT NULL
+          #$maakunnatQueryStr""".as[Koodi]
+  }
+
+  def selectDistinctKoulutusalat1(): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
+    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso1 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso1_nimi as koodinimi
+                  FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
+            WHERE kansallinenkoulutusluokitus2016koulutusalataso1 IS NOT NULL""".as[Koodi]
+  }
+
+  def selectDistinctKoulutusalat2(koulutusalat1: List[String]): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
+    val koulutusala1Str = RepositoryUtils.makeListOfValuesQueryStr(koulutusalat1)
+    val koulutusala1QueryStr = if (koulutusala1Str.isEmpty) {
+      ""
+    } else {
+      s"AND k.kansallinenkoulutusluokitus2016koulutusalataso1 in ($koulutusala1Str)"
+    }
+    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso2 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso2_nimi as koodinimi
+                  FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
+            WHERE kansallinenkoulutusluokitus2016koulutusalataso2 IS NOT NULL
+            #$koulutusala1QueryStr""".as[Koodi]
+  }
+
+  def selectDistinctKoulutusalat3(koulutusalat2: List[String]): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
+    val koulutusala2Str = RepositoryUtils.makeListOfValuesQueryStr(koulutusalat2)
+    val koulutusala2QueryStr = if (koulutusala2Str.isEmpty) {
+      ""
+    } else {
+      s"AND k.kansallinenkoulutusluokitus2016koulutusalataso2 in ($koulutusala2Str)"
+    }
+    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso3 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso3_nimi as koodinimi
+                  FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
+            WHERE kansallinenkoulutusluokitus2016koulutusalataso3 IS NOT NULL
+            #$koulutusala2QueryStr""".as[Koodi]
   }
 
   def selectDistinctOrganisaatiot(

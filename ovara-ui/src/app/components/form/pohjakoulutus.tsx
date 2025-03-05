@@ -3,12 +3,7 @@ import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearc
 import { useQuery } from '@tanstack/react-query';
 import { doApiFetch } from '@/app/lib/ovara-backend/api';
 import { changeMultiComboBoxSelection } from './utils';
-import { Kielistetty, LanguageCode } from '@/app/lib/types/common';
-
-type Koodi = {
-  koodiarvo: string;
-  koodinimi: Kielistetty;
-};
+import { Koodi, LanguageCode } from '@/app/lib/types/common';
 
 export const Pohjakoulutus = ({
   t,

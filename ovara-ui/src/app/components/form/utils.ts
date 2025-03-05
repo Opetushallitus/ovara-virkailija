@@ -3,6 +3,7 @@ import { SelectChangeEvent } from '@mui/material';
 import { match } from 'ts-pattern';
 import { isEmpty, isNullish } from 'remeda';
 import { apiFetch } from '@/app/lib/ovara-backend/api';
+import { Koodi, LanguageCode } from '@/app/lib/types/common';
 
 export const changeRadioGroupSelection = (
   e: SelectChangeEvent,
@@ -67,6 +68,19 @@ export const changeMultiComboBoxSelection = (
   return setSelected(isEmpty(value) ? null : value?.map((v) => v.value));
 };
 
+export const getKoodiOptions = (locale: string, koodit: Array<Koodi>) => {
+  if (isNullish(koodit)) {
+    return [];
+  } else {
+    return koodit.map((koodi) => {
+      return {
+        value: koodi.koodiarvo,
+        label: koodi.koodinimi[locale as LanguageCode] || '',
+      };
+    });
+  }
+};
+
 // https://stackoverflow.com/a/59940621
 // https://www.stefanjudis.com/snippets/how-trigger-file-downloads-with-javascript/
 export const downloadExcel = async (
@@ -75,9 +89,13 @@ export const downloadExcel = async (
   setIsLoading: (v: boolean) => void,
 ) => {
   setIsLoading(true);
-  const response = await apiFetch(raporttiEndpoint, {
-    queryParams: `?${queryParamsStr}`,
-  });
+  const response = await apiFetch(
+    raporttiEndpoint,
+    {
+      queryParams: `?${queryParamsStr}`,
+    },
+    'no-store',
+  );
 
   const contentDisposition = response.headers.get('content-disposition')!;
   const filename = contentDisposition.match(/.*filename=(.*)/)![1];

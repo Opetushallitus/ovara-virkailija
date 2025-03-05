@@ -26,6 +26,31 @@ object Constants {
     )
   )
 
+  val HAKUTOIVEET_TITLES: List[String] =
+    List(
+      "toive1",
+      "toive2",
+      "toive3",
+      "toive4",
+      "toive5",
+      "toive6",
+      "toive7"
+    )
+
+  val HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES: List[String] =
+    List(
+      "otsikko",
+      "hakijat-yht",
+      "ensisijaisia",
+      "varasija",
+      "hyvaksytyt",
+      "vastaanottaneet",
+      "lasna",
+      "poissa",
+      "ilm-yht",
+      "aloituspaikat",
+    )
+
   val OPH_PAAKAYTTAJA_OID = "1.2.246.562.10.00000000001"
 
   val KOULUTUSTOIMIJARAPORTTI = "koulutustoimijaraportti"

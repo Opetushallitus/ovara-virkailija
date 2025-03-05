@@ -8,11 +8,6 @@ import {
 import { DEFAULT_NUQS_OPTIONS } from '@/app/lib/constants';
 
 export const useHakijatSearchParams = () => {
-  const [selectedHakukohteet, setSelectedHakukohteet] = useQueryState(
-    'hakukohde',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
-
   const [selectedPohjakoulutukset, setSelectedPohjakoulutukset] = useQueryState(
     'pohjakoulutus',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
@@ -60,8 +55,6 @@ export const useHakijatSearchParams = () => {
   );
 
   return {
-    selectedHakukohteet,
-    setSelectedHakukohteet,
     selectedPohjakoulutukset,
     setSelectedPohjakoulutukset,
     selectedVastaanottotieto,

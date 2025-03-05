@@ -3,12 +3,7 @@ package fi.oph.ovara.backend.raportointi
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.UserResponse
-import fi.oph.ovara.backend.service.{
-  CommonService,
-  HakijatService,
-  KoulutuksetToteutuksetHakukohteetService,
-  UserService
-}
+import fi.oph.ovara.backend.service.{CommonService, HakeneetHyvaksytytVastaanottaneetService, HakijatService, KoulutuksetToteutuksetHakukohteetService, UserService}
 import fi.oph.ovara.backend.utils.AuditLog
 import fi.oph.ovara.backend.utils.AuditOperation.KoulutuksetToteutuksetHakukohteet
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
@@ -30,6 +25,7 @@ class Controller(
     commonService: CommonService,
     koulutuksetToteutuksetHakukohteetService: KoulutuksetToteutuksetHakukohteetService,
     hakijatService: HakijatService,
+    hakeneetHyvaksytytVastaanottaneetService: HakeneetHyvaksytytVastaanottaneetService,
     userService: UserService,
     val auditLog: AuditLog = AuditLog
 ) {
@@ -109,6 +105,27 @@ class Controller(
 
   @GetMapping(path = Array("vastaanottotiedot"))
   def vastaanottotiedot: String = mapper.writeValueAsString(commonService.getVastaanottotiedot)
+
+  @GetMapping(path = Array("opetuskielet"))
+  def opetuskielet: String = mapper.writeValueAsString(commonService.getOpetuskielet)
+
+  @GetMapping(path = Array("maakunnat"))
+  def maakunnat: String = mapper.writeValueAsString(commonService.getMaakunnat)
+
+  @GetMapping(path = Array("kunnat"))
+  def kunnat(@RequestParam("maakunnat", required = false) maakunnat: java.util.Collection[String]): String = mapper.writeValueAsString(commonService.getKunnat(if (maakunnat == null) List() else maakunnat.asScala.toList))
+
+  @GetMapping(path = Array("koulutusalat1"))
+  def koulutusalat1: String = mapper.writeValueAsString(commonService.getKoulutusalat1)
+
+  @GetMapping(path = Array("koulutusalat2"))
+  def koulutusalat2(@RequestParam("koulutusalat1", required = false) koulutusalat1: java.util.Collection[String]): String = 
+    mapper.writeValueAsString(commonService.getKoulutusalat2(if (koulutusalat1 == null) List() else koulutusalat1.asScala.toList)
+  )
+
+  @GetMapping(path = Array("koulutusalat3"))
+  def koulutusalat3(@RequestParam("koulutusalat2", required = false) koulutusalat2: java.util.Collection[String]): String = 
+    mapper.writeValueAsString(commonService.getKoulutusalat3(if (koulutusalat2 == null) List() else koulutusalat2.asScala.toList))
 
   // RAPORTIT
 
@@ -274,4 +291,82 @@ class Controller(
 
     sendExcel(wb, response, request, "hakijat", raporttiParams)
   }
+
+  @GetMapping(path = Array("hakeneet-hyvaksytyt-vastaanottaneet"))
+  def hakeneet_hyvaksytyt_vastaanottaneet(
+                                           @RequestParam("alkamiskausi") alkamiskausi: java.util.Collection[String],
+                                           @RequestParam("haku") haku: java.util.Collection[String],
+                                           @RequestParam("tulostustapa") tulostustapa: String,
+                                           @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
+                                           @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
+                                           @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
+                                           @RequestParam("hakukohde", required = false) hakukohde: java.util.Collection[String],
+                                           @RequestParam("koulutusala1", required = false) koulutusala1: java.util.Collection[String],
+                                           @RequestParam("koulutusala2", required = false) koulutusala2: java.util.Collection[String],
+                                           @RequestParam("koulutusala3", required = false) koulutusala3: java.util.Collection[String],
+                                           @RequestParam("opetuskieli", required = false) opetuskieli: java.util.Collection[String],
+                                           @RequestParam("maakunta", required = false) maakunta: java.util.Collection[String],
+                                           @RequestParam("kunta", required = false) kunta: java.util.Collection[String],
+                                           @RequestParam("harkinnanvaraisuus", required = false) harkinnanvaraisuudet: java.util.Collection[String],
+                                           @RequestParam("nayta-hakutoiveet", required = false) naytaHakutoiveet: String,
+                                           @RequestParam("sukupuoli", required = false) sukupuoli: String,
+                                           request: HttpServletRequest,
+                                           response: HttpServletResponse
+                                         ): Unit = {
+    val maybeKoulutustoimija = Option(koulutustoimija)
+    val tulostustapaValinta = Option(tulostustapa).getOrElse("hakukohteittain")
+    val naytaHakutoiveetBool = Option(naytaHakutoiveet).exists(_.toBoolean)
+    val maybeSukupuoli: Option[String] = if (sukupuoli == "neutral") None else Option(sukupuoli)
+    val alkamiskausiList = if (alkamiskausi == null) List() else alkamiskausi.asScala.toList
+    val hakuList = if (haku == null) List() else haku.asScala.toList
+    val oppilaitosList = if (oppilaitos == null) List() else oppilaitos.asScala.toList
+    val toimipisteList = if (toimipiste == null) List() else toimipiste.asScala.toList
+    val hakukohdeList = if (hakukohde == null) List() else hakukohde.asScala.toList
+    val koulutusala1List = if (koulutusala1 == null) List() else koulutusala1.asScala.toList
+    val koulutusala2List = if (koulutusala2 == null) List() else koulutusala2.asScala.toList
+    val koulutusala3List = if (koulutusala3 == null) List() else koulutusala3.asScala.toList
+    val maakuntaList = if (maakunta == null) List() else maakunta.asScala.toList.map("maakunta_" + _)
+    val kuntaList = if (kunta == null) List() else kunta.asScala.toList.map("kunta_" + _)
+    val opetuskieliList = if (opetuskieli == null) List() else opetuskieli.asScala.toList.map("oppilaitoksenopetuskieli_" + _)
+    val harkinnanvaraisuusList = if (harkinnanvaraisuudet == null) List() else harkinnanvaraisuudet.asScala.toList
+
+    val wb = hakeneetHyvaksytytVastaanottaneetService.get(
+      hakuList,
+      tulostustapaValinta,
+      maybeKoulutustoimija,
+      oppilaitosList,
+      toimipisteList,
+      hakukohdeList,
+      koulutusala1List,
+      koulutusala2List,
+      koulutusala3List,
+      opetuskieliList,
+      maakuntaList,
+      kuntaList,
+      harkinnanvaraisuusList,
+      maybeSukupuoli,
+      naytaHakutoiveetBool
+    )
+
+    val raporttiParams = Map(
+      "alkamiskausi" -> Option(alkamiskausiList).filterNot(_.isEmpty),
+      "haku" -> Option(hakuList).filterNot(_.isEmpty),
+      "koulutustoimija" -> maybeKoulutustoimija,
+      "oppilaitos" -> Option(oppilaitosList).filterNot(_.isEmpty),
+      "toimipiste" -> Option(toimipisteList).filterNot(_.isEmpty),
+      "hakukohde"        -> Option(hakukohdeList).filterNot(_.isEmpty),
+      "koulutusala1"        -> Option(koulutusala1).filterNot(_.isEmpty),
+      "koulutusala2"        -> Option(koulutusala2).filterNot(_.isEmpty),
+      "koulutusala3"        -> Option(koulutusala3).filterNot(_.isEmpty),
+      "opetuskieli" -> Option(opetuskieliList).filterNot(_.isEmpty),
+      "maakunta" -> Option(maakuntaList).filterNot(_.isEmpty),
+      "kunta" -> Option(kuntaList).filterNot(_.isEmpty),
+      "harkinnanvaraisuudet" -> Option(harkinnanvaraisuusList).filterNot(_.isEmpty),
+      "naytaHakutoiveet" -> naytaHakutoiveetBool,
+      "sukupuoli" -> maybeSukupuoli
+    ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
+
+    sendExcel(wb, response, request, "hakeneet-hyvaksytyt-vastaanottaneet", raporttiParams)
+  }
+
 }

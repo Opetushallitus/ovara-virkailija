@@ -22,7 +22,6 @@ import { Vastaanottotieto } from '@/app/components/form/vastaanottotieto';
 import { Markkinointilupa } from '@/app/components/form/markkinointilupa';
 import { Julkaisulupa } from '@/app/components/form/julkaisulupa';
 import { Harkinnanvaraisuus } from '@/app/components/form/harkinnanvaraisuus';
-import { useSearchParams as useQueryParams } from 'next/navigation';
 import { useState } from 'react';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { downloadExcel } from '@/app/components/form/utils';
@@ -32,23 +31,40 @@ import { SoraTerveys } from '@/app/components/form/soraTerveys';
 import { SoraAiempi } from '@/app/components/form/soraAiempi';
 import { Urheilijatutkinto } from '@/app/components/form/Urheilijatutkinto';
 import { Pohjakoulutus } from '@/app/components/form/pohjakoulutus';
+import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
+import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
 
 export default function Hakijat() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const hasToinenAsteRights = hasOvaraToinenAsteRole(user?.authorities);
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
-  const queryParams = useSearchParams();
-  const organisaatiot = useFetchOrganisaatiohierarkiat();
-  const alkamiskausi = queryParams.get('alkamiskausi');
-  const haku = queryParams.get('haku');
-  const oppilaitos = queryParams.get('oppilaitos');
-  const toimipiste = queryParams.get('toimipiste');
+  const organisaatiot = useFetchOrganisaatiohierarkiat().data;
+  const {
+    selectedAlkamiskaudet,
+    setSelectedAlkamiskaudet,
+    selectedHaut,
+    setSelectedHaut,
+    selectedOppilaitokset,
+    selectedToimipisteet,
+    setSelectedOppilaitokset,
+    setSelectedToimipisteet,
+    setSelectedHakukohteet,
+    setSelectedHarkinnanvaraisuus,
+  } = useCommonSearchParams();
+  const {
+    setSelectedJulkaisulupa,
+    setSelectedMarkkinointilupa,
+    setSelectedVastaanottotieto,
+  } = useHakijatSearchParams();
 
-  const isDisabled = !(alkamiskausi && haku && (oppilaitos || toimipiste));
-
+  const isDisabled = !(
+    selectedAlkamiskaudet &&
+    selectedHaut &&
+    (selectedOppilaitokset || selectedToimipisteet)
+  );
   const [isLoading, setIsLoading] = useState(false);
-  const queryParamsStr = useQueryParams().toString();
+  const queryParamsStr = useSearchParams().toString();
 
   return (
     <MainContainer>
@@ -56,8 +72,8 @@ export default function Hakijat() {
         <FormBox>
           {isLoading && <SpinnerModal open={isLoading} />}
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
-          <KoulutuksenAlkaminen t={t} />
-          <Haku locale={locale} t={t} />
+          <KoulutuksenAlkaminen />
+          <Haku />
           <Divider />
           <OphTypography>
             {t('raportti.oppilaitos-tai-toimipiste')}
@@ -75,7 +91,7 @@ export default function Hakijat() {
             />
           </Box>
           <Divider />
-          <Hakukohde locale={locale} t={t} />
+          <Hakukohde locale={locale} t={t} sx={{ paddingTop: 0 }} />
           <Pohjakoulutus locale={locale} t={t} />
           <Divider />
           <Valintatieto t={t} />
@@ -92,6 +108,17 @@ export default function Hakijat() {
             downloadExcel={() =>
               downloadExcel('hakijat', queryParamsStr, setIsLoading)
             }
+            fieldsToClear={[
+              () => setSelectedAlkamiskaudet(null),
+              () => setSelectedHaut(null),
+              () => setSelectedOppilaitokset(null),
+              () => setSelectedToimipisteet(null),
+              () => setSelectedHakukohteet(null),
+              () => setSelectedVastaanottotieto(null),
+              () => setSelectedMarkkinointilupa(null),
+              () => setSelectedJulkaisulupa(null),
+              () => setSelectedHarkinnanvaraisuus(null),
+            ]}
           />
         </FormBox>
       ) : null}
