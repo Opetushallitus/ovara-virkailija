@@ -486,6 +486,7 @@ object ExcelWriter {
                             data: List[HakeneetHyvaksytytVastaanottaneetResult],
                             yksittaisetHakijat: Int,
                             naytaHakutoiveet: Boolean,
+                            tulostustapa: String
                           ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new HakeneetHyvaksytytVastaanottaneet excel from db results")
@@ -510,11 +511,17 @@ object ExcelWriter {
 
     var currentRowIndex = 0
 
+    val otsikko = tulostustapa match
+      case "hakukohteittain" => "hakukohde"
+      case "oppilaitoksittain" => "oppilaitos"
+      case "toimipisteittain" => "toimipiste"
+      case "koulutustoimijoittain" => "koulutustoimija"
+      case "koulutusaloittain" => "koulutusala"
     val fieldNames =
       if(naytaHakutoiveet)
-        HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES ++ HAKUTOIVEET_TITLES
+        List(otsikko) ++ HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES ++ HAKUTOIVEET_TITLES
       else
-        HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES
+        List(otsikko) ++ HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES
     val fieldNamesWithIndex = fieldNames.zipWithIndex
 
     currentRowIndex =

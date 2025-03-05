@@ -134,6 +134,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
       queryResult.toList,
       sumQueryResult,
       naytaHakutoiveet,
+      tulostustapa
     )
   }
 
