@@ -119,6 +119,7 @@ export default function KkHakijat() {
                 setIsLoading,
               )
             }
+            fieldsToClear={[]}
           />
         </FormBox>
       ) : null}

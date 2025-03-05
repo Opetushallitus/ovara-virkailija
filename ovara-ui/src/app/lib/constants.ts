@@ -4,7 +4,10 @@ export const TOISEN_ASTEEN_RAPORTIT = [
   'hakeneet-hyvaksytyt-vastaanottaneet',
 ];
 
-export const KK_RAPORTIT = ['kk-hakijat'];
+export const KK_RAPORTIT = [
+  'kk-hakijat',
+  'kk-hakeneet-hyvaksytyt-vastaanottaneet',
+];
 
 export const RADIOGROUP_OPTIONS = ['neutral', 'yes', 'no'];
 export const RADIOGROUP_BOOLEAN_OPTIONS = ['yes', 'no'];
