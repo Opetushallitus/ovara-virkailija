@@ -28,6 +28,7 @@ class KkHakijatService(
       hakukohteet: List[String],
       valintatieto: List[String],
       vastaanottotieto: List[String],
+      kansalaisuus: List[String],
       markkinointilupa: Option[Boolean],
       naytaYoArvosanat: Boolean,
       naytaHetu: Boolean,
@@ -55,6 +56,7 @@ class KkHakijatService(
       hakukohteet = hakukohteet,
       valintatieto = valintatieto,
       vastaanottotieto = vastaanottotieto,
+      kansalaisuus = kansalaisuus,
       markkinointilupa = markkinointilupa,
     )
 

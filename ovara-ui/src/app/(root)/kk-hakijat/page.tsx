@@ -31,6 +31,7 @@ import {
 import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { isEmpty } from 'remeda';
+import { Kansalaisuus } from '@/app/components/form/kansalaisuus';
 
 export default function KkHakijat() {
   const { t } = useTranslate();
@@ -100,6 +101,7 @@ export default function KkHakijat() {
           <Hakukohde locale={locale} t={t} />
           <Valintatieto t={t} />
           <Vastaanottotieto t={t} />
+          <Kansalaisuus />
           <Markkinointilupa t={t} />
           <NaytaYoArvosanat t={t} />
           <NaytaHetu t={t} />
