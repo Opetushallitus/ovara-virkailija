@@ -6,7 +6,6 @@ import { Box, Divider } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { hasOvaraKkRole } from '@/app/lib/utils';
-import { useSearchParams } from 'next/navigation';
 import { LanguageCode } from '@/app/lib/types/common';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
 
@@ -30,18 +29,22 @@ import {
   NaytaPostiosoite,
 } from '@/app/components/form/nayta';
 import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
+import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
+import { isEmpty } from 'remeda';
 
 export default function KkHakijat() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const hasKkRights = hasOvaraKkRole(user?.authorities);
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
-  const queryParams = useSearchParams();
   const { data: organisaatiot } = useFetchOrganisaatiohierarkiat();
-  const alkamiskausi = queryParams.get('alkamiskausi');
-  const haku = queryParams.get('haku');
-  const oppilaitos = queryParams.get('oppilaitos');
-  const toimipiste = queryParams.get('toimipiste');
+
+  const {
+    selectedAlkamiskaudet,
+    selectedHaut,
+    selectedOppilaitokset,
+    selectedToimipisteet,
+  } = useCommonSearchParams();
 
   const {
     selectedNaytaYoArvosanat,
@@ -61,7 +64,12 @@ export default function KkHakijat() {
     selectedNaytaPostiosoite.toString(),
   );
 
-  const isDisabled = !(alkamiskausi && haku && (oppilaitos || toimipiste));
+  const isDisabled =
+    isEmpty(selectedAlkamiskaudet || []) ||
+    isEmpty(selectedHaut || []) ||
+    (isEmpty(selectedOppilaitokset || []) &&
+      isEmpty(selectedToimipisteet || []));
+
   const [isLoading, setIsLoading] = useState(false);
 
   return (
