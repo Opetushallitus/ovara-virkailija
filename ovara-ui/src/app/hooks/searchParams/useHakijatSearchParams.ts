@@ -69,6 +69,22 @@ export const useHakijatSearchParams = () => {
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS).withDefault(true),
   );
 
+  const emptyAllHakijatParams = () => {
+    console.log('EMPTY ALL HAKIJAT PARAMS');
+    setSelectedPohjakoulutukset(null);
+    setSelectedVastaanottotieto(null);
+    setSelectedMarkkinointilupa(null);
+    setSelectedJulkaisulupa(null);
+    setSelectedValintatieto(null);
+    setSelectedKaksoistutkinto(null);
+    setSelectedUrheilijatutkinto(null);
+    setSelectedSoraTerveys(null);
+    setSelectedSoraAiempi(null);
+    setSelectedNaytaYoArvosanat(null);
+    setSelectedNaytaHetu(null);
+    setSelectedNaytaPostiosoite(null);
+  };
+
   return {
     selectedPohjakoulutukset,
     setSelectedPohjakoulutukset,
@@ -94,5 +110,6 @@ export const useHakijatSearchParams = () => {
     setSelectedNaytaHetu,
     selectedNaytaPostiosoite,
     setSelectedNaytaPostiosoite,
+    emptyAllHakijatParams,
   };
 };
