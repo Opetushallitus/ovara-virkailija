@@ -64,6 +64,20 @@ export const useCommonSearchParams = () => {
       parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
     );
 
+  const emptyAllCommonParams = () => {
+    setSelectedAlkamiskaudet(null);
+    setSelectedHaut(null);
+    setSelectedKoulutustoimija(null);
+    setSelectedOppilaitokset(null);
+    setSelectedToimipisteet(null);
+    setSelectedKoulutuksenTila(null);
+    setSelectedToteutuksenTila(null);
+    setSelectedHakukohteenTila(null);
+    setSelectedValintakoe(null);
+    setSelectedHakukohteet(null);
+    setSelectedHarkinnanvaraisuus(null);
+  };
+
   return {
     selectedAlkamiskaudet,
     setSelectedAlkamiskaudet,
@@ -87,5 +101,6 @@ export const useCommonSearchParams = () => {
     setSelectedHakukohteet,
     selectedHarkinnanvaraisuus,
     setSelectedHarkinnanvaraisuus,
+    emptyAllCommonParams,
   };
 };
