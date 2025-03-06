@@ -313,6 +313,7 @@ class Controller(
       @RequestParam("hakukohde", required = false) hakukohde: java.util.Collection[String],
       @RequestParam("valintatieto", required = false) valintatieto: java.util.Collection[String],
       @RequestParam("vastaanottotieto", required = false) vastaanottotieto: java.util.Collection[String],
+      @RequestParam("kansalaisuus", required = false) kansalaisuus: java.util.Collection[String],
       @RequestParam("markkinointilupa", required = false) markkinointilupa: String,
       @RequestParam("nayta-yo-arvosanat", required = true) naytaYoArvosanat: String,
       @RequestParam("nayta-hetu", required = true) naytaHetu: String,
@@ -326,6 +327,7 @@ class Controller(
     val hakukohdeList        = if (hakukohde == null) List() else hakukohde.asScala.toList
     val valintatietoList     = if (valintatieto == null) List() else valintatieto.asScala.toList
     val vastaanottotietoList = if (vastaanottotieto == null) List() else vastaanottotieto.asScala.toList
+    val kansalaisuusList     = if (kansalaisuus == null) List() else kansalaisuus.asScala.toList
 
     val maybeMarkkinointilupa = strToOptionBoolean(markkinointilupa)
 
@@ -336,6 +338,7 @@ class Controller(
       hakukohdeList,
       valintatietoList,
       vastaanottotietoList,
+      kansalaisuusList,
       maybeMarkkinointilupa,
       naytaYoArvosanat.toBoolean,
       naytaHetu.toBoolean,
@@ -349,6 +352,7 @@ class Controller(
       "hakukohde"        -> Option(hakukohdeList).filterNot(_.isEmpty),
       "valintatieto"     -> Option(vastaanottotietoList).filterNot(_.isEmpty),
       "vastaanottotieto" -> Option(vastaanottotietoList).filterNot(_.isEmpty),
+      "kansalaisuus"     -> Option(kansalaisuusList).filterNot(_.isEmpty),
       "markkinointilupa" -> maybeMarkkinointilupa,
       "naytaYoArvosanat" -> naytaYoArvosanat,
       "naytaHetu"        -> naytaHetu,
