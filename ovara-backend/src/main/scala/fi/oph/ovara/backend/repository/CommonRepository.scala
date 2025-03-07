@@ -122,11 +122,11 @@ class CommonRepository extends Extractors {
     } else {
       s"WHERE km.maakunta_koodiarvo in ($maakunnatStr)"
     }
-    sql"""SELECT DISTINCT k.koodiarvo, k.koodinimi
+    sql"""SELECT k.koodiarvo, k.koodinimi
           FROM pub.pub_dim_koodisto_kunta k
           JOIN pub.pub_dim_koodisto_kunta_maakunta km
           ON k.koodiarvo = km.kunta_koodiarvo
-          #$maakunnatQueryStr""".as[Koodi]
+          WHERE #$maakunnatQueryStr""".as[Koodi]
   }
 
   def selectHakukohderyhmat(
@@ -158,7 +158,7 @@ class CommonRepository extends Extractors {
 
   def selectDistinctKoulutusalat1(): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
     sql"""SELECT k.kansallinenkoulutusluokitus2016koulutusalataso1 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso1_nimi as koodinimi
-          FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k""".as[Koodi]
+                  FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k""".as[Koodi]
   }
 
   def selectDistinctKoulutusalat2(koulutusalat1: List[String]): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
@@ -186,9 +186,8 @@ class CommonRepository extends Extractors {
   }
 
   def selectDistinctOkmOhjauksenAlat: SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
-    sql"""SELECT DISTINCT oo.koodiarvo, oo.koodinimi
-          FROM pub.pub_dim_koodisto_okmohjauksenala oo
-       """.as[Koodi]
+    sql"""SELECT oo.koodiarvo, oo.koodinimi
+          FROM pub.pub_dim_koodisto_okmohjauksenala oo""".as[Koodi]
   }
 
   def selectDistinctOrganisaatiot(

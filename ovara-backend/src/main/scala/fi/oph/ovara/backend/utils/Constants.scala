@@ -36,6 +36,15 @@ object Constants {
       "toive6",
       "toive7"
     )
+  val KK_HAKUTOIVEET_TITLES: List[String] =
+    List(
+      "toive1",
+      "toive2",
+      "toive3",
+      "toive4",
+      "toive5",
+      "toive6"
+    )  
 
   val HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES: List[String] =
     List(
@@ -48,6 +57,22 @@ object Constants {
       "poissa",
       "ilm-yht",
       "aloituspaikat"
+    )
+
+  val KK_HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES: List[String] =
+    List(
+      "hakijat-yht",
+      "ensisijaisia",
+      "ensikertalaisia", 
+      "varasija",
+      "hyvaksytyt",
+      "vastaanottaneet",
+      "lasna",
+      "poissa",
+      "ilm-yht",
+      "maksuvelvollisia",
+      "valinnan-aloituspaikat",
+      "aloituspaikat",
     )
 
   val OPH_PAAKAYTTAJA_OID = "1.2.246.562.10.00000000001"

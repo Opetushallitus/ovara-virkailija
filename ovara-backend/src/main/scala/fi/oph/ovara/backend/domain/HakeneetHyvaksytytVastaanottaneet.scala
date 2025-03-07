@@ -1,5 +1,7 @@
 package fi.oph.ovara.backend.domain
 
+import fi.oph.ovara.backend.domain.DomainUtils.mergeKielistetty
+
 abstract class HakeneetHyvaksytytVastaanottaneetBase {
   val hakijat: Int
   val ensisijaisia: Int
@@ -123,10 +125,5 @@ object HakeneetHyvaksytytVastaanottaneetResult {
       toive7 = toimipisteittain.toive7
     )
   }
-
-  def mergeKielistetty(a: Kielistetty, b: Kielistetty): Kielistetty = {
-    (a.keys ++ b.keys).map { key =>
-      key -> List(a.getOrElse(key, ""), b.getOrElse(key, "")).filter(_.nonEmpty).mkString("\n")
-    }.toMap
-  }
+  
 }

@@ -71,7 +71,7 @@ export default function KkHakutilasto() {
           {isLoading && <SpinnerModal open={isLoading} />}
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
           <KoulutuksenAlkaminen />
-          <Haku haunTyyppi={'toinen_aste'} />
+          <Haku haunTyyppi={'korkeakoulu'} />
           <Tulostustapa />
           <OrganisaatioValikot />
           <Hakukohde locale={locale} t={t} />

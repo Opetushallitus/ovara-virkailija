@@ -289,4 +289,41 @@ trait Extractors extends GenericOvaraJsonFormats {
       )
     }
 
+  def extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(r: PositionedResult): (Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int) = {
+    (
+      r.nextInt(), // hakijat
+      r.nextInt(), // ensisijaisia
+      r.nextInt(), // ensikertalaisia
+      r.nextInt(), // varasija
+      r.nextInt(), // hyvaksytyt
+      r.nextInt(), // vastaanottaneet
+      r.nextInt(), // lasna
+      r.nextInt(), // poissa
+      r.nextInt(), // ilmYht
+      r.nextInt(), // maksuvelvollisia
+      r.nextInt(), // valinnanAloituspaikat
+      r.nextInt(), // aloituspaikat
+      r.nextInt(), // toive1
+      r.nextInt(), // toive2
+      r.nextInt(), // toive3
+      r.nextInt(), // toive4
+      r.nextInt(), // toive5
+      r.nextInt(), // toive6
+    )
+  }
+
+  implicit val getKkHakeneetHyvaksytytVastaanottaneetHakukohteittainResult: GetResult[KkHakeneetHyvaksytytVastaanottaneetHakukohteittain] = GetResult { r =>
+    val hakukohdeNimi = extractKielistetty(r.nextStringOption())
+    val organisaatioNimi = extractKielistetty(r.nextStringOption())
+    val commonFields = extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(r)
+
+    KkHakeneetHyvaksytytVastaanottaneetHakukohteittain(
+      hakukohdeNimi = hakukohdeNimi,
+      organisaatioNimi = organisaatioNimi,
+      commonFields._1, commonFields._2, commonFields._3, commonFields._4, commonFields._5,
+      commonFields._6, commonFields._7, commonFields._8, commonFields._9,
+      commonFields._10, commonFields._11, commonFields._12, commonFields._13,
+      commonFields._14, commonFields._15, commonFields._16, commonFields._17, commonFields._18
+    )
+  }
 }
