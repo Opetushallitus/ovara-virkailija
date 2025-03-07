@@ -126,7 +126,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
       sukupuoli = sukupuoli
     )
     
-    val sumQueryResult = db.run(sumQuery, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaHakukohteittainWithParams")
+    val sumQueryResult = db.run(sumQuery, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams")
     
     ExcelWriter.writeHakeneetHyvaksytytVastaanottaneetRaportti(
       asiointikieli,

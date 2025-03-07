@@ -96,13 +96,13 @@ class CommonRepository extends Extractors {
   }
 
   def selectDistinctOpetuskielet: SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
-    sql"""SELECT DISTINCT ook.koodiarvo, ook.koodinimi
+    sql"""SELECT ook.koodiarvo, ook.koodinimi
           FROM pub.pub_dim_koodisto_oppilaitoksenopetuskieli ook
        """.as[Koodi]
   }
 
   def selectDistinctMaakunnat: SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
-    sql"""SELECT DISTINCT mk.koodiarvo, mk.koodinimi
+    sql"""SELECT mk.koodiarvo, mk.koodinimi
           FROM pub.pub_dim_koodisto_maakunta mk
        """.as[Koodi]
   }
@@ -114,18 +114,16 @@ class CommonRepository extends Extractors {
     } else {
       s"AND km.maakunta_koodiarvo in ($maakunnatStr)"
     }
-    sql"""SELECT DISTINCT k.koodiarvo, k.koodinimi
+    sql"""SELECT k.koodiarvo, k.koodinimi
           FROM pub.pub_dim_koodisto_kunta k
           JOIN pub.pub_dim_koodisto_kunta_maakunta km
           ON k.koodiarvo = km.kunta_koodiarvo
-          WHERE k.koodiarvo IS NOT NULL
-          #$maakunnatQueryStr""".as[Koodi]
+          WHERE #$maakunnatQueryStr""".as[Koodi]
   }
 
   def selectDistinctKoulutusalat1(): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
-    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso1 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso1_nimi as koodinimi
-                  FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
-            WHERE kansallinenkoulutusluokitus2016koulutusalataso1 IS NOT NULL""".as[Koodi]
+    sql"""SELECT k.kansallinenkoulutusluokitus2016koulutusalataso1 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso1_nimi as koodinimi
+                  FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k""".as[Koodi]
   }
 
   def selectDistinctKoulutusalat2(koulutusalat1: List[String]): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
@@ -155,9 +153,8 @@ class CommonRepository extends Extractors {
   }
 
   def selectDistinctOkmOhjauksenAlat: SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
-    sql"""SELECT DISTINCT oo.koodiarvo, oo.koodinimi
-          FROM pub.pub_dim_koodisto_okmohjauksenala oo
-       """.as[Koodi]
+    sql"""SELECT oo.koodiarvo, oo.koodinimi
+          FROM pub.pub_dim_koodisto_okmohjauksenala oo""".as[Koodi]
   }
 
   def selectDistinctOrganisaatiot(
