@@ -162,7 +162,7 @@ class Controller(
   // RAPORTIT
 
   private def sendExcel(
-      wb: Workbook,
+      wb: Option[Workbook],
       response: HttpServletResponse,
       request: HttpServletRequest,
       id: String,
@@ -170,19 +170,25 @@ class Controller(
   ): Unit = {
     try {
       auditLog.logWithParams(request, KoulutuksetToteutuksetHakukohteet, raporttiParamsForLogs)
-      LOG.info(s"Sending excel in the response")
-      val date: LocalDateTime = LocalDateTime.now().withNano(0)
-      val dateTimeStr         = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-      val out                 = response.getOutputStream
-      response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-      response.setHeader(
-        HttpHeaders.CONTENT_DISPOSITION,
-        s"attachment; filename=$id-$dateTimeStr.xlsx"
-      )
-      response.setHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Content-Disposition")
-      wb.write(out)
-      out.close()
-      wb.close()
+      wb match {
+        case Some(wb) =>
+          LOG.info(s"Sending excel in the response")
+          val date: LocalDateTime = LocalDateTime.now().withNano(0)
+          val dateTimeStr         = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+          val out                 = response.getOutputStream
+          response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+          response.setHeader(
+            HttpHeaders.CONTENT_DISPOSITION,
+            s"attachment; filename=$id-$dateTimeStr.xlsx"
+          )
+          response.setHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Content-Disposition")
+          wb.write(out)
+          out.close()
+          wb.close()
+        case None =>
+          LOG.error("Could not create excel.")
+          response.sendError(400)
+      }
     } catch {
       case e: Exception =>
         LOG.error(s"Error sending excel: ${e.getMessage}")
@@ -238,7 +244,7 @@ class Controller(
       "valintakoe"      -> maybeValintakoe
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
-    sendExcel(wb, response, request, "koulutukset-toteutukset-hakukohteet", raporttiParams)
+    sendExcel(Some(wb), response, request, "koulutukset-toteutukset-hakukohteet", raporttiParams)
   }
 
   @GetMapping(path = Array("hakijat"))
@@ -276,22 +282,27 @@ class Controller(
     val maybeMarkkinointilupa            = strToOptionBoolean(markkinointilupa)
     val maybeJulkaisulupa                = strToOptionBoolean(julkaisulupa)
 
-    val wb = hakijatService.get(
-      hakuList,
-      oppilaitosList,
-      toimipisteList,
-      hakukohdeList,
-      pohjakoulutusList,
-      valintatietoList,
-      vastaanottotietoList,
-      harkinnanvaraisuusList,
-      maybeKaksoistutkintoKiinnostaa,
-      maybeUrheilijatutkintoKiinnostaa,
-      maybeSoraTerveys,
-      maybeSoraAiempi,
-      maybeMarkkinointilupa,
-      maybeJulkaisulupa
-    )
+    val maybeWb = if (oppilaitosList.nonEmpty || toimipisteList.nonEmpty) {
+      val wb = hakijatService.get(
+        hakuList,
+        oppilaitosList,
+        toimipisteList,
+        hakukohdeList,
+        pohjakoulutusList,
+        valintatietoList,
+        vastaanottotietoList,
+        harkinnanvaraisuusList,
+        maybeKaksoistutkintoKiinnostaa,
+        maybeUrheilijatutkintoKiinnostaa,
+        maybeSoraTerveys,
+        maybeSoraAiempi,
+        maybeMarkkinointilupa,
+        maybeJulkaisulupa
+      )
+      Some(wb)
+    } else {
+      None
+    }
 
     val raporttiParams = Map(
       "haku"               -> Option(hakuList).filterNot(_.isEmpty),
@@ -310,7 +321,7 @@ class Controller(
       "julkaisulupa"       -> maybeJulkaisulupa
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
-    sendExcel(wb, response, request, "hakijat", raporttiParams)
+    sendExcel(maybeWb, response, request, "hakijat", raporttiParams)
   }
 
   @GetMapping(path = Array("kk-hakijat"))
@@ -341,20 +352,25 @@ class Controller(
 
     val maybeMarkkinointilupa = strToOptionBoolean(markkinointilupa)
 
-    val wb = kkHakijatService.get(
-      hakuList,
-      oppilaitosList,
-      toimipisteList,
-      hakukohdeList,
-      valintatietoList,
-      vastaanottotietoList,
-      hakukohderyhmaList,
-      kansalaisuusList,
-      maybeMarkkinointilupa,
-      naytaYoArvosanat.toBoolean,
-      naytaHetu.toBoolean,
-      naytaPostiosoite.toBoolean
-    )
+    val maybeWb = if (oppilaitosList.nonEmpty || toimipisteList.nonEmpty || hakukohderyhmaList.nonEmpty) {
+      val wb = kkHakijatService.get(
+        hakuList,
+        oppilaitosList,
+        toimipisteList,
+        hakukohdeList,
+        valintatietoList,
+        vastaanottotietoList,
+        hakukohderyhmaList,
+        kansalaisuusList,
+        maybeMarkkinointilupa,
+        naytaYoArvosanat.toBoolean,
+        naytaHetu.toBoolean,
+        naytaPostiosoite.toBoolean
+      )
+      Some(wb)
+    } else {
+      None
+    }
 
     val raporttiParams = Map(
       "haku"             -> Option(hakuList).filterNot(_.isEmpty),
@@ -371,7 +387,7 @@ class Controller(
       "naytaPostiosoite" -> naytaPostiosoite
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
-    sendExcel(wb, response, request, "kk-hakijat", raporttiParams)
+    sendExcel(maybeWb, response, request, "kk-hakijat", raporttiParams)
   }
 
   @GetMapping(path = Array("hakeneet-hyvaksytyt-vastaanottaneet"))
@@ -449,7 +465,7 @@ class Controller(
       "sukupuoli"            -> maybeSukupuoli
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
-    sendExcel(wb, response, request, "hakeneet-hyvaksytyt-vastaanottaneet", raporttiParams)
+    sendExcel(Some(wb), response, request, "hakeneet-hyvaksytyt-vastaanottaneet", raporttiParams)
   }
 
 }
