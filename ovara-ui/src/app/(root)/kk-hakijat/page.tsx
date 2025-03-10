@@ -32,6 +32,7 @@ import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearc
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { isEmpty } from 'remeda';
 import { Kansalaisuus } from '@/app/components/form/kansalaisuus';
+import { Hakukohderyhma } from '@/app/components/form/hakukohderyhma';
 
 export default function KkHakijat() {
   const { t } = useTranslate();
@@ -45,6 +46,7 @@ export default function KkHakijat() {
     selectedHaut,
     selectedOppilaitokset,
     selectedToimipisteet,
+    selectedHakukohderyhmat,
   } = useCommonSearchParams();
 
   const {
@@ -69,7 +71,8 @@ export default function KkHakijat() {
     isEmpty(selectedAlkamiskaudet || []) ||
     isEmpty(selectedHaut || []) ||
     (isEmpty(selectedOppilaitokset || []) &&
-      isEmpty(selectedToimipisteet || []));
+      isEmpty(selectedToimipisteet || []) &&
+      isEmpty(selectedHakukohderyhmat || []));
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -96,6 +99,7 @@ export default function KkHakijat() {
               organisaatiot={organisaatiot}
               t={t}
             />
+            <Hakukohderyhma />
           </Box>
           <Divider />
           <Hakukohde locale={locale} t={t} />
