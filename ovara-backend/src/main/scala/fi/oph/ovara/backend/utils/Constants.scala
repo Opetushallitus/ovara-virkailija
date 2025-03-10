@@ -56,5 +56,5 @@ object Constants {
   val OPPILAITOSRAPORTTI = "oppilaitosraportti"
   val TOIMIPISTERAPORTTI = "toimipisteraportti"
 
-  val POSTIOSOITEFIELDS = List("lahiosoite", "postinumero", "postitoimipaikka")
+  val POSTIOSOITEFIELDS: List[String] = List("lahiosoite", "postinumero", "postitoimipaikka")
 }

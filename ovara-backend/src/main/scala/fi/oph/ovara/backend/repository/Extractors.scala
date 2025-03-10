@@ -34,6 +34,13 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   )
 
+  implicit val getHakukohderyhmaResult: GetResult[Hakukohderyhma] = GetResult(r =>
+    Hakukohderyhma(
+      hakukohderyhma_oid = r.nextString(),
+      hakukohderyhma_nimi = extractKielistetty(r.nextStringOption())
+    )
+  )
+
   implicit val getOrganisaatioResult: GetResult[Organisaatio] = GetResult(r =>
     Organisaatio(
       organisaatio_oid = r.nextString(),

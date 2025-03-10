@@ -144,6 +144,14 @@ class Controller(
       commonService.getKoulutusalat3(if (koulutusalat2 == null) List() else koulutusalat2.asScala.toList)
     )
 
+  @GetMapping(path = Array("hakukohderyhmat"))
+  def hakukohderyhmat(
+      @RequestParam("haku", required = true) haut: java.util.Collection[String]
+  ): String =
+    mapper.writeValueAsString(
+      commonService.getHakukohderyhmat(if (haut == null) List() else haut.asScala.toList)
+    )
+
   // RAPORTIT
 
   private def sendExcel(
@@ -306,6 +314,7 @@ class Controller(
       @RequestParam("hakukohde", required = false) hakukohde: java.util.Collection[String],
       @RequestParam("valintatieto", required = false) valintatieto: java.util.Collection[String],
       @RequestParam("vastaanottotieto", required = false) vastaanottotieto: java.util.Collection[String],
+      @RequestParam("hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
       @RequestParam("kansalaisuus", required = false) kansalaisuus: java.util.Collection[String],
       @RequestParam("markkinointilupa", required = false) markkinointilupa: String,
       @RequestParam("nayta-yo-arvosanat", required = true) naytaYoArvosanat: String,
@@ -320,6 +329,7 @@ class Controller(
     val hakukohdeList        = if (hakukohde == null) List() else hakukohde.asScala.toList
     val valintatietoList     = if (valintatieto == null) List() else valintatieto.asScala.toList
     val vastaanottotietoList = if (vastaanottotieto == null) List() else vastaanottotieto.asScala.toList
+    val hakukohderyhmaList   = if (hakukohderyhmat == null) List() else hakukohderyhmat.asScala.toList
     val kansalaisuusList     = if (kansalaisuus == null) List() else kansalaisuus.asScala.toList
 
     val maybeMarkkinointilupa = strToOptionBoolean(markkinointilupa)
@@ -331,6 +341,7 @@ class Controller(
       hakukohdeList,
       valintatietoList,
       vastaanottotietoList,
+      hakukohderyhmaList,
       kansalaisuusList,
       maybeMarkkinointilupa,
       naytaYoArvosanat.toBoolean,
@@ -345,6 +356,7 @@ class Controller(
       "hakukohde"        -> Option(hakukohdeList).filterNot(_.isEmpty),
       "valintatieto"     -> Option(vastaanottotietoList).filterNot(_.isEmpty),
       "vastaanottotieto" -> Option(vastaanottotietoList).filterNot(_.isEmpty),
+      "hakukohderyhmat"  -> Option(vastaanottotietoList).filterNot(_.isEmpty),
       "kansalaisuus"     -> Option(kansalaisuusList).filterNot(_.isEmpty),
       "markkinointilupa" -> maybeMarkkinointilupa,
       "naytaYoArvosanat" -> naytaYoArvosanat,
