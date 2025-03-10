@@ -44,7 +44,7 @@ class KkHakijatRepository extends Extractors {
     //TODO: palautetaan yo-arvosanat
     sql"""SELECT hlo.sukunimi, hlo.etunimet, hlo.hetu, hlo.syntymaaika,
                  hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid, hk.toimipiste_nimi,
-                 hk.hakukohde_nimi, ht.hakutoivenumero,
+                 hk.hakukohde_nimi, kkh.hakukelpoisuus, ht.hakutoivenumero,
                  ht.valintatapajonot->0->>'valinnan_tila' AS valinnan_tila,
                  ht.vastaanottotieto, ht.viimeinen_vastaanottopaiva, e.isensikertalainen AS ensikertalainen,
                  ht.ilmoittautumisen_tila, hlo.koulutusmarkkinointilupa,
@@ -57,6 +57,8 @@ class KkHakijatRepository extends Extractors {
           ON ht.hakukohde_oid = hk.hakukohde_oid
           LEFT JOIN pub.pub_dim_ensikertalainen e
           ON ht.henkilo_oid = e.henkilooid AND ht.haku_oid = e.hakuoid
+          JOIN pub.pub_fct_raportti_hakijat_kk kkh
+          ON ht.hakutoive_id = kkh.hakutoive_id
           WHERE ht.haku_oid IN (#$hakuStr)  
           AND hk.jarjestyspaikka_oid IN (#$raportointiorganisaatiotStr)
           #$optionalHakukohdeQuery
