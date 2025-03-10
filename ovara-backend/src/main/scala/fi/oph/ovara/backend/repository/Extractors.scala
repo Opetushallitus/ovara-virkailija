@@ -146,6 +146,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       hakemusOid = r.nextString(),
       toimipiste = extractKielistetty(r.nextStringOption()),
       hakukohteenNimi = extractKielistetty(r.nextStringOption()),
+      hakukelpoisuus = r.nextStringOption(),
       prioriteetti = r.nextInt(),
       valintatieto = r.nextString(),
       vastaanottotieto = r.nextStringOption(),

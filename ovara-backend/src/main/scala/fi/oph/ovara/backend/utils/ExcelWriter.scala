@@ -369,6 +369,11 @@ object ExcelWriter {
       (POSTIOSOITEFIELDS.contains(fieldName) && !naytaPostiosoite))
   }
 
+  def getTranslationForCellValue(s: String, translations: Map[String, String]): String = {
+    val lowerCaseStr = s.toLowerCase
+    translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+  }
+
   def writeHakijatRaportti(
       hakijat: Seq[HakijaWithCombinedNimi | KkHakijaWithCombinedNimi],
       asiointikieli: String,
@@ -443,14 +448,12 @@ object ExcelWriter {
               val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
               cell.setCellValue(d.format(formatter))
             case s: String if List("valintatieto").contains(fieldName) =>
-              val lowerCaseStr = s.toLowerCase
-              val translation  = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+              val translation = getTranslationForCellValue(s, translations)
               cell.setCellValue(translation)
             case s: String =>
               cell.setCellValue(s)
-            case Some(s: String) if List("vastaanottotieto", "ilmoittautuminen").contains(fieldName) =>
-              val lowerCaseStr = s.toLowerCase
-              val translation  = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+            case Some(s: String) if List("vastaanottotieto", "ilmoittautuminen", "hakukelpoisuus").contains(fieldName) =>
+              val translation = getTranslationForCellValue(s, translations)
               cell.setCellValue(translation)
             case Some(s: String) if List("harkinnanvaraisuus").contains(fieldName) =>
               val value = if (s.startsWith("EI_HARKINNANVARAINEN")) {
@@ -465,8 +468,8 @@ object ExcelWriter {
                     } else {
                       m
                     }
-                    val lowerCaseStr = value.toLowerCase
-                    translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+
+                    getTranslationForCellValue(value, translations)
                   case None => "-"
                 }
               }
