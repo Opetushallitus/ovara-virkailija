@@ -452,7 +452,8 @@ object ExcelWriter {
               cell.setCellValue(translation)
             case s: String =>
               cell.setCellValue(s)
-            case Some(s: String) if List("vastaanottotieto", "ilmoittautuminen", "hakukelpoisuus").contains(fieldName) =>
+            case Some(s: String)
+                if List("vastaanottotieto", "ilmoittautuminen", "hakukelpoisuus").contains(fieldName) =>
               val translation = getTranslationForCellValue(s, translations)
               cell.setCellValue(translation)
             case Some(s: String) if List("harkinnanvaraisuus").contains(fieldName) =>
@@ -521,13 +522,13 @@ object ExcelWriter {
   }
 
   def writeHakeneetHyvaksytytVastaanottaneetRaportti(
-                            asiointikieli: String,
-                            translations: Map[String, String],
-                            data: List[HakeneetHyvaksytytVastaanottaneetResult],
-                            yksittaisetHakijat: Int,
-                            naytaHakutoiveet: Boolean,
-                            tulostustapa: String
-                          ): XSSFWorkbook = {
+      asiointikieli: String,
+      translations: Map[String, String],
+      data: List[HakeneetHyvaksytytVastaanottaneetResult],
+      yksittaisetHakijat: Int,
+      naytaHakutoiveet: Boolean,
+      tulostustapa: String
+  ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new HakeneetHyvaksytytVastaanottaneet excel from db results")
     val sheet: XSSFSheet = workbook.createSheet()
@@ -536,13 +537,13 @@ object ExcelWriter {
       WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yhteenveto", "raportti.yhteenveto"))
     )
 
-    val headingCellStyle: XSSFCellStyle = workbook.createCellStyle()
+    val headingCellStyle: XSSFCellStyle  = workbook.createCellStyle()
     val bodyTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
-    val summaryCellStyle: XSSFCellStyle = workbook.createCellStyle()
+    val summaryCellStyle: XSSFCellStyle  = workbook.createCellStyle()
 
-    val headingFont = createHeadingFont(workbook, headingCellStyle)
+    val headingFont  = createHeadingFont(workbook, headingCellStyle)
     val bodyTextFont = createBodyTextFont(workbook, bodyTextCellStyle)
-    val summaryFont = createSummaryRowFont(workbook)
+    val summaryFont  = createSummaryRowFont(workbook)
 
     summaryCellStyle.setFont(summaryFont)
     summaryCellStyle.setAlignment(HorizontalAlignment.RIGHT)
@@ -551,14 +552,15 @@ object ExcelWriter {
 
     var currentRowIndex = 0
 
-    val otsikko = tulostustapa match
-      case "hakukohteittain" => "hakukohde"
-      case "oppilaitoksittain" => "oppilaitos"
-      case "toimipisteittain" => "toimipiste"
+    val otsikko = tulostustapa match {
+      case "hakukohteittain"       => "hakukohde"
+      case "oppilaitoksittain"     => "oppilaitos"
+      case "toimipisteittain"      => "toimipiste"
       case "koulutustoimijoittain" => "koulutustoimija"
-      case "koulutusaloittain" => "koulutusala"
+      case "koulutusaloittain"     => "koulutusala"
+    }
     val fieldNames =
-      if(naytaHakutoiveet)
+      if (naytaHakutoiveet)
         List(otsikko) ++ HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES ++ HAKUTOIVEET_TITLES
       else
         List(otsikko) ++ HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES
@@ -581,18 +583,18 @@ object ExcelWriter {
         item.ilmYht.toString,
         item.aloituspaikat.toString
       ) ++ (if (naytaHakutoiveet) {
-        List(
-          item.toive1.toString,
-          item.toive2.toString,
-          item.toive3.toString,
-          item.toive4.toString,
-          item.toive5.toString,
-          item.toive6.toString,
-          item.toive7.toString
-        )
-      } else {
-        List()
-      })
+              List(
+                item.toive1.toString,
+                item.toive2.toString,
+                item.toive3.toString,
+                item.toive4.toString,
+                item.toive5.toString,
+                item.toive6.toString,
+                item.toive7.toString
+              )
+            } else {
+              List()
+            })
       rowData.zipWithIndex.foreach { case (value, index) =>
         val cell = dataRow.createCell(index)
         cell.setCellStyle(bodyTextCellStyle)
@@ -615,18 +617,18 @@ object ExcelWriter {
       data.map(_.ilmYht).sum.toString,
       data.map(_.aloituspaikat).sum.toString
     ) ++ (if (naytaHakutoiveet) {
-      List(
-        data.map(_.toive1).sum.toString,
-        data.map(_.toive2).sum.toString,
-        data.map(_.toive3).sum.toString,
-        data.map(_.toive4).sum.toString,
-        data.map(_.toive5).sum.toString,
-        data.map(_.toive6).sum.toString,
-        data.map(_.toive7).sum.toString
-      )
-    } else {
-      List()
-    })
+            List(
+              data.map(_.toive1).sum.toString,
+              data.map(_.toive2).sum.toString,
+              data.map(_.toive3).sum.toString,
+              data.map(_.toive4).sum.toString,
+              data.map(_.toive5).sum.toString,
+              data.map(_.toive6).sum.toString,
+              data.map(_.toive7).sum.toString
+            )
+          } else {
+            List()
+          })
 
     summaryData.zipWithIndex.foreach { case (value, index) =>
       val cell = summaryRow.createCell(index)
@@ -644,7 +646,7 @@ object ExcelWriter {
     val hakijatSummaryRow = sheet.createRow(currentRowIndex)
     val hakijatSummaryData = List(
       translations.getOrElse("raportti.yksittaiset-hakijat", "raportti.yksittaiset-hakijat"),
-      yksittaisetHakijat.toString,
+      yksittaisetHakijat.toString
     )
 
     hakijatSummaryData.zipWithIndex.foreach { case (value, index) =>
