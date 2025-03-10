@@ -422,7 +422,6 @@ object ExcelWriter {
     currentRowIndex =
       createHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNamesToShow, headingCellStyle)
 
-    // TODO: päätellään täällä näytetäänkö yo, osoite flagin perusteella
     hakijat.foreach(hakutoive => {
       val hakijanHakutoiveRow = sheet.createRow(currentRowIndex)
       currentRowIndex = currentRowIndex + 1
@@ -453,7 +452,8 @@ object ExcelWriter {
               cell.setCellValue(translation)
             case s: String =>
               cell.setCellValue(s)
-            case Some(s: String) if List("vastaanottotieto", "ilmoittautuminen", "hakukelpoisuus").contains(fieldName) =>
+            case Some(s: String)
+                if List("vastaanottotieto", "ilmoittautuminen", "hakukelpoisuus").contains(fieldName) =>
               val translation = getTranslationForCellValue(s, translations)
               cell.setCellValue(translation)
             case Some(s: String) if List("harkinnanvaraisuus").contains(fieldName) =>
@@ -522,12 +522,13 @@ object ExcelWriter {
   }
 
   def writeHakeneetHyvaksytytVastaanottaneetRaportti(
-                            asiointikieli: String,
-                            translations: Map[String, String],
-                            data: List[HakeneetHyvaksytytVastaanottaneetResult],
-                            yksittaisetHakijat: Int,
-                            naytaHakutoiveet: Boolean,
-                          ): XSSFWorkbook = {
+      asiointikieli: String,
+      translations: Map[String, String],
+      data: List[HakeneetHyvaksytytVastaanottaneetResult],
+      yksittaisetHakijat: Int,
+      naytaHakutoiveet: Boolean,
+      tulostustapa: String
+  ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new HakeneetHyvaksytytVastaanottaneet excel from db results")
     val sheet: XSSFSheet = workbook.createSheet()
@@ -536,13 +537,13 @@ object ExcelWriter {
       WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yhteenveto", "raportti.yhteenveto"))
     )
 
-    val headingCellStyle: XSSFCellStyle = workbook.createCellStyle()
+    val headingCellStyle: XSSFCellStyle  = workbook.createCellStyle()
     val bodyTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
-    val summaryCellStyle: XSSFCellStyle = workbook.createCellStyle()
+    val summaryCellStyle: XSSFCellStyle  = workbook.createCellStyle()
 
-    val headingFont = createHeadingFont(workbook, headingCellStyle)
+    val headingFont  = createHeadingFont(workbook, headingCellStyle)
     val bodyTextFont = createBodyTextFont(workbook, bodyTextCellStyle)
-    val summaryFont = createSummaryRowFont(workbook)
+    val summaryFont  = createSummaryRowFont(workbook)
 
     summaryCellStyle.setFont(summaryFont)
     summaryCellStyle.setAlignment(HorizontalAlignment.RIGHT)
@@ -551,11 +552,18 @@ object ExcelWriter {
 
     var currentRowIndex = 0
 
+    val otsikko = tulostustapa match {
+      case "hakukohteittain"       => "hakukohde"
+      case "oppilaitoksittain"     => "oppilaitos"
+      case "toimipisteittain"      => "toimipiste"
+      case "koulutustoimijoittain" => "koulutustoimija"
+      case "koulutusaloittain"     => "koulutusala"
+    }
     val fieldNames =
-      if(naytaHakutoiveet)
-        HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES ++ HAKUTOIVEET_TITLES
+      if (naytaHakutoiveet)
+        List(otsikko) ++ HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES ++ HAKUTOIVEET_TITLES
       else
-        HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_TITLES
+        List(otsikko) ++ HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES
     val fieldNamesWithIndex = fieldNames.zipWithIndex
 
     currentRowIndex =
