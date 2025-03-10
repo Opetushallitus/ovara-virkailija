@@ -43,7 +43,7 @@ class HakijatService(
     val translations = lokalisointiService.getOvaraTranslations(asiointikieli)
 
     val authorities               = user.authorities
-    val kayttooikeusOrganisaatiot = AuthoritiesUtil.getOrganisaatiot(authorities)
+    val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
 
     val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,

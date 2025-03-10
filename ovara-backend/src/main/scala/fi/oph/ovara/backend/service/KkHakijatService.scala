@@ -28,6 +28,7 @@ class KkHakijatService(
       hakukohteet: List[String],
       valintatieto: List[String],
       vastaanottotieto: List[String],
+      hakukohderyhmat: List[String],
       kansalaisuus: List[String],
       markkinointilupa: Option[Boolean],
       naytaYoArvosanat: Boolean,
@@ -40,7 +41,7 @@ class KkHakijatService(
     val translations = lokalisointiService.getOvaraTranslations(asiointikieli)
 
     val authorities               = user.authorities
-    val kayttooikeusOrganisaatiot = AuthoritiesUtil.getOrganisaatiot(authorities)
+    val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
 
     val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
@@ -50,6 +51,7 @@ class KkHakijatService(
 
     val query = kkHakijatRepository.selectWithParams(
       kayttooikeusOrganisaatiot = orgOidsForQuery,
+      hakukohderyhmat = hakukohderyhmat,
       haut = haku,
       oppilaitokset = oppilaitokset,
       toimipisteet = toimipisteet,
@@ -57,7 +59,7 @@ class KkHakijatService(
       valintatieto = valintatieto,
       vastaanottotieto = vastaanottotieto,
       kansalaisuus = kansalaisuus,
-      markkinointilupa = markkinointilupa,
+      markkinointilupa = markkinointilupa
     )
 
     val queryResult = db.run(query, "kkHakijatRepository.selectWithParams")
