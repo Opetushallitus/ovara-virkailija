@@ -53,8 +53,8 @@ class KkHakijatRepository extends Extractors {
                  hk.hakukohde_nimi, kkh.hakukelpoisuus, ht.hakutoivenumero,
                  ht.valintatapajonot->0->>'valinnan_tila' AS valinnan_tila,
                  ht.vastaanottotieto, ht.viimeinen_vastaanottopaiva, e.isensikertalainen AS ensikertalainen,
-                 ht.ilmoittautumisen_tila, hlo.koulutusmarkkinointilupa,
-                 hlo.valintatuloksen_julkaisulupa, hlo.sahkoinenviestintalupa,
+                 ht.ilmoittautumisen_tila, hlo.valintatuloksen_julkaisulupa,
+                 hlo.koulutusmarkkinointilupa, hlo.sahkoinenviestintalupa,
                  hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka
           FROM pub.pub_dim_henkilo hlo
           JOIN pub.pub_dim_hakutoive ht
