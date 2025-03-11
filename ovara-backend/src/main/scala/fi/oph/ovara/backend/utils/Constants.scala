@@ -63,8 +63,7 @@ object Constants {
     List(
       "hakijat-yht",
       "ensisijaisia",
-      "ensikertalaisia", 
-      "varasija",
+      "ensikertalaisia",
       "hyvaksytyt",
       "vastaanottaneet",
       "lasna",

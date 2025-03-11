@@ -26,7 +26,12 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
            oppilaitokset: List[String],
            toimipisteet: List[String],
            hakukohteet: List[String],
+           okmOhjauksenAlat: List[String],
+           tutkinnonTasot: List[String],
+           aidinkielet: List[String],
+           kansalaisuudet: List[String],
            sukupuoli: Option[String],
+           ensikertalainen: Option[Boolean],
            naytaHakutoiveet: Boolean
          ): XSSFWorkbook = {
     val user = userService.getEnrichedUserDetails
@@ -49,7 +54,12 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
           haut = haku,
           hakukohteet = hakukohteet,
-          sukupuoli = sukupuoli
+          okmOhjauksenAlat = okmOhjauksenAlat,
+          tutkinnonTasot = tutkinnonTasot,
+          aidinkielet = aidinkielet,
+          kansalaisuudet = kansalaisuudet,
+          sukupuoli = sukupuoli,
+          ensikertalainen = ensikertalainen
         )
         db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams").map(r => KkHakeneetHyvaksytytVastaanottaneetResult(r))
 //      case "toimipisteittain" =>
@@ -74,16 +84,34 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
       haut = haku,
       hakukohteet = hakukohteet,
+      okmOhjauksenAlat = okmOhjauksenAlat,
+      tutkinnonTasot = tutkinnonTasot,
+      aidinkielet = aidinkielet,
+      kansalaisuudet = kansalaisuudet,
+      sukupuoli = sukupuoli,
+      ensikertalainen = ensikertalainen
+    )
+
+    val ensikertalaisetSumQuery = kkHakeneetHyvaksytytVastaanottaneetRepository.selectEnsikertalaisetHakijatYhteensaWithParams(
+      selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
+      haut = haku,
+      hakukohteet = hakukohteet,
+      okmOhjauksenAlat = okmOhjauksenAlat,
+      tutkinnonTasot = tutkinnonTasot,
+      aidinkielet = aidinkielet,
+      kansalaisuudet = kansalaisuudet,
       sukupuoli = sukupuoli
     )
 
     val sumQueryResult = db.run(sumQuery, "kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams")
-
+    val ensikertalaisetSumQueryResult = db.run(ensikertalaisetSumQuery, "kkHakeneetHyvaksytytVastaanottaneetRepository.selectEnsikertalaisetHakijatYhteensaWithParams")
+    
     ExcelWriter.writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
       asiointikieli,
       translations,
       queryResult.toList,
       sumQueryResult,
+      ensikertalaisetSumQueryResult,
       naytaHakutoiveet,
       tulostustapa
     )
