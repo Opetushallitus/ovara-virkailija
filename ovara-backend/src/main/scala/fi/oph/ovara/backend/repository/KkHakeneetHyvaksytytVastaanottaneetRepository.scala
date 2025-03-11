@@ -14,6 +14,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                             haut: List[String],
                             selectedKayttooikeusOrganisaatiot: List[String],
                             hakukohteet: List[String],
+                            hakukohderyhmat: List[String],
                             okmOhjauksenAlat: List[String],
                             tutkinnonTasot: List[String],
                             aidinkielet: List[String],
@@ -26,6 +27,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       Some(s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.jarjestyspaikka_oid", selectedKayttooikeusOrganisaatiot)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.hakukohde_oid", hakukohteet)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hkr_hk.hakukohderyhma_oid", hakukohderyhmat)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.aidinkieli", aidinkielet)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.kansalaisuus", kansalaisuudet)).filter(_.nonEmpty),
@@ -61,6 +63,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                        selectedKayttooikeusOrganisaatiot: List[String],
                                        haut: List[String],
                                        hakukohteet: List[String],
+                                       hakukohderyhmat: List[String],
                                        okmOhjauksenAlat: List[String],
                                        tutkinnonTasot: List[String],
                                        aidinkielet: List[String],
@@ -70,7 +73,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                      ): SqlStreamingAction[Vector[KkHakeneetHyvaksytytVastaanottaneetHakukohteittain], KkHakeneetHyvaksytytVastaanottaneetHakukohteittain, Effect] = {
 
     val filters = buildFilters(
-      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, okmOhjauksenAlat, tutkinnonTasot, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen
+      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, hakukohderyhmat, okmOhjauksenAlat, tutkinnonTasot, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen
     )
 
     sql"""SELECT h.hakukohde_nimi, h.organisaatio_nimi, SUM(t.hakijat) AS hakijat, SUM(t.ensisijaisia) AS ensisijaisia, SUM(t.ensikertalaisia) AS ensikertalaisia,
@@ -80,6 +83,8 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     FROM pub.pub_fct_raportti_tilastoraportti_kk t
     JOIN pub.pub_dim_hakukohde h
     ON t.hakukohde_oid = h.hakukohde_oid
+    JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
+    ON h.hakukohde_oid = hkr_hk.hakukohde_oid
     WHERE #$filters
     GROUP BY h.hakukohde_nimi, h.organisaatio_nimi""".as[KkHakeneetHyvaksytytVastaanottaneetHakukohteittain]
   }
@@ -88,6 +93,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                        selectedKayttooikeusOrganisaatiot: List[String],
                                        haut: List[String],
                                        hakukohteet: List[String],
+                                       hakukohderyhmat: List[String],
                                        okmOhjauksenAlat: List[String],
                                        tutkinnonTasot: List[String],
                                        aidinkielet: List[String],
@@ -97,7 +103,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                      ): DBIO[Int] = {
 
     val filters = buildFilters(
-      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, okmOhjauksenAlat, tutkinnonTasot, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen
+      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, hakukohderyhmat, okmOhjauksenAlat, tutkinnonTasot, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen
     )
 
     sql"""SELECT count(distinct ht.henkilo_oid)
@@ -106,6 +112,8 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     ON t.hakukohde_oid = ht.hakukohde_oid
     JOIN pub.pub_dim_hakukohde h
     ON t.hakukohde_oid = h.hakukohde_oid
+    JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
+    ON h.hakukohde_oid = hkr_hk.hakukohde_oid
     WHERE #$filters
     """.as[Int].head
   }
@@ -114,6 +122,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                                       selectedKayttooikeusOrganisaatiot: List[String],
                                                       haut: List[String],
                                                       hakukohteet: List[String],
+                                                      hakukohderyhmat: List[String],
                                                       okmOhjauksenAlat: List[String],
                                                       tutkinnonTasot: List[String],
                                                       aidinkielet: List[String],
@@ -122,7 +131,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                                     ): DBIO[Int] = {
 
     val filters = buildFilters(
-      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, okmOhjauksenAlat, tutkinnonTasot, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen = Some(true)
+      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, hakukohderyhmat, okmOhjauksenAlat, tutkinnonTasot, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen = Some(true)
     )
 
     sql"""SELECT count(distinct ht.henkilo_oid)
@@ -131,6 +140,8 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       ON t.hakukohde_oid = ht.hakukohde_oid
       JOIN pub.pub_dim_hakukohde h
       ON t.hakukohde_oid = h.hakukohde_oid
+      JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
+      ON h.hakukohde_oid = hkr_hk.hakukohde_oid
       WHERE #$filters
       """.as[Int].head
   }

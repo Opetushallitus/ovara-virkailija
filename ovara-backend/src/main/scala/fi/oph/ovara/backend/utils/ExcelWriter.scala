@@ -806,6 +806,7 @@ object ExcelWriter {
     val hakijatSummaryData = List(
       translations.getOrElse("raportti.yksittaiset-hakijat", "raportti.yksittaiset-hakijat"),
       yksittaisetHakijat.toString,
+      "",
       ensikertalaisetYksittaisetHakijat.toString
     )
 
