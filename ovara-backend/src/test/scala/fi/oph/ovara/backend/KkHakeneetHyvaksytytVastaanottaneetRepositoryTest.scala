@@ -33,6 +33,6 @@ class KkHakeneetHyvaksytytVastaanottaneetRepositoryTest extends AnyFlatSpec with
   it should "return the correct filter for multiple values" in {
     val repository = new KkHakeneetHyvaksytytVastaanottaneetRepository
     val result = repository.buildTutkinnonTasoFilters(List("alempi", "ylempi"))
-    result shouldBe Some("AND (h.alempi_kk_aste = true AND h.ylempi_kk_aste = false) OR (h.alempi_kk_aste = false AND h.ylempi_kk_aste = true)")
+    result shouldBe Some("AND (h.alempi_kk_aste = true AND h.ylempi_kk_aste = false OR h.alempi_kk_aste = false AND h.ylempi_kk_aste = true)")
   }
 }
