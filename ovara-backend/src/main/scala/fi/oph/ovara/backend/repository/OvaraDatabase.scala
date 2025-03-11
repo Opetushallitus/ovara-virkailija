@@ -14,9 +14,11 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 @Component
-class OvaraDatabase(@Value("${spring.datasource.url}") url: String,
-                    @Value("${spring.datasource.username}") username: String,
-                    @Value("${spring.datasource.password}") password: String) {
+class OvaraDatabase(
+    @Value("${spring.datasource.url}") url: String,
+    @Value("${spring.datasource.username}") username: String,
+    @Value("${spring.datasource.password}") password: String
+) {
 
   val LOG = LoggerFactory.getLogger(classOf[OvaraDatabase]);
 
@@ -30,7 +32,7 @@ class OvaraDatabase(@Value("${spring.datasource.url}") url: String,
     config.setMinimumIdle(1)
     config
   }
-  
+
   @Bean
   val db = {
     val executor = AsyncExecutor("ovara", hikariConfig.getMaximumPoolSize, 1000)
@@ -46,7 +48,7 @@ class OvaraDatabase(@Value("${spring.datasource.url}") url: String,
 
     val result = Await.result(
       db.run(operations),
-      Duration(100, TimeUnit.SECONDS)
+      Duration(150, TimeUnit.SECONDS)
     )
 
     LOG.info(s"Db query finished: $id")
