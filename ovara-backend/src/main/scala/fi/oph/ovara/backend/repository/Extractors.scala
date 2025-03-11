@@ -1,7 +1,6 @@
 package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.*
-import fi.oph.ovara.backend.utils.ExtractorUtils.extractValintatapajonot
 import fi.oph.ovara.backend.utils.GenericOvaraJsonFormats
 import org.json4s.jackson.Serialization.read
 import slick.jdbc.*
