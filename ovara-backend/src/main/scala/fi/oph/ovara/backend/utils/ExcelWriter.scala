@@ -934,6 +934,7 @@ object ExcelWriter {
                                                       translations: Map[String, String],
                                                       data: List[KkHakeneetHyvaksytytVastaanottaneetResult],
                                                       yksittaisetHakijat: Int,
+                                                      ensikertalaisetYksittaisetHakijat: Int,
                                                       naytaHakutoiveet: Boolean,
                                                       tulostustapa: String
                                                     ): XSSFWorkbook = {
@@ -988,7 +989,6 @@ object ExcelWriter {
         item.hakijat.toString,
         item.ensisijaisia.toString,
         item.ensikertalaisia.toString,
-        item.varasija.toString,
         item.hyvaksytyt.toString,
         item.vastaanottaneet.toString,
         item.lasna.toString,
@@ -1024,7 +1024,6 @@ object ExcelWriter {
       data.map(_.hakijat).sum.toString,
       data.map(_.ensisijaisia).sum.toString,
       data.map(_.ensikertalaisia).sum.toString,
-      data.map(_.varasija).sum.toString,
       data.map(_.hyvaksytyt).sum.toString,
       data.map(_.vastaanottaneet).sum.toString,
       data.map(_.lasna).sum.toString,
@@ -1063,6 +1062,7 @@ object ExcelWriter {
     val hakijatSummaryData = List(
       translations.getOrElse("raportti.yksittaiset-hakijat", "raportti.yksittaiset-hakijat"),
       yksittaisetHakijat.toString,
+      ensikertalaisetYksittaisetHakijat.toString
     )
 
     hakijatSummaryData.zipWithIndex.foreach { case (value, index) =>

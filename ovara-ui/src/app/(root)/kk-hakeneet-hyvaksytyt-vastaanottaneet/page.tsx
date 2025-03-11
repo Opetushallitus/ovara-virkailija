@@ -87,7 +87,7 @@ export default function KkHakutilasto() {
             disabled={isDisabled}
             downloadExcel={() =>
               downloadExcel(
-                'hakeneet-hyvaksytyt-vastaanottaneet',
+                'kk-hakeneet-hyvaksytyt-vastaanottaneet',
                 queryParamsStr,
                 setIsLoading,
               )

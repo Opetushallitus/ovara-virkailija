@@ -482,8 +482,13 @@ class Controller(
                                            @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
                                            @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
                                            @RequestParam("hakukohde", required = false) hakukohde: java.util.Collection[String],
-                                           @RequestParam("nayta-hakutoiveet", required = false) naytaHakutoiveet: String,
+                                           @RequestParam("okm-ohjauksen-ala", required = false) okmOhjauksenAla: java.util.Collection[String],
+                                           @RequestParam("tutkinnon-taso", required = false) tutkinnonTaso: java.util.Collection[String],
+                                           @RequestParam("aidinkieli", required = false) aidinkieli: java.util.Collection[String],
+                                           @RequestParam("kansalaisuus", required = false) kansalaisuus: java.util.Collection[String],
                                            @RequestParam("sukupuoli", required = false) sukupuoli: String,
+                                           @RequestParam("ensikertalainen", required = false) ensikertalainen: String,
+                                           @RequestParam("nayta-hakutoiveet", required = false) naytaHakutoiveet: String,
                                            request: HttpServletRequest,
                                            response: HttpServletResponse
                                          ): Unit = {
@@ -491,11 +496,16 @@ class Controller(
     val tulostustapaValinta = Option(tulostustapa).getOrElse("hakukohteittain")
     val naytaHakutoiveetBool = Option(naytaHakutoiveet).exists(_.toBoolean)
     val maybeSukupuoli: Option[String] = if (sukupuoli == "neutral") None else Option(sukupuoli)
+    val maybeEnsikertalainen: Option[Boolean] = strToOptionBoolean(ensikertalainen)
     val alkamiskausiList = if (alkamiskausi == null) List() else alkamiskausi.asScala.toList
     val hakuList = if (haku == null) List() else haku.asScala.toList
     val oppilaitosList = if (oppilaitos == null) List() else oppilaitos.asScala.toList
     val toimipisteList = if (toimipiste == null) List() else toimipiste.asScala.toList
     val hakukohdeList = if (hakukohde == null) List() else hakukohde.asScala.toList
+    val okmOhjauksenAlaList = if (okmOhjauksenAla == null) List() else okmOhjauksenAla.asScala.toList
+    val tutkinnonTasoList = if (tutkinnonTaso == null) List() else tutkinnonTaso.asScala.toList
+    val aidinkieliList = if (aidinkieli == null) List() else aidinkieli.asScala.toList
+    val kansalaisuusList = if (kansalaisuus == null) List() else kansalaisuus.asScala.toList
 
     val wb = kkHakeneetHyvaksytytVastaanottaneetService.get(
       hakuList,
@@ -504,7 +514,12 @@ class Controller(
       oppilaitosList,
       toimipisteList,
       hakukohdeList,
+      okmOhjauksenAlaList,
+      tutkinnonTasoList,
+      aidinkieliList,
+      kansalaisuusList,
       maybeSukupuoli,
+      maybeEnsikertalainen,
       naytaHakutoiveetBool
     )
 
@@ -516,7 +531,8 @@ class Controller(
       "toimipiste" -> Option(toimipisteList).filterNot(_.isEmpty),
       "hakukohde" -> Option(hakukohdeList).filterNot(_.isEmpty),
       "naytaHakutoiveet" -> naytaHakutoiveetBool,
-      "sukupuoli" -> maybeSukupuoli
+      "sukupuoli" -> maybeSukupuoli,
+      "kansalaisuus" -> Option(kansalaisuusList).filterNot(_.isEmpty)
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
     sendExcel(wb, response, request, "kk-hakeneet-hyvaksytyt-vastaanottaneet", raporttiParams)

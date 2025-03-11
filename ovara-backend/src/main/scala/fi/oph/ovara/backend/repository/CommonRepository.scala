@@ -126,7 +126,7 @@ class CommonRepository extends Extractors {
           FROM pub.pub_dim_koodisto_kunta k
           JOIN pub.pub_dim_koodisto_kunta_maakunta km
           ON k.koodiarvo = km.kunta_koodiarvo
-          WHERE #$maakunnatQueryStr""".as[Koodi]
+          #$maakunnatQueryStr""".as[Koodi]
   }
 
   def selectHakukohderyhmat(

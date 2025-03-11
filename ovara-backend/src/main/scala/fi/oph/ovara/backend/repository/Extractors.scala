@@ -289,12 +289,11 @@ trait Extractors extends GenericOvaraJsonFormats {
       )
     }
 
-  def extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(r: PositionedResult): (Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int) = {
+  def extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(r: PositionedResult): (Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int) = {
     (
       r.nextInt(), // hakijat
       r.nextInt(), // ensisijaisia
       r.nextInt(), // ensikertalaisia
-      r.nextInt(), // varasija
       r.nextInt(), // hyvaksytyt
       r.nextInt(), // vastaanottaneet
       r.nextInt(), // lasna
@@ -323,7 +322,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       commonFields._1, commonFields._2, commonFields._3, commonFields._4, commonFields._5,
       commonFields._6, commonFields._7, commonFields._8, commonFields._9,
       commonFields._10, commonFields._11, commonFields._12, commonFields._13,
-      commonFields._14, commonFields._15, commonFields._16, commonFields._17, commonFields._18
+      commonFields._14, commonFields._15, commonFields._16, commonFields._17
     )
   }
 }
