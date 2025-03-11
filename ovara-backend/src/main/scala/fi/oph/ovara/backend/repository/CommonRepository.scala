@@ -109,13 +109,13 @@ class CommonRepository extends Extractors {
     val maakunnatQueryStr = if (maakunnatStr.isEmpty) {
       ""
     } else {
-      s"AND km.maakunta_koodiarvo in ($maakunnatStr)"
+      s"WHERE km.maakunta_koodiarvo in ($maakunnatStr)"
     }
     sql"""SELECT k.koodiarvo, k.koodinimi
           FROM pub.pub_dim_koodisto_kunta k
           JOIN pub.pub_dim_koodisto_kunta_maakunta km
           ON k.koodiarvo = km.kunta_koodiarvo
-          WHERE #$maakunnatQueryStr""".as[Koodi]
+          #$maakunnatQueryStr""".as[Koodi]
   }
 
   def selectHakukohderyhmat(

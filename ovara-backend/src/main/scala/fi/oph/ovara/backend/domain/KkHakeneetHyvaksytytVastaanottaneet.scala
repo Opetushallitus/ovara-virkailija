@@ -6,7 +6,6 @@ abstract class KkHakeneetHyvaksytytVastaanottaneetBase {
   val hakijat: Int
   val ensisijaisia: Int
   val ensikertalaisia: Int
-  val varasija: Int
   val hyvaksytyt: Int
   val vastaanottaneet: Int
   val lasna: Int
@@ -29,7 +28,6 @@ case class KkHakeneetHyvaksytytVastaanottaneetHakukohteittain(
                                                                hakijat: Int,
                                                                ensisijaisia: Int,
                                                                ensikertalaisia: Int,
-                                                               varasija: Int,
                                                                hyvaksytyt: Int,
                                                                vastaanottaneet: Int,
                                                                lasna: Int,
@@ -50,7 +48,6 @@ case class KkHakeneetHyvaksytytVastaanottaneetResult(
                                                       hakijat: Int,
                                                       ensisijaisia: Int,
                                                       ensikertalaisia: Int,
-                                                      varasija: Int,
                                                       hyvaksytyt: Int,
                                                       vastaanottaneet: Int,
                                                       lasna: Int,
@@ -74,7 +71,6 @@ object KkHakeneetHyvaksytytVastaanottaneetResult {
       hakijat = hakukohteittain.hakijat,
       ensisijaisia = hakukohteittain.ensisijaisia,
       ensikertalaisia = hakukohteittain.ensikertalaisia,
-      varasija = hakukohteittain.varasija,
       hyvaksytyt = hakukohteittain.hyvaksytyt,
       vastaanottaneet = hakukohteittain.vastaanottaneet,
       lasna = hakukohteittain.lasna,
