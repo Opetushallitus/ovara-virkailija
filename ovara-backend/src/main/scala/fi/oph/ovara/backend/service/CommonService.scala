@@ -271,7 +271,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       } else if (oppilaitosOids.nonEmpty) {
         getOppilaitoshierarkiat(oppilaitosOids)
       } else if (koulutustoimijaOid.isDefined) {
-        getKoulutustoimijahierarkia(List(koulutustoimijaOid.get))  
+        getKoulutustoimijahierarkia(List(koulutustoimijaOid.get))
       } else {
         List()
       }

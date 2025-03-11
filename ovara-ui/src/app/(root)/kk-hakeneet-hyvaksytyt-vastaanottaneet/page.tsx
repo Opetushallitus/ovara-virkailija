@@ -27,6 +27,7 @@ import { KkTutkinnonTaso } from '@/app/components/form/kk-tutkinnon-taso';
 import { Aidinkieli } from '@/app/components/form/aidinkieli';
 import { OkmOhjauksenAlat } from '@/app/components/form/okm-ohjauksen-ala';
 import { Ensikertalainen } from '@/app/components/form/ensikertalainen';
+import { Hakukohderyhma } from '@/app/components/form/hakukohderyhma';
 
 export default function KkHakutilasto() {
   const { t } = useTranslate();
@@ -74,6 +75,7 @@ export default function KkHakutilasto() {
           <Haku haunTyyppi={'korkeakoulu'} />
           <Tulostustapa />
           <OrganisaatioValikot />
+          <Hakukohderyhma />
           <Hakukohde locale={locale} t={t} />
           <OkmOhjauksenAlat />
           <Divider />

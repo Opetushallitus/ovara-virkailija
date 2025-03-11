@@ -482,6 +482,7 @@ class Controller(
                                            @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
                                            @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
                                            @RequestParam("hakukohde", required = false) hakukohde: java.util.Collection[String],
+                                           @RequestParam("hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
                                            @RequestParam("okm-ohjauksen-ala", required = false) okmOhjauksenAla: java.util.Collection[String],
                                            @RequestParam("tutkinnon-taso", required = false) tutkinnonTaso: java.util.Collection[String],
                                            @RequestParam("aidinkieli", required = false) aidinkieli: java.util.Collection[String],
@@ -502,6 +503,7 @@ class Controller(
     val oppilaitosList = if (oppilaitos == null) List() else oppilaitos.asScala.toList
     val toimipisteList = if (toimipiste == null) List() else toimipiste.asScala.toList
     val hakukohdeList = if (hakukohde == null) List() else hakukohde.asScala.toList
+    val hakukohdeRyhmaList = if (hakukohderyhmat == null) List() else hakukohderyhmat.asScala.toList
     val okmOhjauksenAlaList = if (okmOhjauksenAla == null) List() else okmOhjauksenAla.asScala.toList
     val tutkinnonTasoList = if (tutkinnonTaso == null) List() else tutkinnonTaso.asScala.toList
     val aidinkieliList = if (aidinkieli == null) List() else aidinkieli.asScala.toList
@@ -514,6 +516,7 @@ class Controller(
       oppilaitosList,
       toimipisteList,
       hakukohdeList,
+      hakukohdeRyhmaList,
       okmOhjauksenAlaList,
       tutkinnonTasoList,
       aidinkieliList,
@@ -530,6 +533,13 @@ class Controller(
       "oppilaitos" -> Option(oppilaitosList).filterNot(_.isEmpty),
       "toimipiste" -> Option(toimipisteList).filterNot(_.isEmpty),
       "hakukohde" -> Option(hakukohdeList).filterNot(_.isEmpty),
+      "hakukohderyhma" -> Option(hakukohdeRyhmaList).filterNot(_.isEmpty),
+      "okmOhjauksenAla" -> Option(okmOhjauksenAlaList).filterNot(_.isEmpty),
+      "tutkinnonTaso" -> Option(tutkinnonTasoList).filterNot(_.isEmpty),
+      "aidinkieli" -> Option(aidinkieliList).filterNot(_.isEmpty),
+      "kansalaisuus" -> Option(kansalaisuusList).filterNot(_.isEmpty),
+      "sukupuoli" -> maybeSukupuoli,
+      "ensikertalainen" -> maybeEnsikertalainen,
       "naytaHakutoiveet" -> naytaHakutoiveetBool,
       "sukupuoli" -> maybeSukupuoli,
       "kansalaisuus" -> Option(kansalaisuusList).filterNot(_.isEmpty)
