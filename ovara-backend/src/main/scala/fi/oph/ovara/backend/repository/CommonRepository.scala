@@ -36,7 +36,7 @@ class CommonRepository extends Extractors {
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(alkamiskaudetAndHenkKohtSuunnitelma)
     }
 
-    sql"""SELECT h.haku_oid, h.haku_nimi
+    sql"""SELECT DISTINCT h.haku_oid, h.haku_nimi
           FROM pub.pub_dim_haku h
           LEFT JOIN (
             SELECT haku_oid, jsonb_array_elements(koulutuksen_alkamiskausi) as alkamiskausi
