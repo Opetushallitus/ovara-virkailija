@@ -38,17 +38,17 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   }
 
   def buildTutkinnonTasoFilters(
-                                         tutkinnonTasot: List[String],
-                                       ): Option[String] = {
+                                 tutkinnonTasot: List[String],
+                               ): Option[String] = {
     if (tutkinnonTasot.nonEmpty) {
       var conditions = List[String]()
-      if(tutkinnonTasot.contains("alempi-ja-ylempi")) {
+      if (tutkinnonTasot.contains("alempi-ja-ylempi")) {
         conditions = conditions :+ "h.alempi_kk_aste = true AND h.ylempi_kk_aste = true"
       }
-      if(tutkinnonTasot.contains("alempi")) {
+      if (tutkinnonTasot.contains("alempi")) {
         conditions = conditions :+ "h.alempi_kk_aste = true AND h.ylempi_kk_aste = false"
       }
-      if(tutkinnonTasot.contains("ylempi")) {
+      if (tutkinnonTasot.contains("ylempi")) {
         conditions = conditions :+ "h.alempi_kk_aste = false AND h.ylempi_kk_aste = true"
       }
       Some(s"AND (" + conditions.mkString(" OR ") + ")")
@@ -111,15 +111,15 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   }
 
   def selectEnsikertalaisetHakijatYhteensaWithParams(
-                                       selectedKayttooikeusOrganisaatiot: List[String],
-                                       haut: List[String],
-                                       hakukohteet: List[String],
-                                       okmOhjauksenAlat: List[String],
-                                       tutkinnonTasot: List[String],
-                                       aidinkielet: List[String],
-                                       kansalaisuudet: List[String],
-                                       sukupuoli: Option[String],
-                                     ): DBIO[Int] = {
+                                                      selectedKayttooikeusOrganisaatiot: List[String],
+                                                      haut: List[String],
+                                                      hakukohteet: List[String],
+                                                      okmOhjauksenAlat: List[String],
+                                                      tutkinnonTasot: List[String],
+                                                      aidinkielet: List[String],
+                                                      kansalaisuudet: List[String],
+                                                      sukupuoli: Option[String],
+                                                    ): DBIO[Int] = {
 
     val filters = buildFilters(
       haut, selectedKayttooikeusOrganisaatiot, hakukohteet, okmOhjauksenAlat, tutkinnonTasot, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen = Some(true)
@@ -134,78 +134,6 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       WHERE #$filters
       """.as[Int].head
   }
-
-/*
-  def selectOKMOhjauksenAloittainWithParams(
-                                         selectedKayttooikeusOrganisaatiot: List[String],
-                                         haut: List[String],
-                                         hakukohteet: List[String],
-                                         sukupuoli: Option[String],
-                                       ): SqlStreamingAction[Vector[HakeneetHyvaksytytVastaanottaneetResult], HakeneetHyvaksytytVastaanottaneetResult, Effect] = {
-
-    val filters = buildFilters(
-      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, sukupuoli
-    )
-
-    sql"""SELECT ka.koodinimi as otsikko, SUM(t.hakijat) AS hakijat, SUM(t.ensisijaisia) AS ensisijaisia, SUM(t.varasija) AS varasija, SUM(t.hyvaksytyt) AS hyvaksytyt,
-    SUM(t.vastaanottaneet) AS vastaanottaneet, SUM(t.lasna) AS lasna, SUM(t.poissa) AS poissa, SUM(t.ilm_yht) AS ilm_yht, SUM(DISTINCT t.aloituspaikat) AS aloituspaikat,
-    SUM(t.toive_1) AS toive1, SUM(t.toive_2) AS toive2, SUM(t.toive_3) AS toive3, SUM(t.toive_4) AS toive4, SUM(t.toive_5) AS toive5, SUM(t.toive_6) AS toive6, SUM(t.toive_7) AS toive7
-    FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
-    JOIN pub.pub_dim_hakukohde h
-    ON t.hakukohde_oid = h.hakukohde_oid
-    JOIN pub.pub_dim_koodisto_koulutusalataso1 ka
-    ON t.koulutusalataso_1 = ka.koodiarvo
-    WHERE #$filters
-    GROUP BY ka.koodinimi""".as[HakeneetHyvaksytytVastaanottaneetResult]
-  }*/
-
-/*  def selectOrganisaatioittainWithParams(
-                                          selectedKayttooikeusOrganisaatiot: List[String],
-                                          haut: List[String],
-                                          hakukohteet: List[String],
-                                          sukupuoli: Option[String],
-                                          organisaatiotaso: String,
-                                        ): SqlStreamingAction[Vector[HakeneetHyvaksytytVastaanottaneetResult], HakeneetHyvaksytytVastaanottaneetResult, Effect] = {
-    val filters = buildFilters(
-      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, sukupuoli
-    )
-    val organisaatioSelect = organisaatiotaso match {
-      case "oppilaitoksittain" => "h.oppilaitos_nimi as otsikko"
-      case _ => "h.koulutustoimija_nimi as otsikko"
-    }
-    val organisaatioGroupBy = organisaatiotaso match {
-      case "oppilaitoksittain" => "h.oppilaitos_nimi"
-      case _ => "h.koulutustoimija_nimi"
-    }
-    sql"""SELECT #$organisaatioSelect, SUM(t.hakijat) AS hakijat, SUM(t.ensisijaisia) AS ensisijaisia, SUM(t.varasija) AS varasija, SUM(t.hyvaksytyt) AS hyvaksytyt,
-    SUM(t.vastaanottaneet) AS vastaanottaneet, SUM(t.lasna) AS lasna, SUM(t.poissa) AS poissa, SUM(t.ilm_yht) AS ilm_yht, SUM(DISTINCT t.aloituspaikat) AS aloituspaikat,
-    SUM(t.toive_1) AS toive1, SUM(t.toive_2) AS toive2, SUM(t.toive_3) AS toive3, SUM(t.toive_4) AS toive4, SUM(t.toive_5) AS toive5, SUM(t.toive_6) AS toive6, SUM(t.toive_7) AS toive7
-    FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
-    JOIN pub.pub_dim_hakukohde h
-    ON t.hakukohde_oid = h.hakukohde_oid
-    WHERE #$filters
-    GROUP BY #$organisaatioGroupBy""".as[HakeneetHyvaksytytVastaanottaneetResult]
-  }
-
-  def selectToimipisteittainWithParams(
-                                        selectedKayttooikeusOrganisaatiot: List[String],
-                                        haut: List[String],
-                                        hakukohteet: List[String],
-                                        sukupuoli: Option[String],
-                                      ): SqlStreamingAction[Vector[HakeneetHyvaksytytVastaanottaneetToimipisteittain], HakeneetHyvaksytytVastaanottaneetToimipisteittain, Effect] = {
-    val filters = buildFilters(
-      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, sukupuoli
-    )
-
-    sql"""SELECT h.toimipiste, h.organisaatio_nimi, SUM(t.hakijat) AS hakijat, SUM(t.ensisijaisia) AS ensisijaisia, SUM(t.varasija) AS varasija, SUM(t.hyvaksytyt) AS hyvaksytyt,
-    SUM(t.vastaanottaneet) AS vastaanottaneet, SUM(t.lasna) AS lasna, SUM(t.poissa) AS poissa, SUM(t.ilm_yht) AS ilm_yht, SUM(DISTINCT t.aloituspaikat) AS aloituspaikat,
-    SUM(t.toive_1) AS toive1, SUM(t.toive_2) AS toive2, SUM(t.toive_3) AS toive3, SUM(t.toive_4) AS toive4, SUM(t.toive_5) AS toive5, SUM(t.toive_6) AS toive6, SUM(t.toive_7) AS toive7
-    FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
-    JOIN pub.pub_dim_hakukohde h
-    ON t.hakukohde_oid = h.hakukohde_oid
-    WHERE #$filters
-    GROUP BY h.toimipiste, h.organisaatio_nimi""".as[HakeneetHyvaksytytVastaanottaneetToimipisteittain]
-  }*/
 
 }
 

@@ -249,7 +249,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       kayttooikeusOrganisaatioOids: List[String],
       oppilaitosOids: List[String],
       toimipisteOids: List[String],
-      koulutustoimijaOid: Option[String] = None
+      koulutustoimijaOid: Option[String] = None,
   ): List[String] = {
     val hierarkiat =
       if (toimipisteOids.nonEmpty) {
@@ -257,7 +257,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       } else if (oppilaitosOids.nonEmpty) {
         getOppilaitoshierarkiat(oppilaitosOids)
       } else if (koulutustoimijaOid.isDefined) {
-        getKoulutustoimijahierarkia(List(koulutustoimijaOid.get))
+        getKoulutustoimijahierarkia(List(koulutustoimijaOid.get))  
       } else {
         List()
       }

@@ -12,7 +12,7 @@ trait Extractors extends GenericOvaraJsonFormats {
   private def extractArray(json: Option[String]): List[String] = {
     json.map(read[List[String]]).getOrElse(List())
   }
-  
+
   implicit val getHakuResult: GetResult[Haku] = GetResult(r =>
     Haku(
       haku_oid = r.nextString(),
@@ -58,7 +58,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       )
 
     val parentOid = r.nextString()
-    val childOid  = r.nextString()
+    val childOid = r.nextString()
 
     OrganisaatioParentChild(
       parent_oid = parentOid,
@@ -104,7 +104,7 @@ trait Extractors extends GenericOvaraJsonFormats {
   def getNextDateOption(r: PositionedResult) = {
     r.nextDateOption() match {
       case Some(date) => Some(date.toLocalDate)
-      case None       => None
+      case None => None
     }
   }
 
@@ -168,7 +168,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       postitoimipaikka = r.nextString()
     )
   )
-  
+
   def extractHakeneetHyvaksytytVastaanottaneetCommonFields(r: PositionedResult): (Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int) = {
     (
       r.nextInt(), // hakijat
