@@ -15,6 +15,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                             selectedKayttooikeusOrganisaatiot: List[String],
                             hakukohteet: List[String],
                             okmOhjauksenAlat: List[String],
+                            tutkinnonTasot: List[String],
                             aidinkielet: List[String],
                             kansalaisuudet: List[String],
                             sukupuoli: Option[String],
@@ -30,9 +31,30 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.kansalaisuus", kansalaisuudet)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "t.sukupuoli", sukupuoli)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "t.ensikertalainen", ensikertalainen)).filter(_.nonEmpty),
+      buildTutkinnonTasoFilters(tutkinnonTasot)
     ).collect { case Some(value) => value }.mkString("\n")
 
     filters
+  }
+  
+  def buildTutkinnonTasoFilters(
+                                         tutkinnonTasot: List[String],
+                                       ): Option[String] = {
+    if (tutkinnonTasot.nonEmpty) {
+      var conditions = List[String]()
+      if(tutkinnonTasot.contains("alempi-ja-ylempi")) {
+        conditions = conditions :+ "(h.alempi_kk_aste = true AND h.ylempi_kk_aste = true)"
+      }
+      if(tutkinnonTasot.contains("alempi")) {
+        conditions = conditions :+ "(h.alempi_kk_aste = true AND h.ylempi_kk_aste = false)"
+      }
+      if(tutkinnonTasot.contains("ylempi")) {
+        conditions = conditions :+ "(h.alempi_kk_aste = false AND h.ylempi_kk_aste = true)"
+      }
+      Some(s"AND (" + conditions.mkString(" OR ") + ")")
+    }
+    else
+      None
   }
 
   def selectHakukohteittainWithParams(
@@ -48,12 +70,12 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                      ): SqlStreamingAction[Vector[KkHakeneetHyvaksytytVastaanottaneetHakukohteittain], KkHakeneetHyvaksytytVastaanottaneetHakukohteittain, Effect] = {
 
     val filters = buildFilters(
-      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, okmOhjauksenAlat, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen
+      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, okmOhjauksenAlat, tutkinnonTasot, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen
     )
 
     sql"""SELECT h.hakukohde_nimi, h.organisaatio_nimi, SUM(t.hakijat) AS hakijat, SUM(t.ensisijaisia) AS ensisijaisia, SUM(t.ensikertalaisia) AS ensikertalaisia,
     SUM(t.hyvaksytyt) AS hyvaksytyt, SUM(t.vastaanottaneet) AS vastaanottaneet, SUM(t.lasna) AS lasna, SUM(t.poissa) AS poissa, SUM(t.ilm_yht) AS ilm_yht,
-    SUM(t.maksuvelvollisia) AS maksuvelvollisia, MIN(t.valinnan_aloituspaikat) AS valinnan_aloituspaikat, MIN(h.hakukohteen_aloituspaikat) AS aloituspaikat,
+    SUM(t.maksuvelvollisia) AS maksuvelvollisia, MIN(h.valintaperusteiden_aloituspaikat) AS valinnan_aloituspaikat, MIN(h.hakukohteen_aloituspaikat) AS aloituspaikat,
     SUM(t.toive_1) AS toive1, SUM(t.toive_2) AS toive2, SUM(t.toive_3) AS toive3, SUM(t.toive_4) AS toive4, SUM(t.toive_5) AS toive5, SUM(t.toive_6) AS toive6
     FROM pub.pub_fct_raportti_tilastoraportti_kk t
     JOIN pub.pub_dim_hakukohde h
@@ -75,7 +97,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                      ): DBIO[Int] = {
 
     val filters = buildFilters(
-      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, okmOhjauksenAlat, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen
+      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, okmOhjauksenAlat, tutkinnonTasot, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen
     )
 
     sql"""SELECT count(distinct ht.henkilo_oid)
@@ -100,7 +122,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                      ): DBIO[Int] = {
 
     val filters = buildFilters(
-      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, okmOhjauksenAlat, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen = Some(true)
+      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, okmOhjauksenAlat, tutkinnonTasot, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen = Some(true)
     )
 
     sql"""SELECT count(distinct ht.henkilo_oid)
