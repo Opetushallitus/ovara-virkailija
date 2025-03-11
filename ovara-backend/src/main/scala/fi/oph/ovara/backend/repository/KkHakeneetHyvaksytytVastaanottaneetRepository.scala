@@ -36,20 +36,20 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
 
     filters
   }
-  
+
   def buildTutkinnonTasoFilters(
                                          tutkinnonTasot: List[String],
                                        ): Option[String] = {
     if (tutkinnonTasot.nonEmpty) {
       var conditions = List[String]()
       if(tutkinnonTasot.contains("alempi-ja-ylempi")) {
-        conditions = conditions :+ "(h.alempi_kk_aste = true AND h.ylempi_kk_aste = true)"
+        conditions = conditions :+ "h.alempi_kk_aste = true AND h.ylempi_kk_aste = true"
       }
       if(tutkinnonTasot.contains("alempi")) {
-        conditions = conditions :+ "(h.alempi_kk_aste = true AND h.ylempi_kk_aste = false)"
+        conditions = conditions :+ "h.alempi_kk_aste = true AND h.ylempi_kk_aste = false"
       }
       if(tutkinnonTasot.contains("ylempi")) {
-        conditions = conditions :+ "(h.alempi_kk_aste = false AND h.ylempi_kk_aste = true)"
+        conditions = conditions :+ "h.alempi_kk_aste = false AND h.ylempi_kk_aste = true"
       }
       Some(s"AND (" + conditions.mkString(" OR ") + ")")
     }
