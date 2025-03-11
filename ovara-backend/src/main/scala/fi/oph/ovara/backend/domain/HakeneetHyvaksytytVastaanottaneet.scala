@@ -20,28 +20,9 @@ abstract class HakeneetHyvaksytytVastaanottaneetBase {
   val toive6: Int
   val toive7: Int
 }
-case class HakeneetHyvaksytytVastaanottaneetHakukohteittain(
-                                                    hakukohdeNimi: Kielistetty,
-                                                    organisaatioNimi: Kielistetty,
-                                                    hakijat: Int,
-                                                    ensisijaisia: Int,
-                                                    varasija: Int,
-                                                    hyvaksytyt: Int,
-                                                    vastaanottaneet: Int,
-                                                    lasna: Int,
-                                                    poissa: Int,
-                                                    ilmYht: Int,
-                                                    aloituspaikat: Int,
-                                                    toive1: Int,
-                                                    toive2: Int,
-                                                    toive3: Int,
-                                                    toive4: Int,
-                                                    toive5: Int,
-                                                    toive6: Int,
-                                                    toive7: Int) extends HakeneetHyvaksytytVastaanottaneetBase
 
-case class HakeneetHyvaksytytVastaanottaneetToimipisteittain(
-                                                             toimipiste: String,
+case class HakeneetHyvaksytytVastaanottaneetHakukohteittain(
+                                                             hakukohdeNimi: Kielistetty,
                                                              organisaatioNimi: Kielistetty,
                                                              hakijat: Int,
                                                              ensisijaisia: Int,
@@ -60,24 +41,44 @@ case class HakeneetHyvaksytytVastaanottaneetToimipisteittain(
                                                              toive6: Int,
                                                              toive7: Int) extends HakeneetHyvaksytytVastaanottaneetBase
 
+case class HakeneetHyvaksytytVastaanottaneetToimipisteittain(
+                                                              toimipiste: String,
+                                                              organisaatioNimi: Kielistetty,
+                                                              hakijat: Int,
+                                                              ensisijaisia: Int,
+                                                              varasija: Int,
+                                                              hyvaksytyt: Int,
+                                                              vastaanottaneet: Int,
+                                                              lasna: Int,
+                                                              poissa: Int,
+                                                              ilmYht: Int,
+                                                              aloituspaikat: Int,
+                                                              toive1: Int,
+                                                              toive2: Int,
+                                                              toive3: Int,
+                                                              toive4: Int,
+                                                              toive5: Int,
+                                                              toive6: Int,
+                                                              toive7: Int) extends HakeneetHyvaksytytVastaanottaneetBase
+
 case class HakeneetHyvaksytytVastaanottaneetResult(
-                                                             otsikko: Kielistetty,
-                                                             hakijat: Int,
-                                                             ensisijaisia: Int,
-                                                             varasija: Int,
-                                                             hyvaksytyt: Int,
-                                                             vastaanottaneet: Int,
-                                                             lasna: Int,
-                                                             poissa: Int,
-                                                             ilmYht: Int,
-                                                             aloituspaikat: Int,
-                                                             toive1: Int,
-                                                             toive2: Int,
-                                                             toive3: Int,
-                                                             toive4: Int,
-                                                             toive5: Int,
-                                                             toive6: Int,
-                                                             toive7: Int) extends HakeneetHyvaksytytVastaanottaneetBase {
+                                                    otsikko: Kielistetty,
+                                                    hakijat: Int,
+                                                    ensisijaisia: Int,
+                                                    varasija: Int,
+                                                    hyvaksytyt: Int,
+                                                    vastaanottaneet: Int,
+                                                    lasna: Int,
+                                                    poissa: Int,
+                                                    ilmYht: Int,
+                                                    aloituspaikat: Int,
+                                                    toive1: Int,
+                                                    toive2: Int,
+                                                    toive3: Int,
+                                                    toive4: Int,
+                                                    toive5: Int,
+                                                    toive6: Int,
+                                                    toive7: Int) extends HakeneetHyvaksytytVastaanottaneetBase {
 }
 
 object HakeneetHyvaksytytVastaanottaneetResult {
@@ -125,5 +126,5 @@ object HakeneetHyvaksytytVastaanottaneetResult {
       toive7 = toimipisteittain.toive7
     )
   }
-  
+
 }

@@ -930,14 +930,14 @@ object ExcelWriter {
   }
 
   def writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
-                                                      asiointikieli: String,
-                                                      translations: Map[String, String],
-                                                      data: List[KkHakeneetHyvaksytytVastaanottaneetResult],
-                                                      yksittaisetHakijat: Int,
-                                                      ensikertalaisetYksittaisetHakijat: Int,
-                                                      naytaHakutoiveet: Boolean,
-                                                      tulostustapa: String
-                                                    ): XSSFWorkbook = {
+                                                        asiointikieli: String,
+                                                        translations: Map[String, String],
+                                                        data: List[KkHakeneetHyvaksytytVastaanottaneetResult],
+                                                        yksittaisetHakijat: Int,
+                                                        ensikertalaisetYksittaisetHakijat: Int,
+                                                        naytaHakutoiveet: Boolean,
+                                                        tulostustapa: String
+                                                      ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new KkHakeneetHyvaksytytVastaanottaneet excel from db results")
     val sheet: XSSFSheet = workbook.createSheet()

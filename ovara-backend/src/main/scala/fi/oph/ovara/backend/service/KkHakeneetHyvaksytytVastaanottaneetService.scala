@@ -10,11 +10,11 @@ import org.springframework.stereotype.{Component, Service}
 @Component
 @Service
 class KkHakeneetHyvaksytytVastaanottaneetService(
-                                                kkHakeneetHyvaksytytVastaanottaneetRepository: KkHakeneetHyvaksytytVastaanottaneetRepository,
-                                                userService: UserService,
-                                                commonService: CommonService,
-                                                lokalisointiService: LokalisointiService
-                                              ) {
+                                                  kkHakeneetHyvaksytytVastaanottaneetRepository: KkHakeneetHyvaksytytVastaanottaneetRepository,
+                                                  userService: UserService,
+                                                  commonService: CommonService,
+                                                  lokalisointiService: LokalisointiService
+                                                ) {
 
   @Autowired
   val db: OvaraDatabase = null
@@ -49,7 +49,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
 
     val queryResult = tulostustapa match
       case _ =>
-//      case "hakukohteittain" =>
+        //      case "hakukohteittain" =>
         val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
           haut = haku,
@@ -62,23 +62,23 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
           ensikertalainen = ensikertalainen
         )
         db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams").map(r => KkHakeneetHyvaksytytVastaanottaneetResult(r))
-//      case "toimipisteittain" =>
-//        val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams(
-//          selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-//          haut = haku,
-//          hakukohteet = hakukohteet,
-//          sukupuoli = sukupuoli
-//        )
-//        db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams").map(r => HakeneetHyvaksytytVastaanottaneetResult(r))
-//      case _ =>
-//        val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams(
-//          selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-//          haut = haku,
-//          hakukohteet = hakukohteet,
-//          sukupuoli = sukupuoli,
-//          organisaatiotaso = tulostustapa
-//        )
-//        db.run(query, "kkHakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams")
+    //      case "toimipisteittain" =>
+    //        val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams(
+    //          selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
+    //          haut = haku,
+    //          hakukohteet = hakukohteet,
+    //          sukupuoli = sukupuoli
+    //        )
+    //        db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams").map(r => HakeneetHyvaksytytVastaanottaneetResult(r))
+    //      case _ =>
+    //        val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams(
+    //          selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
+    //          haut = haku,
+    //          hakukohteet = hakukohteet,
+    //          sukupuoli = sukupuoli,
+    //          organisaatiotaso = tulostustapa
+    //        )
+    //        db.run(query, "kkHakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams")
 
     val sumQuery = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams(
       selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
@@ -105,7 +105,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
 
     val sumQueryResult = db.run(sumQuery, "kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams")
     val ensikertalaisetSumQueryResult = db.run(ensikertalaisetSumQuery, "kkHakeneetHyvaksytytVastaanottaneetRepository.selectEnsikertalaisetHakijatYhteensaWithParams")
-    
+
     ExcelWriter.writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
       asiointikieli,
       translations,
