@@ -534,7 +534,7 @@ class Controller(
       "kansalaisuus" -> Option(kansalaisuusList).filterNot(_.isEmpty)
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
-    sendExcel(wb, response, request, "kk-hakeneet-hyvaksytyt-vastaanottaneet", raporttiParams)
+    sendExcel(Some(wb), response, request, "kk-hakeneet-hyvaksytyt-vastaanottaneet", raporttiParams)
   }
 
 }
