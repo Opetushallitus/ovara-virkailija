@@ -44,6 +44,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ github.token }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ovara-backend
           mvn clean package -B
@@ -89,6 +90,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@opetushallitus'
       - name: Install dependencies
         run: |
           cd ovara-ui
@@ -107,6 +110,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@opetushallitus'
       - name: Install dependencies
         run: |
           cd ovara-ui
@@ -128,6 +133,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@opetushallitus'
       - name: Install dependencies
         run: |
           cd ovara-ui
