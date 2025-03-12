@@ -1,7 +1,7 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.HakijaWithCombinedNimi
-import fi.oph.ovara.backend.repository.{HakijatRepository, OvaraDatabase}
+import fi.oph.ovara.backend.domain.ToisenAsteenHakijaWithCombinedNimi
+import fi.oph.ovara.backend.repository.{OvaraDatabase, ToisenAsteenHakijatRepository}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
@@ -10,13 +10,13 @@ import org.springframework.stereotype.{Component, Service}
 
 @Component
 @Service
-class HakijatService(
-    hakijatRepository: HakijatRepository,
+class ToisenAsteenHakijatService(
+    toisenAsteenHakijatRepository: ToisenAsteenHakijatRepository,
     userService: UserService,
     commonService: CommonService,
     lokalisointiService: LokalisointiService
 ) {
-  val LOG: Logger = LoggerFactory.getLogger(classOf[HakijatService]);
+  val LOG: Logger = LoggerFactory.getLogger(classOf[ToisenAsteenHakijatService]);
 
   @Autowired
   val db: OvaraDatabase = null
@@ -51,7 +51,7 @@ class HakijatService(
       oppilaitosOids = oppilaitokset
     )
 
-    val query = hakijatRepository.selectWithParams(
+    val query = toisenAsteenHakijatRepository.selectWithParams(
       kayttooikeusOrganisaatiot = orgOidsForQuery,
       haut = haku,
       oppilaitokset = oppilaitokset,
@@ -69,10 +69,10 @@ class HakijatService(
       julkaisulupa = julkaisulupa
     )
 
-    val queryResult = db.run(query, "hakijatRepository.selectWithParams")
+    val queryResult = db.run(query, "toisenAsteenHakijatRepository.selectWithParams")
     val sorted =
       queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi, resultRow.hakijanEtunimi, resultRow.oppijanumero))
-    val sortedListwithCombinedNimi = sorted.map(sortedResult => HakijaWithCombinedNimi(sortedResult))
+    val sortedListwithCombinedNimi = sorted.map(sortedResult => ToisenAsteenHakijaWithCombinedNimi(sortedResult))
 
     ExcelWriter.writeHakijatRaportti(
       sortedListwithCombinedNimi,

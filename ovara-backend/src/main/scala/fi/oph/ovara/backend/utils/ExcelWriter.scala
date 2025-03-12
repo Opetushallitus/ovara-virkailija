@@ -375,7 +375,7 @@ object ExcelWriter {
   }
 
   def writeHakijatRaportti(
-      hakijat: Seq[HakijaWithCombinedNimi | KkHakijaWithCombinedNimi],
+      hakijat: Seq[ToisenAsteenHakijaWithCombinedNimi | KkHakijaWithCombinedNimi],
       asiointikieli: String,
       translations: Map[String, String],
       id: String,
@@ -404,8 +404,9 @@ object ExcelWriter {
     val naytaHetu        = maybeNaytaHetu.getOrElse(false)
     val naytaPostiosoite = maybeNaytaPostiosoite.getOrElse(false)
 
-    val hakijaClass = if (id == "korkeakoulu") classOf[KkHakijaWithCombinedNimi] else classOf[HakijaWithCombinedNimi]
-    val fieldNames  = hakijaClass.getDeclaredFields.map(_.getName).toList
+    val hakijaClass =
+      if (id == "korkeakoulu") classOf[KkHakijaWithCombinedNimi] else classOf[ToisenAsteenHakijaWithCombinedNimi]
+    val fieldNames = hakijaClass.getDeclaredFields.map(_.getName).toList
     val fieldNamesToShow = if (id == "korkeakoulu") {
       fieldNames.filter(fieldName => {
         !optionallyShowableFields.contains(fieldName) ||
