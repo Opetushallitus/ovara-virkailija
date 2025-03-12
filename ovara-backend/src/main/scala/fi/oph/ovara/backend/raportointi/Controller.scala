@@ -25,7 +25,7 @@ import scala.jdk.CollectionConverters.*
 class Controller(
     commonService: CommonService,
     koulutuksetToteutuksetHakukohteetService: KoulutuksetToteutuksetHakukohteetService,
-    hakijatService: HakijatService,
+    hakijatService: ToisenAsteenHakijatService,
     kkHakijatService: KkHakijatService,
     hakeneetHyvaksytytVastaanottaneetService: HakeneetHyvaksytytVastaanottaneetService,
     userService: UserService,

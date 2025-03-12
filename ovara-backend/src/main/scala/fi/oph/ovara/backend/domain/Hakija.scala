@@ -53,7 +53,7 @@ case class ToisenAsteenHakija(
     postitoimipaikka: String
 ) extends Hakija
 
-case class HakijaWithCombinedNimi(
+case class ToisenAsteenHakijaWithCombinedNimi(
     hakija: String,
     turvakielto: Option[Boolean],
     kansalaisuus: Kielistetty,
@@ -84,9 +84,9 @@ case class HakijaWithCombinedNimi(
     postitoimipaikka: String
 ) extends Hakija
 
-object HakijaWithCombinedNimi {
-  def apply(hakija: ToisenAsteenHakija): HakijaWithCombinedNimi = {
-    new HakijaWithCombinedNimi(
+object ToisenAsteenHakijaWithCombinedNimi {
+  def apply(hakija: ToisenAsteenHakija): ToisenAsteenHakijaWithCombinedNimi = {
+    new ToisenAsteenHakijaWithCombinedNimi(
       hakija = s"${hakija.hakijanSukunimi}, ${hakija.hakijanEtunimi}",
       turvakielto = hakija.turvakielto,
       kansalaisuus = hakija.kansalaisuus,

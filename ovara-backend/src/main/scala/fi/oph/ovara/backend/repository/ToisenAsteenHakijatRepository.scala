@@ -8,7 +8,7 @@ import slick.jdbc.PostgresProfile.api.*
 import slick.sql.SqlStreamingAction
 
 @Component
-class HakijatRepository extends Extractors {
+class ToisenAsteenHakijatRepository extends Extractors {
   def selectWithParams(
       kayttooikeusOrganisaatiot: List[String],
       haut: List[String],
