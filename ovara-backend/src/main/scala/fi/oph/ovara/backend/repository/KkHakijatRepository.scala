@@ -48,7 +48,7 @@ class KkHakijatRepository extends Extractors {
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hkr_hk.hakukohderyhma_oid", hakukohderyhmat)
 
     //TODO: palautetaan yo-arvosanat
-    sql"""SELECT hlo.sukunimi, hlo.etunimet, hlo.hetu, hlo.syntymaaika,
+    sql"""SELECT DISTINCT hlo.sukunimi, hlo.etunimet, hlo.hetu, hlo.syntymaaika,
                  hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid, hk.toimipiste_nimi,
                  hk.hakukohde_nimi, kkh.hakukelpoisuus, ht.hakutoivenumero, ht.valintatieto,
                  ht.vastaanottotieto, ht.viimeinen_vastaanottopaiva, e.isensikertalainen AS ensikertalainen,
