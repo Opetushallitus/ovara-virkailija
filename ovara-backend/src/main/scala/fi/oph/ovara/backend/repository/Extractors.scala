@@ -157,6 +157,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       prioriteetti = r.nextInt(),
       valintatieto = r.nextString(),
       vastaanottotieto = r.nextStringOption(),
+      ehdollisestiHyvaksytty = r.nextBooleanOption(),
       viimVastaanottopaiva = getNextDateOption(r),
       ensikertalainen = r.nextBooleanOption(),
       ilmoittautuminen = r.nextStringOption(),
