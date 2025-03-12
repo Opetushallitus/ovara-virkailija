@@ -42,8 +42,9 @@
         <appender-ref ref="APP" />
     </root>
     <logger name="org.springframework" level="warn" />
-    <logger name="org.springframework.security" level="warn" />
+    <logger name="org.springframework.security" level="info" />
     <logger name="org.springframework.boot.autoconfigure.security.AuthenticationManagerConfiguration" level="info" />
+    <logger name="fi.oph.ovara.backend.security.JdbcSessionMappingStorage" level="debug" />
 
     <!-- Auditlog  -->
     <logger name="fi.vm.sade.auditlog.Audit" level="INFO" additivity="false">

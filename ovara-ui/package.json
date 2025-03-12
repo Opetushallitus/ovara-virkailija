@@ -45,6 +45,7 @@
     "http-proxy-middleware": "^3.0.3",
     "husky": "^9.1.7",
     "lint-staged": "^15.4.3",
+    "@opentelemetry/api": "^1.9.0",
     "postcss": "^8",
     "prettier": "3.5.3",
     "typescript": "^5.8.2",

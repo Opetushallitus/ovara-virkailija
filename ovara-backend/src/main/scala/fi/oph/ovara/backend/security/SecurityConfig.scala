@@ -146,6 +146,7 @@ class SecurityConfig  {
       .authorizeHttpRequests(requests => requests
         .requestMatchers("/api/healthcheck", "/api/csrf").permitAll()
         .requestMatchers(SWAGGER_WHITELIST*).permitAll()
+        .requestMatchers(SPRING_CAS_SECURITY_CHECK_PATH).permitAll()
         .anyRequest().fullyAuthenticated()
       )
       .csrf(csrf => csrf
