@@ -491,7 +491,8 @@ object ExcelWriter {
                   "markkinointilupa",
                   "julkaisulupa",
                   "sahkoinenViestintaLupa",
-                  "ensikertalainen"
+                  "ensikertalainen",
+                  "ehdollisestiHyvaksytty"
                 ).contains(fieldName) =>
               val translation =
                 if (b) translations.getOrElse("raportti.kylla", "raportti.kylla")
