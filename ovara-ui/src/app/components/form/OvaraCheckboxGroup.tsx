@@ -23,7 +23,6 @@ export const OvaraCheckboxGroup = ({
   return (
     <OvaraFormControl
       sx={{
-        marginBottom: '20px',
         display: 'flex',
       }}
       label={t(`raportti.${id}`)}
