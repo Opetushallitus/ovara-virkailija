@@ -5,6 +5,8 @@ on:
   push:
     paths-ignore:
       - '**.md'
+env:
+  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   # BACKEND
@@ -44,7 +46,6 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ github.token }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ovara-backend
           mvn clean package -B
