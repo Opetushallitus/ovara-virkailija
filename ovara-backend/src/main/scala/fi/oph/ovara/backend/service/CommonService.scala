@@ -112,7 +112,12 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
   def getHakukohderyhmat(haut: List[String]): Vector[Hakukohderyhma] = {
     val user             = userService.getEnrichedUserDetails
     val kayttooikeusOids = AuthoritiesUtil.getKayttooikeusOids(user.authorities)
-    db.run(commonRepository.selectHakukohderyhmat(kayttooikeusOids, haut), "selectHakukohderyhmat")
+    val hakukohderyhmaOids =
+      if (hasOPHPaakayttajaRights(kayttooikeusOids))
+        List() // ei rajata listaa pääkäyttäjälle
+      else
+        kayttooikeusOids
+    db.run(commonRepository.selectHakukohderyhmat(hakukohderyhmaOids, haut), "selectHakukohderyhmat")
   }
 
   def getOrganisaatioHierarkiatWithUserRights: List[OrganisaatioHierarkia] = {
