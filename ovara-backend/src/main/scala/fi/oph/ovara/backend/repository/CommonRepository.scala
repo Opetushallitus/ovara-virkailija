@@ -50,7 +50,8 @@ class CommonRepository extends Extractors {
 
   def selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(
       orgs: List[String],
-      haut: List[String]
+      haut: List[String],
+      hakukohderyhmat: List[String]
   ): SqlStreamingAction[Vector[Hakukohde], Hakukohde, Effect] = {
     val organisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(orgs)
     val organisaatiotQueryStr = if (organisaatiotStr.isEmpty) {
@@ -64,11 +65,21 @@ class CommonRepository extends Extractors {
       s"AND hk.haku_oid in ($hautStr)"
     }
 
+    val hakukohderyhmatStr = RepositoryUtils.makeListOfValuesQueryStr(hakukohderyhmat)
+    val hakukohderyhmatQueryStr = if (hakukohderyhmatStr.isEmpty) {
+      ""
+    } else {
+      s"AND hkr_hk.hakukohderyhma_oid in ($hakukohderyhmatStr)"
+    }
+
     sql"""SELECT hk.hakukohde_oid, hk.hakukohde_nimi
           FROM pub.pub_dim_hakukohde hk
+          JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
+          ON hkr_hk.hakukohde_oid = hk.hakukohde_oid
           WHERE hk.tila != 'poistettu'
           #$organisaatiotQueryStr
           #$hautQueryStr
+          #$hakukohderyhmatQueryStr
           """.as[Hakukohde]
   }
 
