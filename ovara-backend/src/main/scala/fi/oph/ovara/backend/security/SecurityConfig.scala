@@ -29,8 +29,8 @@ import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHtt
 @EnableWebSecurity
 @EnableJdbcHttpSession(tableName = "VIRKAILIJA_SESSION")
 class SecurityConfig  {
-  //private final val SPRING_CAS_SECURITY_CHECK_PATH = "/j_spring_cas_security_check"
-  private final val SPRING_CAS_SECURITY_CHECK_PATH = "/login/cas"
+  private final val SPRING_CAS_SECURITY_CHECK_PATH = "/j_spring_cas_security_check"
+  //private final val SPRING_CAS_SECURITY_CHECK_PATH = "/login/cas"
   @Value("${cas.url}")
   val cas_url: String = null
 
