@@ -153,7 +153,7 @@ class SecurityConfig  {
         .ignoringRequestMatchers("/api/healthcheck", "/api/csrf")
       )
       .exceptionHandling(exceptionHandling =>
-        // corsin takia cas uudelleenohjauksen sijaan palautetaan http 401 ja käli hoitaa forwardoinnin loginiin
+        // corsin takia cas uudelleenohjauksen sijaan palautetaan http 401 ja käli hoitaa forwardoinnin login apiin
         exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
       )
       .addFilterAt(authenticationFilter, classOf[CasAuthenticationFilter])
@@ -164,7 +164,7 @@ class SecurityConfig  {
       .build()
   }
 
-  // api joka ohjaa tarvittaessa cas loginiin
+  // api joka ohjaa tarvittaessa kirjautumattoman käyttäjän cas loginiin
   @Bean
   @Order(1)
   def apiLoginFilterChain(http: HttpSecurity, casAuthenticationEntryPoint: CasAuthenticationEntryPoint): SecurityFilterChain = {

@@ -13,7 +13,7 @@ class JdbcSessionMappingStorage(sessionRepository: SessionRepository[Session], s
 
   @Override
   def removeSessionByMappingId(mappingId: String): HttpSession = {
-    val query = sql"SELECT session_id FROM #$schema.cas_client_session WHERE mapping_id = $mappingId".as[String].headOption
+    val query = sql"SELECT session_id FROM #$schema.virkailija_cas_client_session WHERE mapping_id = $mappingId".as[String].headOption
     val sessionIdOpt = ovaraDatabase.run(query, "removeSessionByMappingId")
 
     sessionIdOpt
@@ -24,19 +24,19 @@ class JdbcSessionMappingStorage(sessionRepository: SessionRepository[Session], s
 
   @Override
   def removeBySessionById(sessionId: String): Unit = {
-    val sql = sqlu"DELETE FROM #$schema.cas_client_session WHERE session_id = $sessionId"
+    val sql = sqlu"DELETE FROM #$schema.virkailija_cas_client_session WHERE session_id = $sessionId"
     ovaraDatabase.run(sql, "removeBySessionById")
   }
 
   @Override
   def addSessionById(mappingId: String, session: HttpSession): Unit = {
-    val sql = sqlu"INSERT INTO #$schema.cas_client_session (mapping_id, session_id) VALUES ($mappingId, ${session.getId}) ON CONFLICT (mapping_id) DO NOTHING"
+    val sql = sqlu"INSERT INTO #$schema.virkailija_cas_client_session (mapping_id, session_id) VALUES ($mappingId, ${session.getId}) ON CONFLICT (mapping_id) DO NOTHING"
     ovaraDatabase.run(sql, "addSessionById")
   }
 
   @Override
   def clean(): Unit = {
-    val sql = sqlu"DELETE FROM #$schema.cas_client_session WHERE session_id NOT IN (SELECT session_id FROM spring_session)"
+    val sql = sqlu"DELETE FROM #$schema.virkailija_cas_client_session WHERE session_id NOT IN (SELECT session_id FROM virkailija_session)"
     ovaraDatabase.run(sql, "clean")
   }
 
