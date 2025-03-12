@@ -29,8 +29,8 @@ import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHtt
 @EnableWebSecurity
 @EnableJdbcHttpSession(tableName = "VIRKAILIJA_SESSION")
 class SecurityConfig  {
-  private final val SPRING_CAS_SECURITY_CHECK_PATH = "/j_spring_cas_security_check"
-
+  //private final val SPRING_CAS_SECURITY_CHECK_PATH = "/j_spring_cas_security_check"
+  private final val SPRING_CAS_SECURITY_CHECK_PATH = "/login/cas"
   @Value("${cas.url}")
   val cas_url: String = null
 
@@ -51,7 +51,7 @@ class SecurityConfig  {
 
   @Bean
   def auditLog(): AuditLog = AuditLog
-  
+
   @Bean
   def createCasClient(): CasClient = CasClientBuilder.build(CasConfig.CasConfigBuilder(
     cas_username,
@@ -152,6 +152,7 @@ class SecurityConfig  {
         .ignoringRequestMatchers("/api/healthcheck", "/api/csrf")
       )
       .exceptionHandling(exceptionHandling =>
+        // corsin takia cas uudelleenohjauksen sijaan palautetaan http 401 ja käli hoitaa forwardoinnin loginiin
         exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
       )
       .addFilterAt(authenticationFilter, classOf[CasAuthenticationFilter])
@@ -159,21 +160,17 @@ class SecurityConfig  {
       .securityContext(securityContext => securityContext
         .requireExplicitSave(true)
         .securityContextRepository(securityContextRepository))
-      .logout(logout =>
-        logout.logoutUrl("/logout")
-          .deleteCookies("JSESSIONID"))
       .build()
   }
 
-
+  // api joka ohjaa tarvittaessa cas loginiin
   @Bean
   @Order(1)
   def apiLoginFilterChain(http: HttpSecurity, casAuthenticationEntryPoint: CasAuthenticationEntryPoint): SecurityFilterChain = {
     http
       .securityMatcher("/api/login")
       .authorizeHttpRequests(requests =>
-        requests.requestMatchers(SPRING_CAS_SECURITY_CHECK_PATH).permitAll() // päästetään läpi cas-logout
-        .anyRequest.fullyAuthenticated)
+        requests.anyRequest.fullyAuthenticated)
       .exceptionHandling(c => c.authenticationEntryPoint(casAuthenticationEntryPoint))
       .build()
   }
