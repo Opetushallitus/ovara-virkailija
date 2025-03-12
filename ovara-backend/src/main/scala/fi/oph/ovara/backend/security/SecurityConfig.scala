@@ -171,7 +171,8 @@ class SecurityConfig  {
     http
       .securityMatcher("/api/login")
       .authorizeHttpRequests(requests =>
-        requests.anyRequest.fullyAuthenticated)
+        requests.requestMatchers(SPRING_CAS_SECURITY_CHECK_PATH).permitAll() // päästetään läpi cas-logout
+        .anyRequest.fullyAuthenticated)
       .exceptionHandling(c => c.authenticationEntryPoint(casAuthenticationEntryPoint))
       .build()
   }
