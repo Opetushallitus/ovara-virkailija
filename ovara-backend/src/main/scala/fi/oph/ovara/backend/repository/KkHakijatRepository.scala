@@ -49,7 +49,7 @@ class KkHakijatRepository extends Extractors {
 
     //TODO: palautetaan yo-arvosanat
     sql"""SELECT DISTINCT hlo.sukunimi, hlo.etunimet, hlo.hetu, hlo.syntymaaika,
-                 hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid, hk.toimipiste_nimi,
+                 hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid, hk.organisaatio_nimi,
                  hk.hakukohde_nimi, kkh.hakukelpoisuus, ht.hakutoivenumero, ht.valintatieto,
                  ht.ehdollisesti_hyvaksytty, ht.valintatiedon_pvm, ht.vastaanottotieto,
                  ht.viimeinen_vastaanottopaiva, e.isensikertalainen AS ensikertalainen,
