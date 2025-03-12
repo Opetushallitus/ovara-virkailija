@@ -1538,7 +1538,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val sheet: XSSFSheet                                         = wb.createSheet()
     val headingCellStyle: XSSFCellStyle                          = wb.createCellStyle()
 
-    val fieldNames: List[String] = classOf[HakijaWithCombinedNimi].getDeclaredFields.map(_.getName).toList
+    val fieldNames: List[String] = classOf[ToisenAsteenHakijaWithCombinedNimi].getDeclaredFields.map(_.getName).toList
     ExcelWriter.createHeadingRow(
       sheet,
       userLng,
@@ -1630,7 +1630,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
   it should "return excel with one result row in addition to heading row" in {
     val hakijatResult = Vector(
-      HakijaWithCombinedNimi(
+      ToisenAsteenHakijaWithCombinedNimi(
         "Rautiainen-Testi, Dina Testi",
         Some(false),
         Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
@@ -1714,7 +1714,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return excel with three result rows: two for one hakija and one for another hakija" in {
     val hakijatResult =
       Vector(
-        HakijaWithCombinedNimi(
+        ToisenAsteenHakijaWithCombinedNimi(
           "Rautiainen-Testi, Dina Testi",
           Some(false),
           Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
@@ -1748,7 +1748,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           "00100",
           "HELSINKI"
         ),
-        HakijaWithCombinedNimi(
+        ToisenAsteenHakijaWithCombinedNimi(
           "Rautiainen-Testi, Dina Testi",
           Some(false),
           Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
@@ -1782,7 +1782,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           "00100",
           "HELSINKI"
         ),
-        HakijaWithCombinedNimi(
+        ToisenAsteenHakijaWithCombinedNimi(
           "Lehto-Testi, Vikke Testi",
           Some(false),
           Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),

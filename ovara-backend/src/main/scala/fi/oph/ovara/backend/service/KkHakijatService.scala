@@ -16,7 +16,7 @@ class KkHakijatService(
     commonService: CommonService,
     lokalisointiService: LokalisointiService
 ) {
-  val LOG: Logger = LoggerFactory.getLogger(classOf[HakijatService]);
+  val LOG: Logger = LoggerFactory.getLogger(classOf[KkHakijatService]);
 
   @Autowired
   val db: OvaraDatabase = null
