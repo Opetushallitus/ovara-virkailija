@@ -448,13 +448,10 @@ object ExcelWriter {
             case Some(d: LocalDate) =>
               val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
               cell.setCellValue(d.format(formatter))
-            case s: String if List("valintatieto").contains(fieldName) =>
-              val translation = getTranslationForCellValue(s, translations)
-              cell.setCellValue(translation)
             case s: String =>
               cell.setCellValue(s)
             case Some(s: String)
-                if List("vastaanottotieto", "ilmoittautuminen", "hakukelpoisuus", "maksuvelvollisuus")
+                if List("vastaanottotieto", "ilmoittautuminen", "hakukelpoisuus", "maksuvelvollisuus", "valintatieto")
                   .contains(fieldName) =>
               val translation = getTranslationForCellValue(s, translations)
               cell.setCellValue(translation)
