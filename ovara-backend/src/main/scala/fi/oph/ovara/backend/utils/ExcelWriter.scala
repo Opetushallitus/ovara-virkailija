@@ -454,7 +454,8 @@ object ExcelWriter {
             case s: String =>
               cell.setCellValue(s)
             case Some(s: String)
-                if List("vastaanottotieto", "ilmoittautuminen", "hakukelpoisuus").contains(fieldName) =>
+                if List("vastaanottotieto", "ilmoittautuminen", "hakukelpoisuus", "maksuvelvollisuus")
+                  .contains(fieldName) =>
               val translation = getTranslationForCellValue(s, translations)
               cell.setCellValue(translation)
             case Some(s: String) if List("harkinnanvaraisuus").contains(fieldName) =>
