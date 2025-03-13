@@ -17,3 +17,5 @@ ovara-backend.cas.username={{ovara_backend_cas_username}}
 ovara-backend.cas.password={{ovara_backend_cas_password}}
 
 ovara_backend.uses-ssl-proxy
+logging.level.fi.oph.ovara.backend.security.JdbcSessionMappingStorage=INFO
+logging.level.org.apereo.cas.client=DEBUG
