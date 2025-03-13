@@ -14,7 +14,7 @@ class JdbcSessionMappingStorage(sessionRepository: SessionRepository[Session], s
   @Override
   def removeSessionByMappingId(mappingId: String): HttpSession = {
     LOG.info("Poistetaan sessiomappaus cas tiketillä")
-    val query = sql"SELECT session_id FROM #$schema.virkailija_cas_client_session WHERE mapping_id = $mappingId".as[String].headOption
+    val query = sql"SELECT virkailija_session_id FROM #$schema.virkailija_cas_client_session WHERE mapping_id = $mappingId".as[String].headOption
     val sessionIdOpt = ovaraDatabase.run(query, "removeSessionByMappingId")
 
     sessionIdOpt
@@ -26,21 +26,21 @@ class JdbcSessionMappingStorage(sessionRepository: SessionRepository[Session], s
   @Override
   def removeBySessionById(sessionId: String): Unit = {
     LOG.info("Poistetaan sessiomappaus session id:llä")
-    val sql = sqlu"DELETE FROM #$schema.virkailija_cas_client_session WHERE session_id = $sessionId"
+    val sql = sqlu"DELETE FROM #$schema.virkailija_cas_client_session WHERE virkailija_session_id = $sessionId"
     ovaraDatabase.run(sql, "removeBySessionById")
   }
 
   @Override
   def addSessionById(mappingId: String, session: HttpSession): Unit = {
     LOG.info("Lisätään sessiomappaus")
-    val sql = sqlu"INSERT INTO #$schema.virkailija_cas_client_session (mapping_id, session_id) VALUES ($mappingId, ${session.getId}) ON CONFLICT (mapping_id) DO NOTHING"
+    val sql = sqlu"INSERT INTO #$schema.virkailija_cas_client_session (mapping_id, virkailija_session_id) VALUES ($mappingId, ${session.getId}) ON CONFLICT (mapping_id) DO NOTHING"
     ovaraDatabase.run(sql, "addSessionById")
   }
 
   @Override
   def clean(): Unit = {
     LOG.info("Siivotaan sessiomappaukset joista ei löydy sessiota")
-    val sql = sqlu"DELETE FROM #$schema.virkailija_cas_client_session WHERE session_id NOT IN (SELECT session_id FROM virkailija_session)"
+    val sql = sqlu"DELETE FROM #$schema.virkailija_cas_client_session WHERE virkailija_session_id NOT IN (SELECT session_id FROM virkailija_session)"
     ovaraDatabase.run(sql, "clean")
   }
 
