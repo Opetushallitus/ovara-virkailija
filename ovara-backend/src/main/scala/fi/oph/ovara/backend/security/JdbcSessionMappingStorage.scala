@@ -33,6 +33,7 @@ class JdbcSessionMappingStorage(sessionRepository: SessionRepository[Session], s
   @Override
   def addSessionById(mappingId: String, session: HttpSession): Unit = {
     LOG.info("Lisätään sessiomappaus")
+    LOG.info(s"mappingId: $mappingId, sessionId: ${session.getId}")
     val sql = sqlu"INSERT INTO #$schema.virkailija_cas_client_session (mapping_id, virkailija_session_id) VALUES ($mappingId, ${session.getId}) ON CONFLICT (mapping_id) DO NOTHING"
     ovaraDatabase.run(sql, "addSessionById")
   }
