@@ -122,7 +122,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       prioriteetti = r.nextInt(),
       kaksoistutkintoKiinnostaa = r.nextBooleanOption(),
       urheilijatutkintoKiinnostaa = r.nextBooleanOption(),
-      valintatieto = r.nextString(),
+      valintatieto = r.nextStringOption(),
       varasija = r.nextStringOption(),
       kokonaispisteet = r.nextStringOption(),
       hylkTaiPerSyy = extractKielistetty(r.nextStringOption()),
@@ -136,9 +136,9 @@ trait Extractors extends GenericOvaraJsonFormats {
       markkinointilupa = r.nextBooleanOption(),
       julkaisulupa = r.nextBooleanOption(),
       sahkoinenViestintaLupa = r.nextBooleanOption(),
-      lahiosoite = r.nextString(),
-      postinumero = r.nextString(),
-      postitoimipaikka = r.nextString()
+      lahiosoite = r.nextStringOption(),
+      postinumero = r.nextStringOption(),
+      postitoimipaikka = r.nextStringOption()
     )
   )
 
@@ -155,7 +155,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       hakukohteenNimi = extractKielistetty(r.nextStringOption()),
       hakukelpoisuus = r.nextStringOption(),
       prioriteetti = r.nextInt(),
-      valintatieto = r.nextString(),
+      valintatieto = r.nextStringOption(),
       ehdollisestiHyvaksytty = r.nextBooleanOption(),
       valintatiedonPvm = getNextDateOption(r),
       vastaanottotieto = r.nextStringOption(),
@@ -167,9 +167,9 @@ trait Extractors extends GenericOvaraJsonFormats {
       julkaisulupa = r.nextBooleanOption(),
       markkinointilupa = r.nextBooleanOption(),
       sahkoinenViestintaLupa = r.nextBooleanOption(),
-      lahiosoite = r.nextString(),
-      postinumero = r.nextString(),
-      postitoimipaikka = r.nextString(),
+      lahiosoite = r.nextStringOption(),
+      postinumero = r.nextStringOption(),
+      postitoimipaikka = r.nextStringOption(),
       puhelinnumero = r.nextStringOption(),
       sahkoposti = r.nextStringOption()
     )
