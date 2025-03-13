@@ -7,6 +7,7 @@ import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl
 import fi.vm.sade.javautils.nio.cas.{CasClient, CasClientBuilder, CasConfig}
 import org.apereo.cas.client.session.{SessionMappingStorage, SingleSignOutFilter}
 import org.apereo.cas.client.validation.{Cas20ServiceTicketValidator, TicketValidator}
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.{Bean, Configuration}
 import org.springframework.core.annotation.Order
@@ -29,6 +30,7 @@ import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHtt
 @EnableWebSecurity
 @EnableJdbcHttpSession(tableName = "VIRKAILIJA_SESSION")
 class SecurityConfig  {
+  val LOG = LoggerFactory.getLogger(classOf[SecurityConfig])
   private final val SPRING_CAS_SECURITY_CHECK_PATH = "/j_spring_cas_security_check"
   //private final val SPRING_CAS_SECURITY_CHECK_PATH = "/login/cas"
   @Value("${cas.url}")
@@ -134,6 +136,8 @@ class SecurityConfig  {
 
   @Bean
   def casFilterChain(http: HttpSecurity, authenticationFilter: CasAuthenticationFilter, sessionMappingStorage: SessionMappingStorage, securityContextRepository: SecurityContextRepository, casAuthenticationEntryPoint: CasAuthenticationEntryPoint): SecurityFilterChain = {
+    LOG.info(s"DEBUG: casFilterChain - Using sessionMappingStorage: ${sessionMappingStorage.getClass.getName}")
+
     val SWAGGER_WHITELIST = List(
       "/swagger-resources",
       "/swagger-resources/**",
@@ -182,6 +186,7 @@ class SecurityConfig  {
   //
   @Bean
   def singleLogoutFilter(sessionMappingStorage: SessionMappingStorage): SingleSignOutFilter = {
+    LOG.info(s"DEBUG: singleLogoutFilter - Using sessionMappingStorage: ${sessionMappingStorage.getClass.getName}")
     val singleSignOutFilter: SingleSignOutFilter = new SingleSignOutFilter();
     singleSignOutFilter.setIgnoreInitConfiguration(true);
     singleSignOutFilter
