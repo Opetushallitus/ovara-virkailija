@@ -144,7 +144,8 @@ case class KkHakija(
     sahkoinenViestintaLupa: Option[Boolean],
     lahiosoite: String,
     postinumero: String,
-    postitoimipaikka: String
+    postitoimipaikka: String,
+    puhelinnumero: Option[String]
 ) extends Hakija
 
 case class KkHakijaWithCombinedNimi(
@@ -171,7 +172,8 @@ case class KkHakijaWithCombinedNimi(
     sahkoinenViestintaLupa: Option[Boolean],
     lahiosoite: String,
     postinumero: String,
-    postitoimipaikka: String
+    postitoimipaikka: String,
+    puhelinnumero: Option[String]
 ) extends Hakija
 
 object KkHakijaWithCombinedNimi {
@@ -200,7 +202,8 @@ object KkHakijaWithCombinedNimi {
       sahkoinenViestintaLupa = hakija.sahkoinenViestintaLupa,
       lahiosoite = hakija.lahiosoite,
       postinumero = hakija.postinumero,
-      postitoimipaikka = hakija.postitoimipaikka
+      postitoimipaikka = hakija.postitoimipaikka,
+      puhelinnumero = hakija.puhelinnumero
     )
   }
 }
