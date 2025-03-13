@@ -31,9 +31,8 @@ import org.springframework.session.web.http.{CookieSerializer, DefaultCookieSeri
 @EnableWebSecurity
 @EnableJdbcHttpSession(tableName = "VIRKAILIJA_SESSION")
 class SecurityConfig  {
-  val LOG = LoggerFactory.getLogger(classOf[SecurityConfig])
   private final val SPRING_CAS_SECURITY_CHECK_PATH = "/j_spring_cas_security_check"
-  //private final val SPRING_CAS_SECURITY_CHECK_PATH = "/login/cas"
+
   @Value("${cas.url}")
   val cas_url: String = null
 
@@ -150,7 +149,6 @@ class SecurityConfig  {
       .authorizeHttpRequests(requests => requests
         .requestMatchers("/api/healthcheck", "/api/csrf").permitAll()
         .requestMatchers(SWAGGER_WHITELIST*).permitAll()
-        .requestMatchers(SPRING_CAS_SECURITY_CHECK_PATH).permitAll()
         .anyRequest().fullyAuthenticated()
       )
       .csrf(csrf => csrf
