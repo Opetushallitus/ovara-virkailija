@@ -52,8 +52,9 @@ class KkHakijatRepository extends Extractors {
                  hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid, hk.organisaatio_nimi,
                  hk.hakukohde_nimi, kkh.hakukelpoisuus, ht.hakutoivenumero, ht.valintatieto,
                  ht.ehdollisesti_hyvaksytty, ht.valintatiedon_pvm, ht.vastaanottotieto,
-                 ht.viimeinen_vastaanottopaiva, e.isensikertalainen AS ensikertalainen,
-                 ht.ilmoittautumisen_tila, hlo.valintatuloksen_julkaisulupa,
+                 ht.viimeinen_vastaanottopaiva, ht.ensikertalainen,
+                 ht.ilmoittautumisen_tila, kkh.pohjakoulutus,
+                 hlo.valintatuloksen_julkaisulupa,
                  hlo.koulutusmarkkinointilupa, hlo.sahkoinenviestintalupa,
                  hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka
           FROM pub.pub_dim_henkilo hlo
@@ -61,8 +62,6 @@ class KkHakijatRepository extends Extractors {
           ON ht.henkilo_oid = hlo.henkilo_oid
           JOIN pub.pub_dim_hakukohde hk
           ON ht.hakukohde_oid = hk.hakukohde_oid
-          LEFT JOIN pub.pub_dim_ensikertalainen e
-          ON ht.henkilo_oid = e.henkilooid AND ht.haku_oid = e.hakuoid
           JOIN pub.pub_fct_raportti_hakijat_kk kkh
           ON ht.hakutoive_id = kkh.hakutoive_id
           JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
