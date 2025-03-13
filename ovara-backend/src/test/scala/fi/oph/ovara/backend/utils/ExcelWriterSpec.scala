@@ -1647,7 +1647,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         2,
         Some(true),
         None,
-        "HYLATTY",
+        Some("HYLATTY"),
         None,
         None,
         Map(En -> "", Fi -> "Hylätty harkinnanvaraisessa valinnassa", Sv -> ""),
@@ -1665,9 +1665,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
         Some(false),
         Some(true),
         None,
-        "Rämsöönranta 368",
-        "00100",
-        "HELSINKI"
+        Some("Rämsöönranta 368"),
+        Some("00100"),
+        Some("HELSINKI")
       )
     )
 
@@ -1731,7 +1731,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           2,
           Some(true),
           Some(false),
-          "HYLATTY",
+          Some("HYLATTY"),
           Some("3"),
           Some("8.5"),
           Map(En -> "", Fi -> "Hylätty harkinnanvaraisessa valinnassa", Sv -> ""),
@@ -1749,9 +1749,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
           Some(false),
           Some(true),
           None,
-          "Rämsöönranta 368",
-          "00100",
-          "HELSINKI"
+          Some("Rämsöönranta 368"),
+          Some("00100"),
+          Some("HELSINKI")
         ),
         ToisenAsteenHakijaWithCombinedNimi(
           "Rautiainen-Testi, Dina Testi",
@@ -1765,7 +1765,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           1,
           Some(true),
           Some(true),
-          "HYVAKSYTTY",
+          Some("HYVAKSYTTY"),
           Some("8"),
           None,
           Map(),
@@ -1783,9 +1783,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
           Some(true),
           Some(true),
           None,
-          "Rämsöönranta 368",
-          "00100",
-          "HELSINKI"
+          Some("Rämsöönranta 368"),
+          Some("00100"),
+          Some("HELSINKI")
         ),
         ToisenAsteenHakijaWithCombinedNimi(
           "Lehto-Testi, Vikke Testi",
@@ -1799,7 +1799,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           1,
           Some(true),
           Some(false),
-          "PERUUNTUNUT",
+          Some("PERUUNTUNUT"),
           None,
           Some("5.6"),
           Map(
@@ -1821,9 +1821,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
           Some(false),
           Some(true),
           Some(true),
-          "Laholanaukio 834",
-          "00100",
-          "HELSINKI"
+          Some("Laholanaukio 834"),
+          Some("00100"),
+          Some("HELSINKI")
         )
       )
 
@@ -1948,7 +1948,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           hakukohteenNimi = Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv -> "Hakukohde 1 SV"),
           hakukelpoisuus = None,
           prioriteetti = 2,
-          valintatieto = "HYVAKSYTTY",
+          valintatieto = Some("HYVAKSYTTY"),
           vastaanottotieto = Some("PERUNUT"),
           ehdollisestiHyvaksytty = Some(false),
           valintatiedonPvm = Some(LocalDate.parse("2024-06-13")),
@@ -1960,9 +1960,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
           markkinointilupa = Some(true),
           julkaisulupa = Some(true),
           sahkoinenViestintaLupa = Some(true),
-          lahiosoite = "Rämsöönranta 368",
-          postinumero = "00100",
-          postitoimipaikka = "HELSINKI",
+          lahiosoite = Some("Rämsöönranta 368"),
+          postinumero = Some("00100"),
+          postitoimipaikka = Some("HELSINKI"),
           puhelinnumero = Some("050 64292261"),
           sahkoposti = None
         ),
@@ -1977,7 +1977,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           hakukohteenNimi = Map(En -> "Hakukohde 2 EN", Fi -> "Hakukohde 2", Sv -> "Hakukohde 2 SV"),
           hakukelpoisuus = Some("eligible"),
           prioriteetti = 1,
-          valintatieto = "HYLATTY",
+          valintatieto = None,
           vastaanottotieto = None,
           ehdollisestiHyvaksytty = None,
           valintatiedonPvm = None,
@@ -1989,9 +1989,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
           markkinointilupa = Some(false),
           julkaisulupa = Some(true),
           sahkoinenViestintaLupa = Some(true),
-          lahiosoite = "Laholanaukio 834",
-          postinumero = "00100",
-          postitoimipaikka = "HELSINKI",
+          lahiosoite = Some("Laholanaukio 834"),
+          postinumero = Some("00100"),
+          postitoimipaikka = Some("HELSINKI"),
           puhelinnumero = None,
           sahkoposti = Some("hakija-33919611@oph.fi")
         )
@@ -2079,7 +2079,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(2).getCell(7).getStringCellValue == "Hakukohde 2 SV")
     assert(wb.getSheetAt(0).getRow(2).getCell(8).getStringCellValue == "hakukelpoinen SV")
     assert(wb.getSheetAt(0).getRow(2).getCell(9).getNumericCellValue == 1)
-    assert(wb.getSheetAt(0).getRow(2).getCell(10).getStringCellValue == "Hylatty SV")
+    assert(wb.getSheetAt(0).getRow(2).getCell(10).getStringCellValue == "-")
     assert(wb.getSheetAt(0).getRow(2).getCell(11).getStringCellValue == "-")
     assert(wb.getSheetAt(0).getRow(2).getCell(12).getStringCellValue == "-")
     assert(wb.getSheetAt(0).getRow(2).getCell(13).getStringCellValue == "-")
@@ -2116,7 +2116,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           hakukohteenNimi = Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv -> "Hakukohde 1 SV"),
           hakukelpoisuus = Some("conditionally-eligible"),
           prioriteetti = 2,
-          valintatieto = "HYVAKSYTTY",
+          valintatieto = Some("HYVAKSYTTY"),
           vastaanottotieto = Some("PERUNUT"),
           ehdollisestiHyvaksytty = Some(true),
           valintatiedonPvm = Some(LocalDate.parse("2024-06-05")),
@@ -2128,9 +2128,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
           markkinointilupa = Some(true),
           julkaisulupa = Some(true),
           sahkoinenViestintaLupa = Some(true),
-          lahiosoite = "Rämsöönranta 368",
-          postinumero = "00100",
-          postitoimipaikka = "HELSINKI",
+          lahiosoite = Some("Rämsöönranta 368"),
+          postinumero = Some("00100"),
+          postitoimipaikka = Some("HELSINKI"),
           puhelinnumero = Some("050 64292261"),
           sahkoposti = Some("hakija-33919666@oph.fi")
         ),
@@ -2145,7 +2145,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           hakukohteenNimi = Map(En -> "Hakukohde 2 EN", Fi -> "Hakukohde 2", Sv -> "Hakukohde 2 SV"),
           hakukelpoisuus = Some("uneligible"),
           prioriteetti = 1,
-          valintatieto = "HYLATTY",
+          valintatieto = Some("HYLATTY"),
           vastaanottotieto = None,
           ehdollisestiHyvaksytty = None,
           valintatiedonPvm = Some(LocalDate.parse("2024-06-11")),
@@ -2157,9 +2157,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
           markkinointilupa = Some(true),
           julkaisulupa = Some(true),
           sahkoinenViestintaLupa = Some(true),
-          lahiosoite = "Laholanaukio 834",
-          postinumero = "00100",
-          postitoimipaikka = "HELSINKI",
+          lahiosoite = Some("Laholanaukio 834"),
+          postinumero = Some("00100"),
+          postitoimipaikka = Some("HELSINKI"),
           puhelinnumero = Some("050 64293345"),
           sahkoposti = None
         )
@@ -2272,7 +2272,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           hakukohteenNimi = Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv -> "Hakukohde 1 SV"),
           hakukelpoisuus = None,
           prioriteetti = 2,
-          valintatieto = "HYVAKSYTTY",
+          valintatieto = Some("HYVAKSYTTY"),
           vastaanottotieto = Some("PERUNUT"),
           ehdollisestiHyvaksytty = Some(true),
           valintatiedonPvm = None,
@@ -2284,9 +2284,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
           markkinointilupa = Some(true),
           julkaisulupa = Some(true),
           sahkoinenViestintaLupa = Some(true),
-          lahiosoite = "Rämsöönranta 368",
-          postinumero = "00100",
-          postitoimipaikka = "HELSINKI",
+          lahiosoite = Some("Rämsöönranta 368"),
+          postinumero = Some("00100"),
+          postitoimipaikka = Some("HELSINKI"),
           puhelinnumero = Some("050 64292261"),
           sahkoposti = Some("hakija-33919666@oph.fi")
         )

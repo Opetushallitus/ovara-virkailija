@@ -9,16 +9,16 @@ abstract class Hakija {
   val toimipiste: Kielistetty
   val hakukohteenNimi: Kielistetty
   val prioriteetti: Int
-  val valintatieto: String
+  val valintatieto: Option[String]
   val vastaanottotieto: Option[String]
   val viimVastaanottopaiva: Option[LocalDate]
   val ilmoittautuminen: Option[String]
   val markkinointilupa: Option[Boolean]
   val julkaisulupa: Option[Boolean]
   val sahkoinenViestintaLupa: Option[Boolean]
-  val lahiosoite: String
-  val postinumero: String
-  val postitoimipaikka: String
+  val lahiosoite: Option[String]
+  val postinumero: Option[String]
+  val postitoimipaikka: Option[String]
 }
 
 case class ToisenAsteenHakija(
@@ -34,7 +34,7 @@ case class ToisenAsteenHakija(
     prioriteetti: Int,
     kaksoistutkintoKiinnostaa: Option[Boolean],
     urheilijatutkintoKiinnostaa: Option[Boolean],
-    valintatieto: String,
+    valintatieto: Option[String],
     varasija: Option[String],
     kokonaispisteet: Option[String],
     hylkTaiPerSyy: Kielistetty,
@@ -48,9 +48,9 @@ case class ToisenAsteenHakija(
     markkinointilupa: Option[Boolean],
     julkaisulupa: Option[Boolean],
     sahkoinenViestintaLupa: Option[Boolean],
-    lahiosoite: String,
-    postinumero: String,
-    postitoimipaikka: String
+    lahiosoite: Option[String],
+    postinumero: Option[String],
+    postitoimipaikka: Option[String]
 ) extends Hakija
 
 case class ToisenAsteenHakijaWithCombinedNimi(
@@ -65,7 +65,7 @@ case class ToisenAsteenHakijaWithCombinedNimi(
     prioriteetti: Int,
     kaksoistutkintoKiinnostaa: Option[Boolean],
     urheilijatutkintoKiinnostaa: Option[Boolean],
-    valintatieto: String,
+    valintatieto: Option[String],
     varasija: Option[String],
     kokonaispisteet: Option[String],
     hylkTaiPerSyy: Kielistetty,
@@ -79,9 +79,9 @@ case class ToisenAsteenHakijaWithCombinedNimi(
     markkinointilupa: Option[Boolean],
     julkaisulupa: Option[Boolean],
     sahkoinenViestintaLupa: Option[Boolean],
-    lahiosoite: String,
-    postinumero: String,
-    postitoimipaikka: String
+    lahiosoite: Option[String],
+    postinumero: Option[String],
+    postitoimipaikka: Option[String]
 ) extends Hakija
 
 object ToisenAsteenHakijaWithCombinedNimi {
@@ -131,7 +131,7 @@ case class KkHakija(
     hakukohteenNimi: Kielistetty,
     hakukelpoisuus: Option[String],
     prioriteetti: Int,
-    valintatieto: String,
+    valintatieto: Option[String],
     ehdollisestiHyvaksytty: Option[Boolean],
     valintatiedonPvm: Option[LocalDate],
     vastaanottotieto: Option[String],
@@ -143,9 +143,9 @@ case class KkHakija(
     julkaisulupa: Option[Boolean],
     markkinointilupa: Option[Boolean],
     sahkoinenViestintaLupa: Option[Boolean],
-    lahiosoite: String,
-    postinumero: String,
-    postitoimipaikka: String,
+    lahiosoite: Option[String],
+    postinumero: Option[String],
+    postitoimipaikka: Option[String],
     puhelinnumero: Option[String],
     sahkoposti: Option[String]
 ) extends Hakija
@@ -161,7 +161,7 @@ case class KkHakijaWithCombinedNimi(
     hakukohteenNimi: Kielistetty,
     hakukelpoisuus: Option[String],
     prioriteetti: Int,
-    valintatieto: String,
+    valintatieto: Option[String],
     ehdollisestiHyvaksytty: Option[Boolean],
     valintatiedonPvm: Option[LocalDate],
     vastaanottotieto: Option[String],
@@ -173,9 +173,9 @@ case class KkHakijaWithCombinedNimi(
     julkaisulupa: Option[Boolean],
     markkinointilupa: Option[Boolean],
     sahkoinenViestintaLupa: Option[Boolean],
-    lahiosoite: String,
-    postinumero: String,
-    postitoimipaikka: String,
+    lahiosoite: Option[String],
+    postinumero: Option[String],
+    postitoimipaikka: Option[String],
     puhelinnumero: Option[String],
     sahkoposti: Option[String]
 ) extends Hakija
