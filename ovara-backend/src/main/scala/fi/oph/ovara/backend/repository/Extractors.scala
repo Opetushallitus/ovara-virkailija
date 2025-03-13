@@ -169,7 +169,8 @@ trait Extractors extends GenericOvaraJsonFormats {
       lahiosoite = r.nextString(),
       postinumero = r.nextString(),
       postitoimipaikka = r.nextString(),
-      puhelinnumero = r.nextStringOption()
+      puhelinnumero = r.nextStringOption(),
+      sahkoposti = r.nextStringOption()
     )
   )
   
