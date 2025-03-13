@@ -136,7 +136,6 @@ class SecurityConfig  {
 
   @Bean
   def casFilterChain(http: HttpSecurity, authenticationFilter: CasAuthenticationFilter, sessionMappingStorage: SessionMappingStorage, securityContextRepository: SecurityContextRepository, casAuthenticationEntryPoint: CasAuthenticationEntryPoint): SecurityFilterChain = {
-    LOG.info(s"DEBUG: casFilterChain - Using sessionMappingStorage: ${sessionMappingStorage.getClass.getName}")
 
     val SWAGGER_WHITELIST = List(
       "/swagger-resources",
@@ -186,7 +185,7 @@ class SecurityConfig  {
   //
   @Bean
   def singleLogoutFilter(sessionMappingStorage: SessionMappingStorage): SingleSignOutFilter = {
-    LOG.info(s"DEBUG: singleLogoutFilter - Using sessionMappingStorage: ${sessionMappingStorage.getClass.getName}")
+    SingleSignOutFilter.setSessionMappingStorage(sessionMappingStorage)
     val singleSignOutFilter: SingleSignOutFilter = new SingleSignOutFilter();
     singleSignOutFilter.setIgnoreInitConfiguration(true);
     singleSignOutFilter
