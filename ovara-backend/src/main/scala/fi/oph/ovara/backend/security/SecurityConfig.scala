@@ -25,6 +25,7 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint
 import org.springframework.security.web.context.{HttpSessionSecurityContextRepository, SecurityContextRepository}
 import org.springframework.session.jdbc.config.annotation.SpringSessionDataSource
 import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHttpSession
+import org.springframework.session.web.http.{CookieSerializer, DefaultCookieSerializer}
 
 @Configuration
 @EnableWebSecurity
@@ -156,7 +157,7 @@ class SecurityConfig  {
         .ignoringRequestMatchers("/api/healthcheck", "/api/csrf")
       )
       .exceptionHandling(exceptionHandling =>
-        // corsin takia cas uudelleenohjauksen sijaan palautetaan http 401 ja käli hoitaa forwardoinnin login apiin
+        // corsin takia suoran cas uudelleenohjauksen sijaan palautetaan http 401 ja käli hoitaa forwardoinnin login apiin
         exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
       )
       .addFilterAt(authenticationFilter, classOf[CasAuthenticationFilter])
@@ -164,6 +165,9 @@ class SecurityConfig  {
       .securityContext(securityContext => securityContext
         .requireExplicitSave(true)
         .securityContextRepository(securityContextRepository))
+      .logout(logout =>
+        logout.logoutUrl("/logout")
+          .deleteCookies("JSESSIONID"))
       .build()
   }
 
@@ -191,4 +195,11 @@ class SecurityConfig  {
     singleSignOutFilter
   }
 
+  @Bean
+  def cookieSerializer(): CookieSerializer = {
+    val serializer = new DefaultCookieSerializer();
+    serializer.setUseSecureCookie(true)
+    serializer.setCookieName("JSESSIONID");
+    serializer;
+  }
 }

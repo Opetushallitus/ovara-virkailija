@@ -17,7 +17,7 @@ class JdbcSessionMappingStorage(sessionRepository: SessionRepository[Session], s
   def removeSessionByMappingId(mappingId: String): HttpSession = {
     LOG.debug(s"Poistetaan sessiomappaus cas tiketillä $mappingId")
     val query = sql"""SELECT virkailija_session_id FROM #$mappingTableName WHERE mapped_ticket_id = $mappingId""".as[String].headOption
-    val sessionIdOpt = ovaraDatabase.run(query, "removeSessionByMappingId")
+    val sessionIdOpt = ovaraDatabase.run(query, "selectSessionIdByMappingId")
 
     sessionIdOpt
       .flatMap(sessionId => Option(sessionRepository.findById(sessionId)))
