@@ -20,5 +20,4 @@ ovara_backend.uses-ssl-proxy
 logging.level.fi.oph.ovara.backend.security=DEBUG
 logging.level.org.apereo.cas.client=DEBUG
 logging.level.org.apereo.cas.client.session=DEBUG
-logging.level.org.springframework.session=DEBUG
 logging.level.org.springframework.security=INFO
