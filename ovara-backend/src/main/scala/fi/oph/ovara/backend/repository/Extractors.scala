@@ -135,7 +135,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       pohjakoulutus = extractKielistetty(r.nextStringOption()),
       markkinointilupa = r.nextBooleanOption(),
       julkaisulupa = r.nextBooleanOption(),
-      sahkoinenViestintaLupa = r.nextBooleanOption(),
+      sahkoinenViestintalupa = r.nextBooleanOption(),
       lahiosoite = r.nextStringOption(),
       postinumero = r.nextStringOption(),
       postitoimipaikka = r.nextStringOption()
@@ -166,7 +166,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       maksuvelvollisuus = r.nextStringOption(),
       julkaisulupa = r.nextBooleanOption(),
       markkinointilupa = r.nextBooleanOption(),
-      sahkoinenViestintaLupa = r.nextBooleanOption(),
+      sahkoinenViestintalupa = r.nextBooleanOption(),
       lahiosoite = r.nextStringOption(),
       postinumero = r.nextStringOption(),
       postitoimipaikka = r.nextStringOption(),
