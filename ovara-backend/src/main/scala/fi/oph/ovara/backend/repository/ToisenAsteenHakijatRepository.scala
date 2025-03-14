@@ -80,7 +80,7 @@ class ToisenAsteenHakijatRepository extends Extractors {
                  hlo.valintatuloksen_julkaisulupa, hlo.sahkoinenviestintalupa, hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka
           FROM pub.pub_dim_henkilo hlo
           JOIN pub.pub_dim_hakutoive ht
-          ON ht.henkilo_oid = hlo.henkilo_oid
+          ON ht.henkilo_hakemus_id = hlo.henkilo_hakemus_id
           JOIN pub.pub_fct_raportti_hakijat_toinen_aste ht2
           ON ht.hakutoive_id = ht2.hakutoive_id
           JOIN pub.pub_dim_hakukohde hk
