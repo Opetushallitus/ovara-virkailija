@@ -364,7 +364,7 @@ object ExcelWriter {
       naytaHetu: Boolean,
       naytaPostiosoite: Boolean
   ): Boolean = {
-    raporttiId == "korkeakoulu" &&
+    raporttiId == KORKEAKOULURAPORTTI &&
     ((fieldName == "hetu" && !naytaHetu) ||
       (POSTIOSOITEFIELDS.contains(fieldName) && !naytaPostiosoite))
   }
@@ -405,9 +405,9 @@ object ExcelWriter {
     val naytaPostiosoite = maybeNaytaPostiosoite.getOrElse(false)
 
     val hakijaClass =
-      if (id == "korkeakoulu") classOf[KkHakijaWithCombinedNimi] else classOf[ToisenAsteenHakijaWithCombinedNimi]
+      if (id == KORKEAKOULURAPORTTI) classOf[KkHakijaWithCombinedNimi] else classOf[ToisenAsteenHakijaWithCombinedNimi]
     val fieldNames = hakijaClass.getDeclaredFields.map(_.getName).toList
-    val fieldNamesToShow = if (id == "korkeakoulu") {
+    val fieldNamesToShow = if (id == KORKEAKOULURAPORTTI) {
       fieldNames.filter(fieldName => {
         !optionallyShowableFields.contains(fieldName) ||
           fieldName == "hetu" && naytaHetu ||
