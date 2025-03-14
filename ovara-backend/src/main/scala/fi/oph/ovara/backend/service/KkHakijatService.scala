@@ -2,6 +2,7 @@ package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.domain.KkHakijaWithCombinedNimi
 import fi.oph.ovara.backend.repository.{KkHakijatRepository, OvaraDatabase}
+import fi.oph.ovara.backend.utils.Constants.KORKEAKOULURAPORTTI
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
@@ -71,7 +72,7 @@ class KkHakijatService(
       sortedListwithCombinedNimi,
       asiointikieli,
       translations,
-      "korkeakoulu",
+      KORKEAKOULURAPORTTI,
       Some(naytaYoArvosanat),
       Some(naytaHetu),
       Some(naytaPostiosoite)

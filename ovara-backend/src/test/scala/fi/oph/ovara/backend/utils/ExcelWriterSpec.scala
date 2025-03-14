@@ -1594,7 +1594,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         hakijatQueryResult,
         userLng,
         translations,
-        "toinen aste"
+        TOISEN_ASTEEN_RAPORTTI
       )
 
     assert(wb.getNumberOfSheets == 1)
@@ -1676,7 +1676,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         hakijatResult,
         userLng,
         translations,
-        "toinen aste"
+        TOISEN_ASTEEN_RAPORTTI
       )
 
     assert(wb.getNumberOfSheets == 1)
@@ -1832,7 +1832,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         hakijatResult,
         userLng,
         translations,
-        "toinen aste"
+        TOISEN_ASTEEN_RAPORTTI
       )
 
     assert(wb.getNumberOfSheets == 1)
@@ -2002,7 +2002,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         kkHakijatResult,
         userLng,
         translations,
-        "korkeakoulu",
+        KORKEAKOULURAPORTTI,
         Some(false),
         Some(true),
         Some(true)
@@ -2170,7 +2170,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         kkHakijatResult,
         userLng,
         translations,
-        "korkeakoulu",
+        KORKEAKOULURAPORTTI,
         None,
         Some(false),
         Some(false)
@@ -2297,7 +2297,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         kkHakijatResult,
         userLng,
         translations,
-        "korkeakoulu",
+        KORKEAKOULURAPORTTI,
         None,
         Some(true),
         Some(false)
@@ -2694,7 +2694,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   "shouldSkipCreatingCell" should "return false for hetu if raportti is NOT korkeakouluraportti" in {
     assert(
       !ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = "toinen aste",
+        raporttiId = TOISEN_ASTEEN_RAPORTTI,
         fieldName = "hetu",
         naytaHetu = true,
         naytaPostiosoite = true
@@ -2705,7 +2705,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return false for lahiosoite if raportti is NOT korkeakouluraportti" in {
     assert(
       !ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = "toinen aste",
+        raporttiId = TOISEN_ASTEEN_RAPORTTI,
         fieldName = "lahiosoite",
         naytaHetu = true,
         naytaPostiosoite = true
@@ -2716,7 +2716,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return false for postinumero if raportti is NOT korkeakouluraportti" in {
     assert(
       !ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = "toinen aste",
+        raporttiId = TOISEN_ASTEEN_RAPORTTI,
         fieldName = "postinumero",
         naytaHetu = true,
         naytaPostiosoite = true
@@ -2727,7 +2727,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return false for postitoimipaikka if raportti is NOT korkeakouluraportti" in {
     assert(
       !ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = "toinen aste",
+        raporttiId = TOISEN_ASTEEN_RAPORTTI,
         fieldName = "postitoimipaikka",
         naytaHetu = true,
         naytaPostiosoite = true
@@ -2738,7 +2738,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return false for hetu if raportti is korkeakouluraportti and naytaHetu is true" in {
     assert(
       !ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = "korkeakoulu",
+        raporttiId = KORKEAKOULURAPORTTI,
         fieldName = "hetu",
         naytaHetu = true,
         naytaPostiosoite = false
@@ -2749,7 +2749,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return true for hetu if raportti is korkeakouluraportti and naytaHetu is false" in {
     assert(
       ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = "korkeakoulu",
+        raporttiId = KORKEAKOULURAPORTTI,
         fieldName = "hetu",
         naytaHetu = false,
         naytaPostiosoite = false
@@ -2760,7 +2760,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return false for lahiosoite if raportti is korkeakouluraportti and naytaPostiosoite is true" in {
     assert(
       !ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = "korkeakoulu",
+        raporttiId = KORKEAKOULURAPORTTI,
         fieldName = "lahiosoite",
         naytaHetu = false,
         naytaPostiosoite = true
@@ -2771,7 +2771,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return true for lahiosoite if raportti is korkeakouluraportti and naytaPostiosoite is false" in {
     assert(
       ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = "korkeakoulu",
+        raporttiId = KORKEAKOULURAPORTTI,
         fieldName = "lahiosoite",
         naytaHetu = false,
         naytaPostiosoite = false
@@ -2782,7 +2782,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return false for postinumero if raportti is korkeakouluraportti and naytaPostiosoite is true" in {
     assert(
       !ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = "korkeakoulu",
+        raporttiId = KORKEAKOULURAPORTTI,
         fieldName = "postinumero",
         naytaHetu = false,
         naytaPostiosoite = true
@@ -2793,7 +2793,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return true for postinumero if raportti is korkeakouluraportti and naytaPostiosoite is false" in {
     assert(
       ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = "korkeakoulu",
+        raporttiId = KORKEAKOULURAPORTTI,
         fieldName = "postinumero",
         naytaHetu = false,
         naytaPostiosoite = false
@@ -2804,7 +2804,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return false for postitoimipaikka if raportti is korkeakouluraportti and naytaPostiosoite is true" in {
     assert(
       !ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = "korkeakoulu",
+        raporttiId = KORKEAKOULURAPORTTI,
         fieldName = "postitoimipaikka",
         naytaHetu = false,
         naytaPostiosoite = true
@@ -2815,7 +2815,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return true for postitoimipaikka if raportti is korkeakouluraportti and naytaPostiosoite is false" in {
     assert(
       ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = "korkeakoulu",
+        raporttiId = KORKEAKOULURAPORTTI,
         fieldName = "postitoimipaikka",
         naytaHetu = false,
         naytaPostiosoite = false
