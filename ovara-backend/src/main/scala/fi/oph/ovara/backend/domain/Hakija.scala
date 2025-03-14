@@ -15,7 +15,7 @@ abstract class Hakija {
   val ilmoittautuminen: Option[String]
   val markkinointilupa: Option[Boolean]
   val julkaisulupa: Option[Boolean]
-  val sahkoinenViestintaLupa: Option[Boolean]
+  val sahkoinenViestintalupa: Option[Boolean]
   val lahiosoite: Option[String]
   val postinumero: Option[String]
   val postitoimipaikka: Option[String]
@@ -47,7 +47,7 @@ case class ToisenAsteenHakija(
     pohjakoulutus: Kielistetty,
     markkinointilupa: Option[Boolean],
     julkaisulupa: Option[Boolean],
-    sahkoinenViestintaLupa: Option[Boolean],
+    sahkoinenViestintalupa: Option[Boolean],
     lahiosoite: Option[String],
     postinumero: Option[String],
     postitoimipaikka: Option[String]
@@ -78,7 +78,7 @@ case class ToisenAsteenHakijaWithCombinedNimi(
     pohjakoulutus: Kielistetty,
     markkinointilupa: Option[Boolean],
     julkaisulupa: Option[Boolean],
-    sahkoinenViestintaLupa: Option[Boolean],
+    sahkoinenViestintalupa: Option[Boolean],
     lahiosoite: Option[String],
     postinumero: Option[String],
     postitoimipaikka: Option[String]
@@ -111,7 +111,7 @@ object ToisenAsteenHakijaWithCombinedNimi {
       pohjakoulutus = hakija.pohjakoulutus,
       markkinointilupa = hakija.markkinointilupa,
       julkaisulupa = hakija.julkaisulupa,
-      sahkoinenViestintaLupa = hakija.sahkoinenViestintaLupa,
+      sahkoinenViestintalupa = hakija.sahkoinenViestintalupa,
       lahiosoite = hakija.lahiosoite,
       postinumero = hakija.postinumero,
       postitoimipaikka = hakija.postitoimipaikka
@@ -142,7 +142,7 @@ case class KkHakija(
     maksuvelvollisuus: Option[String],
     julkaisulupa: Option[Boolean],
     markkinointilupa: Option[Boolean],
-    sahkoinenViestintaLupa: Option[Boolean],
+    sahkoinenViestintalupa: Option[Boolean],
     lahiosoite: Option[String],
     postinumero: Option[String],
     postitoimipaikka: Option[String],
@@ -172,7 +172,7 @@ case class KkHakijaWithCombinedNimi(
     maksuvelvollisuus: Option[String],
     julkaisulupa: Option[Boolean],
     markkinointilupa: Option[Boolean],
-    sahkoinenViestintaLupa: Option[Boolean],
+    sahkoinenViestintalupa: Option[Boolean],
     lahiosoite: Option[String],
     postinumero: Option[String],
     postitoimipaikka: Option[String],
@@ -204,7 +204,7 @@ object KkHakijaWithCombinedNimi {
       maksuvelvollisuus = hakija.maksuvelvollisuus,
       markkinointilupa = hakija.markkinointilupa,
       julkaisulupa = hakija.julkaisulupa,
-      sahkoinenViestintaLupa = hakija.sahkoinenViestintaLupa,
+      sahkoinenViestintalupa = hakija.sahkoinenViestintalupa,
       lahiosoite = hakija.lahiosoite,
       postinumero = hakija.postinumero,
       postitoimipaikka = hakija.postitoimipaikka,

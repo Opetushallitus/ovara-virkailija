@@ -489,7 +489,7 @@ object ExcelWriter {
                   "soraTerveys",
                   "markkinointilupa",
                   "julkaisulupa",
-                  "sahkoinenViestintaLupa",
+                  "sahkoinenViestintalupa",
                   "ensikertalainen",
                   "ehdollisestiHyvaksytty"
                 ).contains(fieldName) =>
