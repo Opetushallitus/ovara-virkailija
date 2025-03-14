@@ -59,7 +59,7 @@ class KkHakijatRepository extends Extractors {
                  hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka, hlo.puhelin, hlo.sahkoposti
           FROM pub.pub_dim_henkilo hlo
           JOIN pub.pub_dim_hakutoive ht
-          ON ht.henkilo_oid = hlo.henkilo_oid
+          ON ht.henkilo_hakemus_id = hlo.henkilo_hakemus_id
           JOIN pub.pub_dim_hakukohde hk
           ON ht.hakukohde_oid = hk.hakukohde_oid
           JOIN pub.pub_fct_raportti_hakijat_kk kkh
