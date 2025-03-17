@@ -1,6 +1,7 @@
 package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.*
+import fi.oph.ovara.backend.utils.ExtractorUtils.extractValintatapajonot
 import fi.oph.ovara.backend.utils.GenericOvaraJsonFormats
 import org.json4s.jackson.Serialization.read
 import slick.jdbc.*
@@ -133,8 +134,8 @@ trait Extractors extends GenericOvaraJsonFormats {
       soraAiempi = r.nextBooleanOption(),
       soraTerveys = r.nextBooleanOption(),
       pohjakoulutus = extractKielistetty(r.nextStringOption()),
-      markkinointilupa = r.nextBooleanOption(),
       julkaisulupa = r.nextBooleanOption(),
+      markkinointilupa = r.nextBooleanOption(),
       sahkoinenViestintalupa = r.nextBooleanOption(),
       lahiosoite = r.nextStringOption(),
       postinumero = r.nextStringOption(),
@@ -158,6 +159,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       valintatieto = r.nextStringOption(),
       ehdollisestiHyvaksytty = r.nextBooleanOption(),
       valintatiedonPvm = getNextDateOption(r),
+      valintatapajonot = extractValintatapajonot(r.nextStringOption()),
       vastaanottotieto = r.nextStringOption(),
       viimVastaanottopaiva = getNextDateOption(r),
       ensikertalainen = r.nextBooleanOption(),

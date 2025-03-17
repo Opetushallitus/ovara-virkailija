@@ -72,7 +72,6 @@ class KkHakijatService(
       sortedListwithCombinedNimi,
       asiointikieli,
       translations,
-      KORKEAKOULURAPORTTI,
       Some(naytaYoArvosanat),
       Some(naytaHetu),
       Some(naytaPostiosoite)
