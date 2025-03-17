@@ -376,6 +376,49 @@ object ExcelWriter {
 
   def writeHakijatRaportti(
       hakijat: Seq[ToisenAsteenHakijaWithCombinedNimi | KkHakijaWithCombinedNimi],
+  def getFieldNames(
+      raporttiId: String,
+      naytaHetu: Boolean,
+      naytaPostiosoite: Boolean,
+      valintatapajonot: Seq[Valintatapajono]
+  ): (List[String], List[String]) = {
+    val optionallyShowableFields = List("hetu") ::: POSTIOSOITEFIELDS
+
+    val hakijaClass =
+      if (raporttiId == KORKEAKOULURAPORTTI) classOf[KkHakijaWithCombinedNimi]
+      else classOf[ToisenAsteenHakijaWithCombinedNimi]
+
+    val fieldNames =
+      hakijaClass.getDeclaredFields
+        .map(_.getName)
+        .toList
+        .filter(fieldName => fieldName != "valintatapajonot")
+
+    val fieldNamesToShow = if (raporttiId == KORKEAKOULURAPORTTI) {
+      val filteredFieldNames = fieldNames.filter(fieldName => {
+        !optionallyShowableFields.contains(fieldName) ||
+          fieldName == "hetu" && naytaHetu ||
+          POSTIOSOITEFIELDS.contains(
+            fieldName
+          ) && naytaPostiosoite
+      })
+
+      for (fieldName <- fieldNames) yield {
+        if (fieldName == "valintatapajonot") {
+          //println(fieldName)
+          val valintatapajonoFieldNames = valintatapajonot.zipWithIndex.map((vtj, i) => s"valintatapajono$i")
+          fieldName
+        } else {
+          fieldName
+        }
+      }
+    } else {
+      fieldNames
+    }
+
+    (fieldNames, fieldNamesToShow)
+  }
+
       asiointikieli: String,
       translations: Map[String, String],
       id: String,
