@@ -1587,14 +1587,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1) == null)
   }
 
-  "writeHakijatRaportti" should "create one sheet with a sheet name, heading row and no results" in {
+  "writeToisenAsteenHakijatRaportti" should "create one sheet with a sheet name, heading row and no results" in {
     val hakijatQueryResult = Vector()
     val wb =
-      ExcelWriter.writeHakijatRaportti(
+      ExcelWriter.writeToisenAsteenHakijatRaportti(
         hakijatQueryResult,
         userLng,
-        translations,
-        TOISEN_ASTEEN_RAPORTTI
+        translations
       )
 
     assert(wb.getNumberOfSheets == 1)
@@ -1672,11 +1671,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
 
     val wb =
-      ExcelWriter.writeHakijatRaportti(
+      ExcelWriter.writeToisenAsteenHakijatRaportti(
         hakijatResult,
         userLng,
-        translations,
-        TOISEN_ASTEEN_RAPORTTI
+        translations
       )
 
     assert(wb.getNumberOfSheets == 1)
@@ -1828,11 +1826,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
 
     val wb =
-      ExcelWriter.writeHakijatRaportti(
+      ExcelWriter.writeToisenAsteenHakijatRaportti(
         hakijatResult,
         userLng,
-        translations,
-        TOISEN_ASTEEN_RAPORTTI
+        translations
       )
 
     assert(wb.getNumberOfSheets == 1)
@@ -1934,7 +1931,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(5) == null)
   }
 
-  it should "return excel with two result rows for kk-hakijat with hetu and postiosoite" in {
+  "writeKkHakijatRaportti" should "return excel with two result rows for kk-hakijat with hetu and postiosoite" in {
     val kkHakijatResult =
       Vector(
         KkHakijaWithCombinedNimi(
@@ -1998,7 +1995,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
 
     val wb =
-      ExcelWriter.writeHakijatRaportti(
+      ExcelWriter.writeKkHakijatRaportti(
         kkHakijatResult,
         userLng,
         translations,
@@ -2166,7 +2163,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
 
     val wb =
-      ExcelWriter.writeHakijatRaportti(
+      ExcelWriter.writeKkHakijatRaportti(
         kkHakijatResult,
         userLng,
         translations,
@@ -2293,7 +2290,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
 
     val wb =
-      ExcelWriter.writeHakijatRaportti(
+      ExcelWriter.writeKkHakijatRaportti(
         kkHakijatResult,
         userLng,
         translations,
@@ -2694,7 +2691,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
   "shouldSkipCreatingCell" should "return false for hetu if raportti is NOT korkeakouluraportti" in {
     assert(
       !ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = TOISEN_ASTEEN_RAPORTTI,
         fieldName = "hetu",
         naytaHetu = true,
         naytaPostiosoite = true
@@ -2705,7 +2701,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return false for lahiosoite if raportti is NOT korkeakouluraportti" in {
     assert(
       !ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = TOISEN_ASTEEN_RAPORTTI,
         fieldName = "lahiosoite",
         naytaHetu = true,
         naytaPostiosoite = true
@@ -2716,7 +2711,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return false for postinumero if raportti is NOT korkeakouluraportti" in {
     assert(
       !ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = TOISEN_ASTEEN_RAPORTTI,
         fieldName = "postinumero",
         naytaHetu = true,
         naytaPostiosoite = true
@@ -2727,7 +2721,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return false for postitoimipaikka if raportti is NOT korkeakouluraportti" in {
     assert(
       !ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = TOISEN_ASTEEN_RAPORTTI,
         fieldName = "postitoimipaikka",
         naytaHetu = true,
         naytaPostiosoite = true
@@ -2738,7 +2731,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return false for hetu if raportti is korkeakouluraportti and naytaHetu is true" in {
     assert(
       !ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = KORKEAKOULURAPORTTI,
         fieldName = "hetu",
         naytaHetu = true,
         naytaPostiosoite = false
@@ -2749,7 +2741,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return true for hetu if raportti is korkeakouluraportti and naytaHetu is false" in {
     assert(
       ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = KORKEAKOULURAPORTTI,
         fieldName = "hetu",
         naytaHetu = false,
         naytaPostiosoite = false
@@ -2760,7 +2751,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return false for lahiosoite if raportti is korkeakouluraportti and naytaPostiosoite is true" in {
     assert(
       !ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = KORKEAKOULURAPORTTI,
         fieldName = "lahiosoite",
         naytaHetu = false,
         naytaPostiosoite = true
@@ -2771,7 +2761,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return true for lahiosoite if raportti is korkeakouluraportti and naytaPostiosoite is false" in {
     assert(
       ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = KORKEAKOULURAPORTTI,
         fieldName = "lahiosoite",
         naytaHetu = false,
         naytaPostiosoite = false
@@ -2782,7 +2771,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return false for postinumero if raportti is korkeakouluraportti and naytaPostiosoite is true" in {
     assert(
       !ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = KORKEAKOULURAPORTTI,
         fieldName = "postinumero",
         naytaHetu = false,
         naytaPostiosoite = true
@@ -2793,7 +2781,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return true for postinumero if raportti is korkeakouluraportti and naytaPostiosoite is false" in {
     assert(
       ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = KORKEAKOULURAPORTTI,
         fieldName = "postinumero",
         naytaHetu = false,
         naytaPostiosoite = false
@@ -2804,7 +2791,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return false for postitoimipaikka if raportti is korkeakouluraportti and naytaPostiosoite is true" in {
     assert(
       !ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = KORKEAKOULURAPORTTI,
         fieldName = "postitoimipaikka",
         naytaHetu = false,
         naytaPostiosoite = true
@@ -2815,7 +2801,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return true for postitoimipaikka if raportti is korkeakouluraportti and naytaPostiosoite is false" in {
     assert(
       ExcelWriter.shouldSkipCreatingCell(
-        raporttiId = KORKEAKOULURAPORTTI,
         fieldName = "postitoimipaikka",
         naytaHetu = false,
         naytaPostiosoite = false

@@ -57,7 +57,7 @@ class ToisenAsteenHakijatService(
       oppilaitokset = oppilaitokset,
       toimipisteet = toimipisteet,
       hakukohteet = hakukohteet,
-      pohjakoulutukset,
+      pohjakoulutukset = pohjakoulutukset,
       valintatieto = valintatieto,
       vastaanottotieto = vastaanottotieto,
       harkinnanvaraisuudet = harkinnanvaraisuudet,
@@ -74,11 +74,10 @@ class ToisenAsteenHakijatService(
       queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi, resultRow.hakijanEtunimi, resultRow.oppijanumero))
     val sortedListwithCombinedNimi = sorted.map(sortedResult => ToisenAsteenHakijaWithCombinedNimi(sortedResult))
 
-    ExcelWriter.writeHakijatRaportti(
+    ExcelWriter.writeToisenAsteenHakijatRaportti(
       sortedListwithCombinedNimi,
       asiointikieli,
-      translations,
-      "toinen aste"
+      translations
     )
   }
 }

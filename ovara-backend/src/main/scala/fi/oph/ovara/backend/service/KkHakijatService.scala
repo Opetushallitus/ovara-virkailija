@@ -68,7 +68,7 @@ class KkHakijatService(
       queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi, resultRow.hakijanEtunimi, resultRow.oppijanumero))
     val sortedListwithCombinedNimi = sorted.map(sortedResult => KkHakijaWithCombinedNimi(sortedResult))
 
-    ExcelWriter.writeHakijatRaportti(
+    ExcelWriter.writeKkHakijatRaportti(
       sortedListwithCombinedNimi,
       asiointikieli,
       translations,
