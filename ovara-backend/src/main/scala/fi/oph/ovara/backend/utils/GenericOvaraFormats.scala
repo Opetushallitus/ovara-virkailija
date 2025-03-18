@@ -1,9 +1,10 @@
 package fi.oph.ovara.backend.utils
 
-import fi.oph.ovara.backend.domain.Kieli
-import org.json4s.JsonAST.JString
+import fi.oph.ovara.backend.domain.{Kieli, Kielistetty, Valintatapajono}
+import org.json4s.JsonAST.{JInt, JObject, JString}
+import org.json4s.MonadicJValue.jvalueToMonadic
 import org.json4s.jackson.Serialization.write
-import org.json4s.{CustomKeySerializer, CustomSerializer, DefaultFormats, Formats, JNull, JValue, MappingException}
+import org.json4s.{CustomKeySerializer, CustomSerializer, DefaultFormats, Extraction, Formats, JNull, JObject, JValue, MappingException, jvalue2extractable}
 
 import scala.collection.Seq
 import scala.util.control.NonFatal
@@ -18,7 +19,8 @@ trait GenericOvaraFormats {
   def genericOvaraFormats: Formats = DefaultFormats.strict
     .addKeySerializers(Seq(kieliKeySerializer)) ++
     Seq(
-      stringSerializer(Kieli.withName)
+      stringSerializer(Kieli.withName),
+      valintatapajonoSerializer
     )
 
   private def kieliKeySerializer = new CustomKeySerializer[Kieli](_ =>
@@ -54,4 +56,24 @@ trait GenericOvaraFormats {
       )
     )
   }
+
+  private def valintatapajonoSerializer = new CustomSerializer[Valintatapajono](_ =>
+    (
+      { case s: JObject =>
+        implicit def formats: Formats = genericOvaraFormats
+
+        Valintatapajono(
+          valintatapajonoOid = (s \ "valintatapajono_oid").extract[String],
+          valintatapajononNimi = (s \ "valintatapajono_nimi").extract[String],
+          valinnanTila = (s \ "valinnan_tila").extract[String],
+          valinnanTilanKuvaus = (s \ "valinnantilan_kuvauksen_teksti").extract[Kielistetty]
+        )
+      },
+      { case v: Valintatapajono =>
+        implicit def formats: Formats = genericOvaraFormats
+
+        Extraction.decompose(v)
+      }
+    )
+  )
 }

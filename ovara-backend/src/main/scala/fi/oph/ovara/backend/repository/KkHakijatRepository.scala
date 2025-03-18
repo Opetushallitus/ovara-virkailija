@@ -51,11 +51,10 @@ class KkHakijatRepository extends Extractors {
     sql"""SELECT DISTINCT hlo.sukunimi, hlo.etunimet, hlo.hetu, hlo.syntymaaika,
                  hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid, hk.organisaatio_nimi,
                  hk.hakukohde_nimi, kkh.hakukelpoisuus, ht.hakutoivenumero, ht.valintatieto,
-                 ht.ehdollisesti_hyvaksytty, ht.valintatiedon_pvm, ht.vastaanottotieto,
-                 ht.viimeinen_vastaanottopaiva, ht.ensikertalainen,
+                 ht.ehdollisesti_hyvaksytty, ht.valintatiedon_pvm, ht.valintatapajonot,
+                 ht.vastaanottotieto, ht.viimeinen_vastaanottopaiva, ht.ensikertalainen,
                  ht.ilmoittautumisen_tila, kkh.pohjakoulutus, kkh.maksuvelvollisuus,
-                 hlo.valintatuloksen_julkaisulupa,
-                 hlo.koulutusmarkkinointilupa, hlo.sahkoinenviestintalupa,
+                 hlo.valintatuloksen_julkaisulupa, hlo.koulutusmarkkinointilupa, hlo.sahkoinenviestintalupa,
                  hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka, hlo.puhelin, hlo.sahkoposti
           FROM pub.pub_dim_henkilo hlo
           JOIN pub.pub_dim_hakutoive ht
