@@ -61,10 +61,8 @@ const isRedirected = (response: Response) => {
 
 const redirectToLogin = () => {
   if (isServer) {
-    console.log('server redirect');
     redirect(loginUrl);
   } else {
-    console.log('client redirect');
     location.assign(loginUrl);
   }
 };
@@ -78,8 +76,7 @@ const responseToData = async (res: Response) => {
     return {};
   }
   try {
-    const result = await res.json();
-    return result;
+    return await res.json();
   } catch (e) {
     console.error('Parsing fetch response body as JSON failed!');
     return Promise.reject(e);
@@ -91,10 +88,6 @@ export const doApiFetch = async (
   options?: Options,
   cache?: string,
 ) => {
-  console.log('doApiFetch for resource:', resource);
-  console.log(
-    typeof window === 'undefined' ? 'Running on Server' : 'Running on Client',
-  );
   try {
     const response = await apiFetch(resource, options, cache);
     const responseUrl = new URL(response.url);
