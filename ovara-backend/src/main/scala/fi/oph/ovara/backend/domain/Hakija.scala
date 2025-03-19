@@ -147,6 +147,7 @@ case class KkHakija(
     lahiosoite: Option[String],
     postinumero: Option[String],
     postitoimipaikka: Option[String],
+    kotikunta: Kielistetty,
     puhelinnumero: Option[String],
     sahkoposti: Option[String]
 ) extends Hakija
@@ -178,6 +179,7 @@ case class KkHakijaWithCombinedNimi(
     lahiosoite: Option[String],
     postinumero: Option[String],
     postitoimipaikka: Option[String],
+    kotikunta: Kielistetty,
     puhelinnumero: Option[String],
     sahkoposti: Option[String]
 ) extends Hakija
@@ -211,6 +213,7 @@ object KkHakijaWithCombinedNimi {
       lahiosoite = hakija.lahiosoite,
       postinumero = hakija.postinumero,
       postitoimipaikka = hakija.postitoimipaikka,
+      kotikunta = hakija.kotikunta,
       puhelinnumero = hakija.puhelinnumero,
       sahkoposti = hakija.sahkoposti
     )

@@ -1641,9 +1641,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(0).getCell(23).getStringCellValue == "raportti.lahiosoite")
     assert(wb.getSheetAt(0).getRow(0).getCell(24).getStringCellValue == "raportti.postinumero")
     assert(wb.getSheetAt(0).getRow(0).getCell(25).getStringCellValue == "raportti.postitoimipaikka")
-    assert(wb.getSheetAt(0).getRow(0).getCell(26).getStringCellValue == "Puhelinnumero SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(27).getStringCellValue == "raportti.sahkoposti")
-    assert(wb.getSheetAt(0).getRow(0).getCell(28) == null)
+    assert(wb.getSheetAt(0).getRow(0).getCell(26).getStringCellValue == "raportti.kotikunta")
+    assert(wb.getSheetAt(0).getRow(0).getCell(27).getStringCellValue == "Puhelinnumero SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(28).getStringCellValue == "raportti.sahkoposti")
+    assert(wb.getSheetAt(0).getRow(0).getCell(29) == null)
 
     assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 1)
     assert(wb.getSheetAt(0).getRow(1) == null)
@@ -2125,6 +2126,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           lahiosoite = Some("Rämsöönranta 368"),
           postinumero = Some("00100"),
           postitoimipaikka = Some("HELSINKI"),
+          kotikunta = Map(En -> "Helsinki", Fi -> "Helsinki", Sv -> "Helsingfors"),
           puhelinnumero = Some("050 64292261"),
           sahkoposti = None
         ),
@@ -2153,8 +2155,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
           julkaisulupa = Some(true),
           sahkoinenViestintalupa = Some(true),
           lahiosoite = Some("Laholanaukio 834"),
-          postinumero = Some("00100"),
-          postitoimipaikka = Some("HELSINKI"),
+          postinumero = Some("15700"),
+          postitoimipaikka = Some("LAHTI"),
+          kotikunta = Map(En -> "Lahti", Fi -> "Lahti", Sv -> "Lahtis"),
           puhelinnumero = None,
           sahkoposti = Some("hakija-33919611@oph.fi")
         )
@@ -2198,9 +2201,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(0).getCell(22).getStringCellValue == "raportti.lahiosoite")
     assert(wb.getSheetAt(0).getRow(0).getCell(23).getStringCellValue == "raportti.postinumero")
     assert(wb.getSheetAt(0).getRow(0).getCell(24).getStringCellValue == "raportti.postitoimipaikka")
-    assert(wb.getSheetAt(0).getRow(0).getCell(25).getStringCellValue == "Puhelinnumero SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(26).getStringCellValue == "raportti.sahkoposti")
-    assert(wb.getSheetAt(0).getRow(0).getCell(27) == null)
+    assert(wb.getSheetAt(0).getRow(0).getCell(25).getStringCellValue == "raportti.kotikunta")
+    assert(wb.getSheetAt(0).getRow(0).getCell(26).getStringCellValue == "Puhelinnumero SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(27).getStringCellValue == "raportti.sahkoposti")
+    assert(wb.getSheetAt(0).getRow(0).getCell(28) == null)
 
     assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Rautiainen-Testi, Dina Testi")
     assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "120393-129E")
@@ -2227,9 +2231,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1).getCell(22).getStringCellValue == "Rämsöönranta 368")
     assert(wb.getSheetAt(0).getRow(1).getCell(23).getStringCellValue == "00100")
     assert(wb.getSheetAt(0).getRow(1).getCell(24).getStringCellValue == "HELSINKI")
-    assert(wb.getSheetAt(0).getRow(1).getCell(25).getStringCellValue == "050 64292261")
-    assert(wb.getSheetAt(0).getRow(1).getCell(26).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(1).getCell(27) == null)
+    assert(wb.getSheetAt(0).getRow(1).getCell(25).getStringCellValue == "Helsingfors")
+    assert(wb.getSheetAt(0).getRow(1).getCell(26).getStringCellValue == "050 64292261")
+    assert(wb.getSheetAt(0).getRow(1).getCell(27).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(1).getCell(28) == null)
 
     assert(wb.getSheetAt(0).getRow(2).getCell(0).getStringCellValue == "Lehto-Testi, Vikke Testi")
     assert(wb.getSheetAt(0).getRow(2).getCell(1).getStringCellValue == "04041990-345K")
@@ -2254,11 +2259,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(2).getCell(20).getStringCellValue == "Nej")
     assert(wb.getSheetAt(0).getRow(2).getCell(21).getStringCellValue == "Ja")
     assert(wb.getSheetAt(0).getRow(2).getCell(22).getStringCellValue == "Laholanaukio 834")
-    assert(wb.getSheetAt(0).getRow(2).getCell(23).getStringCellValue == "00100")
-    assert(wb.getSheetAt(0).getRow(2).getCell(24).getStringCellValue == "HELSINKI")
-    assert(wb.getSheetAt(0).getRow(2).getCell(25).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(2).getCell(26).getStringCellValue == "hakija-33919611@oph.fi")
-    assert(wb.getSheetAt(0).getRow(2).getCell(27) == null)
+    assert(wb.getSheetAt(0).getRow(2).getCell(23).getStringCellValue == "15700")
+    assert(wb.getSheetAt(0).getRow(2).getCell(24).getStringCellValue == "LAHTI")
+    assert(wb.getSheetAt(0).getRow(2).getCell(25).getStringCellValue == "Lahtis")
+    assert(wb.getSheetAt(0).getRow(2).getCell(26).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(27).getStringCellValue == "hakija-33919611@oph.fi")
+    assert(wb.getSheetAt(0).getRow(2).getCell(28) == null)
 
     assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 3)
     assert(wb.getSheetAt(0).getRow(3) == null)
@@ -2294,6 +2300,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           lahiosoite = Some("Rämsöönranta 368"),
           postinumero = Some("00100"),
           postitoimipaikka = Some("HELSINKI"),
+          kotikunta = Map(En -> "Helsinki", Fi -> "Helsinki", Sv -> "Helsingfors"),
           puhelinnumero = Some("050 64292261"),
           sahkoposti = Some("hakija-33919666@oph.fi")
         ),
@@ -2322,8 +2329,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
           julkaisulupa = Some(true),
           sahkoinenViestintalupa = Some(true),
           lahiosoite = Some("Laholanaukio 834"),
-          postinumero = Some("00100"),
-          postitoimipaikka = Some("HELSINKI"),
+          postinumero = Some("15700"),
+          postitoimipaikka = Some("LAHTI"),
+          kotikunta = Map(En -> "Lahti", Fi -> "Lahti", Sv -> "Lahtis"),
           puhelinnumero = Some("050 64293345"),
           sahkoposti = None
         )
@@ -2363,9 +2371,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(0).getCell(18).getStringCellValue == "raportti.julkaisulupa")
     assert(wb.getSheetAt(0).getRow(0).getCell(19).getStringCellValue == "LupaMark SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(20).getStringCellValue == "raportti.sahkoinenViestintalupa")
-    assert(wb.getSheetAt(0).getRow(0).getCell(21).getStringCellValue == "Puhelinnumero SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(22).getStringCellValue == "raportti.sahkoposti")
-    assert(wb.getSheetAt(0).getRow(0).getCell(23) == null)
+    assert(wb.getSheetAt(0).getRow(0).getCell(21).getStringCellValue == "raportti.kotikunta")
+    assert(wb.getSheetAt(0).getRow(0).getCell(22).getStringCellValue == "Puhelinnumero SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(23).getStringCellValue == "raportti.sahkoposti")
+    assert(wb.getSheetAt(0).getRow(0).getCell(24) == null)
 
     assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Rautiainen-Testi, Dina Testi")
     assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "12.03.1993")
@@ -2388,9 +2397,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1).getCell(18).getStringCellValue == "Ja")
     assert(wb.getSheetAt(0).getRow(1).getCell(19).getStringCellValue == "Ja")
     assert(wb.getSheetAt(0).getRow(1).getCell(20).getStringCellValue == "Ja")
-    assert(wb.getSheetAt(0).getRow(1).getCell(21).getStringCellValue == "050 64292261")
-    assert(wb.getSheetAt(0).getRow(1).getCell(22).getStringCellValue == "hakija-33919666@oph.fi")
-    assert(wb.getSheetAt(0).getRow(1).getCell(23) == null)
+    assert(wb.getSheetAt(0).getRow(1).getCell(21).getStringCellValue == "Helsingfors")
+    assert(wb.getSheetAt(0).getRow(1).getCell(22).getStringCellValue == "050 64292261")
+    assert(wb.getSheetAt(0).getRow(1).getCell(23).getStringCellValue == "hakija-33919666@oph.fi")
+    assert(wb.getSheetAt(0).getRow(1).getCell(24) == null)
 
     assert(wb.getSheetAt(0).getRow(2).getCell(0).getStringCellValue == "Lehto-Testi, Vikke Testi")
     assert(wb.getSheetAt(0).getRow(2).getCell(1).getStringCellValue == "04.04.1990")
@@ -2413,9 +2423,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(2).getCell(18).getStringCellValue == "Ja")
     assert(wb.getSheetAt(0).getRow(2).getCell(19).getStringCellValue == "Ja")
     assert(wb.getSheetAt(0).getRow(2).getCell(20).getStringCellValue == "Ja")
-    assert(wb.getSheetAt(0).getRow(2).getCell(21).getStringCellValue == "050 64293345")
-    assert(wb.getSheetAt(0).getRow(2).getCell(22).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(2).getCell(23) == null)
+    assert(wb.getSheetAt(0).getRow(2).getCell(21).getStringCellValue == "Lahtis")
+    assert(wb.getSheetAt(0).getRow(2).getCell(22).getStringCellValue == "050 64293345")
+    assert(wb.getSheetAt(0).getRow(2).getCell(23).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(24) == null)
 
     assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 3)
     assert(wb.getSheetAt(0).getRow(4) == null)
@@ -2462,6 +2473,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           lahiosoite = Some("Rämsöönranta 368"),
           postinumero = Some("00100"),
           postitoimipaikka = Some("HELSINKI"),
+          kotikunta = Map(En -> "Helsinki", Fi -> "Helsinki", Sv -> "Helsingfors"),
           puhelinnumero = Some("050 64292261"),
           sahkoposti = Some("hakija-33919666@oph.fi")
         )
@@ -2505,9 +2517,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1).getCell(20).getStringCellValue == "raportti.julkaisulupa")
     assert(wb.getSheetAt(0).getRow(1).getCell(21).getStringCellValue == "LupaMark SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(22).getStringCellValue == "raportti.sahkoinenViestintalupa")
-    assert(wb.getSheetAt(0).getRow(1).getCell(23).getStringCellValue == "Puhelinnumero SV")
-    assert(wb.getSheetAt(0).getRow(1).getCell(24).getStringCellValue == "raportti.sahkoposti")
-    assert(wb.getSheetAt(0).getRow(1).getCell(25) == null)
+    assert(wb.getSheetAt(0).getRow(1).getCell(23).getStringCellValue == "raportti.kotikunta")
+    assert(wb.getSheetAt(0).getRow(1).getCell(24).getStringCellValue == "Puhelinnumero SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(25).getStringCellValue == "raportti.sahkoposti")
+    assert(wb.getSheetAt(0).getRow(1).getCell(26) == null)
 
     assert(wb.getSheetAt(0).getRow(2).getCell(0).getStringCellValue == "Rautiainen-Testi, Dina Testi")
     assert(wb.getSheetAt(0).getRow(2).getCell(1).getStringCellValue == "120393-129E")
@@ -2537,9 +2550,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(2).getCell(20).getStringCellValue == "Ja")
     assert(wb.getSheetAt(0).getRow(2).getCell(21).getStringCellValue == "Ja")
     assert(wb.getSheetAt(0).getRow(2).getCell(22).getStringCellValue == "Ja")
-    assert(wb.getSheetAt(0).getRow(2).getCell(23).getStringCellValue == "050 64292261")
-    assert(wb.getSheetAt(0).getRow(2).getCell(24).getStringCellValue == "hakija-33919666@oph.fi")
-    assert(wb.getSheetAt(0).getRow(2).getCell(25) == null)
+    assert(wb.getSheetAt(0).getRow(2).getCell(23).getStringCellValue == "Helsingfors")
+    assert(wb.getSheetAt(0).getRow(2).getCell(24).getStringCellValue == "050 64292261")
+    assert(wb.getSheetAt(0).getRow(2).getCell(25).getStringCellValue == "hakija-33919666@oph.fi")
+    assert(wb.getSheetAt(0).getRow(2).getCell(26) == null)
 
     assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 3)
     assert(wb.getSheetAt(0).getRow(4) == null)
@@ -2606,6 +2620,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           lahiosoite = Some("Rämsöönranta 368"),
           postinumero = Some("00100"),
           postitoimipaikka = Some("HELSINKI"),
+          kotikunta = Map(En -> "Helsinki", Fi -> "Helsinki", Sv -> "Helsingfors"),
           puhelinnumero = Some("050 64292261"),
           sahkoposti = Some("hakija-33919666@oph.fi")
         ),
@@ -2665,8 +2680,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
           markkinointilupa = Some(true),
           sahkoinenViestintalupa = Some(true),
           lahiosoite = Some("Laholanaukio 834"),
-          postinumero = Some("00100"),
-          postitoimipaikka = Some("HELSINKI"),
+          postinumero = Some("15700"),
+          postitoimipaikka = Some("LAHTI"),
+          kotikunta = Map(En -> "Lahti", Fi -> "Lahti", Sv -> "Lahtis"),
           puhelinnumero = Some("050 64293345"),
           sahkoposti = None
         )
@@ -2720,9 +2736,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1).getCell(26).getStringCellValue == "raportti.lahiosoite")
     assert(wb.getSheetAt(0).getRow(1).getCell(27).getStringCellValue == "raportti.postinumero")
     assert(wb.getSheetAt(0).getRow(1).getCell(28).getStringCellValue == "raportti.postitoimipaikka")
-    assert(wb.getSheetAt(0).getRow(1).getCell(29).getStringCellValue == "Puhelinnumero SV")
-    assert(wb.getSheetAt(0).getRow(1).getCell(30).getStringCellValue == "raportti.sahkoposti")
-    assert(wb.getSheetAt(0).getRow(1).getCell(31) == null)
+    assert(wb.getSheetAt(0).getRow(1).getCell(29).getStringCellValue == "raportti.kotikunta")
+    assert(wb.getSheetAt(0).getRow(1).getCell(30).getStringCellValue == "Puhelinnumero SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(31).getStringCellValue == "raportti.sahkoposti")
+    assert(wb.getSheetAt(0).getRow(1).getCell(32) == null)
 
     assert(wb.getSheetAt(0).getRow(2).getCell(0).getStringCellValue == "Rautiainen-Testi, Dina Testi")
     assert(wb.getSheetAt(0).getRow(2).getCell(1).getStringCellValue == "12.03.1993")
@@ -2772,9 +2789,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(2).getCell(26).getStringCellValue == "Rämsöönranta 368")
     assert(wb.getSheetAt(0).getRow(2).getCell(27).getStringCellValue == "00100")
     assert(wb.getSheetAt(0).getRow(2).getCell(28).getStringCellValue == "HELSINKI")
-    assert(wb.getSheetAt(0).getRow(2).getCell(29).getStringCellValue == "050 64292261")
-    assert(wb.getSheetAt(0).getRow(2).getCell(30).getStringCellValue == "hakija-33919666@oph.fi")
-    assert(wb.getSheetAt(0).getRow(2).getCell(31) == null)
+    assert(wb.getSheetAt(0).getRow(2).getCell(29).getStringCellValue == "Helsingfors")
+    assert(wb.getSheetAt(0).getRow(2).getCell(30).getStringCellValue == "050 64292261")
+    assert(wb.getSheetAt(0).getRow(2).getCell(31).getStringCellValue == "hakija-33919666@oph.fi")
+    assert(wb.getSheetAt(0).getRow(2).getCell(32) == null)
 
     assert(wb.getSheetAt(0).getRow(3).getCell(0).getStringCellValue == "Lehto-Testi, Vikke Testi")
     assert(wb.getSheetAt(0).getRow(3).getCell(1).getStringCellValue == "04.04.1990")
@@ -2815,11 +2833,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(3).getCell(24).getStringCellValue == "Ja")
     assert(wb.getSheetAt(0).getRow(3).getCell(25).getStringCellValue == "Ja")
     assert(wb.getSheetAt(0).getRow(3).getCell(26).getStringCellValue == "Laholanaukio 834")
-    assert(wb.getSheetAt(0).getRow(3).getCell(27).getStringCellValue == "00100")
-    assert(wb.getSheetAt(0).getRow(3).getCell(28).getStringCellValue == "HELSINKI")
-    assert(wb.getSheetAt(0).getRow(3).getCell(29).getStringCellValue == "050 64293345")
-    assert(wb.getSheetAt(0).getRow(3).getCell(30).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(3).getCell(31) == null)
+    assert(wb.getSheetAt(0).getRow(3).getCell(27).getStringCellValue == "15700")
+    assert(wb.getSheetAt(0).getRow(3).getCell(28).getStringCellValue == "LAHTI")
+    assert(wb.getSheetAt(0).getRow(3).getCell(29).getStringCellValue == "Lahtis")
+    assert(wb.getSheetAt(0).getRow(3).getCell(30).getStringCellValue == "050 64293345")
+    assert(wb.getSheetAt(0).getRow(3).getCell(31).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(3).getCell(32) == null)
 
     assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 4)
     assert(wb.getSheetAt(0).getRow(4) == null)
@@ -3315,6 +3334,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           "lahiosoite",
           "postinumero",
           "postitoimipaikka",
+          "kotikunta",
           "puhelinnumero",
           "sahkoposti"
         )
@@ -3364,6 +3384,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           "lahiosoite",
           "postinumero",
           "postitoimipaikka",
+          "kotikunta",
           "puhelinnumero",
           "sahkoposti"
         )
@@ -3412,6 +3433,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           "lahiosoite",
           "postinumero",
           "postitoimipaikka",
+          "kotikunta",
           "puhelinnumero",
           "sahkoposti"
         )
@@ -3480,6 +3502,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           "julkaisulupa",
           "markkinointilupa",
           "sahkoinenViestintalupa",
+          "kotikunta",
           "puhelinnumero",
           "sahkoposti"
         )
