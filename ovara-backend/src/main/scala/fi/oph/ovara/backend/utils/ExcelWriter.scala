@@ -3,7 +3,7 @@ package fi.oph.ovara.backend.utils
 import fi.oph.ovara.backend.domain.*
 import fi.oph.ovara.backend.utils.Constants.*
 import org.apache.poi.ss.usermodel.HorizontalAlignment
-import org.apache.poi.ss.util.WorkbookUtil
+import org.apache.poi.ss.util.{CellRangeAddress, WorkbookUtil}
 import org.apache.poi.xssf.usermodel.*
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -569,6 +569,46 @@ object ExcelWriter {
     }).flatten
   }
 
+  def createHylkTaiPerSyyHeadingRow(
+      workbook: XSSFWorkbook,
+      sheet: XSSFSheet,
+      translations: Map[String, String],
+      currentRowIndex: Int,
+      fieldNames: List[String],
+      valintatapajonot: Seq[Valintatapajono],
+      naytaHetu: Boolean
+  ): Int = {
+    val headingRow                      = sheet.createRow(currentRowIndex)
+    val headingCellStyle: XSSFCellStyle = workbook.createCellStyle()
+    createHeadingFont(workbook, headingCellStyle)
+    headingCellStyle.setAlignment(HorizontalAlignment.CENTER)
+
+    var headingColumnStartIndex = 0
+    for (fieldName <- fieldNames.takeWhile(_ != "valintatapajonot")) {
+      headingColumnStartIndex += 1
+    }
+
+    if (!naytaHetu) {
+      headingColumnStartIndex -= 1
+    }
+
+    if (valintatapajonot.length > 1) {
+      val firstRow              = currentRowIndex
+      val lastRow               = currentRowIndex
+      val headingColumnEndIndex = headingColumnStartIndex + valintatapajonot.length - 1
+
+      sheet.addMergedRegion(new CellRangeAddress(firstRow, lastRow, headingColumnStartIndex, headingColumnEndIndex))
+    }
+
+    val headingCell = headingRow.createCell(headingColumnStartIndex)
+    headingCell.setCellStyle(headingCellStyle)
+    val translationKey = s"raportti.hylkTaiPerSyy"
+    val value          = translations.getOrElse(translationKey, translationKey)
+    headingCell.setCellValue(value)
+
+    currentRowIndex + 1
+  }
+
   def writeKkHakijatRaportti(
       hakijat: Seq[KkHakijaWithCombinedNimi],
       asiointikieli: String,
@@ -607,6 +647,18 @@ object ExcelWriter {
     val fieldNames: List[String] = classOf[KkHakijaWithCombinedNimi].getDeclaredFields.map(_.getName).toList
     val fieldNamesWithIndex      = fieldNames.zipWithIndex
 
+    if (distinctSortedValintatapajonotInQueryResult.nonEmpty) {
+      currentRowIndex = createHylkTaiPerSyyHeadingRow(
+        workbook,
+        sheet,
+        translations,
+        currentRowIndex,
+        fieldNames,
+        distinctSortedValintatapajonotInQueryResult,
+        naytaHetu
+      )
+    }
+
     currentRowIndex = createHeadingRowWithValintatapajonot(
       sheet,
       translations,
@@ -620,8 +672,8 @@ object ExcelWriter {
       val hakijanHakutoiveRow = sheet.createRow(currentRowIndex)
       currentRowIndex = currentRowIndex + 1
 
-      var numberOfSkippedFields = 0
-      var cellIndex             = 0
+      var numberOfSkippedFields    = 0
+      var cellIndex                = 0
       var numberOfValintatapajonot = 0
 
       for ((fieldName, i) <- fieldNamesWithIndex) yield {

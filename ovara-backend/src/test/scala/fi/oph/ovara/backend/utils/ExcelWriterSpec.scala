@@ -1993,6 +1993,108 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(5) == null)
   }
 
+  "createHylkTaiPerSyyHeadingRow" should "create merged hylkäämisen tai peruuntumisen syy heading cell in the right index on the row" in {
+    val wb: XSSFWorkbook                = new XSSFWorkbook()
+    val sheet: XSSFSheet                = wb.createSheet()
+    val headingCellStyle: XSSFCellStyle = wb.createCellStyle()
+    val valintatapajonot = List(
+      Valintatapajono(
+        valintatapajonoOid = "1704199256878262657431481297336",
+        valintatapajononNimi = "Todistusvalintajono ensikertalaisille hakijoille",
+        valinnanTila = "HYLATTY",
+        valinnanTilanKuvaus = Map(
+          En -> "Et ole ensikertalainen hakija.",
+          Fi -> "Et ole ensikertalainen hakija.",
+          Sv -> "Du är inte en förstagångssökande."
+        )
+      ),
+      Valintatapajono(
+        valintatapajonoOid = "17000468320548583779630214204232",
+        valintatapajononNimi = "Koevalintajono kaikille hakijoille",
+        valinnanTila = "HYLATTY",
+        valinnanTilanKuvaus = Map(
+          En -> "Et osallistunut valintakokeeseen",
+          Fi -> "Et osallistunut valintakokeeseen",
+          Sv -> "Et osallistunut valintakokeeseen SV"
+        )
+      ),
+      Valintatapajono(
+        valintatapajonoOid = "1707384694164-3621431542682802084",
+        valintatapajononNimi = "Todistusvalintajono kaikille hakijoille",
+        valinnanTila = "HYLATTY",
+        valinnanTilanKuvaus = Map(
+          En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+          Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+          Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
+        )
+      )
+    )
+    val fieldNames = classOf[KkHakijaWithCombinedNimi].getDeclaredFields.map(_.getName).toList
+    ExcelWriter.createHylkTaiPerSyyHeadingRow(wb, sheet, translations, 0, fieldNames, valintatapajonot, true)
+
+    for (i <- 0 until 12) {
+      assert(wb.getSheetAt(0).getRow(0).getCell(i) == null)
+    }
+
+    assert(wb.getSheetAt(0).getRow(0).getCell(13).getStringCellValue == "Hylkäämisen tai peruuntumisen syy SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(13).getColumnIndex == 13)
+
+    for (i <- 14 until 27) {
+      assert(wb.getSheetAt(0).getRow(0).getCell(i) == null)
+    }
+  }
+
+  it should "create merged hylkäämisen tai peruuntumisen syy heading cell in the right index on the row when hetu is not shown" in {
+    val wb: XSSFWorkbook                = new XSSFWorkbook()
+    val sheet: XSSFSheet                = wb.createSheet()
+    val headingCellStyle: XSSFCellStyle = wb.createCellStyle()
+    val valintatapajonot = List(
+      Valintatapajono(
+        valintatapajonoOid = "1704199256878262657431481297336",
+        valintatapajononNimi = "Todistusvalintajono ensikertalaisille hakijoille",
+        valinnanTila = "HYLATTY",
+        valinnanTilanKuvaus = Map(
+          En -> "Et ole ensikertalainen hakija.",
+          Fi -> "Et ole ensikertalainen hakija.",
+          Sv -> "Du är inte en förstagångssökande."
+        )
+      ),
+      Valintatapajono(
+        valintatapajonoOid = "17000468320548583779630214204232",
+        valintatapajononNimi = "Koevalintajono kaikille hakijoille",
+        valinnanTila = "HYLATTY",
+        valinnanTilanKuvaus = Map(
+          En -> "Et osallistunut valintakokeeseen",
+          Fi -> "Et osallistunut valintakokeeseen",
+          Sv -> "Et osallistunut valintakokeeseen SV"
+        )
+      ),
+      Valintatapajono(
+        valintatapajonoOid = "1707384694164-3621431542682802084",
+        valintatapajononNimi = "Todistusvalintajono kaikille hakijoille",
+        valinnanTila = "HYLATTY",
+        valinnanTilanKuvaus = Map(
+          En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+          Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+          Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
+        )
+      )
+    )
+    val fieldNames = classOf[KkHakijaWithCombinedNimi].getDeclaredFields.map(_.getName).toList
+    ExcelWriter.createHylkTaiPerSyyHeadingRow(wb, sheet, translations, 0, fieldNames, valintatapajonot, false)
+
+    for (i <- 0 until 12) {
+      assert(wb.getSheetAt(0).getRow(0).getCell(i) == null)
+    }
+
+    assert(wb.getSheetAt(0).getRow(0).getCell(12).getStringCellValue == "Hylkäämisen tai peruuntumisen syy SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(12).getColumnIndex == 12)
+
+    for (i <- 13 until 26) {
+      assert(wb.getSheetAt(0).getRow(0).getCell(i) == null)
+    }
+  }
+
   "writeKkHakijatRaportti" should "return excel with two result rows for kk-hakijat with hetu and postiosoite" in {
     val kkHakijatResult =
       Vector(
@@ -2378,66 +2480,68 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getNumberOfSheets == 1)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
-    assert(wb.getSheetAt(0).getRow(0).getCell(0).getStringCellValue == "Hakija SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(1).getStringCellValue == "raportti.hetu")
-    assert(wb.getSheetAt(0).getRow(0).getCell(2).getStringCellValue == "raportti.syntymaAika")
-    assert(wb.getSheetAt(0).getRow(0).getCell(3).getStringCellValue == "Kansalaisuus SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(4).getStringCellValue == "raportti.oppijanumero")
-    assert(wb.getSheetAt(0).getRow(0).getCell(5).getStringCellValue == "raportti.hakemusOid")
-    assert(wb.getSheetAt(0).getRow(0).getCell(6).getStringCellValue == "Toimipiste SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(7).getStringCellValue == "Hakukohde SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(8).getStringCellValue == "Hakukelpoisuus SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(9).getStringCellValue == "raportti.prioriteetti")
-    assert(wb.getSheetAt(0).getRow(0).getCell(10).getStringCellValue == "raportti.valintatieto")
-    assert(wb.getSheetAt(0).getRow(0).getCell(11).getStringCellValue == "raportti.ehdollisestiHyvaksytty")
-    assert(wb.getSheetAt(0).getRow(0).getCell(12).getStringCellValue == "Valintatiedon päivämäärä SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(13).getStringCellValue == "Lukiokoulutus")
-    assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "raportti.vastaanottotieto")
-    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "raportti.viimVastaanottopaiva")
-    assert(wb.getSheetAt(0).getRow(0).getCell(16).getStringCellValue == "raportti.ensikertalainen")
-    assert(wb.getSheetAt(0).getRow(0).getCell(17).getStringCellValue == "raportti.ilmoittautuminen")
-    assert(wb.getSheetAt(0).getRow(0).getCell(18).getStringCellValue == "Pohjakoulutus SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(19).getStringCellValue == "raportti.maksuvelvollisuus")
-    assert(wb.getSheetAt(0).getRow(0).getCell(20).getStringCellValue == "raportti.julkaisulupa")
-    assert(wb.getSheetAt(0).getRow(0).getCell(21).getStringCellValue == "LupaMark SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(22).getStringCellValue == "raportti.sahkoinenViestintalupa")
-    assert(wb.getSheetAt(0).getRow(0).getCell(23).getStringCellValue == "Puhelinnumero SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(24).getStringCellValue == "raportti.sahkoposti")
-    assert(wb.getSheetAt(0).getRow(0).getCell(25) == null)
+    assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
+    assert(wb.getSheetAt(0).getRow(0).getCell(13).getStringCellValue == "Hylkäämisen tai peruuntumisen syy SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Hakija SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "raportti.hetu")
+    assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "raportti.syntymaAika")
+    assert(wb.getSheetAt(0).getRow(1).getCell(3).getStringCellValue == "Kansalaisuus SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(4).getStringCellValue == "raportti.oppijanumero")
+    assert(wb.getSheetAt(0).getRow(1).getCell(5).getStringCellValue == "raportti.hakemusOid")
+    assert(wb.getSheetAt(0).getRow(1).getCell(6).getStringCellValue == "Toimipiste SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(7).getStringCellValue == "Hakukohde SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(8).getStringCellValue == "Hakukelpoisuus SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(9).getStringCellValue == "raportti.prioriteetti")
+    assert(wb.getSheetAt(0).getRow(1).getCell(10).getStringCellValue == "raportti.valintatieto")
+    assert(wb.getSheetAt(0).getRow(1).getCell(11).getStringCellValue == "raportti.ehdollisestiHyvaksytty")
+    assert(wb.getSheetAt(0).getRow(1).getCell(12).getStringCellValue == "Valintatiedon päivämäärä SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(13).getStringCellValue == "Lukiokoulutus")
+    assert(wb.getSheetAt(0).getRow(1).getCell(14).getStringCellValue == "raportti.vastaanottotieto")
+    assert(wb.getSheetAt(0).getRow(1).getCell(15).getStringCellValue == "raportti.viimVastaanottopaiva")
+    assert(wb.getSheetAt(0).getRow(1).getCell(16).getStringCellValue == "raportti.ensikertalainen")
+    assert(wb.getSheetAt(0).getRow(1).getCell(17).getStringCellValue == "raportti.ilmoittautuminen")
+    assert(wb.getSheetAt(0).getRow(1).getCell(18).getStringCellValue == "Pohjakoulutus SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(19).getStringCellValue == "raportti.maksuvelvollisuus")
+    assert(wb.getSheetAt(0).getRow(1).getCell(20).getStringCellValue == "raportti.julkaisulupa")
+    assert(wb.getSheetAt(0).getRow(1).getCell(21).getStringCellValue == "LupaMark SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(22).getStringCellValue == "raportti.sahkoinenViestintalupa")
+    assert(wb.getSheetAt(0).getRow(1).getCell(23).getStringCellValue == "Puhelinnumero SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(24).getStringCellValue == "raportti.sahkoposti")
+    assert(wb.getSheetAt(0).getRow(1).getCell(25) == null)
 
-    assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Rautiainen-Testi, Dina Testi")
-    assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "120393-129E")
-    assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "12.03.1993")
-    assert(wb.getSheetAt(0).getRow(1).getCell(3).getStringCellValue == "Finland")
-    assert(wb.getSheetAt(0).getRow(1).getCell(4).getStringCellValue == "1.2.246.562.24.30646006111")
-    assert(wb.getSheetAt(0).getRow(1).getCell(5).getStringCellValue == "1.2.246.562.11.00000000000002179045")
-    assert(wb.getSheetAt(0).getRow(1).getCell(6).getStringCellValue == "Toimipiste 1 sv")
-    assert(wb.getSheetAt(0).getRow(1).getCell(7).getStringCellValue == "Hakukohde 1 SV")
-    assert(wb.getSheetAt(0).getRow(1).getCell(8).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(1).getCell(9).getNumericCellValue == 2)
-    assert(wb.getSheetAt(0).getRow(1).getCell(10).getStringCellValue == "Hyvaksytty SV")
-    assert(wb.getSheetAt(0).getRow(1).getCell(11).getStringCellValue == "Ja")
-    assert(wb.getSheetAt(0).getRow(1).getCell(12).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(0).getStringCellValue == "Rautiainen-Testi, Dina Testi")
+    assert(wb.getSheetAt(0).getRow(2).getCell(1).getStringCellValue == "120393-129E")
+    assert(wb.getSheetAt(0).getRow(2).getCell(2).getStringCellValue == "12.03.1993")
+    assert(wb.getSheetAt(0).getRow(2).getCell(3).getStringCellValue == "Finland")
+    assert(wb.getSheetAt(0).getRow(2).getCell(4).getStringCellValue == "1.2.246.562.24.30646006111")
+    assert(wb.getSheetAt(0).getRow(2).getCell(5).getStringCellValue == "1.2.246.562.11.00000000000002179045")
+    assert(wb.getSheetAt(0).getRow(2).getCell(6).getStringCellValue == "Toimipiste 1 sv")
+    assert(wb.getSheetAt(0).getRow(2).getCell(7).getStringCellValue == "Hakukohde 1 SV")
+    assert(wb.getSheetAt(0).getRow(2).getCell(8).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(9).getNumericCellValue == 2)
+    assert(wb.getSheetAt(0).getRow(2).getCell(10).getStringCellValue == "Hyvaksytty SV")
+    assert(wb.getSheetAt(0).getRow(2).getCell(11).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(2).getCell(12).getStringCellValue == "-")
     assert(
       wb.getSheetAt(0)
-        .getRow(1)
+        .getRow(2)
         .getCell(13)
         .getStringCellValue == "Annullerad, godkänt till ansökningsmål med högre prioritet"
     )
-    assert(wb.getSheetAt(0).getRow(1).getCell(14).getStringCellValue == "raportti.perunut")
-    assert(wb.getSheetAt(0).getRow(1).getCell(15).getStringCellValue == "26.06.2024")
-    assert(wb.getSheetAt(0).getRow(1).getCell(16).getStringCellValue == "Ja")
-    assert(wb.getSheetAt(0).getRow(1).getCell(17).getStringCellValue == "raportti.lasna_koko_lukuvuosi")
-    assert(wb.getSheetAt(0).getRow(1).getCell(18).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(1).getCell(19).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(1).getCell(20).getStringCellValue == "Ja")
-    assert(wb.getSheetAt(0).getRow(1).getCell(21).getStringCellValue == "Ja")
-    assert(wb.getSheetAt(0).getRow(1).getCell(22).getStringCellValue == "Ja")
-    assert(wb.getSheetAt(0).getRow(1).getCell(23).getStringCellValue == "050 64292261")
-    assert(wb.getSheetAt(0).getRow(1).getCell(24).getStringCellValue == "hakija-33919666@oph.fi")
-    assert(wb.getSheetAt(0).getRow(1).getCell(25) == null)
+    assert(wb.getSheetAt(0).getRow(2).getCell(14).getStringCellValue == "raportti.perunut")
+    assert(wb.getSheetAt(0).getRow(2).getCell(15).getStringCellValue == "26.06.2024")
+    assert(wb.getSheetAt(0).getRow(2).getCell(16).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(2).getCell(17).getStringCellValue == "raportti.lasna_koko_lukuvuosi")
+    assert(wb.getSheetAt(0).getRow(2).getCell(18).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(19).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(20).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(2).getCell(21).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(2).getCell(22).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(2).getCell(23).getStringCellValue == "050 64292261")
+    assert(wb.getSheetAt(0).getRow(2).getCell(24).getStringCellValue == "hakija-33919666@oph.fi")
+    assert(wb.getSheetAt(0).getRow(2).getCell(25) == null)
 
-    assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 2)
+    assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 3)
     assert(wb.getSheetAt(0).getRow(4) == null)
   }
 
@@ -2581,137 +2685,143 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getNumberOfSheets == 1)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
-    assert(wb.getSheetAt(0).getRow(0).getCell(0).getStringCellValue == "Hakija SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(1).getStringCellValue == "raportti.syntymaAika")
-    assert(wb.getSheetAt(0).getRow(0).getCell(2).getStringCellValue == "Kansalaisuus SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(3).getStringCellValue == "raportti.oppijanumero")
-    assert(wb.getSheetAt(0).getRow(0).getCell(4).getStringCellValue == "raportti.hakemusOid")
-    assert(wb.getSheetAt(0).getRow(0).getCell(5).getStringCellValue == "Toimipiste SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(6).getStringCellValue == "Hakukohde SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(7).getStringCellValue == "Hakukelpoisuus SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(8).getStringCellValue == "raportti.prioriteetti")
-    assert(wb.getSheetAt(0).getRow(0).getCell(9).getStringCellValue == "raportti.valintatieto")
-    assert(wb.getSheetAt(0).getRow(0).getCell(10).getStringCellValue == "raportti.ehdollisestiHyvaksytty")
-    assert(wb.getSheetAt(0).getRow(0).getCell(11).getStringCellValue == "Valintatiedon päivämäärä SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(12).getStringCellValue == "Koevalintajono kaikille hakijoille")
-    assert(wb.getSheetAt(0).getRow(0).getCell(13).getStringCellValue == "Todistusvalinta (YO)")
+    assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
+    assert(wb.getSheetAt(0).getRow(0).getCell(12).getStringCellValue == "Hylkäämisen tai peruuntumisen syy SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Hakija SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "raportti.syntymaAika")
+    assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "Kansalaisuus SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(3).getStringCellValue == "raportti.oppijanumero")
+    assert(wb.getSheetAt(0).getRow(1).getCell(4).getStringCellValue == "raportti.hakemusOid")
+    assert(wb.getSheetAt(0).getRow(1).getCell(5).getStringCellValue == "Toimipiste SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(6).getStringCellValue == "Hakukohde SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(7).getStringCellValue == "Hakukelpoisuus SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(8).getStringCellValue == "raportti.prioriteetti")
+    assert(wb.getSheetAt(0).getRow(1).getCell(9).getStringCellValue == "raportti.valintatieto")
+    assert(wb.getSheetAt(0).getRow(1).getCell(10).getStringCellValue == "raportti.ehdollisestiHyvaksytty")
+    assert(wb.getSheetAt(0).getRow(1).getCell(11).getStringCellValue == "Valintatiedon päivämäärä SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(12).getStringCellValue == "Koevalintajono kaikille hakijoille")
+    assert(wb.getSheetAt(0).getRow(1).getCell(13).getStringCellValue == "Todistusvalinta (YO)")
     assert(
-      wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "Todistusvalintajono ensikertalaisille hakijoille"
+      wb.getSheetAt(0).getRow(1).getCell(14).getStringCellValue == "Todistusvalintajono ensikertalaisille hakijoille"
     )
     assert(
-      wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "Todistusvalintajono ensikertalaisille hakijoille"
+      wb.getSheetAt(0).getRow(1).getCell(15).getStringCellValue == "Todistusvalintajono ensikertalaisille hakijoille"
     )
-    assert(wb.getSheetAt(0).getRow(0).getCell(16).getStringCellValue == "Todistusvalintajono kaikille hakijoille")
-    assert(wb.getSheetAt(0).getRow(0).getCell(17).getStringCellValue == "raportti.vastaanottotieto")
-    assert(wb.getSheetAt(0).getRow(0).getCell(18).getStringCellValue == "raportti.viimVastaanottopaiva")
-    assert(wb.getSheetAt(0).getRow(0).getCell(19).getStringCellValue == "raportti.ensikertalainen")
-    assert(wb.getSheetAt(0).getRow(0).getCell(20).getStringCellValue == "raportti.ilmoittautuminen")
-    assert(wb.getSheetAt(0).getRow(0).getCell(21).getStringCellValue == "Pohjakoulutus SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(22).getStringCellValue == "raportti.maksuvelvollisuus")
-    assert(wb.getSheetAt(0).getRow(0).getCell(23).getStringCellValue == "raportti.julkaisulupa")
-    assert(wb.getSheetAt(0).getRow(0).getCell(24).getStringCellValue == "LupaMark SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(25).getStringCellValue == "raportti.sahkoinenViestintalupa")
-    assert(wb.getSheetAt(0).getRow(0).getCell(26).getStringCellValue == "raportti.lahiosoite")
-    assert(wb.getSheetAt(0).getRow(0).getCell(27).getStringCellValue == "raportti.postinumero")
-    assert(wb.getSheetAt(0).getRow(0).getCell(28).getStringCellValue == "raportti.postitoimipaikka")
-    assert(wb.getSheetAt(0).getRow(0).getCell(29).getStringCellValue == "Puhelinnumero SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(30).getStringCellValue == "raportti.sahkoposti")
-    assert(wb.getSheetAt(0).getRow(0).getCell(31) == null)
-
-    assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Rautiainen-Testi, Dina Testi")
-    assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "12.03.1993")
-    assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "Finland")
-    assert(wb.getSheetAt(0).getRow(1).getCell(3).getStringCellValue == "1.2.246.562.24.30646006111")
-    assert(wb.getSheetAt(0).getRow(1).getCell(4).getStringCellValue == "1.2.246.562.11.00000000000002179045")
-    assert(wb.getSheetAt(0).getRow(1).getCell(5).getStringCellValue == "Toimipiste 1 sv")
-    assert(wb.getSheetAt(0).getRow(1).getCell(6).getStringCellValue == "Hakukohde 1 SV")
-    assert(wb.getSheetAt(0).getRow(1).getCell(7).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(1).getCell(8).getNumericCellValue == 2)
-    assert(wb.getSheetAt(0).getRow(1).getCell(9).getStringCellValue == "Hyvaksytty SV")
-    assert(wb.getSheetAt(0).getRow(1).getCell(10).getStringCellValue == "Ja")
-    assert(wb.getSheetAt(0).getRow(1).getCell(11).getStringCellValue == "-")
-    //Valintatapajonosarakkeet alkaa
-    assert(wb.getSheetAt(0).getRow(1).getCell(12).getStringCellValue == "-") // Koevalintajono kaikille hakijoille
-    assert(wb.getSheetAt(0).getRow(1).getCell(13).getStringCellValue == "-") // Todistusvalinta (YO)
-    assert(
-      wb.getSheetAt(0)
-        .getRow(1)
-        .getCell(14)
-        .getStringCellValue == "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 2."
-    ) //Todistusvalintajono ensikertalaisille hakijoille
-    assert(
-      wb.getSheetAt(0).getRow(1).getCell(15).getStringCellValue == "-"
-    ) // Todistusvalintajono ensikertalaisille hakijoille
-    assert(
-      wb.getSheetAt(0)
-        .getRow(1)
-        .getCell(16)
-        .getStringCellValue == "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 1."
-    ) // Todistusvalintajono kaikille hakijoille
-    //Valintatapajonosarakkeet loppuu
-    assert(wb.getSheetAt(0).getRow(1).getCell(17).getStringCellValue == "raportti.perunut")
-    assert(wb.getSheetAt(0).getRow(1).getCell(18).getStringCellValue == "26.06.2024")
-    assert(wb.getSheetAt(0).getRow(1).getCell(19).getStringCellValue == "Ja")
-    assert(wb.getSheetAt(0).getRow(1).getCell(20).getStringCellValue == "raportti.lasna_koko_lukuvuosi")
-    assert(wb.getSheetAt(0).getRow(1).getCell(21).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(1).getCell(22).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(1).getCell(23).getStringCellValue == "Ja")
-    assert(wb.getSheetAt(0).getRow(1).getCell(24).getStringCellValue == "Ja")
-    assert(wb.getSheetAt(0).getRow(1).getCell(25).getStringCellValue == "Ja")
-    assert(wb.getSheetAt(0).getRow(1).getCell(26).getStringCellValue == "Rämsöönranta 368")
-    assert(wb.getSheetAt(0).getRow(1).getCell(27).getStringCellValue == "00100")
-    assert(wb.getSheetAt(0).getRow(1).getCell(28).getStringCellValue == "HELSINKI")
-    assert(wb.getSheetAt(0).getRow(1).getCell(29).getStringCellValue == "050 64292261")
-    assert(wb.getSheetAt(0).getRow(1).getCell(30).getStringCellValue == "hakija-33919666@oph.fi")
+    assert(wb.getSheetAt(0).getRow(1).getCell(16).getStringCellValue == "Todistusvalintajono kaikille hakijoille")
+    assert(wb.getSheetAt(0).getRow(1).getCell(17).getStringCellValue == "raportti.vastaanottotieto")
+    assert(wb.getSheetAt(0).getRow(1).getCell(18).getStringCellValue == "raportti.viimVastaanottopaiva")
+    assert(wb.getSheetAt(0).getRow(1).getCell(19).getStringCellValue == "raportti.ensikertalainen")
+    assert(wb.getSheetAt(0).getRow(1).getCell(20).getStringCellValue == "raportti.ilmoittautuminen")
+    assert(wb.getSheetAt(0).getRow(1).getCell(21).getStringCellValue == "Pohjakoulutus SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(22).getStringCellValue == "raportti.maksuvelvollisuus")
+    assert(wb.getSheetAt(0).getRow(1).getCell(23).getStringCellValue == "raportti.julkaisulupa")
+    assert(wb.getSheetAt(0).getRow(1).getCell(24).getStringCellValue == "LupaMark SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(25).getStringCellValue == "raportti.sahkoinenViestintalupa")
+    assert(wb.getSheetAt(0).getRow(1).getCell(26).getStringCellValue == "raportti.lahiosoite")
+    assert(wb.getSheetAt(0).getRow(1).getCell(27).getStringCellValue == "raportti.postinumero")
+    assert(wb.getSheetAt(0).getRow(1).getCell(28).getStringCellValue == "raportti.postitoimipaikka")
+    assert(wb.getSheetAt(0).getRow(1).getCell(29).getStringCellValue == "Puhelinnumero SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(30).getStringCellValue == "raportti.sahkoposti")
     assert(wb.getSheetAt(0).getRow(1).getCell(31) == null)
 
-    assert(wb.getSheetAt(0).getRow(2).getCell(0).getStringCellValue == "Lehto-Testi, Vikke Testi")
-    assert(wb.getSheetAt(0).getRow(2).getCell(1).getStringCellValue == "04.04.1990")
+    assert(wb.getSheetAt(0).getRow(2).getCell(0).getStringCellValue == "Rautiainen-Testi, Dina Testi")
+    assert(wb.getSheetAt(0).getRow(2).getCell(1).getStringCellValue == "12.03.1993")
     assert(wb.getSheetAt(0).getRow(2).getCell(2).getStringCellValue == "Finland")
-    assert(wb.getSheetAt(0).getRow(2).getCell(3).getStringCellValue == "1.2.246.562.24.18441866015")
-    assert(wb.getSheetAt(0).getRow(2).getCell(4).getStringCellValue == "1.2.246.562.11.00000000000002126102")
-    assert(wb.getSheetAt(0).getRow(2).getCell(5).getStringCellValue == "Toimipiste 2 sv")
-    assert(wb.getSheetAt(0).getRow(2).getCell(6).getStringCellValue == "Hakukohde 2 SV")
-    assert(wb.getSheetAt(0).getRow(2).getCell(7).getStringCellValue == "raportti.uneligible")
-    assert(wb.getSheetAt(0).getRow(2).getCell(8).getNumericCellValue == 1)
-    assert(wb.getSheetAt(0).getRow(2).getCell(9).getStringCellValue == "Hylatty SV")
-    assert(wb.getSheetAt(0).getRow(2).getCell(10).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(2).getCell(11).getStringCellValue == "11.06.2024")
-    //Valintatapajonosarakkeet alkaa
+    assert(wb.getSheetAt(0).getRow(2).getCell(3).getStringCellValue == "1.2.246.562.24.30646006111")
+    assert(wb.getSheetAt(0).getRow(2).getCell(4).getStringCellValue == "1.2.246.562.11.00000000000002179045")
+    assert(wb.getSheetAt(0).getRow(2).getCell(5).getStringCellValue == "Toimipiste 1 sv")
+    assert(wb.getSheetAt(0).getRow(2).getCell(6).getStringCellValue == "Hakukohde 1 SV")
+    assert(wb.getSheetAt(0).getRow(2).getCell(7).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(8).getNumericCellValue == 2)
+    assert(wb.getSheetAt(0).getRow(2).getCell(9).getStringCellValue == "Hyvaksytty SV")
+    assert(wb.getSheetAt(0).getRow(2).getCell(10).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(2).getCell(11).getStringCellValue == "-")
+    // Valintatapajonosarakkeet alkaa
+    // Koevalintajono kaikille hakijoille
+    assert(wb.getSheetAt(0).getRow(2).getCell(12).getStringCellValue == "-")
+    // Todistusvalinta (YO)
+    assert(wb.getSheetAt(0).getRow(2).getCell(13).getStringCellValue == "-")
+    //Todistusvalintajono ensikertalaisille hakijoille
     assert(
-      wb.getSheetAt(0).getRow(2).getCell(12).getStringCellValue == "Et osallistunut valintakokeeseen SV"
-    ) // Koevalintajono kaikille hakijoille
-    assert(wb.getSheetAt(0).getRow(2).getCell(13).getStringCellValue == "-") // Todistusvalinta (YO)
+      wb.getSheetAt(0)
+        .getRow(2)
+        .getCell(14)
+        .getStringCellValue == "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 2."
+    )
+    // Todistusvalintajono ensikertalaisille hakijoille
     assert(
-      wb.getSheetAt(0).getRow(2).getCell(14).getStringCellValue == "-"
-    ) //Todistusvalintajono ensikertalaisille hakijoille - 1707384681516-2842344525807969324
-    assert(
-      wb.getSheetAt(0).getRow(2).getCell(15).getStringCellValue == "Du är inte en förstagångssökande."
-    ) // Todistusvalintajono ensikertalaisille hakijoille - 1704199256878262657431481297336
+      wb.getSheetAt(0).getRow(2).getCell(15).getStringCellValue == "-"
+    )
+    // Todistusvalintajono kaikille hakijoille
     assert(
       wb.getSheetAt(0)
         .getRow(2)
         .getCell(16)
-        .getStringCellValue == "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
-    ) // Todistusvalintajono kaikille hakijoille
-    //Valintatapajonosarakkeet loppuu
-    assert(wb.getSheetAt(0).getRow(2).getCell(17).getStringCellValue == "-")
+        .getStringCellValue == "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 1."
+    )
+    // Valintatapajonosarakkeet loppuu
+    assert(wb.getSheetAt(0).getRow(2).getCell(17).getStringCellValue == "raportti.perunut")
     assert(wb.getSheetAt(0).getRow(2).getCell(18).getStringCellValue == "26.06.2024")
-    assert(wb.getSheetAt(0).getRow(2).getCell(19).getStringCellValue == "Nej")
-    assert(wb.getSheetAt(0).getRow(2).getCell(20).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(19).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(2).getCell(20).getStringCellValue == "raportti.lasna_koko_lukuvuosi")
     assert(wb.getSheetAt(0).getRow(2).getCell(21).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(2).getCell(22).getStringCellValue == "Tarkastamatta SV")
-    assert(wb.getSheetAt(0).getRow(2).getCell(23).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(2).getCell(22).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(23).getStringCellValue == "Ja")
     assert(wb.getSheetAt(0).getRow(2).getCell(24).getStringCellValue == "Ja")
     assert(wb.getSheetAt(0).getRow(2).getCell(25).getStringCellValue == "Ja")
-    assert(wb.getSheetAt(0).getRow(2).getCell(26).getStringCellValue == "Laholanaukio 834")
+    assert(wb.getSheetAt(0).getRow(2).getCell(26).getStringCellValue == "Rämsöönranta 368")
     assert(wb.getSheetAt(0).getRow(2).getCell(27).getStringCellValue == "00100")
     assert(wb.getSheetAt(0).getRow(2).getCell(28).getStringCellValue == "HELSINKI")
-    assert(wb.getSheetAt(0).getRow(2).getCell(29).getStringCellValue == "050 64293345")
-    assert(wb.getSheetAt(0).getRow(2).getCell(30).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(29).getStringCellValue == "050 64292261")
+    assert(wb.getSheetAt(0).getRow(2).getCell(30).getStringCellValue == "hakija-33919666@oph.fi")
     assert(wb.getSheetAt(0).getRow(2).getCell(31) == null)
 
-    assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 3)
+    assert(wb.getSheetAt(0).getRow(3).getCell(0).getStringCellValue == "Lehto-Testi, Vikke Testi")
+    assert(wb.getSheetAt(0).getRow(3).getCell(1).getStringCellValue == "04.04.1990")
+    assert(wb.getSheetAt(0).getRow(3).getCell(2).getStringCellValue == "Finland")
+    assert(wb.getSheetAt(0).getRow(3).getCell(3).getStringCellValue == "1.2.246.562.24.18441866015")
+    assert(wb.getSheetAt(0).getRow(3).getCell(4).getStringCellValue == "1.2.246.562.11.00000000000002126102")
+    assert(wb.getSheetAt(0).getRow(3).getCell(5).getStringCellValue == "Toimipiste 2 sv")
+    assert(wb.getSheetAt(0).getRow(3).getCell(6).getStringCellValue == "Hakukohde 2 SV")
+    assert(wb.getSheetAt(0).getRow(3).getCell(7).getStringCellValue == "raportti.uneligible")
+    assert(wb.getSheetAt(0).getRow(3).getCell(8).getNumericCellValue == 1)
+    assert(wb.getSheetAt(0).getRow(3).getCell(9).getStringCellValue == "Hylatty SV")
+    assert(wb.getSheetAt(0).getRow(3).getCell(10).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(3).getCell(11).getStringCellValue == "11.06.2024")
+    // Valintatapajonosarakkeet alkaa
+    // Koevalintajono kaikille hakijoille
+    assert(wb.getSheetAt(0).getRow(3).getCell(12).getStringCellValue == "Et osallistunut valintakokeeseen SV")
+    // Todistusvalinta (YO)
+    assert(wb.getSheetAt(0).getRow(3).getCell(13).getStringCellValue == "-")
+    //Todistusvalintajono ensikertalaisille hakijoille - 1707384681516-2842344525807969324
+    assert(wb.getSheetAt(0).getRow(3).getCell(14).getStringCellValue == "-")
+    // Todistusvalintajono ensikertalaisille hakijoille - 1704199256878262657431481297336
+    assert(wb.getSheetAt(0).getRow(3).getCell(15).getStringCellValue == "Du är inte en förstagångssökande.")
+    // Todistusvalintajono kaikille hakijoille
+    assert(
+      wb.getSheetAt(0)
+        .getRow(3)
+        .getCell(16)
+        .getStringCellValue == "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
+    )
+    // Valintatapajonosarakkeet loppuu
+    assert(wb.getSheetAt(0).getRow(3).getCell(17).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(3).getCell(18).getStringCellValue == "26.06.2024")
+    assert(wb.getSheetAt(0).getRow(3).getCell(19).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(3).getCell(20).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(3).getCell(21).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(3).getCell(22).getStringCellValue == "Tarkastamatta SV")
+    assert(wb.getSheetAt(0).getRow(3).getCell(23).getStringCellValue == "Nej")
+    assert(wb.getSheetAt(0).getRow(3).getCell(24).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(3).getCell(25).getStringCellValue == "Ja")
+    assert(wb.getSheetAt(0).getRow(3).getCell(26).getStringCellValue == "Laholanaukio 834")
+    assert(wb.getSheetAt(0).getRow(3).getCell(27).getStringCellValue == "00100")
+    assert(wb.getSheetAt(0).getRow(3).getCell(28).getStringCellValue == "HELSINKI")
+    assert(wb.getSheetAt(0).getRow(3).getCell(29).getStringCellValue == "050 64293345")
+    assert(wb.getSheetAt(0).getRow(3).getCell(30).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(3).getCell(31) == null)
+
+    assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 4)
     assert(wb.getSheetAt(0).getRow(4) == null)
   }
 
