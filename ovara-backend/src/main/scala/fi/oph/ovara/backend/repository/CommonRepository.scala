@@ -72,7 +72,7 @@ class CommonRepository extends Extractors {
       s"AND hkr_hk.hakukohderyhma_oid in ($hakukohderyhmatStr)"
     }
 
-    sql"""SELECT hk.hakukohde_oid, hk.hakukohde_nimi
+    sql"""SELECT DISTINCT hk.hakukohde_oid, hk.hakukohde_nimi
           FROM pub.pub_dim_hakukohde hk
           JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
           ON hkr_hk.hakukohde_oid = hk.hakukohde_oid
