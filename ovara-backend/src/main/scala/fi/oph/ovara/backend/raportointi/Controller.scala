@@ -10,7 +10,8 @@ import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.apache.poi.ss.usermodel.Workbook
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
+import org.springframework.http.{HttpHeaders, ResponseEntity}
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.csrf.CsrfToken
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
 import org.springframework.web.servlet.view.RedirectView
@@ -58,6 +59,12 @@ class Controller(
 
   @GetMapping(path = Array("login"))
   def login = RedirectView(ovaraUiUrl)
+
+  @GetMapping(path = Array("session"))
+  def response: ResponseEntity[Map[String, String]] = {
+    // Palautetaan jokin paluuarvo koska client-kirjasto sellaise haluaa
+     ResponseEntity.ok(Map("status" -> "ok"))
+  }
 
   @GetMapping(path = Array("csrf"))
   def csrf(csrfToken: CsrfToken): String = mapper.writeValueAsString(csrfToken)
@@ -119,12 +126,12 @@ class Controller(
   def koulutusalat1: String = mapper.writeValueAsString(commonService.getKoulutusalat1)
 
   @GetMapping(path = Array("koulutusalat2"))
-  def koulutusalat2(@RequestParam("koulutusalat1", required = false) koulutusalat1: java.util.Collection[String]): String = 
+  def koulutusalat2(@RequestParam("koulutusalat1", required = false) koulutusalat1: java.util.Collection[String]): String =
     mapper.writeValueAsString(commonService.getKoulutusalat2(if (koulutusalat1 == null) List() else koulutusalat1.asScala.toList)
   )
 
   @GetMapping(path = Array("koulutusalat3"))
-  def koulutusalat3(@RequestParam("koulutusalat2", required = false) koulutusalat2: java.util.Collection[String]): String = 
+  def koulutusalat3(@RequestParam("koulutusalat2", required = false) koulutusalat2: java.util.Collection[String]): String =
     mapper.writeValueAsString(commonService.getKoulutusalat3(if (koulutusalat2 == null) List() else koulutusalat2.asScala.toList))
 
   // RAPORTIT

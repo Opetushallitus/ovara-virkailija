@@ -1,8 +1,10 @@
 import { configuration } from '../configuration';
 import { FetchError, PermissionError } from '@/app/lib/common';
+import { redirect } from 'next/navigation';
 
 let _csrfToken: string;
 const loginUrl = `${configuration.ovaraBackendApiUrl}/login`;
+const isServer = typeof window === 'undefined';
 
 async function csrfToken() {
   if (!_csrfToken) {
@@ -58,7 +60,13 @@ const isRedirected = (response: Response) => {
 };
 
 const redirectToLogin = () => {
-  location.assign(loginUrl);
+  if (isServer) {
+    console.log('server redirect');
+    redirect(loginUrl);
+  } else {
+    console.log('client redirect');
+    location.assign(loginUrl);
+  }
 };
 
 const noContent = (response: Response) => {
@@ -83,6 +91,10 @@ export const doApiFetch = async (
   options?: Options,
   cache?: string,
 ) => {
+  console.log('doApiFetch for resource:', resource);
+  console.log(
+    typeof window === 'undefined' ? 'Running on Server' : 'Running on Client',
+  );
   try {
     const response = await apiFetch(resource, options, cache);
     const responseUrl = new URL(response.url);
