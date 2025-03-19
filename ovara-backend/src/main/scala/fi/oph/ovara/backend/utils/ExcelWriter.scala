@@ -717,7 +717,7 @@ object ExcelWriter {
     })
 
     // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
-    fieldNamesWithIndex.foreach { case (title, index) =>
+    headingFieldNames.zipWithIndex.foreach { case (title, index) =>
       sheet.autoSizeColumn(index)
     }
 
