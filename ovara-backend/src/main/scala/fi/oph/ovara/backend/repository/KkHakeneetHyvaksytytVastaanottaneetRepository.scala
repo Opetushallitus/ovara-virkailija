@@ -41,35 +41,6 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     filters
   }
 
-  private def buildPersonCountFilters(
-                            haut: List[String],
-                            selectedKayttooikeusOrganisaatiot: List[String],
-                            hakukohteet: List[String],
-                            hakukohderyhmat: List[String],
-                            okmOhjauksenAlat: List[String],
-                            tutkinnonTasot: List[String],
-                            aidinkielet: List[String],
-                            kansalaisuudet: List[String],
-                            sukupuoli: Option[String],
-                            ensikertalainen: Option[Boolean],
-                          ): String = {
-
-    val filters = Seq(
-      Some(s"ht.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.jarjestyspaikka_oid", selectedKayttooikeusOrganisaatiot)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.hakukohde_oid", hakukohteet)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hkr_hk.hakukohderyhma_oid", hakukohderyhmat)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "he.aidinkieli", aidinkielet)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "he.kansalaisuusluokka", kansalaisuudet)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "he.sukupuoli", sukupuoli)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "ht.ensikertalainen", ensikertalainen)).filter(_.nonEmpty),
-      buildTutkinnonTasoFilters(tutkinnonTasot)
-    ).collect { case Some(value) => value }.mkString("\n")
-
-    filters
-  }
-
   def buildTutkinnonTasoFilters(
                                  tutkinnonTasot: List[String],
                                ): Option[String] = {
@@ -135,9 +106,19 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                        sukupuoli: Option[String],
                                        ensikertalainen: Option[Boolean],
                                      ): DBIO[Int] = {
-    val filters = buildPersonCountFilters(
-      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, hakukohderyhmat, okmOhjauksenAlat, tutkinnonTasot, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen
-    )
+    val filters = Seq(
+      Some(s"ht.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.jarjestyspaikka_oid", selectedKayttooikeusOrganisaatiot)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.hakukohde_oid", hakukohteet)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hkr_hk.hakukohderyhma_oid", hakukohderyhmat)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "he.aidinkieli", aidinkielet)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "he.kansalaisuusluokka", kansalaisuudet)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "he.sukupuoli", sukupuoli)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "ht.ensikertalainen", ensikertalainen)).filter(_.nonEmpty),
+      buildTutkinnonTasoFilters(tutkinnonTasot)
+    ).collect { case Some(value) => value }.mkString("\n")
+
     val query = sql"""SELECT count(distinct ht.henkilo_oid)
       FROM pub.pub_dim_hakutoive ht
       JOIN pub.pub_dim_hakukohde h ON ht.hakukohde_oid = h.hakukohde_oid
