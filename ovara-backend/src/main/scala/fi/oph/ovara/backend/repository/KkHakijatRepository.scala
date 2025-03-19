@@ -55,7 +55,7 @@ class KkHakijatRepository extends Extractors {
                  ht.vastaanottotieto, ht.viimeinen_vastaanottopaiva, ht.ensikertalainen,
                  ht.ilmoittautumisen_tila, kkh.pohjakoulutus, kkh.maksuvelvollisuus,
                  hlo.valintatuloksen_julkaisulupa, hlo.koulutusmarkkinointilupa, hlo.sahkoinenviestintalupa,
-                 hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka, hlo.puhelin, hlo.sahkoposti
+                 hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka, hlo.kotikunta_nimi, hlo.puhelin, hlo.sahkoposti
           FROM pub.pub_dim_henkilo hlo
           JOIN pub.pub_dim_hakutoive ht
           ON ht.henkilo_hakemus_id = hlo.henkilo_hakemus_id

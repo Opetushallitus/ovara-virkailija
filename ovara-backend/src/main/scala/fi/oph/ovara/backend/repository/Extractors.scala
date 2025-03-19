@@ -109,7 +109,7 @@ trait Extractors extends GenericOvaraJsonFormats {
     }
   }
 
-  implicit val getHakijaResult: GetResult[ToisenAsteenHakija] = GetResult(r =>
+  implicit val getToisenAsteenHakijaResult: GetResult[ToisenAsteenHakija] = GetResult(r =>
     ToisenAsteenHakija(
       hakijanSukunimi = r.nextString(),
       hakijanEtunimi = r.nextString(),
@@ -172,6 +172,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       lahiosoite = r.nextStringOption(),
       postinumero = r.nextStringOption(),
       postitoimipaikka = r.nextStringOption(),
+      kotikunta = extractKielistetty(r.nextStringOption()),
       puhelinnumero = r.nextStringOption(),
       sahkoposti = r.nextStringOption()
     )
