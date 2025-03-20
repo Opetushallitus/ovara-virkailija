@@ -73,7 +73,7 @@ export default function KkHakutilasto() {
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
           <KoulutuksenAlkaminen />
           <Haku haunTyyppi={'korkeakoulu'} />
-          <Tulostustapa />
+          <Tulostustapa kk={true} />
           <OrganisaatioValikot />
           <Hakukohderyhma />
           <Hakukohde locale={locale} t={t} />

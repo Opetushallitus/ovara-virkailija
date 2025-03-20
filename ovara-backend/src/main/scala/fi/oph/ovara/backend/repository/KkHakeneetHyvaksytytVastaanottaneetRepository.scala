@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.domain.KkHakeneetHyvaksytytVastaanottaneetHakukohteittain
+import fi.oph.ovara.backend.domain.KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella
 import fi.oph.ovara.backend.utils.RepositoryUtils
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.Component
@@ -78,7 +78,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                        kansalaisuudet: List[String],
                                        sukupuoli: Option[String],
                                        ensikertalainen: Option[Boolean],
-                                     ): SqlStreamingAction[Vector[KkHakeneetHyvaksytytVastaanottaneetHakukohteittain], KkHakeneetHyvaksytytVastaanottaneetHakukohteittain, Effect] = {
+                                     ): SqlStreamingAction[Vector[KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella], KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella, Effect] = {
 
     val filters = buildFilters(
       haut, selectedKayttooikeusOrganisaatiot, hakukohteet, hakukohderyhmat, okmOhjauksenAlat, tutkinnonTasot, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen
@@ -86,7 +86,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
 
     val query =
       sql"""SELECT
-            h.hakukohde_nimi,
+            h.hakukohde_nimi AS otsikko,
             h.organisaatio_nimi,
             SUM(t.hakijat) AS hakijat,
             SUM(t.ensisijaisia) AS ensisijaisia,
@@ -108,9 +108,57 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       FROM pub.pub_fct_raportti_tilastoraportti_kk t
       JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
       WHERE #$filters
-      GROUP BY h.hakukohde_nimi, h.organisaatio_nimi""".as[KkHakeneetHyvaksytytVastaanottaneetHakukohteittain]
+      GROUP BY h.hakukohde_nimi, h.organisaatio_nimi""".as[KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella]
 
     LOG.info(s"selectHakukohteittainWithParams: ${query.statements.head}")
+    query
+  }
+
+  def selectHauittainWithParams(
+                                       selectedKayttooikeusOrganisaatiot: List[String],
+                                       haut: List[String],
+                                       hakukohteet: List[String],
+                                       hakukohderyhmat: List[String],
+                                       okmOhjauksenAlat: List[String],
+                                       tutkinnonTasot: List[String],
+                                       aidinkielet: List[String],
+                                       kansalaisuudet: List[String],
+                                       sukupuoli: Option[String],
+                                       ensikertalainen: Option[Boolean],
+                                     ): SqlStreamingAction[Vector[KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella], KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella, Effect] = {
+
+    val filters = buildFilters(
+      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, hakukohderyhmat, okmOhjauksenAlat, tutkinnonTasot, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen
+    )
+
+    val query =
+      sql"""SELECT
+            ha.haku_nimi AS otsikko,
+            h.organisaatio_nimi,
+            SUM(t.hakijat) AS hakijat,
+            SUM(t.ensisijaisia) AS ensisijaisia,
+            SUM(t.ensikertalaisia) AS ensikertalaisia,
+            SUM(t.hyvaksytyt) AS hyvaksytyt,
+            SUM(t.vastaanottaneet) AS vastaanottaneet,
+            SUM(t.lasna) AS lasna,
+            SUM(t.poissa) AS poissa,
+            SUM(t.ilm_yht) AS ilm_yht,
+            SUM(t.maksuvelvollisia) AS maksuvelvollisia,
+            MIN(h.valintaperusteiden_aloituspaikat) AS valinnan_aloituspaikat,
+            MIN(h.hakukohteen_aloituspaikat) AS aloituspaikat,
+            SUM(t.toive_1) AS toive1,
+            SUM(t.toive_2) AS toive2,
+            SUM(t.toive_3) AS toive3,
+            SUM(t.toive_4) AS toive4,
+            SUM(t.toive_5) AS toive5,
+            SUM(t.toive_6) AS toive6
+      FROM pub.pub_fct_raportti_tilastoraportti_kk t
+      JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
+      JOIN pub.pub_dim_haku ha ON h.haku_oid = ha.haku_oid
+      WHERE #$filters
+      GROUP BY ha.haku_nimi, h.organisaatio_nimi""".as[KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella]
+
+    LOG.info(s"selectHauittainWithParams: ${query.statements.head}")
     query
   }
 
@@ -149,7 +197,6 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       sql"""SELECT count(distinct ht.henkilo_oid)
       FROM pub.pub_dim_hakutoive ht
       JOIN pub.pub_dim_hakukohde h ON ht.hakukohde_oid = h.hakukohde_oid
-      JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk ON ht.hakukohde_oid = hkr_hk.hakukohde_oid
       JOIN pub.pub_dim_henkilo he on ht.henkilo_hakemus_id = he.henkilo_hakemus_id
       WHERE #$filters
       """.as[Int].head

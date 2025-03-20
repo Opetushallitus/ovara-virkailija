@@ -49,6 +49,20 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
     )
 
     val queryResult = tulostustapa match
+      case "hauittain" =>
+        val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHauittainWithParams(
+          selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
+          haut = haku,
+          hakukohteet = hakukohteet,
+          hakukohderyhmat = hakukohderyhmat,
+          okmOhjauksenAlat = okmOhjauksenAlat,
+          tutkinnonTasot = tutkinnonTasot,
+          aidinkielet = aidinkielet,
+          kansalaisuudet = kansalaisuudet,
+          sukupuoli = sukupuoli,
+          ensikertalainen = ensikertalainen
+        )
+        db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectHauittainWithParams").map(r => KkHakeneetHyvaksytytVastaanottaneetResult(r))
       case _ =>
         //      case "hakukohteittain" =>
         val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams(
