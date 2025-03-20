@@ -25,11 +25,17 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                             ensikertalainen: Option[Boolean],
                           ): String = {
 
+    val hakukohderyhmaFilter =
+      if (hakukohderyhmat.nonEmpty) {
+        Some(s"AND (t.hakukohde_oid IN (SELECT DISTINCT hakukohde_oid FROM pub.pub_dim_hakukohderyhma_ja_hakukohteet WHERE hakukohderyhma_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(hakukohderyhmat)})))")
+      }
+      else
+        None
     val filters = Seq(
       Some(s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.jarjestyspaikka_oid", selectedKayttooikeusOrganisaatiot)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.hakukohde_oid", hakukohteet)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hkr_hk.hakukohderyhma_oid", hakukohderyhmat)).filter(_.nonEmpty),
+      hakukohderyhmaFilter,
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.aidinkieli", aidinkielet)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.kansalaisuus", kansalaisuudet)).filter(_.nonEmpty),
@@ -78,17 +84,31 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       haut, selectedKayttooikeusOrganisaatiot, hakukohteet, hakukohderyhmat, okmOhjauksenAlat, tutkinnonTasot, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen
     )
 
-    val query = sql"""SELECT h.hakukohde_nimi, h.organisaatio_nimi, SUM(t.hakijat) AS hakijat, SUM(t.ensisijaisia) AS ensisijaisia, SUM(t.ensikertalaisia) AS ensikertalaisia,
-    SUM(t.hyvaksytyt) AS hyvaksytyt, SUM(t.vastaanottaneet) AS vastaanottaneet, SUM(t.lasna) AS lasna, SUM(t.poissa) AS poissa, SUM(t.ilm_yht) AS ilm_yht,
-    SUM(t.maksuvelvollisia) AS maksuvelvollisia, MIN(h.valintaperusteiden_aloituspaikat) AS valinnan_aloituspaikat, MIN(h.hakukohteen_aloituspaikat) AS aloituspaikat,
-    SUM(t.toive_1) AS toive1, SUM(t.toive_2) AS toive2, SUM(t.toive_3) AS toive3, SUM(t.toive_4) AS toive4, SUM(t.toive_5) AS toive5, SUM(t.toive_6) AS toive6
-    FROM pub.pub_fct_raportti_tilastoraportti_kk t
-    JOIN pub.pub_dim_hakukohde h
-    ON t.hakukohde_oid = h.hakukohde_oid
-    JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
-    ON h.hakukohde_oid = hkr_hk.hakukohde_oid
-    WHERE #$filters
-    GROUP BY h.hakukohde_nimi, h.organisaatio_nimi""".as[KkHakeneetHyvaksytytVastaanottaneetHakukohteittain]
+    val query =
+      sql"""SELECT
+            h.hakukohde_nimi,
+            h.organisaatio_nimi,
+            SUM(t.hakijat) AS hakijat,
+            SUM(t.ensisijaisia) AS ensisijaisia,
+            SUM(t.ensikertalaisia) AS ensikertalaisia,
+            SUM(t.hyvaksytyt) AS hyvaksytyt,
+            SUM(t.vastaanottaneet) AS vastaanottaneet,
+            SUM(t.lasna) AS lasna,
+            SUM(t.poissa) AS poissa,
+            SUM(t.ilm_yht) AS ilm_yht,
+            SUM(t.maksuvelvollisia) AS maksuvelvollisia,
+            MIN(h.valintaperusteiden_aloituspaikat) AS valinnan_aloituspaikat,
+            MIN(h.hakukohteen_aloituspaikat) AS aloituspaikat,
+            SUM(t.toive_1) AS toive1,
+            SUM(t.toive_2) AS toive2,
+            SUM(t.toive_3) AS toive3,
+            SUM(t.toive_4) AS toive4,
+            SUM(t.toive_5) AS toive5,
+            SUM(t.toive_6) AS toive6
+      FROM pub.pub_fct_raportti_tilastoraportti_kk t
+      JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
+      WHERE #$filters
+      GROUP BY h.hakukohde_nimi, h.organisaatio_nimi""".as[KkHakeneetHyvaksytytVastaanottaneetHakukohteittain]
 
     LOG.info(s"selectHakukohteittainWithParams: ${query.statements.head}")
     query
@@ -106,11 +126,17 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                        sukupuoli: Option[String],
                                        ensikertalainen: Option[Boolean],
                                      ): DBIO[Int] = {
+    val hakukohderyhmaFilter =
+      if (hakukohderyhmat.nonEmpty) {
+        Some(s"AND (ht.hakukohde_oid IN (SELECT DISTINCT hakukohde_oid FROM pub.pub_dim_hakukohderyhma_ja_hakukohteet WHERE hakukohderyhma_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(hakukohderyhmat)})))")
+      }
+      else
+        None
     val filters = Seq(
       Some(s"ht.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.jarjestyspaikka_oid", selectedKayttooikeusOrganisaatiot)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.hakukohde_oid", hakukohteet)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hkr_hk.hakukohderyhma_oid", hakukohderyhmat)).filter(_.nonEmpty),
+      hakukohderyhmaFilter,
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "he.aidinkieli", aidinkielet)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "he.kansalaisuusluokka", kansalaisuudet)).filter(_.nonEmpty),
@@ -119,13 +145,14 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       buildTutkinnonTasoFilters(tutkinnonTasot)
     ).collect { case Some(value) => value }.mkString("\n")
 
-    val query = sql"""SELECT count(distinct ht.henkilo_oid)
+    val query =
+      sql"""SELECT count(distinct ht.henkilo_oid)
       FROM pub.pub_dim_hakutoive ht
       JOIN pub.pub_dim_hakukohde h ON ht.hakukohde_oid = h.hakukohde_oid
       JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk ON ht.hakukohde_oid = hkr_hk.hakukohde_oid
       JOIN pub.pub_dim_henkilo he on ht.henkilo_hakemus_id = he.henkilo_hakemus_id
-    WHERE #$filters
-    """.as[Int].head
+      WHERE #$filters
+      """.as[Int].head
 
     LOG.info(s"selectHakijatYhteensaWithParams: ${query.statements.head}")
     query
