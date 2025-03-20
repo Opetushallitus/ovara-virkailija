@@ -2,6 +2,7 @@ package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.KkHakija
 import fi.oph.ovara.backend.utils.RepositoryUtils
+import fi.oph.ovara.backend.utils.RepositoryUtils.makeListOfValuesQueryStr
 import org.springframework.stereotype.Component
 import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api.*
@@ -44,11 +45,18 @@ class KkHakijatRepository extends Extractors {
 
     val optionalJarjestyspaikkaQuery =
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hk.jarjestyspaikka_oid", kayttooikeusOrganisaatiot)
-    val optionalHakukohderyhmaQuery =
-      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hkr_hk.hakukohderyhma_oid", hakukohderyhmat)
+
+    val hakukohderyhmatStr = makeListOfValuesQueryStr(hakukohderyhmat)
+    val optionalHakukohderyhmaSubSelect = if (hakukohderyhmatStr.isEmpty) {
+      ""
+    } else {
+      "AND hk.hakukohde_oid IN (" +
+        "SELECT hkr_hk.hakukohde_oid FROM pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk " +
+        s"WHERE hkr_hk.hakukohderyhma_oid IN ($hakukohderyhmatStr))"
+    }
 
     //TODO: palautetaan yo-arvosanat
-    sql"""SELECT DISTINCT hlo.sukunimi, hlo.etunimet, hlo.hetu, hlo.syntymaaika,
+    sql"""SELECT hlo.sukunimi, hlo.etunimet, hlo.hetu, hlo.syntymaaika,
                  hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid, hk.organisaatio_nimi,
                  hk.hakukohde_nimi, kkh.hakukelpoisuus, ht.hakutoivenumero, ht.valintatieto,
                  ht.ehdollisesti_hyvaksytty, ht.valintatiedon_pvm, ht.valintatapajonot,
@@ -64,11 +72,9 @@ class KkHakijatRepository extends Extractors {
           ON ht.hakukohde_oid = hk.hakukohde_oid
           JOIN pub.pub_fct_raportti_hakijat_kk kkh
           ON ht.hakutoive_id = kkh.hakutoive_id
-          JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
-          ON hk.hakukohde_oid = hkr_hk.hakukohde_oid
           WHERE ht.haku_oid IN (#$hakuStr)
           #$optionalJarjestyspaikkaQuery
-          #$optionalHakukohderyhmaQuery
+          #$optionalHakukohderyhmaSubSelect
           #$optionalHakukohdeQuery
           #$optionalValintatietoQuery
           #$optionalVastaanottotietoQuery
