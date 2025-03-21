@@ -40,9 +40,9 @@ export const Hakukohde = ({
       options={hakukohteet?.map((hakukohde) => {
         return {
           value: hakukohde?.hakukohde_oid,
-          label:
-            `${hakukohde?.hakukohde_nimi[locale]} (${hakukohde.hakukohde_oid})` ||
-            '',
+          label: hakukohde?.hakukohde_nimi[locale]
+            ? `${hakukohde.hakukohde_nimi[locale]} (${hakukohde.hakukohde_oid})`
+            : '',
         };
       })}
       onChange={(e, value) =>

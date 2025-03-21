@@ -1,8 +1,10 @@
 import { configuration } from '../configuration';
 import { FetchError, PermissionError } from '@/app/lib/common';
+import { redirect } from 'next/navigation';
 
 let _csrfToken: string;
 const loginUrl = `${configuration.ovaraBackendApiUrl}/login`;
+const isServer = typeof window === 'undefined';
 
 async function csrfToken() {
   if (!_csrfToken) {
@@ -58,7 +60,11 @@ const isRedirected = (response: Response) => {
 };
 
 const redirectToLogin = () => {
-  location.assign(loginUrl);
+  if (isServer) {
+    redirect(loginUrl);
+  } else {
+    location.assign(loginUrl);
+  }
 };
 
 const noContent = (response: Response) => {
@@ -70,8 +76,7 @@ const responseToData = async (res: Response) => {
     return {};
   }
   try {
-    const result = await res.json();
-    return result;
+    return await res.json();
   } catch (e) {
     console.error('Parsing fetch response body as JSON failed!');
     return Promise.reject(e);

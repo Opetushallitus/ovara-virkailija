@@ -7,6 +7,7 @@ import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl
 import fi.vm.sade.javautils.nio.cas.{CasClient, CasClientBuilder, CasConfig}
 import org.apereo.cas.client.session.{SessionMappingStorage, SingleSignOutFilter}
 import org.apereo.cas.client.validation.{Cas20ServiceTicketValidator, TicketValidator}
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.{Bean, Configuration}
 import org.springframework.core.annotation.Order
@@ -24,6 +25,7 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint
 import org.springframework.security.web.context.{HttpSessionSecurityContextRepository, SecurityContextRepository}
 import org.springframework.session.jdbc.config.annotation.SpringSessionDataSource
 import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHttpSession
+import org.springframework.session.web.http.{CookieSerializer, DefaultCookieSerializer}
 
 @Configuration
 @EnableWebSecurity
@@ -51,7 +53,7 @@ class SecurityConfig  {
 
   @Bean
   def auditLog(): AuditLog = AuditLog
-  
+
   @Bean
   def createCasClient(): CasClient = CasClientBuilder.build(CasConfig.CasConfigBuilder(
     cas_username,
@@ -134,6 +136,7 @@ class SecurityConfig  {
 
   @Bean
   def casFilterChain(http: HttpSecurity, authenticationFilter: CasAuthenticationFilter, sessionMappingStorage: SessionMappingStorage, securityContextRepository: SecurityContextRepository, casAuthenticationEntryPoint: CasAuthenticationEntryPoint): SecurityFilterChain = {
+
     val SWAGGER_WHITELIST = List(
       "/swagger-resources",
       "/swagger-resources/**",
@@ -152,6 +155,7 @@ class SecurityConfig  {
         .ignoringRequestMatchers("/api/healthcheck", "/api/csrf")
       )
       .exceptionHandling(exceptionHandling =>
+        // corsin takia suoran cas uudelleenohjauksen sijaan palautetaan http 401 ja käli hoitaa forwardoinnin login apiin
         exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
       )
       .addFilterAt(authenticationFilter, classOf[CasAuthenticationFilter])
@@ -165,7 +169,7 @@ class SecurityConfig  {
       .build()
   }
 
-
+  // api joka ohjaa tarvittaessa kirjautumattoman käyttäjän cas loginiin
   @Bean
   @Order(1)
   def apiLoginFilterChain(http: HttpSecurity, casAuthenticationEntryPoint: CasAuthenticationEntryPoint): SecurityFilterChain = {
@@ -183,9 +187,17 @@ class SecurityConfig  {
   //
   @Bean
   def singleLogoutFilter(sessionMappingStorage: SessionMappingStorage): SingleSignOutFilter = {
+    SingleSignOutFilter.setSessionMappingStorage(sessionMappingStorage)
     val singleSignOutFilter: SingleSignOutFilter = new SingleSignOutFilter();
     singleSignOutFilter.setIgnoreInitConfiguration(true);
     singleSignOutFilter
   }
 
+  @Bean
+  def cookieSerializer(): CookieSerializer = {
+    val serializer = new DefaultCookieSerializer();
+    serializer.setUseSecureCookie(true)
+    serializer.setCookieName("JSESSIONID");
+    serializer;
+  }
 }
