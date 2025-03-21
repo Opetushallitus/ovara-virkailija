@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.{Haku, Hakukohde, Koodi, Organisaatio, OrganisaatioHierarkia}
+import fi.oph.ovara.backend.domain.*
 import fi.oph.ovara.backend.repository.{CommonRepository, OvaraDatabase}
 import fi.oph.ovara.backend.utils.Constants.{
   KOULUTUSTOIMIJARAPORTTI,
@@ -9,7 +9,11 @@ import fi.oph.ovara.backend.utils.Constants.{
   TOIMIPISTERAPORTTI
 }
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, OrganisaatioUtils}
+import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.CacheManager
+import org.springframework.cache.annotation.{CacheEvict, Cacheable}
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
@@ -17,27 +21,48 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
   @Autowired
   val db: OvaraDatabase = null
 
+  @Autowired
+  val cacheManager: CacheManager = null
+
+  val LOG: Logger = LoggerFactory.getLogger(classOf[LokalisointiService])
+
+  @Cacheable(value = Array("alkamisvuodet"), key = "#root.methodName")
   def getAlkamisvuodet: Vector[String] = {
     db.run(commonRepository.selectDistinctAlkamisvuodet(), "selectDistinctAlkamisvuodet")
+  }
+
+  @CacheEvict(value = Array("alkamisvuodet"), allEntries = true)
+  @Scheduled(fixedRateString = "${caching.spring.alkamisvuodetTTL}")
+  def emptyAlkamisvuodetCache(): Unit = {
+    LOG.info("Emptying alkamisvuodet cache")
   }
 
   def getHaut(alkamiskaudet: List[String], haunTyyppi: String): Vector[Haku] = {
     db.run(commonRepository.selectDistinctExistingHaut(alkamiskaudet, haunTyyppi), "selectDistinctExistingHaut")
   }
 
-  def getHakukohteet(oppilaitokset: List[String], toimipisteet: List[String], haut: List[String]): Vector[Hakukohde] = {
+  def getHakukohteet(
+      oppilaitokset: List[String],
+      toimipisteet: List[String],
+      haut: List[String],
+      hakukohderyhmat: List[String]
+  ): Vector[Hakukohde] = {
     val user                      = userService.getEnrichedUserDetails
     val authorities               = user.authorities
-    val kayttooikeusOrganisaatiot = AuthoritiesUtil.getOrganisaatiot(authorities)
+    val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
 
     val allowedOrgOidsFromSelection =
       getAllowedOrgOidsFromOrgSelection(kayttooikeusOrganisaatiot, oppilaitokset, toimipisteet)
 
-    if (allowedOrgOidsFromSelection.nonEmpty) {
+    if (allowedOrgOidsFromSelection.nonEmpty || hakukohderyhmat.nonEmpty) {
       db.run(
         commonRepository
-          .selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(allowedOrgOidsFromSelection, haut),
-        "selectDistinctExistingHakukohteet"
+          .selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(
+            allowedOrgOidsFromSelection,
+            haut,
+            hakukohderyhmat
+          ),
+        "selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja"
       )
     } else {
       Vector()
@@ -84,9 +109,20 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     db.run(commonRepository.selectDistinctKoulutusalat3(koulutusalat2), "selectDistinctKoulutusalat3")
   }
 
+  def getHakukohderyhmat(haut: List[String]): Vector[Hakukohderyhma] = {
+    val user             = userService.getEnrichedUserDetails
+    val kayttooikeusOids = AuthoritiesUtil.getKayttooikeusOids(user.authorities)
+    val hakukohderyhmaOids =
+      if (hasOPHPaakayttajaRights(kayttooikeusOids))
+        List() // ei rajata listaa pääkäyttäjälle
+      else
+        kayttooikeusOids
+    db.run(commonRepository.selectHakukohderyhmat(hakukohderyhmaOids, haut), "selectHakukohderyhmat")
+  }
+
   def getOrganisaatioHierarkiatWithUserRights: List[OrganisaatioHierarkia] = {
     val user          = userService.getEnrichedUserDetails
-    val organisaatiot = AuthoritiesUtil.getOrganisaatiot(user.authorities)
+    val organisaatiot = AuthoritiesUtil.getKayttooikeusOids(user.authorities)
 
     val parentOids = if (organisaatiot.contains(OPH_PAAKAYTTAJA_OID)) {
       List(OPH_PAAKAYTTAJA_OID)
@@ -223,7 +259,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       kayttooikeusOrganisaatioOids: List[String],
       oppilaitosOids: List[String],
       toimipisteOids: List[String],
-      koulutustoimijaOid: Option[String] = None,
+      koulutustoimijaOid: Option[String] = None
   ): List[String] = {
     val hierarkiat =
       if (toimipisteOids.nonEmpty) {
@@ -231,7 +267,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       } else if (oppilaitosOids.nonEmpty) {
         getOppilaitoshierarkiat(oppilaitosOids)
       } else if (koulutustoimijaOid.isDefined) {
-        getKoulutustoimijahierarkia(List(koulutustoimijaOid.get))  
+        getKoulutustoimijahierarkia(List(koulutustoimijaOid.get))
       } else {
         List()
       }

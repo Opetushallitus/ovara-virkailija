@@ -54,6 +54,37 @@ export const useHakijatSearchParams = () => {
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
+  const [selectedNaytaYoArvosanat, setSelectedNaytaYoArvosanat] = useQueryState(
+    'nayta-yo-arvosanat',
+    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS).withDefault(true),
+  );
+
+  const [selectedNaytaHetu, setSelectedNaytaHetu] = useQueryState(
+    'nayta-hetu',
+    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS).withDefault(true),
+  );
+
+  const [selectedNaytaPostiosoite, setSelectedNaytaPostiosoite] = useQueryState(
+    'nayta-postiosoite',
+    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS).withDefault(true),
+  );
+
+  const emptyAllHakijatParams = () => {
+    console.log('EMPTY ALL HAKIJAT PARAMS');
+    setSelectedPohjakoulutukset(null);
+    setSelectedVastaanottotieto(null);
+    setSelectedMarkkinointilupa(null);
+    setSelectedJulkaisulupa(null);
+    setSelectedValintatieto(null);
+    setSelectedKaksoistutkinto(null);
+    setSelectedUrheilijatutkinto(null);
+    setSelectedSoraTerveys(null);
+    setSelectedSoraAiempi(null);
+    setSelectedNaytaYoArvosanat(null);
+    setSelectedNaytaHetu(null);
+    setSelectedNaytaPostiosoite(null);
+  };
+
   return {
     selectedPohjakoulutukset,
     setSelectedPohjakoulutukset,
@@ -73,5 +104,12 @@ export const useHakijatSearchParams = () => {
     setSelectedSoraTerveys,
     selectedSoraAiempi,
     setSelectedSoraAiempi,
+    selectedNaytaYoArvosanat,
+    setSelectedNaytaYoArvosanat,
+    selectedNaytaHetu,
+    setSelectedNaytaHetu,
+    selectedNaytaPostiosoite,
+    setSelectedNaytaPostiosoite,
+    emptyAllHakijatParams,
   };
 };

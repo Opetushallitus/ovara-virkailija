@@ -1,8 +1,10 @@
 import { OvaraRadioGroup } from '@/app/components/form/ovara-radio-group';
 import { SUKUPUOLET } from '@/app/lib/constants';
 import { useHakeneetSearchParams } from '@/app/hooks/searchParams/useHakeneetSearchParams';
+import { useTranslate } from '@tolgee/react';
 
-export const Sukupuoli = ({ t }: { t: (key: string) => string }) => {
+export const Sukupuoli = () => {
+  const { t } = useTranslate();
   const { selectedSukupuoli, setSelectedSukupuoli } = useHakeneetSearchParams();
 
   const sukupuoliLabels = {

@@ -43,7 +43,7 @@ class AuthoritiesUtilSpec extends AnyFlatSpec {
       "ROLE_APP_KOUTA",
       "ROLE_APP_RAPORTOINTI_KK"
     )
-    assert(AuthoritiesUtil.getOrganisaatiot(allAuthorities) == List("1.2.246.562.10.654321"))
+    assert(AuthoritiesUtil.getKayttooikeusOids(allAuthorities) == List("1.2.246.562.10.654321"))
   }
 
   it should "return all organisaatiot the user has rights for" in {
@@ -56,7 +56,7 @@ class AuthoritiesUtilSpec extends AnyFlatSpec {
       "ROLE_APP_RAPORTOINTI_KK",
       "ROLE_APP_RAPORTOINTI_1.2.246.562.10.333334445",
     )
-    assert(AuthoritiesUtil.getOrganisaatiot(allAuthorities) == List(
+    assert(AuthoritiesUtil.getKayttooikeusOids(allAuthorities) == List(
       "1.2.246.562.10.654321", "1.2.246.562.10.789101112", "1.2.246.562.10.333334445"))
   }
 }

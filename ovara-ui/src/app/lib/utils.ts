@@ -5,6 +5,7 @@ import {
   OPPILAITOSORGANISAATIOTYYPPI,
   TOIMIPISTEORGANISAATIOTYYPPI,
 } from './constants';
+import { match } from 'ts-pattern';
 
 export type KoulutuksenAlkaminen = {
   alkamiskausinimi: string;
@@ -61,6 +62,13 @@ export const hasOvaraRole = (userRoles?: Array<string>) => {
 export const hasOvaraToinenAsteRole = (userRoles?: Array<string>) => {
   return (
     userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_2ASTE') ||
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA')
+  );
+};
+
+export const hasOvaraKkRole = (userRoles?: Array<string>) => {
+  return (
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_KK') ||
     userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA')
   );
 };
@@ -162,4 +170,14 @@ export const getHarkinnanvaraisuusTranslation = (
   const match = harkinnanvaraisuuden_syy.match(/(ATARU)_(\w*)/);
   const lowerCaseMatch = match?.[2].toLowerCase();
   return lowerCaseMatch ? t(`raportti.${lowerCaseMatch}`) : t('');
+};
+
+export const getKansalaisuusTranslation = (
+  kansalaisuus: string,
+  t: (s: string) => string,
+) => {
+  return match(kansalaisuus)
+    .with('1', () => t('raportti.kansalaisuus.suomi'))
+    .with('2', () => t('raportti.kansalaisuus.eu-eta'))
+    .otherwise(() => t('raportti.kansalaisuus.muu'));
 };

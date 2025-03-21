@@ -13,7 +13,7 @@ type Haku = {
   haku_nimi: Kielistetty;
 };
 
-export const Haku = () => {
+export const Haku = ({ haunTyyppi }: { haunTyyppi: string }) => {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const locale = (user?.asiointikieli ?? 'fi') as LanguageCode;
@@ -24,7 +24,8 @@ export const Haku = () => {
   const queryParams = useSearchParams();
   const queryParamsStr = queryParams.toString();
   const queryParamsWithHauntyyppi = new URLSearchParams(queryParamsStr);
-  queryParamsWithHauntyyppi.set('haun_tyyppi', 'toinen_aste');
+  queryParamsWithHauntyyppi.set('haun_tyyppi', haunTyyppi);
+
   const { data } = useFetchHaut(
     queryParamsWithHauntyyppi.toString(),
     fetchEnabled,

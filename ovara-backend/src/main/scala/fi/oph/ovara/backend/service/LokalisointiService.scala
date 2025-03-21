@@ -5,7 +5,7 @@ import org.json4s.jackson.JsonMethods.*
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.cache.CacheManager
-import org.springframework.cache.annotation.{CacheEvict, CachePut, Cacheable}
+import org.springframework.cache.annotation.{CacheEvict, Cacheable}
 import org.springframework.context.annotation.Bean
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -33,35 +33,27 @@ class LokalisointiService(userService: UserService, webClientBuilder: WebClient.
 
   @Cacheable(value = Array("lokalisointi"))
   def getOvaraTranslations(asiointikieli: String): Map[String, String] = {
+    val json =
+      try {
+        webClient(webClientBuilder)
+          .get()
+          .uri(s"/ovara/$asiointikieli.json")
+          .retrieve()
+          .bodyToMono(classOf[String])
+          .retryWhen(
+            Retry
+              .fixedDelay(3, Duration.ofSeconds(2))
+              .filter(throwable => throwable.isInstanceOf[Exception])
+              .doAfterRetry(retrySignal => LOG.error(s"Failed to fetch translations for language $asiointikieli"))
+          )
+          .block()
+      } catch {
+        case throwable: Throwable =>
+          LOG.error(s"Failed to fetch translations for language $asiointikieli after max retries")
+          ""
+      }
 
-    val lokalisointiCache = cacheManager.getCache("lokalisointi")
-    val cachedLokalisoinnit = lokalisointiCache.get(asiointikieli, classOf[Map[String, String]])
-
-    if (cachedLokalisoinnit != null) {
-      cachedLokalisoinnit
-    } else {
-      val json =
-        try {
-          webClient(webClientBuilder)
-            .get()
-            .uri(s"/ovara/$asiointikieli.json")
-            .retrieve()
-            .bodyToMono(classOf[String])
-            .retryWhen(
-              Retry
-                .fixedDelay(3, Duration.ofSeconds(2))
-                .filter(throwable => throwable.isInstanceOf[Exception])
-                .doAfterRetry(retrySignal => LOG.error(s"Failed to fetch translations for language $asiointikieli"))
-            )
-            .block()
-        } catch {
-          case throwable: Throwable =>
-            LOG.error(s"Failed to fetch translations for language $asiointikieli after max retries")
-            ""
-        }
-
-      parse(json).extract[Map[String, String]]
-    }
+    parse(json).extract[Map[String, String]]
   }
 
   @CacheEvict(value = Array("lokalisointi"), allEntries = true)

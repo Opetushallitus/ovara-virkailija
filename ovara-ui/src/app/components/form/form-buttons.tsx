@@ -1,6 +1,8 @@
 import { useTranslate } from '@tolgee/react';
 import { OphButton } from '@opetushallitus/oph-design-system';
 import { Box, Stack } from '@mui/material';
+import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
+import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 
 type ExcelDownloadButton = {
   disabled: boolean;
@@ -14,7 +16,7 @@ export const FormButtons = ({
 }: {
   disabled: boolean;
   downloadExcel: () => void;
-  fieldsToClear: Array<() => void>;
+  fieldsToClear?: Array<() => void>;
 }) => {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'end' }}>
@@ -32,16 +34,25 @@ export const FormButtons = ({
 export const TyhjennaHakuehdotButton = ({
   fieldsToClear,
 }: {
-  fieldsToClear: Array<() => void>;
+  fieldsToClear?: Array<() => void>;
 }) => {
   const { t } = useTranslate();
 
   const emptySearchParams = () => {
-    fieldsToClear.forEach((clearField) => clearField());
+    fieldsToClear?.forEach((clearField) => clearField());
+  };
+
+  const { emptyAllHakijatParams } = useHakijatSearchParams();
+  const { emptyAllCommonParams } = useCommonSearchParams();
+
+  const emptyAllSearchParams = () => {
+    emptySearchParams();
+    emptyAllHakijatParams();
+    emptyAllCommonParams();
   };
 
   return (
-    <OphButton variant="outlined" onClick={emptySearchParams}>
+    <OphButton variant="outlined" onClick={() => emptyAllSearchParams()}>
       {t('raportti.tyhjenna-hakuehdot')}
     </OphButton>
   );
