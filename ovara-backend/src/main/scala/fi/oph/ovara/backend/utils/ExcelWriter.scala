@@ -385,11 +385,13 @@ object ExcelWriter {
 
   def shouldSkipCreatingCell(
       fieldName: String,
+      naytaArvosanat: Boolean,
       naytaHetu: Boolean,
       naytaPostiosoite: Boolean
   ): Boolean = {
     (fieldName == "hetu" && !naytaHetu) ||
-    (POSTIOSOITEFIELDS.contains(fieldName) && !naytaPostiosoite)
+    (POSTIOSOITEFIELDS.contains(fieldName) && !naytaPostiosoite) ||
+    (fieldName == "arvosanat" && !naytaArvosanat)
   }
 
   def getTranslationForCellValue(s: String, translations: Map[String, String]): String = {
@@ -537,12 +539,13 @@ object ExcelWriter {
   }
 
   def getHeadingFieldNames(
+      naytaArvosanat: Boolean,
       naytaHetu: Boolean,
       naytaPostiosoite: Boolean,
       valintatapajonot: Seq[Valintatapajono],
       arvosanat: Seq[String]
   ): List[String] = {
-    val optionallyShowableFields = List("hetu") ::: POSTIOSOITEFIELDS
+    val optionallyShowableFields = List("hetu", "arvosanat") ::: POSTIOSOITEFIELDS
 
     val fieldNames =
       classOf[KkHakijaWithCombinedNimi].getDeclaredFields
@@ -554,7 +557,8 @@ object ExcelWriter {
         fieldName == "hetu" && naytaHetu ||
         POSTIOSOITEFIELDS.contains(
           fieldName
-        ) && naytaPostiosoite
+        ) && naytaPostiosoite ||
+        fieldName == "arvosanat" && naytaArvosanat
     })
 
     (for (field <- showableFieldNames) yield {
@@ -642,6 +646,7 @@ object ExcelWriter {
 
     val optionallyShowableFields = List("hetu") ::: POSTIOSOITEFIELDS
 
+    val naytaArvosanat   = maybeNaytaYoArvosanat.getOrElse(false)
     val naytaHetu        = maybeNaytaHetu.getOrElse(false)
     val naytaPostiosoite = maybeNaytaPostiosoite.getOrElse(false)
 
@@ -653,6 +658,7 @@ object ExcelWriter {
 
     val headingFieldNames =
       getHeadingFieldNames(
+        naytaArvosanat,
         naytaHetu,
         naytaPostiosoite,
         distinctSortedValintatapajonotInQueryResult,
@@ -693,7 +699,7 @@ object ExcelWriter {
       var numberOfArvosanat        = 0
 
       for ((fieldName, i) <- fieldNamesWithIndex) yield {
-        if (shouldSkipCreatingCell(fieldName, naytaHetu, naytaPostiosoite)) {
+        if (shouldSkipCreatingCell(fieldName, naytaArvosanat, naytaHetu, naytaPostiosoite)) {
           numberOfSkippedFields += 1
         } else if (fieldName == "valintatapajonot") {
           cellIndex = i - numberOfSkippedFields
@@ -736,6 +742,7 @@ object ExcelWriter {
             }
             writeValueToCell(maybeArvosana, fieldName, cell, asiointikieli, translations)
           })
+
           numberOfSkippedFields += 1
         } else {
           cellIndex = i + numberOfValintatapajonot + numberOfArvosanat - numberOfSkippedFields
