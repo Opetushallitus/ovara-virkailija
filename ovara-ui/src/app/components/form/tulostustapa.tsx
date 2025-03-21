@@ -15,7 +15,7 @@ const tulostustavat = ({
         'koulutustoimijoittain',
         'oppilaitoksittain',
         'toimipisteittain',
-        'okmohjauksenaloittain',
+        'okm-ohjauksen-aloittain',
         'hauittain',
         'hakukohteittain',
         'hakukohderyhmittain',
