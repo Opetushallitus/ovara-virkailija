@@ -12,6 +12,7 @@ export const OvaraCheckboxGroup = ({
   setSelectedValues,
   t,
   getTranslation,
+  sx,
 }: {
   id: string;
   options: Array<string>;
@@ -19,10 +20,12 @@ export const OvaraCheckboxGroup = ({
   setSelectedValues: (v: Array<string> | null) => void;
   t: TranslationFunction;
   getTranslation?: (s: string, t: TranslationFunction) => string;
+  sx: React.CSSProperties;
 }) => {
   return (
     <OvaraFormControl
       sx={{
+        ...sx,
         display: 'flex',
       }}
       label={t(`raportti.${id}`)}

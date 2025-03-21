@@ -32,6 +32,7 @@ import { Urheilijatutkinto } from '@/app/components/form/Urheilijatutkinto';
 import { Pohjakoulutus } from '@/app/components/form/pohjakoulutus';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
+import { MainContainer } from '@/app/components/main-container';
 
 export default function Hakijat() {
   const { t } = useTranslate();
@@ -66,7 +67,7 @@ export default function Hakijat() {
   const queryParamsStr = useSearchParams().toString();
 
   return (
-    <Box>
+    <MainContainer>
       {hasToinenAsteRights ? (
         <FormBox>
           {isLoading && <SpinnerModal open={isLoading} />}
@@ -93,7 +94,7 @@ export default function Hakijat() {
           <Hakukohde locale={locale} t={t} sx={{ paddingTop: 0 }} />
           <Pohjakoulutus locale={locale} t={t} />
           <Divider />
-          <Valintatieto t={t} />
+          <Valintatieto t={t} sx={{ paddingTop: 0 }} />
           <Vastaanottotieto t={t} />
           <Harkinnanvaraisuus t={t} />
           <Kaksoistutkinto t={t} />
@@ -121,6 +122,6 @@ export default function Hakijat() {
           />
         </FormBox>
       ) : null}
-    </Box>
+    </MainContainer>
   );
 }

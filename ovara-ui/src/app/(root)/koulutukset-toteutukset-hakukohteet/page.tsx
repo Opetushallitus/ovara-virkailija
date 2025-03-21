@@ -12,7 +12,7 @@ import { OrganisaatioValikot } from '@/app/components/form/organisaatiovalikot';
 import { FormBox } from '@/app/components/form/form-box';
 import { Valintakoe } from '@/app/components/form/valintakoe';
 import { FormButtons } from '@/app/components/form/form-buttons';
-import { Box, Divider } from '@mui/material';
+import { Divider } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { hasOvaraToinenAsteRole } from '@/app/lib/utils';
@@ -20,6 +20,7 @@ import { useState } from 'react';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { downloadExcel } from '@/app/components/form/utils';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
+import { MainContainer } from '@/app/components/main-container';
 
 export default function KoulutuksetToteutuksetHakukohteet() {
   const { t } = useTranslate();
@@ -43,7 +44,7 @@ export default function KoulutuksetToteutuksetHakukohteet() {
   const queryParamsStr = useSearchParams().toString();
 
   return (
-    <Box>
+    <MainContainer>
       {hasToinenAsteRights ? (
         <FormBox>
           {isLoading && <SpinnerModal open={isLoading} />}
@@ -79,6 +80,6 @@ export default function KoulutuksetToteutuksetHakukohteet() {
           />
         </FormBox>
       ) : null}
-    </Box>
+    </MainContainer>
   );
 }

@@ -33,6 +33,7 @@ import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchP
 import { isEmpty } from 'remeda';
 import { Kansalaisuus } from '@/app/components/form/kansalaisuus';
 import { Hakukohderyhma } from '@/app/components/form/hakukohderyhma';
+import { MainContainer } from '@/app/components/main-container';
 
 export default function KkHakijat() {
   const { t } = useTranslate();
@@ -77,7 +78,7 @@ export default function KkHakijat() {
   const [isLoading, setIsLoading] = useState(false);
 
   return (
-    <Box>
+    <MainContainer>
       {hasKkRights ? (
         <FormBox>
           {isLoading && <SpinnerModal open={isLoading} />}
@@ -102,7 +103,7 @@ export default function KkHakijat() {
             <Hakukohderyhma />
           </Box>
           <Divider />
-          <Hakukohde locale={locale} t={t} />
+          <Hakukohde locale={locale} t={t} sx={{ paddingTop: 0 }} />
           <Valintatieto t={t} />
           <Vastaanottotieto t={t} />
           <Kansalaisuus />
@@ -122,6 +123,6 @@ export default function KkHakijat() {
           />
         </FormBox>
       ) : null}
-    </Box>
+    </MainContainer>
   );
 }
