@@ -13,11 +13,7 @@ type Haku = {
   haku_nimi: Kielistetty;
 };
 
-export const Haku = ({
-  haunTyyppi,
-}: {
-  haunTyyppi: string;
-}) => {
+export const Haku = ({ haunTyyppi }: { haunTyyppi: string }) => {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const locale = (user?.asiointikieli ?? 'fi') as LanguageCode;
