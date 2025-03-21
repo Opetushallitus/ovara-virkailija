@@ -358,7 +358,7 @@ object ExcelWriter {
     currentRowIndex + 1
   }
 
-  def createHeadingRowWithValintatapajonot(
+  def createHeadingRowWithValintatapajonotAndYoArvosanat(
       sheet: XSSFSheet,
       translations: Map[String, String],
       currentRowIndex: Int,
@@ -539,7 +539,8 @@ object ExcelWriter {
   def getHeadingFieldNames(
       naytaHetu: Boolean,
       naytaPostiosoite: Boolean,
-      valintatapajonot: Seq[Valintatapajono]
+      valintatapajonot: Seq[Valintatapajono],
+      arvosanat: Seq[String]
   ): List[String] = {
     val optionallyShowableFields = List("hetu") ::: POSTIOSOITEFIELDS
 
@@ -562,6 +563,12 @@ object ExcelWriter {
           List()
         } else {
           valintatapajonot.flatMap(valintatapajono => List(valintatapajono.valintatapajononNimi))
+        }
+      } else if (field == "arvosanat") {
+        if (arvosanat.isEmpty) {
+          List()
+        } else {
+          arvosanat
         }
       } else {
         List(field)
@@ -610,7 +617,7 @@ object ExcelWriter {
   }
 
   def writeKkHakijatRaportti(
-      hakijat: Seq[KkHakijaWithCombinedNimi],
+      hakijoidenHakutoiveet: Seq[KkHakijaWithCombinedNimi],
       asiointikieli: String,
       translations: Map[String, String],
       maybeNaytaYoArvosanat: Option[Boolean] = None,
@@ -639,10 +646,18 @@ object ExcelWriter {
     val naytaPostiosoite = maybeNaytaPostiosoite.getOrElse(false)
 
     val distinctSortedValintatapajonotInQueryResult =
-      hakijat.flatMap(_.valintatapajonot).distinctBy(_.valintatapajonoOid).sortBy(_.valintatapajononNimi)
+      hakijoidenHakutoiveet.flatMap(_.valintatapajonot).distinctBy(_.valintatapajonoOid).sortBy(_.valintatapajononNimi)
+
+    val distinctSortedYoArvosanatInQueryResult =
+      hakijoidenHakutoiveet.flatMap(hakutoive => hakutoive.arvosanat.keys).distinct.sorted
 
     val headingFieldNames =
-      getHeadingFieldNames(naytaHetu, naytaPostiosoite, distinctSortedValintatapajonotInQueryResult)
+      getHeadingFieldNames(
+        naytaHetu,
+        naytaPostiosoite,
+        distinctSortedValintatapajonotInQueryResult,
+        distinctSortedYoArvosanatInQueryResult
+      )
 
     val fieldNames: List[String] = classOf[KkHakijaWithCombinedNimi].getDeclaredFields.map(_.getName).toList
     val fieldNamesWithIndex      = fieldNames.zipWithIndex
@@ -659,7 +674,7 @@ object ExcelWriter {
       )
     }
 
-    currentRowIndex = createHeadingRowWithValintatapajonot(
+    currentRowIndex = createHeadingRowWithValintatapajonotAndYoArvosanat(
       sheet,
       translations,
       currentRowIndex,
@@ -668,44 +683,62 @@ object ExcelWriter {
       headingCellStyle
     )
 
-    hakijat.foreach(hakutoive => {
+    hakijoidenHakutoiveet.foreach(hakutoive => {
       val hakijanHakutoiveRow = sheet.createRow(currentRowIndex)
-      currentRowIndex = currentRowIndex + 1
+      currentRowIndex += 1
 
       var numberOfSkippedFields    = 0
       var cellIndex                = 0
       var numberOfValintatapajonot = 0
+      var numberOfArvosanat        = 0
 
       for ((fieldName, i) <- fieldNamesWithIndex) yield {
         if (shouldSkipCreatingCell(fieldName, naytaHetu, naytaPostiosoite)) {
           numberOfSkippedFields += 1
         } else if (fieldName == "valintatapajonot") {
-          if (distinctSortedValintatapajonotInQueryResult.isEmpty) {
-            numberOfSkippedFields += 1
-          } else {
-            cellIndex = i - numberOfSkippedFields
-            numberOfValintatapajonot = distinctSortedValintatapajonotInQueryResult.length
+          cellIndex = i - numberOfSkippedFields
+          numberOfValintatapajonot = distinctSortedValintatapajonotInQueryResult.length
 
-            val hakutoiveValintatapajonot = hakutoive.valintatapajonot
-            distinctSortedValintatapajonotInQueryResult.foreach(valintatapajono => {
-              val cell = hakijanHakutoiveRow.createCell(cellIndex)
-              cell.setCellStyle(bodyTextCellStyle)
-              cellIndex += 1
+          val hakutoiveValintatapajonot = hakutoive.valintatapajonot
+          distinctSortedValintatapajonotInQueryResult.foreach(valintatapajono => {
+            val cell = hakijanHakutoiveRow.createCell(cellIndex)
+            cell.setCellStyle(bodyTextCellStyle)
+            cellIndex += 1
 
-              val maybeValinnanTilanKuvaus = hakutoiveValintatapajonot.find(hakutoiveVtj => {
-                hakutoiveVtj.valintatapajonoOid == valintatapajono.valintatapajonoOid
-              }) match {
-                case Some(foundVtj) =>
-                  foundVtj.valinnanTilanKuvaus
-                case None =>
-                  None
-              }
-              writeValueToCell(maybeValinnanTilanKuvaus, fieldName, cell, asiointikieli, translations)
-            })
-            numberOfSkippedFields += 1
-          }
-        } else {
+            val maybeValinnanTilanKuvaus = hakutoiveValintatapajonot.find(hakutoiveVtj => {
+              hakutoiveVtj.valintatapajonoOid == valintatapajono.valintatapajonoOid
+            }) match {
+              case Some(foundVtj) =>
+                foundVtj.valinnanTilanKuvaus
+              case None =>
+                None
+            }
+            writeValueToCell(maybeValinnanTilanKuvaus, fieldName, cell, asiointikieli, translations)
+          })
+          numberOfSkippedFields += 1
+        } else if (fieldName == "arvosanat") {
           cellIndex = i + numberOfValintatapajonot - numberOfSkippedFields
+          numberOfArvosanat = distinctSortedYoArvosanatInQueryResult.length
+
+          val hakutoiveArvosanat = hakutoive.arvosanat
+          distinctSortedYoArvosanatInQueryResult.foreach(arvosana => {
+            val cell = hakijanHakutoiveRow.createCell(cellIndex)
+            cell.setCellStyle(bodyTextCellStyle)
+            cellIndex += 1
+
+            val maybeArvosana = hakutoiveArvosanat.find(hakutoiveArvosana => {
+              hakutoiveArvosana._1 == arvosana
+            }) match {
+              case Some(foundArvosana) =>
+                foundArvosana._2
+              case None =>
+                None
+            }
+            writeValueToCell(maybeArvosana, fieldName, cell, asiointikieli, translations)
+          })
+          numberOfSkippedFields += 1
+        } else {
+          cellIndex = i + numberOfValintatapajonot + numberOfArvosanat - numberOfSkippedFields
 
           val cell = hakijanHakutoiveRow.createCell(cellIndex)
           cell.setCellStyle(bodyTextCellStyle)

@@ -14,6 +14,9 @@ trait Extractors extends GenericOvaraJsonFormats {
     json.map(read[List[String]]).getOrElse(List())
   }
 
+  private def extractMap(json: Option[String]): Map[String, String] =
+    json.map(read[Map[String, String]]).getOrElse(Map())
+
   implicit val getHakuResult: GetResult[Haku] = GetResult(r =>
     Haku(
       haku_oid = r.nextString(),
@@ -175,7 +178,8 @@ trait Extractors extends GenericOvaraJsonFormats {
       kotikunta = extractKielistetty(r.nextStringOption()),
       asuinmaa = extractKielistetty(r.nextStringOption()),
       puhelinnumero = r.nextStringOption(),
-      sahkoposti = r.nextStringOption()
+      sahkoposti = r.nextStringOption(),
+      arvosanat = extractMap(r.nextStringOption())
     )
   )
 

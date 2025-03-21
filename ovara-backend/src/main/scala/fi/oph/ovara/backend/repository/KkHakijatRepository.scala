@@ -55,7 +55,6 @@ class KkHakijatRepository extends Extractors {
         s"WHERE hkr_hk.hakukohderyhma_oid IN ($hakukohderyhmatStr))"
     }
 
-    //TODO: palautetaan yo-arvosanat
     sql"""SELECT hlo.sukunimi, hlo.etunimet, hlo.hetu, hlo.syntymaaika,
                  hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid, hk.organisaatio_nimi,
                  hk.hakukohde_nimi, kkh.hakukelpoisuus, ht.hakutoivenumero, ht.valintatieto,
@@ -64,7 +63,7 @@ class KkHakijatRepository extends Extractors {
                  ht.ilmoittautumisen_tila, kkh.pohjakoulutus, kkh.maksuvelvollisuus,
                  hlo.valintatuloksen_julkaisulupa, hlo.koulutusmarkkinointilupa, hlo.sahkoinenviestintalupa,
                  hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka, hlo.kotikunta_nimi,
-                 hlo.asuinmaa_nimi, hlo.puhelin, hlo.sahkoposti
+                 hlo.asuinmaa_nimi, hlo.puhelin, hlo.sahkoposti, yo.arvosanat
           FROM pub.pub_dim_henkilo hlo
           JOIN pub.pub_dim_hakutoive ht
           ON ht.henkilo_hakemus_id = hlo.henkilo_hakemus_id
@@ -72,6 +71,8 @@ class KkHakijatRepository extends Extractors {
           ON ht.hakukohde_oid = hk.hakukohde_oid
           JOIN pub.pub_fct_raportti_hakijat_kk kkh
           ON ht.hakutoive_id = kkh.hakutoive_id
+          LEFT JOIN pub.pub_dim_arvosana_yo yo
+          ON yo.henkilo_oid = ht.henkilo_oid
           WHERE ht.haku_oid IN (#$hakuStr)
           #$optionalJarjestyspaikkaQuery
           #$optionalHakukohderyhmaSubSelect
