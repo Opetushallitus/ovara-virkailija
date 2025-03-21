@@ -325,4 +325,32 @@ trait Extractors extends GenericOvaraJsonFormats {
       commonFields._14, commonFields._15, commonFields._16, commonFields._17
     )
   }
+
+  implicit val getKkHakeneetHyvaksytytVastaanottaneetToimipisteittainResult: GetResult[KkHakeneetHyvaksytytVastaanottaneetToimipisteittain] = GetResult { r =>
+    val toimipiste       = r.nextString()
+    val organisaatioNimi = extractKielistetty(r.nextStringOption())
+    val commonFields = extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(r)
+
+    KkHakeneetHyvaksytytVastaanottaneetToimipisteittain(
+      toimipiste = toimipiste,
+      organisaatioNimi = organisaatioNimi,
+      commonFields._1, commonFields._2, commonFields._3, commonFields._4, commonFields._5,
+      commonFields._6, commonFields._7, commonFields._8, commonFields._9,
+      commonFields._10, commonFields._11, commonFields._12, commonFields._13,
+      commonFields._14, commonFields._15, commonFields._16, commonFields._17
+    )
+  }
+
+  implicit val getKkHakeneetHyvaksytytResult: GetResult[KkHakeneetHyvaksytytVastaanottaneetResult] = GetResult { r =>
+    val otsikko = extractKielistetty(r.nextStringOption())
+    val commonFields = extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(r)
+
+    KkHakeneetHyvaksytytVastaanottaneetResult(
+      otsikko = otsikko,
+      commonFields._1, commonFields._2, commonFields._3, commonFields._4, commonFields._5,
+      commonFields._6, commonFields._7, commonFields._8, commonFields._9,
+      commonFields._10, commonFields._11, commonFields._12, commonFields._13,
+      commonFields._14, commonFields._15, commonFields._16, commonFields._17
+    )
+  }
 }

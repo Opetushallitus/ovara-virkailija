@@ -63,8 +63,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
           ensikertalainen = ensikertalainen
         )
         db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectHauittainWithParams").map(r => KkHakeneetHyvaksytytVastaanottaneetResult(r))
-      case _ =>
-        //      case "hakukohteittain" =>
+      case "hakukohteittain" =>
         val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
           haut = haku,
@@ -78,6 +77,36 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
           ensikertalainen = ensikertalainen
         )
         db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams").map(r => KkHakeneetHyvaksytytVastaanottaneetResult(r))
+      case "toimipisteittain" =>
+        val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams(
+          selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
+          haut = haku,
+          hakukohteet = hakukohteet,
+          hakukohderyhmat = hakukohderyhmat,
+          okmOhjauksenAlat = okmOhjauksenAlat,
+          tutkinnonTasot = tutkinnonTasot,
+          aidinkielet = aidinkielet,
+          kansalaisuudet = kansalaisuudet,
+          sukupuoli = sukupuoli,
+          ensikertalainen = ensikertalainen
+        )
+        db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams").map(r => KkHakeneetHyvaksytytVastaanottaneetResult(r))
+      case _ =>
+        val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams(
+          selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
+          haut = haku,
+          hakukohteet = hakukohteet,
+          hakukohderyhmat = hakukohderyhmat,
+          okmOhjauksenAlat = okmOhjauksenAlat,
+          tutkinnonTasot = tutkinnonTasot,
+          aidinkielet = aidinkielet,
+          kansalaisuudet = kansalaisuudet,
+          sukupuoli = sukupuoli,
+          ensikertalainen = ensikertalainen,
+          organisaatiotaso = tulostustapa
+        )
+        db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams")
+
     //      case "toimipisteittain" =>
     //        val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams(
     //          selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
