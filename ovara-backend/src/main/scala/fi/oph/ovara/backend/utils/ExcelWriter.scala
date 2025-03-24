@@ -424,7 +424,14 @@ object ExcelWriter {
       case s: String =>
         cell.setCellValue(s)
       case Some(s: String)
-          if List("vastaanottotieto", "ilmoittautuminen", "hakukelpoisuus", "maksuvelvollisuus", "valintatieto")
+          if List(
+            "vastaanottotieto",
+            "ilmoittautuminen",
+            "hakukelpoisuus",
+            "maksuvelvollisuus",
+            "valintatieto",
+            "hakemusmaksunTila"
+          )
             .contains(fieldName) =>
         val lowerCaseStr = s.toLowerCase
         val translation  = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
