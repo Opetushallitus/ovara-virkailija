@@ -1,6 +1,6 @@
 import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
 import { OvaraRadioGroup } from '@/app/components/form/ovara-radio-group';
-import { YES_NO_RADIOGROUP_OPTIONS } from '@/app/lib/constants';
+import { RADIOGROUP_BOOLEAN_OPTIONS } from '@/app/lib/constants';
 import {
   changeRadioGroupSelection,
   getSelectedRadioGroupValue,
@@ -13,7 +13,7 @@ export const NaytaYoArvosanat = ({ t }: { t: (key: string) => string }) => {
   return (
     <OvaraRadioGroup
       label={t(`raportti.nayta-yo-arvosanat`)}
-      options={YES_NO_RADIOGROUP_OPTIONS}
+      options={RADIOGROUP_BOOLEAN_OPTIONS}
       value={getSelectedRadioGroupValue(selectedNaytaYoArvosanat)}
       onChange={(e) =>
         changeRadioGroupSelection(e, setSelectedNaytaYoArvosanat)
@@ -28,7 +28,7 @@ export const NaytaHetu = ({ t }: { t: (key: string) => string }) => {
   return (
     <OvaraRadioGroup
       label={t(`raportti.nayta-hetu`)}
-      options={YES_NO_RADIOGROUP_OPTIONS}
+      options={RADIOGROUP_BOOLEAN_OPTIONS}
       value={getSelectedRadioGroupValue(selectedNaytaHetu)}
       onChange={(e) => changeRadioGroupSelection(e, setSelectedNaytaHetu)}
     />
@@ -42,7 +42,7 @@ export const NaytaPostiosoite = ({ t }: { t: (key: string) => string }) => {
   return (
     <OvaraRadioGroup
       label={t(`raportti.nayta-postiosoite`)}
-      options={YES_NO_RADIOGROUP_OPTIONS}
+      options={RADIOGROUP_BOOLEAN_OPTIONS}
       value={getSelectedRadioGroupValue(selectedNaytaPostiosoite)}
       onChange={(e) =>
         changeRadioGroupSelection(e, setSelectedNaytaPostiosoite)
