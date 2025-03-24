@@ -133,26 +133,27 @@ class CommonRepository extends Extractors {
       kayttooikeusHakukohderyhmaOids: List[String],
       haut: List[String]
   ): SqlStreamingAction[Vector[Hakukohderyhma], Hakukohderyhma, Effect] = {
-    val hakukohderyhmaStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusHakukohderyhmaOids)
-    val hakukohderyhmaQueryStr = if (kayttooikeusHakukohderyhmaOids.isEmpty) {
-      ""
-    } else {
-      s"WHERE hkr.hakukohderyhma_oid in ($hakukohderyhmaStr)"
-    }
-
     val hautStr = RepositoryUtils.makeListOfValuesQueryStr(haut)
     val hautQueryStr = if (hautStr.isEmpty) {
       ""
     } else {
-      s"AND hkr_hk.haku_oid in ($hautStr)"
+      s"WHERE hkr_hk.haku_oid in ($hautStr)"
+    }
+
+    val hakukohderyhmaStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusHakukohderyhmaOids)
+    val hakukohderyhmaQueryStr = if (kayttooikeusHakukohderyhmaOids.isEmpty) {
+      ""
+    } else {
+      s"AND hkr.hakukohderyhma_oid in ($hakukohderyhmaStr)"
     }
 
     sql"""SELECT DISTINCT hkr.hakukohderyhma_oid, hkr.hakukohderyhma_nimi
           FROM pub.pub_dim_hakukohderyhma hkr
           JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
           ON hkr.hakukohderyhma_oid = hkr_hk.hakukohderyhma_oid
+          #$hautQueryStr
           #$hakukohderyhmaQueryStr
-          #$hautQueryStr""".as[Hakukohderyhma]
+          """.as[Hakukohderyhma]
   }
 
   def selectDistinctKoulutusalat1(): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
