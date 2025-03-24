@@ -120,7 +120,7 @@ class CommonRepository extends Extractors {
     val maakunnatQueryStr = if (maakunnatStr.isEmpty) {
       ""
     } else {
-      s"AND km.maakunta_koodiarvo in ($maakunnatStr)"
+      s"WHERE km.maakunta_koodiarvo in ($maakunnatStr)"
     }
     sql"""SELECT DISTINCT k.koodiarvo, k.koodinimi
           FROM pub.pub_dim_koodisto_kunta k
@@ -166,10 +166,10 @@ class CommonRepository extends Extractors {
     val koulutusala1QueryStr = if (koulutusala1Str.isEmpty) {
       ""
     } else {
-      s"AND k.kansallinenkoulutusluokitus2016koulutusalataso1 in ($koulutusala1Str)"
+      s"WHERE k.kansallinenkoulutusluokitus2016koulutusalataso1 in ($koulutusala1Str)"
     }
     sql"""SELECT k.kansallinenkoulutusluokitus2016koulutusalataso2 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso2_nimi as koodinimi
-                  FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
+          FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
             #$koulutusala1QueryStr""".as[Koodi]
   }
 
@@ -178,7 +178,7 @@ class CommonRepository extends Extractors {
     val koulutusala2QueryStr = if (koulutusala2Str.isEmpty) {
       ""
     } else {
-      s"AND k.kansallinenkoulutusluokitus2016koulutusalataso2 in ($koulutusala2Str)"
+      s"WHERE k.kansallinenkoulutusluokitus2016koulutusalataso2 in ($koulutusala2Str)"
     }
     sql"""SELECT k.kansallinenkoulutusluokitus2016koulutusalataso3 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso3_nimi as koodinimi
           FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
