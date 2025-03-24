@@ -935,6 +935,7 @@ object ExcelWriter {
                                                         data: List[KkHakeneetHyvaksytytVastaanottaneetResult],
                                                         yksittaisetHakijat: Int,
                                                         ensikertalaisetYksittaisetHakijat: Int,
+                                                        maksuvelvollisetYksittaisetHakijat: Int,
                                                         naytaHakutoiveet: Boolean,
                                                         tulostustapa: String
                                                       ): XSSFWorkbook = {
@@ -1063,7 +1064,13 @@ object ExcelWriter {
       translations.getOrElse("raportti.yksittaiset-hakijat", "raportti.yksittaiset-hakijat"),
       yksittaisetHakijat.toString,
       "",
-      ensikertalaisetYksittaisetHakijat.toString
+      ensikertalaisetYksittaisetHakijat.toString,
+      "",
+      "",
+      "",
+      "",
+      "",
+      maksuvelvollisetYksittaisetHakijat.toString,
     )
 
     hakijatSummaryData.zipWithIndex.foreach { case (value, index) =>

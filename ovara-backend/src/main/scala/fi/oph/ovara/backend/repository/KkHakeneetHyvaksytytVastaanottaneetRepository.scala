@@ -334,6 +334,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                        kansalaisuudet: List[String],
                                        sukupuoli: Option[String],
                                        ensikertalainen: Option[Boolean],
+                                       maksuvelvollinen: Option[String] = None,
                                      ): DBIO[Int] = {
     val hakukohderyhmaFilter =
       if (hakukohderyhmat.nonEmpty) {
@@ -351,14 +352,22 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "he.kansalaisuusluokka", kansalaisuudet)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "he.sukupuoli", sukupuoli)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "ht.ensikertalainen", ensikertalainen)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "m.maksuvelvollisuus", maksuvelvollinen)).filter(_.nonEmpty),
       buildTutkinnonTasoFilters(tutkinnonTasot)
     ).collect { case Some(value) => value }.mkString("\n")
 
+    val maksuvelvollisuusJoin =
+      if (maksuvelvollinen.isDefined) {
+       s"JOIN pub.pub_dim_maksuvelvollisuus m ON ht.hakutoive_id = m.hakutoive_id"
+      }
+      else
+        ""
     val query =
       sql"""SELECT count(distinct ht.henkilo_oid)
       FROM pub.pub_dim_hakutoive ht
       JOIN pub.pub_dim_hakukohde h ON ht.hakukohde_oid = h.hakukohde_oid
       JOIN pub.pub_dim_henkilo he on ht.henkilo_hakemus_id = he.henkilo_hakemus_id
+      #$maksuvelvollisuusJoin
       WHERE #$filters
       """.as[Int].head
 

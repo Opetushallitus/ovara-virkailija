@@ -152,19 +152,34 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       ensikertalainen = Some(true)
     )
 
+    val maksuvelvollisetSumQuery = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams(
+      selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
+      haut = haku,
+      hakukohteet = hakukohteet,
+      hakukohderyhmat = hakukohderyhmat,
+      okmOhjauksenAlat = okmOhjauksenAlat,
+      tutkinnonTasot = tutkinnonTasot,
+      aidinkielet = aidinkielet,
+      kansalaisuudet = kansalaisuudet,
+      sukupuoli = sukupuoli,
+      ensikertalainen = ensikertalainen,
+      maksuvelvollinen = Some("obligated")
+    )
+
     val sumQueryResult = db.run(sumQuery, "kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams")
     val ensikertalaisetSumQueryResult =
       if (vainEnsikertalaiset)
         sumQueryResult
       else
         db.run(ensikertalaisetSumQuery, "kkHakeneetHyvaksytytVastaanottaneetRepository.selectEnsikertalaisetHakijatYhteensaWithParams")
-
+    val maksuvelvollisetSumQueryResult = db.run(maksuvelvollisetSumQuery, "kkHakeneetHyvaksytytVastaanottaneetRepository.selectMaksuvelvollisetHakijatYhteensaWithParams")
     ExcelWriter.writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
       asiointikieli,
       translations,
       queryResult.toList,
       sumQueryResult,
       ensikertalaisetSumQueryResult,
+      maksuvelvollisetSumQueryResult,
       naytaHakutoiveet,
       tulostustapa
     )
