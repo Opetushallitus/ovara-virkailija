@@ -2100,74 +2100,159 @@ class ExcelWriterSpec extends AnyFlatSpec {
     }
   }
 
+  val kkHakijaRautiainen: KkHakijaWithCombinedNimi = KkHakijaWithCombinedNimi(
+    hakija = "Rautiainen-Testi, Dina Testi",
+    hetu = Some("120393-129E"),
+    syntymaAika = Some(LocalDate.parse("1993-03-12")),
+    kansalaisuus = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+    oppijanumero = "1.2.246.562.24.30646006111",
+    hakemusOid = "1.2.246.562.11.00000000000002179045",
+    toimipiste = Map(En -> "Toimipiste 1 en", Fi -> "Toimipiste 1 fi", Sv -> "Toimipiste 1 sv"),
+    hakukohteenNimi = Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv -> "Hakukohde 1 SV"),
+    hakukelpoisuus = None,
+    prioriteetti = 2,
+    valintatieto = Some("HYVAKSYTTY"),
+    ehdollisestiHyvaksytty = Some(true),
+    valintatiedonPvm = Some(LocalDate.parse("2024-06-13")),
+    valintatapajonot = List(),
+    vastaanottotieto = Some("PERUNUT"),
+    viimVastaanottopaiva = Some(LocalDate.parse("2024-06-26")),
+    ensikertalainen = Some(true),
+    ilmoittautuminen = Some("LASNA_KOKO_LUKUVUOSI"),
+    pohjakoulutus = Some(s"""["pohjakoulutus_yo", "pohjakoulutus_kk"]"""),
+    maksuvelvollisuus = Some("not-obligated"),
+    julkaisulupa = Some(true),
+    markkinointilupa = Some(true),
+    sahkoinenViestintalupa = Some(true),
+    lahiosoite = Some("Rämsöönranta 368"),
+    postinumero = Some("00100"),
+    postitoimipaikka = Some("HELSINKI"),
+    kotikunta = Map(En -> "Helsinki", Fi -> "Helsinki", Sv -> "Helsingfors"),
+    asuinmaa = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+    puhelinnumero = Some("050 64292261"),
+    sahkoposti = Some("hakija-33919666@oph.fi"),
+    arvosanat = Map("A" -> "E", "M" -> "E", "BB" -> "M", "EA" -> "C", "FY" -> "E", "KE" -> "L")
+  )
+
+  val kkHakijatRautiainenWithValintatapajonot: KkHakijaWithCombinedNimi = kkHakijaRautiainen.copy(
+    valintatiedonPvm = None,
+    pohjakoulutus = None,
+    maksuvelvollisuus = None,
+    valintatapajonot = List(
+      Valintatapajono(
+        valintatapajonoOid = "1707384694164-3621431542682802084",
+        valintatapajononNimi = "Todistusvalintajono kaikille hakijoille",
+        valinnanTila = "HYLATTY",
+        valinnanTilanKuvaus = Map(
+          En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+          Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+          Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 1."
+        )
+      ),
+      Valintatapajono(
+        valintatapajonoOid = "17096467457545361875995955973551",
+        valintatapajononNimi = "Todistusvalinta (YO)",
+        valinnanTila = "HYVAKSYTTY",
+        valinnanTilanKuvaus = Map(
+          En -> null,
+          Fi -> null,
+          Sv -> null
+        )
+      ),
+      Valintatapajono(
+        valintatapajonoOid = "1707384681516-2842344525807969324",
+        valintatapajononNimi = "Todistusvalintajono ensikertalaisille hakijoille",
+        valinnanTila = "HYLATTY",
+        valinnanTilanKuvaus = Map(
+          En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+          Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+          Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 2."
+        )
+      )
+    )
+  )
+
+  val kkHakijaLehto: KkHakijaWithCombinedNimi = KkHakijaWithCombinedNimi(
+    hakija = "Lehto-Testi, Vikke Testi",
+    hetu = Some("04041990-345K"),
+    syntymaAika = Some(LocalDate.parse("1990-04-04")),
+    kansalaisuus = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+    oppijanumero = "1.2.246.562.24.18441866015",
+    hakemusOid = "1.2.246.562.11.00000000000002126102",
+    toimipiste = Map(En -> "Toimipiste 2 en", Fi -> "Toimipiste 2 fi", Sv -> "Toimipiste 2 sv"),
+    hakukohteenNimi = Map(En -> "Hakukohde 2 EN", Fi -> "Hakukohde 2", Sv -> "Hakukohde 2 SV"),
+    hakukelpoisuus = Some("uneligible"),
+    prioriteetti = 1,
+    valintatieto = Some("HYLATTY"),
+    ehdollisestiHyvaksytty = None,
+    valintatiedonPvm = Some(LocalDate.parse("2024-06-11")),
+    valintatapajonot = List(),
+    vastaanottotieto = None,
+    viimVastaanottopaiva = Some(LocalDate.parse("2024-06-26")),
+    ensikertalainen = Some(false),
+    ilmoittautuminen = None,
+    pohjakoulutus = None,
+    maksuvelvollisuus = Some("unreviewed"),
+    julkaisulupa = Some(true),
+    markkinointilupa = Some(false),
+    sahkoinenViestintalupa = Some(true),
+    lahiosoite = Some("Laholanaukio 834"),
+    postinumero = Some("15700"),
+    postitoimipaikka = Some("LAHTI"),
+    kotikunta = Map(En -> "Lahti", Fi -> "Lahti", Sv -> "Lahtis"),
+    asuinmaa = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+    puhelinnumero = Some("050 64293345"),
+    sahkoposti = Some("hakija-33919611@oph.fi"),
+    arvosanat = Map("M" -> "M", "O" -> "L", "CA" -> "M", "EA" -> "M", "PS" -> "E", "YH" -> "E")
+  )
+
+  val kkHakijaLehtoWithValintatapajonot: KkHakijaWithCombinedNimi = kkHakijaLehto.copy(
+    julkaisulupa = Some(false),
+    markkinointilupa = Some(true),
+    valintatapajonot = List(
+      Valintatapajono(
+        valintatapajonoOid = "1704199256878262657431481297336",
+        valintatapajononNimi = "Todistusvalintajono ensikertalaisille hakijoille",
+        valinnanTila = "HYLATTY",
+        valinnanTilanKuvaus = Map(
+          En -> "Et ole ensikertalainen hakija.",
+          Fi -> "Et ole ensikertalainen hakija.",
+          Sv -> "Du är inte en förstagångssökande."
+        )
+      ),
+      Valintatapajono(
+        valintatapajonoOid = "17000468320548583779630214204232",
+        valintatapajononNimi = "Koevalintajono kaikille hakijoille",
+        valinnanTila = "HYLATTY",
+        valinnanTilanKuvaus = Map(
+          En -> "Et osallistunut valintakokeeseen",
+          Fi -> "Et osallistunut valintakokeeseen",
+          Sv -> "Et osallistunut valintakokeeseen SV"
+        )
+      ),
+      Valintatapajono(
+        valintatapajonoOid = "1707384694164-3621431542682802084",
+        valintatapajononNimi = "Todistusvalintajono kaikille hakijoille",
+        valinnanTila = "HYLATTY",
+        valinnanTilanKuvaus = Map(
+          En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+          Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+          Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
+        )
+      )
+    )
+  )
+
   "writeKkHakijatRaportti" should "return excel with two result rows for kk-hakijat with hetu, postiosoite and arvosanat" in {
     val kkHakijatResult =
       Vector(
-        KkHakijaWithCombinedNimi(
-          hakija = "Rautiainen-Testi, Dina Testi",
-          hetu = Some("120393-129E"),
-          syntymaAika = Some(LocalDate.parse("1993-03-12")),
-          kansalaisuus = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          oppijanumero = "1.2.246.562.24.30646006111",
-          hakemusOid = "1.2.246.562.11.00000000000002179045",
-          toimipiste = Map(En -> "Toimipiste 1 en", Fi -> "Toimipiste 1 fi", Sv -> "Toimipiste 1 sv"),
-          hakukohteenNimi = Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv -> "Hakukohde 1 SV"),
-          hakukelpoisuus = None,
-          prioriteetti = 2,
-          valintatieto = Some("HYVAKSYTTY"),
-          ehdollisestiHyvaksytty = Some(false),
-          valintatiedonPvm = Some(LocalDate.parse("2024-06-13")),
-          valintatapajonot = List(),
-          vastaanottotieto = Some("PERUNUT"),
-          viimVastaanottopaiva = Some(LocalDate.parse("2024-06-26")),
-          ensikertalainen = Some(true),
-          ilmoittautuminen = Some("LASNA_KOKO_LUKUVUOSI"),
-          pohjakoulutus = Some(s"""["pohjakoulutus_yo", "pohjakoulutus_kk"]"""),
-          maksuvelvollisuus = Some("not-obligated"),
-          markkinointilupa = Some(true),
-          julkaisulupa = Some(true),
-          sahkoinenViestintalupa = Some(true),
-          lahiosoite = Some("Rämsöönranta 368"),
-          postinumero = Some("00100"),
-          postitoimipaikka = Some("HELSINKI"),
-          kotikunta = Map(En -> "Helsinki", Fi -> "Helsinki", Sv -> "Helsingfors"),
-          asuinmaa = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          puhelinnumero = Some("050 64292261"),
-          sahkoposti = None,
-          arvosanat = Map("A" -> "E", "M" -> "E", "BB" -> "M", "EA" -> "C", "FY" -> "E", "KE" -> "L")
-        ),
-        KkHakijaWithCombinedNimi(
-          hakija = "Lehto-Testi, Vikke Testi",
-          hetu = Some("04041990-345K"),
-          syntymaAika = Some(LocalDate.parse("1990-04-04")),
-          kansalaisuus = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          oppijanumero = "1.2.246.562.24.18441866015",
-          hakemusOid = "1.2.246.562.11.00000000000002126102",
-          toimipiste = Map(En -> "Toimipiste 2 en", Fi -> "Toimipiste 2 fi", Sv -> "Toimipiste 2 sv"),
-          hakukohteenNimi = Map(En -> "Hakukohde 2 EN", Fi -> "Hakukohde 2", Sv -> "Hakukohde 2 SV"),
+        kkHakijaRautiainen.copy(ehdollisestiHyvaksytty = Some(false)),
+        kkHakijaLehto.copy(
           hakukelpoisuus = Some("eligible"),
-          prioriteetti = 1,
           valintatieto = None,
-          ehdollisestiHyvaksytty = None,
           valintatiedonPvm = None,
-          valintatapajonot = List(),
-          vastaanottotieto = None,
-          viimVastaanottopaiva = Some(LocalDate.parse("2024-06-26")),
-          ensikertalainen = Some(false),
-          ilmoittautuminen = None,
-          pohjakoulutus = None,
           maksuvelvollisuus = None,
-          markkinointilupa = Some(false),
-          julkaisulupa = Some(true),
-          sahkoinenViestintalupa = Some(true),
-          lahiosoite = Some("Laholanaukio 834"),
-          postinumero = Some("15700"),
-          postitoimipaikka = Some("LAHTI"),
-          kotikunta = Map(En -> "Lahti", Fi -> "Lahti", Sv -> "Lahtis"),
-          asuinmaa = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          puhelinnumero = None,
-          sahkoposti = Some("hakija-33919611@oph.fi"),
-          arvosanat = Map("M" -> "M", "O" -> "L", "CA" -> "M", "EA" -> "M", "PS" -> "E", "YH" -> "E")
+          puhelinnumero = None
         )
       )
 
@@ -2253,7 +2338,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1).getCell(25).getStringCellValue == "Helsingfors")
     assert(wb.getSheetAt(0).getRow(1).getCell(26).getStringCellValue == "Finland")
     assert(wb.getSheetAt(0).getRow(1).getCell(27).getStringCellValue == "050 64292261")
-    assert(wb.getSheetAt(0).getRow(1).getCell(28).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(1).getCell(28).getStringCellValue == "hakija-33919666@oph.fi")
     assert(wb.getSheetAt(0).getRow(1).getCell(29).getStringCellValue == "E")
     assert(wb.getSheetAt(0).getRow(1).getCell(30).getStringCellValue == "M")
     assert(wb.getSheetAt(0).getRow(1).getCell(31).getStringCellValue == "-")
@@ -2314,71 +2399,15 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return excel with two result rows for kk-hakijat without hetu and postiosoite and with arvosanat" in {
     val kkHakijatResult =
       Vector(
-        KkHakijaWithCombinedNimi(
-          hakija = "Rautiainen-Testi, Dina Testi",
-          hetu = Some("120393-129E"),
-          syntymaAika = Some(LocalDate.parse("1993-03-12")),
-          kansalaisuus = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          oppijanumero = "1.2.246.562.24.30646006111",
-          hakemusOid = "1.2.246.562.11.00000000000002179045",
-          toimipiste = Map(En -> "Toimipiste 1 en", Fi -> "Toimipiste 1 fi", Sv -> "Toimipiste 1 sv"),
-          hakukohteenNimi = Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv -> "Hakukohde 1 SV"),
+        kkHakijaRautiainen.copy(
           hakukelpoisuus = Some("conditionally-eligible"),
-          prioriteetti = 2,
-          valintatieto = Some("HYVAKSYTTY"),
-          vastaanottotieto = Some("PERUNUT"),
-          ehdollisestiHyvaksytty = Some(true),
           valintatiedonPvm = Some(LocalDate.parse("2024-06-05")),
-          valintatapajonot = List(),
-          viimVastaanottopaiva = Some(LocalDate.parse("2024-06-26")),
-          ensikertalainen = Some(true),
-          ilmoittautuminen = Some("LASNA_KOKO_LUKUVUOSI"),
-          pohjakoulutus = Some(s"""["pohjakoulutus_yo", "pohjakoulutus_kk"]"""),
-          maksuvelvollisuus = Some("obligated"),
-          markkinointilupa = Some(true),
-          julkaisulupa = Some(true),
-          sahkoinenViestintalupa = Some(true),
-          lahiosoite = Some("Rämsöönranta 368"),
-          postinumero = Some("00100"),
-          postitoimipaikka = Some("HELSINKI"),
-          kotikunta = Map(En -> "Helsinki", Fi -> "Helsinki", Sv -> "Helsingfors"),
-          asuinmaa = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          puhelinnumero = Some("050 64292261"),
-          sahkoposti = Some("hakija-33919666@oph.fi"),
-          arvosanat = Map("A" -> "E", "M" -> "E", "BB" -> "M", "EA" -> "C", "FY" -> "E", "KE" -> "L")
+          maksuvelvollisuus = Some("obligated")
         ),
-        KkHakijaWithCombinedNimi(
-          hakija = "Lehto-Testi, Vikke Testi",
-          hetu = Some("04041990-345K"),
-          syntymaAika = Some(LocalDate.parse("1990-04-04")),
-          kansalaisuus = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          oppijanumero = "1.2.246.562.24.18441866015",
-          hakemusOid = "1.2.246.562.11.00000000000002126102",
-          toimipiste = Map(En -> "Toimipiste 2 en", Fi -> "Toimipiste 2 fi", Sv -> "Toimipiste 2 sv"),
-          hakukohteenNimi = Map(En -> "Hakukohde 2 EN", Fi -> "Hakukohde 2", Sv -> "Hakukohde 2 SV"),
-          hakukelpoisuus = Some("uneligible"),
-          prioriteetti = 1,
-          valintatieto = Some("HYLATTY"),
-          vastaanottotieto = None,
-          ehdollisestiHyvaksytty = None,
-          valintatiedonPvm = Some(LocalDate.parse("2024-06-11")),
-          valintatapajonot = List(),
-          viimVastaanottopaiva = Some(LocalDate.parse("2024-06-26")),
-          ensikertalainen = Some(false),
-          ilmoittautuminen = None,
-          pohjakoulutus = None,
-          maksuvelvollisuus = Some("unreviewed"),
+        kkHakijaLehto.copy(
           markkinointilupa = Some(true),
-          julkaisulupa = Some(true),
-          sahkoinenViestintalupa = Some(true),
-          lahiosoite = Some("Laholanaukio 834"),
-          postinumero = Some("15700"),
-          postitoimipaikka = Some("LAHTI"),
-          kotikunta = Map(En -> "Lahti", Fi -> "Lahti", Sv -> "Lahtis"),
-          asuinmaa = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
           puhelinnumero = Some("050 64293345"),
-          sahkoposti = None,
-          arvosanat = Map("M" -> "M", "O" -> "L", "CA" -> "M", "EA" -> "M", "PS" -> "E", "YH" -> "E")
+          sahkoposti = None
         )
       )
 
@@ -2513,21 +2542,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return excel with one result row for kk-hakijat with hetu and arvosanat but without postiosoite" in {
     val kkHakijatResult =
       Vector(
-        KkHakijaWithCombinedNimi(
-          hakija = "Rautiainen-Testi, Dina Testi",
-          hetu = Some("120393-129E"),
-          syntymaAika = Some(LocalDate.parse("1993-03-12")),
-          kansalaisuus = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          oppijanumero = "1.2.246.562.24.30646006111",
-          hakemusOid = "1.2.246.562.11.00000000000002179045",
-          toimipiste = Map(En -> "Toimipiste 1 en", Fi -> "Toimipiste 1 fi", Sv -> "Toimipiste 1 sv"),
-          hakukohteenNimi = Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv -> "Hakukohde 1 SV"),
-          hakukelpoisuus = None,
-          prioriteetti = 2,
-          valintatieto = Some("HYVAKSYTTY"),
-          vastaanottotieto = Some("PERUNUT"),
-          ehdollisestiHyvaksytty = Some(true),
+        kkHakijaRautiainen.copy(
           valintatiedonPvm = None,
+          pohjakoulutus = None,
+          maksuvelvollisuus = None,
           valintatapajonot = List(
             Valintatapajono(
               valintatapajonoOid = "1709304116443-4815957697640331820",
@@ -2539,23 +2557,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
                 Sv -> "Annullerad, godkänt till ansökningsmål med högre prioritet"
               )
             )
-          ),
-          viimVastaanottopaiva = Some(LocalDate.parse("2024-06-26")),
-          ensikertalainen = Some(true),
-          ilmoittautuminen = Some("LASNA_KOKO_LUKUVUOSI"),
-          pohjakoulutus = None,
-          maksuvelvollisuus = None,
-          markkinointilupa = Some(true),
-          julkaisulupa = Some(true),
-          sahkoinenViestintalupa = Some(true),
-          lahiosoite = Some("Rämsöönranta 368"),
-          postinumero = Some("00100"),
-          postitoimipaikka = Some("HELSINKI"),
-          kotikunta = Map(En -> "Helsinki", Fi -> "Helsinki", Sv -> "Helsingfors"),
-          asuinmaa = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          puhelinnumero = Some("050 64292261"),
-          sahkoposti = Some("hakija-33919666@oph.fi"),
-          arvosanat = Map("A" -> "E", "M" -> "E", "BB" -> "M", "EA" -> "C", "FY" -> "E", "KE" -> "L")
+          )
         )
       )
 
@@ -2656,134 +2658,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "return excel with two result rows without hetu and with postiosoite and arvosanat for kk-hakijat that have several valintatapajono" in {
     val kkHakijatResult =
       Vector(
-        KkHakijaWithCombinedNimi(
-          hakija = "Rautiainen-Testi, Dina Testi",
-          hetu = Some("120393-129E"),
-          syntymaAika = Some(LocalDate.parse("1993-03-12")),
-          kansalaisuus = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          oppijanumero = "1.2.246.562.24.30646006111",
-          hakemusOid = "1.2.246.562.11.00000000000002179045",
-          toimipiste = Map(En -> "Toimipiste 1 en", Fi -> "Toimipiste 1 fi", Sv -> "Toimipiste 1 sv"),
-          hakukohteenNimi = Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv -> "Hakukohde 1 SV"),
-          hakukelpoisuus = None,
-          prioriteetti = 2,
-          valintatieto = Some("HYVAKSYTTY"),
-          ehdollisestiHyvaksytty = Some(true),
-          valintatiedonPvm = None,
-          valintatapajonot = List(
-            Valintatapajono(
-              valintatapajonoOid = "1707384694164-3621431542682802084",
-              valintatapajononNimi = "Todistusvalintajono kaikille hakijoille",
-              valinnanTila = "HYLATTY",
-              valinnanTilanKuvaus = Map(
-                En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 1."
-              )
-            ),
-            Valintatapajono(
-              valintatapajonoOid = "17096467457545361875995955973551",
-              valintatapajononNimi = "Todistusvalinta (YO)",
-              valinnanTila = "HYVAKSYTTY",
-              valinnanTilanKuvaus = Map(
-                En -> null,
-                Fi -> null,
-                Sv -> null
-              )
-            ),
-            Valintatapajono(
-              valintatapajonoOid = "1707384681516-2842344525807969324",
-              valintatapajononNimi = "Todistusvalintajono ensikertalaisille hakijoille",
-              valinnanTila = "HYLATTY",
-              valinnanTilanKuvaus = Map(
-                En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 2."
-              )
-            )
-          ),
-          vastaanottotieto = Some("PERUNUT"),
-          viimVastaanottopaiva = Some(LocalDate.parse("2024-06-26")),
-          ensikertalainen = Some(true),
-          ilmoittautuminen = Some("LASNA_KOKO_LUKUVUOSI"),
-          pohjakoulutus = None,
-          maksuvelvollisuus = None,
-          markkinointilupa = Some(true),
-          julkaisulupa = Some(true),
-          sahkoinenViestintalupa = Some(true),
-          lahiosoite = Some("Rämsöönranta 368"),
-          postinumero = Some("00100"),
-          postitoimipaikka = Some("HELSINKI"),
-          kotikunta = Map(En -> "Helsinki", Fi -> "Helsinki", Sv -> "Helsingfors"),
-          asuinmaa = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          puhelinnumero = Some("050 64292261"),
-          sahkoposti = Some("hakija-33919666@oph.fi"),
-          arvosanat = Map("A" -> "E", "M" -> "E", "BB" -> "M", "EA" -> "C", "FY" -> "E", "KE" -> "L")
-        ),
-        KkHakijaWithCombinedNimi(
-          hakija = "Lehto-Testi, Vikke Testi",
-          hetu = Some("04041990-345K"),
-          syntymaAika = Some(LocalDate.parse("1990-04-04")),
-          kansalaisuus = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          oppijanumero = "1.2.246.562.24.18441866015",
-          hakemusOid = "1.2.246.562.11.00000000000002126102",
-          toimipiste = Map(En -> "Toimipiste 2 en", Fi -> "Toimipiste 2 fi", Sv -> "Toimipiste 2 sv"),
-          hakukohteenNimi = Map(En -> "Hakukohde 2 EN", Fi -> "Hakukohde 2", Sv -> "Hakukohde 2 SV"),
-          hakukelpoisuus = Some("uneligible"),
-          prioriteetti = 1,
-          valintatieto = Some("HYLATTY"),
-          ehdollisestiHyvaksytty = None,
-          valintatiedonPvm = Some(LocalDate.parse("2024-06-11")),
-          valintatapajonot = List(
-            Valintatapajono(
-              valintatapajonoOid = "1704199256878262657431481297336",
-              valintatapajononNimi = "Todistusvalintajono ensikertalaisille hakijoille",
-              valinnanTila = "HYLATTY",
-              valinnanTilanKuvaus = Map(
-                En -> "Et ole ensikertalainen hakija.",
-                Fi -> "Et ole ensikertalainen hakija.",
-                Sv -> "Du är inte en förstagångssökande."
-              )
-            ),
-            Valintatapajono(
-              valintatapajonoOid = "17000468320548583779630214204232",
-              valintatapajononNimi = "Koevalintajono kaikille hakijoille",
-              valinnanTila = "HYLATTY",
-              valinnanTilanKuvaus = Map(
-                En -> "Et osallistunut valintakokeeseen",
-                Fi -> "Et osallistunut valintakokeeseen",
-                Sv -> "Et osallistunut valintakokeeseen SV"
-              )
-            ),
-            Valintatapajono(
-              valintatapajonoOid = "1707384694164-3621431542682802084",
-              valintatapajononNimi = "Todistusvalintajono kaikille hakijoille",
-              valinnanTila = "HYLATTY",
-              valinnanTilanKuvaus = Map(
-                En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
-              )
-            )
-          ),
-          vastaanottotieto = None,
-          viimVastaanottopaiva = Some(LocalDate.parse("2024-06-26")),
-          ensikertalainen = Some(false),
-          ilmoittautuminen = None,
-          pohjakoulutus = None,
-          maksuvelvollisuus = Some("unreviewed"),
-          julkaisulupa = Some(false),
-          markkinointilupa = Some(true),
-          sahkoinenViestintalupa = Some(true),
-          lahiosoite = Some("Laholanaukio 834"),
-          postinumero = Some("15700"),
-          postitoimipaikka = Some("LAHTI"),
-          kotikunta = Map(En -> "Lahti", Fi -> "Lahti", Sv -> "Lahtis"),
-          asuinmaa = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          puhelinnumero = Some("050 64293345"),
-          sahkoposti = None,
-          arvosanat = Map("M" -> "M", "O" -> "L", "CA" -> "M", "EA" -> "M", "PS" -> "E", "YH" -> "E")
-        )
+        kkHakijatRautiainenWithValintatapajonot,
+        kkHakijaLehtoWithValintatapajonot
       )
 
     val wb =
@@ -2958,7 +2834,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(3).getCell(29).getStringCellValue == "Lahtis")
     assert(wb.getSheetAt(0).getRow(3).getCell(30).getStringCellValue == "Finland")
     assert(wb.getSheetAt(0).getRow(3).getCell(31).getStringCellValue == "050 64293345")
-    assert(wb.getSheetAt(0).getRow(3).getCell(32).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(3).getCell(32).getStringCellValue == "hakija-33919611@oph.fi")
     assert(wb.getSheetAt(0).getRow(3).getCell(33).getStringCellValue == "-")
     assert(wb.getSheetAt(0).getRow(3).getCell(34).getStringCellValue == "-")
     assert(wb.getSheetAt(0).getRow(3).getCell(35).getStringCellValue == "M")
@@ -2976,137 +2852,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   it should "return excel with arvosanat in their right place without hetu and postiosoite and several valintatapajono" in {
-    val kkHakijatResult =
-      Vector(
-        KkHakijaWithCombinedNimi(
-          hakija = "Rautiainen-Testi, Dina Testi",
-          hetu = Some("120393-129E"),
-          syntymaAika = Some(LocalDate.parse("1993-03-12")),
-          kansalaisuus = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          oppijanumero = "1.2.246.562.24.30646006111",
-          hakemusOid = "1.2.246.562.11.00000000000002179045",
-          toimipiste = Map(En -> "Toimipiste 1 en", Fi -> "Toimipiste 1 fi", Sv -> "Toimipiste 1 sv"),
-          hakukohteenNimi = Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv -> "Hakukohde 1 SV"),
-          hakukelpoisuus = None,
-          prioriteetti = 2,
-          valintatieto = Some("HYVAKSYTTY"),
-          ehdollisestiHyvaksytty = Some(true),
-          valintatiedonPvm = None,
-          valintatapajonot = List(
-            Valintatapajono(
-              valintatapajonoOid = "1707384694164-3621431542682802084",
-              valintatapajononNimi = "Todistusvalintajono kaikille hakijoille",
-              valinnanTila = "HYLATTY",
-              valinnanTilanKuvaus = Map(
-                En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 1."
-              )
-            ),
-            Valintatapajono(
-              valintatapajonoOid = "17096467457545361875995955973551",
-              valintatapajononNimi = "Todistusvalinta (YO)",
-              valinnanTila = "HYVAKSYTTY",
-              valinnanTilanKuvaus = Map(
-                En -> null,
-                Fi -> null,
-                Sv -> null
-              )
-            ),
-            Valintatapajono(
-              valintatapajonoOid = "1707384681516-2842344525807969324",
-              valintatapajononNimi = "Todistusvalintajono ensikertalaisille hakijoille",
-              valinnanTila = "HYLATTY",
-              valinnanTilanKuvaus = Map(
-                En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 2."
-              )
-            )
-          ),
-          vastaanottotieto = Some("PERUNUT"),
-          viimVastaanottopaiva = Some(LocalDate.parse("2024-06-26")),
-          ensikertalainen = Some(true),
-          ilmoittautuminen = Some("LASNA_KOKO_LUKUVUOSI"),
-          pohjakoulutus = None,
-          maksuvelvollisuus = None,
-          markkinointilupa = Some(true),
-          julkaisulupa = Some(true),
-          sahkoinenViestintalupa = Some(true),
-          lahiosoite = Some("Rämsöönranta 368"),
-          postinumero = Some("00100"),
-          postitoimipaikka = Some("HELSINKI"),
-          kotikunta = Map(En -> "Helsinki", Fi -> "Helsinki", Sv -> "Helsingfors"),
-          asuinmaa = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          puhelinnumero = Some("050 64292261"),
-          sahkoposti = Some("hakija-33919666@oph.fi"),
-          arvosanat = Map("A" -> "E", "M" -> "E", "BB" -> "M", "EA" -> "C", "FY" -> "E", "KE" -> "L")
-        ),
-        KkHakijaWithCombinedNimi(
-          hakija = "Lehto-Testi, Vikke Testi",
-          hetu = Some("04041990-345K"),
-          syntymaAika = Some(LocalDate.parse("1990-04-04")),
-          kansalaisuus = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          oppijanumero = "1.2.246.562.24.18441866015",
-          hakemusOid = "1.2.246.562.11.00000000000002126102",
-          toimipiste = Map(En -> "Toimipiste 2 en", Fi -> "Toimipiste 2 fi", Sv -> "Toimipiste 2 sv"),
-          hakukohteenNimi = Map(En -> "Hakukohde 2 EN", Fi -> "Hakukohde 2", Sv -> "Hakukohde 2 SV"),
-          hakukelpoisuus = Some("uneligible"),
-          prioriteetti = 1,
-          valintatieto = Some("HYLATTY"),
-          ehdollisestiHyvaksytty = None,
-          valintatiedonPvm = Some(LocalDate.parse("2024-06-11")),
-          valintatapajonot = List(
-            Valintatapajono(
-              valintatapajonoOid = "1704199256878262657431481297336",
-              valintatapajononNimi = "Todistusvalintajono ensikertalaisille hakijoille",
-              valinnanTila = "HYLATTY",
-              valinnanTilanKuvaus = Map(
-                En -> "Et ole ensikertalainen hakija.",
-                Fi -> "Et ole ensikertalainen hakija.",
-                Sv -> "Du är inte en förstagångssökande."
-              )
-            ),
-            Valintatapajono(
-              valintatapajonoOid = "17000468320548583779630214204232",
-              valintatapajononNimi = "Koevalintajono kaikille hakijoille",
-              valinnanTila = "HYLATTY",
-              valinnanTilanKuvaus = Map(
-                En -> "Et osallistunut valintakokeeseen",
-                Fi -> "Et osallistunut valintakokeeseen",
-                Sv -> "Et osallistunut valintakokeeseen SV"
-              )
-            ),
-            Valintatapajono(
-              valintatapajonoOid = "1707384694164-3621431542682802084",
-              valintatapajononNimi = "Todistusvalintajono kaikille hakijoille",
-              valinnanTila = "HYLATTY",
-              valinnanTilanKuvaus = Map(
-                En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
-              )
-            )
-          ),
-          vastaanottotieto = None,
-          viimVastaanottopaiva = Some(LocalDate.parse("2024-06-26")),
-          ensikertalainen = Some(false),
-          ilmoittautuminen = None,
-          pohjakoulutus = None,
-          maksuvelvollisuus = Some("unreviewed"),
-          julkaisulupa = Some(false),
-          markkinointilupa = Some(true),
-          sahkoinenViestintalupa = Some(true),
-          lahiosoite = Some("Laholanaukio 834"),
-          postinumero = Some("15700"),
-          postitoimipaikka = Some("LAHTI"),
-          kotikunta = Map(En -> "Lahti", Fi -> "Lahti", Sv -> "Lahtis"),
-          asuinmaa = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          puhelinnumero = Some("050 64293345"),
-          sahkoposti = None,
-          arvosanat = Map("M" -> "M", "O" -> "L", "CA" -> "M", "EA" -> "M", "PS" -> "E", "YH" -> "E")
-        )
-      )
+    val kkHakijatResult = Vector(kkHakijatRautiainenWithValintatapajonot, kkHakijaLehtoWithValintatapajonot)
 
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
@@ -3271,7 +3017,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(3).getCell(26).getStringCellValue == "Lahtis")
     assert(wb.getSheetAt(0).getRow(3).getCell(27).getStringCellValue == "Finland")
     assert(wb.getSheetAt(0).getRow(3).getCell(28).getStringCellValue == "050 64293345")
-    assert(wb.getSheetAt(0).getRow(3).getCell(29).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(3).getCell(29).getStringCellValue == "hakija-33919611@oph.fi")
     assert(wb.getSheetAt(0).getRow(3).getCell(30).getStringCellValue == "-")
     assert(wb.getSheetAt(0).getRow(3).getCell(31).getStringCellValue == "-")
     assert(wb.getSheetAt(0).getRow(3).getCell(32).getStringCellValue == "M")
@@ -3289,137 +3035,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   it should "return excel without arvosanat when nayta arvosanat is false" in {
-    val kkHakijatResult =
-      Vector(
-        KkHakijaWithCombinedNimi(
-          hakija = "Rautiainen-Testi, Dina Testi",
-          hetu = Some("120393-129E"),
-          syntymaAika = Some(LocalDate.parse("1993-03-12")),
-          kansalaisuus = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          oppijanumero = "1.2.246.562.24.30646006111",
-          hakemusOid = "1.2.246.562.11.00000000000002179045",
-          toimipiste = Map(En -> "Toimipiste 1 en", Fi -> "Toimipiste 1 fi", Sv -> "Toimipiste 1 sv"),
-          hakukohteenNimi = Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv -> "Hakukohde 1 SV"),
-          hakukelpoisuus = None,
-          prioriteetti = 2,
-          valintatieto = Some("HYVAKSYTTY"),
-          ehdollisestiHyvaksytty = Some(true),
-          valintatiedonPvm = None,
-          valintatapajonot = List(
-            Valintatapajono(
-              valintatapajonoOid = "1707384694164-3621431542682802084",
-              valintatapajononNimi = "Todistusvalintajono kaikille hakijoille",
-              valinnanTila = "HYLATTY",
-              valinnanTilanKuvaus = Map(
-                En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 1."
-              )
-            ),
-            Valintatapajono(
-              valintatapajonoOid = "17096467457545361875995955973551",
-              valintatapajononNimi = "Todistusvalinta (YO)",
-              valinnanTila = "HYVAKSYTTY",
-              valinnanTilanKuvaus = Map(
-                En -> null,
-                Fi -> null,
-                Sv -> null
-              )
-            ),
-            Valintatapajono(
-              valintatapajonoOid = "1707384681516-2842344525807969324",
-              valintatapajononNimi = "Todistusvalintajono ensikertalaisille hakijoille",
-              valinnanTila = "HYLATTY",
-              valinnanTilanKuvaus = Map(
-                En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 2."
-              )
-            )
-          ),
-          vastaanottotieto = Some("PERUNUT"),
-          viimVastaanottopaiva = Some(LocalDate.parse("2024-06-26")),
-          ensikertalainen = Some(true),
-          ilmoittautuminen = Some("LASNA_KOKO_LUKUVUOSI"),
-          pohjakoulutus = None,
-          maksuvelvollisuus = None,
-          markkinointilupa = Some(true),
-          julkaisulupa = Some(true),
-          sahkoinenViestintalupa = Some(true),
-          lahiosoite = Some("Rämsöönranta 368"),
-          postinumero = Some("00100"),
-          postitoimipaikka = Some("HELSINKI"),
-          kotikunta = Map(En -> "Helsinki", Fi -> "Helsinki", Sv -> "Helsingfors"),
-          asuinmaa = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          puhelinnumero = Some("050 64292261"),
-          sahkoposti = Some("hakija-33919666@oph.fi"),
-          arvosanat = Map("A" -> "E", "M" -> "E", "BB" -> "M", "EA" -> "C", "FY" -> "E", "KE" -> "L")
-        ),
-        KkHakijaWithCombinedNimi(
-          hakija = "Lehto-Testi, Vikke Testi",
-          hetu = Some("04041990-345K"),
-          syntymaAika = Some(LocalDate.parse("1990-04-04")),
-          kansalaisuus = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          oppijanumero = "1.2.246.562.24.18441866015",
-          hakemusOid = "1.2.246.562.11.00000000000002126102",
-          toimipiste = Map(En -> "Toimipiste 2 en", Fi -> "Toimipiste 2 fi", Sv -> "Toimipiste 2 sv"),
-          hakukohteenNimi = Map(En -> "Hakukohde 2 EN", Fi -> "Hakukohde 2", Sv -> "Hakukohde 2 SV"),
-          hakukelpoisuus = Some("uneligible"),
-          prioriteetti = 1,
-          valintatieto = Some("HYLATTY"),
-          ehdollisestiHyvaksytty = None,
-          valintatiedonPvm = Some(LocalDate.parse("2024-06-11")),
-          valintatapajonot = List(
-            Valintatapajono(
-              valintatapajonoOid = "1704199256878262657431481297336",
-              valintatapajononNimi = "Todistusvalintajono ensikertalaisille hakijoille",
-              valinnanTila = "HYLATTY",
-              valinnanTilanKuvaus = Map(
-                En -> "Et ole ensikertalainen hakija.",
-                Fi -> "Et ole ensikertalainen hakija.",
-                Sv -> "Du är inte en förstagångssökande."
-              )
-            ),
-            Valintatapajono(
-              valintatapajonoOid = "17000468320548583779630214204232",
-              valintatapajononNimi = "Koevalintajono kaikille hakijoille",
-              valinnanTila = "HYLATTY",
-              valinnanTilanKuvaus = Map(
-                En -> "Et osallistunut valintakokeeseen",
-                Fi -> "Et osallistunut valintakokeeseen",
-                Sv -> "Et osallistunut valintakokeeseen SV"
-              )
-            ),
-            Valintatapajono(
-              valintatapajonoOid = "1707384694164-3621431542682802084",
-              valintatapajononNimi = "Todistusvalintajono kaikille hakijoille",
-              valinnanTila = "HYLATTY",
-              valinnanTilanKuvaus = Map(
-                En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
-              )
-            )
-          ),
-          vastaanottotieto = None,
-          viimVastaanottopaiva = Some(LocalDate.parse("2024-06-26")),
-          ensikertalainen = Some(false),
-          ilmoittautuminen = None,
-          pohjakoulutus = None,
-          maksuvelvollisuus = Some("unreviewed"),
-          julkaisulupa = Some(false),
-          markkinointilupa = Some(true),
-          sahkoinenViestintalupa = Some(true),
-          lahiosoite = Some("Laholanaukio 834"),
-          postinumero = Some("15700"),
-          postitoimipaikka = Some("LAHTI"),
-          kotikunta = Map(En -> "Lahti", Fi -> "Lahti", Sv -> "Lahtis"),
-          asuinmaa = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          puhelinnumero = Some("050 64293345"),
-          sahkoposti = None,
-          arvosanat = Map("M" -> "M", "O" -> "L", "CA" -> "M", "EA" -> "M", "PS" -> "E", "YH" -> "E")
-        )
-      )
+    val kkHakijatResult = Vector(
+      kkHakijatRautiainenWithValintatapajonot,
+      kkHakijaLehtoWithValintatapajonot
+    )
 
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
@@ -3576,7 +3195,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(3).getCell(30).getStringCellValue == "Lahtis")
     assert(wb.getSheetAt(0).getRow(3).getCell(31).getStringCellValue == "Finland")
     assert(wb.getSheetAt(0).getRow(3).getCell(32).getStringCellValue == "050 64293345")
-    assert(wb.getSheetAt(0).getRow(3).getCell(33).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(3).getCell(33).getStringCellValue == "hakija-33919611@oph.fi")
     assert(wb.getSheetAt(0).getRow(3).getCell(34) == null)
 
     assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 4)
@@ -3584,73 +3203,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   it should "return excel without arvosanat in the heading when they don't exist" in {
-    val kkHakijatResult =
-      Vector(
-        KkHakijaWithCombinedNimi(
-          hakija = "Rautiainen-Testi, Dina Testi",
-          hetu = Some("120393-129E"),
-          syntymaAika = Some(LocalDate.parse("1993-03-12")),
-          kansalaisuus = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          oppijanumero = "1.2.246.562.24.30646006111",
-          hakemusOid = "1.2.246.562.11.00000000000002179045",
-          toimipiste = Map(En -> "Toimipiste 1 en", Fi -> "Toimipiste 1 fi", Sv -> "Toimipiste 1 sv"),
-          hakukohteenNimi = Map(En -> "Hakukohde 1 EN", Fi -> "Hakukohde 1", Sv -> "Hakukohde 1 SV"),
-          hakukelpoisuus = None,
-          prioriteetti = 2,
-          valintatieto = Some("HYVAKSYTTY"),
-          ehdollisestiHyvaksytty = Some(true),
-          valintatiedonPvm = None,
-          valintatapajonot = List(
-            Valintatapajono(
-              valintatapajonoOid = "1707384694164-3621431542682802084",
-              valintatapajononNimi = "Todistusvalintajono kaikille hakijoille",
-              valinnanTila = "HYLATTY",
-              valinnanTilanKuvaus = Map(
-                En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 1."
-              )
-            ),
-            Valintatapajono(
-              valintatapajonoOid = "17096467457545361875995955973551",
-              valintatapajononNimi = "Todistusvalinta (YO)",
-              valinnanTila = "HYVAKSYTTY",
-              valinnanTilanKuvaus = Map(
-                En -> null,
-                Fi -> null,
-                Sv -> null
-              )
-            ),
-            Valintatapajono(
-              valintatapajonoOid = "1707384681516-2842344525807969324",
-              valintatapajononNimi = "Todistusvalintajono ensikertalaisille hakijoille",
-              valinnanTila = "HYLATTY",
-              valinnanTilanKuvaus = Map(
-                En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-                Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 2."
-              )
-            )
-          ),
-          vastaanottotieto = Some("PERUNUT"),
-          viimVastaanottopaiva = Some(LocalDate.parse("2024-06-26")),
-          ensikertalainen = Some(true),
-          ilmoittautuminen = Some("LASNA_KOKO_LUKUVUOSI"),
-          pohjakoulutus = None,
-          maksuvelvollisuus = None,
-          markkinointilupa = Some(true),
-          julkaisulupa = Some(true),
-          sahkoinenViestintalupa = Some(true),
-          lahiosoite = Some("Rämsöönranta 368"),
-          postinumero = Some("00100"),
-          postitoimipaikka = Some("HELSINKI"),
-          kotikunta = Map(En -> "Helsinki", Fi -> "Helsinki", Sv -> "Helsingfors"),
-          asuinmaa = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
-          puhelinnumero = Some("050 64292261"),
-          sahkoposti = Some("hakija-33919666@oph.fi"),
-          arvosanat = Map()
-        )
-      )
+    val kkHakijatResult = Vector(kkHakijatRautiainenWithValintatapajonot)
 
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
