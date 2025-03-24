@@ -162,30 +162,50 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     )
 
     val query = sql"""SELECT
-        ka.koodinimi as otsikko,
-        SUM(t.hakijat) AS hakijat,
-        SUM(t.ensisijaisia) AS ensisijaisia,
-        SUM(t.varasija) AS varasija,
-        SUM(t.hyvaksytyt) AS hyvaksytyt,
-        SUM(t.vastaanottaneet) AS vastaanottaneet,
-        SUM(t.lasna) AS lasna,
-        SUM(t.poissa) AS poissa,
-        SUM(t.ilm_yht) AS ilm_yht,
-        SUM(DISTINCT h.hakukohteen_aloituspaikat) AS aloituspaikat,
-        SUM(t.toive_1) AS toive1,
-        SUM(t.toive_2) AS toive2,
-        SUM(t.toive_3) AS toive3,
-        SUM(t.toive_4) AS toive4,
-        SUM(t.toive_5) AS toive5,
-        SUM(t.toive_6) AS toive6,
-        SUM(t.toive_7) AS toive7
-    FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
-    JOIN pub.pub_dim_hakukohde h
-    ON t.hakukohde_oid = h.hakukohde_oid
-    JOIN pub.pub_dim_koodisto_koulutusalataso1 ka
-    ON t.koulutusalataso_1 = ka.koodiarvo
-    WHERE #$filters
-    GROUP BY ka.koodinimi""".as[HakeneetHyvaksytytVastaanottaneetResult]
+        ka.koodinimi AS otsikko,
+	      SUM(a.hakijat) as hakijat,
+	      SUM(a.ensisijaisia) AS ensisijaisia,
+        SUM(a.varasija) AS varasija,
+        SUM(a.hyvaksytyt) AS hyvaksytyt,
+        SUM(a.vastaanottaneet) AS vastaanottaneet,
+        SUM(a.lasna) AS lasna,
+        SUM(a.poissa) AS poissa,
+        SUM(a.ilm_yht) AS ilm_yht,
+        SUM(b.hakukohteen_aloituspaikat) AS aloituspaikat,
+        SUM(a.toive1) AS toive1,
+        SUM(a.toive2) AS toive2,
+        SUM(a.toive3) AS toive3,
+        SUM(a.toive4) AS toive4,
+        SUM(a.toive5) AS toive5,
+        SUM(a.toive6) AS toive6,
+        SUM(a.toive7) AS toive7
+	    FROM (
+		    SELECT
+      	  t.koulutusalataso_1,
+          h.hakukohde_oid,
+          SUM(t.hakijat) AS hakijat,
+          SUM(t.ensisijaisia) AS ensisijaisia,
+          SUM(t.varasija) AS varasija,
+          SUM(t.hyvaksytyt) AS hyvaksytyt,
+          SUM(t.vastaanottaneet) AS vastaanottaneet,
+          SUM(t.lasna) AS lasna,
+          SUM(t.poissa) AS poissa,
+          SUM(t.ilm_yht) AS ilm_yht,
+          SUM(t.toive_1) AS toive1,
+          SUM(t.toive_2) AS toive2,
+          SUM(t.toive_3) AS toive3,
+          SUM(t.toive_4) AS toive4,
+          SUM(t.toive_5) AS toive5,
+          SUM(t.toive_6) AS toive6,
+          SUM(t.toive_7) AS toive7
+	      FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
+        JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
+	      WHERE #$filters
+        GROUP BY t.koulutusalataso_1, h.hakukohde_oid
+	    ) a
+      JOIN pub.pub_dim_hakukohde b on a.hakukohde_oid = b.hakukohde_oid
+      JOIN pub.pub_dim_koodisto_koulutusalataso1 ka ON a.koulutusalataso_1 = ka.koodiarvo
+      GROUP BY 1""".as[HakeneetHyvaksytytVastaanottaneetResult]
     LOG.info(s"selectKoulutusaloittainWithParams: ${query.statements.head}")
     query
   }
@@ -209,35 +229,52 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       opetuskielet, maakunnat, kunnat, harkinnanvaraisuudet, sukupuoli
     )
     val organisaatioSelect = organisaatiotaso match {
-      case "oppilaitoksittain" => "h.oppilaitos_nimi as otsikko"
-      case _ => "h.koulutustoimija_nimi as otsikko"
+      case "oppilaitoksittain" => "b.oppilaitos_nimi as otsikko"
+      case _ => "b.koulutustoimija_nimi as otsikko"
     }
-    val organisaatioGroupBy = organisaatiotaso match {
-      case "oppilaitoksittain" => "h.oppilaitos_nimi"
-      case _ => "h.koulutustoimija_nimi"
-    }
-    val query = sql"""SELECT #$organisaatioSelect,
-        SUM(t.hakijat) AS hakijat,
-        SUM(t.ensisijaisia) AS ensisijaisia,
-        SUM(t.varasija) AS varasija,
-        SUM(t.hyvaksytyt) AS hyvaksytyt,
-        SUM(t.vastaanottaneet) AS vastaanottaneet,
-        SUM(t.lasna) AS lasna,
-        SUM(t.poissa) AS poissa,
-        SUM(t.ilm_yht) AS ilm_yht,
-        SUM(DISTINCT h.hakukohteen_aloituspaikat) AS aloituspaikat,
-        SUM(t.toive_1) AS toive1,
-        SUM(t.toive_2) AS toive2,
-        SUM(t.toive_3) AS toive3,
-        SUM(t.toive_4) AS toive4,
-        SUM(t.toive_5) AS toive5,
-        SUM(t.toive_6) AS toive6,
-        SUM(t.toive_7) AS toive7
-    FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
-    JOIN pub.pub_dim_hakukohde h
-    ON t.hakukohde_oid = h.hakukohde_oid
-    WHERE #$filters
-    GROUP BY #$organisaatioGroupBy""".as[HakeneetHyvaksytytVastaanottaneetResult]
+    val query = sql"""SELECT
+        #$organisaatioSelect,
+	      SUM(a.hakijat) as hakijat,
+	      SUM(a.ensisijaisia) AS ensisijaisia,
+        SUM(a.varasija) AS varasija,
+        SUM(a.hyvaksytyt) AS hyvaksytyt,
+        SUM(a.vastaanottaneet) AS vastaanottaneet,
+        SUM(a.lasna) AS lasna,
+        SUM(a.poissa) AS poissa,
+        SUM(a.ilm_yht) AS ilm_yht,
+        SUM(b.hakukohteen_aloituspaikat) AS aloituspaikat,
+        SUM(a.toive1) AS toive1,
+        SUM(a.toive2) AS toive2,
+        SUM(a.toive3) AS toive3,
+        SUM(a.toive4) AS toive4,
+        SUM(a.toive5) AS toive5,
+        SUM(a.toive6) AS toive6,
+        SUM(a.toive7) AS toive7
+	    FROM (
+		    SELECT
+      		h.hakukohde_oid,
+            SUM(t.hakijat) AS hakijat,
+            SUM(t.ensisijaisia) AS ensisijaisia,
+            SUM(t.varasija) AS varasija,
+            SUM(t.hyvaksytyt) AS hyvaksytyt,
+            SUM(t.vastaanottaneet) AS vastaanottaneet,
+            SUM(t.lasna) AS lasna,
+            SUM(t.poissa) AS poissa,
+            SUM(t.ilm_yht) AS ilm_yht,
+            SUM(t.toive_1) AS toive1,
+            SUM(t.toive_2) AS toive2,
+            SUM(t.toive_3) AS toive3,
+            SUM(t.toive_4) AS toive4,
+            SUM(t.toive_5) AS toive5,
+            SUM(t.toive_6) AS toive6,
+            SUM(t.toive_7) AS toive7
+	      FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
+	      JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
+	      WHERE #$filters
+        GROUP BY h.hakukohde_oid
+	    ) a
+      JOIN pub.pub_dim_hakukohde b on a.hakukohde_oid = b.hakukohde_oid
+      GROUP BY 1""".as[HakeneetHyvaksytytVastaanottaneetResult]
     LOG.info(s"selectOrganisaatioittainWithParams: ${query.statements.head}")
     query
   }
@@ -261,29 +298,49 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     )
 
     val query = sql"""SELECT
-      h.toimipiste,
-      h.organisaatio_nimi,
-      SUM(t.hakijat) AS hakijat,
-      SUM(t.ensisijaisia) AS ensisijaisia,
-      SUM(t.varasija) AS varasija,
-      SUM(t.hyvaksytyt) AS hyvaksytyt,
-      SUM(t.vastaanottaneet) AS vastaanottaneet,
-      SUM(t.lasna) AS lasna,
-      SUM(t.poissa) AS poissa,
-      SUM(t.ilm_yht) AS ilm_yht,
-      SUM(DISTINCT h.hakukohteen_aloituspaikat) AS aloituspaikat,
-      SUM(t.toive_1) AS toive1,
-      SUM(t.toive_2) AS toive2,
-      SUM(t.toive_3) AS toive3,
-      SUM(t.toive_4) AS toive4,
-      SUM(t.toive_5) AS toive5,
-      SUM(t.toive_6) AS toive6,
-      SUM(t.toive_7) AS toive7
-    FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
-    JOIN pub.pub_dim_hakukohde h
-    ON t.hakukohde_oid = h.hakukohde_oid
-    WHERE #$filters
-    GROUP BY h.toimipiste, h.organisaatio_nimi""".as[HakeneetHyvaksytytVastaanottaneetToimipisteittain]
+	    b.toimipiste,
+	    b.organisaatio_nimi,
+	    SUM(a.hakijat) as hakijat,
+	    SUM(a.ensisijaisia) AS ensisijaisia,
+      SUM(a.varasija) AS varasija,
+      SUM(a.hyvaksytyt) AS hyvaksytyt,
+      SUM(a.vastaanottaneet) AS vastaanottaneet,
+      SUM(a.lasna) AS lasna,
+      SUM(a.poissa) AS poissa,
+      SUM(a.ilm_yht) AS ilm_yht,
+      SUM(b.hakukohteen_aloituspaikat) AS aloituspaikat,
+      SUM(a.toive1) AS toive1,
+      SUM(a.toive2) AS toive2,
+      SUM(a.toive3) AS toive3,
+      SUM(a.toive4) AS toive4,
+      SUM(a.toive5) AS toive5,
+      SUM(a.toive6) AS toive6,
+      SUM(a.toive7) AS toive7
+	    FROM (
+		    SELECT
+      		h.hakukohde_oid,
+          SUM(t.hakijat) AS hakijat,
+          SUM(t.ensisijaisia) AS ensisijaisia,
+          SUM(t.varasija) AS varasija,
+          SUM(t.hyvaksytyt) AS hyvaksytyt,
+          SUM(t.vastaanottaneet) AS vastaanottaneet,
+          SUM(t.lasna) AS lasna,
+          SUM(t.poissa) AS poissa,
+          SUM(t.ilm_yht) AS ilm_yht,
+          SUM(t.toive_1) AS toive1,
+          SUM(t.toive_2) AS toive2,
+          SUM(t.toive_3) AS toive3,
+          SUM(t.toive_4) AS toive4,
+          SUM(t.toive_5) AS toive5,
+          SUM(t.toive_6) AS toive6,
+          SUM(t.toive_7) AS toive7
+	      FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
+	      JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
+	      WHERE #$filters
+        GROUP BY h.hakukohde_oid
+	    ) a
+      JOIN pub.pub_dim_hakukohde b ON a.hakukohde_oid = b.hakukohde_oid
+      GROUP BY 1,2""".as[HakeneetHyvaksytytVastaanottaneetToimipisteittain]
     LOG.info(s"selectToimipisteittainWithParams: ${query.statements.head}")
     query
   }
