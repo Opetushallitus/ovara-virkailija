@@ -963,15 +963,14 @@ object ExcelWriter {
     var currentRowIndex = 0
 
     val otsikko = tulostustapa match
-      case "hakukohteittain" => "hakukohde"
-      case "oppilaitoksittain" => "oppilaitos"
-      case "toimipisteittain" => "toimipiste"
-      case "koulutustoimijoittain" => "koulutustoimija"
+      case "hakukohteittain"         => "hakukohde"
+      case "oppilaitoksittain"       => "oppilaitos"
+      case "toimipisteittain"        => "toimipiste"
+      case "koulutustoimijoittain"   => "koulutustoimija"
       case "okm-ohjauksen-aloittain" => "okm-ohjauksen-ala"
-      case "hauittain" => "haku"
-      case "hakukohteittain" => "hakukohde"
-      case "hakukohderyhmittain" => "hakukohderyhma"
-      case "kansalaisuuksittain" => "kansalaisuus"
+      case "hauittain"               => "haku"
+      case "hakukohderyhmittain"     => "hakukohderyhma"
+      case "kansalaisuuksittain"     => "kansalaisuus"
 
     val fieldNames =
       if (naytaHakutoiveet)
