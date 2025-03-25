@@ -2277,12 +2277,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
-        kkHakijatResult,
-        userLng,
-        translations,
-        Some(true),
-        Some(true),
-        Some(true)
+        hakijoidenHakutoiveet = kkHakijatResult,
+        asiointikieli = userLng,
+        translations = translations,
+        maybeNaytaYoArvosanat = Some(true),
+        maybeNaytaHetu = Some(true),
+        maybeNaytaPostiosoite = Some(true)
       )
 
     assert(wb.getNumberOfSheets == 1)
@@ -2435,12 +2435,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
-        kkHakijatResult,
-        userLng,
-        translations,
-        Some(true),
-        Some(false),
-        Some(false)
+        hakijoidenHakutoiveet = kkHakijatResult,
+        asiointikieli = userLng,
+        translations = translations,
+        maybeNaytaYoArvosanat = Some(true),
+        maybeNaytaHetu = Some(false),
+        maybeNaytaPostiosoite = Some(false)
       )
 
     assert(wb.getNumberOfSheets == 1)
@@ -2588,12 +2588,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
-        kkHakijatResult,
-        userLng,
-        translations,
-        Some(true),
-        Some(true),
-        Some(false)
+        hakijoidenHakutoiveet = kkHakijatResult,
+        asiointikieli = userLng,
+        translations = translations,
+        maybeNaytaYoArvosanat = Some(true),
+        maybeNaytaHetu = Some(true),
+        maybeNaytaPostiosoite = Some(false)
       )
 
     assert(wb.getNumberOfSheets == 1)
@@ -2691,12 +2691,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
-        kkHakijatResult,
-        userLng,
-        translations,
-        Some(true),
-        Some(false),
-        Some(true)
+        hakijoidenHakutoiveet = kkHakijatResult,
+        asiointikieli = userLng,
+        translations = translations,
+        maybeNaytaYoArvosanat = Some(true),
+        maybeNaytaHetu = Some(false),
+        maybeNaytaPostiosoite = Some(true)
       )
 
     assert(wb.getNumberOfSheets == 1)
@@ -2886,12 +2886,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
-        kkHakijatResult,
-        userLng,
-        translations,
-        Some(true),
-        Some(false),
-        Some(false)
+        hakijoidenHakutoiveet = kkHakijatResult,
+        asiointikieli = userLng,
+        translations = translations,
+        maybeNaytaYoArvosanat = Some(true),
+        maybeNaytaHetu = Some(false),
+        maybeNaytaPostiosoite = Some(false)
       )
 
     assert(wb.getNumberOfSheets == 1)
@@ -3075,12 +3075,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
-        kkHakijatResult,
-        userLng,
-        translations,
-        Some(false),
-        Some(true),
-        Some(true)
+        hakijoidenHakutoiveet = kkHakijatResult,
+        asiointikieli = userLng,
+        translations = translations,
+        maybeNaytaYoArvosanat = Some(false),
+        maybeNaytaHetu = Some(true),
+        maybeNaytaPostiosoite = Some(true)
       )
 
     assert(wb.getNumberOfSheets == 1)
@@ -3243,12 +3243,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
-        kkHakijatResult,
-        userLng,
-        translations,
-        None,
-        Some(false),
-        Some(false)
+        hakijoidenHakutoiveet = kkHakijatResult,
+        asiointikieli = userLng,
+        translations = translations,
+        maybeNaytaYoArvosanat = None,
+        maybeNaytaHetu = Some(false),
+        maybeNaytaPostiosoite = Some(false)
       )
 
     assert(wb.getNumberOfSheets == 1)
