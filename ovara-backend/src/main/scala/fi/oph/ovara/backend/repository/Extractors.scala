@@ -100,7 +100,8 @@ trait Extractors extends GenericOvaraJsonFormats {
         oppilaitosJaToimipiste = extractKielistetty(r.nextStringOption()),
         koulutuksenNimi = extractKielistetty(r.nextStringOption()),
         koulutusOid = r.nextString(),
-        koulutuksenTila = r.nextStringOption()
+        koulutuksenTila = r.nextStringOption(),
+        koulutuskoodi = r.nextStringOption()
       )
     })
   }

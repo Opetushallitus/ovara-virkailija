@@ -22,7 +22,8 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
     sql"""SELECT hk.organisaatio_nimi,
                  k.koulutus_nimi,
                  k.koulutus_oid,
-                 k.tila AS koulutuksen_tila
+                 k.tila AS koulutuksen_tila,
+                 k.koulutus_koodi
           FROM pub.pub_dim_haku h
           JOIN pub.pub_dim_hakukohde hk
           ON h.haku_oid = hk.haku_oid
