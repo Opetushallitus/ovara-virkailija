@@ -59,7 +59,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
     "raportti.toive6"                         -> "Toive6 SV",
     "raportti.toive7"                         -> "Toive7 SV",
     "raportti.yhteensa"                       -> "Yhteensä SV",
-    "raportti.yksittaiset-hakijat"            -> "Yksittäiset hakijat SV"
+    "raportti.yksittaiset-hakijat"            -> "Yksittäiset hakijat SV",
+    "raportti.oppilaitosJaToimipiste" -> "Oppilaitos ja toimipiste SV"
   )
 
   def checkAloituspaikatRowValidity(sheet: XSSFSheet, rowNumber: Int, expected: Int): Unit = {
@@ -1540,6 +1541,41 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(10).getCell(9) == null)
 
     assert(sheet.getPhysicalNumberOfRows == 11)
+  }
+
+  "writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti" should "create Korkeakoulujen koulutukset toteutukset ja hakukohteet -raportti koulutustoimijoittain with one result row" in {
+    val koulutuksetToteutuksetHakukohteet = Vector(
+      KorkeakouluKoulutusToteutusHakukohdeResult(
+        Map(
+          En -> "Aalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
+          Fi -> "Aalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
+          Sv -> "Aalto-universitetet, Högskolan för konst design och arkitektur"
+        ),
+        Map(
+          En -> "Screenwriting - Film and Television, Master of Arts (Art and Design) (2 yrs)",
+          Fi -> "Elokuva- ja tv-käsikirjoitus - Elokuvataide, taiteen maisteri (2 v)",
+          Sv -> "Film- och tv-manuskript - Filmkonst, konstmagister (2 år)"
+        ),
+        "1.2.246.562.13.00000000000000002677",
+        Some("julkaistu")
+      )
+    )
+
+    val wb = ExcelWriter.writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
+      korkeakouluKoulutuksetToteutuksetHakukohteetResults = koulutuksetToteutuksetHakukohteet,
+      asiointikieli = userLng,
+      translations = translations
+    )
+
+    val sheet = wb.getSheetAt(0)
+    assert(sheet.getRow(0).getCell(0).getStringCellValue == "Oppilaitos ja toimipiste SV")
+    assert(sheet.getRow(0).getCell(1).getStringCellValue == "raportti.koulutuksenNimi")
+    assert(sheet.getRow(0).getCell(2).getStringCellValue == "raportti.koulutusOid")
+    assert(sheet.getRow(0).getCell(3).getStringCellValue == "raportti.koulutuksenTila")
+    assert(sheet.getRow(1).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur")
+    assert(sheet.getRow(1).getCell(1).getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år)")
+    assert(sheet.getRow(1).getCell(2).getStringCellValue == "1.2.246.562.13.00000000000000002677")
+    assert(sheet.getRow(1).getCell(3).getStringCellValue == "julkaistu")
   }
 
   "createHeadingRow" should "create heading row with translated column names or translation keys for hakijat raportti" in {

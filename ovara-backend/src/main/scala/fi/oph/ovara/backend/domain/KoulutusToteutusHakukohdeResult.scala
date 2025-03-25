@@ -28,3 +28,10 @@ case class OrganisaationKoulutusToteutusHakukohde(
     organisaatio_oid: Option[String],
     koulutusToteutusHakukohde: KoulutusToteutusHakukohdeResult
 )
+
+case class KorkeakouluKoulutusToteutusHakukohdeResult(
+    oppilaitosJaToimipiste: Kielistetty,
+    koulutuksenNimi: Kielistetty,
+    koulutusOid: String,
+    koulutuksenTila: Option[String] = None
+)
