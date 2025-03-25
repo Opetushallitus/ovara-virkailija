@@ -967,7 +967,7 @@ object ExcelWriter {
       case "oppilaitoksittain" => "oppilaitos"
       case "toimipisteittain" => "toimipiste"
       case "koulutustoimijoittain" => "koulutustoimija"
-      case "okmohjauksenaloittain" => "okm-ohjauksen-ala"
+      case "okm-ohjauksen-aloittain" => "okm-ohjauksen-ala"
       case "hauittain" => "haku"
       case "hakukohteittain" => "hakukohde"
       case "hakukohderyhmittain" => "hakukohderyhma"
