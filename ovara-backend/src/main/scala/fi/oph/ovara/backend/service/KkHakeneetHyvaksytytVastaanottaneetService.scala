@@ -105,6 +105,20 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
           ensikertalainen = ensikertalainen
         )
         db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectOkmOhjauksenAloittainWithParams")
+      case "kansalaisuuksittain" =>
+        val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectKansalaisuuksittainWithParams(
+          selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
+          haut = haku,
+          hakukohteet = hakukohteet,
+          hakukohderyhmat = hakukohderyhmat,
+          okmOhjauksenAlat = okmOhjauksenAlat,
+          tutkinnonTasot = tutkinnonTasot,
+          aidinkielet = aidinkielet,
+          kansalaisuudet = kansalaisuudet,
+          sukupuoli = sukupuoli,
+          ensikertalainen = ensikertalainen
+        )
+        db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectKansalaisuuksittainWithParams")
       case _ =>
         val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
