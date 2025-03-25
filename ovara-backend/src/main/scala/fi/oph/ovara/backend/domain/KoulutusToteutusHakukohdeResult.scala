@@ -33,5 +33,6 @@ case class KorkeakouluKoulutusToteutusHakukohdeResult(
     oppilaitosJaToimipiste: Kielistetty,
     koulutuksenNimi: Kielistetty,
     koulutusOid: String,
-    koulutuksenTila: Option[String] = None
+    koulutuksenTila: Option[String],
+    koulutuskoodi: Option[String]
 )
