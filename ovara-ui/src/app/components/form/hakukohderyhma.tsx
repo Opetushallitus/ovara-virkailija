@@ -4,9 +4,10 @@ import { useTranslate } from '@tolgee/react';
 import { useSearchParams } from 'next/navigation';
 import { changeMultiComboBoxSelection } from '@/app/components/form/utils';
 import { isNullish } from 'remeda';
-import { useFetchHakukohderyhmat } from '@/app/hooks/useHakukohderyhmat';
 import { useAsiointiKieli } from '@/app/hooks/useAsiointikieli';
 import { Kielistetty } from '@/app/lib/types/common';
+import { useQuery } from '@tanstack/react-query';
+import { doApiFetch } from '@/app/lib/ovara-backend/api';
 
 type Hakukohderyhma = {
   hakukohderyhma_oid: string;
@@ -24,10 +25,14 @@ export const Hakukohderyhma = () => {
   const fetchEnabled = !isNullish(haut);
   const queryParamsStr = queryParams.toString();
 
-  const { data: hakukohderyhmat } = useFetchHakukohderyhmat(
-    queryParamsStr,
-    fetchEnabled,
-  );
+  const { data: hakukohderyhmat } = useQuery({
+    queryKey: ['fetchHakukohderyhmat', queryParamsStr],
+    queryFn: () =>
+      doApiFetch('hakukohderyhmat', {
+        queryParams: queryParamsStr ? `?${queryParamsStr}` : null,
+      }),
+    enabled: fetchEnabled,
+  });
 
   return (
     <MultiComboBox
