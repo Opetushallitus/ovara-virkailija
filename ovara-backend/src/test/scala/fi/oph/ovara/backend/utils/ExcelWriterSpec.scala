@@ -3649,46 +3649,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
   }
 
-  /*  "shouldSkipCreatingCell" should "return false for hetu if raportti is NOT korkeakouluraportti" in {
-    assert(
-      !ExcelWriter.shouldSkipCreatingCell(
-        fieldName = "hetu",
-        naytaHetu = true,
-        naytaPostiosoite = true
-      )
-    )
-  }
-
-  it should "return false for lahiosoite if raportti is NOT korkeakouluraportti" in {
-    assert(
-      !ExcelWriter.shouldSkipCreatingCell(
-        fieldName = "lahiosoite",
-        naytaHetu = true,
-        naytaPostiosoite = true
-      )
-    )
-  }
-
-  it should "return false for postinumero if raportti is NOT korkeakouluraportti" in {
-    assert(
-      !ExcelWriter.shouldSkipCreatingCell(
-        fieldName = "postinumero",
-        naytaHetu = true,
-        naytaPostiosoite = true
-      )
-    )
-  }
-
-  it should "return false for postitoimipaikka if raportti is NOT korkeakouluraportti" in {
-    assert(
-      !ExcelWriter.shouldSkipCreatingCell(
-        fieldName = "postitoimipaikka",
-        naytaHetu = true,
-        naytaPostiosoite = true
-      )
-    )
-  }*/
-
   "shouldSkipCreatingCell" should "return false for hetu if naytaHetu is true" in {
     assert(
       !ExcelWriter.shouldSkipCreatingCell(
