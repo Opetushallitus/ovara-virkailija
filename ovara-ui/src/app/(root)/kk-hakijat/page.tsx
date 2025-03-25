@@ -69,11 +69,12 @@ export default function KkHakijat() {
   );
 
   const isDisabled =
-    isEmpty(selectedAlkamiskaudet || []) ||
-    isEmpty(selectedHaut || []) ||
-    (isEmpty(selectedOppilaitokset || []) &&
-      isEmpty(selectedToimipisteet || []) &&
-      isEmpty(selectedHakukohderyhmat || []));
+    [selectedAlkamiskaudet || [], selectedHaut || []].some(isEmpty) ||
+    [
+      selectedOppilaitokset || [],
+      selectedToimipisteet || [],
+      selectedHakukohderyhmat || [],
+    ].every(isEmpty);
 
   const [isLoading, setIsLoading] = useState(false);
 
