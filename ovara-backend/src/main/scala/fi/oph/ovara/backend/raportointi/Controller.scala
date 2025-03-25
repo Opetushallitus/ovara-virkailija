@@ -397,7 +397,6 @@ class Controller(
 
   @GetMapping(path = Array("hakeneet-hyvaksytyt-vastaanottaneet"))
   def hakeneet_hyvaksytyt_vastaanottaneet(
-      @RequestParam("alkamiskausi") alkamiskausi: java.util.Collection[String],
       @RequestParam("haku") haku: java.util.Collection[String],
       @RequestParam("tulostustapa") tulostustapa: String,
       @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
@@ -420,7 +419,6 @@ class Controller(
     val tulostustapaValinta            = Option(tulostustapa).getOrElse("hakukohteittain")
     val naytaHakutoiveetBool           = Option(naytaHakutoiveet).exists(_.toBoolean)
     val maybeSukupuoli: Option[String] = if (sukupuoli == "neutral") None else Option(sukupuoli)
-    val alkamiskausiList               = if (alkamiskausi == null) List() else alkamiskausi.asScala.toList
     val hakuList                       = if (haku == null) List() else haku.asScala.toList
     val oppilaitosList                 = if (oppilaitos == null) List() else oppilaitos.asScala.toList
     val toimipisteList                 = if (toimipiste == null) List() else toimipiste.asScala.toList
@@ -453,7 +451,6 @@ class Controller(
     )
 
     val raporttiParams = Map(
-      "alkamiskausi"         -> Option(alkamiskausiList).filterNot(_.isEmpty),
       "haku"                 -> Option(hakuList).filterNot(_.isEmpty),
       "koulutustoimija"      -> maybeKoulutustoimija,
       "oppilaitos"           -> Option(oppilaitosList).filterNot(_.isEmpty),
@@ -475,7 +472,6 @@ class Controller(
 
   @GetMapping(path = Array("kk-hakeneet-hyvaksytyt-vastaanottaneet"))
   def kk_hakeneet_hyvaksytyt_vastaanottaneet(
-                                           @RequestParam("alkamiskausi") alkamiskausi: java.util.Collection[String],
                                            @RequestParam("haku") haku: java.util.Collection[String],
                                            @RequestParam("tulostustapa") tulostustapa: String,
                                            @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
@@ -498,7 +494,6 @@ class Controller(
     val naytaHakutoiveetBool = Option(naytaHakutoiveet).exists(_.toBoolean)
     val maybeSukupuoli: Option[String] = if (sukupuoli == "neutral") None else Option(sukupuoli)
     val maybeEnsikertalainen: Option[Boolean] = strToOptionBoolean(ensikertalainen)
-    val alkamiskausiList = if (alkamiskausi == null) List() else alkamiskausi.asScala.toList
     val hakuList = if (haku == null) List() else haku.asScala.toList
     val oppilaitosList = if (oppilaitos == null) List() else oppilaitos.asScala.toList
     val toimipisteList = if (toimipiste == null) List() else toimipiste.asScala.toList
@@ -527,7 +522,6 @@ class Controller(
     )
 
     val raporttiParams = Map(
-      "alkamiskausi" -> Option(alkamiskausiList).filterNot(_.isEmpty),
       "haku" -> Option(hakuList).filterNot(_.isEmpty),
       "koulutustoimija" -> maybeKoulutustoimija,
       "oppilaitos" -> Option(oppilaitosList).filterNot(_.isEmpty),

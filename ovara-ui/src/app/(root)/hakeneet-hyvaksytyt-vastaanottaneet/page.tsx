@@ -34,29 +34,8 @@ export default function Hakutilasto() {
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const queryParams = useSearchParams();
 
-  const {
-    selectedAlkamiskaudet,
-    setSelectedAlkamiskaudet,
-    selectedHaut,
-    setSelectedHaut,
-    setSelectedKoulutustoimija,
-    setSelectedOppilaitokset,
-    setSelectedToimipisteet,
-    setSelectedHakukohteet,
-    setSelectedHarkinnanvaraisuus,
-  } = useCommonSearchParams();
-  const {
-    setSelectedKoulutusalat1,
-    setSelectedKoulutusalat2,
-    setSelectedKoulutusalat3,
-    setSelectedMaakunnat,
-    setSelectedKunnat,
-    setSelectedNaytaHakutoiveet,
-    selectedTulostustapa,
-    setSelectedTulostustapa,
-    setSelectedOpetuskielet,
-    setSelectedSukupuoli,
-  } = useHakeneetSearchParams();
+  const { selectedAlkamiskaudet, selectedHaut } = useCommonSearchParams();
+  const { selectedTulostustapa } = useHakeneetSearchParams();
 
   const isDisabled = !(
     selectedAlkamiskaudet &&
@@ -92,24 +71,6 @@ export default function Hakutilasto() {
                 setIsLoading,
               )
             }
-            fieldsToClear={[
-              () => setSelectedAlkamiskaudet(null),
-              () => setSelectedHaut(null),
-              () => setSelectedKoulutustoimija(null),
-              () => setSelectedOppilaitokset(null),
-              () => setSelectedToimipisteet(null),
-              () => setSelectedTulostustapa(null),
-              () => setSelectedKoulutusalat1(null),
-              () => setSelectedKoulutusalat2(null),
-              () => setSelectedKoulutusalat3(null),
-              () => setSelectedMaakunnat(null),
-              () => setSelectedKunnat(null),
-              () => setSelectedNaytaHakutoiveet(null),
-              () => setSelectedOpetuskielet(null),
-              () => setSelectedHakukohteet(null),
-              () => setSelectedHarkinnanvaraisuus(null),
-              () => setSelectedSukupuoli(null),
-            ]}
           />
         </FormBox>
       ) : null}

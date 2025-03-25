@@ -36,27 +36,8 @@ export default function KkHakutilasto() {
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const queryParams = useSearchParams();
 
-  const {
-    selectedAlkamiskaudet,
-    setSelectedAlkamiskaudet,
-    selectedHaut,
-    setSelectedHaut,
-    setSelectedKoulutustoimija,
-    setSelectedOppilaitokset,
-    setSelectedToimipisteet,
-    setSelectedHakukohteet,
-    setSelectedKansalaisuus,
-  } = useCommonSearchParams();
-  const {
-    setSelectedNaytaHakutoiveet,
-    selectedTulostustapa,
-    setSelectedTulostustapa,
-    setSelectedSukupuoli,
-    setSelectedTutkinnonTaso,
-    setSelectedAidinkieli,
-    setSelectedOkmOhjauksenAla,
-    setSelectedEnsikertalainen,
-  } = useHakeneetSearchParams();
+  const { selectedAlkamiskaudet, selectedHaut } = useCommonSearchParams();
+  const { selectedTulostustapa } = useHakeneetSearchParams();
 
   const isDisabled = !(
     selectedAlkamiskaudet &&
@@ -94,22 +75,6 @@ export default function KkHakutilasto() {
                 setIsLoading,
               )
             }
-            fieldsToClear={[
-              () => setSelectedAlkamiskaudet(null),
-              () => setSelectedHaut(null),
-              () => setSelectedKoulutustoimija(null),
-              () => setSelectedOppilaitokset(null),
-              () => setSelectedToimipisteet(null),
-              () => setSelectedTulostustapa(null),
-              () => setSelectedNaytaHakutoiveet(null),
-              () => setSelectedHakukohteet(null),
-              () => setSelectedOkmOhjauksenAla(null),
-              () => setSelectedEnsikertalainen(null),
-              () => setSelectedTutkinnonTaso(null),
-              () => setSelectedAidinkieli(null),
-              () => setSelectedKansalaisuus(null),
-              () => setSelectedSukupuoli(null),
-            ]}
           />
         </FormBox>
       ) : null}

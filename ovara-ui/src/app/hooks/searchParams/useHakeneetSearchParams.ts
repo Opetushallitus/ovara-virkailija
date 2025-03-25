@@ -68,10 +68,27 @@ export const useHakeneetSearchParams = () => {
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
-  const [selectedOkmOhjauksenAla, setSelectedOkmOhjauksenAla] = useQueryState(
+  const [selectedOkmOhjauksenAlat, setSelectedOkmOhjauksenAlat] = useQueryState(
     'okm-ohjauksen-ala',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
+
+  const emptyAllHakeneetParams = () => {
+    console.debug('EMPTY ALL HAKENEET-HYVÄKSYTYT-VASTAANOTTANEET PARAMS');
+    setSelectedTulostustapa(null);
+    setSelectedOpetuskielet(null);
+    setSelectedMaakunnat(null);
+    setSelectedKunnat(null);
+    setSelectedKoulutusalat1(null);
+    setSelectedKoulutusalat2(null);
+    setSelectedKoulutusalat3(null);
+    setSelectedNaytaHakutoiveet(null);
+    setSelectedSukupuoli(null);
+    setSelectedTutkinnonTaso(null);
+    setSelectedAidinkieli(null);
+    setSelectedEnsikertalainen(null);
+    setSelectedOkmOhjauksenAlat(null);
+  };
 
   return {
     selectedTulostustapa,
@@ -98,7 +115,8 @@ export const useHakeneetSearchParams = () => {
     setSelectedAidinkieli,
     selectedEnsikertalainen,
     setSelectedEnsikertalainen,
-    selectedOkmOhjauksenAla,
-    setSelectedOkmOhjauksenAla,
+    selectedOkmOhjauksenAlat,
+    setSelectedOkmOhjauksenAlat,
+    emptyAllHakeneetParams,
   };
 };

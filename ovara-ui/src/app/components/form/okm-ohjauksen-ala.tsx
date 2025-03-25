@@ -15,7 +15,7 @@ export const OkmOhjauksenAlat = () => {
   const user = useAuthorizedUser();
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
 
-  const { selectedOkmOhjauksenAla, setSelectedOkmOhjauksenAla } =
+  const { selectedOkmOhjauksenAlat, setSelectedOkmOhjauksenAlat } =
     useHakeneetSearchParams();
 
   const okmOhjauksenAlaData = useQuery({
@@ -31,10 +31,10 @@ export const OkmOhjauksenAlat = () => {
     <MultiComboBox
       id={okm_ohjauksen_alat_id}
       label={t(`raportti.${okm_ohjauksen_alat_id}`)}
-      value={selectedOkmOhjauksenAla ?? []}
+      value={selectedOkmOhjauksenAlat ?? []}
       options={getKoodiOptions(locale, maakunnat)}
       onChange={(e, value) =>
-        changeMultiComboBoxSelection(e, value, setSelectedOkmOhjauksenAla)
+        changeMultiComboBoxSelection(e, value, setSelectedOkmOhjauksenAlat)
       }
     />
   );
