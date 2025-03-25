@@ -93,6 +93,18 @@ trait Extractors extends GenericOvaraJsonFormats {
     })
   }
 
+  implicit val getKorkeakouluKoulutuksetToteutuksetHakukohteetResult
+      : GetResult[KorkeakouluKoulutusToteutusHakukohdeResult] = {
+    GetResult(r => {
+      KorkeakouluKoulutusToteutusHakukohdeResult(
+        oppilaitosJaToimipiste = extractKielistetty(r.nextStringOption()),
+        koulutuksenNimi = extractKielistetty(r.nextStringOption()),
+        koulutusOid = r.nextString(),
+        koulutuksenTila = r.nextStringOption()
+      )
+    })
+  }
+
   implicit val getOrganisaatioHierarkiaResult: GetResult[OrganisaatioHierarkia] = GetResult(r =>
     OrganisaatioHierarkia(
       organisaatio_oid = r.nextString(),
@@ -105,7 +117,7 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   )
 
-  def getNextDateOption(r: PositionedResult) = {
+  private def getNextDateOption(r: PositionedResult) = {
     r.nextDateOption() match {
       case Some(date) => Some(date.toLocalDate)
       case None       => None
