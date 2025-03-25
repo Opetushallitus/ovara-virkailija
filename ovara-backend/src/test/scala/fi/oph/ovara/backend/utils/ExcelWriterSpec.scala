@@ -1543,6 +1543,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getPhysicalNumberOfRows == 11)
   }
 
+  "extractKoodi" should "return numeric koodi when there is no version" in {
+    assert(ExcelWriter.extractKoodi("koulutus_309902") == "309902")
+  }
+
+  it should "return numeric koodi when the koodiarvo ends in a version" in {
+    assert(ExcelWriter.extractKoodi("koulutus_309902") == "309902")
+  }
+
   "writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti" should "create Korkeakoulujen koulutukset toteutukset ja hakukohteet -raportti koulutustoimijoittain with one result row" in {
     val koulutuksetToteutuksetHakukohteet = Vector(
       KorkeakouluKoulutusToteutusHakukohdeResult(
@@ -1557,7 +1565,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
           Sv -> "Film- och tv-manuskript - Filmkonst, konstmagister (2 år)"
         ),
         "1.2.246.562.13.00000000000000002677",
-        Some("julkaistu")
+        Some("julkaistu"),
+        Some("koulutus_309902#7")
       )
     )
 
@@ -1572,10 +1581,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(0).getCell(1).getStringCellValue == "raportti.koulutuksenNimi")
     assert(sheet.getRow(0).getCell(2).getStringCellValue == "raportti.koulutusOid")
     assert(sheet.getRow(0).getCell(3).getStringCellValue == "raportti.koulutuksenTila")
+    assert(sheet.getRow(0).getCell(4).getStringCellValue == "raportti.koulutuskoodi")
+    assert(sheet.getRow(0).getCell(5) == null)
     assert(sheet.getRow(1).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur")
     assert(sheet.getRow(1).getCell(1).getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år)")
     assert(sheet.getRow(1).getCell(2).getStringCellValue == "1.2.246.562.13.00000000000000002677")
     assert(sheet.getRow(1).getCell(3).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(1).getCell(4).getStringCellValue == "309902")
+    assert(sheet.getRow(1).getCell(5) == null)
   }
 
   "createHeadingRow" should "create heading row with translated column names or translation keys for hakijat raportti" in {

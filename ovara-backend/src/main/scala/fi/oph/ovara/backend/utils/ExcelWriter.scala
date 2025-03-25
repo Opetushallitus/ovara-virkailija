@@ -439,7 +439,7 @@ object ExcelWriter {
       val headingCell = headingRow.createCell(index)
       headingCell.setCellStyle(headingCellStyle)
       val translationKey = s"raportti.$fieldName"
-      val translation = translations.getOrElse(translationKey, translationKey)
+      val translation    = translations.getOrElse(translationKey, translationKey)
       headingCell.setCellValue(translation)
     })
 
@@ -485,6 +485,14 @@ object ExcelWriter {
   def getTranslationForCellValue(s: String, translations: Map[String, String]): String = {
     val lowerCaseStr = s.toLowerCase
     translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+  }
+
+  def extractKoodi(koodiarvo: String): String = {
+    val koodiRegex: Regex = """\d+""".r
+    koodiRegex.findFirstIn(koodiarvo) match {
+      case Some(koodi) => koodi
+      case None => ""
+    }
   }
 
   private def writeValueToCell(
@@ -543,6 +551,8 @@ object ExcelWriter {
           }
         }
         cell.setCellValue(value)
+      case Some(koodiarvo: String) if List("koulutuskoodi").contains(fieldName) =>
+        cell.setCellValue(extractKoodi(koodiarvo))
       case Some(s: String) =>
         cell.setCellValue(s)
       case Some(int: Int) =>
