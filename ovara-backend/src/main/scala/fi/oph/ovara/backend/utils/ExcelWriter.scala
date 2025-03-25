@@ -359,6 +359,73 @@ object ExcelWriter {
     workbook
   }
 
+  def writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
+      korkeakouluKoulutuksetToteutuksetHakukohteetResults: Seq[KorkeakouluKoulutusToteutusHakukohdeResult],
+      asiointikieli: String,
+      translations: Map[String, String]
+  ): XSSFWorkbook = {
+    val workbook: XSSFWorkbook = new XSSFWorkbook()
+    try {
+      LOG.info("Creating new excel from db results")
+      val sheet: XSSFSheet                 = workbook.createSheet()
+      val headingCellStyle: XSSFCellStyle  = workbook.createCellStyle()
+      val bodyTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
+
+      val headingFont    = createHeadingFont(workbook, headingCellStyle)
+      val subHeadingFont = createSubHeadingFont(workbook)
+      val bodyTextFont   = createBodyTextFont(workbook, bodyTextCellStyle)
+
+      workbook.setSheetName(
+        0,
+        WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yhteenveto", "raportti.yhteenveto"))
+      )
+
+      var currentRowIndex = 0
+      val titles = classOf[KorkeakouluKoulutusToteutusHakukohdeResult].getDeclaredFields
+        .map(_.getName)
+        .toList
+      val raporttiColumnTitlesWithIndex = titles.zipWithIndex
+
+      currentRowIndex = createHeadingRow(
+        sheet = sheet,
+        asiontikieli = asiointikieli,
+        translations = translations,
+        currentRowIndex = currentRowIndex,
+        fieldNames = titles,
+        headingCellStyle = headingCellStyle
+      )
+
+      korkeakouluKoulutuksetToteutuksetHakukohteetResults.foreach(result => {
+        val resultRow = sheet.createRow(currentRowIndex)
+        currentRowIndex = currentRowIndex + 1
+
+        for (i <- 0 until result.productArity) yield {
+          val fieldName = raporttiColumnTitlesWithIndex.find((name, index) => i == index) match {
+            case Some((name, i)) => name
+            case None            => ""
+          }
+
+          val cell = resultRow.createCell(i)
+          cell.setCellStyle(bodyTextCellStyle)
+          val property = result.productElement(i)
+
+          writeValueToCell(property, fieldName, cell, asiointikieli, translations)
+        }
+      })
+
+      // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
+      raporttiColumnTitlesWithIndex.foreach { case (title, index) =>
+        sheet.autoSizeColumn(index)
+      }
+    } catch {
+      case e: Exception =>
+        LOG.error(s"Error creating excel: ${e.getMessage}")
+        throw e
+    }
+
+    workbook
+  }
+
   def createHeadingRow(
       sheet: XSSFSheet,
       asiontikieli: String,
@@ -372,7 +439,7 @@ object ExcelWriter {
       val headingCell = headingRow.createCell(index)
       headingCell.setCellStyle(headingCellStyle)
       val translationKey = s"raportti.$fieldName"
-      val translation    = translations.getOrElse(translationKey, translationKey)
+      val translation = translations.getOrElse(translationKey, translationKey)
       headingCell.setCellValue(translation)
     })
 

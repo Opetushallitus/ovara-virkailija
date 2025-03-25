@@ -11,7 +11,6 @@ import org.apache.poi.ss.usermodel.Workbook
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.{HttpHeaders, ResponseEntity}
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.csrf.CsrfToken
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
 import org.springframework.web.servlet.view.RedirectView
@@ -26,6 +25,7 @@ import scala.jdk.CollectionConverters.*
 class Controller(
     commonService: CommonService,
     koulutuksetToteutuksetHakukohteetService: KoulutuksetToteutuksetHakukohteetService,
+    kkKoulutuksetToteutuksetHakukohteetService: KorkeakouluKoulutuksetToteutuksetHakukohteetService,
     hakijatService: ToisenAsteenHakijatService,
     kkHakijatService: KkHakijatService,
     hakeneetHyvaksytytVastaanottaneetService: HakeneetHyvaksytytVastaanottaneetService,
@@ -259,6 +259,51 @@ class Controller(
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
     sendExcel(Some(wb), response, request, "koulutukset-toteutukset-hakukohteet", raporttiParams)
+  }
+
+  @GetMapping(path = Array("kk-koulutukset-toteutukset-hakukohteet"))
+  def kk_koulutukset_toteutukset_hakukohteet(
+      @RequestParam("haku") haku: java.util.Collection[String],
+      @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
+      @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
+      @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
+      @RequestParam("koulutuksen-tila", required = false) koulutuksenTila: String,
+      @RequestParam("toteutuksen-tila", required = false) toteutuksenTila: String,
+      @RequestParam("hakukohteen-tila", required = false) hakukohteenTila: String,
+      request: HttpServletRequest,
+      response: HttpServletResponse
+  ): Unit = {
+    val maybeKoulutustoimija = Option(koulutustoimija)
+    val maybeKoulutuksenTila = Option(koulutuksenTila)
+    val maybeToteutuksenTila = Option(toteutuksenTila)
+    val maybeHakukohteenTila = Option(hakukohteenTila)
+
+    val oppilaitosList = if (oppilaitos == null) List() else oppilaitos.asScala.toList
+    val toimipisteList = if (toimipiste == null) List() else toimipiste.asScala.toList
+    val hakuList       = if (haku == null) List() else haku.asScala.toList
+
+    val wb = kkKoulutuksetToteutuksetHakukohteetService.get(
+      hakuList,
+      maybeKoulutustoimija,
+      oppilaitosList,
+      toimipisteList,
+      maybeKoulutuksenTila,
+      maybeToteutuksenTila,
+      maybeHakukohteenTila,
+      None
+    )
+
+    val raporttiParams = Map(
+      "haku"            -> Option(hakuList).filterNot(_.isEmpty),
+      "koulutustoimija" -> maybeKoulutustoimija,
+      "oppilaitos"      -> Option(oppilaitosList).filterNot(_.isEmpty),
+      "toimipiste"      -> Option(toimipisteList).filterNot(_.isEmpty),
+      "koulutuksenTila" -> maybeKoulutuksenTila,
+      "toteutuksenTila" -> maybeToteutuksenTila,
+      "hakukohteenTila" -> maybeHakukohteenTila
+    ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
+
+    sendExcel(Some(wb), response, request, "kk-koulutukset-toteutukset-hakukohteet", raporttiParams)
   }
 
   @GetMapping(path = Array("hakijat"))

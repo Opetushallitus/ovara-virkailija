@@ -7,6 +7,7 @@ export const TOISEN_ASTEEN_RAPORTIT = [
 export const KK_RAPORTIT = [
   'kk-hakijat',
   'kk-hakeneet-hyvaksytyt-vastaanottaneet',
+  'kk-koulutukset-toteutukset-hakukohteet',
 ];
 
 export const RADIOGROUP_OPTIONS = ['neutral', 'yes', 'no'];
