@@ -79,7 +79,7 @@ export default function KkHakijat() {
   const [isLoading, setIsLoading] = useState(false);
 
   return (
-    <Box>
+    <MainContainer>
       {hasKkRights ? (
         <FormBox>
           {isLoading && <SpinnerModal open={isLoading} />}
@@ -124,6 +124,6 @@ export default function KkHakijat() {
           />
         </FormBox>
       ) : null}
-    </Box>
+    </MainContainer>
   );
 }

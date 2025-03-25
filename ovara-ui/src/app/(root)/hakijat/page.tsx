@@ -67,7 +67,7 @@ export default function Hakijat() {
   const queryParamsStr = useSearchParams().toString();
 
   return (
-    <Box>
+    <MainContainer>
       {hasToinenAsteRights ? (
         <FormBox>
           {isLoading && <SpinnerModal open={isLoading} />}
@@ -122,6 +122,6 @@ export default function Hakijat() {
           />
         </FormBox>
       ) : null}
-    </Box>
+    </MainContainer>
   );
 }
