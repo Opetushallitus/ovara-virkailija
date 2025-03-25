@@ -12,50 +12,50 @@ class ExcelWriterSpec extends AnyFlatSpec {
   val userLng: String = "sv"
 
   val translations: Map[String, String] = Map(
-    "raportti.yhteenveto"                    -> "Yhteenveto SV",
-    "raportti.hakija"                        -> "Hakija SV",
-    "raportti.turvakielto"                   -> "Turvakielto SV",
-    "raportti.kansalaisuus"                  -> "Kansalaisuus SV",
-    "raportti.hakukohteenNimi"               -> "Hakukohde SV",
-    "raportti.kaksoistutkintoKiinnostaa"     -> "Kaksoistutkinto kiinnostaa SV",
-    "raportti.markkinointilupa"              -> "LupaMark SV",
-    "raportti.kylla"                         -> "Ja",
-    "raportti.ei"                            -> "Nej",
-    "raportti.hylatty"                       -> "Hylatty SV",
-    "raportti.hyvaksytty"                    -> "Hyvaksytty SV",
-    "raportti.peruuntunut"                   -> "Peruuntunut SV",
-    "raportti.ei_vastaanotettu_maara_aikana" -> "Ei vastaanotettu SV",
-    "raportti.kokonaispisteet"               -> "Kokonaispisteet SV",
-    "raportti.hylkTaiPerSyy"                 -> "Hylkäämisen tai peruuntumisen syy SV",
-    "raportti.toimipiste"                    -> "Toimipiste SV",
-    "raportti.hakukohde"                     -> "Hakukohde SV",
-    "raportti.hakukelpoisuus"                -> "Hakukelpoisuus SV",
-    "raportti.eligible"                      -> "hakukelpoinen SV",
-    "raportti.oppilaitos"                    -> "Oppilaitos SV",
-    "raportti.hakijat-yht"                   -> "Hakijat SV",
-    "raportti.ensisijaisia"                  -> "Ensisijaisia SV",
-    "raportti.varasija"                      -> "Varasija SV",
-    "raportti.hyvaksytyt"                    -> "Hyväksytyt SV",
-    "raportti.pohjakoulutus"                 -> "Pohjakoulutus SV",
-    "raportti.puhelinnumero"                 -> "Puhelinnumero SV",
-    "raportti.not-obligated"                 -> "Ei velvollinen",
-    "raportti.obligated"                     -> "Velvollinen",
-    "raportti.unreviewed"                    -> "Tarkastamatta SV",
-    "raportti.vastaanottaneet"               -> "Vastaanottaneet SV",
-    "raportti.valintatiedonPvm"              -> "Valintatiedon päivämäärä SV",
-    "raportti.lasna"                         -> "Läsnä SV",
-    "raportti.poissa"                        -> "Poissa SV",
-    "raportti.ilm-yht"                       -> "IlmYht SV",
-    "raportti.aloituspaikat"                 -> "Aloituspaikat SV",
-    "raportti.toive1"                        -> "Toive1 SV",
-    "raportti.toive2"                        -> "Toive2 SV",
-    "raportti.toive3"                        -> "Toive3 SV",
-    "raportti.toive4"                        -> "Toive4 SV",
-    "raportti.toive5"                        -> "Toive5 SV",
-    "raportti.toive6"                        -> "Toive6 SV",
-    "raportti.toive7"                        -> "Toive7 SV",
-    "raportti.yhteensa"                      -> "Yhteensä SV",
-    "raportti.yksittaiset-hakijat"           -> "Yksittäiset hakijat SV"
+    "raportti.yhteenveto"                     -> "Yhteenveto SV",
+    "raportti.hakija"                         -> "Hakija SV",
+    "raportti.turvakielto"                    -> "Turvakielto SV",
+    "raportti.kansalaisuus"                   -> "Kansalaisuus SV",
+    "raportti.hakukohteenNimi"                -> "Hakukohde SV",
+    "raportti.kaksoistutkintoKiinnostaa"      -> "Kaksoistutkinto kiinnostaa SV",
+    "raportti.markkinointilupa"               -> "LupaMark SV",
+    "raportti.kylla"                          -> "Ja",
+    "raportti.ei"                             -> "Nej",
+    "raportti.hylatty"                        -> "Hylatty SV",
+    "raportti.hyvaksytty"                     -> "Hyvaksytty SV",
+    "raportti.peruuntunut"                    -> "Peruuntunut SV",
+    "raportti.ei_vastaanotettu_maara_aikana"  -> "Ei vastaanotettu SV",
+    "raportti.kokonaispisteet"                -> "Kokonaispisteet SV",
+    "raportti.hylkaamisenTaiPeruuntumisenSyy" -> "Hylkäämisen tai peruuntumisen syy SV",
+    "raportti.toimipiste"                     -> "Toimipiste SV",
+    "raportti.hakukohde"                      -> "Hakukohde SV",
+    "raportti.hakukelpoisuus"                 -> "Hakukelpoisuus SV",
+    "raportti.eligible"                       -> "hakukelpoinen SV",
+    "raportti.oppilaitos"                     -> "Oppilaitos SV",
+    "raportti.hakijat-yht"                    -> "Hakijat SV",
+    "raportti.ensisijaisia"                   -> "Ensisijaisia SV",
+    "raportti.varasija"                       -> "Varasija SV",
+    "raportti.hyvaksytyt"                     -> "Hyväksytyt SV",
+    "raportti.pohjakoulutus"                  -> "Pohjakoulutus SV",
+    "raportti.puhelinnumero"                  -> "Puhelinnumero SV",
+    "raportti.not-obligated"                  -> "Ei velvollinen",
+    "raportti.obligated"                      -> "Velvollinen",
+    "raportti.unreviewed"                     -> "Tarkastamatta SV",
+    "raportti.vastaanottaneet"                -> "Vastaanottaneet SV",
+    "raportti.valintatiedonPvm"               -> "Valintatiedon päivämäärä SV",
+    "raportti.lasna"                          -> "Läsnä SV",
+    "raportti.poissa"                         -> "Poissa SV",
+    "raportti.ilm-yht"                        -> "IlmYht SV",
+    "raportti.aloituspaikat"                  -> "Aloituspaikat SV",
+    "raportti.toive1"                         -> "Toive1 SV",
+    "raportti.toive2"                         -> "Toive2 SV",
+    "raportti.toive3"                         -> "Toive3 SV",
+    "raportti.toive4"                         -> "Toive4 SV",
+    "raportti.toive5"                         -> "Toive5 SV",
+    "raportti.toive6"                         -> "Toive6 SV",
+    "raportti.toive7"                         -> "Toive7 SV",
+    "raportti.yhteensa"                       -> "Yhteensä SV",
+    "raportti.yksittaiset-hakijat"            -> "Yksittäiset hakijat SV"
   )
 
   def checkAloituspaikatRowValidity(sheet: XSSFSheet, rowNumber: Int, expected: Int): Unit = {
@@ -1999,7 +1999,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(5) == null)
   }
 
-  "createHylkTaiPerSyyHeadingRow" should "create merged hylkäämisen tai peruuntumisen syy heading cell in the right index on the row" in {
+  "createHylkaamisenTaiPeruuntumisenSyyHeadingRow" should "create merged hylkäämisen tai peruuntumisen syy heading cell in the right index on the row" in {
     val wb: XSSFWorkbook                = new XSSFWorkbook()
     val sheet: XSSFSheet                = wb.createSheet()
     val headingCellStyle: XSSFCellStyle = wb.createCellStyle()
@@ -2036,7 +2036,15 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
     )
     val fieldNames = classOf[KkHakijaWithCombinedNimi].getDeclaredFields.map(_.getName).toList
-    ExcelWriter.createHylkTaiPerSyyHeadingRow(wb, sheet, translations, 0, fieldNames, valintatapajonot, true)
+    ExcelWriter.createHylkaamisenTaiPeruuntumisenSyyHeadingRow(
+      wb,
+      sheet,
+      translations,
+      0,
+      fieldNames,
+      valintatapajonot,
+      true
+    )
 
     for (i <- 0 until 12) {
       assert(wb.getSheetAt(0).getRow(0).getCell(i) == null)
@@ -2087,7 +2095,15 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
     )
     val fieldNames = classOf[KkHakijaWithCombinedNimi].getDeclaredFields.map(_.getName).toList
-    ExcelWriter.createHylkTaiPerSyyHeadingRow(wb, sheet, translations, 0, fieldNames, valintatapajonot, false)
+    ExcelWriter.createHylkaamisenTaiPeruuntumisenSyyHeadingRow(
+      wb,
+      sheet,
+      translations,
+      0,
+      fieldNames,
+      valintatapajonot,
+      false
+    )
 
     for (i <- 0 until 12) {
       assert(wb.getSheetAt(0).getRow(0).getCell(i) == null)

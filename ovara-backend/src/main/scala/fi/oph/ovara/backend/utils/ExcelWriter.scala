@@ -587,7 +587,7 @@ object ExcelWriter {
     }).flatten
   }
 
-  def createHylkTaiPerSyyHeadingRow(
+  def createHylkaamisenTaiPeruuntumisenSyyHeadingRow(
       workbook: XSSFWorkbook,
       sheet: XSSFSheet,
       translations: Map[String, String],
@@ -620,7 +620,7 @@ object ExcelWriter {
 
     val headingCell = headingRow.createCell(headingColumnStartIndex)
     headingCell.setCellStyle(headingCellStyle)
-    val translationKey = s"raportti.hylkTaiPerSyy"
+    val translationKey = s"raportti.hylkaamisenTaiPeruuntumisenSyy"
     val value          = translations.getOrElse(translationKey, translationKey)
     headingCell.setCellValue(value)
 
@@ -676,7 +676,7 @@ object ExcelWriter {
     val fieldNamesWithIndex      = fieldNames.zipWithIndex
 
     if (distinctSortedValintatapajonotInQueryResult.nonEmpty) {
-      currentRowIndex = createHylkTaiPerSyyHeadingRow(
+      currentRowIndex = createHylkaamisenTaiPeruuntumisenSyyHeadingRow(
         workbook,
         sheet,
         translations,
