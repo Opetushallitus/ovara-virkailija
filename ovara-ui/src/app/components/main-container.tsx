@@ -5,7 +5,7 @@ import { ophColors, withDefaultProps, DEFAULT_BOX_BORDER } from '../theme';
 
 export const MainContainer = withDefaultProps(
   styled(Box)(({ theme }) => ({
-    padding: theme.spacing(4),
+    padding: theme.spacing(1),
     border: DEFAULT_BOX_BORDER,
     backgroundColor: ophColors.white,
   })),

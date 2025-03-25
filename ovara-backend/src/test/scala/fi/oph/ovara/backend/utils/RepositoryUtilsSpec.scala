@@ -158,42 +158,6 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     )
   }
 
-  "makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery" should "return empty query str when alkamiskaudet is empty and henkilokohtainenSuunnitelma and eiAlkamiskautta are false" in {
-    assert(
-      RepositoryUtils.makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery((List(), false, false)) == ""
-    )
-  }
-
-  it should "return AND query string for alkamiskaudet when henkilokohtainenSuunnitelma and eiAlkamiskautta are false" in {
-    assert(
-      RepositoryUtils.makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery(
-        (List((2023, "kausi_s"), (2021, "kausi_k")), false, false)
-      ) ==
-        "AND (((t.koulutuksen_alkamisvuosi = 2023 AND t.koulutuksen_alkamiskausi_koodiuri LIKE 'kausi_s%') " +
-        "OR (hk.koulutuksen_alkamisvuosi = 2023 AND hk.koulutuksen_alkamiskausi_koodiuri LIKE 'kausi_s%')) " +
-        "OR ((t.koulutuksen_alkamisvuosi = 2021 AND t.koulutuksen_alkamiskausi_koodiuri LIKE 'kausi_k%') " +
-        "OR (hk.koulutuksen_alkamisvuosi = 2021 AND hk.koulutuksen_alkamiskausi_koodiuri LIKE 'kausi_k%')))"
-    )
-  }
-
-  it should "return AND query string for alkamiskaudet with OR query for henkilokohtainen suunnitelma when henkilokohtainenSuunnitelma is true" in {
-    assert(
-      RepositoryUtils.makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery((List((2021, "kausi_k")), true, false)) ==
-        "AND (((t.koulutuksen_alkamisvuosi = 2021 AND t.koulutuksen_alkamiskausi_koodiuri LIKE 'kausi_k%') " +
-        "OR (hk.koulutuksen_alkamisvuosi = 2021 AND hk.koulutuksen_alkamiskausi_koodiuri LIKE 'kausi_k%')) " +
-        "OR hk.koulutuksen_alkamiskausi_tyyppi = 'henkilokohtainen suunnitelma')"
-    )
-  }
-
-  it should "return AND query string for henkilokohtainen suunnitelma when henkilokohtainenSuunnitelma is true and alkamiskaudet is empty" in {
-    assert(
-      RepositoryUtils.makeAlkamiskaudetAndHenkkohtSuunnitelmaQuery((List(), true, false)) ==
-        "AND (hk.koulutuksen_alkamiskausi_tyyppi = 'henkilokohtainen suunnitelma')"
-    )
-  }
-
-  //TODO: Testi eiAlkamiskautta
-
   "makeHakuTableAlkamiskausiQueryStr" should "return full query string for one alkamiskausi" in {
     assert(
       RepositoryUtils.makeHakuTableAlkamiskausiQueryStr(
@@ -308,6 +272,7 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
       )
     )
   }
+
   it should "add ATARU_ULKOMAILLA_OPISKELTU to harkinnanvaraisuudet when ATARU_KOULUTODISTUSTEN_VERTAILUVAIKEUDET is selected" in {
     assert(
       RepositoryUtils.enrichHarkinnanvaraisuudet(
@@ -316,6 +281,86 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
         "ATARU_OPPIMISVAIKEUDET",
         "ATARU_ULKOMAILLA_OPISKELTU",
         "ATARU_KOULUTODISTUSTEN_VERTAILUVAIKEUDET"
+      )
+    )
+  }
+
+  "mapVastaanottotiedotToDbValues" should "add EI_VASTAANOTETTU_MAARA_AIKANA to vastaanottotiedot list if list contains PERUNUT" in {
+    assert(
+      RepositoryUtils.mapVastaanottotiedotToDbValues(List("PERUNUT")) == List(
+        "PERUNUT",
+        "EI_VASTAANOTETTU_MAARA_AIKANA"
+      )
+    )
+  }
+
+  it should "change VASTAANOTTANUT to VASTAANOTTANUT_SITOVASTI in vastaanottotiedot list if list contains VASTAANOTTANUT" in {
+    assert(
+      RepositoryUtils.mapVastaanottotiedotToDbValues(List("VASTAANOTTANUT")) == List(
+        "VASTAANOTTANUT_SITOVASTI"
+      )
+    )
+  }
+
+  it should "keep vastaanottotiedot list as it is when PERUUTETTU is the only value" in {
+    assert(
+      RepositoryUtils.mapVastaanottotiedotToDbValues(List("PERUUTETTU")) == List(
+        "PERUUTETTU"
+      )
+    )
+  }
+
+  it should "change VASTAANOTTANUT to VASTAANOTTANUT_SITOVASTI and add EI_VASTAANOTETTU_MAARA_AIKANA when PERUNUT, PERUUTETTU and VASTAANOTTANUT are in the original list" in {
+    assert(
+      RepositoryUtils.mapVastaanottotiedotToDbValues(List("PERUNUT", "PERUUTETTU", "VASTAANOTTANUT")) == List(
+        "PERUNUT",
+        "EI_VASTAANOTETTU_MAARA_AIKANA",
+        "PERUUTETTU",
+        "VASTAANOTTANUT_SITOVASTI"
+      )
+    )
+  }
+
+  "mapValintatiedotToDbValues" should "add HYVAKSYTTY_HARKINNANVARAISESTI, VARASIJALTA_HYVAKSYTTY, PERUNUT and PERUUTETTU to list when orig list contains only HYVAKSYTTY" in {
+    assert(
+      RepositoryUtils.mapValintatiedotToDbValues(List("HYVAKSYTTY")) == List(
+        "HYVAKSYTTY",
+        "HYVAKSYTTY_HARKINNANVARAISESTI",
+        "VARASIJALTA_HYVAKSYTTY",
+        "PERUNUT",
+        "PERUUTETTU"
+      )
+    )
+  }
+
+  it should "keep valintatiedot list as it is when the original list has values HYLATTY, PERUUNTUNUT and VARALLA" in {
+    assert(
+      RepositoryUtils.mapValintatiedotToDbValues(List("HYLATTY", "PERUUNTUNUT", "VARALLA")) == List(
+        "HYLATTY",
+        "PERUUNTUNUT",
+        "VARALLA"
+      )
+    )
+  }
+
+  it should "add HYVAKSYTTY values to the list when the original list has values HYVAKSYTTY, HYLATTY, PERUUNTUNUT and VARALLA" in {
+    assert(
+      RepositoryUtils.mapValintatiedotToDbValues(
+        List(
+          "HYVAKSYTTY",
+          "HYLATTY",
+          "PERUUNTUNUT",
+          "VARALLA"
+        )
+      ) == List(
+        "HYVAKSYTTY",
+        "HYVAKSYTTY_HARKINNANVARAISESTI",
+        "VARASIJALTA_HYVAKSYTTY",
+        "PERUNUT",
+        "PERUUTETTU",
+        "HYLATTY",
+        "PERUUNTUNUT",
+        "VARALLA"
       )
     )
   }

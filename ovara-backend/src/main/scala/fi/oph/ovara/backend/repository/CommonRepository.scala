@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component
 import slick.jdbc.PostgresProfile.api.*
 import slick.sql.SqlStreamingAction
 
-
 @Component
 class CommonRepository extends Extractors {
   def selectDistinctAlkamisvuodet(): SqlStreamingAction[Vector[String], String, Effect] = {
@@ -26,7 +25,7 @@ class CommonRepository extends Extractors {
 
   def selectDistinctExistingHaut(
       alkamiskaudet: List[String] = List(),
-      haunTyyppi: String = "toinen_aste"
+      haunTyyppi: String
   ): SqlStreamingAction[Vector[Haku], Haku, Effect] = {
     val alkamiskaudetAndHenkKohtSuunnitelma =
       RepositoryUtils.extractAlkamisvuosiKausiAndHenkkohtSuunnitelma(alkamiskaudet)
@@ -38,20 +37,21 @@ class CommonRepository extends Extractors {
     }
 
     sql"""SELECT DISTINCT h.haku_oid, h.haku_nimi
-                  FROM pub.pub_dim_haku h
-                  LEFT JOIN (
-                    SELECT haku_oid, jsonb_array_elements(koulutuksen_alkamiskausi) as alkamiskausi
-                    FROM pub.pub_dim_haku h2
-                  ) alkamiskaudet
-                  ON h.haku_oid = alkamiskaudet.haku_oid
-                  WHERE h.haun_tyyppi = $haunTyyppi
-                  AND h.tila != 'poistettu'
-                  #$alkamiskaudetQueryStr""".as[Haku]
+          FROM pub.pub_dim_haku h
+          LEFT JOIN (
+            SELECT haku_oid, jsonb_array_elements(koulutuksen_alkamiskausi) as alkamiskausi
+            FROM pub.pub_dim_haku h2
+          ) alkamiskaudet
+          ON h.haku_oid = alkamiskaudet.haku_oid
+          WHERE h.haun_tyyppi = $haunTyyppi
+          AND h.tila != 'poistettu'
+          #$alkamiskaudetQueryStr""".as[Haku]
   }
 
   def selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(
       orgs: List[String],
-      haut: List[String]
+      haut: List[String],
+      hakukohderyhmat: List[String]
   ): SqlStreamingAction[Vector[Hakukohde], Hakukohde, Effect] = {
     val organisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(orgs)
     val organisaatiotQueryStr = if (organisaatiotStr.isEmpty) {
@@ -62,16 +62,24 @@ class CommonRepository extends Extractors {
     val hautQueryStr = if (hautStr.isEmpty) {
       ""
     } else {
-      s"AND h.haku_oid in ($hautStr)"
+      s"AND hk.haku_oid in ($hautStr)"
+    }
+
+    val hakukohderyhmatStr = RepositoryUtils.makeListOfValuesQueryStr(hakukohderyhmat)
+    val hakukohderyhmatQueryStr = if (hakukohderyhmatStr.isEmpty) {
+      ""
+    } else {
+      s"AND hkr_hk.hakukohderyhma_oid in ($hakukohderyhmatStr)"
     }
 
     sql"""SELECT DISTINCT hk.hakukohde_oid, hk.hakukohde_nimi
           FROM pub.pub_dim_hakukohde hk
-          JOIN pub.pub_dim_haku h
-          ON hk.haku_oid = h.haku_oid
+          JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
+          ON hkr_hk.hakukohde_oid = hk.hakukohde_oid
           WHERE hk.tila != 'poistettu'
           #$organisaatiotQueryStr
           #$hautQueryStr
+          #$hakukohderyhmatQueryStr
           """.as[Hakukohde]
   }
 
@@ -96,13 +104,13 @@ class CommonRepository extends Extractors {
   }
 
   def selectDistinctOpetuskielet: SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
-    sql"""SELECT DISTINCT ook.koodiarvo, ook.koodinimi
+    sql"""SELECT ook.koodiarvo, ook.koodinimi
           FROM pub.pub_dim_koodisto_oppilaitoksenopetuskieli ook
        """.as[Koodi]
   }
 
   def selectDistinctMaakunnat: SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
-    sql"""SELECT DISTINCT mk.koodiarvo, mk.koodinimi
+    sql"""SELECT mk.koodiarvo, mk.koodinimi
           FROM pub.pub_dim_koodisto_maakunta mk
        """.as[Koodi]
   }
@@ -112,20 +120,45 @@ class CommonRepository extends Extractors {
     val maakunnatQueryStr = if (maakunnatStr.isEmpty) {
       ""
     } else {
-      s"AND km.maakunta_koodiarvo in ($maakunnatStr)"
+      s"WHERE km.maakunta_koodiarvo in ($maakunnatStr)"
     }
     sql"""SELECT DISTINCT k.koodiarvo, k.koodinimi
           FROM pub.pub_dim_koodisto_kunta k
           JOIN pub.pub_dim_koodisto_kunta_maakunta km
           ON k.koodiarvo = km.kunta_koodiarvo
-          WHERE k.koodiarvo IS NOT NULL
           #$maakunnatQueryStr""".as[Koodi]
   }
 
+  def selectHakukohderyhmat(
+      kayttooikeusHakukohderyhmaOids: List[String],
+      haut: List[String]
+  ): SqlStreamingAction[Vector[Hakukohderyhma], Hakukohderyhma, Effect] = {
+    val hautStr = RepositoryUtils.makeListOfValuesQueryStr(haut)
+    val hautQueryStr = if (hautStr.isEmpty) {
+      ""
+    } else {
+      s"WHERE hkr_hk.haku_oid in ($hautStr)"
+    }
+
+    val hakukohderyhmaStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusHakukohderyhmaOids)
+    val hakukohderyhmaQueryStr = if (kayttooikeusHakukohderyhmaOids.isEmpty) {
+      ""
+    } else {
+      s"AND hkr.hakukohderyhma_oid in ($hakukohderyhmaStr)"
+    }
+
+    sql"""SELECT DISTINCT hkr.hakukohderyhma_oid, hkr.hakukohderyhma_nimi
+          FROM pub.pub_dim_hakukohderyhma hkr
+          JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
+          ON hkr.hakukohderyhma_oid = hkr_hk.hakukohderyhma_oid
+          #$hautQueryStr
+          #$hakukohderyhmaQueryStr
+          """.as[Hakukohderyhma]
+  }
+
   def selectDistinctKoulutusalat1(): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
-    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso1 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso1_nimi as koodinimi
-                  FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
-            WHERE kansallinenkoulutusluokitus2016koulutusalataso1 IS NOT NULL""".as[Koodi]
+    sql"""SELECT k.kansallinenkoulutusluokitus2016koulutusalataso1 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso1_nimi as koodinimi
+          FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k""".as[Koodi]
   }
 
   def selectDistinctKoulutusalat2(koulutusalat1: List[String]): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
@@ -133,11 +166,10 @@ class CommonRepository extends Extractors {
     val koulutusala1QueryStr = if (koulutusala1Str.isEmpty) {
       ""
     } else {
-      s"AND k.kansallinenkoulutusluokitus2016koulutusalataso1 in ($koulutusala1Str)"
+      s"WHERE k.kansallinenkoulutusluokitus2016koulutusalataso1 in ($koulutusala1Str)"
     }
-    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso2 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso2_nimi as koodinimi
-                  FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
-            WHERE kansallinenkoulutusluokitus2016koulutusalataso2 IS NOT NULL
+    sql"""SELECT k.kansallinenkoulutusluokitus2016koulutusalataso2 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso2_nimi as koodinimi
+          FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
             #$koulutusala1QueryStr""".as[Koodi]
   }
 
@@ -146,12 +178,11 @@ class CommonRepository extends Extractors {
     val koulutusala2QueryStr = if (koulutusala2Str.isEmpty) {
       ""
     } else {
-      s"AND k.kansallinenkoulutusluokitus2016koulutusalataso2 in ($koulutusala2Str)"
+      s"WHERE k.kansallinenkoulutusluokitus2016koulutusalataso2 in ($koulutusala2Str)"
     }
-    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso3 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso3_nimi as koodinimi
-                  FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
-            WHERE kansallinenkoulutusluokitus2016koulutusalataso3 IS NOT NULL
-            #$koulutusala2QueryStr""".as[Koodi]
+    sql"""SELECT k.kansallinenkoulutusluokitus2016koulutusalataso3 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso3_nimi as koodinimi
+          FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
+          #$koulutusala2QueryStr""".as[Koodi]
   }
 
   def selectDistinctOrganisaatiot(
@@ -160,7 +191,7 @@ class CommonRepository extends Extractors {
     val organisaatiotStr = organisaatiot.map(s => s"'$s'").mkString(",")
     val optionalOrganisaatiotClause =
       if (organisaatiotStr.isEmpty) "" else s"where org.organisaatio_oid in ($organisaatiotStr)"
-    sql"""SELECT DISTINCT *
+    sql"""SELECT *
           FROM (SELECT organisaatio_oid, organisaatio_nimi, organisaatiotyypit
                 FROM pub.pub_dim_organisaatio o) AS org
                 #$optionalOrganisaatiotClause""".as[Organisaatio]
@@ -172,11 +203,11 @@ class CommonRepository extends Extractors {
     val organisaatiotStr = organisaatiot.map(s => s"'$s'").mkString(",")
     val optionalOrganisaatiotClause =
       if (organisaatiotStr.isEmpty) "" else s"where org.organisaatio_oid in ($organisaatiotStr)"
-    sql"""SELECT DISTINCT *
+    sql"""SELECT *
           FROM (SELECT organisaatio_oid, organisaatio_nimi, organisaatiotyypit
                 FROM pub.pub_dim_organisaatio o
-            WHERE organisaatiotyypit ?? '01') AS org
-                #$optionalOrganisaatiotClause""".as[Organisaatio]
+          WHERE organisaatiotyypit ?? '01') AS org
+          #$optionalOrganisaatiotClause""".as[Organisaatio]
   }
 
   def selectChildOrganisaatiot(

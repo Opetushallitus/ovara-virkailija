@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.domain.Hakija
+import fi.oph.ovara.backend.domain.ToisenAsteenHakija
 import fi.oph.ovara.backend.utils.RepositoryUtils
 import org.springframework.stereotype.Component
 import slick.dbio.Effect
@@ -8,7 +8,7 @@ import slick.jdbc.PostgresProfile.api.*
 import slick.sql.SqlStreamingAction
 
 @Component
-class HakijatRepository extends Extractors {
+class ToisenAsteenHakijatRepository extends Extractors {
   def selectWithParams(
       kayttooikeusOrganisaatiot: List[String],
       haut: List[String],
@@ -25,30 +25,12 @@ class HakijatRepository extends Extractors {
       soraAiempi: Option[Boolean],
       markkinointilupa: Option[Boolean],
       julkaisulupa: Option[Boolean]
-  ): SqlStreamingAction[Vector[Hakija], Hakija, Effect] = {
+  ): SqlStreamingAction[Vector[ToisenAsteenHakija], ToisenAsteenHakija, Effect] = {
     val hakuStr                     = RepositoryUtils.makeListOfValuesQueryStr(haut)
     val raportointiorganisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusOrganisaatiot)
 
-    def mapVastaanottotiedotToDbValues(vastaanottotiedot: List[String]): List[String] = {
-      vastaanottotiedot.flatMap {
-        case s: String if s == "PERUNUT"        => s :: List("EI_VASTAANOTETTU_MAARA_AIKANA")
-        case s: String if s == "VASTAANOTTANUT" => List(s"${s}_SITOVASTI")
-        case s: String                          => List(s)
-        case null                               => List()
-      }
-    }
-
-    def mapValintatiedotToDbValues(valintatiedot: List[String]): List[String] = {
-      valintatiedot.flatMap {
-        case s: String if s == "HYVAKSYTTY" =>
-          s :: List("HYVAKSYTTY_HARKINNANVARAISESTI", "VARASIJALTA_HYVAKSYTTY", "PERUNUT", "PERUUTETTU")
-        case s: String => List(s)
-        case null      => List()
-      }
-    }
-
-    val vastaanottotiedotAsDbValues        = mapVastaanottotiedotToDbValues(vastaanottotieto)
-    val valintatiedotAsDbValues            = mapValintatiedotToDbValues(valintatieto)
+    val vastaanottotiedotAsDbValues        = RepositoryUtils.mapVastaanottotiedotToDbValues(vastaanottotieto)
+    val valintatiedotAsDbValues            = RepositoryUtils.mapValintatiedotToDbValues(valintatieto)
     val harkinnanvaraisuudetWithSureValues = RepositoryUtils.enrichHarkinnanvaraisuudet(harkinnanvaraisuudet)
     val optionalHakukohdeQuery =
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hk.hakukohde_oid", hakukohteet)
@@ -86,17 +68,19 @@ class HakijatRepository extends Extractors {
       harkinnanvaraisuudetWithSureValues
     )
 
+    // Toisella asteella kirjoitushetkellä käytössä vain yksi valintatapajono, minkä takia varasija, kokonaispisteet ja hylk_tai_per_syy
+    // haetaan jonon ensimmäisestä ja siis ainoasta valintatapajonosta.
     sql"""SELECT hlo.sukunimi, hlo.etunimet, hlo.turvakielto,
                  hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid, hk.oppilaitos_nimi, hk.toimipiste_nimi,
-                 hk.hakukohde_nimi, hk.hakukohde_oid, ht.hakutoivenumero, ht2.kaksoistutkinto_kiinnostaa, ht2.urheilijatutkinto_kiinnostaa,
-                 ht.valintatapajonot->0->>'valinnan_tila' AS valinnan_tila, ht.valintatapajonot->0->>'varasijan_numero' as varasija,
+                 hk.hakukohde_nimi, ht.hakutoivenumero, ht2.kaksoistutkinto_kiinnostaa, ht2.urheilijatutkinto_kiinnostaa,
+                 ht.valintatieto, ht.valintatapajonot->0->>'varasijan_numero' as varasija,
                  ht.valintatapajonot->0->>'pisteet' as kokonaispisteet, ht.valintatapajonot->0->>'valinnantilan_kuvauksen_teksti' as hylk_tai_per_syy,
                  ht.vastaanottotieto, ht.viimeinen_vastaanottopaiva, ht.ilmoittautumisen_tila, ht2.harkinnanvaraisuuden_syy,
                  ht2.sora_aiempi, ht2.sora_terveys, ht2.pohjakoulutus_nimi, hlo.koulutusmarkkinointilupa,
                  hlo.valintatuloksen_julkaisulupa, hlo.sahkoinenviestintalupa, hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka
           FROM pub.pub_dim_henkilo hlo
           JOIN pub.pub_dim_hakutoive ht
-          ON ht.henkilo_oid = hlo.henkilo_oid
+          ON ht.henkilo_hakemus_id = hlo.henkilo_hakemus_id
           JOIN pub.pub_fct_raportti_hakijat_toinen_aste ht2
           ON ht.hakutoive_id = ht2.hakutoive_id
           JOIN pub.pub_dim_hakukohde hk
@@ -114,6 +98,6 @@ class HakijatRepository extends Extractors {
           #$optionalMarkkinointilupaQuery
           #$optionalJulkaisulupaQuery
           #$optionalHarkinnanvaraisuusQuery
-          """.as[Hakija]
+          """.as[ToisenAsteenHakija]
   }
 }

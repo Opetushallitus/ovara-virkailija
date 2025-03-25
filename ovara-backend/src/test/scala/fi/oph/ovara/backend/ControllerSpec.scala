@@ -3,7 +3,7 @@ package fi.oph.ovara.backend
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.raportointi.Controller
-import fi.oph.ovara.backend.service.{CommonService, HakeneetHyvaksytytVastaanottaneetService, HakijatService, KoulutuksetToteutuksetHakukohteetService, UserService}
+import fi.oph.ovara.backend.service.*
 import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation}
 import fi.vm.sade.auditlog.*
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
@@ -22,7 +22,8 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
     val mockCommonService                            = mock(classOf[CommonService])
     val mockKoulutuksetToteutuksetHakukohteetService = mock(classOf[KoulutuksetToteutuksetHakukohteetService])
     val mockUserService                              = mock(classOf[UserService])
-    val mockHakijatService                           = mock(classOf[HakijatService])
+    val mockHakijatService                           = mock(classOf[ToisenAsteenHakijatService])
+    val mockKkHakijatService                         = mock(classOf[KkHakijatService])
     val mockHakeneetHyvaksytytVastaanottaneetService = mock(classOf[HakeneetHyvaksytytVastaanottaneetService])
     val mockRequest                                  = mock(classOf[HttpServletRequest])
     val mockResponse                                 = mock(classOf[HttpServletResponse])
@@ -39,12 +40,12 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
       mockCommonService,
       mockKoulutuksetToteutuksetHakukohteetService,
       mockHakijatService,
+      mockKkHakijatService,
       mockHakeneetHyvaksytytVastaanottaneetService,
       mockUserService,
       mockAuditLog
     )
 
-    val alkamiskausi                        = List("2025_syksy").asJava
     val haku                                = List("1.2.246.562.29.00000000000000049925").asJava
     val koulutustoimija                     = "koulutustoimija1"
     val oppilaitos                          = List("oppilaitos1").asJava
@@ -55,7 +56,6 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
     val valintakoe                          = "true"
 
     controller.koulutukset_toteutukset_hakukohteet(
-      alkamiskausi,
       haku,
       koulutustoimija,
       oppilaitos,
@@ -89,7 +89,6 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
       "haku"            -> List("1.2.246.562.29.00000000000000049925"),
       "koulutuksenTila" -> "julkaistu",
       "oppilaitos"      -> List("oppilaitos1"),
-      "alkamiskausi"    -> List("2025_syksy"),
       "hakukohteenTila" -> "julkaistu"
     )
 

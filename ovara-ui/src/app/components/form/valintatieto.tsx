@@ -1,7 +1,13 @@
 import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
 import { OvaraCheckboxGroup } from './OvaraCheckboxGroup';
 
-export const Valintatieto = ({ t }: { t: (key: string) => string }) => {
+export const Valintatieto = ({
+  t,
+  ...props
+}: {
+  t: (key: string) => string;
+  [key: string]: unknown;
+}) => {
   const valintatiedotSelection = [
     'HYVAKSYTTY',
     'HYLATTY',
@@ -19,6 +25,7 @@ export const Valintatieto = ({ t }: { t: (key: string) => string }) => {
       selectedValues={selectedValintatieto}
       setSelectedValues={setSelectedValintatieto}
       t={t}
+      {...props}
     />
   );
 };

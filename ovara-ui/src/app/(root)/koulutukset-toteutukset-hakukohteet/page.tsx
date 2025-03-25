@@ -1,8 +1,6 @@
 'use client';
 import { OphTypography } from '@opetushallitus/oph-design-system';
-import { MainContainer } from '@/app/components/main-container';
 import { useTranslate } from '@tolgee/react';
-import { LanguageCode } from '@/app/lib/types/common';
 import { KoulutuksenAlkaminen } from '@/app/components/form/koulutuksen-alkaminen';
 import { Haku } from '@/app/components/form/haku';
 import {
@@ -22,11 +20,11 @@ import { useState } from 'react';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { downloadExcel } from '@/app/components/form/utils';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
+import { MainContainer } from '@/app/components/main-container';
 
 export default function KoulutuksetToteutuksetHakukohteet() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
-  const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const hasToinenAsteRights = hasOvaraToinenAsteRole(user?.authorities);
   const {
     selectedAlkamiskaudet,
@@ -51,8 +49,8 @@ export default function KoulutuksetToteutuksetHakukohteet() {
         <FormBox>
           {isLoading && <SpinnerModal open={isLoading} />}
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
-          <KoulutuksenAlkaminen t={t} />
-          <Haku t={t} locale={locale} />
+          <KoulutuksenAlkaminen />
+          <Haku haunTyyppi="toinen_aste" />
           <OrganisaatioValikot />
           <KoulutuksenTila />
           <ToteutuksenTila />

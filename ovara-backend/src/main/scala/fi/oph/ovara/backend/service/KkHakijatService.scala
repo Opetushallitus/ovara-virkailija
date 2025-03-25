@@ -1,7 +1,8 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.HakijaWithCombinedNimi
-import fi.oph.ovara.backend.repository.{HakijatRepository, OvaraDatabase}
+import fi.oph.ovara.backend.domain.KkHakijaWithCombinedNimi
+import fi.oph.ovara.backend.repository.{KkHakijatRepository, OvaraDatabase}
+import fi.oph.ovara.backend.utils.Constants.KORKEAKOULURAPORTTI
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
@@ -10,13 +11,13 @@ import org.springframework.stereotype.{Component, Service}
 
 @Component
 @Service
-class HakijatService(
-    hakijatRepository: HakijatRepository,
+class KkHakijatService(
+    kkHakijatRepository: KkHakijatRepository,
     userService: UserService,
     commonService: CommonService,
     lokalisointiService: LokalisointiService
 ) {
-  val LOG: Logger = LoggerFactory.getLogger(classOf[HakijatService]);
+  val LOG: Logger = LoggerFactory.getLogger(classOf[KkHakijatService]);
 
   @Autowired
   val db: OvaraDatabase = null
@@ -26,16 +27,14 @@ class HakijatService(
       oppilaitokset: List[String],
       toimipisteet: List[String],
       hakukohteet: List[String],
-      pohjakoulutukset: List[String],
       valintatieto: List[String],
       vastaanottotieto: List[String],
-      harkinnanvaraisuudet: List[String],
-      kaksoistutkintoKiinnostaa: Option[Boolean],
-      urheilijatutkintoKiinnostaa: Option[Boolean],
-      soraTerveys: Option[Boolean],
-      soraAiempi: Option[Boolean],
+      hakukohderyhmat: List[String],
+      kansalaisuus: List[String],
       markkinointilupa: Option[Boolean],
-      julkaisulupa: Option[Boolean]
+      naytaYoArvosanat: Boolean,
+      naytaHetu: Boolean,
+      naytaPostiosoite: Boolean
   ): XSSFWorkbook = {
     val user          = userService.getEnrichedUserDetails
     val asiointikieli = user.asiointikieli.getOrElse("fi")
@@ -43,7 +42,7 @@ class HakijatService(
     val translations = lokalisointiService.getOvaraTranslations(asiointikieli)
 
     val authorities               = user.authorities
-    val kayttooikeusOrganisaatiot = AuthoritiesUtil.getOrganisaatiot(authorities)
+    val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
 
     val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
@@ -51,33 +50,31 @@ class HakijatService(
       oppilaitosOids = oppilaitokset
     )
 
-    val query = hakijatRepository.selectWithParams(
+    val query = kkHakijatRepository.selectWithParams(
       kayttooikeusOrganisaatiot = orgOidsForQuery,
+      hakukohderyhmat = hakukohderyhmat,
       haut = haku,
       oppilaitokset = oppilaitokset,
       toimipisteet = toimipisteet,
       hakukohteet = hakukohteet,
-      pohjakoulutukset,
       valintatieto = valintatieto,
       vastaanottotieto = vastaanottotieto,
-      harkinnanvaraisuudet = harkinnanvaraisuudet,
-      kaksoistutkintoKiinnostaa = kaksoistutkintoKiinnostaa,
-      urheilijatutkintoKiinnostaa = urheilijatutkintoKiinnostaa,
-      soraTerveys = soraTerveys,
-      soraAiempi = soraAiempi,
-      markkinointilupa = markkinointilupa,
-      julkaisulupa = julkaisulupa
+      kansalaisuus = kansalaisuus,
+      markkinointilupa = markkinointilupa
     )
 
-    val queryResult = db.run(query, "hakijatRepository.selectWithParams")
+    val queryResult = db.run(query, "kkHakijatRepository.selectWithParams")
     val sorted =
       queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi, resultRow.hakijanEtunimi, resultRow.oppijanumero))
-    val sortedListwithCombinedNimi = sorted.map(sortedResult => HakijaWithCombinedNimi(sortedResult))
+    val sortedListwithCombinedNimi = sorted.map(sortedResult => KkHakijaWithCombinedNimi(sortedResult))
 
-    ExcelWriter.writeHakijatRaportti(
+    ExcelWriter.writeKkHakijatRaportti(
       sortedListwithCombinedNimi,
       asiointikieli,
-      translations
+      translations,
+      Some(naytaYoArvosanat),
+      Some(naytaHetu),
+      Some(naytaPostiosoite)
     )
   }
 }
