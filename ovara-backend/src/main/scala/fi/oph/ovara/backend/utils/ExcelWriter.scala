@@ -963,6 +963,7 @@ object ExcelWriter {
       createHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNames, headingCellStyle)
 
     data.foreach { item =>
+      LOG.info(s"{$item.otsikko}")
       val dataRow = sheet.createRow(currentRowIndex)
       val rowData = List(
         item.otsikko(Kieli.withName(asiointikieli)),
