@@ -1017,6 +1017,44 @@ object ExcelWriter {
       currentRowIndex += 1
     }
 
+    if(!tulostustapa.equals("hakukohderyhmittain")) {
+      // hakukohderyhmittäin tulostaessa ei lasketa rivien summaa
+        createSummaryRow(translations, data, naytaHakutoiveet, sheet, currentRowIndex, summaryCellStyle, bodyTextCellStyle)
+        currentRowIndex += 1
+      }
+
+    // yksittäiset hakijat -rivi
+    val hakijatSummaryRow = sheet.createRow(currentRowIndex)
+    val hakijatSummaryData = List(
+      translations.getOrElse("raportti.yksittaiset-hakijat", "raportti.yksittaiset-hakijat"),
+      yksittaisetHakijat.toString,
+      "",
+      ensikertalaisetYksittaisetHakijat.toString,
+      "",
+      "",
+      "",
+      "",
+      "",
+      maksuvelvollisetYksittaisetHakijat.toString,
+    )
+
+    createSummaryRowCells(hakijatSummaryData, hakijatSummaryRow, summaryCellStyle, bodyTextCellStyle)
+
+    // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
+    fieldNamesWithIndex.foreach { case (title, index) =>
+      sheet.autoSizeColumn(index)
+    }
+
+    try {
+      workbook
+    } catch {
+      case e: Exception =>
+        LOG.error(s"Error creating excel: ${e.getMessage}")
+        throw e
+    }
+  }
+
+  private def createSummaryRow(translations: Map[String, String], data: List[KkHakeneetHyvaksytytVastaanottaneetResult], naytaHakutoiveet: Boolean, sheet: XSSFSheet, currentRowIndex: Int, summaryCellStyle: XSSFCellStyle, bodyTextCellStyle: XSSFCellStyle): Unit = {
     // yhteensä-rivi
     val summaryRow = sheet.createRow(currentRowIndex)
     val summaryData = List(
@@ -1045,6 +1083,11 @@ object ExcelWriter {
       List()
     })
 
+    createSummaryRowCells(summaryData, summaryRow, summaryCellStyle, bodyTextCellStyle)
+
+  }
+
+  private def createSummaryRowCells(summaryData: List[String], summaryRow: XSSFRow, summaryCellStyle: XSSFCellStyle, bodyTextCellStyle: XSSFCellStyle): Unit = {
     summaryData.zipWithIndex.foreach { case (value, index) =>
       val cell = summaryRow.createCell(index)
       if (index == 0) {
@@ -1053,46 +1096,6 @@ object ExcelWriter {
         cell.setCellStyle(bodyTextCellStyle)
       }
       cell.setCellValue(value)
-    }
-
-    currentRowIndex += 1
-
-    // yksittäiset hakijat -rivi
-    val hakijatSummaryRow = sheet.createRow(currentRowIndex)
-    val hakijatSummaryData = List(
-      translations.getOrElse("raportti.yksittaiset-hakijat", "raportti.yksittaiset-hakijat"),
-      yksittaisetHakijat.toString,
-      "",
-      ensikertalaisetYksittaisetHakijat.toString,
-      "",
-      "",
-      "",
-      "",
-      "",
-      maksuvelvollisetYksittaisetHakijat.toString,
-    )
-
-    hakijatSummaryData.zipWithIndex.foreach { case (value, index) =>
-      val cell = hakijatSummaryRow.createCell(index)
-      if (index == 0) {
-        cell.setCellStyle(summaryCellStyle)
-      } else {
-        cell.setCellStyle(bodyTextCellStyle)
-      }
-      cell.setCellValue(value)
-    }
-
-    // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
-    fieldNamesWithIndex.foreach { case (title, index) =>
-      sheet.autoSizeColumn(index)
-    }
-
-    try {
-      workbook
-    } catch {
-      case e: Exception =>
-        LOG.error(s"Error creating excel: ${e.getMessage}")
-        throw e
     }
   }
 }

@@ -38,7 +38,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       hakukohderyhmaFilter,
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.aidinkieli", aidinkielet)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.kansalaisuus", kansalaisuudet)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.kansalaisuusryhma", kansalaisuudet)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "t.sukupuoli", sukupuoli)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "t.ensikertalainen", ensikertalainen)).filter(_.nonEmpty),
       buildTutkinnonTasoFilters(tutkinnonTasot)
@@ -411,7 +411,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
 
     val query =
       sql"""SELECT
-      he.kansalaisuus_nimi AS otsikko,
+      c.koodinimi AS otsikko,
       SUM(a.hakijat) AS hakijat,
       SUM(a.ensisijaisia) AS ensisijaisia,
       SUM(a.ensikertalaisia) AS ensikertalaisia,
@@ -432,6 +432,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       FROM (
         SELECT
           h.hakukohde_oid,
+          t.kansalaisuus,
           SUM(t.hakijat) AS hakijat,
           SUM(t.ensisijaisia) AS ensisijaisia,
           SUM(t.ensikertalaisia) AS ensikertalaisia,
@@ -450,11 +451,10 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
         FROM pub.pub_fct_raportti_tilastoraportti_kk t
         JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
         WHERE #$filters
-        GROUP BY h.hakukohde_oid
+        GROUP BY h.hakukohde_oid, t.kansalaisuus
       ) a
       JOIN pub.pub_dim_hakukohde b ON a.hakukohde_oid = b.hakukohde_oid
-      JOIN pub.pub_dim_hakutoive ht ON ht.hakukohde_oid = b.hakukohde_oid
-      JOIN pub.pub_dim_henkilo he on ht.henkilo_hakemus_id = he.henkilo_hakemus_id
+      JOIN pub.pub_dim_koodisto_maa_2 c ON a.kansalaisuus = c.koodiarvo
       GROUP BY 1""".as[KkHakeneetHyvaksytytVastaanottaneetResult]
 
     LOG.info(s"selectKansalaisuuksittainWithParams: ${query.statements.head}")
@@ -462,76 +462,6 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   }
 
   def selectHakukohderyhmittainWithParams(
-                                             selectedKayttooikeusOrganisaatiot: List[String],
-                                             haut: List[String],
-                                             hakukohteet: List[String],
-                                             hakukohderyhmat: List[String],
-                                             okmOhjauksenAlat: List[String],
-                                             tutkinnonTasot: List[String],
-                                             aidinkielet: List[String],
-                                             kansalaisuudet: List[String],
-                                             sukupuoli: Option[String],
-                                             ensikertalainen: Option[Boolean],
-                                           ): SqlStreamingAction[Vector[KkHakeneetHyvaksytytVastaanottaneetHakukohderyhmittain], KkHakeneetHyvaksytytVastaanottaneetHakukohderyhmittain, Effect] = {
-
-    val filters = buildFilters(
-      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, hakukohderyhmat, okmOhjauksenAlat, tutkinnonTasot, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen
-    )
-
-    val query =
-      sql"""SELECT
-      hr.hakukohderyhma_nimi AS otsikko,
-      b.hakukohde_nimi,
-      SUM(a.hakijat) AS hakijat,
-      SUM(a.ensisijaisia) AS ensisijaisia,
-      SUM(a.ensikertalaisia) AS ensikertalaisia,
-      SUM(a.hyvaksytyt) AS hyvaksytyt,
-      SUM(a.vastaanottaneet) AS vastaanottaneet,
-      SUM(a.lasna) AS lasna,
-      SUM(a.poissa) AS poissa,
-      SUM(a.ilm_yht) AS ilm_yht,
-      SUM(a.maksuvelvollisia) AS maksuvelvollisia,
-      SUM(b.valintaperusteiden_aloituspaikat) AS valinnan_aloituspaikat,
-      SUM(b.hakukohteen_aloituspaikat) AS aloituspaikat,
-      SUM(a.toive1) AS toive1,
-      SUM(a.toive2) AS toive2,
-      SUM(a.toive3) AS toive3,
-      SUM(a.toive4) AS toive4,
-      SUM(a.toive5) AS toive5,
-      SUM(a.toive6) AS toive6
-      FROM (
-        SELECT
-          h.hakukohde_oid,
-          SUM(t.hakijat) AS hakijat,
-          SUM(t.ensisijaisia) AS ensisijaisia,
-          SUM(t.ensikertalaisia) AS ensikertalaisia,
-          SUM(t.hyvaksytyt) AS hyvaksytyt,
-          SUM(t.vastaanottaneet) AS vastaanottaneet,
-          SUM(t.lasna) AS lasna,
-          SUM(t.poissa) AS poissa,
-          SUM(t.ilm_yht) AS ilm_yht,
-          SUM(t.maksuvelvollisia) AS maksuvelvollisia,
-          SUM(t.toive_1) AS toive1,
-          SUM(t.toive_2) AS toive2,
-          SUM(t.toive_3) AS toive3,
-          SUM(t.toive_4) AS toive4,
-          SUM(t.toive_5) AS toive5,
-          SUM(t.toive_6) AS toive6
-        FROM pub.pub_fct_raportti_tilastoraportti_kk t
-        JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
-        WHERE #$filters
-        GROUP BY h.hakukohde_oid
-      ) a
-      JOIN pub.pub_dim_hakukohde b ON a.hakukohde_oid = b.hakukohde_oid
-      JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hh ON b.hakukohde_oid = hh.hakukohde_oid
-      JOIN pub.pub_dim_hakukohderyhma hr ON hh.hakukohderyhma_oid = hr.hakukohderyhma_oid
-      GROUP BY 1,2""".as[KkHakeneetHyvaksytytVastaanottaneetHakukohderyhmittain]
-
-    LOG.info(s"selectOkmOhjauksenAloittainWithParams: ${query.statements.head}")
-    query
-  }
-
-  def selectHakukohderyhmittainWithParams2(
                                            selectedKayttooikeusOrganisaatiot: List[String],
                                            haut: List[String],
                                            hakukohteet: List[String],

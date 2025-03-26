@@ -120,7 +120,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
         )
         db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectKansalaisuuksittainWithParams")
       case "hakukohderyhmittain" =>
-        val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakukohderyhmittainWithParams2(
+        val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakukohderyhmittainWithParams(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
           haut = haku,
           hakukohteet = hakukohteet,
