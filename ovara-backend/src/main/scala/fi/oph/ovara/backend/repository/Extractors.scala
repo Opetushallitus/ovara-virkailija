@@ -105,6 +105,19 @@ trait Extractors extends GenericOvaraJsonFormats {
       }
     }
 
+    def extractKoulutuksenAlkamiskausiJaVuosi(
+        alkamiskausi: Option[String],
+        alkamivuosi: Option[String],
+        kausienNimet: Option[String]
+    ) = {
+      val kielistetytKausienNimet = extractKielistetty(kausienNimet)
+      alkamiskausi match {
+        case Some(kausi) if kielistetytKausienNimet.nonEmpty =>
+          kielistetytKausienNimet.map((kieli: Kieli, nimi: String) => kieli -> s"$nimi ${alkamivuosi.getOrElse("")}")
+        case _ => Map()
+      }
+    }
+
     GetResult(r => {
       KorkeakouluKoulutusToteutusHakukohdeResult(
         oppilaitosJaToimipiste = extractKielistetty(r.nextStringOption()),
@@ -117,7 +130,9 @@ trait Extractors extends GenericOvaraJsonFormats {
         toteutuksenNimi = extractKielistetty(r.nextStringOption()),
         toteutusOid = r.nextString(),
         toteutuksenTila = r.nextStringOption(),
-        toteutuksenUlkoinenTunniste = r.nextStringOption()
+        toteutuksenUlkoinenTunniste = r.nextStringOption(),
+        koulutuksenAlkamiskausiJaVuosi =
+          extractKoulutuksenAlkamiskausiJaVuosi(r.nextStringOption(), r.nextStringOption(), r.nextStringOption())
       )
     })
   }
