@@ -60,7 +60,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     "raportti.toive7"                         -> "Toive7 SV",
     "raportti.yhteensa"                       -> "Yhteensä SV",
     "raportti.yksittaiset-hakijat"            -> "Yksittäiset hakijat SV",
-    "raportti.oppilaitosJaToimipiste" -> "Oppilaitos ja toimipiste SV"
+    "raportti.oppilaitosJaToimipiste"         -> "Oppilaitos ja toimipiste SV"
   )
 
   def checkAloituspaikatRowValidity(sheet: XSSFSheet, rowNumber: Int, expected: Int): Unit = {
@@ -78,7 +78,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       OrganisaationKoulutusToteutusHakukohde(
         organisaatio_oid = Some("1.2.246.562.10.278170642010"),
         koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-          hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+          hakukohteenNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
           hakukohdeOid = "1.2.246.562.20.00000000000000021565",
           koulutuksenTila = Some("julkaistu"),
           toteutuksenTila = Some("julkaistu"),
@@ -96,7 +96,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val kth = OrganisaationKoulutusToteutusHakukohde(
       organisaatio_oid = Some("1.2.246.562.10.278170642010"),
       koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-        hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+        hakukohteenNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
         hakukohdeOid = "1.2.246.562.20.00000000000000021565",
         koulutuksenTila = Some("julkaistu"),
         toteutuksenTila = Some("julkaistu"),
@@ -108,7 +108,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val kth2 = kth.copy(koulutusToteutusHakukohde =
       kth._2.copy(
-        hakukohdeNimi =
+        hakukohteenNimi =
           Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
         hakukohdeOid = "1.2.246.562.20.00000000000000012345",
         aloituspaikat = Some(20)
@@ -117,7 +117,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val kth3 = kth.copy(koulutusToteutusHakukohde =
       kth._2.copy(
-        hakukohdeNimi =
+        hakukohteenNimi =
           Map(En -> "Hakukohteen 3 nimi en", Fi -> "Hakukohteen 3 nimi fi", Sv -> "Hakukohteen 3 nimi sv"),
         hakukohdeOid = "1.2.246.562.20.00000000000000025467",
         aloituspaikat = Some(10)
@@ -137,7 +137,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val kth = OrganisaationKoulutusToteutusHakukohde(
       organisaatio_oid = Some("1.2.246.562.10.2781706420000"),
       koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-        hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+        hakukohteenNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
         hakukohdeOid = "1.2.246.562.20.00000000000000021565",
         koulutuksenTila = Some("julkaistu"),
         toteutuksenTila = Some("julkaistu"),
@@ -169,7 +169,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val kth = OrganisaationKoulutusToteutusHakukohde(
       organisaatio_oid = Some("1.2.246.562.10.2781706420000"),
       koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-        hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+        hakukohteenNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
         hakukohdeOid = "1.2.246.562.20.00000000000000021565",
         koulutuksenTila = Some("julkaistu"),
         toteutuksenTila = Some("julkaistu"),
@@ -182,7 +182,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val oppilaitoksenKth = OrganisaationKoulutusToteutusHakukohde(
       organisaatio_oid = Some("1.2.246.562.10.2781706420111"),
       koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-        hakukohdeNimi = Map(
+        hakukohteenNimi = Map(
           En -> "Oppilaitoksen hakukohteen nimi en",
           Fi -> "Oppilaitoksen hakukohteen nimi fi",
           Sv -> "Oppilaitoksen hakukohteen nimi sv"
@@ -232,7 +232,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val kth1 = OrganisaationKoulutusToteutusHakukohde(
       organisaatio_oid = Some("1.2.246.562.10.278170642010"),
       koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-        hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+        hakukohteenNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
         hakukohdeOid = "1.2.246.562.20.00000000000000021565",
         koulutuksenTila = Some("julkaistu"),
         toteutuksenTila = Some("julkaistu"),
@@ -244,7 +244,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val kth2 = kth1.copy(koulutusToteutusHakukohde =
       kth1._2.copy(
-        hakukohdeNimi =
+        hakukohteenNimi =
           Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
         hakukohdeOid = "1.2.246.562.20.0000000000000002156667"
       )
@@ -282,7 +282,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val oppilaitoksenKth1 = OrganisaationKoulutusToteutusHakukohde(
       organisaatio_oid = Some("1.2.246.562.10.278170642010"),
       koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-        hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+        hakukohteenNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
         hakukohdeOid = "1.2.246.562.20.00000000000000021565",
         koulutuksenTila = Some("julkaistu"),
         toteutuksenTila = Some("julkaistu"),
@@ -294,7 +294,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val oppilaitoksenKth2 = oppilaitoksenKth1.copy(
       koulutusToteutusHakukohde = oppilaitoksenKth1._2.copy(
-        hakukohdeNimi =
+        hakukohteenNimi =
           Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
         hakukohdeOid = "1.2.246.562.20.0000000000000002156667"
       )
@@ -302,7 +302,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val toimipisteenKth = oppilaitoksenKth1.copy(
       koulutusToteutusHakukohde = oppilaitoksenKth1._2.copy(
-        hakukohdeNimi = Map(
+        hakukohteenNimi = Map(
           En -> "Toimipiste hakukohteen nimi en",
           Fi -> "Toimipiste hakukohteen nimi fi",
           Sv -> "Toimipiste hakukohteen nimi sv"
@@ -365,7 +365,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val oppilaitoksenKth1 = OrganisaationKoulutusToteutusHakukohde(
       organisaatio_oid = Some("1.2.246.562.10.2781706420000"),
       koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-        hakukohdeNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
+        hakukohteenNimi = Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
         hakukohdeOid = "1.2.246.562.20.00000000000000021565",
         koulutuksenTila = Some("julkaistu"),
         toteutuksenTila = Some("julkaistu"),
@@ -377,7 +377,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val oppilaitoksenKth2 = oppilaitoksenKth1.copy(
       koulutusToteutusHakukohde = oppilaitoksenKth1._2.copy(
-        hakukohdeNimi =
+        hakukohteenNimi =
           Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
         hakukohdeOid = "1.2.246.562.20.0000000000000002156667"
       )
@@ -401,10 +401,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val workbook: XSSFWorkbook          = new XSSFWorkbook()
     val sheet: XSSFSheet                = workbook.createSheet()
     val headingCellstyle: XSSFCellStyle = workbook.createCellStyle()
-    val titles = KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES.getOrElse(
-      userLng,
-      KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES.getOrElse("fi", List())
-    )
+    val titles = classOf[KoulutusToteutusHakukohdeResult].getDeclaredFields
+      .map(_.getName)
+      .toList
+
     val raporttiColumnTitlesWithIndex = titles.zipWithIndex
 
     val currentRowIndex = ExcelWriter.createOrganisaatioHeadingRow(
@@ -442,10 +442,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val workbook: XSSFWorkbook          = new XSSFWorkbook()
     val sheet: XSSFSheet                = workbook.createSheet()
     val headingCellstyle: XSSFCellStyle = workbook.createCellStyle()
-    val titles = KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES.getOrElse(
-      userLng,
-      KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES.getOrElse("fi", List())
-    )
+    val titles = classOf[KoulutusToteutusHakukohdeResult].getDeclaredFields
+      .map(_.getName)
+      .toList
+
     val raporttiColumnTitlesWithIndex = titles.zipWithIndex
 
     val currentRowIndex = ExcelWriter.createOrganisaatioHeadingRow(
@@ -482,7 +482,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb =
       ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         hierarkiatWithHakukohteet,
-        KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
         userLng,
         KOULUTUSTOIMIJARAPORTTI,
         translations
@@ -496,12 +495,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb =
       ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         hierarkiatWithHakukohteet,
-        KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
         userLng,
         KOULUTUSTOIMIJARAPORTTI,
         translations
       )
-    assert(wb.getSheetAt(0).getRow(0).getCell(0).getStringCellValue == "Hakukohteen nimi SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(0).getStringCellValue == "Hakukohde SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(1).getStringCellValue == "Hakukohteen oid SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(2).getStringCellValue == "Kou.tila SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(3).getStringCellValue == "Tot.tila SV")
@@ -534,14 +532,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb =
       ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         hierarkiatWithHakukohteet,
-        KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
         userLng,
         KOULUTUSTOIMIJARAPORTTI,
         translations
       )
     val sheet = wb.getSheetAt(0)
     // Heading row
-    assert(sheet.getRow(0).getCell(0).getStringCellValue == "Hakukohteen nimi SV")
+    assert(sheet.getRow(0).getCell(0).getStringCellValue == "Hakukohde SV")
     assert(sheet.getRow(0).getCell(4).getStringCellValue == "Hak.tila SV")
     assert(sheet.getRow(0).getCell(5).getStringCellValue == "Aloituspaikat SV")
     assert(sheet.getRow(0).getCell(2).getStringCellValue == "Kou.tila SV")
@@ -579,7 +576,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
               OrganisaationKoulutusToteutusHakukohde(
                 organisaatio_oid = Some("1.2.246.562.10.278170642010"),
                 koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-                  hakukohdeNimi =
+                  hakukohteenNimi =
                     Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
                   hakukohdeOid = "1.2.246.562.20.00000000000000021565",
                   koulutuksenTila = Some("julkaistu"),
@@ -592,7 +589,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
               OrganisaationKoulutusToteutusHakukohde(
                 organisaatio_oid = Some("1.2.246.562.10.278170642010"),
                 koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-                  hakukohdeNimi =
+                  hakukohteenNimi =
                     Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
                   hakukohdeOid = "1.2.246.562.20.00000000000000031232",
                   koulutuksenTila = Some("julkaistu"),
@@ -612,19 +609,18 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb =
       ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         hierarkiatWithHakukohteet,
-        KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
         userLng,
         KOULUTUSTOIMIJARAPORTTI,
         translations
       )
     val sheet = wb.getSheetAt(0)
     // Heading row
-    assert(sheet.getRow(0).getCell(0).getStringCellValue == "Hakukohteen nimi SV")
-    assert(sheet.getRow(0).getCell(4).getStringCellValue == "Hak.tila SV")
-    assert(sheet.getRow(0).getCell(5).getStringCellValue == "Aloituspaikat SV")
+    assert(sheet.getRow(0).getCell(0).getStringCellValue == "Hakukohde SV")
+    assert(sheet.getRow(0).getCell(1).getStringCellValue == "Hakukohteen oid SV")
     assert(sheet.getRow(0).getCell(2).getStringCellValue == "Kou.tila SV")
     assert(sheet.getRow(0).getCell(3).getStringCellValue == "Tot.tila SV")
-    assert(sheet.getRow(0).getCell(1).getStringCellValue == "Hakukohteen oid SV")
+    assert(sheet.getRow(0).getCell(4).getStringCellValue == "Hak.tila SV")
+    assert(sheet.getRow(0).getCell(5).getStringCellValue == "Aloituspaikat SV")
     assert(sheet.getRow(0).getCell(6).getStringCellValue == "Koe SV")
     assert(sheet.getRow(0).getCell(7).getStringCellValue == "Voi suorittaa kaksoistutkinnon? SV")
     assert(sheet.getRow(0).getCell(8).getStringCellValue == "Voi suorittaa tutkinnon urheilijana? SV")
@@ -672,7 +668,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           OrganisaationKoulutusToteutusHakukohde(
             organisaatio_oid = Some("1.2.246.562.10.2781706420000"),
             koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-              hakukohdeNimi =
+              hakukohteenNimi =
                 Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
               hakukohdeOid = "1.2.246.562.20.00000000000000021565",
               koulutuksenTila = Some("julkaistu"),
@@ -685,7 +681,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           OrganisaationKoulutusToteutusHakukohde(
             organisaatio_oid = Some("1.2.246.562.10.2781706420000"),
             koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-              hakukohdeNimi =
+              hakukohteenNimi =
                 Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
               hakukohdeOid = "1.2.246.562.20.00000000000000031232",
               koulutuksenTila = Some("julkaistu"),
@@ -701,7 +697,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val wb = ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
       koulutustoimijaWithHakukohteet,
-      KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
       userLng,
       KOULUTUSTOIMIJARAPORTTI,
       translations
@@ -777,7 +772,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
               OrganisaationKoulutusToteutusHakukohde(
                 organisaatio_oid = Some("1.2.246.562.10.2781706420111"),
                 koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-                  hakukohdeNimi = Map(
+                  hakukohteenNimi = Map(
                     En -> "Toimipisteen hakukohteen nimi en",
                     Fi -> "Toimipisteen hakukohteen nimi fi",
                     Sv -> "Toimipisteen hakukohteen nimi sv"
@@ -845,7 +840,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
                   OrganisaationKoulutusToteutusHakukohde(
                     organisaatio_oid = Some("1.2.246.562.10.278170642013211"),
                     koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-                      hakukohdeNimi = Map(
+                      hakukohteenNimi = Map(
                         En -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi en",
                         Fi -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi fi",
                         Sv -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi sv"
@@ -865,7 +860,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
               OrganisaationKoulutusToteutusHakukohde(
                 organisaatio_oid = Some("1.2.246.562.10.2781706420132"),
                 koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-                  hakukohdeNimi = Map(
+                  hakukohteenNimi = Map(
                     En -> "Toimipisteen 2 hakukohteen nimi en",
                     Fi -> "Toimipisteen 2 hakukohteen nimi fi",
                     Sv -> "Toimipisteen 2 hakukohteen nimi sv"
@@ -885,7 +880,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           OrganisaationKoulutusToteutusHakukohde(
             organisaatio_oid = Some("1.2.246.562.10.278170642010"),
             koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-              hakukohdeNimi =
+              hakukohteenNimi =
                 Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
               hakukohdeOid = "1.2.246.562.20.00000000000000021565",
               koulutuksenTila = Some("julkaistu"),
@@ -898,7 +893,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           OrganisaationKoulutusToteutusHakukohde(
             organisaatio_oid = Some("1.2.246.562.10.278170642010"),
             koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-              hakukohdeNimi =
+              hakukohteenNimi =
                 Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
               hakukohdeOid = "1.2.246.562.20.00000000000000031232",
               koulutuksenTila = Some("julkaistu"),
@@ -943,7 +938,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
               OrganisaationKoulutusToteutusHakukohde(
                 organisaatio_oid = Some("1.2.246.562.10.27817064201113"),
                 koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-                  hakukohdeNimi = Map(
+                  hakukohteenNimi = Map(
                     En -> "Toimipisteen 3 hakukohteen nimi en",
                     Fi -> "Toimipisteen 3 hakukohteen nimi fi",
                     Sv -> "Toimipisteen 3 hakukohteen nimi sv"
@@ -963,7 +958,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           OrganisaationKoulutusToteutusHakukohde(
             organisaatio_oid = Some("1.2.246.562.10.278170642012"),
             koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-              hakukohdeNimi = Map(
+              hakukohteenNimi = Map(
                 En -> "Oppilaitoksen 2 hakukohteen nimi en",
                 Fi -> "Oppilaitoksen 2 hakukohteen nimi fi",
                 Sv -> "Oppilaitoksen 2 hakukohteen nimi sv"
@@ -982,7 +977,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val wb = ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
       hierarkiatWithHakukohteet,
-      KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
       userLng,
       OPPILAITOSRAPORTTI,
       translations
@@ -1110,7 +1104,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           OrganisaationKoulutusToteutusHakukohde(
             organisaatio_oid = Some("1.2.246.562.10.2781706420111"),
             koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-              hakukohdeNimi = Map(
+              hakukohteenNimi = Map(
                 En -> "Toimipisteen hakukohteen nimi en",
                 Fi -> "Toimipisteen hakukohteen nimi fi",
                 Sv -> "Toimipisteen hakukohteen nimi sv"
@@ -1178,7 +1172,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
               OrganisaationKoulutusToteutusHakukohde(
                 organisaatio_oid = Some("1.2.246.562.10.278170642013211"),
                 koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-                  hakukohdeNimi = Map(
+                  hakukohteenNimi = Map(
                     En -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi en",
                     Fi -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi fi",
                     Sv -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi sv"
@@ -1198,7 +1192,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           OrganisaationKoulutusToteutusHakukohde(
             organisaatio_oid = Some("1.2.246.562.10.2781706420132"),
             koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-              hakukohdeNimi = Map(
+              hakukohteenNimi = Map(
                 En -> "Toimipisteen 2 hakukohteen nimi en",
                 Fi -> "Toimipisteen 2 hakukohteen nimi fi",
                 Sv -> "Toimipisteen 2 hakukohteen nimi sv"
@@ -1217,7 +1211,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val wb = ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
       hierarkiatWithHakukohteet,
-      KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
       userLng,
       TOIMIPISTERAPORTTI,
       translations
@@ -1275,7 +1268,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
                   OrganisaationKoulutusToteutusHakukohde(
                     organisaatio_oid = Some("1.2.246.562.10.2781706420111"),
                     koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-                      hakukohdeNimi = Map(
+                      hakukohteenNimi = Map(
                         En -> "Toimipisteen hakukohteen nimi en",
                         Fi -> "Toimipisteen hakukohteen nimi fi",
                         Sv -> "Toimipisteen hakukohteen nimi sv"
@@ -1323,7 +1316,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
                       OrganisaationKoulutusToteutusHakukohde(
                         organisaatio_oid = Some("1.2.246.562.10.278170642013211"),
                         koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-                          hakukohdeNimi = Map(
+                          hakukohteenNimi = Map(
                             En -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi en",
                             Fi -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi fi",
                             Sv -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi sv"
@@ -1343,7 +1336,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
                   OrganisaationKoulutusToteutusHakukohde(
                     organisaatio_oid = Some("1.2.246.562.10.2781706420132"),
                     koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-                      hakukohdeNimi = Map(
+                      hakukohteenNimi = Map(
                         En -> "Toimipisteen 2 hakukohteen nimi en",
                         Fi -> "Toimipisteen 2 hakukohteen nimi fi",
                         Sv -> "Toimipisteen 2 hakukohteen nimi sv"
@@ -1363,7 +1356,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
               OrganisaationKoulutusToteutusHakukohde(
                 organisaatio_oid = Some("1.2.246.562.10.278170642010"),
                 koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-                  hakukohdeNimi =
+                  hakukohteenNimi =
                     Map(En -> "Hakukohteen nimi en", Fi -> "Hakukohteen nimi fi", Sv -> "Hakukohteen nimi sv"),
                   hakukohdeOid = "1.2.246.562.20.00000000000000021565",
                   koulutuksenTila = Some("julkaistu"),
@@ -1378,7 +1371,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
               OrganisaationKoulutusToteutusHakukohde(
                 organisaatio_oid = Some("1.2.246.562.10.278170642010"),
                 koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-                  hakukohdeNimi =
+                  hakukohteenNimi =
                     Map(En -> "Hakukohteen 2 nimi en", Fi -> "Hakukohteen 2 nimi fi", Sv -> "Hakukohteen 2 nimi sv"),
                   hakukohdeOid = "1.2.246.562.20.00000000000000031232",
                   koulutuksenTila = Some("julkaistu"),
@@ -1395,7 +1388,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           OrganisaationKoulutusToteutusHakukohde(
             organisaatio_oid = Some("1.2.246.562.10.2781706420000"),
             koulutusToteutusHakukohde = KoulutusToteutusHakukohdeResult(
-              hakukohdeNimi = Map(
+              hakukohteenNimi = Map(
                 En -> "Koulutustoimijan hakukohteen nimi en",
                 Fi -> "Koulutustoimijan hakukohteen nimi fi",
                 Sv -> "Koulutustoimijan hakukohteen nimi sv"
@@ -1417,10 +1410,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val headingCellStyle: XSSFCellStyle = workbook.createCellStyle()
     val cellStyle: XSSFCellStyle        = workbook.createCellStyle()
     val font1                           = workbook.createFont()
-    val titles = KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES.getOrElse(
-      userLng,
-      KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES.getOrElse("fi", List())
-    )
+
+    val titles = classOf[KoulutusToteutusHakukohdeResult].getDeclaredFields
+      .map(_.getName)
+      .toList
+
     val raporttiColumnTitlesWithIndex = titles.zipWithIndex
 
     val wb: Unit =
@@ -1580,10 +1574,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(0).getCell(0).getStringCellValue == "Oppilaitos ja toimipiste SV")
     assert(sheet.getRow(0).getCell(1).getStringCellValue == "raportti.koulutuksenNimi")
     assert(sheet.getRow(0).getCell(2).getStringCellValue == "raportti.koulutusOid")
-    assert(sheet.getRow(0).getCell(3).getStringCellValue == "raportti.koulutuksenTila")
+    assert(sheet.getRow(0).getCell(3).getStringCellValue == "raportti.tila")
     assert(sheet.getRow(0).getCell(4).getStringCellValue == "raportti.koulutuskoodi")
     assert(sheet.getRow(0).getCell(5) == null)
-    assert(sheet.getRow(1).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur")
+    assert(
+      sheet.getRow(1).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
+    )
     assert(sheet.getRow(1).getCell(1).getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år)")
     assert(sheet.getRow(1).getCell(2).getStringCellValue == "1.2.246.562.13.00000000000000002677")
     assert(sheet.getRow(1).getCell(3).getStringCellValue == "julkaistu")
@@ -4118,7 +4114,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         otsikko = Map(
           Fi -> "Arkkitehtuuri, tekniikan kandidaatti ja arkkitehti (3 v + 2 v) - DIA-yhteisvalinta\nAalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
           En -> "Arkkitehtuuri, tekniikan kandidaatti ja arkkitehti (3 v + 2 v) - DIA-yhteisvalinta\nAalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
-          Sv -> "Arkitektur, teknologie kandidat och arkitekt (3 år + 2 år) - DIA gemensamma antagning\nAalto-universitetet, Högskolan för konst design och arkitektur"),
+          Sv -> "Arkitektur, teknologie kandidat och arkitekt (3 år + 2 år) - DIA gemensamma antagning\nAalto-universitetet, Högskolan för konst design och arkitektur"
+        ),
         hakijat = 815,
         ensisijaisia = 261,
         ensikertalaisia = 120,
@@ -4141,7 +4138,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         otsikko = Map(
           Fi -> "Dokumentaarinen elokuva, taiteen kandidaatti ja maisteri (3 v + 2 v)\nAalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
           En -> "Dokumentaarinen elokuva, taiteen kandidaatti ja maisteri (3 v + 2 v)\nAalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
-          Sv -> "Dokumentärfilm, konstkandidat och -magister (3 år + 2 år)\nAalto-universitetet, Högskolan för konst design och arkitektur"),
+          Sv -> "Dokumentärfilm, konstkandidat och -magister (3 år + 2 år)\nAalto-universitetet, Högskolan för konst design och arkitektur"
+        ),
         hakijat = 41,
         ensisijaisia = 26,
         ensikertalaisia = 5,
@@ -4199,7 +4197,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(headingRow.getCell(18) == null)
 
     val dataRow1 = sheet.getRow(1)
-    assert(dataRow1.getCell(0).getStringCellValue == "Arkitektur, teknologie kandidat och arkitekt (3 år + 2 år) - DIA gemensamma antagning\nAalto-universitetet, Högskolan för konst design och arkitektur")
+    assert(
+      dataRow1
+        .getCell(0)
+        .getStringCellValue == "Arkitektur, teknologie kandidat och arkitekt (3 år + 2 år) - DIA gemensamma antagning\nAalto-universitetet, Högskolan för konst design och arkitektur"
+    )
     assert(dataRow1.getCell(1).getNumericCellValue == 815)
     assert(dataRow1.getCell(2).getNumericCellValue == 261)
     assert(dataRow1.getCell(3).getNumericCellValue == 120)
@@ -4220,7 +4222,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(dataRow1.getCell(18) == null)
 
     val dataRow2 = sheet.getRow(2)
-    assert(dataRow2.getCell(0).getStringCellValue == "Dokumentärfilm, konstkandidat och -magister (3 år + 2 år)\nAalto-universitetet, Högskolan för konst design och arkitektur")
+    assert(
+      dataRow2
+        .getCell(0)
+        .getStringCellValue == "Dokumentärfilm, konstkandidat och -magister (3 år + 2 år)\nAalto-universitetet, Högskolan för konst design och arkitektur"
+    )
     assert(dataRow2.getCell(1).getNumericCellValue == 41)
     assert(dataRow2.getCell(2).getNumericCellValue == 26)
     assert(dataRow2.getCell(3).getNumericCellValue == 5)
@@ -4282,7 +4288,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         otsikko = Map(
           Fi -> "Arkkitehtuuri, tekniikan kandidaatti ja arkkitehti (3 v + 2 v) - DIA-yhteisvalinta\nAalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
           En -> "Arkkitehtuuri, tekniikan kandidaatti ja arkkitehti (3 v + 2 v) - DIA-yhteisvalinta\nAalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
-          Sv -> "Arkitektur, teknologie kandidat och arkitekt (3 år + 2 år) - DIA gemensamma antagning\nAalto-universitetet, Högskolan för konst design och arkitektur"),
+          Sv -> "Arkitektur, teknologie kandidat och arkitekt (3 år + 2 år) - DIA gemensamma antagning\nAalto-universitetet, Högskolan för konst design och arkitektur"
+        ),
         hakijat = 815,
         ensisijaisia = 261,
         ensikertalaisia = 120,
@@ -4305,7 +4312,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         otsikko = Map(
           Fi -> "Dokumentaarinen elokuva, taiteen kandidaatti ja maisteri (3 v + 2 v)\nAalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
           En -> "Dokumentaarinen elokuva, taiteen kandidaatti ja maisteri (3 v + 2 v)\nAalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
-          Sv -> "Dokumentärfilm, konstkandidat och -magister (3 år + 2 år)\nAalto-universitetet, Högskolan för konst design och arkitektur"),
+          Sv -> "Dokumentärfilm, konstkandidat och -magister (3 år + 2 år)\nAalto-universitetet, Högskolan för konst design och arkitektur"
+        ),
         hakijat = 41,
         ensisijaisia = 26,
         ensikertalaisia = 5,
@@ -4357,7 +4365,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(headingRow.getCell(12) == null)
 
     val dataRow1 = sheet.getRow(1)
-    assert(dataRow1.getCell(0).getStringCellValue == "Arkitektur, teknologie kandidat och arkitekt (3 år + 2 år) - DIA gemensamma antagning\nAalto-universitetet, Högskolan för konst design och arkitektur")
+    assert(
+      dataRow1
+        .getCell(0)
+        .getStringCellValue == "Arkitektur, teknologie kandidat och arkitekt (3 år + 2 år) - DIA gemensamma antagning\nAalto-universitetet, Högskolan för konst design och arkitektur"
+    )
     assert(dataRow1.getCell(1).getNumericCellValue == 815)
     assert(dataRow1.getCell(2).getNumericCellValue == 261)
     assert(dataRow1.getCell(3).getNumericCellValue == 120)
@@ -4372,7 +4384,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(dataRow1.getCell(12) == null)
 
     val dataRow2 = sheet.getRow(2)
-    assert(dataRow2.getCell(0).getStringCellValue == "Dokumentärfilm, konstkandidat och -magister (3 år + 2 år)\nAalto-universitetet, Högskolan för konst design och arkitektur")
+    assert(
+      dataRow2
+        .getCell(0)
+        .getStringCellValue == "Dokumentärfilm, konstkandidat och -magister (3 år + 2 år)\nAalto-universitetet, Högskolan för konst design och arkitektur"
+    )
     assert(dataRow2.getCell(1).getNumericCellValue == 41)
     assert(dataRow2.getCell(2).getNumericCellValue == 26)
     assert(dataRow2.getCell(3).getNumericCellValue == 5)
@@ -4651,7 +4667,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         otsikko = Map(
           En -> "Automaattinen hakukelpoisuus kevät II 2024",
           Fi -> "Automaattinen hakukelpoisuus kevät II 2024",
-          Sv -> "Automaattinen hakukelpoisuus kevät II 2024"),
+          Sv -> "Automaattinen hakukelpoisuus kevät II 2024"
+        ),
         hakijat = 5661,
         ensisijaisia = 1309,
         ensikertalaisia = 0,
@@ -4674,7 +4691,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         otsikko = Map(
           En -> "Hammaslääketieteen yhteisvalinta 2024",
           Fi -> "Hammaslääketieteen yhteisvalinta 2024",
-          Sv -> "Hammaslääketieteen yhteisvalinta 2024"),
+          Sv -> "Hammaslääketieteen yhteisvalinta 2024"
+        ),
         hakijat = 1078,
         ensisijaisia = 269,
         ensikertalaisia = 0,
@@ -4697,7 +4715,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         otsikko = Map(
           En -> "Hoitotieteen/terveystieteiden valintakoeyhteistyö 2024",
           Fi -> "Hoitotieteen/terveystieteiden valintakoeyhteistyö 2024",
-          Sv -> "Hoitotieteen/terveystieteiden valintakoeyhteistyö 2024"),
+          Sv -> "Hoitotieteen/terveystieteiden valintakoeyhteistyö 2024"
+        ),
         hakijat = 0,
         ensisijaisia = 0,
         ensikertalaisia = 0,

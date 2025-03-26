@@ -74,7 +74,7 @@ trait Extractors extends GenericOvaraJsonFormats {
   implicit val getKoulutuksetToteutuksetHakukohteetResult: GetResult[OrganisaationKoulutusToteutusHakukohde] = {
     GetResult(r => {
       val kth = KoulutusToteutusHakukohdeResult(
-        hakukohdeNimi = extractKielistetty(r.nextStringOption()),
+        hakukohteenNimi = extractKielistetty(r.nextStringOption()),
         hakukohdeOid = r.nextString(),
         koulutuksenTila = r.nextStringOption(),
         toteutuksenTila = r.nextStringOption(),
@@ -100,7 +100,7 @@ trait Extractors extends GenericOvaraJsonFormats {
         oppilaitosJaToimipiste = extractKielistetty(r.nextStringOption()),
         koulutuksenNimi = extractKielistetty(r.nextStringOption()),
         koulutusOid = r.nextString(),
-        koulutuksenTila = r.nextStringOption(),
+        tila = r.nextStringOption(),
         koulutuskoodi = r.nextStringOption()
       )
     })
