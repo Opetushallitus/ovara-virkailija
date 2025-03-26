@@ -1,5 +1,6 @@
 package fi.oph.ovara.backend.service
 
+import fi.oph.ovara.backend.domain.Kieli
 import fi.oph.ovara.backend.repository.{KorkeakouluKoulutuksetToteutuksetHakukohteetRepository, OvaraDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -51,8 +52,16 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetService(
       "selectWithParams"
     )
 
+    val sorted =
+      queryResult.sortBy(resultRow =>
+        (
+          resultRow.oppilaitosJaToimipiste.get(Kieli.withName(asiointikieli)),
+          resultRow.koulutuksenNimi.get(Kieli.withName(asiointikieli))
+        )
+      )
+
     ExcelWriter.writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
-      queryResult,
+      sorted,
       asiointikieli,
       translations
     )
