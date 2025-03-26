@@ -13,11 +13,14 @@ export const Sukupuoli = () => {
     '2': t('raportti.sukupuoli.nainen'),
   };
 
+  const getNonNullSelectedValue = (selected: string | null) =>
+    selected === null ? 'neutral' : selected;
+
   return (
     <OvaraRadioGroup
       label={t(`raportti.sukupuoli`)}
       options={SUKUPUOLET}
-      value={selectedSukupuoli}
+      value={getNonNullSelectedValue(selectedSukupuoli)}
       labels={sukupuoliLabels}
       onChange={(e) => setSelectedSukupuoli(e.target.value)}
     />

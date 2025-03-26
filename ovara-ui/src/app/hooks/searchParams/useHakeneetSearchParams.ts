@@ -45,12 +45,12 @@ export const useHakeneetSearchParams = () => {
 
   const [selectedNaytaHakutoiveet, setSelectedNaytaHakutoiveet] = useQueryState(
     'nayta-hakutoiveet',
-    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
+    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS).withDefault(true),
   );
 
   const [selectedSukupuoli, setSelectedSukupuoli] = useQueryState(
     'sukupuoli',
-    DEFAULT_NUQS_OPTIONS,
+    parseAsString.withOptions(DEFAULT_NUQS_OPTIONS).withDefault('neutral'),
   );
 
   const [selectedTutkinnonTaso, setSelectedTutkinnonTaso] = useQueryState(
