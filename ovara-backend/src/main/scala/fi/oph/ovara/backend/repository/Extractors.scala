@@ -110,12 +110,13 @@ trait Extractors extends GenericOvaraJsonFormats {
         oppilaitosJaToimipiste = extractKielistetty(r.nextStringOption()),
         koulutuksenNimi = extractKielistetty(r.nextStringOption()),
         koulutusOid = r.nextString(),
-        tila = r.nextStringOption(),
+        koulutuksenTila = r.nextStringOption(),
         koulutuskoodi = r.nextStringOption(),
         ulkoinenTunniste = r.nextStringOption(),
         opintojenLaajuus = extractOpintojenlaajuus(r.nextStringOption(), r.nextStringOption()),
         toteutuksenNimi = extractKielistetty(r.nextStringOption()),
-        toteutusOid = r.nextString()
+        toteutusOid = r.nextString(),
+        toteutuksenTila = r.nextStringOption()
       )
     })
   }
