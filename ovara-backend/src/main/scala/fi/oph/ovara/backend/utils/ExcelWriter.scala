@@ -437,7 +437,6 @@ object ExcelWriter {
       fieldNames: List[String],
       headingCellStyle: XSSFCellStyle
   ): Int = {
-    println(fieldNames)
     val headingRow = sheet.createRow(currentRowIndex)
     fieldNames.zipWithIndex.foreach((fieldName, index) => {
       val headingCell = headingRow.createCell(index)
