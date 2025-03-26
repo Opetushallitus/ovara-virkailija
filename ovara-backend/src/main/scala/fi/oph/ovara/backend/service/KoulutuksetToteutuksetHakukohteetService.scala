@@ -63,7 +63,6 @@ class KoulutuksetToteutuksetHakukohteetService(
 
     ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
       organisaationKoulutuksetHakukohteetToteutukset,
-      KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET_COLUMN_TITLES,
       asiointikieli,
       raporttityyppi,
       translations

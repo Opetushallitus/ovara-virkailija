@@ -56,7 +56,7 @@ object ExcelWriter {
 
       orgNameCell.setCellValue(kielistettyNimi)
 
-      raporttiColumnTitlesWithIndex.find((title, i) => title.startsWith("Aloituspaikat")) match {
+      raporttiColumnTitlesWithIndex.find((title, i) => title.startsWith("aloituspaikat")) match {
         case Some((t, index)) =>
           val aloituspaikatCell = row.createCell(index)
           aloituspaikatCell.setCellStyle(headingCellStyle)
@@ -293,8 +293,7 @@ object ExcelWriter {
 
   def writeKoulutuksetToteutuksetHakukohteetRaportti(
       hierarkiatWithResults: List[OrganisaatioHierarkiaWithHakukohteet],
-      raporttiColumnTitles: Map[String, List[String]],
-      userLng: String,
+      asiointikieli: String,
       raporttityyppi: String,
       translations: Map[String, String]
   ): XSSFWorkbook = {
@@ -320,16 +319,20 @@ object ExcelWriter {
       )
 
       var currentRowIndex = 0
-      val row             = sheet.createRow(currentRowIndex)
-      currentRowIndex = currentRowIndex + 1
+      val titles = classOf[KoulutusToteutusHakukohdeResult].getDeclaredFields
+        .map(_.getName)
+        .toList
 
-      val titles                        = raporttiColumnTitles.getOrElse(userLng, raporttiColumnTitles.getOrElse("fi", List()))
       val raporttiColumnTitlesWithIndex = titles.zipWithIndex
-      raporttiColumnTitlesWithIndex.foreach { case (title, index) =>
-        val cell = row.createCell(index)
-        cell.setCellStyle(headingCellStyle)
-        cell.setCellValue(title)
-      }
+
+      currentRowIndex = createHeadingRow(
+        sheet = sheet,
+        asiontikieli = asiointikieli,
+        translations = translations,
+        currentRowIndex = currentRowIndex,
+        fieldNames = titles,
+        headingCellStyle = headingCellStyle
+      )
 
       createKoulutuksetToteutuksetHakukohteetResultRows(
         workbook = workbook,
@@ -341,7 +344,7 @@ object ExcelWriter {
         hakukohteenNimiTextCellStyle = hakukohteenNimiTextCellStyle,
         headingFont = headingFont,
         subHeadingFont = subHeadingFont,
-        asiointikieli = userLng,
+        asiointikieli = asiointikieli,
         raporttiColumnTitlesWithIndex = raporttiColumnTitlesWithIndex,
         raporttityyppi = raporttityyppi
       )
@@ -434,6 +437,7 @@ object ExcelWriter {
       fieldNames: List[String],
       headingCellStyle: XSSFCellStyle
   ): Int = {
+    println(fieldNames)
     val headingRow = sheet.createRow(currentRowIndex)
     fieldNames.zipWithIndex.foreach((fieldName, index) => {
       val headingCell = headingRow.createCell(index)
@@ -491,7 +495,7 @@ object ExcelWriter {
     val koodiRegex: Regex = """\d+""".r
     koodiRegex.findFirstIn(koodiarvo) match {
       case Some(koodi) => koodi
-      case None => ""
+      case None        => ""
     }
   }
 

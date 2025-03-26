@@ -1,7 +1,7 @@
 package fi.oph.ovara.backend.domain
 
 sealed trait KoulutusToteutusHakukohde {
-  val hakukohdeNimi: Kielistetty
+  val hakukohteenNimi: Kielistetty
   val hakukohdeOid: String
   val koulutuksenTila: Option[String]
   val toteutuksenTila: Option[String]
@@ -13,7 +13,7 @@ sealed trait KoulutusToteutusHakukohde {
 }
 
 case class KoulutusToteutusHakukohdeResult(
-    hakukohdeNimi: Kielistetty,
+    hakukohteenNimi: Kielistetty,
     hakukohdeOid: String,
     koulutuksenTila: Option[String] = None,
     toteutuksenTila: Option[String] = None,
@@ -33,6 +33,6 @@ case class KorkeakouluKoulutusToteutusHakukohdeResult(
     oppilaitosJaToimipiste: Kielistetty,
     koulutuksenNimi: Kielistetty,
     koulutusOid: String,
-    koulutuksenTila: Option[String],
+    tila: Option[String],
     koulutuskoodi: Option[String]
 )
