@@ -24,7 +24,9 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
                  k.koulutus_oid,
                  k.tila AS koulutuksen_tila,
                  k.koulutus_koodi,
-                 k.ulkoinen_tunniste
+                 k.ulkoinen_tunniste,
+                 k.opintojenlaajuus,
+                 k.laajuusyksikko_nimi
           FROM pub.pub_dim_haku h
           JOIN pub.pub_dim_hakukohde hk
           ON h.haku_oid = hk.haku_oid

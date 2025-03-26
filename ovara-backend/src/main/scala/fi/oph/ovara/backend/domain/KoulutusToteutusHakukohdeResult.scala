@@ -35,5 +35,6 @@ case class KorkeakouluKoulutusToteutusHakukohdeResult(
     koulutusOid: String,
     tila: Option[String],
     koulutuskoodi: Option[String],
-    ulkoinenTunniste: Option[String]
+    ulkoinenTunniste: Option[String],
+    opintojenLaajuus: Kielistetty
 )

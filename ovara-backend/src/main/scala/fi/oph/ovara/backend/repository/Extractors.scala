@@ -95,6 +95,16 @@ trait Extractors extends GenericOvaraJsonFormats {
 
   implicit val getKorkeakouluKoulutuksetToteutuksetHakukohteetResult
       : GetResult[KorkeakouluKoulutusToteutusHakukohdeResult] = {
+
+    def extractOpintojenlaajuus(laajuusnumero: Option[String], laajuusyksikko: Option[String]): Kielistetty = {
+      val kielistettyLaajuusyksikko = extractKielistetty(laajuusyksikko)
+      laajuusnumero match {
+        case Some(numero) =>
+          kielistettyLaajuusyksikko.map((kieli: Kieli, yksikko: String) => kieli -> s"$numero $yksikko")
+        case None => Map()
+      }
+    }
+
     GetResult(r => {
       KorkeakouluKoulutusToteutusHakukohdeResult(
         oppilaitosJaToimipiste = extractKielistetty(r.nextStringOption()),
@@ -102,7 +112,8 @@ trait Extractors extends GenericOvaraJsonFormats {
         koulutusOid = r.nextString(),
         tila = r.nextStringOption(),
         koulutuskoodi = r.nextStringOption(),
-        ulkoinenTunniste = r.nextStringOption()
+        ulkoinenTunniste = r.nextStringOption(),
+        opintojenLaajuus = extractOpintojenlaajuus(r.nextStringOption(), r.nextStringOption())
       )
     })
   }
