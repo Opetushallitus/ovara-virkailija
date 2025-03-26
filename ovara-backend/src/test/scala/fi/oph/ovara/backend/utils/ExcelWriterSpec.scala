@@ -1569,7 +1569,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
           Sv -> "Film- och tv-manuskript - Filmkonst, konstmagister (2 år) -toteutus"
         ),
         "1.2.246.562.17.00000000000000007967",
-        Some("arkistoitu")
+        Some("arkistoitu"),
+        None
       )
     )
 
@@ -1585,12 +1586,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(0).getCell(2).getStringCellValue == "raportti.koulutusOid")
     assert(sheet.getRow(0).getCell(3).getStringCellValue == "Kou.tila SV")
     assert(sheet.getRow(0).getCell(4).getStringCellValue == "raportti.koulutuskoodi")
-    assert(sheet.getRow(0).getCell(5).getStringCellValue == "raportti.ulkoinenTunniste")
+    assert(sheet.getRow(0).getCell(5).getStringCellValue == "raportti.koulutuksenUlkoinenTunniste")
     assert(sheet.getRow(0).getCell(6).getStringCellValue == "raportti.opintojenLaajuus")
     assert(sheet.getRow(0).getCell(7).getStringCellValue == "raportti.toteutuksenNimi")
     assert(sheet.getRow(0).getCell(8).getStringCellValue == "raportti.toteutusOid")
     assert(sheet.getRow(0).getCell(9).getStringCellValue == "Tot.tila SV")
-    assert(sheet.getRow(0).getCell(10) == null)
+    assert(sheet.getRow(0).getCell(10).getStringCellValue == "raportti.toteutuksenUlkoinenTunniste")
+    assert(sheet.getRow(0).getCell(11) == null)
     assert(
       sheet.getRow(1).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
     )
@@ -1603,7 +1605,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(1).getCell(7).getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år) -toteutus")
     assert(sheet.getRow(1).getCell(8).getStringCellValue == "1.2.246.562.17.00000000000000007967")
     assert(sheet.getRow(1).getCell(9).getStringCellValue == "arkistoitu")
-    assert(sheet.getRow(1).getCell(10) == null)
+    assert(sheet.getRow(1).getCell(10).getStringCellValue == "-")
+    assert(sheet.getRow(1).getCell(11) == null)
   }
 
   "createHeadingRow" should "create heading row with translated column names or translation keys for hakijat raportti" in {
