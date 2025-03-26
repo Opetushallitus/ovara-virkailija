@@ -1560,7 +1560,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         ),
         "1.2.246.562.13.00000000000000002677",
         Some("julkaistu"),
-        Some("koulutus_309902#7")
+        Some("koulutus_309902#7"),
+        Some("ARTS20502")
       )
     )
 
@@ -1576,7 +1577,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(0).getCell(2).getStringCellValue == "raportti.koulutusOid")
     assert(sheet.getRow(0).getCell(3).getStringCellValue == "raportti.tila")
     assert(sheet.getRow(0).getCell(4).getStringCellValue == "raportti.koulutuskoodi")
-    assert(sheet.getRow(0).getCell(5) == null)
+    assert(sheet.getRow(0).getCell(5).getStringCellValue == "raportti.ulkoinenTunniste")
+    assert(sheet.getRow(0).getCell(6) == null)
     assert(
       sheet.getRow(1).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
     )
@@ -1584,7 +1586,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(1).getCell(2).getStringCellValue == "1.2.246.562.13.00000000000000002677")
     assert(sheet.getRow(1).getCell(3).getStringCellValue == "julkaistu")
     assert(sheet.getRow(1).getCell(4).getStringCellValue == "309902")
-    assert(sheet.getRow(1).getCell(5) == null)
+    assert(sheet.getRow(1).getCell(5).getStringCellValue == "ARTS20502")
+    assert(sheet.getRow(1).getCell(6) == null)
   }
 
   "createHeadingRow" should "create heading row with translated column names or translation keys for hakijat raportti" in {
