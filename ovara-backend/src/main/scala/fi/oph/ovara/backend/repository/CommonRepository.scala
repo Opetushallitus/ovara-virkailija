@@ -185,18 +185,6 @@ class CommonRepository extends Extractors {
           #$koulutusala2QueryStr""".as[Koodi]
   }
 
-  def selectDistinctOrganisaatiot(
-      organisaatiot: List[String]
-  ): SqlStreamingAction[Vector[Organisaatio], Organisaatio, Effect] = {
-    val organisaatiotStr = organisaatiot.map(s => s"'$s'").mkString(",")
-    val optionalOrganisaatiotClause =
-      if (organisaatiotStr.isEmpty) "" else s"where org.organisaatio_oid in ($organisaatiotStr)"
-    sql"""SELECT *
-          FROM (SELECT organisaatio_oid, organisaatio_nimi, organisaatiotyypit
-                FROM pub.pub_dim_organisaatio o) AS org
-                #$optionalOrganisaatiotClause""".as[Organisaatio]
-  }
-
   def selectDistinctKoulutustoimijat(
       organisaatiot: List[String]
   ): SqlStreamingAction[Vector[Organisaatio], Organisaatio, Effect] = {
@@ -206,7 +194,7 @@ class CommonRepository extends Extractors {
     sql"""SELECT *
           FROM (SELECT organisaatio_oid, organisaatio_nimi, organisaatiotyypit
                 FROM pub.pub_dim_organisaatio o
-          WHERE organisaatiotyypit ?? '01') AS org
+          WHERE organisaatiotyypit ?? '01' AND tila='AKTIIVINEN') AS org
           #$optionalOrganisaatiotClause""".as[Organisaatio]
   }
 
@@ -247,6 +235,7 @@ class CommonRepository extends Extractors {
           FROM pub.pub_dim_koulutustoimija_ja_toimipisteet,
           LATERAL jsonb_array_elements_text(parent_oids) AS parent_oid
           WHERE parent_oid IN (#$organisaatiotStr)
+          AND tila='AKTIIVINEN'
           """.as[OrganisaatioHierarkia]
   }
 
@@ -258,6 +247,7 @@ class CommonRepository extends Extractors {
           FROM pub.pub_dim_oppilaitos_ja_toimipisteet,
           LATERAL jsonb_array_elements_text(parent_oids) AS parent_oid
           WHERE parent_oid IN (#$organisaatiotStr)
+          AND tila='AKTIIVINEN'
           """.as[OrganisaatioHierarkia]
   }
 
@@ -269,6 +259,7 @@ class CommonRepository extends Extractors {
           FROM pub.pub_dim_toimipiste_ja_toimipisteet,
           LATERAL jsonb_array_elements_text(parent_oids) AS parent_oid
           WHERE parent_oid IN (#$organisaatiotStr)
+          AND tila='AKTIIVINEN'
           """.as[OrganisaatioHierarkia]
   }
 }

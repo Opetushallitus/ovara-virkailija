@@ -1286,7 +1286,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         )
       )
 
-    assert(OrganisaatioUtils.filterExistingOrgs(hierarkia) == result)
+    assert(OrganisaatioUtils.filterActiveOrgs(hierarkia) == result)
   }
 
   it should "remove POISTETTU alitoimipiste from deeper in hierarkia" in {
@@ -1475,6 +1475,6 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
         )
       )
 
-    assert(OrganisaatioUtils.filterExistingOrgs(hierarkia) == result)
+    assert(OrganisaatioUtils.filterActiveOrgs(hierarkia) == result)
   }
 }

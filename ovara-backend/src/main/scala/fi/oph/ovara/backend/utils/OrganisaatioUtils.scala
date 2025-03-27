@@ -67,19 +67,19 @@ object OrganisaatioUtils {
     }
   }
 
-  def filterExistingOrgs(hierarkia: OrganisaatioHierarkia): Option[OrganisaatioHierarkia] = {
+  def filterActiveOrgs(hierarkia: OrganisaatioHierarkia): Option[OrganisaatioHierarkia] = {
     val children = hierarkia.children
 
-    if (hierarkia.tila == "POISTETTU") {
+    if (hierarkia.tila != "AKTIIVINEN") {
       None
     } else {
-      val filteredChildHierarkiat = children.flatMap(child => filterExistingOrgs(child))
+      val filteredChildHierarkiat = children.flatMap(child => filterActiveOrgs(child))
       Some(hierarkia.copy(children = filteredChildHierarkiat))
     }
   }
 
-  def filterExistingOrgs(hierarkiat: List[OrganisaatioHierarkia]): List[OrganisaatioHierarkia] = {
-    hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+  def filterActiveOrgs(hierarkiat: List[OrganisaatioHierarkia]): List[OrganisaatioHierarkia] = {
+    hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterActiveOrgs(hierarkia))
   }
 
   def addKoulutustoimijaParentToHierarkiaDescendants(
