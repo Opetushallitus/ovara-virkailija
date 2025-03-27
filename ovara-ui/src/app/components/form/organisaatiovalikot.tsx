@@ -26,9 +26,8 @@ const getOrganisaatioOptions = (
     return orgs.map((org) => {
       return {
         value: org.organisaatio_oid,
-        // TODO: Jos org tila jätetään labeliin, täytyy lisätä käännös
         label: org.organisaatio_nimi[locale as LanguageCode]
-          ? `${org.organisaatio_nimi[locale as LanguageCode]} (${org.tila})`
+          ? `${org.organisaatio_nimi[locale as LanguageCode]}`
           : '',
       };
     });
