@@ -1571,7 +1571,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
         "1.2.246.562.17.00000000000000007967",
         Some("arkistoitu"),
         None,
-        Map(En -> "Spring 2022", Fi -> "Kevät 2022", Sv -> "Vår 2022")
+        Map(En -> "Spring 2022", Fi -> "Kevät 2022", Sv -> "Vår 2022"),
+        Map(
+          En -> "Screenwriting, Master of Arts (2 yrs)",
+          Fi -> "Elokuva- ja tv-käsikirjoitus, taiteen maisteri (2 v) ",
+          Sv -> "Film- och tv-manuskript, konstmagister (2 år)"
+        )
       )
     )
 
@@ -1594,7 +1599,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(0).getCell(9).getStringCellValue == "Tot.tila SV")
     assert(sheet.getRow(0).getCell(10).getStringCellValue == "raportti.toteutuksenUlkoinenTunniste")
     assert(sheet.getRow(0).getCell(11).getStringCellValue == "raportti.koulutuksenAlkamiskausiJaVuosi")
-    assert(sheet.getRow(0).getCell(12) == null)
+    assert(sheet.getRow(0).getCell(12).getStringCellValue == "Hakukohde SV")
+    assert(sheet.getRow(0).getCell(13) == null)
     assert(
       sheet.getRow(1).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
     )
@@ -1604,12 +1610,18 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(1).getCell(4).getStringCellValue == "309902")
     assert(sheet.getRow(1).getCell(5).getStringCellValue == "ARTS20502")
     assert(sheet.getRow(1).getCell(6).getStringCellValue == "120 studiepoäng")
-    assert(sheet.getRow(1).getCell(7).getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år) -toteutus")
+    assert(
+      sheet
+        .getRow(1)
+        .getCell(7)
+        .getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år) -toteutus"
+    )
     assert(sheet.getRow(1).getCell(8).getStringCellValue == "1.2.246.562.17.00000000000000007967")
     assert(sheet.getRow(1).getCell(9).getStringCellValue == "arkistoitu")
     assert(sheet.getRow(1).getCell(10).getStringCellValue == "-")
     assert(sheet.getRow(1).getCell(11).getStringCellValue == "Vår 2022")
-    assert(sheet.getRow(1).getCell(12) == null)
+    assert(sheet.getRow(1).getCell(12).getStringCellValue == "Film- och tv-manuskript, konstmagister (2 år)")
+    assert(sheet.getRow(1).getCell(13) == null)
   }
 
   "createHeadingRow" should "create heading row with translated column names or translation keys for hakijat raportti" in {
