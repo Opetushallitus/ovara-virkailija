@@ -110,7 +110,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       WHERE #$filters
       GROUP BY h.hakukohde_nimi, h.organisaatio_nimi""".as[KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella]
 
-    LOG.info(s"selectHakukohteittainWithParams: ${query.statements.head}")
+    LOG.debug(s"selectHakukohteittainWithParams: ${query.statements.head}")
     query
   }
 
@@ -179,7 +179,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       JOIN pub.pub_dim_haku ha ON b.haku_oid = ha.haku_oid
       GROUP BY 1,2""".as[KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella]
 
-    LOG.info(s"selectHauittainWithParams: ${query.statements.head}")
+    LOG.debug(s"selectHauittainWithParams: ${query.statements.head}")
     query
   }
 
@@ -247,7 +247,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       JOIN pub.pub_dim_hakukohde b ON a.hakukohde_oid = b.hakukohde_oid
       GROUP BY 1,2""".as[KkHakeneetHyvaksytytVastaanottaneetToimipisteittain]
 
-    LOG.info(s"selectToimipisteittainWithParams: ${query.statements.head}")
+    LOG.debug(s"selectToimipisteittainWithParams: ${query.statements.head}")
     query
   }
 
@@ -319,7 +319,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       JOIN pub.pub_dim_hakukohde b on a.hakukohde_oid = b.hakukohde_oid
       GROUP BY 1""".as[KkHakeneetHyvaksytytVastaanottaneetResult]
 
-    LOG.info(s"selectOrganisaatioittainWithParams: ${query.statements.head}")
+    LOG.debug(s"selectOrganisaatioittainWithParams: ${query.statements.head}")
     query
   }
 
@@ -388,7 +388,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       JOIN pub.pub_dim_koodisto_okmohjauksenala o ON a.okm_ohjauksen_ala = o.koodiarvo
       GROUP BY 1""".as[KkHakeneetHyvaksytytVastaanottaneetResult]
 
-    LOG.info(s"selectOkmOhjauksenAloittainWithParams: ${query.statements.head}")
+    LOG.debug(s"selectOkmOhjauksenAloittainWithParams: ${query.statements.head}")
     query
   }
 
@@ -457,7 +457,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       JOIN pub.pub_dim_koodisto_maa_2 c ON a.kansalaisuus = c.koodiarvo
       GROUP BY 1""".as[KkHakeneetHyvaksytytVastaanottaneetResult]
 
-    LOG.info(s"selectKansalaisuuksittainWithParams: ${query.statements.head}")
+    LOG.debug(s"selectKansalaisuuksittainWithParams: ${query.statements.head}")
     query
   }
 
@@ -526,7 +526,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       JOIN pub.pub_dim_hakukohderyhma hr ON hh.hakukohderyhma_oid = hr.hakukohderyhma_oid
       GROUP BY 1""".as[KkHakeneetHyvaksytytVastaanottaneetResult]
 
-    LOG.info(s"selectHakukohderyhmittainWithParams: ${query.statements.head}")
+    LOG.debug(s"selectHakukohderyhmittainWithParams: ${query.statements.head}")
     query
   }
 
@@ -579,7 +579,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       WHERE #$filters
       """.as[Int].head
 
-    LOG.info(s"selectHakijatYhteensaWithParams: ${query.statements.head}")
+    LOG.debug(s"selectHakijatYhteensaWithParams: ${query.statements.head}")
     query
   }
 

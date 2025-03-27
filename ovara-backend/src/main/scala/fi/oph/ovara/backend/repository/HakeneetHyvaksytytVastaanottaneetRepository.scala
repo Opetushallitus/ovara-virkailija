@@ -98,7 +98,7 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     ON t.hakukohde_oid = h.hakukohde_oid
     WHERE #$filters
     GROUP BY h.hakukohde_nimi, h.organisaatio_nimi""".as[HakeneetHyvaksytytVastaanottaneetHakukohteittain]
-    LOG.info(s"selectHakukohteittainWithParams: ${query.statements.head}")
+    LOG.debug(s"selectHakukohteittainWithParams: ${query.statements.head}")
     query
   }
 
@@ -138,7 +138,7 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       JOIN pub.pub_dim_henkilo he on ht.henkilo_hakemus_id = he.henkilo_hakemus_id
     WHERE #$filters
     """.as[Int].head
-    LOG.info(s"selectHakijatYhteensaWithParams: ${query.statements.head}")
+    LOG.debug(s"selectHakijatYhteensaWithParams: ${query.statements.head}")
     query
   }
 
@@ -206,7 +206,7 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       JOIN pub.pub_dim_hakukohde b on a.hakukohde_oid = b.hakukohde_oid
       JOIN pub.pub_dim_koodisto_koulutusalataso1 ka ON a.koulutusalataso_1 = ka.koodiarvo
       GROUP BY 1""".as[HakeneetHyvaksytytVastaanottaneetResult]
-    LOG.info(s"selectKoulutusaloittainWithParams: ${query.statements.head}")
+    LOG.debug(s"selectKoulutusaloittainWithParams: ${query.statements.head}")
     query
   }
 
@@ -275,7 +275,7 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
 	    ) a
       JOIN pub.pub_dim_hakukohde b on a.hakukohde_oid = b.hakukohde_oid
       GROUP BY 1""".as[HakeneetHyvaksytytVastaanottaneetResult]
-    LOG.info(s"selectOrganisaatioittainWithParams: ${query.statements.head}")
+    LOG.debug(s"selectOrganisaatioittainWithParams: ${query.statements.head}")
     query
   }
 
@@ -341,7 +341,7 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
 	    ) a
       JOIN pub.pub_dim_hakukohde b ON a.hakukohde_oid = b.hakukohde_oid
       GROUP BY 1,2""".as[HakeneetHyvaksytytVastaanottaneetToimipisteittain]
-    LOG.info(s"selectToimipisteittainWithParams: ${query.statements.head}")
+    LOG.debug(s"selectToimipisteittainWithParams: ${query.statements.head}")
     query
   }
 
