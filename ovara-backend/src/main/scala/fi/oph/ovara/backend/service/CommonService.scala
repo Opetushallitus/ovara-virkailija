@@ -117,7 +117,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     val user             = userService.getEnrichedUserDetails
     val kayttooikeusOids = AuthoritiesUtil.getKayttooikeusOids(user.authorities)
     val hakukohderyhmaOids =
-      if (AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOids))
+      if (hasOPHPaakayttajaRights(kayttooikeusOids))
         List() // ei rajata listaa pääkäyttäjälle
       else
         kayttooikeusOids
@@ -149,7 +149,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       koulutustoimijahierarkia concat oppilaitoshierarkia concat toimipistehierarkia
     }
 
-    kayttoOikeushierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+    kayttoOikeushierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterActiveOrgs(hierarkia))
   }
 
   def getToimipistehierarkiat(toimipisteet: List[String]): List[OrganisaatioHierarkia] = {
@@ -163,8 +163,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
         )
         .toList
 
-      hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
-    }
+    hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterActiveOrgs(hierarkia))
   }
 
   def getOppilaitoshierarkiat(oppilaitokset: List[String]): List[OrganisaatioHierarkia] = {
@@ -178,8 +177,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
         )
         .toList
 
-      hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
-    }
+    hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterActiveOrgs(hierarkia))
   }
 
   def getKoulutustoimijahierarkia(koulutustoimijat: List[String]): List[OrganisaatioHierarkia] = {
@@ -193,8 +191,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
         )
         .toList
 
-      hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
-    }
+    hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterActiveOrgs(hierarkia))
   }
 
   def getDistinctKoulutustoimijat(organisaatioOids: List[String]): List[Organisaatio] = {
@@ -248,7 +245,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
         (hierarkiat, "koulutustoimijaraportti")
       }
 
-    val hierarkiatWithExistingOrgs = OrganisaatioUtils.filterExistingOrgs(hierarkiat)
+    val hierarkiatWithExistingOrgs = OrganisaatioUtils.filterActiveOrgs(hierarkiat)
 
     val selectedOrgsDescendantOids =
       hierarkiatWithExistingOrgs.flatMap(hierarkia => OrganisaatioUtils.getDescendantOids(hierarkia)).distinct
@@ -271,7 +268,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       kayttooikeusOrganisaatioOids: List[String],
       oppilaitosOids: List[String],
       toimipisteOids: List[String],
-      koulutustoimijaOid: Option[String] = None,
+      koulutustoimijaOid: Option[String] = None
   ): List[String] = {
     val hierarkiat =
       if (toimipisteOids.nonEmpty) {
@@ -284,7 +281,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
         List()
       }
 
-    val hierarkiatWithExistingOrgs = OrganisaatioUtils.filterExistingOrgs(hierarkiat)
+    val hierarkiatWithExistingOrgs = OrganisaatioUtils.filterActiveOrgs(hierarkiat)
 
     val selectedOrgsDescendantOids =
       hierarkiatWithExistingOrgs.flatMap(hierarkia => OrganisaatioUtils.getDescendantOids(hierarkia)).distinct

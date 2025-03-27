@@ -122,7 +122,7 @@ class CommonRepository extends Extractors {
     } else {
       s"WHERE km.maakunta_koodiarvo in ($maakunnatStr)"
     }
-    sql"""SELECT k.koodiarvo, k.koodinimi
+    sql"""SELECT DISTINCT k.koodiarvo, k.koodinimi
           FROM pub.pub_dim_koodisto_kunta k
           JOIN pub.pub_dim_koodisto_kunta_maakunta km
           ON k.koodiarvo = km.kunta_koodiarvo
@@ -157,7 +157,7 @@ class CommonRepository extends Extractors {
   }
 
   def selectDistinctKoulutusalat1(): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
-    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso1 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso1_nimi as koodinimi
+    sql"""SELECT k.kansallinenkoulutusluokitus2016koulutusalataso1 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso1_nimi as koodinimi
           FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k""".as[Koodi]
   }
 
@@ -168,7 +168,7 @@ class CommonRepository extends Extractors {
     } else {
       s"WHERE k.kansallinenkoulutusluokitus2016koulutusalataso1 in ($koulutusala1Str)"
     }
-    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso2 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso2_nimi as koodinimi
+    sql"""SELECT k.kansallinenkoulutusluokitus2016koulutusalataso2 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso2_nimi as koodinimi
           FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
             #$koulutusala1QueryStr""".as[Koodi]
   }
@@ -180,7 +180,7 @@ class CommonRepository extends Extractors {
     } else {
       s"WHERE k.kansallinenkoulutusluokitus2016koulutusalataso2 in ($koulutusala2Str)"
     }
-    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso3 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso3_nimi as koodinimi
+    sql"""SELECT k.kansallinenkoulutusluokitus2016koulutusalataso3 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso3_nimi as koodinimi
           FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
           #$koulutusala2QueryStr""".as[Koodi]
   }
@@ -211,7 +211,7 @@ class CommonRepository extends Extractors {
     sql"""SELECT *
           FROM (SELECT organisaatio_oid, organisaatio_nimi, organisaatiotyypit
                 FROM pub.pub_dim_organisaatio o
-          WHERE organisaatiotyypit ?? '01') AS org
+          WHERE organisaatiotyypit ?? '01' AND tila='AKTIIVINEN') AS org
           #$optionalOrganisaatiotClause""".as[Organisaatio]
   }
 
@@ -252,6 +252,7 @@ class CommonRepository extends Extractors {
           FROM pub.pub_dim_koulutustoimija_ja_toimipisteet,
           LATERAL jsonb_array_elements_text(parent_oids) AS parent_oid
           WHERE parent_oid IN (#$organisaatiotStr)
+          AND tila='AKTIIVINEN'
           """.as[OrganisaatioHierarkia]
   }
 
@@ -263,6 +264,7 @@ class CommonRepository extends Extractors {
           FROM pub.pub_dim_oppilaitos_ja_toimipisteet,
           LATERAL jsonb_array_elements_text(parent_oids) AS parent_oid
           WHERE parent_oid IN (#$organisaatiotStr)
+          AND tila='AKTIIVINEN'
           """.as[OrganisaatioHierarkia]
   }
 
@@ -274,6 +276,7 @@ class CommonRepository extends Extractors {
           FROM pub.pub_dim_toimipiste_ja_toimipisteet,
           LATERAL jsonb_array_elements_text(parent_oids) AS parent_oid
           WHERE parent_oid IN (#$organisaatiotStr)
+          AND tila='AKTIIVINEN'
           """.as[OrganisaatioHierarkia]
   }
 }
