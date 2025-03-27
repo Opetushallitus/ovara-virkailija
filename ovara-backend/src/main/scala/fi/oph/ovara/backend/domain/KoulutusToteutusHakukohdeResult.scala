@@ -41,5 +41,6 @@ case class KorkeakouluKoulutusToteutusHakukohdeResult(
     toteutusOid: String,
     toteutuksenTila: Option[String],
     toteutuksenUlkoinenTunniste: Option[String],
-    koulutuksenAlkamiskausiJaVuosi: Kielistetty
+    koulutuksenAlkamiskausiJaVuosi: Kielistetty,
+    hakukohteenNimi: Kielistetty
 )
