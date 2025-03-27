@@ -34,7 +34,8 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
                  t.koulutuksen_alkamiskausi_koodiuri,
                  t.koulutuksen_alkamisvuosi,
                  kausi.koodinimi,
-                 hk.hakukohde_nimi
+                 hk.hakukohde_nimi,
+                 hk.hakukohde_oid
           FROM pub.pub_dim_haku h
           JOIN pub.pub_dim_hakukohde hk
           ON h.haku_oid = hk.haku_oid

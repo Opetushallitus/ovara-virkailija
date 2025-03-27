@@ -133,7 +133,8 @@ trait Extractors extends GenericOvaraJsonFormats {
         toteutuksenUlkoinenTunniste = r.nextStringOption(),
         koulutuksenAlkamiskausiJaVuosi =
           extractKoulutuksenAlkamiskausiJaVuosi(r.nextStringOption(), r.nextStringOption(), r.nextStringOption()),
-        hakukohteenNimi = extractKielistetty(r.nextStringOption())
+        hakukohteenNimi = extractKielistetty(r.nextStringOption()),
+        hakukohdeOid = r.nextString()
       )
     })
   }
