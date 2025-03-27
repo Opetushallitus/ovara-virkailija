@@ -1,5 +1,7 @@
 package fi.oph.ovara.backend.utils
 
+import java.time.format.DateTimeFormatter
+
 object Constants {
   val HAKUTOIVEET_TITLES: List[String] =
     List(
@@ -63,4 +65,6 @@ object Constants {
   val TOISEN_ASTEEN_RAPORTTI = "toinen aste"
 
   val POSTIOSOITEFIELDS: List[String] = List("lahiosoite", "postinumero", "postitoimipaikka")
+
+  val ISO_LOCAL_DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")
 }

@@ -505,6 +505,8 @@ object ExcelWriter {
       asiointikieli: String,
       translations: Map[String, String]
   ): Unit = {
+    val dateFormatter = DateTimeFormatter.ofPattern("d.M.yyyy")
+
     value match {
       case kielistetty: Kielistetty =>
         val kielistettyValue = kielistetty.get(Kieli.withName(asiointikieli)) match {
@@ -518,8 +520,17 @@ object ExcelWriter {
         }
         cell.setCellValue(kielistettyValue)
       case Some(d: LocalDate) =>
-        val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-        cell.setCellValue(d.format(formatter))
+        cell.setCellValue(d.format(dateFormatter))
+      case Some(hakuaika: Hakuaika) =>
+        def getDateStr(localDate: Option[LocalDate]) = {
+          localDate match {
+            case Some(localDate: LocalDate) => localDate.format(dateFormatter)
+            case None                       => ""
+          }
+        }
+        val alkaaStr   = getDateStr(hakuaika.alkaa)
+        val paattyyStr = getDateStr(hakuaika.paattyy)
+        cell.setCellValue(s"$alkaaStr - $paattyyStr")
       case s: String =>
         cell.setCellValue(s)
       case Some(s: String)
