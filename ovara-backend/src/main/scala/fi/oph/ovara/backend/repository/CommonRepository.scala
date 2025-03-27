@@ -231,8 +231,8 @@ class CommonRepository extends Extractors {
             ON or2.parent_oid = x1.child_oid
           ) SELECT parent_oid, child_oid, organisaatio_nimi, organisaatiotyypit
             FROM x
-            inner join pub.pub_dim_organisaatio org
-            on org.organisaatio_oid = x.child_oid""".as[OrganisaatioParentChild]
+            INNER JOIN pub.pub_dim_organisaatio org
+            ON org.organisaatio_oid = x.child_oid""".as[OrganisaatioParentChild]
   }
 
   val selectOrganisaatioHierarkiaSql =
