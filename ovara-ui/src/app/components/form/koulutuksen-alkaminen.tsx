@@ -41,6 +41,7 @@ export const KoulutuksenAlkaminen = () => {
         changeMultiComboBoxSelection(e, value, setSelectedAlkamiskaudet)
       }
       required={true}
+      sortOptions={false}
     />
   );
 };

@@ -157,7 +157,7 @@ class CommonRepository extends Extractors {
   }
 
   def selectDistinctKoulutusalat1(): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
-    sql"""SELECT k.kansallinenkoulutusluokitus2016koulutusalataso1 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso1_nimi as koodinimi
+    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso1 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso1_nimi as koodinimi
           FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k""".as[Koodi]
   }
 
@@ -168,7 +168,7 @@ class CommonRepository extends Extractors {
     } else {
       s"WHERE k.kansallinenkoulutusluokitus2016koulutusalataso1 in ($koulutusala1Str)"
     }
-    sql"""SELECT k.kansallinenkoulutusluokitus2016koulutusalataso2 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso2_nimi as koodinimi
+    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso2 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso2_nimi as koodinimi
           FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
             #$koulutusala1QueryStr""".as[Koodi]
   }
@@ -180,7 +180,7 @@ class CommonRepository extends Extractors {
     } else {
       s"WHERE k.kansallinenkoulutusluokitus2016koulutusalataso2 in ($koulutusala2Str)"
     }
-    sql"""SELECT k.kansallinenkoulutusluokitus2016koulutusalataso3 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso3_nimi as koodinimi
+    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso3 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso3_nimi as koodinimi
           FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
           #$koulutusala2QueryStr""".as[Koodi]
   }
