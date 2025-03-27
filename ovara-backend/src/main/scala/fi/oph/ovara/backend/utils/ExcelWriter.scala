@@ -954,9 +954,12 @@ object ExcelWriter {
 
     val fieldNames =
       if (naytaHakutoiveet)
-        List(otsikko) ++ KK_HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES ++ KK_HAKUTOIVEET_TITLES
+        List(otsikko) ++ KK_HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES
+          ++ (if (tulostustapa != "kansalaisuuksittain") KK_HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_ALOITUSPAIKAT_TITLES else List())
+          ++ KK_HAKUTOIVEET_TITLES
       else
         List(otsikko) ++ KK_HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES
+          ++ (if (tulostustapa != "kansalaisuuksittain") KK_HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_ALOITUSPAIKAT_TITLES else List())
     val fieldNamesWithIndex = fieldNames.zipWithIndex
 
     currentRowIndex =
@@ -975,9 +978,10 @@ object ExcelWriter {
         item.poissa,
         item.ilmYht,
         item.maksuvelvollisia,
-        item.valinnanAloituspaikat,
-        item.aloituspaikat
-      ) ++ (if (naytaHakutoiveet) {
+      ) ++ (if (tulostustapa != "kansalaisuuksittain")
+        List(item.valinnanAloituspaikat, item.aloituspaikat)
+      else List())
+        ++ (if (naytaHakutoiveet) {
         List(
           item.toive1,
           item.toive2,
@@ -996,7 +1000,7 @@ object ExcelWriter {
 
     if(!tulostustapa.equals("hakukohderyhmittain")) {
       // hakukohderyhmittäin tulostaessa ei lasketa rivien summaa
-        createSummaryRow(translations, data, naytaHakutoiveet, sheet, currentRowIndex, workbook)
+        createSummaryRow(translations, data, naytaHakutoiveet, sheet, currentRowIndex, workbook, tulostustapa)
         currentRowIndex += 1
       }
 
@@ -1031,7 +1035,12 @@ object ExcelWriter {
     }
   }
 
-  private def createSummaryRow(translations: Map[String, String], data: List[KkHakeneetHyvaksytytVastaanottaneetResult], naytaHakutoiveet: Boolean, sheet: XSSFSheet, currentRowIndex: Int, workbook: XSSFWorkbook): Unit = {
+  private def createSummaryRow(translations: Map[String, String],
+                               data: List[KkHakeneetHyvaksytytVastaanottaneetResult],
+                               naytaHakutoiveet: Boolean, sheet: XSSFSheet,
+                               currentRowIndex: Int,
+                               workbook: XSSFWorkbook,
+                               tulostustapa: String): Unit = {
     // yhteensä-rivi
     val summaryRow = sheet.createRow(currentRowIndex)
     val summaryData = List(
@@ -1045,9 +1054,10 @@ object ExcelWriter {
       data.map(_.poissa).sum,
       data.map(_.ilmYht).sum,
       data.map(_.maksuvelvollisia).sum,
-      data.map(_.valinnanAloituspaikat).sum,
-      data.map(_.aloituspaikat).sum
-    ) ++ (if (naytaHakutoiveet) {
+    ) ++ (if (tulostustapa != "kansalaisuuksittain")
+      List(data.map(_.valinnanAloituspaikat).sum, data.map(_.aloituspaikat).sum)
+    else List())
+      ++ (if (naytaHakutoiveet) {
       List(
         data.map(_.toive1).sum,
         data.map(_.toive2).sum,

@@ -4227,7 +4227,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(hakijatSummaryRow.getCell(9).getNumericCellValue == 2)
   }
 
-  "writeKkHakeneetHyvaksytytVastaanottaneetRaportti" should "return excel without hautoiveet columns if naytaHakutoiveet is false" in {
+  "writeKkHakeneetHyvaksytytVastaanottaneetRaportti" should "return excel without hakutoiveet columns if naytaHakutoiveet is false" in {
     val data = List(
       KkHakeneetHyvaksytytVastaanottaneetResult(
         otsikko = Map(
@@ -4367,7 +4367,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(hakijatSummaryRow.getCell(9).getNumericCellValue == 2)
   }
 
-  "writeKkHakeneetHyvaksytytVastaanottaneetRaportti" should "return excel with correct heading and first column and provided data rows" in {
+  "writeKkHakeneetHyvaksytytVastaanottaneetRaportti" should "return excel without aloituspaikat for kansalaisuuksittain" in {
     val data = List(
       KkHakeneetHyvaksytytVastaanottaneetResult(
         otsikko = Map(En -> "Afghanistan", Fi -> "Afganistan", Sv -> "Afghanistan"),
@@ -4477,15 +4477,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(headingRow.getCell(7).getStringCellValue == "Poissa SV")
     assert(headingRow.getCell(8).getStringCellValue == "IlmYht SV")
     assert(headingRow.getCell(9).getStringCellValue == "Maksuvelvollisia SV")
-    assert(headingRow.getCell(10).getStringCellValue == "Valinnan aloituspaikat SV")
-    assert(headingRow.getCell(11).getStringCellValue == "Aloituspaikat SV")
-    assert(headingRow.getCell(12).getStringCellValue == "Toive1 SV")
-    assert(headingRow.getCell(13).getStringCellValue == "Toive2 SV")
-    assert(headingRow.getCell(14).getStringCellValue == "Toive3 SV")
-    assert(headingRow.getCell(15).getStringCellValue == "Toive4 SV")
-    assert(headingRow.getCell(16).getStringCellValue == "Toive5 SV")
-    assert(headingRow.getCell(17).getStringCellValue == "Toive6 SV")
-    assert(headingRow.getCell(18) == null)
+    assert(headingRow.getCell(10).getStringCellValue == "Toive1 SV")
+    assert(headingRow.getCell(11).getStringCellValue == "Toive2 SV")
+    assert(headingRow.getCell(12).getStringCellValue == "Toive3 SV")
+    assert(headingRow.getCell(13).getStringCellValue == "Toive4 SV")
+    assert(headingRow.getCell(14).getStringCellValue == "Toive5 SV")
+    assert(headingRow.getCell(15).getStringCellValue == "Toive6 SV")
+    assert(headingRow.getCell(16) == null)
 
     // data rows
     val dataRow1 = sheet.getRow(1)
@@ -4499,15 +4497,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(dataRow1.getCell(7).getNumericCellValue == 0)
     assert(dataRow1.getCell(8).getNumericCellValue == 0)
     assert(dataRow1.getCell(9).getNumericCellValue == 0)
-    assert(dataRow1.getCell(10).getNumericCellValue == 58)
-    assert(dataRow1.getCell(11).getNumericCellValue == 58)
-    assert(dataRow1.getCell(12).getNumericCellValue == 0)
+    assert(dataRow1.getCell(10).getNumericCellValue == 0)
+    assert(dataRow1.getCell(11).getNumericCellValue == 0)
+    assert(dataRow1.getCell(12).getNumericCellValue == 2)
     assert(dataRow1.getCell(13).getNumericCellValue == 0)
-    assert(dataRow1.getCell(14).getNumericCellValue == 2)
+    assert(dataRow1.getCell(14).getNumericCellValue == 0)
     assert(dataRow1.getCell(15).getNumericCellValue == 0)
-    assert(dataRow1.getCell(16).getNumericCellValue == 0)
-    assert(dataRow1.getCell(17).getNumericCellValue == 0)
-    assert(dataRow1.getCell(18) == null)
+    assert(dataRow1.getCell(16) == null)
 
     val dataRow2 = sheet.getRow(2)
     assert(dataRow2.getCell(0).getStringCellValue == "Bulgarien")
@@ -4520,15 +4516,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(dataRow2.getCell(7).getNumericCellValue == 0)
     assert(dataRow2.getCell(8).getNumericCellValue == 0)
     assert(dataRow2.getCell(9).getNumericCellValue == 0)
-    assert(dataRow2.getCell(10).getNumericCellValue == 42)
-    assert(dataRow2.getCell(11).getNumericCellValue == 42)
-    assert(dataRow2.getCell(12).getNumericCellValue == 0)
-    assert(dataRow2.getCell(13).getNumericCellValue == 1)
-    assert(dataRow2.getCell(14).getNumericCellValue == 1)
+    assert(dataRow2.getCell(10).getNumericCellValue == 0)
+    assert(dataRow2.getCell(11).getNumericCellValue == 1)
+    assert(dataRow2.getCell(12).getNumericCellValue == 1)
+    assert(dataRow2.getCell(13).getNumericCellValue == 0)
+    assert(dataRow2.getCell(14).getNumericCellValue == 0)
     assert(dataRow2.getCell(15).getNumericCellValue == 0)
-    assert(dataRow2.getCell(16).getNumericCellValue == 0)
-    assert(dataRow2.getCell(17).getNumericCellValue == 0)
-    assert(dataRow2.getCell(18) == null)
+    assert(dataRow2.getCell(16) == null)
 
     val dataRow3 = sheet.getRow(3)
     assert(dataRow3.getCell(0).getStringCellValue == "Kina")
@@ -4541,15 +4535,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(dataRow3.getCell(7).getNumericCellValue == 0)
     assert(dataRow3.getCell(8).getNumericCellValue == 0)
     assert(dataRow3.getCell(9).getNumericCellValue == 0)
-    assert(dataRow3.getCell(10).getNumericCellValue == 79)
-    assert(dataRow3.getCell(11).getNumericCellValue == 79)
-    assert(dataRow3.getCell(12).getNumericCellValue == 2)
-    assert(dataRow3.getCell(13).getNumericCellValue == 1)
+    assert(dataRow3.getCell(10).getNumericCellValue == 2)
+    assert(dataRow3.getCell(11).getNumericCellValue == 1)
+    assert(dataRow3.getCell(12).getNumericCellValue == 0)
+    assert(dataRow3.getCell(13).getNumericCellValue == 0)
     assert(dataRow3.getCell(14).getNumericCellValue == 0)
-    assert(dataRow3.getCell(15).getNumericCellValue == 0)
-    assert(dataRow3.getCell(16).getNumericCellValue == 0)
-    assert(dataRow3.getCell(17).getNumericCellValue == 1)
-    assert(dataRow3.getCell(18) == null)
+    assert(dataRow3.getCell(15).getNumericCellValue == 1)
+    assert(dataRow3.getCell(16) == null)
 
     val dataRow4 = sheet.getRow(4)
     assert(dataRow4.getCell(0).getStringCellValue == "Finland")
@@ -4562,15 +4554,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(dataRow4.getCell(7).getNumericCellValue == 0)
     assert(dataRow4.getCell(8).getNumericCellValue == 0)
     assert(dataRow4.getCell(9).getNumericCellValue == 0)
-    assert(dataRow4.getCell(10).getNumericCellValue == 252)
-    assert(dataRow4.getCell(11).getNumericCellValue == 252)
-    assert(dataRow4.getCell(12).getNumericCellValue == 1287)
-    assert(dataRow4.getCell(13).getNumericCellValue == 694)
-    assert(dataRow4.getCell(14).getNumericCellValue == 347)
-    assert(dataRow4.getCell(15).getNumericCellValue == 209)
-    assert(dataRow4.getCell(16).getNumericCellValue == 122)
-    assert(dataRow4.getCell(17).getNumericCellValue == 92)
-    assert(dataRow4.getCell(18) == null)
+    assert(dataRow4.getCell(10).getNumericCellValue == 1287)
+    assert(dataRow4.getCell(11).getNumericCellValue == 694)
+    assert(dataRow4.getCell(12).getNumericCellValue == 347)
+    assert(dataRow4.getCell(13).getNumericCellValue == 209)
+    assert(dataRow4.getCell(14).getNumericCellValue == 122)
+    assert(dataRow4.getCell(15).getNumericCellValue == 92)
+    assert(dataRow4.getCell(16) == null)
 
     // summary rows
     val summaryRow = sheet.getRow(5)
@@ -4584,15 +4574,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(summaryRow.getCell(7).getNumericCellValue == 0)
     assert(summaryRow.getCell(8).getNumericCellValue == 0)
     assert(summaryRow.getCell(9).getNumericCellValue == 0)
-    assert(summaryRow.getCell(10).getNumericCellValue == 431)
-    assert(summaryRow.getCell(11).getNumericCellValue == 431)
-    assert(summaryRow.getCell(12).getNumericCellValue == 1289)
-    assert(summaryRow.getCell(13).getNumericCellValue == 696)
-    assert(summaryRow.getCell(14).getNumericCellValue == 350)
-    assert(summaryRow.getCell(15).getNumericCellValue == 209)
-    assert(summaryRow.getCell(16).getNumericCellValue == 122)
-    assert(summaryRow.getCell(17).getNumericCellValue == 93)
-    assert(summaryRow.getCell(18) == null)
+    assert(summaryRow.getCell(10).getNumericCellValue == 1289)
+    assert(summaryRow.getCell(11).getNumericCellValue == 696)
+    assert(summaryRow.getCell(12).getNumericCellValue == 350)
+    assert(summaryRow.getCell(13).getNumericCellValue == 209)
+    assert(summaryRow.getCell(14).getNumericCellValue == 122)
+    assert(summaryRow.getCell(15).getNumericCellValue == 93)
+    assert(summaryRow.getCell(16) == null)
 
     val hakijatSummaryRow = sheet.getRow(6)
     assert(hakijatSummaryRow.getCell(0).getStringCellValue == "Yksittäiset hakijat SV")
