@@ -1,9 +1,11 @@
 package fi.oph.ovara.backend.utils
 
-import fi.oph.ovara.backend.domain.{En, Fi, Sv, Valintatapajono}
+import fi.oph.ovara.backend.domain.*
 import org.json4s.jackson.JsonMethods.parse
 import org.json4s.jvalue2extractable
 import org.scalatest.flatspec.AnyFlatSpec
+
+import java.time.LocalDate
 
 class jsonDeserializingSpec extends AnyFlatSpec with GenericOvaraJsonFormats {
   "valintatapajonoSerializer" should "return empty list when valintatapajonot json is empty" in {
@@ -30,6 +32,26 @@ class jsonDeserializingSpec extends AnyFlatSpec with GenericOvaraJsonFormats {
             Sv -> ""
           )
         )
+      )
+    )
+  }
+
+  "hakuaikaSerializer" should "return hakuaika json extracted as Hakuaika with alkaa and paattyy times defined" in {
+    val hakuaikaJson = s"""{"alkaa": "2021-09-01T08:00", "paattyy": "2021-09-15T15:00"}"""
+    assert(
+      parse(hakuaikaJson).extract[Hakuaika] == Hakuaika(
+        alkaa = Some(LocalDate.parse("2021-09-01")),
+        paattyy = Some(LocalDate.parse("2021-09-15"))
+      )
+    )
+  }
+
+  it should "return hakuaika json extracted as Hakuaika with only alkaa time defined" in {
+    val hakuaikaJson = s"""{"alkaa": "2021-09-01T08:00"}"""
+    assert(
+      parse(hakuaikaJson).extract[Hakuaika] == Hakuaika(
+        alkaa = Some(LocalDate.parse("2021-09-01")),
+        paattyy = None
       )
     )
   }
