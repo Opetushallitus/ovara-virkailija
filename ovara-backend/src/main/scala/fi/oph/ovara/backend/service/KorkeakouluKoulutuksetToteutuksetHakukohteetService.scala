@@ -5,9 +5,10 @@ import fi.oph.ovara.backend.repository.{KorkeakouluKoulutuksetToteutuksetHakukoh
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.{Component, Service}
 
 @Component
+@Service
 class KorkeakouluKoulutuksetToteutuksetHakukohteetService(
     korkeakouluKoulutuksetToteutuksetHakukohteetRepository: KorkeakouluKoulutuksetToteutuksetHakukohteetRepository,
     userService: UserService,

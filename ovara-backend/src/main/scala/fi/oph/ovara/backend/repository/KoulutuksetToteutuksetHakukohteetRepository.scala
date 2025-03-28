@@ -2,11 +2,12 @@ package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.OrganisaationKoulutusToteutusHakukohde
 import fi.oph.ovara.backend.utils.RepositoryUtils
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.{Component, Repository}
 import slick.jdbc.PostgresProfile.api.*
 import slick.sql.SqlStreamingAction
 
 @Component
+@Repository
 class KoulutuksetToteutuksetHakukohteetRepository extends Extractors {
   def selectWithParams(
       selectedKayttooikeusOrganisaatiot: List[String],

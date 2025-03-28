@@ -4,9 +4,10 @@ import fi.oph.ovara.backend.domain.User
 import fi.oph.ovara.backend.security.AuthenticationFacade
 import fi.oph.ovara.backend.utils.AuthoritiesUtil
 import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.{Component, Service}
 
 @Component
+@Service
 class UserService(onrService: OnrService, authenticationFacade: AuthenticationFacade) {
   def getEnrichedUserDetails: User = {
     val principal = authenticationFacade.getAuthentication.getPrincipal.asInstanceOf[UserDetails]

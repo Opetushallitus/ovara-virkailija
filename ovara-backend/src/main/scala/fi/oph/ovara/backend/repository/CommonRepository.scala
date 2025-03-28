@@ -3,11 +3,12 @@ package fi.oph.ovara.backend.repository
 import fi.oph.ovara.backend.domain.*
 import fi.oph.ovara.backend.utils.RepositoryUtils
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.{Component, Repository}
 import slick.jdbc.PostgresProfile.api.*
 import slick.sql.SqlStreamingAction
 
 @Component
+@Repository
 class CommonRepository extends Extractors {
 
   val LOG = LoggerFactory.getLogger(classOf[CommonRepository])
