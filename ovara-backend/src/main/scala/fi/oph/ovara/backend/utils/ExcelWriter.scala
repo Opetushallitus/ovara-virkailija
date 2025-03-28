@@ -567,6 +567,15 @@ object ExcelWriter {
         cell.setCellValue(value)
       case Some(koodiarvo: String) if List("koulutuskoodi").contains(fieldName) =>
         cell.setCellValue(extractKoodi(koodiarvo))
+      case Some(tila: String) if List("koulutuksenTila", "toteutuksenTila", "hakukohteenTila").contains(fieldName) =>
+        val value = if (tila == "tallennettu") {
+          "luonnos"
+        } else {
+          tila
+        }
+        val lowerCaseStr = value.toLowerCase
+        val translation = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+        cell.setCellValue(translation)
       case Some(s: String) =>
         cell.setCellValue(s)
       case Some(int: Int) =>

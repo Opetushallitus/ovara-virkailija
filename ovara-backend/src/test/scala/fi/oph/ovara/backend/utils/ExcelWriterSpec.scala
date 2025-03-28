@@ -60,7 +60,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
     "raportti.toive7"                         -> "Toive7 SV",
     "raportti.yhteensa"                       -> "Yhteensä SV",
     "raportti.yksittaiset-hakijat"            -> "Yksittäiset hakijat SV",
-    "raportti.oppilaitosJaToimipiste"         -> "Oppilaitos ja toimipiste SV"
+    "raportti.oppilaitosJaToimipiste"         -> "Oppilaitos ja toimipiste SV",
+    "raportti.julkaistu"                        -> "Julkaistu SV",
+    "raportti.luonnos"                          -> "Luonnos SV"
   )
 
   def checkAloituspaikatRowValidity(sheet: XSSFSheet, rowNumber: Int, expected: Int): Unit = {
@@ -1625,7 +1627,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
     assert(sheet.getRow(1).getCell(1).getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år)")
     assert(sheet.getRow(1).getCell(2).getStringCellValue == "1.2.246.562.13.00000000000000002677")
-    assert(sheet.getRow(1).getCell(3).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(1).getCell(3).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(1).getCell(4).getStringCellValue == "309902")
     assert(sheet.getRow(1).getCell(5).getStringCellValue == "ARTS20502")
     assert(sheet.getRow(1).getCell(6).getStringCellValue == "120 studiepoäng")
@@ -1636,12 +1638,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
         .getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år) -toteutus"
     )
     assert(sheet.getRow(1).getCell(8).getStringCellValue == "1.2.246.562.17.00000000000000007967")
-    assert(sheet.getRow(1).getCell(9).getStringCellValue == "arkistoitu")
+    assert(sheet.getRow(1).getCell(9).getStringCellValue == "raportti.arkistoitu")
     assert(sheet.getRow(1).getCell(10).getStringCellValue == "-")
     assert(sheet.getRow(1).getCell(11).getStringCellValue == "Vår 2022")
     assert(sheet.getRow(1).getCell(12).getStringCellValue == "Film- och tv-manuskript, konstmagister (2 år)")
     assert(sheet.getRow(1).getCell(13).getStringCellValue == "1.2.246.562.20.00000000000000017822")
-    assert(sheet.getRow(1).getCell(14).getStringCellValue == "tallennettu")
+    assert(sheet.getRow(1).getCell(14).getStringCellValue == "Luonnos SV")
     assert(sheet.getRow(1).getCell(15).getStringCellValue == "ARTS20503")
     assert(sheet.getRow(1).getCell(16).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
     assert(sheet.getRow(1).getCell(17).getStringCellValue == "30.11.2023 - 2.1.2024")

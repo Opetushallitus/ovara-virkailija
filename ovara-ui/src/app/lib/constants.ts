@@ -13,7 +13,7 @@ export const KK_RAPORTIT = [
 export const RADIOGROUP_OPTIONS = ['neutral', 'yes', 'no'];
 export const RADIOGROUP_BOOLEAN_OPTIONS = ['yes', 'no'];
 
-export const TILAT = ['julkaistu', 'luonnos', 'arkistoitu'];
+export const TILAT = ['julkaistu', 'tallennettu', 'arkistoitu'];
 export const SUKUPUOLET = ['neutral', '2', '1'];
 
 export const KOULUTUSTOIMIJAORGANISAATIOTYYPPI = '01';
