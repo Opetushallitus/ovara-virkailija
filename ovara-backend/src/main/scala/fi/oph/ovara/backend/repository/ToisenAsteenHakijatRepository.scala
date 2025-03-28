@@ -2,12 +2,13 @@ package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.ToisenAsteenHakija
 import fi.oph.ovara.backend.utils.RepositoryUtils
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.{Component, Repository}
 import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api.*
 import slick.sql.SqlStreamingAction
 
 @Component
+@Repository
 class ToisenAsteenHakijatRepository extends Extractors {
   def selectWithParams(
       kayttooikeusOrganisaatiot: List[String],

@@ -3,12 +3,13 @@ package fi.oph.ovara.backend.repository
 import fi.oph.ovara.backend.domain.KkHakija
 import fi.oph.ovara.backend.utils.RepositoryUtils
 import fi.oph.ovara.backend.utils.RepositoryUtils.makeListOfValuesQueryStr
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.{Component, Repository}
 import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api.*
 import slick.sql.SqlStreamingAction
 
 @Component
+@Repository
 class KkHakijatRepository extends Extractors {
   def selectWithParams(
       kayttooikeusOrganisaatiot: List[String],

@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.{CacheEvict, CachePut, Cacheable}
 import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.{Component, Service}
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.Await
@@ -16,6 +16,7 @@ import scala.concurrent.duration.Duration
 import scala.jdk.javaapi.FutureConverters.asScala
 
 @Component
+@Service
 class OnrService {
   val LOG: Logger = LoggerFactory.getLogger(classOf[OnrService])
 

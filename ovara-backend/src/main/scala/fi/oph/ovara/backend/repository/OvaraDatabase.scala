@@ -4,7 +4,7 @@ import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.{Component, Repository}
 import slick.dbio.DBIO
 import slick.jdbc.JdbcBackend.Database
 import slick.util.AsyncExecutor
@@ -14,6 +14,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 @Component
+@Repository
 class OvaraDatabase(
     @Value("${spring.datasource.url}") url: String,
     @Value("${spring.datasource.username}") username: String,
