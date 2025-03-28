@@ -7,7 +7,6 @@ import fi.oph.ovara.backend.domain.{
 }
 import fi.oph.ovara.backend.utils.RepositoryUtils
 import org.slf4j.{Logger, LoggerFactory}
-import slick.sql.SqlStreamingAction
 import org.springframework.stereotype.{Component, Repository}
 import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api.*
@@ -158,14 +157,36 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     val harkinnanvaraisuudetWithSureValues = RepositoryUtils.enrichHarkinnanvaraisuudet(harkinnanvaraisuudet)
     val filters = Seq(
       Some(s"ht.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.jarjestyspaikka_oid", selectedKayttooikeusOrganisaatiot)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.hakukohde_oid", hakukohteet)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_1", koulutusalat1)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_2", koulutusalat2)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_3", koulutusalat3)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.sijaintimaakunta", maakunnat)).filter(_.nonEmpty),
+      Option(
+        RepositoryUtils.makeOptionalListOfValuesQueryStr(
+          "AND",
+          "h.jarjestyspaikka_oid",
+          selectedKayttooikeusOrganisaatiot
+        )
+      ).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.hakukohde_oid", hakukohteet)).filter(
+        _.nonEmpty
+      ),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_1", koulutusalat1)).filter(
+        _.nonEmpty
+      ),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_2", koulutusalat2)).filter(
+        _.nonEmpty
+      ),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_3", koulutusalat3)).filter(
+        _.nonEmpty
+      ),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.sijaintimaakunta", maakunnat)).filter(
+        _.nonEmpty
+      ),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.sijaintikunta", kunnat)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.harkinnanvaraisuuden_syy", harkinnanvaraisuudetWithSureValues)).filter(_.nonEmpty),
+      Option(
+        RepositoryUtils.makeOptionalListOfValuesQueryStr(
+          "AND",
+          "ht.harkinnanvaraisuuden_syy",
+          harkinnanvaraisuudetWithSureValues
+        )
+      ).filter(_.nonEmpty),
       Option(RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "he.sukupuoli", sukupuoli)).filter(_.nonEmpty),
       buildOpetuskieletFilter(opetuskielet)
     ).collect { case Some(value) => value }.mkString("\n")
@@ -291,7 +312,7 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     )
     val organisaatioSelect = organisaatiotaso match {
       case "oppilaitoksittain" => "b.oppilaitos_nimi as otsikko"
-      case _ => "b.koulutustoimija_nimi as otsikko"
+      case _                   => "b.koulutustoimija_nimi as otsikko"
     }
     val query = sql"""SELECT
         #$organisaatioSelect,
