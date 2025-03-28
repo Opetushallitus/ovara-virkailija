@@ -1,41 +1,69 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.domain.{HakeneetHyvaksytytVastaanottaneetHakukohteittain, HakeneetHyvaksytytVastaanottaneetResult, HakeneetHyvaksytytVastaanottaneetToimipisteittain}
+import fi.oph.ovara.backend.domain.{
+  HakeneetHyvaksytytVastaanottaneetHakukohteittain,
+  HakeneetHyvaksytytVastaanottaneetResult,
+  HakeneetHyvaksytytVastaanottaneetToimipisteittain
+}
 import fi.oph.ovara.backend.utils.RepositoryUtils
 import org.slf4j.{Logger, LoggerFactory}
-import org.springframework.stereotype.Component
 import slick.sql.SqlStreamingAction
+import org.springframework.stereotype.{Component, Repository}
 import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api.*
+import slick.sql.SqlStreamingAction
 
 @Component
+@Repository
 class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   val LOG: Logger = LoggerFactory.getLogger(classOf[HakeneetHyvaksytytVastaanottaneetRepository]);
   private def buildFilters(
-                            haut: List[String],
-                            selectedKayttooikeusOrganisaatiot: List[String],
-                            hakukohteet: List[String],
-                            koulutusalat1: List[String],
-                            koulutusalat2: List[String],
-                            koulutusalat3: List[String],
-                            opetuskielet: List[String],
-                            maakunnat: List[String],
-                            kunnat: List[String],
-                            harkinnanvaraisuudet: List[String],
-                            sukupuoli: Option[String]
-                          ): String = {
+      haut: List[String],
+      selectedKayttooikeusOrganisaatiot: List[String],
+      hakukohteet: List[String],
+      koulutusalat1: List[String],
+      koulutusalat2: List[String],
+      koulutusalat3: List[String],
+      opetuskielet: List[String],
+      maakunnat: List[String],
+      kunnat: List[String],
+      harkinnanvaraisuudet: List[String],
+      sukupuoli: Option[String]
+  ): String = {
     val harkinnanvaraisuudetWithSureValues = RepositoryUtils.enrichHarkinnanvaraisuudet(harkinnanvaraisuudet)
 
     val filters = Seq(
       Some(s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.jarjestyspaikka_oid", selectedKayttooikeusOrganisaatiot)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.hakukohde_oid", hakukohteet)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_1", koulutusalat1)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_2", koulutusalat2)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_3", koulutusalat3)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintimaakunta", maakunnat)).filter(_.nonEmpty),
+      Option(
+        RepositoryUtils.makeOptionalListOfValuesQueryStr(
+          "AND",
+          "h.jarjestyspaikka_oid",
+          selectedKayttooikeusOrganisaatiot
+        )
+      ).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.hakukohde_oid", hakukohteet)).filter(
+        _.nonEmpty
+      ),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_1", koulutusalat1)).filter(
+        _.nonEmpty
+      ),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_2", koulutusalat2)).filter(
+        _.nonEmpty
+      ),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_3", koulutusalat3)).filter(
+        _.nonEmpty
+      ),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintimaakunta", maakunnat)).filter(
+        _.nonEmpty
+      ),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintikunta", kunnat)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.harkinnanvaraisuuden_syy", harkinnanvaraisuudetWithSureValues)).filter(_.nonEmpty),
+      Option(
+        RepositoryUtils.makeOptionalListOfValuesQueryStr(
+          "AND",
+          "t.harkinnanvaraisuuden_syy",
+          harkinnanvaraisuudetWithSureValues
+        )
+      ).filter(_.nonEmpty),
       Option(RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "t.sukupuoli", sukupuoli)).filter(_.nonEmpty),
       buildOpetuskieletFilter(opetuskielet)
     ).collect { case Some(value) => value }.mkString("\n")
@@ -56,22 +84,33 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   }
 
   def selectHakukohteittainWithParams(
-                        selectedKayttooikeusOrganisaatiot: List[String],
-                        haut: List[String],
-                        hakukohteet: List[String],
-                        koulutusalat1: List[String],
-                        koulutusalat2: List[String],
-                        koulutusalat3: List[String],
-                        opetuskielet: List[String],
-                        maakunnat: List[String],
-                        kunnat: List[String],
-                        harkinnanvaraisuudet: List[String],
-                        sukupuoli: Option[String],
-                      ): SqlStreamingAction[Vector[HakeneetHyvaksytytVastaanottaneetHakukohteittain], HakeneetHyvaksytytVastaanottaneetHakukohteittain, Effect] = {
+      selectedKayttooikeusOrganisaatiot: List[String],
+      haut: List[String],
+      hakukohteet: List[String],
+      koulutusalat1: List[String],
+      koulutusalat2: List[String],
+      koulutusalat3: List[String],
+      opetuskielet: List[String],
+      maakunnat: List[String],
+      kunnat: List[String],
+      harkinnanvaraisuudet: List[String],
+      sukupuoli: Option[String]
+  ): SqlStreamingAction[Vector[
+    HakeneetHyvaksytytVastaanottaneetHakukohteittain
+  ], HakeneetHyvaksytytVastaanottaneetHakukohteittain, Effect] = {
 
     val filters = buildFilters(
-      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, koulutusalat1, koulutusalat2, koulutusalat3,
-      opetuskielet, maakunnat, kunnat, harkinnanvaraisuudet, sukupuoli
+      haut,
+      selectedKayttooikeusOrganisaatiot,
+      hakukohteet,
+      koulutusalat1,
+      koulutusalat2,
+      koulutusalat3,
+      opetuskielet,
+      maakunnat,
+      kunnat,
+      harkinnanvaraisuudet,
+      sukupuoli
     )
 
     val query = sql"""SELECT
@@ -103,18 +142,18 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   }
 
   def selectHakijatYhteensaWithParams(
-                                       selectedKayttooikeusOrganisaatiot: List[String],
-                                       haut: List[String],
-                                       hakukohteet: List[String],
-                                       koulutusalat1: List[String],
-                                       koulutusalat2: List[String],
-                                       koulutusalat3: List[String],
-                                       opetuskielet: List[String],
-                                       maakunnat: List[String],
-                                       kunnat: List[String],
-                                       harkinnanvaraisuudet: List[String],
-                                       sukupuoli: Option[String],
-                                     ): DBIO[Int] = {
+      selectedKayttooikeusOrganisaatiot: List[String],
+      haut: List[String],
+      hakukohteet: List[String],
+      koulutusalat1: List[String],
+      koulutusalat2: List[String],
+      koulutusalat3: List[String],
+      opetuskielet: List[String],
+      maakunnat: List[String],
+      kunnat: List[String],
+      harkinnanvaraisuudet: List[String],
+      sukupuoli: Option[String]
+  ): DBIO[Int] = {
 
     val harkinnanvaraisuudetWithSureValues = RepositoryUtils.enrichHarkinnanvaraisuudet(harkinnanvaraisuudet)
     val filters = Seq(
@@ -143,22 +182,33 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   }
 
   def selectKoulutusaloittainWithParams(
-                                       selectedKayttooikeusOrganisaatiot: List[String],
-                                       haut: List[String],
-                                       hakukohteet: List[String],
-                                       koulutusalat1: List[String],
-                                       koulutusalat2: List[String],
-                                       koulutusalat3: List[String],
-                                       opetuskielet: List[String],
-                                       maakunnat: List[String],
-                                       kunnat: List[String],
-                                       harkinnanvaraisuudet: List[String],
-                                       sukupuoli: Option[String],
-                                     ): SqlStreamingAction[Vector[HakeneetHyvaksytytVastaanottaneetResult], HakeneetHyvaksytytVastaanottaneetResult, Effect] = {
+      selectedKayttooikeusOrganisaatiot: List[String],
+      haut: List[String],
+      hakukohteet: List[String],
+      koulutusalat1: List[String],
+      koulutusalat2: List[String],
+      koulutusalat3: List[String],
+      opetuskielet: List[String],
+      maakunnat: List[String],
+      kunnat: List[String],
+      harkinnanvaraisuudet: List[String],
+      sukupuoli: Option[String]
+  ): SqlStreamingAction[Vector[
+    HakeneetHyvaksytytVastaanottaneetResult
+  ], HakeneetHyvaksytytVastaanottaneetResult, Effect] = {
 
     val filters = buildFilters(
-      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, koulutusalat1, koulutusalat2, koulutusalat3,
-      opetuskielet, maakunnat, kunnat, harkinnanvaraisuudet, sukupuoli
+      haut,
+      selectedKayttooikeusOrganisaatiot,
+      hakukohteet,
+      koulutusalat1,
+      koulutusalat2,
+      koulutusalat3,
+      opetuskielet,
+      maakunnat,
+      kunnat,
+      harkinnanvaraisuudet,
+      sukupuoli
     )
 
     val query = sql"""SELECT
@@ -211,22 +261,33 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   }
 
   def selectOrganisaatioittainWithParams(
-                                         selectedKayttooikeusOrganisaatiot: List[String],
-                                         haut: List[String],
-                                         hakukohteet: List[String],
-                                         koulutusalat1: List[String],
-                                         koulutusalat2: List[String],
-                                         koulutusalat3: List[String],
-                                         opetuskielet: List[String],
-                                         maakunnat: List[String],
-                                         kunnat: List[String],
-                                         harkinnanvaraisuudet: List[String],
-                                         sukupuoli: Option[String],
-                                         organisaatiotaso: String,
-                                       ): SqlStreamingAction[Vector[HakeneetHyvaksytytVastaanottaneetResult], HakeneetHyvaksytytVastaanottaneetResult, Effect] = {
+      selectedKayttooikeusOrganisaatiot: List[String],
+      haut: List[String],
+      hakukohteet: List[String],
+      koulutusalat1: List[String],
+      koulutusalat2: List[String],
+      koulutusalat3: List[String],
+      opetuskielet: List[String],
+      maakunnat: List[String],
+      kunnat: List[String],
+      harkinnanvaraisuudet: List[String],
+      sukupuoli: Option[String],
+      organisaatiotaso: String
+  ): SqlStreamingAction[Vector[
+    HakeneetHyvaksytytVastaanottaneetResult
+  ], HakeneetHyvaksytytVastaanottaneetResult, Effect] = {
     val filters = buildFilters(
-      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, koulutusalat1, koulutusalat2, koulutusalat3,
-      opetuskielet, maakunnat, kunnat, harkinnanvaraisuudet, sukupuoli
+      haut,
+      selectedKayttooikeusOrganisaatiot,
+      hakukohteet,
+      koulutusalat1,
+      koulutusalat2,
+      koulutusalat3,
+      opetuskielet,
+      maakunnat,
+      kunnat,
+      harkinnanvaraisuudet,
+      sukupuoli
     )
     val organisaatioSelect = organisaatiotaso match {
       case "oppilaitoksittain" => "b.oppilaitos_nimi as otsikko"
@@ -280,21 +341,32 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   }
 
   def selectToimipisteittainWithParams(
-                                       selectedKayttooikeusOrganisaatiot: List[String],
-                                       haut: List[String],
-                                       hakukohteet: List[String],
-                                       koulutusalat1: List[String],
-                                       koulutusalat2: List[String],
-                                       koulutusalat3: List[String],
-                                       opetuskielet: List[String],
-                                       maakunnat: List[String],
-                                       kunnat: List[String],
-                                       harkinnanvaraisuudet: List[String],
-                                       sukupuoli: Option[String],
-                                     ): SqlStreamingAction[Vector[HakeneetHyvaksytytVastaanottaneetToimipisteittain], HakeneetHyvaksytytVastaanottaneetToimipisteittain, Effect] = {
+      selectedKayttooikeusOrganisaatiot: List[String],
+      haut: List[String],
+      hakukohteet: List[String],
+      koulutusalat1: List[String],
+      koulutusalat2: List[String],
+      koulutusalat3: List[String],
+      opetuskielet: List[String],
+      maakunnat: List[String],
+      kunnat: List[String],
+      harkinnanvaraisuudet: List[String],
+      sukupuoli: Option[String]
+  ): SqlStreamingAction[Vector[
+    HakeneetHyvaksytytVastaanottaneetToimipisteittain
+  ], HakeneetHyvaksytytVastaanottaneetToimipisteittain, Effect] = {
     val filters = buildFilters(
-      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, koulutusalat1, koulutusalat2, koulutusalat3,
-      opetuskielet, maakunnat, kunnat, harkinnanvaraisuudet, sukupuoli
+      haut,
+      selectedKayttooikeusOrganisaatiot,
+      hakukohteet,
+      koulutusalat1,
+      koulutusalat2,
+      koulutusalat3,
+      opetuskielet,
+      maakunnat,
+      kunnat,
+      harkinnanvaraisuudet,
+      sukupuoli
     )
 
     val query = sql"""SELECT

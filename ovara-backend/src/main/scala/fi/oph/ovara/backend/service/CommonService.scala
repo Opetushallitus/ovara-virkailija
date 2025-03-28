@@ -14,9 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.{CacheEvict, Cacheable}
 import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.{Component, Service}
 
 @Component
+@Service
 class CommonService(commonRepository: CommonRepository, userService: UserService) {
   @Autowired
   val db: OvaraDatabase = null
