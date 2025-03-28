@@ -4227,7 +4227,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(hakijatSummaryRow.getCell(9).getNumericCellValue == 2)
   }
 
-  "writeKkHakeneetHyvaksytytVastaanottaneetRaportti" should "return excel without hakutoiveet columns if naytaHakutoiveet is false" in {
+  it should "return excel without hakutoiveet columns if naytaHakutoiveet is false" in {
     val data = List(
       KkHakeneetHyvaksytytVastaanottaneetResult(
         otsikko = Map(
@@ -4367,7 +4367,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(hakijatSummaryRow.getCell(9).getNumericCellValue == 2)
   }
 
-  "writeKkHakeneetHyvaksytytVastaanottaneetRaportti" should "return excel without aloituspaikat for kansalaisuuksittain" in {
+  it should "return excel without aloituspaikat for kansalaisuuksittain" in {
     val data = List(
       KkHakeneetHyvaksytytVastaanottaneetResult(
         otsikko = Map(En -> "Afghanistan", Fi -> "Afganistan", Sv -> "Afghanistan"),

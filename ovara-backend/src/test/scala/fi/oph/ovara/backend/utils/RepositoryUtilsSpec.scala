@@ -2,6 +2,7 @@ package fi.oph.ovara.backend.utils
 
 import org.scalatest.*
 import org.scalatest.flatspec.*
+import org.scalatest.matchers.should.Matchers.shouldBe
 
 class RepositoryUtilsSpec extends AnyFlatSpec {
   "extractAlkamisvuosiKausiAndHenkKohtSuunnitelma" should "return year and alkamiskausikoodiuri for one alkamiskausi and false for henkilokohtainen suunnitelma" in {
@@ -363,5 +364,30 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
         "VARALLA"
       )
     )
+  }
+
+  "buildTutkinnonTasoFilters" should "return None when the list is empty" in {
+    val result = RepositoryUtils.buildTutkinnonTasoFilters(List.empty, "h")
+    result shouldBe None
+  }
+
+  it should "return the correct filter for 'alempi-ja-ylempi'" in {
+    val result = RepositoryUtils.buildTutkinnonTasoFilters(List("alempi-ja-ylempi"), "h")
+    result shouldBe Some("AND (h.alempi_kk_aste = true AND h.ylempi_kk_aste = true)")
+  }
+
+  it should "return the correct filter for 'alempi'" in {
+    val result = RepositoryUtils.buildTutkinnonTasoFilters(List("alempi"), "h")
+    result shouldBe Some("AND (h.alempi_kk_aste = true AND h.ylempi_kk_aste = false)")
+  }
+
+  it should "return the correct filter for 'ylempi'" in {
+    val result = RepositoryUtils.buildTutkinnonTasoFilters(List("ylempi"), "h")
+    result shouldBe Some("AND (h.alempi_kk_aste = false AND h.ylempi_kk_aste = true)")
+  }
+
+  it should "return the correct filter for multiple values" in {
+    val result = RepositoryUtils.buildTutkinnonTasoFilters(List("alempi", "ylempi"), "h")
+    result shouldBe Some("AND (h.alempi_kk_aste = true AND h.ylempi_kk_aste = false OR h.alempi_kk_aste = false AND h.ylempi_kk_aste = true)")
   }
 }

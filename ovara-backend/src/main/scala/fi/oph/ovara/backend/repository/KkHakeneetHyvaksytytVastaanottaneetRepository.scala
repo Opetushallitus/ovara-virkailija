@@ -2,6 +2,7 @@ package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.{KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella, KkHakeneetHyvaksytytVastaanottaneetResult, KkHakeneetHyvaksytytVastaanottaneetToimipisteittain}
 import fi.oph.ovara.backend.utils.RepositoryUtils
+import fi.oph.ovara.backend.utils.RepositoryUtils.buildTutkinnonTasoFilters
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.Component
 import slick.dbio.{DBIO, Effect}
@@ -41,30 +42,10 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.kansalaisuusluokka", kansalaisuudet)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "t.sukupuoli", sukupuoli)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "t.ensikertalainen", ensikertalainen)).filter(_.nonEmpty),
-      buildTutkinnonTasoFilters(tutkinnonTasot)
+      buildTutkinnonTasoFilters(tutkinnonTasot, "h")
     ).collect { case Some(value) => value }.mkString("\n")
 
     filters
-  }
-
-  def buildTutkinnonTasoFilters(
-                                 tutkinnonTasot: List[String],
-                               ): Option[String] = {
-    if (tutkinnonTasot.nonEmpty) {
-      var conditions = List[String]()
-      if (tutkinnonTasot.contains("alempi-ja-ylempi")) {
-        conditions = conditions :+ "h.alempi_kk_aste = true AND h.ylempi_kk_aste = true"
-      }
-      if (tutkinnonTasot.contains("alempi")) {
-        conditions = conditions :+ "h.alempi_kk_aste = true AND h.ylempi_kk_aste = false"
-      }
-      if (tutkinnonTasot.contains("ylempi")) {
-        conditions = conditions :+ "h.alempi_kk_aste = false AND h.ylempi_kk_aste = true"
-      }
-      Some(s"AND (" + conditions.mkString(" OR ") + ")")
-    }
-    else
-      None
   }
 
   def selectHakukohteittainWithParams(
@@ -561,7 +542,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       Option(RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "he.sukupuoli", sukupuoli)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "ht.ensikertalainen", ensikertalainen)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "m.maksuvelvollisuus", maksuvelvollinen)).filter(_.nonEmpty),
-      buildTutkinnonTasoFilters(tutkinnonTasot)
+      buildTutkinnonTasoFilters(tutkinnonTasot, "h")
     ).collect { case Some(value) => value }.mkString("\n")
 
     val maksuvelvollisuusJoin =
