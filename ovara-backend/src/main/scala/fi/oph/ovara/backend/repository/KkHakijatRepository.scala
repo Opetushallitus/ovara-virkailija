@@ -3,6 +3,7 @@ package fi.oph.ovara.backend.repository
 import fi.oph.ovara.backend.domain.KkHakija
 import fi.oph.ovara.backend.utils.RepositoryUtils
 import fi.oph.ovara.backend.utils.RepositoryUtils.makeListOfValuesQueryStr
+import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.{Component, Repository}
 import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api.*
@@ -11,6 +12,8 @@ import slick.sql.SqlStreamingAction
 @Component
 @Repository
 class KkHakijatRepository extends Extractors {
+  val LOG: Logger = LoggerFactory.getLogger(classOf[KkHakijatRepository])
+
   def selectWithParams(
       kayttooikeusOrganisaatiot: List[String],
       hakukohderyhmat: List[String],
@@ -56,7 +59,7 @@ class KkHakijatRepository extends Extractors {
         s"WHERE hkr_hk.hakukohderyhma_oid IN ($hakukohderyhmatStr))"
     }
 
-    sql"""SELECT hlo.sukunimi, hlo.etunimet, hlo.hetu, hlo.syntymaaika,
+    val query = sql"""SELECT hlo.sukunimi, hlo.etunimet, hlo.hetu, hlo.syntymaaika,
                  hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid, hk.organisaatio_nimi,
                  hk.hakukohde_nimi, kkh.hakukelpoisuus, ht.hakutoivenumero, ht.valintatieto,
                  ht.ehdollisesti_hyvaksytty, ht.valintatiedon_pvm, ht.valintatapajonot,
@@ -83,5 +86,9 @@ class KkHakijatRepository extends Extractors {
           #$optionalKansalaisuusQuery
           #$optionalMarkkinointilupaQuery
           """.as[KkHakija]
+
+    LOG.debug(s"selectWithParams: ${query.statements.head}")
+
+    query
   }
 }
