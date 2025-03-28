@@ -270,6 +270,27 @@ object ExcelWriter {
     bodyTextFont
   }
 
+  private def createNumericCellStyle(workbook: XSSFWorkbook): XSSFCellStyle = {
+    val numericCellStyle = workbook.createCellStyle()
+    numericCellStyle.setDataFormat(workbook.createDataFormat().getFormat("0"))
+    numericCellStyle
+  }
+
+  private def createBodyTextCellStyle(workbook: XSSFWorkbook): XSSFCellStyle = {
+    val bodyTextCellStyle = workbook.createCellStyle()
+    val bodyTextFont     = createBodyTextFont(workbook, bodyTextCellStyle)
+    bodyTextCellStyle.setWrapText(true)
+    bodyTextCellStyle
+  }
+
+  private def createSummaryCellStyle(workbook: XSSFWorkbook): XSSFCellStyle = {
+    val summaryCellStyle = workbook.createCellStyle()
+    val summaryFont      = createSummaryRowFont(workbook)
+    summaryCellStyle.setFont(summaryFont)
+    summaryCellStyle.setAlignment(HorizontalAlignment.RIGHT)
+    summaryCellStyle
+  }
+
   def writeKoulutuksetToteutuksetHakukohteetRaportti(
       hierarkiatWithResults: List[OrganisaatioHierarkiaWithHakukohteet],
       raporttiColumnTitles: Map[String, List[String]],
@@ -794,17 +815,7 @@ object ExcelWriter {
     )
 
     val headingCellStyle: XSSFCellStyle  = workbook.createCellStyle()
-    val bodyTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
-    val summaryCellStyle: XSSFCellStyle  = workbook.createCellStyle()
-
     val headingFont  = createHeadingFont(workbook, headingCellStyle)
-    val bodyTextFont = createBodyTextFont(workbook, bodyTextCellStyle)
-    val summaryFont  = createSummaryRowFont(workbook)
-
-    summaryCellStyle.setFont(summaryFont)
-    summaryCellStyle.setAlignment(HorizontalAlignment.RIGHT)
-
-    bodyTextCellStyle.setWrapText(true)
 
     var currentRowIndex = 0
 
@@ -829,33 +840,29 @@ object ExcelWriter {
       val dataRow = sheet.createRow(currentRowIndex)
       val rowData = List(
         item.otsikko(Kieli.withName(asiointikieli)),
-        item.hakijat.toString,
-        item.ensisijaisia.toString,
-        item.varasija.toString,
-        item.hyvaksytyt.toString,
-        item.vastaanottaneet.toString,
-        item.lasna.toString,
-        item.poissa.toString,
-        item.ilmYht.toString,
-        item.aloituspaikat.toString
+        item.hakijat,
+        item.ensisijaisia,
+        item.varasija,
+        item.hyvaksytyt,
+        item.vastaanottaneet,
+        item.lasna,
+        item.poissa,
+        item.ilmYht,
+        item.aloituspaikat
       ) ++ (if (naytaHakutoiveet) {
               List(
-                item.toive1.toString,
-                item.toive2.toString,
-                item.toive3.toString,
-                item.toive4.toString,
-                item.toive5.toString,
-                item.toive6.toString,
-                item.toive7.toString
+                item.toive1,
+                item.toive2,
+                item.toive3,
+                item.toive4,
+                item.toive5,
+                item.toive6,
+                item.toive7
               )
             } else {
               List()
             })
-      rowData.zipWithIndex.foreach { case (value, index) =>
-        val cell = dataRow.createCell(index)
-        cell.setCellStyle(bodyTextCellStyle)
-        cell.setCellValue(value)
-      }
+      createRowCells(rowData, dataRow, workbook, createBodyTextCellStyle(workbook))
       currentRowIndex += 1
     }
 
@@ -863,57 +870,40 @@ object ExcelWriter {
     val summaryRow = sheet.createRow(currentRowIndex)
     val summaryData = List(
       translations.getOrElse("raportti.yhteensa", "raportti.yhteensa"),
-      data.map(_.hakijat).sum.toString,
-      data.map(_.ensisijaisia).sum.toString,
-      data.map(_.varasija).sum.toString,
-      data.map(_.hyvaksytyt).sum.toString,
-      data.map(_.vastaanottaneet).sum.toString,
-      data.map(_.lasna).sum.toString,
-      data.map(_.poissa).sum.toString,
-      data.map(_.ilmYht).sum.toString,
-      data.map(_.aloituspaikat).sum.toString
+      data.map(_.hakijat).sum,
+      data.map(_.ensisijaisia).sum,
+      data.map(_.varasija).sum,
+      data.map(_.hyvaksytyt).sum,
+      data.map(_.vastaanottaneet).sum,
+      data.map(_.lasna).sum,
+      data.map(_.poissa).sum,
+      data.map(_.ilmYht).sum,
+      data.map(_.aloituspaikat).sum
     ) ++ (if (naytaHakutoiveet) {
             List(
-              data.map(_.toive1).sum.toString,
-              data.map(_.toive2).sum.toString,
-              data.map(_.toive3).sum.toString,
-              data.map(_.toive4).sum.toString,
-              data.map(_.toive5).sum.toString,
-              data.map(_.toive6).sum.toString,
-              data.map(_.toive7).sum.toString
+              data.map(_.toive1).sum,
+              data.map(_.toive2).sum,
+              data.map(_.toive3).sum,
+              data.map(_.toive4).sum,
+              data.map(_.toive5).sum,
+              data.map(_.toive6).sum,
+              data.map(_.toive7).sum
             )
           } else {
             List()
           })
 
-    summaryData.zipWithIndex.foreach { case (value, index) =>
-      val cell = summaryRow.createCell(index)
-      if (index == 0) {
-        cell.setCellStyle(summaryCellStyle)
-      } else {
-        cell.setCellStyle(bodyTextCellStyle)
-      }
-      cell.setCellValue(value)
-    }
-
+    createRowCells(summaryData, summaryRow, workbook, createSummaryCellStyle(workbook))
     currentRowIndex += 1
 
     // yksittäiset hakijat -rivi
     val hakijatSummaryRow = sheet.createRow(currentRowIndex)
     val hakijatSummaryData = List(
       translations.getOrElse("raportti.yksittaiset-hakijat", "raportti.yksittaiset-hakijat"),
-      yksittaisetHakijat.toString
+      yksittaisetHakijat
     )
 
-    hakijatSummaryData.zipWithIndex.foreach { case (value, index) =>
-      val cell = hakijatSummaryRow.createCell(index)
-      if (index == 0) {
-        cell.setCellStyle(summaryCellStyle)
-      } else {
-        cell.setCellStyle(bodyTextCellStyle)
-      }
-      cell.setCellValue(value)
-    }
+    createRowCells(hakijatSummaryData, hakijatSummaryRow, workbook, createSummaryCellStyle(workbook))
 
     // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
     fieldNamesWithIndex.foreach { case (title, index) =>
@@ -926,6 +916,177 @@ object ExcelWriter {
       case e: Exception =>
         LOG.error(s"Error creating excel: ${e.getMessage}")
         throw e
+    }
+  }
+
+  def writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
+                                                        asiointikieli: String,
+                                                        translations: Map[String, String],
+                                                        data: List[KkHakeneetHyvaksytytVastaanottaneetResult],
+                                                        yksittaisetHakijat: Int,
+                                                        ensikertalaisetYksittaisetHakijat: Int,
+                                                        maksuvelvollisetYksittaisetHakijat: Int,
+                                                        naytaHakutoiveet: Boolean,
+                                                        tulostustapa: String
+                                                      ): XSSFWorkbook = {
+    val workbook: XSSFWorkbook = new XSSFWorkbook()
+    LOG.info("Creating new KkHakeneetHyvaksytytVastaanottaneet excel from db results")
+    val sheet: XSSFSheet = workbook.createSheet()
+    workbook.setSheetName(
+      0,
+      WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yhteenveto", "raportti.yhteenveto"))
+    )
+
+    val headingCellStyle: XSSFCellStyle = workbook.createCellStyle()
+    val headingFont = createHeadingFont(workbook, headingCellStyle)
+
+    var currentRowIndex = 0
+
+    val otsikko = tulostustapa match
+      case "hakukohteittain"         => "hakukohde"
+      case "oppilaitoksittain"       => "oppilaitos"
+      case "toimipisteittain"        => "toimipiste"
+      case "koulutustoimijoittain"   => "koulutustoimija"
+      case "okm-ohjauksen-aloittain" => "okm-ohjauksen-ala"
+      case "hauittain"               => "haku"
+      case "hakukohderyhmittain"     => "hakukohderyhma"
+      case "kansalaisuuksittain"     => "kansalaisuus"
+
+    val fieldNames =
+      if (naytaHakutoiveet)
+        List(otsikko) ++ KK_HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES
+          ++ (if (tulostustapa != "kansalaisuuksittain") KK_HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_ALOITUSPAIKAT_TITLES else List())
+          ++ KK_HAKUTOIVEET_TITLES
+      else
+        List(otsikko) ++ KK_HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES
+          ++ (if (tulostustapa != "kansalaisuuksittain") KK_HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_ALOITUSPAIKAT_TITLES else List())
+    val fieldNamesWithIndex = fieldNames.zipWithIndex
+
+    currentRowIndex =
+      createHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNames, headingCellStyle)
+
+    data.foreach { item =>
+      val dataRow = sheet.createRow(currentRowIndex)
+      val rowData = List(
+        item.otsikko(Kieli.withName(asiointikieli)),
+        item.hakijat,
+        item.ensisijaisia,
+        item.ensikertalaisia,
+        item.hyvaksytyt,
+        item.vastaanottaneet,
+        item.lasna,
+        item.poissa,
+        item.ilmYht,
+        item.maksuvelvollisia,
+      ) ++ (if (tulostustapa != "kansalaisuuksittain")
+        List(item.valinnanAloituspaikat, item.aloituspaikat)
+      else List())
+        ++ (if (naytaHakutoiveet) {
+        List(
+          item.toive1,
+          item.toive2,
+          item.toive3,
+          item.toive4,
+          item.toive5,
+          item.toive6
+        )
+      } else {
+        List()
+      })
+
+      createRowCells(rowData, dataRow, workbook, createBodyTextCellStyle(workbook))
+      currentRowIndex += 1
+    }
+
+    if(!tulostustapa.equals("hakukohderyhmittain")) {
+      // hakukohderyhmittäin tulostaessa ei lasketa rivien summaa
+        createSummaryRow(translations, data, naytaHakutoiveet, sheet, currentRowIndex, workbook, tulostustapa)
+        currentRowIndex += 1
+      }
+
+    // yksittäiset hakijat -rivi
+    val hakijatSummaryRow = sheet.createRow(currentRowIndex)
+    val hakijatSummaryData = List(
+      translations.getOrElse("raportti.yksittaiset-hakijat", "raportti.yksittaiset-hakijat"),
+      yksittaisetHakijat,
+      "",
+      ensikertalaisetYksittaisetHakijat,
+      "",
+      "",
+      "",
+      "",
+      "",
+      maksuvelvollisetYksittaisetHakijat,
+    )
+
+    createRowCells(hakijatSummaryData, hakijatSummaryRow, workbook, createSummaryCellStyle(workbook))
+
+    // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
+    fieldNamesWithIndex.foreach { case (title, index) =>
+      sheet.autoSizeColumn(index)
+    }
+
+    try {
+      workbook
+    } catch {
+      case e: Exception =>
+        LOG.error(s"Error creating excel: ${e.getMessage}")
+        throw e
+    }
+  }
+
+  private def createSummaryRow(translations: Map[String, String],
+                               data: List[KkHakeneetHyvaksytytVastaanottaneetResult],
+                               naytaHakutoiveet: Boolean, sheet: XSSFSheet,
+                               currentRowIndex: Int,
+                               workbook: XSSFWorkbook,
+                               tulostustapa: String): Unit = {
+    // yhteensä-rivi
+    val summaryRow = sheet.createRow(currentRowIndex)
+    val summaryData = List(
+      translations.getOrElse("raportti.yhteensa", "raportti.yhteensa"),
+      data.map(_.hakijat).sum,
+      data.map(_.ensisijaisia).sum,
+      data.map(_.ensikertalaisia).sum,
+      data.map(_.hyvaksytyt).sum,
+      data.map(_.vastaanottaneet).sum,
+      data.map(_.lasna).sum,
+      data.map(_.poissa).sum,
+      data.map(_.ilmYht).sum,
+      data.map(_.maksuvelvollisia).sum,
+    ) ++ (if (tulostustapa != "kansalaisuuksittain")
+      List(data.map(_.valinnanAloituspaikat).sum, data.map(_.aloituspaikat).sum)
+    else List())
+      ++ (if (naytaHakutoiveet) {
+      List(
+        data.map(_.toive1).sum,
+        data.map(_.toive2).sum,
+        data.map(_.toive3).sum,
+        data.map(_.toive4).sum,
+        data.map(_.toive5).sum,
+        data.map(_.toive6).sum
+      )
+    } else {
+      List()
+    })
+
+    createRowCells(summaryData, summaryRow, workbook, createSummaryCellStyle(workbook))
+
+  }
+
+  private def createRowCells(rowData: List[String | Int], row: XSSFRow, workbook: XSSFWorkbook, firstCellStyle: XSSFCellStyle): Unit = {
+    val numericCellStyle = createNumericCellStyle(workbook)
+    rowData.zipWithIndex.foreach { case (value, index) =>
+      val cell = row.createCell(index)
+      if (index == 0) {
+        cell.setCellStyle(firstCellStyle)
+      } else {
+        cell.setCellStyle(numericCellStyle)
+      }
+      value match {
+        case intValue: Int => cell.setCellValue(intValue)
+        case _ => cell.setCellValue(value.toString)
+      }
     }
   }
 }

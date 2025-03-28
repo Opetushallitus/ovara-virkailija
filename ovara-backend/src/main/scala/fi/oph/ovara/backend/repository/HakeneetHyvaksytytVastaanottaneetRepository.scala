@@ -2,6 +2,7 @@ package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.{HakeneetHyvaksytytVastaanottaneetHakukohteittain, HakeneetHyvaksytytVastaanottaneetResult, HakeneetHyvaksytytVastaanottaneetToimipisteittain}
 import fi.oph.ovara.backend.utils.RepositoryUtils
+import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.Component
 import slick.sql.SqlStreamingAction
 import slick.dbio.Effect
@@ -9,7 +10,7 @@ import slick.jdbc.PostgresProfile.api.*
 
 @Component
 class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
-
+  val LOG: Logger = LoggerFactory.getLogger(classOf[HakeneetHyvaksytytVastaanottaneetRepository]);
   private def buildFilters(
                             haut: List[String],
                             selectedKayttooikeusOrganisaatiot: List[String],
@@ -73,14 +74,32 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       opetuskielet, maakunnat, kunnat, harkinnanvaraisuudet, sukupuoli
     )
 
-    sql"""SELECT h.hakukohde_nimi, h.organisaatio_nimi, SUM(t.hakijat) AS hakijat, SUM(t.ensisijaisia) AS ensisijaisia, SUM(t.varasija) AS varasija, SUM(t.hyvaksytyt) AS hyvaksytyt,
-    SUM(t.vastaanottaneet) AS vastaanottaneet, SUM(t.lasna) AS lasna, SUM(t.poissa) AS poissa, SUM(t.ilm_yht) AS ilm_yht, MIN(h.hakukohteen_aloituspaikat) AS aloituspaikat,
-    SUM(t.toive_1) AS toive1, SUM(t.toive_2) AS toive2, SUM(t.toive_3) AS toive3, SUM(t.toive_4) AS toive4, SUM(t.toive_5) AS toive5, SUM(t.toive_6) AS toive6, SUM(t.toive_7) AS toive7
+    val query = sql"""SELECT
+        h.hakukohde_nimi,
+        h.organisaatio_nimi,
+        SUM(t.hakijat) AS hakijat,
+        SUM(t.ensisijaisia) AS ensisijaisia,
+        SUM(t.varasija) AS varasija,
+        SUM(t.hyvaksytyt) AS hyvaksytyt,
+        SUM(t.vastaanottaneet) AS vastaanottaneet,
+        SUM(t.lasna) AS lasna,
+        SUM(t.poissa) AS poissa,
+        SUM(t.ilm_yht) AS ilm_yht,
+        MIN(h.hakukohteen_aloituspaikat) AS aloituspaikat,
+        SUM(t.toive_1) AS toive1,
+        SUM(t.toive_2) AS toive2,
+        SUM(t.toive_3) AS toive3,
+        SUM(t.toive_4) AS toive4,
+        SUM(t.toive_5) AS toive5,
+        SUM(t.toive_6) AS toive6,
+        SUM(t.toive_7) AS toive7
     FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
     JOIN pub.pub_dim_hakukohde h
     ON t.hakukohde_oid = h.hakukohde_oid
     WHERE #$filters
     GROUP BY h.hakukohde_nimi, h.organisaatio_nimi""".as[HakeneetHyvaksytytVastaanottaneetHakukohteittain]
+    LOG.debug(s"selectHakukohteittainWithParams: ${query.statements.head}")
+    query
   }
 
   def selectHakijatYhteensaWithParams(
@@ -97,19 +116,30 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                        sukupuoli: Option[String],
                                      ): DBIO[Int] = {
 
-    val filters = buildFilters(
-      haut, selectedKayttooikeusOrganisaatiot, hakukohteet, koulutusalat1, koulutusalat2, koulutusalat3,
-      opetuskielet, maakunnat, kunnat, harkinnanvaraisuudet, sukupuoli
-    )
+    val harkinnanvaraisuudetWithSureValues = RepositoryUtils.enrichHarkinnanvaraisuudet(harkinnanvaraisuudet)
+    val filters = Seq(
+      Some(s"ht.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.jarjestyspaikka_oid", selectedKayttooikeusOrganisaatiot)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.hakukohde_oid", hakukohteet)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_1", koulutusalat1)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_2", koulutusalat2)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_3", koulutusalat3)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.sijaintimaakunta", maakunnat)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.sijaintikunta", kunnat)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.harkinnanvaraisuuden_syy", harkinnanvaraisuudetWithSureValues)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "he.sukupuoli", sukupuoli)).filter(_.nonEmpty),
+      buildOpetuskieletFilter(opetuskielet)
+    ).collect { case Some(value) => value }.mkString("\n")
 
-    sql"""SELECT count(distinct ht.henkilo_oid)
-    FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
-    JOIN pub.pub_dim_hakutoive ht
-    ON t.hakukohde_oid = ht.hakukohde_oid
-    JOIN pub.pub_dim_hakukohde h
-    ON t.hakukohde_oid = h.hakukohde_oid
+    val query = sql"""SELECT count(distinct ht.henkilo_oid)
+      FROM pub.pub_dim_hakutoive ht
+      JOIN pub.pub_dim_hakukohde h ON ht.hakukohde_oid = h.hakukohde_oid
+      JOIN pub.pub_fct_raportti_tilastoraportti_toinen_aste t ON t.hakukohde_oid = ht.hakukohde_oid
+      JOIN pub.pub_dim_henkilo he on ht.henkilo_hakemus_id = he.henkilo_hakemus_id
     WHERE #$filters
     """.as[Int].head
+    LOG.debug(s"selectHakijatYhteensaWithParams: ${query.statements.head}")
+    query
   }
 
   def selectKoulutusaloittainWithParams(
@@ -131,16 +161,53 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       opetuskielet, maakunnat, kunnat, harkinnanvaraisuudet, sukupuoli
     )
 
-    sql"""SELECT ka.koodinimi as otsikko, SUM(t.hakijat) AS hakijat, SUM(t.ensisijaisia) AS ensisijaisia, SUM(t.varasija) AS varasija, SUM(t.hyvaksytyt) AS hyvaksytyt,
-    SUM(t.vastaanottaneet) AS vastaanottaneet, SUM(t.lasna) AS lasna, SUM(t.poissa) AS poissa, SUM(t.ilm_yht) AS ilm_yht, SUM(DISTINCT h.hakukohteen_aloituspaikat) AS aloituspaikat,
-    SUM(t.toive_1) AS toive1, SUM(t.toive_2) AS toive2, SUM(t.toive_3) AS toive3, SUM(t.toive_4) AS toive4, SUM(t.toive_5) AS toive5, SUM(t.toive_6) AS toive6, SUM(t.toive_7) AS toive7
-    FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
-    JOIN pub.pub_dim_hakukohde h
-    ON t.hakukohde_oid = h.hakukohde_oid
-    JOIN pub.pub_dim_koodisto_koulutusalataso1 ka
-    ON t.koulutusalataso_1 = ka.koodiarvo
-    WHERE #$filters
-    GROUP BY ka.koodinimi""".as[HakeneetHyvaksytytVastaanottaneetResult]
+    val query = sql"""SELECT
+        ka.koodinimi AS otsikko,
+	      SUM(a.hakijat) as hakijat,
+	      SUM(a.ensisijaisia) AS ensisijaisia,
+        SUM(a.varasija) AS varasija,
+        SUM(a.hyvaksytyt) AS hyvaksytyt,
+        SUM(a.vastaanottaneet) AS vastaanottaneet,
+        SUM(a.lasna) AS lasna,
+        SUM(a.poissa) AS poissa,
+        SUM(a.ilm_yht) AS ilm_yht,
+        SUM(b.hakukohteen_aloituspaikat) AS aloituspaikat,
+        SUM(a.toive1) AS toive1,
+        SUM(a.toive2) AS toive2,
+        SUM(a.toive3) AS toive3,
+        SUM(a.toive4) AS toive4,
+        SUM(a.toive5) AS toive5,
+        SUM(a.toive6) AS toive6,
+        SUM(a.toive7) AS toive7
+	    FROM (
+		    SELECT
+      	  t.koulutusalataso_1,
+          h.hakukohde_oid,
+          SUM(t.hakijat) AS hakijat,
+          SUM(t.ensisijaisia) AS ensisijaisia,
+          SUM(t.varasija) AS varasija,
+          SUM(t.hyvaksytyt) AS hyvaksytyt,
+          SUM(t.vastaanottaneet) AS vastaanottaneet,
+          SUM(t.lasna) AS lasna,
+          SUM(t.poissa) AS poissa,
+          SUM(t.ilm_yht) AS ilm_yht,
+          SUM(t.toive_1) AS toive1,
+          SUM(t.toive_2) AS toive2,
+          SUM(t.toive_3) AS toive3,
+          SUM(t.toive_4) AS toive4,
+          SUM(t.toive_5) AS toive5,
+          SUM(t.toive_6) AS toive6,
+          SUM(t.toive_7) AS toive7
+	      FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
+        JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
+	      WHERE #$filters
+        GROUP BY t.koulutusalataso_1, h.hakukohde_oid
+	    ) a
+      JOIN pub.pub_dim_hakukohde b on a.hakukohde_oid = b.hakukohde_oid
+      JOIN pub.pub_dim_koodisto_koulutusalataso1 ka ON a.koulutusalataso_1 = ka.koodiarvo
+      GROUP BY 1""".as[HakeneetHyvaksytytVastaanottaneetResult]
+    LOG.debug(s"selectKoulutusaloittainWithParams: ${query.statements.head}")
+    query
   }
 
   def selectOrganisaatioittainWithParams(
@@ -162,21 +229,54 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       opetuskielet, maakunnat, kunnat, harkinnanvaraisuudet, sukupuoli
     )
     val organisaatioSelect = organisaatiotaso match {
-      case "oppilaitoksittain" => "h.oppilaitos_nimi as otsikko"
-      case _ => "h.koulutustoimija_nimi as otsikko"
+      case "oppilaitoksittain" => "b.oppilaitos_nimi as otsikko"
+      case _ => "b.koulutustoimija_nimi as otsikko"
     }
-    val organisaatioGroupBy = organisaatiotaso match {
-      case "oppilaitoksittain" => "h.oppilaitos_nimi"
-      case _ => "h.koulutustoimija_nimi"
-    }
-    sql"""SELECT #$organisaatioSelect, SUM(t.hakijat) AS hakijat, SUM(t.ensisijaisia) AS ensisijaisia, SUM(t.varasija) AS varasija, SUM(t.hyvaksytyt) AS hyvaksytyt,
-    SUM(t.vastaanottaneet) AS vastaanottaneet, SUM(t.lasna) AS lasna, SUM(t.poissa) AS poissa, SUM(t.ilm_yht) AS ilm_yht, SUM(DISTINCT h.hakukohteen_aloituspaikat) AS aloituspaikat,
-    SUM(t.toive_1) AS toive1, SUM(t.toive_2) AS toive2, SUM(t.toive_3) AS toive3, SUM(t.toive_4) AS toive4, SUM(t.toive_5) AS toive5, SUM(t.toive_6) AS toive6, SUM(t.toive_7) AS toive7
-    FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
-    JOIN pub.pub_dim_hakukohde h
-    ON t.hakukohde_oid = h.hakukohde_oid
-    WHERE #$filters
-    GROUP BY #$organisaatioGroupBy""".as[HakeneetHyvaksytytVastaanottaneetResult]
+    val query = sql"""SELECT
+        #$organisaatioSelect,
+	      SUM(a.hakijat) as hakijat,
+	      SUM(a.ensisijaisia) AS ensisijaisia,
+        SUM(a.varasija) AS varasija,
+        SUM(a.hyvaksytyt) AS hyvaksytyt,
+        SUM(a.vastaanottaneet) AS vastaanottaneet,
+        SUM(a.lasna) AS lasna,
+        SUM(a.poissa) AS poissa,
+        SUM(a.ilm_yht) AS ilm_yht,
+        SUM(b.hakukohteen_aloituspaikat) AS aloituspaikat,
+        SUM(a.toive1) AS toive1,
+        SUM(a.toive2) AS toive2,
+        SUM(a.toive3) AS toive3,
+        SUM(a.toive4) AS toive4,
+        SUM(a.toive5) AS toive5,
+        SUM(a.toive6) AS toive6,
+        SUM(a.toive7) AS toive7
+	    FROM (
+		    SELECT
+      		h.hakukohde_oid,
+            SUM(t.hakijat) AS hakijat,
+            SUM(t.ensisijaisia) AS ensisijaisia,
+            SUM(t.varasija) AS varasija,
+            SUM(t.hyvaksytyt) AS hyvaksytyt,
+            SUM(t.vastaanottaneet) AS vastaanottaneet,
+            SUM(t.lasna) AS lasna,
+            SUM(t.poissa) AS poissa,
+            SUM(t.ilm_yht) AS ilm_yht,
+            SUM(t.toive_1) AS toive1,
+            SUM(t.toive_2) AS toive2,
+            SUM(t.toive_3) AS toive3,
+            SUM(t.toive_4) AS toive4,
+            SUM(t.toive_5) AS toive5,
+            SUM(t.toive_6) AS toive6,
+            SUM(t.toive_7) AS toive7
+	      FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
+	      JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
+	      WHERE #$filters
+        GROUP BY h.hakukohde_oid
+	    ) a
+      JOIN pub.pub_dim_hakukohde b on a.hakukohde_oid = b.hakukohde_oid
+      GROUP BY 1""".as[HakeneetHyvaksytytVastaanottaneetResult]
+    LOG.debug(s"selectOrganisaatioittainWithParams: ${query.statements.head}")
+    query
   }
 
   def selectToimipisteittainWithParams(
@@ -197,14 +297,52 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       opetuskielet, maakunnat, kunnat, harkinnanvaraisuudet, sukupuoli
     )
 
-    sql"""SELECT h.toimipiste, h.organisaatio_nimi, SUM(t.hakijat) AS hakijat, SUM(t.ensisijaisia) AS ensisijaisia, SUM(t.varasija) AS varasija, SUM(t.hyvaksytyt) AS hyvaksytyt,
-    SUM(t.vastaanottaneet) AS vastaanottaneet, SUM(t.lasna) AS lasna, SUM(t.poissa) AS poissa, SUM(t.ilm_yht) AS ilm_yht, SUM(DISTINCT h.hakukohteen_aloituspaikat) AS aloituspaikat,
-    SUM(t.toive_1) AS toive1, SUM(t.toive_2) AS toive2, SUM(t.toive_3) AS toive3, SUM(t.toive_4) AS toive4, SUM(t.toive_5) AS toive5, SUM(t.toive_6) AS toive6, SUM(t.toive_7) AS toive7
-    FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
-    JOIN pub.pub_dim_hakukohde h
-    ON t.hakukohde_oid = h.hakukohde_oid
-    WHERE #$filters
-    GROUP BY h.toimipiste, h.organisaatio_nimi""".as[HakeneetHyvaksytytVastaanottaneetToimipisteittain]
+    val query = sql"""SELECT
+	    b.toimipiste,
+	    b.organisaatio_nimi,
+	    SUM(a.hakijat) as hakijat,
+	    SUM(a.ensisijaisia) AS ensisijaisia,
+      SUM(a.varasija) AS varasija,
+      SUM(a.hyvaksytyt) AS hyvaksytyt,
+      SUM(a.vastaanottaneet) AS vastaanottaneet,
+      SUM(a.lasna) AS lasna,
+      SUM(a.poissa) AS poissa,
+      SUM(a.ilm_yht) AS ilm_yht,
+      SUM(b.hakukohteen_aloituspaikat) AS aloituspaikat,
+      SUM(a.toive1) AS toive1,
+      SUM(a.toive2) AS toive2,
+      SUM(a.toive3) AS toive3,
+      SUM(a.toive4) AS toive4,
+      SUM(a.toive5) AS toive5,
+      SUM(a.toive6) AS toive6,
+      SUM(a.toive7) AS toive7
+	    FROM (
+		    SELECT
+      		h.hakukohde_oid,
+          SUM(t.hakijat) AS hakijat,
+          SUM(t.ensisijaisia) AS ensisijaisia,
+          SUM(t.varasija) AS varasija,
+          SUM(t.hyvaksytyt) AS hyvaksytyt,
+          SUM(t.vastaanottaneet) AS vastaanottaneet,
+          SUM(t.lasna) AS lasna,
+          SUM(t.poissa) AS poissa,
+          SUM(t.ilm_yht) AS ilm_yht,
+          SUM(t.toive_1) AS toive1,
+          SUM(t.toive_2) AS toive2,
+          SUM(t.toive_3) AS toive3,
+          SUM(t.toive_4) AS toive4,
+          SUM(t.toive_5) AS toive5,
+          SUM(t.toive_6) AS toive6,
+          SUM(t.toive_7) AS toive7
+	      FROM pub.pub_fct_raportti_tilastoraportti_toinen_aste t
+	      JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
+	      WHERE #$filters
+        GROUP BY h.hakukohde_oid
+	    ) a
+      JOIN pub.pub_dim_hakukohde b ON a.hakukohde_oid = b.hakukohde_oid
+      GROUP BY 1,2""".as[HakeneetHyvaksytytVastaanottaneetToimipisteittain]
+    LOG.debug(s"selectToimipisteittainWithParams: ${query.statements.head}")
+    query
   }
 
 }

@@ -70,7 +70,7 @@ export const useHakijatSearchParams = () => {
   );
 
   const emptyAllHakijatParams = () => {
-    console.log('EMPTY ALL HAKIJAT PARAMS');
+    console.debug('EMPTY ALL HAKIJAT PARAMS');
     setSelectedPohjakoulutukset(null);
     setSelectedVastaanottotieto(null);
     setSelectedMarkkinointilupa(null);

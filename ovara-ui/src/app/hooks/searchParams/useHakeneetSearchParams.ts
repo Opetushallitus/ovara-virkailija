@@ -45,13 +45,50 @@ export const useHakeneetSearchParams = () => {
 
   const [selectedNaytaHakutoiveet, setSelectedNaytaHakutoiveet] = useQueryState(
     'nayta-hakutoiveet',
-    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
+    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS).withDefault(true),
   );
 
   const [selectedSukupuoli, setSelectedSukupuoli] = useQueryState(
     'sukupuoli',
-    DEFAULT_NUQS_OPTIONS,
+    parseAsString.withOptions(DEFAULT_NUQS_OPTIONS).withDefault('neutral'),
   );
+
+  const [selectedTutkinnonTaso, setSelectedTutkinnonTaso] = useQueryState(
+    'tutkinnon-taso',
+    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
+  const [selectedAidinkieli, setSelectedAidinkieli] = useQueryState(
+    'aidinkieli',
+    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
+  const [selectedEnsikertalainen, setSelectedEnsikertalainen] = useQueryState(
+    'ensikertalainen',
+    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
+  const [selectedOkmOhjauksenAlat, setSelectedOkmOhjauksenAlat] = useQueryState(
+    'okm-ohjauksen-ala',
+    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
+  const emptyAllHakeneetParams = () => {
+    console.debug('EMPTY ALL HAKENEET-HYVÄKSYTYT-VASTAANOTTANEET PARAMS');
+    setSelectedTulostustapa(null);
+    setSelectedOpetuskielet(null);
+    setSelectedMaakunnat(null);
+    setSelectedKunnat(null);
+    setSelectedKoulutusalat1(null);
+    setSelectedKoulutusalat2(null);
+    setSelectedKoulutusalat3(null);
+    setSelectedNaytaHakutoiveet(null);
+    setSelectedSukupuoli(null);
+    setSelectedTutkinnonTaso(null);
+    setSelectedAidinkieli(null);
+    setSelectedEnsikertalainen(null);
+    setSelectedOkmOhjauksenAlat(null);
+  };
 
   return {
     selectedTulostustapa,
@@ -72,5 +109,14 @@ export const useHakeneetSearchParams = () => {
     setSelectedNaytaHakutoiveet,
     selectedSukupuoli,
     setSelectedSukupuoli,
+    selectedTutkinnonTaso,
+    setSelectedTutkinnonTaso,
+    selectedAidinkieli,
+    setSelectedAidinkieli,
+    selectedEnsikertalainen,
+    setSelectedEnsikertalainen,
+    selectedOkmOhjauksenAlat,
+    setSelectedOkmOhjauksenAlat,
+    emptyAllHakeneetParams,
   };
 };

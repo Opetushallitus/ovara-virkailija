@@ -24,7 +24,7 @@ class KoulutuksetToteutuksetHakukohteetRepository extends Extractors {
                  k.tila AS koulutuksen_tila,
                  t.tila AS toteutuksen_tila,
                  hk.tila AS hakukohteen_tila,
-                 hk.aloituspaikat,
+                 hk.hakukohteen_aloituspaikat,
                  hk.on_valintakoe,
                  hk.toinen_aste_onko_kaksoistutkinto,
                  hk.jarjestaa_urheilijan_ammkoulutusta,

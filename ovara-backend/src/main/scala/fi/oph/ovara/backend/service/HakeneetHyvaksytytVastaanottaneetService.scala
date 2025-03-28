@@ -18,7 +18,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
 
   @Autowired
   val db: OvaraDatabase = null
-  
+
   def get(
            haku: List[String],
            tulostustapa: String,
@@ -111,7 +111,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
           organisaatiotaso = tulostustapa
         )
         db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams")
-    
+
     val sumQuery = hakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams(
       selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
       haut = haku,
@@ -125,9 +125,9 @@ class HakeneetHyvaksytytVastaanottaneetService(
       harkinnanvaraisuudet = harkinnanvaraisuudet,
       sukupuoli = sukupuoli
     )
-    
-    val sumQueryResult = db.run(sumQuery, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaHakukohteittainWithParams")
-    
+
+    val sumQueryResult = db.run(sumQuery, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams")
+
     ExcelWriter.writeHakeneetHyvaksytytVastaanottaneetRaportti(
       asiointikieli,
       translations,

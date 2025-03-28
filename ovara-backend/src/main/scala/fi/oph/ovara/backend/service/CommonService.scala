@@ -109,6 +109,10 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     db.run(commonRepository.selectDistinctKoulutusalat3(koulutusalat2), "selectDistinctKoulutusalat3")
   }
 
+  def getOkmOhjauksenAlat: Vector[Koodi] = {
+    db.run(commonRepository.selectDistinctOkmOhjauksenAlat, "selectDistinctOkmOhjauksenAlat")
+  }
+
   def getHakukohderyhmat(haut: List[String]): Vector[Hakukohderyhma] = {
     val user             = userService.getEnrichedUserDetails
     val kayttooikeusOids = AuthoritiesUtil.getKayttooikeusOids(user.authorities)
@@ -259,7 +263,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       kayttooikeusOrganisaatioOids: List[String],
       oppilaitosOids: List[String],
       toimipisteOids: List[String],
-      koulutustoimijaOid: Option[String] = None
+      koulutustoimijaOid: Option[String] = None,
   ): List[String] = {
     val hierarkiat =
       if (toimipisteOids.nonEmpty) {

@@ -21,6 +21,7 @@ export const Harkinnanvaraisuus = ({ t }: { t: (key: string) => string }) => {
       setSelectedValues={setSelectedHarkinnanvaraisuus}
       t={t}
       getTranslation={getHarkinnanvaraisuusTranslation}
+      boxSx={{ columns: 3, width: '100%' }}
     />
   );
 };

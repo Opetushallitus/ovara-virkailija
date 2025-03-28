@@ -31,7 +31,6 @@ import { SoraAiempi } from '@/app/components/form/soraAiempi';
 import { Urheilijatutkinto } from '@/app/components/form/Urheilijatutkinto';
 import { Pohjakoulutus } from '@/app/components/form/pohjakoulutus';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
-import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
 import { MainContainer } from '@/app/components/main-container';
 
 export default function Hakijat() {
@@ -42,21 +41,10 @@ export default function Hakijat() {
   const organisaatiot = useFetchOrganisaatiohierarkiat().data;
   const {
     selectedAlkamiskaudet,
-    setSelectedAlkamiskaudet,
     selectedHaut,
-    setSelectedHaut,
     selectedOppilaitokset,
     selectedToimipisteet,
-    setSelectedOppilaitokset,
-    setSelectedToimipisteet,
-    setSelectedHakukohteet,
-    setSelectedHarkinnanvaraisuus,
   } = useCommonSearchParams();
-  const {
-    setSelectedJulkaisulupa,
-    setSelectedMarkkinointilupa,
-    setSelectedVastaanottotieto,
-  } = useHakijatSearchParams();
 
   const isDisabled = !(
     selectedAlkamiskaudet &&
@@ -108,17 +96,6 @@ export default function Hakijat() {
             downloadExcel={() =>
               downloadExcel('hakijat', queryParamsStr, setIsLoading)
             }
-            fieldsToClear={[
-              () => setSelectedAlkamiskaudet(null),
-              () => setSelectedHaut(null),
-              () => setSelectedOppilaitokset(null),
-              () => setSelectedToimipisteet(null),
-              () => setSelectedHakukohteet(null),
-              () => setSelectedVastaanottotieto(null),
-              () => setSelectedMarkkinointilupa(null),
-              () => setSelectedJulkaisulupa(null),
-              () => setSelectedHarkinnanvaraisuus(null),
-            ]}
           />
         </FormBox>
       ) : null}

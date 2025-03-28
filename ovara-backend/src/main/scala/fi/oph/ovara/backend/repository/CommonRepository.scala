@@ -122,7 +122,7 @@ class CommonRepository extends Extractors {
     } else {
       s"WHERE km.maakunta_koodiarvo in ($maakunnatStr)"
     }
-    sql"""SELECT DISTINCT k.koodiarvo, k.koodinimi
+    sql"""SELECT k.koodiarvo, k.koodinimi
           FROM pub.pub_dim_koodisto_kunta k
           JOIN pub.pub_dim_koodisto_kunta_maakunta km
           ON k.koodiarvo = km.kunta_koodiarvo
@@ -157,7 +157,7 @@ class CommonRepository extends Extractors {
   }
 
   def selectDistinctKoulutusalat1(): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
-    sql"""SELECT k.kansallinenkoulutusluokitus2016koulutusalataso1 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso1_nimi as koodinimi
+    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso1 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso1_nimi as koodinimi
           FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k""".as[Koodi]
   }
 
@@ -168,7 +168,7 @@ class CommonRepository extends Extractors {
     } else {
       s"WHERE k.kansallinenkoulutusluokitus2016koulutusalataso1 in ($koulutusala1Str)"
     }
-    sql"""SELECT k.kansallinenkoulutusluokitus2016koulutusalataso2 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso2_nimi as koodinimi
+    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso2 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso2_nimi as koodinimi
           FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
             #$koulutusala1QueryStr""".as[Koodi]
   }
@@ -180,9 +180,14 @@ class CommonRepository extends Extractors {
     } else {
       s"WHERE k.kansallinenkoulutusluokitus2016koulutusalataso2 in ($koulutusala2Str)"
     }
-    sql"""SELECT k.kansallinenkoulutusluokitus2016koulutusalataso3 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso3_nimi as koodinimi
+    sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso3 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso3_nimi as koodinimi
           FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
           #$koulutusala2QueryStr""".as[Koodi]
+  }
+
+  def selectDistinctOkmOhjauksenAlat: SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
+    sql"""SELECT oo.koodiarvo, oo.koodinimi
+          FROM pub.pub_dim_koodisto_okmohjauksenala oo""".as[Koodi]
   }
 
   def selectDistinctOrganisaatiot(

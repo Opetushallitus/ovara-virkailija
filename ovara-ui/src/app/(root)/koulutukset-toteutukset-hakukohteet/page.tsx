@@ -26,19 +26,7 @@ export default function KoulutuksetToteutuksetHakukohteet() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const hasToinenAsteRights = hasOvaraToinenAsteRole(user?.authorities);
-  const {
-    selectedAlkamiskaudet,
-    setSelectedAlkamiskaudet,
-    selectedHaut,
-    setSelectedHaut,
-    setSelectedKoulutustoimija,
-    setSelectedOppilaitokset,
-    setSelectedToimipisteet,
-    setSelectedKoulutuksenTila,
-    setSelectedToteutuksenTila,
-    setSelectedHakukohteenTila,
-    setSelectedValintakoe,
-  } = useCommonSearchParams();
+  const { selectedAlkamiskaudet, selectedHaut } = useCommonSearchParams();
 
   const [isLoading, setIsLoading] = useState(false);
   const queryParamsStr = useSearchParams().toString();
@@ -66,17 +54,6 @@ export default function KoulutuksetToteutuksetHakukohteet() {
                 setIsLoading,
               )
             }
-            fieldsToClear={[
-              () => setSelectedAlkamiskaudet(null),
-              () => setSelectedHaut(null),
-              () => setSelectedKoulutustoimija(null),
-              () => setSelectedOppilaitokset(null),
-              () => setSelectedToimipisteet(null),
-              () => setSelectedKoulutuksenTila(null),
-              () => setSelectedToteutuksenTila(null),
-              () => setSelectedHakukohteenTila(null),
-              () => setSelectedValintakoe(null),
-            ]}
           />
         </FormBox>
       ) : null}
