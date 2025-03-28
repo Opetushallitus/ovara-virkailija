@@ -7,7 +7,6 @@ import fi.oph.ovara.backend.domain.{
 }
 import fi.oph.ovara.backend.utils.RepositoryUtils
 import org.slf4j.{Logger, LoggerFactory}
-import slick.sql.SqlStreamingAction
 import org.springframework.stereotype.{Component, Repository}
 import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api.*
@@ -291,7 +290,7 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     )
     val organisaatioSelect = organisaatiotaso match {
       case "oppilaitoksittain" => "b.oppilaitos_nimi as otsikko"
-      case _ => "b.koulutustoimija_nimi as otsikko"
+      case _                   => "b.koulutustoimija_nimi as otsikko"
     }
     val query = sql"""SELECT
         #$organisaatioSelect,
