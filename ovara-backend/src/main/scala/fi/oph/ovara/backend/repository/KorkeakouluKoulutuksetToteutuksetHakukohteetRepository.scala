@@ -2,6 +2,7 @@ package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.KorkeakouluKoulutusToteutusHakukohdeResult
 import fi.oph.ovara.backend.utils.RepositoryUtils
+import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.{Component, Repository}
 import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api.*
@@ -10,6 +11,8 @@ import slick.sql.SqlStreamingAction
 @Component
 @Repository
 class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors {
+  val LOG: Logger = LoggerFactory.getLogger(classOf[KorkeakouluKoulutuksetToteutuksetHakukohteetRepository])
+
   def selectWithParams(
       selectedKayttooikeusOrganisaatiot: List[String],
       haku: List[String],
@@ -20,7 +23,7 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
     KorkeakouluKoulutusToteutusHakukohdeResult
   ], KorkeakouluKoulutusToteutusHakukohdeResult, Effect] = {
     val raportointiorganisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(selectedKayttooikeusOrganisaatiot)
-    sql"""SELECT hk.organisaatio_nimi,
+    val query = sql"""SELECT hk.organisaatio_nimi,
                  k.koulutus_nimi,
                  k.koulutus_oid,
                  k.tila AS koulutuksen_tila,
@@ -64,5 +67,9 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
           #${RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "t.tila", toteutuksenTila)}
           #${RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "hk.tila", hakukohteenTila)}
           """.as[KorkeakouluKoulutusToteutusHakukohdeResult]
+
+    LOG.debug(s"selectWithParams: ${query.statements.head}")
+
+    query
   }
 }
