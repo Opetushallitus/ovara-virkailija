@@ -1592,6 +1592,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
             alkaa = Some(LocalDate.from(ISO_LOCAL_DATE_TIME_FORMATTER.parse("2023-11-30T09:00"))),
             paattyy = Some(LocalDate.from(ISO_LOCAL_DATE_TIME_FORMATTER.parse("2024-01-02T15:00")))
           )
+        ),
+        Map(
+          En -> "Separate application",
+          Fi -> "Erillishaku",
+          Sv -> "Separata antagningar"
         )
       )
     )
@@ -1621,7 +1626,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(0).getCell(15).getStringCellValue == "raportti.hakukohteenUlkoinenTunniste")
     assert(sheet.getRow(0).getCell(16).getStringCellValue == "raportti.haunNimi")
     assert(sheet.getRow(0).getCell(17).getStringCellValue == "raportti.hakuaika")
-    assert(sheet.getRow(0).getCell(18) == null)
+    assert(sheet.getRow(0).getCell(18).getStringCellValue == "raportti.hakutapa")
+    assert(sheet.getRow(0).getCell(19) == null)
     assert(
       sheet.getRow(1).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
     )
@@ -1647,7 +1653,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(1).getCell(15).getStringCellValue == "ARTS20503")
     assert(sheet.getRow(1).getCell(16).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
     assert(sheet.getRow(1).getCell(17).getStringCellValue == "30.11.2023 - 2.1.2024")
-    assert(sheet.getRow(1).getCell(18) == null)
+    assert(sheet.getRow(1).getCell(18).getStringCellValue == "Separata antagningar")
+    assert(sheet.getRow(1).getCell(19) == null)
   }
 
   "createHeadingRow" should "create heading row with translated column names or translation keys for hakijat raportti" in {
