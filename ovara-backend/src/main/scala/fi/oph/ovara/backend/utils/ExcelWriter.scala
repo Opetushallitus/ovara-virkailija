@@ -594,6 +594,152 @@ object ExcelWriter {
     }
   }
 
+  private def writeToisenAsteenHakijatRows(
+      sheet: XSSFSheet,
+      bodyTextCellStyle: XSSFCellStyle,
+      currentRowIndex: Int,
+      hakijoidenHakutoiveet: Seq[ToisenAsteenHakijaWithCombinedNimi],
+      asiointikieli: String,
+      translations: Map[String, String]
+  ): Unit = {
+    var rowIndex = currentRowIndex
+    hakijoidenHakutoiveet.foreach(hakutoive => {
+      val hakijanHakutoiveRow = sheet.createRow(rowIndex)
+      rowIndex += 1
+      var cellIndex = 0
+
+      cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.hakija)
+      cellIndex =
+        writeOptionBooleanToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.turvakielto, translations)
+
+      cellIndex =
+        writeKielistettyToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.kansalaisuus, asiointikieli)
+      cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.oppijanumero)
+      cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.hakemusOid)
+      cellIndex =
+        writeKielistettyToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.oppilaitos, asiointikieli)
+      cellIndex =
+        writeKielistettyToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.toimipiste, asiointikieli)
+      cellIndex = writeKielistettyToCell(
+        hakijanHakutoiveRow,
+        bodyTextCellStyle,
+        cellIndex,
+        hakutoive.hakukohteenNimi,
+        asiointikieli
+      )
+      cellIndex = writeIntToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.prioriteetti)
+      cellIndex = writeOptionBooleanToCell(
+        hakijanHakutoiveRow,
+        bodyTextCellStyle,
+        cellIndex,
+        hakutoive.kaksoistutkintoKiinnostaa,
+        translations
+      )
+      cellIndex = writeOptionBooleanToCell(
+        hakijanHakutoiveRow,
+        bodyTextCellStyle,
+        cellIndex,
+        hakutoive.urheilijatutkintoKiinnostaa,
+        translations
+      )
+      cellIndex = writeOptionTranslationToCell(
+        hakijanHakutoiveRow,
+        bodyTextCellStyle,
+        cellIndex,
+        hakutoive.valintatieto,
+        translations
+      )
+      cellIndex = writeOptionStrToCell(
+        hakijanHakutoiveRow,
+        bodyTextCellStyle,
+        cellIndex,
+        hakutoive.varasija
+      )
+      cellIndex = writeOptionStrToCell(
+        hakijanHakutoiveRow,
+        bodyTextCellStyle,
+        cellIndex,
+        hakutoive.kokonaispisteet
+      )
+      cellIndex = writeKielistettyToCell(
+        hakijanHakutoiveRow,
+        bodyTextCellStyle,
+        cellIndex,
+        hakutoive.hylkaamisenTaiPeruuntumisenSyy,
+        asiointikieli
+      )
+      cellIndex = writeOptionTranslationToCell(
+        hakijanHakutoiveRow,
+        bodyTextCellStyle,
+        cellIndex,
+        hakutoive.vastaanottotieto,
+        translations
+      )
+      cellIndex =
+        writeOptionLocalDateToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.viimVastaanottopaiva)
+      cellIndex = writeOptionTranslationToCell(
+        hakijanHakutoiveRow,
+        bodyTextCellStyle,
+        cellIndex,
+        hakutoive.ilmoittautuminen,
+        translations
+      )
+      cellIndex = writeOptionHarkinnanvaraisuusToCell(
+        hakijanHakutoiveRow,
+        bodyTextCellStyle,
+        cellIndex,
+        hakutoive.harkinnanvaraisuus,
+        translations
+      )
+      cellIndex = writeOptionBooleanToCell(
+        hakijanHakutoiveRow,
+        bodyTextCellStyle,
+        cellIndex,
+        hakutoive.soraAiempi,
+        translations
+      )
+      cellIndex = writeOptionBooleanToCell(
+        hakijanHakutoiveRow,
+        bodyTextCellStyle,
+        cellIndex,
+        hakutoive.soraTerveys,
+        translations
+      )
+      cellIndex = writeKielistettyToCell(
+        hakijanHakutoiveRow,
+        bodyTextCellStyle,
+        cellIndex,
+        hakutoive.pohjakoulutus,
+        asiointikieli
+      )
+      cellIndex = writeOptionBooleanToCell(
+        hakijanHakutoiveRow,
+        bodyTextCellStyle,
+        cellIndex,
+        hakutoive.markkinointilupa,
+        translations
+      )
+      cellIndex = writeOptionBooleanToCell(
+        hakijanHakutoiveRow,
+        bodyTextCellStyle,
+        cellIndex,
+        hakutoive.julkaisulupa,
+        translations
+      )
+      cellIndex = writeOptionBooleanToCell(
+        hakijanHakutoiveRow,
+        bodyTextCellStyle,
+        cellIndex,
+        hakutoive.sahkoinenViestintalupa,
+        translations
+      )
+
+      cellIndex = writeOptionStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.lahiosoite)
+      cellIndex = writeOptionStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.postinumero)
+      cellIndex = writeOptionStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.postitoimipaikka)
+    })
+  }
+
   def writeToisenAsteenHakijatRaportti(
       hakijat: Seq[ToisenAsteenHakijaWithCombinedNimi],
       asiointikieli: String,
@@ -610,8 +756,8 @@ object ExcelWriter {
     val headingCellStyle: XSSFCellStyle  = workbook.createCellStyle()
     val bodyTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
 
-    val headingFont  = createHeadingFont(workbook, headingCellStyle)
-    val bodyTextFont = createBodyTextFont(workbook, bodyTextCellStyle)
+    createHeadingFont(workbook, headingCellStyle)
+    createBodyTextFont(workbook, bodyTextCellStyle)
 
     var currentRowIndex = 0
 
@@ -621,23 +767,14 @@ object ExcelWriter {
     currentRowIndex =
       createHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNames, headingCellStyle)
 
-    hakijat.foreach(hakutoive => {
-      val hakijanHakutoiveRow = sheet.createRow(currentRowIndex)
-      currentRowIndex = currentRowIndex + 1
-
-      for (i <- 0 until hakutoive.productArity) yield {
-        val fieldName = fieldNamesWithIndex.find((name, index) => i == index) match {
-          case Some((name, i)) => name
-          case None            => ""
-        }
-
-        val cell = hakijanHakutoiveRow.createCell(i)
-        cell.setCellStyle(bodyTextCellStyle)
-        val property = hakutoive.productElement(i)
-
-        writeValueToCell(property, fieldName, cell, asiointikieli, translations)
-      }
-    })
+    writeToisenAsteenHakijatRows(
+      sheet = sheet,
+      bodyTextCellStyle = bodyTextCellStyle,
+      currentRowIndex = currentRowIndex,
+      hakijoidenHakutoiveet = hakijat,
+      asiointikieli = asiointikieli,
+      translations = translations
+    )
 
     // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
     fieldNamesWithIndex.foreach { case (title, index) =>
