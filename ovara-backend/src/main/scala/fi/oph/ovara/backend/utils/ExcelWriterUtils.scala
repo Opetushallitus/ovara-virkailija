@@ -5,6 +5,7 @@ import fi.oph.ovara.backend.utils.Constants.DATE_FORMATTER_FOR_EXCEL
 import org.apache.poi.xssf.usermodel.{XSSFCell, XSSFCellStyle, XSSFRow}
 
 import java.time.LocalDate
+import scala.util.matching.Regex
 
 object ExcelWriterUtils {
   def createCell(row: XSSFRow, cellStyle: XSSFCellStyle, cellIndex: Int): XSSFCell = {
@@ -104,6 +105,39 @@ object ExcelWriterUtils {
       case None => "-"
     }
     cell.setCellValue(value)
+    cellIndex + 1
+  }
+
+  def writeOptionHarkinnanvaraisuusToCell(
+      row: XSSFRow,
+      cellStyle: XSSFCellStyle,
+      cellIndex: Int,
+      maybeStr: Option[String],
+      translations: Map[String, String]
+  ): Int = {
+    val cell = createCell(row, cellStyle, cellIndex)
+    val valueToWrite = maybeStr match {
+      case Some(s) =>
+        if (s.startsWith("EI_HARKINNANVARAINEN")) {
+          "-"
+        } else {
+          val r: Regex = "(ATARU|SURE)_(\\w*)".r
+          val group    = for (m <- r.findFirstMatchIn(s)) yield m.group(2)
+          group match {
+            case Some(m) =>
+              val value = if (m == "ULKOMAILLA_OPISKELTU") {
+                "KOULUTODISTUSTEN_VERTAILUVAIKEUDET"
+              } else {
+                m
+              }
+              val lowerCaseStr = value.toLowerCase
+              translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+            case None => "-"
+          }
+        }
+      case None => "-"
+    }
+    cell.setCellValue(valueToWrite)
     cellIndex + 1
   }
 }
