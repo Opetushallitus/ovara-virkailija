@@ -67,4 +67,5 @@ object Constants {
   val POSTIOSOITEFIELDS: List[String] = List("lahiosoite", "postinumero", "postitoimipaikka")
 
   val ISO_LOCAL_DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")
+  val DATE_FORMATTER_FOR_EXCEL: DateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy")
 }
