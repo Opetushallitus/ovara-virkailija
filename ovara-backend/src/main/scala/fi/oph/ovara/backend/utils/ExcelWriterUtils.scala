@@ -198,7 +198,7 @@ object ExcelWriterUtils {
     cellIndex + 1
   }
 
-  def getDateStr(localDate: Option[LocalDate]): String = {
+  private def getDateStr(localDate: Option[LocalDate]): String = {
     localDate match {
       case Some(localDate: LocalDate) => localDate.format(DATE_FORMATTER_FOR_EXCEL)
       case None                       => ""
@@ -222,5 +222,17 @@ object ExcelWriterUtils {
 
     cell.setCellValue(value)
     cellIndex + 1
+  }
+
+  def createHakutoiveenArvosanatWritableValues(
+      arvosanat: Map[String, String],
+      allSortedArvosanaNames: Seq[String]
+  ): Seq[String] = {
+    allSortedArvosanaNames.map(arvosanaName =>
+      arvosanat.get(arvosanaName) match {
+        case Some(foundArvosana) => foundArvosana
+        case None                => "-"
+      }
+    )
   }
 }
