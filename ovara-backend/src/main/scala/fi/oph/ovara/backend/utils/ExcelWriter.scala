@@ -978,17 +978,10 @@ object ExcelWriter {
 
       if (naytaArvosanat) {
         val hakutoiveArvosanat = hakutoive.arvosanat
-        distinctSortedYoArvosanatInQueryResult.foreach(arvosana => {
-          val maybeArvosana = hakutoiveArvosanat.find(hakutoiveArvosana => {
-            hakutoiveArvosana._1 == arvosana
-          }) match {
-            case Some(foundArvosana) =>
-              Some(foundArvosana._2)
-            case None =>
-              None
-          }
-
-          cellIndex = writeOptionStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, maybeArvosana)
+        val hakutoiveenArvosanatCellValues =
+          createHakutoiveenArvosanatWritableValues(hakutoiveArvosanat, distinctSortedYoArvosanatInQueryResult)
+        hakutoiveenArvosanatCellValues.foreach(arvosanaValue => {
+          cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, arvosanaValue)
         })
       }
     })

@@ -4890,4 +4890,41 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     assert(sheet.getPhysicalNumberOfRows == 5)
   }
+
+  "createHakutoiveenArvosanatWritableValues" should "return empty list when there are no arvosanat in the excel" in {
+    val arvosanat: Map[String, String] = Map()
+    val sortedArvosanaNames            = List()
+
+    assert(ExcelWriterUtils.createHakutoiveenArvosanatWritableValues(arvosanat, sortedArvosanaNames) == List())
+  }
+
+  it should s"""return a list of "-" values when hakutoiveen arvosanat Map is empty""" in {
+    val arvosanat: Map[String, String] = Map()
+    val sortedArvosanaNames            = List("A", "BB", "EA", "KE", "M")
+
+    assert(
+      ExcelWriterUtils
+        .createHakutoiveenArvosanatWritableValues(arvosanat, sortedArvosanaNames) == List("-", "-", "-", "-", "-")
+    )
+  }
+
+  it should "return a list of arvosana values in the sorted orer of arvosana names list" in {
+    val arvosanat           = Map("A" -> "E", "M" -> "E", "BB" -> "M", "EA" -> "C", "KE" -> "L")
+    val sortedArvosanaNames = List("A", "BB", "EA", "KE", "M")
+
+    assert(
+      ExcelWriterUtils
+        .createHakutoiveenArvosanatWritableValues(arvosanat, sortedArvosanaNames) == List("E", "M", "C", "L", "E")
+    )
+  }
+
+  it should s"""add "-" when there is no corresponding arvosana value in the hakutoiveen arvosanat Map""" in {
+    val arvosanat = Map("A" -> "E", "M" -> "E", "KE" -> "L")
+    val sortedArvosanaNames = List("A", "BB", "EA", "KE", "M")
+
+    assert(
+      ExcelWriterUtils
+        .createHakutoiveenArvosanatWritableValues(arvosanat, sortedArvosanaNames) == List("E", "-", "-", "L", "E")
+    )
+  }
 }
