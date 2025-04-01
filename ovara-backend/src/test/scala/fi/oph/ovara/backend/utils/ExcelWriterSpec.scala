@@ -3843,13 +3843,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
   "getTranslationForCellValue" should "return translation key if translation is not found" in {
     assert(
-      ExcelWriter.getTranslationForCellValue("puuttuva_kaannos", translations) == "raportti.puuttuva_kaannos"
+      ExcelWriterUtils.getTranslationForCellValue("puuttuva_kaannos", translations) == "raportti.puuttuva_kaannos"
     )
   }
 
   it should "return translation when translation if found with translation key" in {
     assert(
-      ExcelWriter.getTranslationForCellValue("eligible", translations) == "hakukelpoinen SV"
+      ExcelWriterUtils.getTranslationForCellValue("eligible", translations) == "hakukelpoinen SV"
     )
   }
 

@@ -14,6 +14,11 @@ object ExcelWriterUtils {
     cell
   }
 
+  def getTranslationForCellValue(s: String, translations: Map[String, String]): String = {
+    val lowerCaseStr = s.toLowerCase
+    translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+  }
+
   def writeStrToCell(row: XSSFRow, cellStyle: XSSFCellStyle, cellIndex: Int, str: String): Int = {
     val cell = createCell(row, cellStyle, cellIndex)
     cell.setCellValue(str)
@@ -40,8 +45,7 @@ object ExcelWriterUtils {
     val cell = createCell(row, cellStyle, cellIndex)
     val value = maybeStr match {
       case Some(str) =>
-        val lowerCaseStr = str.toLowerCase
-        translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+        getTranslationForCellValue(str, translations)
       case None => "-"
     }
     cell.setCellValue(value)
@@ -92,10 +96,10 @@ object ExcelWriterUtils {
 
   def writeOptionIntToCell(row: XSSFRow, cellStyle: XSSFCellStyle, cellIndex: Int, maybeInt: Option[Int]): Int = {
     val cell = createCell(row, cellStyle, cellIndex)
-    maybeInt match
+    maybeInt match {
       case Some(int) => cell.setCellValue(int)
-      case None => cell.setCellValue("-")
-
+      case None      => cell.setCellValue("-")
+    }
     cellIndex + 1
   }
 
@@ -139,8 +143,7 @@ object ExcelWriterUtils {
               } else {
                 m
               }
-              val lowerCaseStr = value.toLowerCase
-              translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+              getTranslationForCellValue(value, translations)
             case None => "-"
           }
         }
@@ -167,8 +170,7 @@ object ExcelWriterUtils {
         }
       case None => "-"
     }
-    val lowerCaseStr = value.toLowerCase
-    val translation  = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+    val translation = getTranslationForCellValue(value, translations)
     cell.setCellValue(translation)
     cellIndex + 1
   }

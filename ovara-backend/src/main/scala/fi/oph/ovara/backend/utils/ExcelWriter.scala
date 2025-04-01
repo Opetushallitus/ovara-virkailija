@@ -542,11 +542,6 @@ object ExcelWriter {
     currentRowIndex + 1
   }
 
-  def getTranslationForCellValue(s: String, translations: Map[String, String]): String = {
-    val lowerCaseStr = s.toLowerCase
-    translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
-  }
-
   private def writeToisenAsteenHakijatRows(
       sheet: XSSFSheet,
       bodyTextCellStyle: XSSFCellStyle,
