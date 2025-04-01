@@ -94,42 +94,76 @@ object ExcelWriter {
     }
   }
 
-  private def createHakukohdeRow(
+  private def createKoulutuksetToteutuksetHakukohteetRow(
       sheet: XSSFSheet,
       initialRowIndex: Int,
-      resultRowIndex: Int,
       cellStyle: XSSFCellStyle,
       hakukohteenNimiCellStyle: XSSFCellStyle,
       kth: KoulutusToteutusHakukohdeResult,
-      asiointikieli: String
+      asiointikieli: String,
+      translations: Map[String, String]
   ) = {
     val hakukohteenTiedotRow = sheet.createRow(initialRowIndex)
+    var cellIndex            = 0
 
-    for (i <- 0 until kth.productArity) yield {
-      val cell = hakukohteenTiedotRow.createCell(i)
-      cell.setCellStyle(cellStyle)
-      kth.productElement(i) match {
-        case kielistetty: Kielistetty =>
-          val kielistettyValue = kielistetty(Kieli.withName(asiointikieli))
+    cellIndex = writeKielistettyToCell(
+      row = hakukohteenTiedotRow,
+      cellStyle = hakukohteenNimiCellStyle,
+      cellIndex = cellIndex,
+      kielistetty = kth.hakukohteenNimi,
+      asiointikieli = asiointikieli
+    )
+    cellIndex =
+      writeStrToCell(row = hakukohteenTiedotRow, cellStyle = cellStyle, cellIndex = cellIndex, str = kth.hakukohdeOid)
 
-          if (i == 0) {
-            cell.setCellStyle(hakukohteenNimiCellStyle)
-          }
-
-          cell.setCellValue(kielistettyValue)
-        case string: String =>
-          cell.setCellValue(string)
-        case Some(s: String) =>
-          cell.setCellValue(s)
-        case Some(int: Int) =>
-          cell.setCellValue(int)
-        case Some(b: Boolean) =>
-          val value = if (b) "X" else "-"
-          cell.setCellValue(value)
-        case _ =>
-          cell.setCellValue("-")
-      }
-    }
+    cellIndex = writeOptionTilaToCell(
+      row = hakukohteenTiedotRow,
+      cellStyle = cellStyle,
+      cellIndex = cellIndex,
+      maybeTila = kth.koulutuksenTila,
+      translations = translations
+    )
+    cellIndex = writeOptionTilaToCell(
+      row = hakukohteenTiedotRow,
+      cellStyle = cellStyle,
+      cellIndex = cellIndex,
+      maybeTila = kth.toteutuksenTila,
+      translations = translations
+    )
+    cellIndex = writeOptionTilaToCell(
+      row = hakukohteenTiedotRow,
+      cellStyle = cellStyle,
+      cellIndex = cellIndex,
+      maybeTila = kth.hakukohteenTila,
+      translations = translations
+    )
+    cellIndex = writeOptionIntToCell(
+      row = hakukohteenTiedotRow,
+      cellStyle = cellStyle,
+      cellIndex = cellIndex,
+      maybeInt = kth.aloituspaikat
+    )
+    cellIndex = writeOptionBooleanToCell(
+      row = hakukohteenTiedotRow,
+      cellStyle = cellStyle,
+      cellIndex = cellIndex,
+      maybeBoolean = kth.onValintakoe,
+      translations = translations
+    )
+    cellIndex = writeOptionBooleanToCell(
+      row = hakukohteenTiedotRow,
+      cellStyle = cellStyle,
+      cellIndex = cellIndex,
+      maybeBoolean = kth.voiSuorittaaKaksoistutkinnon,
+      translations = translations
+    )
+    cellIndex = writeOptionBooleanToCell(
+      row = hakukohteenTiedotRow,
+      cellStyle = cellStyle,
+      cellIndex = cellIndex,
+      maybeBoolean = kth.jarjestaaUrheilijanAmmKoulutusta,
+      translations = translations
+    )
 
     initialRowIndex + 1
   }
@@ -146,7 +180,8 @@ object ExcelWriter {
       subHeadingFont: XSSFFont,
       asiointikieli: String,
       raporttiColumnTitlesWithIndex: List[(String, Int)],
-      raporttityyppi: String
+      raporttityyppi: String,
+      translations: Map[String, String]
   ): Int = {
     var currentRowIndex = initialRowIndex
 
@@ -199,14 +234,14 @@ object ExcelWriter {
         }
 
         orgHierarkiaWithResults.hakukohteet.zipWithIndex.foreach((hakukohde, resultRowIndex) => {
-          currentRowIndex = createHakukohdeRow(
+          currentRowIndex = createKoulutuksetToteutuksetHakukohteetRow(
             sheet,
             currentRowIndex,
-            resultRowIndex,
             cellStyle,
             hakukohteenNimiTextCellStyle,
             hakukohde._2,
-            asiointikieli
+            asiointikieli,
+            translations
           )
         })
 
@@ -223,7 +258,8 @@ object ExcelWriter {
             subHeadingFont,
             asiointikieli,
             raporttiColumnTitlesWithIndex,
-            raporttityyppi
+            raporttityyppi,
+            translations
           )
           currentRowIndex = updatedRowIndex
         }
@@ -343,7 +379,8 @@ object ExcelWriter {
         subHeadingFont = subHeadingFont,
         asiointikieli = asiointikieli,
         raporttiColumnTitlesWithIndex = raporttiColumnTitlesWithIndex,
-        raporttityyppi = raporttityyppi
+        raporttityyppi = raporttityyppi,
+        translations = translations
       )
 
       // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan

@@ -605,7 +605,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
                   toteutuksenTila = Some("tallennettu"),
                   hakukohteenTila = Some("tallennettu"),
                   aloituspaikat = Some(5),
-                  onValintakoe = Some(true)
+                  onValintakoe = Some(true),
+                  voiSuorittaaKaksoistutkinnon = Some(true),
+                  jarjestaaUrheilijanAmmKoulutusta = Some(false)
                 )
               )
             )
@@ -642,20 +644,26 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Hakukohde result row
     assert(sheet.getRow(3).getCell(0).getStringCellValue == "Hakukohteen nimi sv")
     assert(sheet.getRow(3).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000021565")
-    assert(sheet.getRow(3).getCell(2).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(3).getCell(3).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(3).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(3).getCell(2).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(3).getCell(3).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(3).getCell(4).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(3).getCell(5).getNumericCellValue == 8)
-    assert(sheet.getRow(3).getCell(6).getStringCellValue == "-")
+    assert(sheet.getRow(3).getCell(6).getStringCellValue == "Nej")
+    assert(sheet.getRow(3).getCell(7).getStringCellValue == "-")
+    assert(sheet.getRow(3).getCell(8).getStringCellValue == "-")
+    assert(sheet.getRow(3).getCell(9) == null)
 
     // Hakukohde 2 result row
     assert(sheet.getRow(4).getCell(0).getStringCellValue == "Hakukohteen 2 nimi sv")
     assert(sheet.getRow(4).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000031232")
-    assert(sheet.getRow(4).getCell(2).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(4).getCell(3).getStringCellValue == "tallennettu")
-    assert(sheet.getRow(4).getCell(4).getStringCellValue == "tallennettu")
+    assert(sheet.getRow(4).getCell(2).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(4).getCell(3).getStringCellValue == "Luonnos SV")
+    assert(sheet.getRow(4).getCell(4).getStringCellValue == "Luonnos SV")
     assert(sheet.getRow(4).getCell(5).getNumericCellValue == 5)
-    assert(sheet.getRow(4).getCell(6).getStringCellValue == "X")
+    assert(sheet.getRow(4).getCell(6).getStringCellValue == "Ja")
+    assert(sheet.getRow(4).getCell(7).getStringCellValue == "Ja")
+    assert(sheet.getRow(4).getCell(8).getStringCellValue == "Nej")
+    assert(sheet.getRow(4).getCell(9) == null)
 
     assert(sheet.getPhysicalNumberOfRows == 5)
   }
@@ -684,7 +692,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
               toteutuksenTila = Some("julkaistu"),
               hakukohteenTila = Some("julkaistu"),
               aloituspaikat = Some(8),
-              onValintakoe = Some(false)
+              onValintakoe = Some(false),
+              voiSuorittaaKaksoistutkinnon = None,
+              jarjestaaUrheilijanAmmKoulutusta = Some(false)
             )
           ),
           OrganisaationKoulutusToteutusHakukohde(
@@ -718,20 +728,26 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Hakukohde result row
     assert(sheet.getRow(2).getCell(0).getStringCellValue == "Hakukohteen nimi sv")
     assert(sheet.getRow(2).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000021565")
-    assert(sheet.getRow(2).getCell(2).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(2).getCell(3).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(2).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(2).getCell(2).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(2).getCell(3).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(2).getCell(4).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(2).getCell(5).getNumericCellValue == 8)
-    assert(sheet.getRow(2).getCell(6).getStringCellValue == "-")
+    assert(sheet.getRow(2).getCell(6).getStringCellValue == "Nej")
+    assert(sheet.getRow(2).getCell(7).getStringCellValue == "-")
+    assert(sheet.getRow(2).getCell(8).getStringCellValue == "Nej")
+    assert(sheet.getRow(2).getCell(9) == null)
 
     // Hakukohde 2 result row
     assert(sheet.getRow(3).getCell(0).getStringCellValue == "Hakukohteen 2 nimi sv")
     assert(sheet.getRow(3).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000031232")
-    assert(sheet.getRow(3).getCell(2).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(3).getCell(3).getStringCellValue == "tallennettu")
-    assert(sheet.getRow(3).getCell(4).getStringCellValue == "tallennettu")
+    assert(sheet.getRow(3).getCell(2).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(3).getCell(3).getStringCellValue == "Luonnos SV")
+    assert(sheet.getRow(3).getCell(4).getStringCellValue == "Luonnos SV")
     assert(sheet.getRow(3).getCell(5).getNumericCellValue == 5)
-    assert(sheet.getRow(3).getCell(6).getStringCellValue == "X")
+    assert(sheet.getRow(3).getCell(6).getStringCellValue == "Ja")
+    assert(sheet.getRow(3).getCell(7).getStringCellValue == "-")
+    assert(sheet.getRow(3).getCell(8).getStringCellValue == "-")
+    assert(sheet.getRow(3).getCell(9) == null)
 
     assert(sheet.getPhysicalNumberOfRows == 4)
   }
@@ -791,7 +807,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
                   toteutuksenTila = Some("julkaistu"),
                   hakukohteenTila = Some("julkaistu"),
                   aloituspaikat = Some(3),
-                  onValintakoe = Some(false)
+                  onValintakoe = Some(false),
+                  jarjestaaUrheilijanAmmKoulutusta = Some(false)
                 )
               )
             )
@@ -859,7 +876,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
                       toteutuksenTila = Some("julkaistu"),
                       hakukohteenTila = Some("julkaistu"),
                       aloituspaikat = Some(2),
-                      onValintakoe = Some(false)
+                      onValintakoe = Some(false),
+                      voiSuorittaaKaksoistutkinnon = Some(true)
                     )
                   )
                 )
@@ -909,7 +927,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
               toteutuksenTila = Some("tallennettu"),
               hakukohteenTila = Some("tallennettu"),
               aloituspaikat = Some(5),
-              onValintakoe = Some(true)
+              onValintakoe = Some(true),
+              voiSuorittaaKaksoistutkinnon = Some(true),
+              jarjestaaUrheilijanAmmKoulutusta = Some(false)
             )
           )
         )
@@ -977,7 +997,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
               toteutuksenTila = Some("julkaistu"),
               hakukohteenTila = Some("julkaistu"),
               aloituspaikat = Some(8),
-              onValintakoe = Some(false)
+              onValintakoe = Some(false),
+              jarjestaaUrheilijanAmmKoulutusta = Some(true)
             )
           )
         )
@@ -1000,20 +1021,26 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Oppilaitos 1 hakukohteet
     assert(sheet.getRow(3).getCell(0).getStringCellValue == "Hakukohteen nimi sv")
     assert(sheet.getRow(3).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000021565")
-    assert(sheet.getRow(3).getCell(2).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(3).getCell(3).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(3).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(3).getCell(2).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(3).getCell(3).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(3).getCell(4).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(3).getCell(5).getNumericCellValue == 8)
-    assert(sheet.getRow(3).getCell(6).getStringCellValue == "-")
+    assert(sheet.getRow(3).getCell(6).getStringCellValue == "Nej")
+    assert(sheet.getRow(3).getCell(7).getStringCellValue == "-")
+    assert(sheet.getRow(3).getCell(8).getStringCellValue == "-")
+    assert(sheet.getRow(3).getCell(9) == null)
 
     // Hakukohde 2 result row
     assert(sheet.getRow(4).getCell(0).getStringCellValue == "Hakukohteen 2 nimi sv")
     assert(sheet.getRow(4).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000031232")
-    assert(sheet.getRow(4).getCell(2).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(4).getCell(3).getStringCellValue == "tallennettu")
-    assert(sheet.getRow(4).getCell(4).getStringCellValue == "tallennettu")
+    assert(sheet.getRow(4).getCell(2).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(4).getCell(3).getStringCellValue == "Luonnos SV")
+    assert(sheet.getRow(4).getCell(4).getStringCellValue == "Luonnos SV")
     assert(sheet.getRow(4).getCell(5).getNumericCellValue == 5)
-    assert(sheet.getRow(4).getCell(6).getStringCellValue == "X")
+    assert(sheet.getRow(4).getCell(6).getStringCellValue == "Ja")
+    assert(sheet.getRow(4).getCell(7).getStringCellValue == "Ja")
+    assert(sheet.getRow(4).getCell(8).getStringCellValue == "Nej")
+    assert(sheet.getRow(4).getCell(9) == null)
 
     // Oppilaitos 1:n toimipiste 1
     assert(sheet.getRow(5).getCell(0).getStringCellValue == "Toimipisteen nimi sv")
@@ -1022,11 +1049,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Toimipisteen hakukohde
     assert(sheet.getRow(6).getCell(0).getStringCellValue == "Toimipisteen hakukohteen nimi sv")
     assert(sheet.getRow(6).getCell(1).getStringCellValue == "1.2.246.562.20.0000000000000004567")
-    assert(sheet.getRow(6).getCell(2).getStringCellValue == "arkistoitu")
-    assert(sheet.getRow(6).getCell(3).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(6).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(6).getCell(2).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(6).getCell(3).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(6).getCell(4).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(6).getCell(5).getNumericCellValue == 3)
-    assert(sheet.getRow(6).getCell(6).getStringCellValue == "-")
+    assert(sheet.getRow(6).getCell(6).getStringCellValue == "Nej")
+    assert(sheet.getRow(6).getCell(7).getStringCellValue == "-")
+    assert(sheet.getRow(6).getCell(8).getStringCellValue == "Nej")
+    assert(sheet.getRow(6).getCell(9) == null)
 
     // Oppilaitos 1:n toimipiste 2
     assert(sheet.getRow(7).getCell(0).getStringCellValue == "Toimipisteen 2 nimi sv")
@@ -1035,11 +1065,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Toimipisteen 2 hakukohde
     assert(sheet.getRow(8).getCell(0).getStringCellValue == "Toimipisteen 2 hakukohteen nimi sv")
     assert(sheet.getRow(8).getCell(1).getStringCellValue == "1.2.246.562.20.0000000000000004568")
-    assert(sheet.getRow(8).getCell(2).getStringCellValue == "arkistoitu")
-    assert(sheet.getRow(8).getCell(3).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(8).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(8).getCell(2).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(8).getCell(3).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(8).getCell(4).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(8).getCell(5).getNumericCellValue == 4)
-    assert(sheet.getRow(8).getCell(6).getStringCellValue == "X")
+    assert(sheet.getRow(8).getCell(6).getStringCellValue == "Ja")
+    assert(sheet.getRow(8).getCell(7).getStringCellValue == "-")
+    assert(sheet.getRow(8).getCell(8).getStringCellValue == "-")
+    assert(sheet.getRow(8).getCell(9) == null)
 
     // Oppilaitos 1:n toimipisteen 2 alitoimipiste
     assert(sheet.getRow(9).getCell(0).getStringCellValue == "Toimipisteen 2 alitoimipisteen nimi sv")
@@ -1048,11 +1081,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Toimipisteen 2 alitoimipiste hakukohde
     assert(sheet.getRow(10).getCell(0).getStringCellValue == "Toimipisteen 2 alitoimipisteen hakukohteen nimi sv")
     assert(sheet.getRow(10).getCell(1).getStringCellValue == "1.2.246.562.20.000000000000000456811")
-    assert(sheet.getRow(10).getCell(2).getStringCellValue == "arkistoitu")
-    assert(sheet.getRow(10).getCell(3).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(10).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(10).getCell(2).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(10).getCell(3).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(10).getCell(4).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(10).getCell(5).getNumericCellValue == 2)
-    assert(sheet.getRow(10).getCell(6).getStringCellValue == "-")
+    assert(sheet.getRow(10).getCell(6).getStringCellValue == "Nej")
+    assert(sheet.getRow(10).getCell(7).getStringCellValue == "Ja")
+    assert(sheet.getRow(10).getCell(8).getStringCellValue == "-")
+    assert(sheet.getRow(10).getCell(9) == null)
 
     // Oppilaitos 2
     assert(sheet.getRow(11).getCell(0).getStringCellValue == "Oppilaitoksen 2 nimi sv")
@@ -1063,11 +1099,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Oppilaitos 2 hakukohde
     assert(sheet.getRow(13).getCell(0).getStringCellValue == "Oppilaitoksen 2 hakukohteen nimi sv")
     assert(sheet.getRow(13).getCell(1).getStringCellValue == "1.2.246.562.20.000000000000000215651")
-    assert(sheet.getRow(13).getCell(2).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(13).getCell(3).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(13).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(13).getCell(2).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(13).getCell(3).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(13).getCell(4).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(13).getCell(5).getNumericCellValue == 8)
-    assert(sheet.getRow(13).getCell(6).getStringCellValue == "-")
+    assert(sheet.getRow(13).getCell(6).getStringCellValue == "Nej")
+    assert(sheet.getRow(13).getCell(7).getStringCellValue == "-")
+    assert(sheet.getRow(13).getCell(8).getStringCellValue == "Ja")
+    assert(sheet.getRow(13).getCell(9) == null)
 
     // Oppilaitos 2 toimipiste 3
     assert(sheet.getRow(14).getCell(0).getStringCellValue == "Toimipisteen 3 nimi sv")
@@ -1076,11 +1115,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Oppilaitos 2 hakukohde
     assert(sheet.getRow(15).getCell(0).getStringCellValue == "Toimipisteen 3 hakukohteen nimi sv")
     assert(sheet.getRow(15).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000045673")
-    assert(sheet.getRow(15).getCell(2).getStringCellValue == "arkistoitu")
-    assert(sheet.getRow(15).getCell(3).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(15).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(15).getCell(2).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(15).getCell(3).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(15).getCell(4).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(15).getCell(5).getNumericCellValue == 3)
-    assert(sheet.getRow(15).getCell(6).getStringCellValue == "-")
+    assert(sheet.getRow(15).getCell(6).getStringCellValue == "Nej")
+    assert(sheet.getRow(15).getCell(7).getStringCellValue == "-")
+    assert(sheet.getRow(15).getCell(8).getStringCellValue == "-")
+    assert(sheet.getRow(15).getCell(9) == null)
 
     assert(sheet.getPhysicalNumberOfRows == 16)
   }
@@ -1119,9 +1161,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
                 Sv -> "Toimipisteen hakukohteen nimi sv"
               ),
               hakukohdeOid = "1.2.246.562.20.0000000000000004567",
-              koulutuksenTila = Some("arkistoitu"),
+              koulutuksenTila = Some("julkaistu"),
               toteutuksenTila = Some("julkaistu"),
-              hakukohteenTila = Some("julkaistu"),
+              hakukohteenTila = Some("arkistoitu"),
               aloituspaikat = Some(3),
               onValintakoe = Some(false)
             )
@@ -1187,9 +1229,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
                     Sv -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi sv"
                   ),
                   hakukohdeOid = "1.2.246.562.20.000000000000000456811",
-                  koulutuksenTila = Some("arkistoitu"),
+                  koulutuksenTila = Some("julkaistu"),
                   toteutuksenTila = Some("julkaistu"),
-                  hakukohteenTila = Some("julkaistu"),
+                  hakukohteenTila = Some("arkistoitu"),
                   aloituspaikat = Some(2),
                   onValintakoe = Some(false)
                 )
@@ -1207,9 +1249,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
                 Sv -> "Toimipisteen 2 hakukohteen nimi sv"
               ),
               hakukohdeOid = "1.2.246.562.20.0000000000000004568",
-              koulutuksenTila = Some("arkistoitu"),
+              koulutuksenTila = Some("julkaistu"),
               toteutuksenTila = Some("julkaistu"),
-              hakukohteenTila = Some("julkaistu"),
+              hakukohteenTila = Some("arkistoitu"),
               aloituspaikat = Some(4),
               onValintakoe = Some(true)
             )
@@ -1283,9 +1325,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
                         Sv -> "Toimipisteen hakukohteen nimi sv"
                       ),
                       hakukohdeOid = "1.2.246.562.20.0000000000000004567",
-                      koulutuksenTila = Some("arkistoitu"),
+                      koulutuksenTila = Some("julkaistu"),
                       toteutuksenTila = Some("julkaistu"),
-                      hakukohteenTila = Some("julkaistu"),
+                      hakukohteenTila = Some("arkistoitu"),
                       aloituspaikat = Some(3),
                       onValintakoe = Some(false)
                     )
@@ -1331,9 +1373,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
                             Sv -> "Toimipisteen 2 alitoimipisteen hakukohteen nimi sv"
                           ),
                           hakukohdeOid = "1.2.246.562.20.000000000000000456811",
-                          koulutuksenTila = Some("arkistoitu"),
+                          koulutuksenTila = Some("julkaistu"),
                           toteutuksenTila = Some("julkaistu"),
-                          hakukohteenTila = Some("julkaistu"),
+                          hakukohteenTila = Some("arkistoitu"),
                           aloituspaikat = Some(2),
                           onValintakoe = Some(false)
                         )
@@ -1351,9 +1393,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
                         Sv -> "Toimipisteen 2 hakukohteen nimi sv"
                       ),
                       hakukohdeOid = "1.2.246.562.20.0000000000000004568",
-                      koulutuksenTila = Some("arkistoitu"),
+                      koulutuksenTila = Some("julkaistu"),
                       toteutuksenTila = Some("julkaistu"),
-                      hakukohteenTila = Some("julkaistu"),
+                      hakukohteenTila = Some("arkistoitu"),
                       aloituspaikat = Some(4),
                       onValintakoe = Some(true)
                     )
@@ -1370,7 +1412,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
                   hakukohdeOid = "1.2.246.562.20.00000000000000021565",
                   koulutuksenTila = Some("julkaistu"),
                   toteutuksenTila = Some("julkaistu"),
-                  hakukohteenTila = Some("julkaistu"),
+                  hakukohteenTila = Some("tallennettu"),
                   aloituspaikat = Some(8),
                   onValintakoe = Some(false),
                   voiSuorittaaKaksoistutkinnon = Some(true),
@@ -1439,7 +1481,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         font1,
         userLng,
         raporttiColumnTitlesWithIndex,
-        KOULUTUSTOIMIJARAPORTTI
+        KOULUTUSTOIMIJARAPORTTI,
+        translations
       )
 
     // Parent organisaatio row with aloituspaikat sum
@@ -1450,11 +1493,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     assert(sheet.getRow(1).getCell(0).getStringCellValue == "Koulutustoimijan hakukohteen nimi sv")
     assert(sheet.getRow(1).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000021542013")
-    assert(sheet.getRow(1).getCell(2).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(1).getCell(3).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(1).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(1).getCell(2).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(1).getCell(3).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(1).getCell(4).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(1).getCell(5).getNumericCellValue == 4)
-    assert(sheet.getRow(1).getCell(6).getStringCellValue == "-")
+    assert(sheet.getRow(1).getCell(6).getStringCellValue == "Nej")
     assert(sheet.getRow(1).getCell(7).getStringCellValue == "-")
     assert(sheet.getRow(1).getCell(8).getStringCellValue == "-")
     assert(sheet.getRow(1).getCell(9) == null)
@@ -1468,23 +1511,23 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Hakukohde result row
     assert(sheet.getRow(3).getCell(0).getStringCellValue == "Hakukohteen nimi sv")
     assert(sheet.getRow(3).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000021565")
-    assert(sheet.getRow(3).getCell(2).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(3).getCell(3).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(3).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(3).getCell(2).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(3).getCell(3).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(3).getCell(4).getStringCellValue == "Luonnos SV")
     assert(sheet.getRow(3).getCell(5).getNumericCellValue == 8)
-    assert(sheet.getRow(3).getCell(6).getStringCellValue == "-")
-    assert(sheet.getRow(3).getCell(7).getStringCellValue == "X")
-    assert(sheet.getRow(3).getCell(8).getStringCellValue == "X")
+    assert(sheet.getRow(3).getCell(6).getStringCellValue == "Nej")
+    assert(sheet.getRow(3).getCell(7).getStringCellValue == "Ja")
+    assert(sheet.getRow(3).getCell(8).getStringCellValue == "Ja")
     assert(sheet.getRow(3).getCell(9) == null)
 
     // Hakukohde 2 result row
     assert(sheet.getRow(4).getCell(0).getStringCellValue == "Hakukohteen 2 nimi sv")
     assert(sheet.getRow(4).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000031232")
-    assert(sheet.getRow(4).getCell(2).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(4).getCell(3).getStringCellValue == "tallennettu")
-    assert(sheet.getRow(4).getCell(4).getStringCellValue == "tallennettu")
+    assert(sheet.getRow(4).getCell(2).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(4).getCell(3).getStringCellValue == "Luonnos SV")
+    assert(sheet.getRow(4).getCell(4).getStringCellValue == "Luonnos SV")
     assert(sheet.getRow(4).getCell(5).getNumericCellValue == 5)
-    assert(sheet.getRow(4).getCell(6).getStringCellValue == "X")
+    assert(sheet.getRow(4).getCell(6).getStringCellValue == "Ja")
     assert(sheet.getRow(4).getCell(7).getStringCellValue == "-")
     assert(sheet.getRow(4).getCell(8).getStringCellValue == "-")
     assert(sheet.getRow(4).getCell(9) == null)
@@ -1498,11 +1541,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Toimipisteen result row
     assert(sheet.getRow(6).getCell(0).getStringCellValue == "Toimipisteen hakukohteen nimi sv")
     assert(sheet.getRow(6).getCell(1).getStringCellValue == "1.2.246.562.20.0000000000000004567")
-    assert(sheet.getRow(6).getCell(2).getStringCellValue == "arkistoitu")
-    assert(sheet.getRow(6).getCell(3).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(6).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(6).getCell(2).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(6).getCell(3).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(6).getCell(4).getStringCellValue == "raportti.arkistoitu")
     assert(sheet.getRow(6).getCell(5).getNumericCellValue == 3)
-    assert(sheet.getRow(6).getCell(6).getStringCellValue == "-")
+    assert(sheet.getRow(6).getCell(6).getStringCellValue == "Nej")
     assert(sheet.getRow(6).getCell(7).getStringCellValue == "-")
     assert(sheet.getRow(6).getCell(8).getStringCellValue == "-")
     assert(sheet.getRow(6).getCell(9) == null)
@@ -1516,11 +1559,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Toimipisteen 2 result row
     assert(sheet.getRow(8).getCell(0).getStringCellValue == "Toimipisteen 2 hakukohteen nimi sv")
     assert(sheet.getRow(8).getCell(1).getStringCellValue == "1.2.246.562.20.0000000000000004568")
-    assert(sheet.getRow(8).getCell(2).getStringCellValue == "arkistoitu")
-    assert(sheet.getRow(8).getCell(3).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(8).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(8).getCell(2).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(8).getCell(3).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(8).getCell(4).getStringCellValue == "raportti.arkistoitu")
     assert(sheet.getRow(8).getCell(5).getNumericCellValue == 4)
-    assert(sheet.getRow(8).getCell(6).getStringCellValue == "X")
+    assert(sheet.getRow(8).getCell(6).getStringCellValue == "Ja")
     assert(sheet.getRow(8).getCell(7).getStringCellValue == "-")
     assert(sheet.getRow(8).getCell(8).getStringCellValue == "-")
     assert(sheet.getRow(8).getCell(9) == null)
@@ -1534,11 +1577,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Toimipisteen 2 alitoimipisteen result row
     assert(sheet.getRow(10).getCell(0).getStringCellValue == "Toimipisteen 2 alitoimipisteen hakukohteen nimi sv")
     assert(sheet.getRow(10).getCell(1).getStringCellValue == "1.2.246.562.20.000000000000000456811")
-    assert(sheet.getRow(10).getCell(2).getStringCellValue == "arkistoitu")
-    assert(sheet.getRow(10).getCell(3).getStringCellValue == "julkaistu")
-    assert(sheet.getRow(10).getCell(4).getStringCellValue == "julkaistu")
+    assert(sheet.getRow(10).getCell(2).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(10).getCell(3).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(10).getCell(4).getStringCellValue == "raportti.arkistoitu")
     assert(sheet.getRow(10).getCell(5).getNumericCellValue == 2)
-    assert(sheet.getRow(10).getCell(6).getStringCellValue == "-")
+    assert(sheet.getRow(10).getCell(6).getStringCellValue == "Nej")
     assert(sheet.getRow(10).getCell(7).getStringCellValue == "-")
     assert(sheet.getRow(10).getCell(8).getStringCellValue == "-")
     assert(sheet.getRow(10).getCell(9) == null)
