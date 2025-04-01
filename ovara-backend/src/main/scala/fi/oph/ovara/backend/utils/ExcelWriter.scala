@@ -883,17 +883,9 @@ object ExcelWriter {
       cellIndex =
         writeOptionLocalDateToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.valintatiedonPvm)
 
-      val hakutoiveValintatapajonot = hakutoive.valintatapajonot
-      distinctSortedValintatapajonotInQueryResult.foreach(valintatapajono => {
-        val kielistettyValinnanTilanKuvaus = hakutoiveValintatapajonot.find(hakutoiveVtj => {
-          hakutoiveVtj.valintatapajonoOid == valintatapajono.valintatapajonoOid
-        }) match {
-          case Some(foundVtj) =>
-            foundVtj.valinnanTilanKuvaus
-          case None =>
-            Map()
-        }
-
+      val hakutoiveValintatapajonot = hakutoive.valintatapajonot.groupBy(_.valintatapajonoOid)
+      val hakukohteenValinnanTilanKuvaukset = createHakutoiveenValintatapajonoWritableValues(hakutoiveValintatapajonot, distinctSortedValintatapajonotInQueryResult)
+      hakukohteenValinnanTilanKuvaukset.foreach(kielistettyValinnanTilanKuvaus => {
         cellIndex = writeKielistettyToCell(
           hakijanHakutoiveRow,
           bodyTextCellStyle,
