@@ -1721,7 +1721,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val fieldNames = classOf[ToisenAsteenHakijaWithCombinedNimi].getDeclaredFields.map(_.getName).toList
     ExcelWriter.createHeadingRow(
       sheet,
-      userLng,
       translations,
       0,
       fieldNames,

@@ -174,7 +174,7 @@ object ExcelWriter {
       hierarkiatWithHakukohteet: List[OrganisaatioHierarkiaWithHakukohteet],
       initialRowIndex: Int,
       headingCellStyle: XSSFCellStyle,
-      cellStyle: XSSFCellStyle,
+      bodyTextCellStyle: XSSFCellStyle,
       hakukohteenNimiTextCellStyle: XSSFCellStyle,
       headingFont: XSSFFont,
       subHeadingFont: XSSFFont,
@@ -237,7 +237,7 @@ object ExcelWriter {
           currentRowIndex = createKoulutuksetToteutuksetHakukohteetRow(
             sheet,
             currentRowIndex,
-            cellStyle,
+            bodyTextCellStyle,
             hakukohteenNimiTextCellStyle,
             hakukohde._2,
             asiointikieli,
@@ -252,7 +252,7 @@ object ExcelWriter {
             orgHierarkiaWithResults.children,
             currentRowIndex,
             headingCellStyle,
-            cellStyle,
+            bodyTextCellStyle,
             hakukohteenNimiTextCellStyle,
             headingFont,
             subHeadingFont,
@@ -360,7 +360,6 @@ object ExcelWriter {
 
       currentRowIndex = createHeadingRow(
         sheet = sheet,
-        asiontikieli = asiointikieli,
         translations = translations,
         currentRowIndex = currentRowIndex,
         fieldNames = titles,
@@ -373,7 +372,7 @@ object ExcelWriter {
         hierarkiatWithHakukohteet = hierarkiatWithResults,
         initialRowIndex = currentRowIndex,
         headingCellStyle = headingCellStyle,
-        cellStyle = bodyTextCellStyle,
+        bodyTextCellStyle = bodyTextCellStyle,
         hakukohteenNimiTextCellStyle = hakukohteenNimiTextCellStyle,
         headingFont = headingFont,
         subHeadingFont = subHeadingFont,
@@ -471,7 +470,6 @@ object ExcelWriter {
 
       currentRowIndex = createHeadingRow(
         sheet = sheet,
-        asiontikieli = asiointikieli,
         translations = translations,
         currentRowIndex = currentRowIndex,
         fieldNames = titles,
@@ -502,7 +500,6 @@ object ExcelWriter {
 
   def createHeadingRow(
       sheet: XSSFSheet,
-      asiontikieli: String,
       translations: Map[String, String],
       currentRowIndex: Int,
       fieldNames: List[String],
@@ -720,8 +717,7 @@ object ExcelWriter {
     val fieldNames: List[String] = classOf[ToisenAsteenHakijaWithCombinedNimi].getDeclaredFields.map(_.getName).toList
     val fieldNamesWithIndex      = fieldNames.zipWithIndex
 
-    currentRowIndex =
-      createHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNames, headingCellStyle)
+    currentRowIndex = createHeadingRow(sheet, translations, currentRowIndex, fieldNames, headingCellStyle)
 
     writeToisenAsteenHakijatRows(
       sheet = sheet,
@@ -1132,8 +1128,7 @@ object ExcelWriter {
         List(otsikko) ++ HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES
     val fieldNamesWithIndex = fieldNames.zipWithIndex
 
-    currentRowIndex =
-      createHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNames, headingCellStyle)
+    currentRowIndex = createHeadingRow(sheet, translations, currentRowIndex, fieldNames, headingCellStyle)
 
     data.foreach { item =>
       val dataRow = sheet.createRow(currentRowIndex)
@@ -1267,8 +1262,7 @@ object ExcelWriter {
       }
     val fieldNamesWithIndex = fieldNames.zipWithIndex
 
-    currentRowIndex =
-      createHeadingRow(sheet, asiointikieli, translations, currentRowIndex, fieldNames, headingCellStyle)
+    currentRowIndex = createHeadingRow(sheet, translations, currentRowIndex, fieldNames, headingCellStyle)
 
     data.foreach { item =>
       val dataRow = sheet.createRow(currentRowIndex)
