@@ -8,9 +8,6 @@ import org.apache.poi.ss.util.{CellRangeAddress, WorkbookUtil}
 import org.apache.poi.xssf.usermodel.*
 import org.slf4j.{Logger, LoggerFactory}
 
-import java.time.LocalDate
-import scala.util.matching.Regex
-
 object ExcelWriter {
 
   val LOG: Logger = LoggerFactory.getLogger("ExcelWriter")
@@ -362,6 +359,52 @@ object ExcelWriter {
     workbook
   }
 
+  private def writeKorkeakouluKoulutuksetToteutuksetHakukohteetRows(
+      sheet: XSSFSheet,
+      bodyTextCellStyle: XSSFCellStyle,
+      currentRowIndex: Int,
+      korkeakouluKoulutuksetToteutuksetHakukohteetResults: Seq[KorkeakouluKoulutusToteutusHakukohdeResult],
+      asiointikieli: String,
+      translations: Map[String, String]
+  ): Unit = {
+    var rowIndex = currentRowIndex
+    korkeakouluKoulutuksetToteutuksetHakukohteetResults.foreach(result => {
+      val resultRow = sheet.createRow(rowIndex)
+      rowIndex += 1
+      var cellIndex = 0
+
+      cellIndex =
+        writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.oppilaitosJaToimipiste, asiointikieli)
+      cellIndex = writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.koulutuksenNimi, asiointikieli)
+      cellIndex = writeStrToCell(resultRow, bodyTextCellStyle, cellIndex, result.koulutusOid)
+      cellIndex = writeOptionTilaToCell(resultRow, bodyTextCellStyle, cellIndex, result.koulutuksenTila, translations)
+      cellIndex = writeOptionKoodiToCell(resultRow, bodyTextCellStyle, cellIndex, result.koulutuskoodi)
+      cellIndex = writeOptionStrToCell(resultRow, bodyTextCellStyle, cellIndex, result.koulutuksenUlkoinenTunniste)
+      cellIndex =
+        writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.opintojenLaajuus, asiointikieli)
+      cellIndex = writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.toteutuksenNimi, asiointikieli)
+      cellIndex = writeStrToCell(resultRow, bodyTextCellStyle, cellIndex, result.toteutusOid)
+      cellIndex = writeOptionTilaToCell(resultRow, bodyTextCellStyle, cellIndex, result.toteutuksenTila, translations)
+      cellIndex = writeOptionStrToCell(resultRow, bodyTextCellStyle, cellIndex, result.toteutuksenUlkoinenTunniste)
+      cellIndex = writeKielistettyToCell(
+        resultRow,
+        bodyTextCellStyle,
+        cellIndex,
+        result.koulutuksenAlkamiskausiJaVuosi,
+        asiointikieli
+      )
+      cellIndex = writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakukohteenNimi, asiointikieli)
+      cellIndex = writeStrToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakukohdeOid)
+      cellIndex = writeOptionTilaToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakukohteenTila, translations)
+      cellIndex = writeOptionStrToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakukohteenUlkoinenTunniste)
+      cellIndex = writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.haunNimi, asiointikieli)
+      cellIndex = writeOptionHakuaikaToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakuaika)
+      cellIndex = writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakutapa, asiointikieli)
+      cellIndex = writeOptionIntToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakukohteenAloituspaikat)
+      cellIndex = writeOptionIntToCell(resultRow, bodyTextCellStyle, cellIndex, result.ensikertalaistenAloituspaikat)
+    })
+  }
+
   def writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
       korkeakouluKoulutuksetToteutuksetHakukohteetResults: Seq[KorkeakouluKoulutusToteutusHakukohdeResult],
       asiointikieli: String,
@@ -374,9 +417,9 @@ object ExcelWriter {
       val headingCellStyle: XSSFCellStyle  = workbook.createCellStyle()
       val bodyTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
 
-      val headingFont    = createHeadingFont(workbook, headingCellStyle)
-      val subHeadingFont = createSubHeadingFont(workbook)
-      val bodyTextFont   = createBodyTextFont(workbook, bodyTextCellStyle)
+      createHeadingFont(workbook, headingCellStyle)
+      createSubHeadingFont(workbook)
+      createBodyTextFont(workbook, bodyTextCellStyle)
 
       workbook.setSheetName(
         0,
@@ -398,23 +441,14 @@ object ExcelWriter {
         headingCellStyle = headingCellStyle
       )
 
-      korkeakouluKoulutuksetToteutuksetHakukohteetResults.foreach(result => {
-        val resultRow = sheet.createRow(currentRowIndex)
-        currentRowIndex = currentRowIndex + 1
-
-        for (i <- 0 until result.productArity) yield {
-          val fieldName = raporttiColumnTitlesWithIndex.find((name, index) => i == index) match {
-            case Some((name, i)) => name
-            case None            => ""
-          }
-
-          val cell = resultRow.createCell(i)
-          cell.setCellStyle(bodyTextCellStyle)
-          val property = result.productElement(i)
-
-          writeValueToCell(property, fieldName, cell, asiointikieli, translations)
-        }
-      })
+      writeKorkeakouluKoulutuksetToteutuksetHakukohteetRows(
+        sheet = sheet,
+        bodyTextCellStyle = bodyTextCellStyle,
+        currentRowIndex = currentRowIndex,
+        korkeakouluKoulutuksetToteutuksetHakukohteetResults = korkeakouluKoulutuksetToteutuksetHakukohteetResults,
+        asiointikieli = asiointikieli,
+        translations = translations
+      )
 
       // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
       raporttiColumnTitlesWithIndex.foreach { case (title, index) =>
@@ -477,121 +511,6 @@ object ExcelWriter {
   def getTranslationForCellValue(s: String, translations: Map[String, String]): String = {
     val lowerCaseStr = s.toLowerCase
     translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
-  }
-
-  def extractKoodi(koodiarvo: String): String = {
-    val koodiRegex: Regex = """\d+""".r
-    koodiRegex.findFirstIn(koodiarvo) match {
-      case Some(koodi) => koodi
-      case None        => ""
-    }
-  }
-
-  private def writeValueToCell(
-      value: Any,
-      fieldName: String,
-      cell: XSSFCell,
-      asiointikieli: String,
-      translations: Map[String, String]
-  ): Unit = {
-    value match {
-      case kielistetty: Kielistetty =>
-        val kielistettyValue = kielistetty.get(Kieli.withName(asiointikieli)) match {
-          case Some(value) =>
-            if (value == null) {
-              "-"
-            } else {
-              value
-            }
-          case None => "-"
-        }
-        cell.setCellValue(kielistettyValue)
-      case Some(d: LocalDate) =>
-        cell.setCellValue(d.format(DATE_FORMATTER_FOR_EXCEL))
-      case Some(hakuaika: Hakuaika) =>
-        def getDateStr(localDate: Option[LocalDate]) = {
-          localDate match {
-            case Some(localDate: LocalDate) => localDate.format(DATE_FORMATTER_FOR_EXCEL)
-            case None                       => ""
-          }
-        }
-        val alkaaStr   = getDateStr(hakuaika.alkaa)
-        val paattyyStr = getDateStr(hakuaika.paattyy)
-        cell.setCellValue(s"$alkaaStr - $paattyyStr")
-      case s: String =>
-        cell.setCellValue(s)
-      case Some(s: String)
-          if List(
-            "vastaanottotieto",
-            "ilmoittautuminen",
-            "hakukelpoisuus",
-            "maksuvelvollisuus",
-            "valintatieto",
-            "hakemusmaksunTila"
-          )
-            .contains(fieldName) =>
-        val lowerCaseStr = s.toLowerCase
-        val translation  = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
-        cell.setCellValue(translation)
-      case Some(s: String) if List("harkinnanvaraisuus").contains(fieldName) =>
-        val value = if (s.startsWith("EI_HARKINNANVARAINEN")) {
-          "-"
-        } else {
-          val r: Regex = "(ATARU|SURE)_(\\w*)".r
-          val group    = for (m <- r.findFirstMatchIn(s)) yield m.group(2)
-          group match {
-            case Some(m) =>
-              val value = if (m == "ULKOMAILLA_OPISKELTU") {
-                "KOULUTODISTUSTEN_VERTAILUVAIKEUDET"
-              } else {
-                m
-              }
-              val lowerCaseStr = value.toLowerCase
-              translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
-            case None => "-"
-          }
-        }
-        cell.setCellValue(value)
-      case Some(koodiarvo: String) if List("koulutuskoodi").contains(fieldName) =>
-        cell.setCellValue(extractKoodi(koodiarvo))
-      case Some(tila: String) if List("koulutuksenTila", "toteutuksenTila", "hakukohteenTila").contains(fieldName) =>
-        val value = if (tila == "tallennettu") {
-          "luonnos"
-        } else {
-          tila
-        }
-        val lowerCaseStr = value.toLowerCase
-        val translation  = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
-        cell.setCellValue(translation)
-      case Some(s: String) =>
-        cell.setCellValue(s)
-      case Some(int: Int) =>
-        cell.setCellValue(int)
-      case int: Int =>
-        cell.setCellValue(int)
-      case Some(b: Boolean)
-          if List(
-            "turvakielto",
-            "kaksoistutkintoKiinnostaa",
-            "urheilijatutkintoKiinnostaa",
-            "soraAiempi",
-            "soraTerveys",
-            "markkinointilupa",
-            "julkaisulupa",
-            "sahkoinenViestintalupa",
-            "ensikertalainen",
-            "ehdollisestiHyvaksytty"
-          ).contains(fieldName) =>
-        val translation =
-          if (b) translations.getOrElse("raportti.kylla", "raportti.kylla")
-          else translations.getOrElse("raportti.ei", "raportti.ei")
-        cell.setCellValue(translation)
-      case Some(b: Boolean) =>
-        val value = if (b) "X" else "-"
-        cell.setCellValue(value)
-      case _ =>
-        cell.setCellValue("-")
-    }
   }
 
   private def writeToisenAsteenHakijatRows(

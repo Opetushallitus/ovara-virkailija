@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.utils
 
-import fi.oph.ovara.backend.domain.{Kieli, Kielistetty}
+import fi.oph.ovara.backend.domain.{Hakuaika, Kieli, Kielistetty}
 import fi.oph.ovara.backend.utils.Constants.DATE_FORMATTER_FOR_EXCEL
 import org.apache.poi.xssf.usermodel.{XSSFCell, XSSFCellStyle, XSSFRow}
 
@@ -90,6 +90,15 @@ object ExcelWriterUtils {
     cellIndex + 1
   }
 
+  def writeOptionIntToCell(row: XSSFRow, cellStyle: XSSFCellStyle, cellIndex: Int, maybeInt: Option[Int]): Int = {
+    val cell = createCell(row, cellStyle, cellIndex)
+    maybeInt match
+      case Some(int) => cell.setCellValue(int)
+      case None => cell.setCellValue("-")
+
+    cellIndex + 1
+  }
+
   def writeOptionBooleanToCell(
       row: XSSFRow,
       cellStyle: XSSFCellStyle,
@@ -138,6 +147,78 @@ object ExcelWriterUtils {
       case None => "-"
     }
     cell.setCellValue(valueToWrite)
+    cellIndex + 1
+  }
+
+  def writeOptionTilaToCell(
+      row: XSSFRow,
+      cellStyle: XSSFCellStyle,
+      cellIndex: Int,
+      maybeTila: Option[String],
+      translations: Map[String, String]
+  ): Int = {
+    val cell = createCell(row, cellStyle, cellIndex)
+    val value = maybeTila match {
+      case Some(tila) =>
+        if (tila == "tallennettu") {
+          "luonnos"
+        } else {
+          tila
+        }
+      case None => "-"
+    }
+    val lowerCaseStr = value.toLowerCase
+    val translation  = translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
+    cell.setCellValue(translation)
+    cellIndex + 1
+  }
+
+  def extractKoodi(koodiarvo: String): String = {
+    val koodiRegex: Regex = """\d+""".r
+    koodiRegex.findFirstIn(koodiarvo) match {
+      case Some(koodi) => koodi
+      case None        => ""
+    }
+  }
+
+  def writeOptionKoodiToCell(
+      row: XSSFRow,
+      cellStyle: XSSFCellStyle,
+      cellIndex: Int,
+      maybeKoodi: Option[String]
+  ): Int = {
+    val cell = createCell(row, cellStyle, cellIndex)
+    val value = maybeKoodi match {
+      case Some(koodiarvo) => extractKoodi(koodiarvo)
+      case None            => "-"
+    }
+    cell.setCellValue(value)
+    cellIndex + 1
+  }
+
+  def getDateStr(localDate: Option[LocalDate]): String = {
+    localDate match {
+      case Some(localDate: LocalDate) => localDate.format(DATE_FORMATTER_FOR_EXCEL)
+      case None                       => ""
+    }
+  }
+
+  def writeOptionHakuaikaToCell(
+      row: XSSFRow,
+      cellStyle: XSSFCellStyle,
+      cellIndex: Int,
+      maybeHakuaika: Option[Hakuaika]
+  ): Int = {
+    val cell = createCell(row, cellStyle, cellIndex)
+    val value = maybeHakuaika match {
+      case Some(hakuaika) =>
+        val alkaaStr   = getDateStr(hakuaika.alkaa)
+        val paattyyStr = getDateStr(hakuaika.paattyy)
+        s"$alkaaStr - $paattyyStr"
+      case None => "-"
+    }
+
+    cell.setCellValue(value)
     cellIndex + 1
   }
 }
