@@ -4891,7 +4891,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getPhysicalNumberOfRows == 5)
   }
 
-  "createHakutoiveenArvosanatWritableValues" should "return empty list when there are no arvosanat in the excel" in {
+  "createHakutoiveenArvosanatWritableValues" should "return empty list when there are no arvosanat in the result" in {
     val arvosanat: Map[String, String] = Map()
     val sortedArvosanaNames            = List()
 
@@ -4919,12 +4919,148 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   it should s"""add "-" when there is no corresponding arvosana value in the hakutoiveen arvosanat Map""" in {
-    val arvosanat = Map("A" -> "E", "M" -> "E", "KE" -> "L")
+    val arvosanat           = Map("A" -> "E", "M" -> "E", "KE" -> "L")
     val sortedArvosanaNames = List("A", "BB", "EA", "KE", "M")
 
     assert(
       ExcelWriterUtils
         .createHakutoiveenArvosanatWritableValues(arvosanat, sortedArvosanaNames) == List("E", "-", "-", "L", "E")
+    )
+  }
+
+  "createHakutoiveenValintapajonoWritableValues" should "return empty list when there are no valintatapajonot in the result" in {
+    val hakutoiveenValintapajonot: Map[String, Seq[Valintatapajono]] = Map()
+    val sortedValintatapajonot                                       = List()
+
+    assert(
+      ExcelWriterUtils.createHakutoiveenValintatapajonoWritableValues(
+        hakutoiveenValintapajonot,
+        sortedValintatapajonot
+      ) == List()
+    )
+  }
+
+  it should s"return a list with empty Map values because hakukohteen valintatapajonot list is empty" in {
+    val hakutoiveenValintapajonot: Map[String, Seq[Valintatapajono]] = Map()
+    val sortedValintatapajonot = List(
+      Valintatapajono(
+        valintatapajonoOid = "17000468320548583779630214204232",
+        valintatapajononNimi = "Koevalintajono kaikille hakijoille",
+        valinnanTila = "HYLATTY",
+        valinnanTilanKuvaus = Map(
+          En -> "Et osallistunut valintakokeeseen",
+          Fi -> "Et osallistunut valintakokeeseen",
+          Sv -> "Et osallistunut valintakokeeseen SV"
+        )
+      ),
+      Valintatapajono(
+        valintatapajonoOid = "1704199256878262657431481297336",
+        valintatapajononNimi = "Todistusvalintajono ensikertalaisille hakijoille",
+        valinnanTila = "HYLATTY",
+        valinnanTilanKuvaus = Map(
+          En -> "Et ole ensikertalainen hakija.",
+          Fi -> "Et ole ensikertalainen hakija.",
+          Sv -> "Du är inte en förstagångssökande."
+        )
+      ),
+      Valintatapajono(
+        valintatapajonoOid = "1707384694164-3621431542682802084",
+        valintatapajononNimi = "Todistusvalintajono kaikille hakijoille",
+        valinnanTila = "HYLATTY",
+        valinnanTilanKuvaus = Map(
+          En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+          Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+          Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
+        )
+      )
+    )
+
+    assert(
+      ExcelWriterUtils.createHakutoiveenValintatapajonoWritableValues(
+        hakutoiveenValintapajonot,
+        sortedValintatapajonot
+      ) == List(Map(), Map(), Map())
+    )
+  }
+
+  it should "return a list with two valinnanTilanKuvaus values and one empty Map because two valintatapajono are found in hakukohteen valintatapajonot" in {
+    val hakutoiveenValintapajonot: Map[String, Seq[Valintatapajono]] = Map(
+      "1707384694164-3621431542682802084" ->
+        List(
+          Valintatapajono(
+            valintatapajonoOid = "1707384694164-3621431542682802084",
+            valintatapajononNimi = "Todistusvalintajono kaikille hakijoille",
+            valinnanTila = "HYLATTY",
+            valinnanTilanKuvaus = Map(
+              En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+              Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+              Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
+            )
+          )
+        ),
+      "17000468320548583779630214204232" -> List(
+        Valintatapajono(
+          valintatapajonoOid = "17000468320548583779630214204232",
+          valintatapajononNimi = "Koevalintajono kaikille hakijoille",
+          valinnanTila = "HYLATTY",
+          valinnanTilanKuvaus = Map(
+            En -> "Et osallistunut valintakokeeseen",
+            Fi -> "Et osallistunut valintakokeeseen",
+            Sv -> "Et osallistunut valintakokeeseen SV"
+          )
+        )
+      )
+    )
+    val sortedValintatapajonot = List(
+      Valintatapajono(
+        valintatapajonoOid = "17000468320548583779630214204232",
+        valintatapajononNimi = "Koevalintajono kaikille hakijoille",
+        valinnanTila = "HYLATTY",
+        valinnanTilanKuvaus = Map(
+          En -> "Et osallistunut valintakokeeseen",
+          Fi -> "Et osallistunut valintakokeeseen",
+          Sv -> "Et osallistunut valintakokeeseen SV"
+        )
+      ),
+      Valintatapajono(
+        valintatapajonoOid = "1704199256878262657431481297336",
+        valintatapajononNimi = "Todistusvalintajono ensikertalaisille hakijoille",
+        valinnanTila = "HYLATTY",
+        valinnanTilanKuvaus = Map(
+          En -> "Et ole ensikertalainen hakija.",
+          Fi -> "Et ole ensikertalainen hakija.",
+          Sv -> "Du är inte en förstagångssökande."
+        )
+      ),
+      Valintatapajono(
+        valintatapajonoOid = "1707384694164-3621431542682802084",
+        valintatapajononNimi = "Todistusvalintajono kaikille hakijoille",
+        valinnanTila = "HYLATTY",
+        valinnanTilanKuvaus = Map(
+          En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+          Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+          Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
+        )
+      )
+    )
+
+    assert(
+      ExcelWriterUtils.createHakutoiveenValintatapajonoWritableValues(
+        hakutoiveenValintapajonot,
+        sortedValintatapajonot
+      ) == List(
+        Map(
+          En -> "Et osallistunut valintakokeeseen",
+          Fi -> "Et osallistunut valintakokeeseen",
+          Sv -> "Et osallistunut valintakokeeseen SV"
+        ),
+        Map(),
+        Map(
+          En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+          Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+          Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
+        )
+      )
     )
   }
 }

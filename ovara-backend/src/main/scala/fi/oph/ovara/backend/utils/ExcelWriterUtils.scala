@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.utils
 
-import fi.oph.ovara.backend.domain.{Hakuaika, Kieli, Kielistetty}
+import fi.oph.ovara.backend.domain.{Hakuaika, Kieli, Kielistetty, Valintatapajono}
 import fi.oph.ovara.backend.utils.Constants.DATE_FORMATTER_FOR_EXCEL
 import org.apache.poi.xssf.usermodel.{XSSFCell, XSSFCellStyle, XSSFRow}
 
@@ -234,5 +234,17 @@ object ExcelWriterUtils {
         case None                => "-"
       }
     )
+  }
+
+  def createHakutoiveenValintatapajonoWritableValues(
+      hakukohteenValintatapajonot: Map[String, Seq[Valintatapajono]],
+      allSortedValintatapajonot: Seq[Valintatapajono]
+  ): Seq[Kielistetty] = {
+    allSortedValintatapajonot.map(valintatapajono => {
+      hakukohteenValintatapajonot.get(valintatapajono.valintatapajonoOid) match {
+        case Some(foundValintatapajono) => foundValintatapajono.head.valinnanTilanKuvaus
+        case None => Map()
+      }
+    })
   }
 }
