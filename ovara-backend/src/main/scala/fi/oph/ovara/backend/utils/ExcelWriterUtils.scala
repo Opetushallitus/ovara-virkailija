@@ -243,7 +243,7 @@ object ExcelWriterUtils {
     allSortedValintatapajonot.map(valintatapajono => {
       hakukohteenValintatapajonot.get(valintatapajono.valintatapajonoOid) match {
         case Some(foundValintatapajono) => foundValintatapajono.head.valinnanTilanKuvaus
-        case None => Map()
+        case None                       => Map()
       }
     })
   }
