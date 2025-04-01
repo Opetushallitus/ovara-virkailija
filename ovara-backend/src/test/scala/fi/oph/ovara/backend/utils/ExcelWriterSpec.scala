@@ -1547,11 +1547,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   "extractKoodi" should "return numeric koodi when there is no version" in {
-    assert(ExcelWriter.extractKoodi("koulutus_309902") == "309902")
+    assert(ExcelWriterUtils.extractKoodi("koulutus_309902") == "309902")
   }
 
   it should "return numeric koodi when the koodiarvo ends in a version" in {
-    assert(ExcelWriter.extractKoodi("koulutus_309902") == "309902")
+    assert(ExcelWriterUtils.extractKoodi("koulutus_309902") == "309902")
   }
 
   "writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti" should "create Korkeakoulujen koulutukset toteutukset ja hakukohteet -raportti koulutustoimijoittain with one result row" in {
