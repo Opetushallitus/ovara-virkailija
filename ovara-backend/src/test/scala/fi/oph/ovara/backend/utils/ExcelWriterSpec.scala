@@ -1936,7 +1936,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(
       sheet.getRow(3).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
     )
-    assert(sheet.getRow(3).getCell(1).getStringCellValue == "Arkitektur - Arkitektur, landskapsarkitektur och inredningsarkitektur, Arkitekt (2 år)")
+    assert(
+      sheet
+        .getRow(3)
+        .getCell(1)
+        .getStringCellValue == "Arkitektur - Arkitektur, landskapsarkitektur och inredningsarkitektur, Arkitekt (2 år)"
+    )
     assert(sheet.getRow(3).getCell(2).getStringCellValue == "1.2.246.562.13.00000000000000002675")
     assert(sheet.getRow(3).getCell(3).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(3).getCell(4).getStringCellValue == "754101")
@@ -1966,7 +1971,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(
       sheet.getRow(4).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
     )
-    assert(sheet.getRow(4).getCell(1).getStringCellValue == "Collaborative and Industrial Design - Design, Master of Arts (Art and Design) (2 yrs) SV")
+    assert(
+      sheet
+        .getRow(4)
+        .getCell(1)
+        .getStringCellValue == "Collaborative and Industrial Design - Design, Master of Arts (Art and Design) (2 yrs) SV"
+    )
     assert(sheet.getRow(4).getCell(2).getStringCellValue == "1.2.246.562.13.00000000000000002687")
     assert(sheet.getRow(4).getCell(3).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(4).getCell(4).getStringCellValue == "722101")
@@ -1982,7 +1992,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(4).getCell(9).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(4).getCell(10).getStringCellValue == "-")
     assert(sheet.getRow(4).getCell(11).getStringCellValue == "30.9.2023")
-    assert(sheet.getRow(4).getCell(12).getStringCellValue == "Collaborative and Industrial Design, Master of Arts (2 yrs) SV")
+    assert(
+      sheet.getRow(4).getCell(12).getStringCellValue == "Collaborative and Industrial Design, Master of Arts (2 yrs) SV"
+    )
     assert(sheet.getRow(4).getCell(13).getStringCellValue == "1.2.246.562.20.00000000000000017881")
     assert(sheet.getRow(4).getCell(14).getStringCellValue == "raportti.arkistoitu")
     assert(sheet.getRow(4).getCell(15).getStringCellValue == "ARTS20200")
