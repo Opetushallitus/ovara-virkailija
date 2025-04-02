@@ -153,36 +153,48 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
   }
 
   def getToimipistehierarkiat(toimipisteet: List[String]): List[OrganisaatioHierarkia] = {
-    val hierarkiat = db
-      .run(
-        commonRepository.selectToimipisteDescendants(toimipisteet),
-        "selectToimipisteDescendants"
-      )
-      .toList
+    if (toimipisteet.isEmpty) {
+      List()
+    } else {
+      val hierarkiat = db
+        .run(
+          commonRepository.selectToimipisteDescendants(toimipisteet),
+          "selectToimipisteDescendants"
+        )
+        .toList
 
-    hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+      hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+    }
   }
 
   def getOppilaitoshierarkiat(oppilaitokset: List[String]): List[OrganisaatioHierarkia] = {
-    val hierarkiat = db
-      .run(
-        commonRepository.selectOppilaitosDescendants(oppilaitokset),
-        "selectOppilaitosDescendants"
-      )
-      .toList
+    if (oppilaitokset.isEmpty) {
+      List()
+    } else {
+      val hierarkiat = db
+        .run(
+          commonRepository.selectOppilaitosDescendants(oppilaitokset),
+          "selectOppilaitosDescendants"
+        )
+        .toList
 
-    hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+      hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+    }
   }
 
   def getKoulutustoimijahierarkia(koulutustoimijat: List[String]): List[OrganisaatioHierarkia] = {
-    val hierarkiat = db
-      .run(
-        commonRepository.selectKoulutustoimijaDescendants(koulutustoimijat),
-        "selectKoulutustoimijaDescendants"
-      )
-      .toList
+    if (koulutustoimijat.isEmpty) {
+      List()
+    } else {
+      val hierarkiat = db
+        .run(
+          commonRepository.selectKoulutustoimijaDescendants(koulutustoimijat),
+          "selectKoulutustoimijaDescendants"
+        )
+        .toList
 
-    hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+      hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+    }
   }
 
   def getDistinctKoulutustoimijat(organisaatioOids: List[String]): List[Organisaatio] = {
