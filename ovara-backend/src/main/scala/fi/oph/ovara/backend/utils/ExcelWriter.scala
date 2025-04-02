@@ -438,6 +438,7 @@ object ExcelWriter {
       cellIndex = writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakutapa, asiointikieli)
       cellIndex = writeOptionIntToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakukohteenAloituspaikat)
       cellIndex = writeOptionIntToCell(resultRow, bodyTextCellStyle, cellIndex, result.ensikertalaistenAloituspaikat)
+      cellIndex = writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.valintaperuste, asiointikieli)
     })
   }
 

@@ -52,5 +52,6 @@ case class KorkeakouluKoulutusToteutusHakukohdeResult(
     hakuaika: Option[Hakuaika],
     hakutapa: Kielistetty,
     hakukohteenAloituspaikat: Option[Int],
-    ensikertalaistenAloituspaikat: Option[Int]
+    ensikertalaistenAloituspaikat: Option[Int],
+    valintaperuste: Kielistetty
 )
