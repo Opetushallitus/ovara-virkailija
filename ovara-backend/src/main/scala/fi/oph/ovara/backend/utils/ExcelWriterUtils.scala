@@ -88,6 +88,25 @@ object ExcelWriterUtils {
     cellIndex + 1
   }
 
+  def writeKoulutuksenAlkamisaikaToCell(
+      row: XSSFRow,
+      cellStyle: XSSFCellStyle,
+      cellIndex: Int,
+      alkamisaika: Kielistetty | Option[LocalDate],
+      asiointikieli: String
+  ): Int = {
+    alkamisaika match {
+      case k: Kielistetty =>
+        writeKielistettyToCell(row, cellStyle, cellIndex, k, asiointikieli)
+      case Some(date: LocalDate) =>
+        writeOptionLocalDateToCell(row, cellStyle, cellIndex, Some(date))
+      case _ =>
+        val cell = createCell(row, cellStyle, cellIndex)
+        cell.setCellValue("-")
+        cellIndex + 1
+    }
+  }
+
   def writeIntToCell(row: XSSFRow, cellStyle: XSSFCellStyle, cellIndex: Int, int: Int): Int = {
     val cell = createCell(row, cellStyle, cellIndex)
     cell.setCellValue(int)

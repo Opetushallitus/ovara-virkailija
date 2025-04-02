@@ -422,11 +422,11 @@ object ExcelWriter {
       cellIndex = writeStrToCell(resultRow, bodyTextCellStyle, cellIndex, result.toteutusOid)
       cellIndex = writeOptionTilaToCell(resultRow, bodyTextCellStyle, cellIndex, result.toteutuksenTila, translations)
       cellIndex = writeOptionStrToCell(resultRow, bodyTextCellStyle, cellIndex, result.toteutuksenUlkoinenTunniste)
-      cellIndex = writeKielistettyToCell(
+      cellIndex = writeKoulutuksenAlkamisaikaToCell(
         resultRow,
         bodyTextCellStyle,
         cellIndex,
-        result.koulutuksenAlkamiskausiJaVuosi,
+        result.koulutuksenAlkamisaika,
         asiointikieli
       )
       cellIndex = writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakukohteenNimi, asiointikieli)

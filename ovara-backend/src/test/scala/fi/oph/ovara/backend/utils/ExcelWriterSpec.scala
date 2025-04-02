@@ -1589,7 +1589,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getPhysicalNumberOfRows == 11)
   }
 
-  "writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti" should "create Korkeakoulujen koulutukset toteutukset ja hakukohteet -raportti koulutustoimijoittain with one result row" in {
+  "writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti" should "create Korkeakoulujen koulutukset toteutukset ja hakukohteet -raportti koulutustoimijoittain with four result rows" in {
     val koulutuksetToteutuksetHakukohteet = Vector(
       KorkeakouluKoulutusToteutusHakukohdeResult(
         Map(
@@ -1615,7 +1615,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         "1.2.246.562.17.00000000000000007967",
         Some("arkistoitu"),
         None,
-        Map(En -> "Spring 2022", Fi -> "Kevät 2022", Sv -> "Vår 2022"),
+        Map(En -> "Autumn 2023", Fi -> "Syksy 2023", Sv -> "Höst 2023"),
         Map(
           En -> "Screenwriting, Master of Arts (2 yrs)",
           Fi -> "Elokuva- ja tv-käsikirjoitus, taiteen maisteri (2 v) ",
@@ -1631,8 +1631,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         ),
         Some(
           Hakuaika(
-            alkaa = Some(LocalDate.from(ISO_LOCAL_DATE_TIME_FORMATTER.parse("2023-11-30T09:00"))),
-            paattyy = Some(LocalDate.from(ISO_LOCAL_DATE_TIME_FORMATTER.parse("2024-01-02T15:00")))
+            alkaa = Some(LocalDate.from(ISO_LOCAL_DATE_TIME_FORMATTER.parse("2022-12-01T09:00"))),
+            paattyy = Some(LocalDate.from(ISO_LOCAL_DATE_TIME_FORMATTER.parse("2023-01-02T15:00")))
           )
         ),
         Map(
@@ -1641,6 +1641,152 @@ class ExcelWriterSpec extends AnyFlatSpec {
           Sv -> "Separata antagningar"
         ),
         Some(15),
+        Some(10)
+      ),
+      KorkeakouluKoulutusToteutusHakukohdeResult(
+        Map(
+          En -> "Aalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
+          Fi -> "Aalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
+          Sv -> "Aalto-universitetet, Högskolan för konst design och arkitektur"
+        ),
+        Map(
+          En -> "Animation, Master of Arts (Art and Design) (2 yrs) EN",
+          Fi -> "Animation, Master of Arts (Art and Design) (2 yrs)",
+          Sv -> "Animation, Master of Arts (Art and Design) (2 yrs) SV"
+        ),
+        "1.2.246.562.13.00000000000000002880",
+        Some("julkaistu"),
+        Some("koulutus_722101#12"),
+        None,
+        Map(En -> "120 ECTS credits", Fi -> "120 opintopistettä", Sv -> "120 studiepoäng"),
+        Map(
+          En -> "Animation, Master of Arts (Art and Design) (2 yrs) -toteutus EN",
+          Fi -> "Animation, Master of Arts (Art and Design) (2 yrs) -toteutus",
+          Sv -> "Animation, Master of Arts (Art and Design) (2 yrs) -toteutus SV"
+        ),
+        "1.2.246.562.17.00000000000000008396",
+        Some("julkaistu"),
+        None,
+        Map(),
+        Map(
+          En -> "Animation, Master of Arts (2 yrs) EN",
+          Fi -> "Animation, Master of Arts (2 yrs)",
+          Sv -> "Animation, Master of Arts (2 yrs) SV"
+        ),
+        "1.2.246.562.20.00000000000000017880",
+        Some("arkistoitu"),
+        None,
+        Map(
+          En -> "Aalto University's Master's Admission 2023",
+          Fi -> "Aalto-yliopiston maisterihaku 2023",
+          Sv -> "Aalto-universitetets magisteransökan 2023"
+        ),
+        Some(
+          Hakuaika(
+            Some(LocalDate.from(ISO_LOCAL_DATE_TIME_FORMATTER.parse("2022-12-01T09:00"))),
+            Some(LocalDate.from(ISO_LOCAL_DATE_TIME_FORMATTER.parse("2023-01-02T15:00")))
+          )
+        ),
+        Map(En -> "Separate application", Fi -> "Erillishaku", Sv -> "Separata antagningar"),
+        Some(8),
+        None
+      ),
+      KorkeakouluKoulutusToteutusHakukohdeResult(
+        Map(
+          En -> "Aalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
+          Fi -> "Aalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
+          Sv -> "Aalto-universitetet, Högskolan för konst design och arkitektur"
+        ),
+        Map(
+          En -> "Architecture - Architecture, Landscape architecture and Interior Architecture, Architect, Master of Science (2 yrs)",
+          Fi -> "Arkkitehtuuri - Arkkitehtuuri, maisema-arkkitehtuuri ja sisustusarkkitehtuuri, Arkkitehti (2 v)",
+          Sv -> "Arkitektur - Arkitektur, landskapsarkitektur och inredningsarkitektur, Arkitekt (2 år)"
+        ),
+        "1.2.246.562.13.00000000000000002675",
+        Some("julkaistu"),
+        Some("koulutus_754101#12"),
+        Some("ARTS20100"),
+        Map(En -> "120 ECTS credits", Fi -> "120 opintopistettä", Sv -> "120 studiepoäng"),
+        Map(
+          En ->
+            "Arkkitehtuuri - Arkkitehtuuri, maisema-arkkitehtuuri ja sisustusarkkitehtuuri, Arkkitehti (2 v)",
+          Fi -> "Architecture - Architecture, Landscape architecture and Interior Architecture, Architect, Master of Science (2 yrs)",
+          Sv -> "Arkitektur - Arkitektur, landskapsarkitektur och inredningsarkitektur, Arkitekt (2 år)"
+        ),
+        "1.2.246.562.17.00000000000000007965",
+        Some("julkaistu"),
+        None,
+        None,
+        Map(
+          En -> "Architecture, Architect, Master of Science (2 yrs)",
+          Fi -> "Arkkitehtuuri, Arkkitehti (2 v)",
+          Sv -> "Arkitektur, Arkitekt (2 år)"
+        ),
+        "1.2.246.562.20.00000000000000017819",
+        Some("arkistoitu"),
+        Some("ARTS20100"),
+        Map(
+          En -> "Aalto University's Master's Admission 2023",
+          Fi -> "Aalto-yliopiston maisterihaku 2023",
+          Sv -> "Aalto-universitetets magisteransökan 2023"
+        ),
+        Some(
+          Hakuaika(
+            Some(LocalDate.from(ISO_LOCAL_DATE_TIME_FORMATTER.parse("2022-12-01T09:00"))),
+            Some(LocalDate.from(ISO_LOCAL_DATE_TIME_FORMATTER.parse("2023-01-02T15:00")))
+          )
+        ),
+        Map(En -> "Separate application", Fi -> "Erillishaku", Sv -> "Separata antagningar"),
+        Some(12),
+        None
+      ),
+      KorkeakouluKoulutusToteutusHakukohdeResult(
+        Map(
+          En -> "Aalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
+          Fi -> "Aalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
+          Sv -> "Aalto-universitetet, Högskolan för konst design och arkitektur"
+        ),
+        Map(
+          En -> "Collaborative and Industrial Design - Design, Master of Arts (Art and Design) (2 yrs) EN",
+          Fi -> "Collaborative and Industrial Design - Design, Master of Arts (Art and Design) (2 yrs)",
+          Sv -> "Collaborative and Industrial Design - Design, Master of Arts (Art and Design) (2 yrs) SV"
+        ),
+        "1.2.246.562.13.00000000000000002687",
+        Some("julkaistu"),
+        Some("koulutus_722101#12"),
+        Some("ARTS20200"),
+        Map(En -> "120 ECTS credits", Fi -> "120 opintopistettä", Sv -> "120 studiepoäng"),
+        Map(
+          En -> "Collaborative and Industrial Design - Design, Master of Arts (Art and Design) (2 yrs) -toteutus EN",
+          Fi -> "Collaborative and Industrial Design - Design, Master of Arts (Art and Design) (2 yrs) -toteutus",
+          Sv ->
+            "Collaborative and Industrial Design - Design, Master of Arts (Art and Design) (2 yrs) -toteutus SV"
+        ),
+        "1.2.246.562.17.00000000000000007977",
+        Some("julkaistu"),
+        None,
+        Some(LocalDate.parse("2023-09-30")),
+        Map(
+          En -> "Collaborative and Industrial Design, Master of Arts (2 yrs) EN",
+          Fi -> "Collaborative and Industrial Design, Master of Arts (2 yrs)",
+          Sv -> "Collaborative and Industrial Design, Master of Arts (2 yrs) SV"
+        ),
+        "1.2.246.562.20.00000000000000017881",
+        Some("arkistoitu"),
+        Some("ARTS20200"),
+        Map(
+          En -> "Aalto University's Master's Admission 2023",
+          Fi -> "Aalto-yliopiston maisterihaku 2023",
+          Sv -> "Aalto-universitetets magisteransökan 2023"
+        ),
+        Some(
+          Hakuaika(
+            Some(LocalDate.from(ISO_LOCAL_DATE_TIME_FORMATTER.parse("2022-12-01T09:00"))),
+            Some(LocalDate.from(ISO_LOCAL_DATE_TIME_FORMATTER.parse("2023-01-02T15:00")))
+          )
+        ),
+        Map(En -> "Separate application", Fi -> "Erillishaku", Sv -> "Separata antagningar"),
+        Some(14),
         Some(10)
       )
     )
@@ -1663,7 +1809,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(0).getCell(8).getStringCellValue == "raportti.toteutusOid")
     assert(sheet.getRow(0).getCell(9).getStringCellValue == "Tot.tila SV")
     assert(sheet.getRow(0).getCell(10).getStringCellValue == "raportti.toteutuksenUlkoinenTunniste")
-    assert(sheet.getRow(0).getCell(11).getStringCellValue == "raportti.koulutuksenAlkamiskausiJaVuosi")
+    assert(sheet.getRow(0).getCell(11).getStringCellValue == "raportti.koulutuksenAlkamisaika")
     assert(sheet.getRow(0).getCell(12).getStringCellValue == "Hakukohde SV")
     assert(sheet.getRow(0).getCell(13).getStringCellValue == "Hakukohteen oid SV")
     assert(sheet.getRow(0).getCell(14).getStringCellValue == "Hak.tila SV")
@@ -1692,17 +1838,163 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(1).getCell(8).getStringCellValue == "1.2.246.562.17.00000000000000007967")
     assert(sheet.getRow(1).getCell(9).getStringCellValue == "raportti.arkistoitu")
     assert(sheet.getRow(1).getCell(10).getStringCellValue == "-")
-    assert(sheet.getRow(1).getCell(11).getStringCellValue == "Vår 2022")
+    assert(sheet.getRow(1).getCell(11).getStringCellValue == "Höst 2023")
     assert(sheet.getRow(1).getCell(12).getStringCellValue == "Film- och tv-manuskript, konstmagister (2 år)")
     assert(sheet.getRow(1).getCell(13).getStringCellValue == "1.2.246.562.20.00000000000000017822")
     assert(sheet.getRow(1).getCell(14).getStringCellValue == "Luonnos SV")
     assert(sheet.getRow(1).getCell(15).getStringCellValue == "ARTS20503")
     assert(sheet.getRow(1).getCell(16).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
-    assert(sheet.getRow(1).getCell(17).getStringCellValue == "30.11.2023 - 2.1.2024")
+    assert(sheet.getRow(1).getCell(17).getStringCellValue == "1.12.2022 - 2.1.2023")
     assert(sheet.getRow(1).getCell(18).getStringCellValue == "Separata antagningar")
     assert(sheet.getRow(1).getCell(19).getNumericCellValue == 15)
     assert(sheet.getRow(1).getCell(20).getNumericCellValue == 10)
     assert(sheet.getRow(1).getCell(21) == null)
+
+    assert(sheet.getRow(0).getCell(0).getStringCellValue == "Oppilaitos ja toimipiste SV")
+    assert(sheet.getRow(0).getCell(1).getStringCellValue == "raportti.koulutuksenNimi")
+    assert(sheet.getRow(0).getCell(2).getStringCellValue == "raportti.koulutusOid")
+    assert(sheet.getRow(0).getCell(3).getStringCellValue == "Kou.tila SV")
+    assert(sheet.getRow(0).getCell(4).getStringCellValue == "raportti.koulutuskoodi")
+    assert(sheet.getRow(0).getCell(5).getStringCellValue == "raportti.koulutuksenUlkoinenTunniste")
+    assert(sheet.getRow(0).getCell(6).getStringCellValue == "raportti.opintojenLaajuus")
+    assert(sheet.getRow(0).getCell(7).getStringCellValue == "raportti.toteutuksenNimi")
+    assert(sheet.getRow(0).getCell(8).getStringCellValue == "raportti.toteutusOid")
+    assert(sheet.getRow(0).getCell(9).getStringCellValue == "Tot.tila SV")
+    assert(sheet.getRow(0).getCell(10).getStringCellValue == "raportti.toteutuksenUlkoinenTunniste")
+    assert(sheet.getRow(0).getCell(11).getStringCellValue == "raportti.koulutuksenAlkamisaika")
+    assert(sheet.getRow(0).getCell(12).getStringCellValue == "Hakukohde SV")
+    assert(sheet.getRow(0).getCell(13).getStringCellValue == "Hakukohteen oid SV")
+    assert(sheet.getRow(0).getCell(14).getStringCellValue == "Hak.tila SV")
+    assert(sheet.getRow(0).getCell(15).getStringCellValue == "raportti.hakukohteenUlkoinenTunniste")
+    assert(sheet.getRow(0).getCell(16).getStringCellValue == "raportti.haunNimi")
+    assert(sheet.getRow(0).getCell(17).getStringCellValue == "raportti.hakuaika")
+    assert(sheet.getRow(0).getCell(18).getStringCellValue == "raportti.hakutapa")
+    assert(sheet.getRow(0).getCell(19).getStringCellValue == "raportti.hakukohteenAloituspaikat")
+    assert(sheet.getRow(0).getCell(20).getStringCellValue == "raportti.ensikertalaistenAloituspaikat")
+    assert(sheet.getRow(0).getCell(21) == null)
+
+    assert(
+      sheet.getRow(1).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
+    )
+    assert(sheet.getRow(1).getCell(1).getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år)")
+    assert(sheet.getRow(1).getCell(2).getStringCellValue == "1.2.246.562.13.00000000000000002677")
+    assert(sheet.getRow(1).getCell(3).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(1).getCell(4).getStringCellValue == "309902")
+    assert(sheet.getRow(1).getCell(5).getStringCellValue == "ARTS20502")
+    assert(sheet.getRow(1).getCell(6).getStringCellValue == "120 studiepoäng")
+    assert(
+      sheet
+        .getRow(1)
+        .getCell(7)
+        .getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år) -toteutus"
+    )
+    assert(sheet.getRow(1).getCell(8).getStringCellValue == "1.2.246.562.17.00000000000000007967")
+    assert(sheet.getRow(1).getCell(9).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(1).getCell(10).getStringCellValue == "-")
+    assert(sheet.getRow(1).getCell(11).getStringCellValue == "Höst 2023")
+    assert(sheet.getRow(1).getCell(12).getStringCellValue == "Film- och tv-manuskript, konstmagister (2 år)")
+    assert(sheet.getRow(1).getCell(13).getStringCellValue == "1.2.246.562.20.00000000000000017822")
+    assert(sheet.getRow(1).getCell(14).getStringCellValue == "Luonnos SV")
+    assert(sheet.getRow(1).getCell(15).getStringCellValue == "ARTS20503")
+    assert(sheet.getRow(1).getCell(16).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
+    assert(sheet.getRow(1).getCell(17).getStringCellValue == "1.12.2022 - 2.1.2023")
+    assert(sheet.getRow(1).getCell(18).getStringCellValue == "Separata antagningar")
+    assert(sheet.getRow(1).getCell(19).getNumericCellValue == 15)
+    assert(sheet.getRow(1).getCell(20).getNumericCellValue == 10)
+    assert(sheet.getRow(1).getCell(21) == null)
+
+    assert(
+      sheet.getRow(2).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
+    )
+    assert(sheet.getRow(2).getCell(1).getStringCellValue == "Animation, Master of Arts (Art and Design) (2 yrs) SV")
+    assert(sheet.getRow(2).getCell(2).getStringCellValue == "1.2.246.562.13.00000000000000002880")
+    assert(sheet.getRow(2).getCell(3).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(2).getCell(4).getStringCellValue == "722101")
+    assert(sheet.getRow(2).getCell(5).getStringCellValue == "-")
+    assert(sheet.getRow(2).getCell(6).getStringCellValue == "120 studiepoäng")
+    assert(
+      sheet
+        .getRow(2)
+        .getCell(7)
+        .getStringCellValue == "Animation, Master of Arts (Art and Design) (2 yrs) -toteutus SV"
+    )
+    assert(sheet.getRow(2).getCell(8).getStringCellValue == "1.2.246.562.17.00000000000000008396")
+    assert(sheet.getRow(2).getCell(9).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(2).getCell(10).getStringCellValue == "-")
+    assert(sheet.getRow(2).getCell(11).getStringCellValue == "-")
+    assert(sheet.getRow(2).getCell(12).getStringCellValue == "Animation, Master of Arts (2 yrs) SV")
+    assert(sheet.getRow(2).getCell(13).getStringCellValue == "1.2.246.562.20.00000000000000017880")
+    assert(sheet.getRow(2).getCell(14).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(2).getCell(15).getStringCellValue == "-")
+    assert(sheet.getRow(2).getCell(16).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
+    assert(sheet.getRow(2).getCell(17).getStringCellValue == "1.12.2022 - 2.1.2023")
+    assert(sheet.getRow(2).getCell(18).getStringCellValue == "Separata antagningar")
+    assert(sheet.getRow(2).getCell(19).getNumericCellValue == 8)
+    assert(sheet.getRow(2).getCell(20).getStringCellValue == "-")
+    assert(sheet.getRow(2).getCell(21) == null)
+
+    assert(
+      sheet.getRow(3).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
+    )
+    assert(sheet.getRow(3).getCell(1).getStringCellValue == "Arkitektur - Arkitektur, landskapsarkitektur och inredningsarkitektur, Arkitekt (2 år)")
+    assert(sheet.getRow(3).getCell(2).getStringCellValue == "1.2.246.562.13.00000000000000002675")
+    assert(sheet.getRow(3).getCell(3).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(3).getCell(4).getStringCellValue == "754101")
+    assert(sheet.getRow(3).getCell(5).getStringCellValue == "ARTS20100")
+    assert(sheet.getRow(3).getCell(6).getStringCellValue == "120 studiepoäng")
+    assert(
+      sheet
+        .getRow(3)
+        .getCell(7)
+        .getStringCellValue == "Arkitektur - Arkitektur, landskapsarkitektur och inredningsarkitektur, Arkitekt (2 år)"
+    )
+    assert(sheet.getRow(3).getCell(8).getStringCellValue == "1.2.246.562.17.00000000000000007965")
+    assert(sheet.getRow(3).getCell(9).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(3).getCell(10).getStringCellValue == "-")
+    assert(sheet.getRow(3).getCell(11).getStringCellValue == "-")
+    assert(sheet.getRow(3).getCell(12).getStringCellValue == "Arkitektur, Arkitekt (2 år)")
+    assert(sheet.getRow(3).getCell(13).getStringCellValue == "1.2.246.562.20.00000000000000017819")
+    assert(sheet.getRow(3).getCell(14).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(3).getCell(15).getStringCellValue == "ARTS20100")
+    assert(sheet.getRow(3).getCell(16).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
+    assert(sheet.getRow(3).getCell(17).getStringCellValue == "1.12.2022 - 2.1.2023")
+    assert(sheet.getRow(3).getCell(18).getStringCellValue == "Separata antagningar")
+    assert(sheet.getRow(3).getCell(19).getNumericCellValue == 12)
+    assert(sheet.getRow(3).getCell(20).getStringCellValue == "-")
+    assert(sheet.getRow(3).getCell(21) == null)
+
+    assert(
+      sheet.getRow(4).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
+    )
+    assert(sheet.getRow(4).getCell(1).getStringCellValue == "Collaborative and Industrial Design - Design, Master of Arts (Art and Design) (2 yrs) SV")
+    assert(sheet.getRow(4).getCell(2).getStringCellValue == "1.2.246.562.13.00000000000000002687")
+    assert(sheet.getRow(4).getCell(3).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(4).getCell(4).getStringCellValue == "722101")
+    assert(sheet.getRow(4).getCell(5).getStringCellValue == "ARTS20200")
+    assert(sheet.getRow(4).getCell(6).getStringCellValue == "120 studiepoäng")
+    assert(
+      sheet
+        .getRow(4)
+        .getCell(7)
+        .getStringCellValue == "Collaborative and Industrial Design - Design, Master of Arts (Art and Design) (2 yrs) -toteutus SV"
+    )
+    assert(sheet.getRow(4).getCell(8).getStringCellValue == "1.2.246.562.17.00000000000000007977")
+    assert(sheet.getRow(4).getCell(9).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(4).getCell(10).getStringCellValue == "-")
+    assert(sheet.getRow(4).getCell(11).getStringCellValue == "30.9.2023")
+    assert(sheet.getRow(4).getCell(12).getStringCellValue == "Collaborative and Industrial Design, Master of Arts (2 yrs) SV")
+    assert(sheet.getRow(4).getCell(13).getStringCellValue == "1.2.246.562.20.00000000000000017881")
+    assert(sheet.getRow(4).getCell(14).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(4).getCell(15).getStringCellValue == "ARTS20200")
+    assert(sheet.getRow(4).getCell(16).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
+    assert(sheet.getRow(4).getCell(17).getStringCellValue == "1.12.2022 - 2.1.2023")
+    assert(sheet.getRow(4).getCell(18).getStringCellValue == "Separata antagningar")
+    assert(sheet.getRow(4).getCell(19).getNumericCellValue == 14)
+    assert(sheet.getRow(4).getCell(20).getNumericCellValue == 10)
+    assert(sheet.getRow(4).getCell(21) == null)
+
+    assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 5)
+    assert(wb.getSheetAt(0).getRow(6) == null)
   }
 
   "createHeadingRow" should "create heading row with translated column names or translation keys for hakijat raportti" in {

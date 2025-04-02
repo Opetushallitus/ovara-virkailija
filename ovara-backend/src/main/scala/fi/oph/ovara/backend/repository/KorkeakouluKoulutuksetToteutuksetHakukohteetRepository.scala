@@ -35,8 +35,9 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
                  t.toteutus_oid,
                  t.tila,
                  t.ulkoinen_tunniste,
-                 t.koulutuksen_alkamiskausi_koodiuri,
-                 t.koulutuksen_alkamisvuosi,
+                 hk.koulutuksen_alkamiskausi_koodiuri,
+                 hk.koulutuksen_alkamisvuosi,
+                 hk.koulutuksen_alkamiskausi,
                  kausi.koodinimi,
                  hk.hakukohde_nimi,
                  hk.hakukohde_oid,
@@ -57,7 +58,7 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
           JOIN pub.pub_dim_organisaatio o
           ON jarjestyspaikka_oid = o.organisaatio_oid
           LEFT JOIN pub.pub_dim_koodisto_kausi kausi
-          ON t.koulutuksen_alkamiskausi_koodiuri = kausi.versioitu_koodiuri
+          ON hk.koulutuksen_alkamiskausi_koodiuri = kausi.versioitu_koodiuri
           JOIN (
             SELECT *, jsonb_array_elements(pdh.hakuajat) AS hakuaika
             FROM pub.pub_dim_haku pdh

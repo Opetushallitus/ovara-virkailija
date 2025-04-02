@@ -1,5 +1,7 @@
 package fi.oph.ovara.backend.domain
 
+import java.time.LocalDate
+
 sealed trait KoulutusToteutusHakukohde {
   val hakukohteenNimi: Kielistetty
   val hakukohdeOid: String
@@ -41,7 +43,7 @@ case class KorkeakouluKoulutusToteutusHakukohdeResult(
     toteutusOid: String,
     toteutuksenTila: Option[String],
     toteutuksenUlkoinenTunniste: Option[String],
-    koulutuksenAlkamiskausiJaVuosi: Kielistetty,
+    koulutuksenAlkamisaika: Kielistetty | Option[LocalDate],
     hakukohteenNimi: Kielistetty,
     hakukohdeOid: String,
     hakukohteenTila: Option[String],
