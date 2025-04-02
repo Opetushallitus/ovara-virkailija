@@ -358,7 +358,9 @@ trait Extractors extends GenericOvaraJsonFormats {
       )
     }
 
-  def extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(r: PositionedResult): (Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int) = {
+  def extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(
+      r: PositionedResult
+  ): (Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int) = {
     (
       r.nextInt(), // hakijat
       r.nextInt(), // ensisijaisia
@@ -376,17 +378,18 @@ trait Extractors extends GenericOvaraJsonFormats {
       r.nextInt(), // toive3
       r.nextInt(), // toive4
       r.nextInt(), // toive5
-      r.nextInt(), // toive6
+      r.nextInt()  // toive6
     )
   }
 
-  implicit val getKkHakeneetHyvaksytytVastaanottaneetOrgNimellaResult: GetResult[KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella] = GetResult { r =>
+  implicit val getKkHakeneetHyvaksytytVastaanottaneetOrgNimellaResult
+      : GetResult[KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella] = GetResult { r =>
     val hakukohdeNimi    = extractKielistetty(r.nextStringOption())
     val organisaatioNimi = extractKielistetty(r.nextStringOption())
     val commonFields     = extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(r)
 
     KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella(
-      otsikko          = hakukohdeNimi,
+      otsikko = hakukohdeNimi,
       organisaatioNimi = organisaatioNimi,
       commonFields._1,
       commonFields._2,
@@ -408,7 +411,8 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   }
 
-  implicit val getKkHakeneetHyvaksytytVastaanottaneetToimipisteittainResult: GetResult[KkHakeneetHyvaksytytVastaanottaneetToimipisteittain] = GetResult { r =>
+  implicit val getKkHakeneetHyvaksytytVastaanottaneetToimipisteittainResult
+      : GetResult[KkHakeneetHyvaksytytVastaanottaneetToimipisteittain] = GetResult { r =>
     val toimipiste       = r.nextString()
     val organisaatioNimi = extractKielistetty(r.nextStringOption())
     val commonFields     = extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(r)
