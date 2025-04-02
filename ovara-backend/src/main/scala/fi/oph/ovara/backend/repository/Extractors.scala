@@ -1,10 +1,13 @@
 package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.*
-import fi.oph.ovara.backend.utils.ExtractorUtils.{extractHakuaika, extractValintatapajonot}
+import fi.oph.ovara.backend.utils.ExtractorUtils.{extractAlkamiskausi, extractHakuaika, extractValintatapajonot}
 import fi.oph.ovara.backend.utils.GenericOvaraJsonFormats
 import org.json4s.jackson.Serialization.read
 import slick.jdbc.*
+
+import java.sql.Date
+import java.time.LocalDate
 
 trait Extractors extends GenericOvaraJsonFormats {
   private def extractKielistetty(json: Option[String]): Kielistetty =
@@ -105,16 +108,25 @@ trait Extractors extends GenericOvaraJsonFormats {
       }
     }
 
-    def extractKoulutuksenAlkamiskausiJaVuosi(
-        alkamiskausi: Option[String],
+    def extractKoulutuksenAlkamisaika(
+        alkamiskausikoodiuri: Option[String],
         alkamivuosi: Option[String],
+        alkamiskausiJsonObject: Option[String],
         kausienNimet: Option[String]
-    ) = {
+    ): Kielistetty | Option[LocalDate] = {
+      val alkamiskausi            = extractAlkamiskausi(alkamiskausiJsonObject)
       val kielistetytKausienNimet = extractKielistetty(kausienNimet)
       alkamiskausi match {
-        case Some(kausi) if kielistetytKausienNimet.nonEmpty =>
-          kielistetytKausienNimet.map((kieli: Kieli, nimi: String) => kieli -> s"$nimi ${alkamivuosi.getOrElse("")}")
-        case _ => Map()
+        case Some(ak: Alkamiskausi) if ak.alkamiskausityyppi == "tarkka alkamisajankohta" =>
+          ak.koulutuksenAlkamispaivamaara
+        case _ =>
+          alkamiskausikoodiuri match {
+            case Some(_) if kielistetytKausienNimet.nonEmpty =>
+              kielistetytKausienNimet.map((kieli: Kieli, nimi: String) =>
+                kieli -> s"$nimi ${alkamivuosi.getOrElse("")}"
+              )
+            case _ => Map()
+          }
       }
     }
 
@@ -131,8 +143,12 @@ trait Extractors extends GenericOvaraJsonFormats {
         toteutusOid = r.nextString(),
         toteutuksenTila = r.nextStringOption(),
         toteutuksenUlkoinenTunniste = r.nextStringOption(),
-        koulutuksenAlkamiskausiJaVuosi =
-          extractKoulutuksenAlkamiskausiJaVuosi(r.nextStringOption(), r.nextStringOption(), r.nextStringOption()),
+        koulutuksenAlkamisaika = extractKoulutuksenAlkamisaika(
+          r.nextStringOption(),
+          r.nextStringOption(),
+          r.nextStringOption(),
+          r.nextStringOption()
+        ),
         hakukohteenNimi = extractKielistetty(r.nextStringOption()),
         hakukohdeOid = r.nextString(),
         hakukohteenTila = r.nextStringOption(),
@@ -158,10 +174,10 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   )
 
-  private def getNextDateOption(r: PositionedResult) = {
-    r.nextDateOption() match {
-      case Some(date) => Some(date.toLocalDate)
-      case None       => None
+  private def extractDateOption(date: Option[Date]) = {
+    date match {
+      case Some(d) => Some(d.toLocalDate)
+      case None    => None
     }
   }
 
@@ -184,7 +200,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       kokonaispisteet = r.nextStringOption(),
       hylkaamisenTaiPeruuntumisenSyy = extractKielistetty(r.nextStringOption()),
       vastaanottotieto = r.nextStringOption(),
-      viimVastaanottopaiva = getNextDateOption(r),
+      viimVastaanottopaiva = extractDateOption(r.nextDateOption()),
       ilmoittautuminen = r.nextStringOption(),
       harkinnanvaraisuus = r.nextStringOption(),
       soraAiempi = r.nextBooleanOption(),
@@ -204,7 +220,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       hakijanSukunimi = r.nextString(),
       hakijanEtunimi = r.nextString(),
       hetu = r.nextStringOption(),
-      syntymaAika = getNextDateOption(r),
+      syntymaAika = extractDateOption(r.nextDateOption()),
       kansalaisuus = extractKielistetty(r.nextStringOption()),
       oppijanumero = r.nextString(),
       hakemusOid = r.nextString(),
@@ -214,10 +230,10 @@ trait Extractors extends GenericOvaraJsonFormats {
       prioriteetti = r.nextInt(),
       valintatieto = r.nextStringOption(),
       ehdollisestiHyvaksytty = r.nextBooleanOption(),
-      valintatiedonPvm = getNextDateOption(r),
+      valintatiedonPvm = extractDateOption(r.nextDateOption()),
       valintatapajonot = extractValintatapajonot(r.nextStringOption()),
       vastaanottotieto = r.nextStringOption(),
-      viimVastaanottopaiva = getNextDateOption(r),
+      viimVastaanottopaiva = extractDateOption(r.nextDateOption()),
       ensikertalainen = r.nextBooleanOption(),
       ilmoittautuminen = r.nextStringOption(),
       pohjakoulutus = r.nextStringOption(),
