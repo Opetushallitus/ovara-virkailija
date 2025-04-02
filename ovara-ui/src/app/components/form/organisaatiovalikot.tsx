@@ -62,6 +62,7 @@ export const OrganisaatioValikot = () => {
 
   const toimipisteet = getToimipisteetToShow(
     organisaatiot,
+    selectedToimipisteet,
     selectedOppilaitokset,
     selectedKoulutustoimija,
   );
@@ -71,6 +72,9 @@ export const OrganisaatioValikot = () => {
     value: SelectOption | null,
   ) => {
     setSelectedKoulutustoimija(isNullish(value) ? null : value?.value);
+    // tyhjätään oppilaitos ja toimipisteet
+    setSelectedOppilaitokset(null);
+    setSelectedToimipisteet(null);
   };
 
   const changeOppilaitokset = (
@@ -178,6 +182,7 @@ export const ToimipisteValikko = ({
 
   const toimipisteet = getToimipisteetToShow(
     organisaatiot,
+    selectedToimipisteet,
     selectedOppilaitokset,
     selectedKoulutustoimija,
   );
