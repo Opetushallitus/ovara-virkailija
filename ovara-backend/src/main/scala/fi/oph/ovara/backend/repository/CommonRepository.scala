@@ -2,12 +2,16 @@ package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.*
 import fi.oph.ovara.backend.utils.RepositoryUtils
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import slick.jdbc.PostgresProfile.api.*
 import slick.sql.SqlStreamingAction
 
 @Component
 class CommonRepository extends Extractors {
+
+  val LOG = LoggerFactory.getLogger(classOf[CommonRepository])
+
   def selectDistinctAlkamisvuodet(): SqlStreamingAction[Vector[String], String, Effect] = {
     sql"""SELECT DISTINCT koulutuksen_alkamisvuosi
           FROM pub.pub_dim_toteutus pdt
@@ -115,18 +119,18 @@ class CommonRepository extends Extractors {
        """.as[Koodi]
   }
 
-  def selectDistinctKunnat(maakunnat: List[String]): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
-    val maakunnatStr = RepositoryUtils.makeListOfValuesQueryStr(maakunnat)
-    val maakunnatQueryStr = if (maakunnatStr.isEmpty) {
-      ""
-    } else {
-      s"WHERE km.maakunta_koodiarvo in ($maakunnatStr)"
-    }
+  def selectDistinctKunnat(maakunnat: List[String], selectedKunnat: List[String]): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
+    val conditions = Map(
+      "km.maakunta_koodiarvo" -> maakunnat,
+      "k.koodiarvo" -> selectedKunnat
+    )
+    val whereClause = RepositoryUtils.makeOptionalWhereClause(conditions)
+
     sql"""SELECT DISTINCT k.koodiarvo, k.koodinimi
           FROM pub.pub_dim_koodisto_kunta k
           JOIN pub.pub_dim_koodisto_kunta_maakunta km
           ON k.koodiarvo = km.kunta_koodiarvo
-          #$maakunnatQueryStr""".as[Koodi]
+          #$whereClause""".as[Koodi]
   }
 
   def selectHakukohderyhmat(
@@ -161,28 +165,28 @@ class CommonRepository extends Extractors {
           FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k""".as[Koodi]
   }
 
-  def selectDistinctKoulutusalat2(koulutusalat1: List[String]): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
-    val koulutusala1Str = RepositoryUtils.makeListOfValuesQueryStr(koulutusalat1)
-    val koulutusala1QueryStr = if (koulutusala1Str.isEmpty) {
-      ""
-    } else {
-      s"WHERE k.kansallinenkoulutusluokitus2016koulutusalataso1 in ($koulutusala1Str)"
-    }
+  def selectDistinctKoulutusalat2(koulutusalat1: List[String], selectedKoulutusalat2: List[String]): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
+    val conditions = Map(
+      "k.kansallinenkoulutusluokitus2016koulutusalataso1" -> koulutusalat1,
+      "k.kansallinenkoulutusluokitus2016koulutusalataso2" -> selectedKoulutusalat2
+    )
+    val whereClause = RepositoryUtils.makeOptionalWhereClause(conditions)
+
     sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso2 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso2_nimi as koodinimi
           FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
-            #$koulutusala1QueryStr""".as[Koodi]
+            #$whereClause""".as[Koodi]
   }
 
-  def selectDistinctKoulutusalat3(koulutusalat2: List[String]): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
-    val koulutusala2Str = RepositoryUtils.makeListOfValuesQueryStr(koulutusalat2)
-    val koulutusala2QueryStr = if (koulutusala2Str.isEmpty) {
-      ""
-    } else {
-      s"WHERE k.kansallinenkoulutusluokitus2016koulutusalataso2 in ($koulutusala2Str)"
-    }
+  def selectDistinctKoulutusalat3(koulutusalat2: List[String], selectedKoulutusalat3: List[String]): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
+    val conditions = Map(
+      "k.kansallinenkoulutusluokitus2016koulutusalataso2" -> koulutusalat2,
+      "k.kansallinenkoulutusluokitus2016koulutusalataso3" -> selectedKoulutusalat3
+    )
+    val whereClause = RepositoryUtils.makeOptionalWhereClause(conditions)
+
     sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso3 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso3_nimi as koodinimi
           FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k
-          #$koulutusala2QueryStr""".as[Koodi]
+          #$whereClause""".as[Koodi]
   }
 
   def selectDistinctOkmOhjauksenAlat: SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {

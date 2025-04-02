@@ -140,18 +140,20 @@ class Controller(
 
   @GetMapping(path = Array("koulutusalat2"))
   def koulutusalat2(
-      @RequestParam("koulutusalat1", required = false) koulutusalat1: java.util.Collection[String]
+      @RequestParam("koulutusalat1", required = false) koulutusalat1: java.util.Collection[String],
+      @RequestParam("selectedKoulutusalat2", required = false) selectedKoulutusalat2: java.util.Collection[String]
   ): String =
     mapper.writeValueAsString(
-      commonService.getKoulutusalat2(if (koulutusalat1 == null) List() else koulutusalat1.asScala.toList)
+      commonService.getKoulutusalat2(getListParamAsScalaList(koulutusalat1), getListParamAsScalaList(selectedKoulutusalat2))
     )
 
   @GetMapping(path = Array("koulutusalat3"))
   def koulutusalat3(
-      @RequestParam("koulutusalat2", required = false) koulutusalat2: java.util.Collection[String]
+      @RequestParam("koulutusalat2", required = false) koulutusalat2: java.util.Collection[String],
+      @RequestParam("selectedKoulutusalat3", required = false) selectedKoulutusalat3: java.util.Collection[String]
   ): String =
     mapper.writeValueAsString(
-      commonService.getKoulutusalat3(if (koulutusalat2 == null) List() else koulutusalat2.asScala.toList)
+      commonService.getKoulutusalat3(getListParamAsScalaList(koulutusalat2), getListParamAsScalaList(selectedKoulutusalat3))
     )
 
   @GetMapping(path = Array("hakukohderyhmat"))
@@ -159,11 +161,9 @@ class Controller(
       @RequestParam("haku", required = true) haut: java.util.Collection[String]
   ): String =
     mapper.writeValueAsString(
-      commonService.getHakukohderyhmat(if (haut == null) List() else haut.asScala.toList)
+      commonService.getHakukohderyhmat(getListParamAsScalaList(haut))
     )
 
-  @GetMapping(path = Array("okm-ohjauksen-alat"))
-  def okmOhjauksenAlat: String = mapper.writeValueAsString(commonService.getOkmOhjauksenAlat)
   // RAPORTIT
 
   private def sendExcel(
@@ -223,9 +223,9 @@ class Controller(
     } else {
       Option(valintakoe.toBoolean)
     }
-    val oppilaitosList = if (oppilaitos == null) List() else oppilaitos.asScala.toList
-    val toimipisteList = if (toimipiste == null) List() else toimipiste.asScala.toList
-    val hakuList       = if (haku == null) List() else haku.asScala.toList
+    val oppilaitosList = getListParamAsScalaList(oppilaitos)
+    val toimipisteList = getListParamAsScalaList(toimipiste)
+    val hakuList       = getListParamAsScalaList(haku)
 
     val wb = koulutuksetToteutuksetHakukohteetService.get(
       hakuList,
@@ -271,14 +271,14 @@ class Controller(
       request: HttpServletRequest,
       response: HttpServletResponse
   ): Unit = {
-    val hakuList               = if (haku == null) List() else haku.asScala.toList
-    val oppilaitosList         = if (oppilaitos == null) List() else oppilaitos.asScala.toList
-    val toimipisteList         = if (toimipiste == null) List() else toimipiste.asScala.toList
-    val hakukohdeList          = if (hakukohde == null) List() else hakukohde.asScala.toList
-    val pohjakoulutusList      = if (pohjakoulutus == null) List() else pohjakoulutus.asScala.toList
-    val valintatietoList       = if (valintatieto == null) List() else valintatieto.asScala.toList
-    val vastaanottotietoList   = if (vastaanottotieto == null) List() else vastaanottotieto.asScala.toList
-    val harkinnanvaraisuusList = if (harkinnanvaraisuus == null) List() else harkinnanvaraisuus.asScala.toList
+    val hakuList               = getListParamAsScalaList(haku)
+    val oppilaitosList         = getListParamAsScalaList(oppilaitos)
+    val toimipisteList         = getListParamAsScalaList(toimipiste)
+    val hakukohdeList          = getListParamAsScalaList(hakukohde)
+    val pohjakoulutusList      = getListParamAsScalaList(pohjakoulutus)
+    val valintatietoList       = getListParamAsScalaList(valintatieto)
+    val vastaanottotietoList   = getListParamAsScalaList(vastaanottotieto)
+    val harkinnanvaraisuusList = getListParamAsScalaList(harkinnanvaraisuus)
 
     val maybeKaksoistutkintoKiinnostaa   = strToOptionBoolean(kaksoistutkinto)
     val maybeUrheilijatutkintoKiinnostaa = strToOptionBoolean(urheilijatutkinto)
@@ -346,14 +346,14 @@ class Controller(
       request: HttpServletRequest,
       response: HttpServletResponse
   ): Unit = {
-    val hakuList             = if (haku == null) List() else haku.asScala.toList
-    val oppilaitosList       = if (oppilaitos == null) List() else oppilaitos.asScala.toList
-    val toimipisteList       = if (toimipiste == null) List() else toimipiste.asScala.toList
-    val hakukohdeList        = if (hakukohde == null) List() else hakukohde.asScala.toList
-    val valintatietoList     = if (valintatieto == null) List() else valintatieto.asScala.toList
-    val vastaanottotietoList = if (vastaanottotieto == null) List() else vastaanottotieto.asScala.toList
-    val hakukohderyhmaList   = if (hakukohderyhmat == null) List() else hakukohderyhmat.asScala.toList
-    val kansalaisuusList     = if (kansalaisuus == null) List() else kansalaisuus.asScala.toList
+    val hakuList             = getListParamAsScalaList(haku)
+    val oppilaitosList       = getListParamAsScalaList(oppilaitos)
+    val toimipisteList       = getListParamAsScalaList(toimipiste)
+    val hakukohdeList        = getListParamAsScalaList(hakukohde)
+    val valintatietoList     = getListParamAsScalaList(valintatieto)
+    val vastaanottotietoList = getListParamAsScalaList(vastaanottotieto)
+    val hakukohderyhmaList   = getListParamAsScalaList(hakukohderyhmat)
+    val kansalaisuusList     = getListParamAsScalaList(kansalaisuus)
 
     val maybeMarkkinointilupa = strToOptionBoolean(markkinointilupa)
 
@@ -397,6 +397,7 @@ class Controller(
 
   @GetMapping(path = Array("hakeneet-hyvaksytyt-vastaanottaneet"))
   def hakeneet_hyvaksytyt_vastaanottaneet(
+      @RequestParam("alkamiskausi") alkamiskausi: java.util.Collection[String],
       @RequestParam("haku") haku: java.util.Collection[String],
       @RequestParam("tulostustapa") tulostustapa: String,
       @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
@@ -419,18 +420,18 @@ class Controller(
     val tulostustapaValinta            = Option(tulostustapa).getOrElse("hakukohteittain")
     val naytaHakutoiveetBool           = Option(naytaHakutoiveet).exists(_.toBoolean)
     val maybeSukupuoli: Option[String] = if (sukupuoli == "neutral") None else Option(sukupuoli)
-    val hakuList                       = if (haku == null) List() else haku.asScala.toList
-    val oppilaitosList                 = if (oppilaitos == null) List() else oppilaitos.asScala.toList
-    val toimipisteList                 = if (toimipiste == null) List() else toimipiste.asScala.toList
-    val hakukohdeList                  = if (hakukohde == null) List() else hakukohde.asScala.toList
-    val koulutusala1List               = if (koulutusala1 == null) List() else koulutusala1.asScala.toList
-    val koulutusala2List               = if (koulutusala2 == null) List() else koulutusala2.asScala.toList
-    val koulutusala3List               = if (koulutusala3 == null) List() else koulutusala3.asScala.toList
-    val maakuntaList                   = if (maakunta == null) List() else maakunta.asScala.toList.map("maakunta_" + _)
-    val kuntaList                      = if (kunta == null) List() else kunta.asScala.toList.map("kunta_" + _)
+    val hakuList                       = getListParamAsScalaList(haku)
+    val oppilaitosList                 = getListParamAsScalaList(oppilaitos)
+    val toimipisteList                 = getListParamAsScalaList(toimipiste)
+    val hakukohdeList                  = getListParamAsScalaList(hakukohde)
+    val koulutusala1List               = getListParamAsScalaList(koulutusala1)
+    val koulutusala2List               = getListParamAsScalaList(koulutusala2)
+    val koulutusala3List               = getListParamAsScalaList(koulutusala3)
+    val maakuntaList                   = getListParamAsScalaList(maakunta).map("maakunta_" + _)
+    val kuntaList                      = getListParamAsScalaList(kunta).map("kunta_" + _)
     val opetuskieliList =
-      if (opetuskieli == null) List() else opetuskieli.asScala.toList.map("oppilaitoksenopetuskieli_" + _)
-    val harkinnanvaraisuusList = if (harkinnanvaraisuudet == null) List() else harkinnanvaraisuudet.asScala.toList
+      getListParamAsScalaList(opetuskieli).map("oppilaitoksenopetuskieli_" + _)
+    val harkinnanvaraisuusList = getListParamAsScalaList(harkinnanvaraisuudet)
 
     val wb = hakeneetHyvaksytytVastaanottaneetService.get(
       hakuList,

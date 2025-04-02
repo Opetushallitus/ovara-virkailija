@@ -37,6 +37,7 @@ export const Opetuskieli = () => {
       onChange={(e, value) =>
         changeMultiComboBoxSelection(e, value, setSelectedOpetuskielet)
       }
+      sortOptions={false}
       required={false}
     />
   );

@@ -145,6 +145,45 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     )
   }
 
+  "makeOptionalWhereClause" should "return an empty string when no conditions are provided" in {
+    val conditions = Map.empty[String, List[String]]
+    assert(
+      RepositoryUtils.makeOptionalWhereClause(conditions) == ""
+    )
+  }
+
+  it should "return an empty string when conditions are empty" in {
+    val conditions = Map("kansallinenkoulutusluokitus2016koulutusastetaso2" -> List())
+    assert(
+      RepositoryUtils.makeOptionalWhereClause(conditions) == ""
+    )
+  }
+
+  it should "return a WHERE clause with a single condition" in {
+    val conditions = Map("kansallinenkoulutusluokitus2016koulutusastetaso2" -> List("02"))
+    assert(
+      RepositoryUtils.makeOptionalWhereClause(conditions) == "WHERE kansallinenkoulutusluokitus2016koulutusastetaso2 IN ('02')")
+  }
+
+  it should "return a WHERE clause with multiple conditions" in {
+    val conditions = Map(
+      "kansallinenkoulutusluokitus2016koulutusastetaso2" -> List("001", "021"),
+      "kansallinenkoulutusluokitus2016koulutusalataso3" -> List("0732")
+    )
+    assert(
+      RepositoryUtils.makeOptionalWhereClause(conditions) ==
+        "WHERE kansallinenkoulutusluokitus2016koulutusastetaso2 IN ('001', '021') OR kansallinenkoulutusluokitus2016koulutusalataso3 IN ('0732')")
+  }
+
+  it should "ignore empty lists in conditions" in {
+    val conditions = Map(
+      "kansallinenkoulutusluokitus2016koulutusastetaso2" -> List("001"),
+      "kansallinenkoulutusluokitus2016koulutusalataso3" -> List()
+    )
+    assert(
+      RepositoryUtils.makeOptionalWhereClause(conditions) == "WHERE kansallinenkoulutusluokitus2016koulutusastetaso2 IN ('001')")
+  }
+
   "optionalHenkilokohtainenSuunnitelmaQuery" should "return empty query str when 'henkilokohtainenSuunnitelma' is false" in {
     assert(
       RepositoryUtils.makeOptionalHenkilokohtainenSuunnitelmaQuery(false) == ""

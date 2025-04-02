@@ -51,6 +51,20 @@ object RepositoryUtils {
     }
   }
 
+  def makeOptionalWhereClause(conditions: Map[String, List[String]]): String = {
+    val clauses = conditions.collect {
+      case (column, values) if values.nonEmpty =>
+        val valuesStr = makeListOfValuesQueryStr(values)
+        s"$column IN ($valuesStr)"
+    }.toList
+
+    if (clauses.nonEmpty) {
+      "WHERE " + clauses.mkString(" OR ")
+    } else {
+      ""
+    }
+  }
+
   def makeAlkamiskaudetQueryStr(tableNames: List[String], alkamiskaudet: List[(Int, String)]): String = {
     def hasMoreThanOne(alkamiskaudet: List[(Int, String)]) = {
       alkamiskaudet.size > 1

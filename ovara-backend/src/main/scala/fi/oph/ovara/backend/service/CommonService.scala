@@ -93,20 +93,20 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     db.run(commonRepository.selectDistinctMaakunnat, "selectDistinctMaakunnat")
   }
 
-  def getKunnat(maakunnat: List[String]): Vector[Koodi] = {
-    db.run(commonRepository.selectDistinctKunnat(maakunnat), "selectDistinctKunnat")
+  def getKunnat(maakunnat: List[String], selectedKunnat: List[String]): Vector[Koodi] = {
+    db.run(commonRepository.selectDistinctKunnat(maakunnat, selectedKunnat), "selectDistinctKunnat")
   }
 
   def getKoulutusalat1: Vector[Koodi] = {
     db.run(commonRepository.selectDistinctKoulutusalat1(), "selectDistinctKoulutusalat1")
   }
 
-  def getKoulutusalat2(koulutusalat1: List[String]): Vector[Koodi] = {
-    db.run(commonRepository.selectDistinctKoulutusalat2(koulutusalat1), "selectDistinctKoulutusalat2")
+  def getKoulutusalat2(koulutusalat1: List[String], selectedKoulutusalat2: List[String]): Vector[Koodi] = {
+    db.run(commonRepository.selectDistinctKoulutusalat2(koulutusalat1, selectedKoulutusalat2), "selectDistinctKoulutusalat2")
   }
 
-  def getKoulutusalat3(koulutusalat2: List[String]): Vector[Koodi] = {
-    db.run(commonRepository.selectDistinctKoulutusalat3(koulutusalat2), "selectDistinctKoulutusalat3")
+  def getKoulutusalat3(koulutusalat2: List[String], selectedKoulutusalat3: List[String]): Vector[Koodi] = {
+    db.run(commonRepository.selectDistinctKoulutusalat3(koulutusalat2, selectedKoulutusalat3), "selectDistinctKoulutusalat3")
   }
 
   def getOkmOhjauksenAlat: Vector[Koodi] = {
@@ -191,7 +191,8 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
         )
         .toList
 
-    hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterActiveOrgsWithoutPeruskoulu(hierarkia))
+      hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterActiveOrgsWithoutPeruskoulu(hierarkia))
+    }
   }
 
   def getDistinctKoulutustoimijat(organisaatioOids: List[String]): List[Organisaatio] = {
