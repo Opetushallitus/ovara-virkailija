@@ -4,6 +4,7 @@ import fi.oph.ovara.backend.domain.{HakeneetHyvaksytytVastaanottaneetResult, KkH
 import fi.oph.ovara.backend.repository.{KkHakeneetHyvaksytytVastaanottaneetRepository, OvaraDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.{Component, Service}
 
@@ -16,6 +17,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
                                                   lokalisointiService: LokalisointiService
                                                 ) {
 
+  val LOG: Logger = LoggerFactory.getLogger(classOf[KkHakeneetHyvaksytytVastaanottaneetService])
   @Autowired
   val db: OvaraDatabase = null
 
@@ -40,6 +42,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
     val authorities = user.authorities
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
     val translations = lokalisointiService.getOvaraTranslations(asiointikieli)
+    val isOphPaakayttaja = AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)
 
     val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
@@ -48,13 +51,19 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       koulutustoimijaOid = koulutustoimija
     )
 
+    val hakukohderyhmarajaus =
+    if(orgOidsForQuery.isEmpty && hakukohderyhmat.isEmpty && !isOphPaakayttaja) {
+      // pakotetaan käyttöoikeuksien mukainen hakukohderyhmärajaus jos ei ole mitään organisaatiorajausta eikä ole pääkäyttäjä
+      kayttooikeusOrganisaatiot
+    } else
+      hakukohderyhmat
     val queryResult = tulostustapa match
       case "hauittain" =>
         val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHauittainWithParams(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
           haut = haku,
           hakukohteet = hakukohteet,
-          hakukohderyhmat = hakukohderyhmat,
+          hakukohderyhmat = hakukohderyhmarajaus,
           okmOhjauksenAlat = okmOhjauksenAlat,
           tutkinnonTasot = tutkinnonTasot,
           aidinkielet = aidinkielet,
@@ -68,7 +77,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
           haut = haku,
           hakukohteet = hakukohteet,
-          hakukohderyhmat = hakukohderyhmat,
+          hakukohderyhmat = hakukohderyhmarajaus,
           okmOhjauksenAlat = okmOhjauksenAlat,
           tutkinnonTasot = tutkinnonTasot,
           aidinkielet = aidinkielet,
@@ -82,7 +91,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
           haut = haku,
           hakukohteet = hakukohteet,
-          hakukohderyhmat = hakukohderyhmat,
+          hakukohderyhmat = hakukohderyhmarajaus,
           okmOhjauksenAlat = okmOhjauksenAlat,
           tutkinnonTasot = tutkinnonTasot,
           aidinkielet = aidinkielet,
@@ -96,7 +105,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
           haut = haku,
           hakukohteet = hakukohteet,
-          hakukohderyhmat = hakukohderyhmat,
+          hakukohderyhmat = hakukohderyhmarajaus,
           okmOhjauksenAlat = okmOhjauksenAlat,
           tutkinnonTasot = tutkinnonTasot,
           aidinkielet = aidinkielet,
@@ -110,7 +119,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
           haut = haku,
           hakukohteet = hakukohteet,
-          hakukohderyhmat = hakukohderyhmat,
+          hakukohderyhmat = hakukohderyhmarajaus,
           okmOhjauksenAlat = okmOhjauksenAlat,
           tutkinnonTasot = tutkinnonTasot,
           aidinkielet = aidinkielet,
@@ -124,7 +133,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
           haut = haku,
           hakukohteet = hakukohteet,
-          hakukohderyhmat = hakukohderyhmat,
+          hakukohderyhmat = hakukohderyhmarajaus,
           okmOhjauksenAlat = okmOhjauksenAlat,
           tutkinnonTasot = tutkinnonTasot,
           aidinkielet = aidinkielet,
@@ -138,7 +147,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
           haut = haku,
           hakukohteet = hakukohteet,
-          hakukohderyhmat = hakukohderyhmat,
+          hakukohderyhmat = hakukohderyhmarajaus,
           okmOhjauksenAlat = okmOhjauksenAlat,
           tutkinnonTasot = tutkinnonTasot,
           aidinkielet = aidinkielet,
@@ -154,7 +163,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
       haut = haku,
       hakukohteet = hakukohteet,
-      hakukohderyhmat = hakukohderyhmat,
+      hakukohderyhmat = hakukohderyhmarajaus,
       okmOhjauksenAlat = okmOhjauksenAlat,
       tutkinnonTasot = tutkinnonTasot,
       aidinkielet = aidinkielet,
@@ -167,7 +176,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
       haut = haku,
       hakukohteet = hakukohteet,
-      hakukohderyhmat = hakukohderyhmat,
+      hakukohderyhmat = hakukohderyhmarajaus,
       okmOhjauksenAlat = okmOhjauksenAlat,
       tutkinnonTasot = tutkinnonTasot,
       aidinkielet = aidinkielet,
@@ -180,7 +189,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
       haut = haku,
       hakukohteet = hakukohteet,
-      hakukohderyhmat = hakukohderyhmat,
+      hakukohderyhmat = hakukohderyhmarajaus,
       okmOhjauksenAlat = okmOhjauksenAlat,
       tutkinnonTasot = tutkinnonTasot,
       aidinkielet = aidinkielet,

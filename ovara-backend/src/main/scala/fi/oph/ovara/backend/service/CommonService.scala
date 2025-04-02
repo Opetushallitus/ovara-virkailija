@@ -117,7 +117,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     val user             = userService.getEnrichedUserDetails
     val kayttooikeusOids = AuthoritiesUtil.getKayttooikeusOids(user.authorities)
     val hakukohderyhmaOids =
-      if (hasOPHPaakayttajaRights(kayttooikeusOids))
+      if (AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOids))
         List() // ei rajata listaa pääkäyttäjälle
       else
         kayttooikeusOids
@@ -204,10 +204,6 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     ).toList
   }
 
-  private def hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot: List[String]) = {
-    kayttooikeusOrganisaatiot.contains(OPH_PAAKAYTTAJA_OID)
-  }
-
   def getAllowedOrgsFromOrgSelection(
       kayttooikeusOrganisaatioOids: List[String],
       koulutustoimijaOid: Option[String],
@@ -240,7 +236,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       } else {
         val koulutustoimijahierarkia = getKoulutustoimijahierarkia(kayttooikeusOrganisaatioOids)
 
-        val hierarkiat = if (hasOPHPaakayttajaRights(kayttooikeusOrganisaatioOids)) {
+        val hierarkiat = if (AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatioOids)) {
           koulutustoimijahierarkia
         } else {
           val oppilaitoshierarkia = getOppilaitoshierarkiat(oppilaitosOids)
@@ -257,7 +253,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     val selectedOrgsDescendantOids =
       hierarkiatWithExistingOrgs.flatMap(hierarkia => OrganisaatioUtils.getDescendantOids(hierarkia)).distinct
 
-    if (hasOPHPaakayttajaRights(kayttooikeusOrganisaatioOids)) {
+    if (AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatioOids)) {
       (selectedOrgsDescendantOids, hierarkiatWithExistingOrgs, raporttityyppi)
     } else {
       val childKayttooikeusOrgs = hierarkiatWithExistingOrgs.flatMap(hierarkia =>
