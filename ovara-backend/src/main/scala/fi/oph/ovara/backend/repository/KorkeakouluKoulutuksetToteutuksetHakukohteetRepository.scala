@@ -47,7 +47,8 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
                  haku_ja_hakuaika.hakuaika,
                  haku_ja_hakuaika.hakutapa_nimi,
                  hk.hakukohteen_aloituspaikat,
-                 hk.aloituspaikat_ensikertalaisille
+                 hk.aloituspaikat_ensikertalaisille,
+                 hk.valintaperuste_nimi
           FROM pub.pub_dim_haku h
           JOIN pub.pub_dim_hakukohde hk
           ON h.haku_oid = hk.haku_oid

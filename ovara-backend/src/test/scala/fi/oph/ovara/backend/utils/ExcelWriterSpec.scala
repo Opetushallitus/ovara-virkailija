@@ -1641,7 +1641,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
           Sv -> "Separata antagningar"
         ),
         Some(15),
-        Some(10)
+        Some(10),
+        Map(
+          En -> "Master's Admissions (Aalto University, field of Art and Design) 2023",
+          Fi -> "Maisterivalinta (Aalto-yliopisto, ARTS) 2023",
+          Sv -> "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
+        )
       ),
       KorkeakouluKoulutusToteutusHakukohdeResult(
         Map(
@@ -1689,7 +1694,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
         ),
         Map(En -> "Separate application", Fi -> "Erillishaku", Sv -> "Separata antagningar"),
         Some(8),
-        None
+        None,
+        Map(
+          En -> "Master's Admissions (Aalto University, field of Art and Design) 2023",
+          Fi -> "Maisterivalinta (Aalto-yliopisto, ARTS) 2023",
+          Sv -> "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
+        )
       ),
       KorkeakouluKoulutusToteutusHakukohdeResult(
         Map(
@@ -1738,7 +1748,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
         ),
         Map(En -> "Separate application", Fi -> "Erillishaku", Sv -> "Separata antagningar"),
         Some(12),
-        None
+        None,
+        Map(
+          En -> "Master's Admissions (Aalto University, field of Art and Design) 2023",
+          Fi -> "Maisterivalinta (Aalto-yliopisto, ARTS) 2023",
+          Sv -> "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
+        )
       ),
       KorkeakouluKoulutusToteutusHakukohdeResult(
         Map(
@@ -1787,7 +1802,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
         ),
         Map(En -> "Separate application", Fi -> "Erillishaku", Sv -> "Separata antagningar"),
         Some(14),
-        Some(10)
+        Some(10),
+        Map(
+          En -> "Master's Admissions (Aalto University, field of Art and Design) 2023",
+          Fi -> "Maisterivalinta (Aalto-yliopisto, ARTS) 2023",
+          Sv -> "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
+        )
       )
     )
 
@@ -1819,59 +1839,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(0).getCell(18).getStringCellValue == "raportti.hakutapa")
     assert(sheet.getRow(0).getCell(19).getStringCellValue == "raportti.hakukohteenAloituspaikat")
     assert(sheet.getRow(0).getCell(20).getStringCellValue == "raportti.ensikertalaistenAloituspaikat")
-    assert(sheet.getRow(0).getCell(21) == null)
-    assert(
-      sheet.getRow(1).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
-    )
-    assert(sheet.getRow(1).getCell(1).getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år)")
-    assert(sheet.getRow(1).getCell(2).getStringCellValue == "1.2.246.562.13.00000000000000002677")
-    assert(sheet.getRow(1).getCell(3).getStringCellValue == "Julkaistu SV")
-    assert(sheet.getRow(1).getCell(4).getStringCellValue == "309902")
-    assert(sheet.getRow(1).getCell(5).getStringCellValue == "ARTS20502")
-    assert(sheet.getRow(1).getCell(6).getStringCellValue == "120 studiepoäng")
-    assert(
-      sheet
-        .getRow(1)
-        .getCell(7)
-        .getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år) -toteutus"
-    )
-    assert(sheet.getRow(1).getCell(8).getStringCellValue == "1.2.246.562.17.00000000000000007967")
-    assert(sheet.getRow(1).getCell(9).getStringCellValue == "raportti.arkistoitu")
-    assert(sheet.getRow(1).getCell(10).getStringCellValue == "-")
-    assert(sheet.getRow(1).getCell(11).getStringCellValue == "Höst 2023")
-    assert(sheet.getRow(1).getCell(12).getStringCellValue == "Film- och tv-manuskript, konstmagister (2 år)")
-    assert(sheet.getRow(1).getCell(13).getStringCellValue == "1.2.246.562.20.00000000000000017822")
-    assert(sheet.getRow(1).getCell(14).getStringCellValue == "Luonnos SV")
-    assert(sheet.getRow(1).getCell(15).getStringCellValue == "ARTS20503")
-    assert(sheet.getRow(1).getCell(16).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
-    assert(sheet.getRow(1).getCell(17).getStringCellValue == "1.12.2022 - 2.1.2023")
-    assert(sheet.getRow(1).getCell(18).getStringCellValue == "Separata antagningar")
-    assert(sheet.getRow(1).getCell(19).getNumericCellValue == 15)
-    assert(sheet.getRow(1).getCell(20).getNumericCellValue == 10)
-    assert(sheet.getRow(1).getCell(21) == null)
-
-    assert(sheet.getRow(0).getCell(0).getStringCellValue == "Oppilaitos ja toimipiste SV")
-    assert(sheet.getRow(0).getCell(1).getStringCellValue == "raportti.koulutuksenNimi")
-    assert(sheet.getRow(0).getCell(2).getStringCellValue == "raportti.koulutusOid")
-    assert(sheet.getRow(0).getCell(3).getStringCellValue == "Kou.tila SV")
-    assert(sheet.getRow(0).getCell(4).getStringCellValue == "raportti.koulutuskoodi")
-    assert(sheet.getRow(0).getCell(5).getStringCellValue == "raportti.koulutuksenUlkoinenTunniste")
-    assert(sheet.getRow(0).getCell(6).getStringCellValue == "raportti.opintojenLaajuus")
-    assert(sheet.getRow(0).getCell(7).getStringCellValue == "raportti.toteutuksenNimi")
-    assert(sheet.getRow(0).getCell(8).getStringCellValue == "raportti.toteutusOid")
-    assert(sheet.getRow(0).getCell(9).getStringCellValue == "Tot.tila SV")
-    assert(sheet.getRow(0).getCell(10).getStringCellValue == "raportti.toteutuksenUlkoinenTunniste")
-    assert(sheet.getRow(0).getCell(11).getStringCellValue == "raportti.koulutuksenAlkamisaika")
-    assert(sheet.getRow(0).getCell(12).getStringCellValue == "Hakukohde SV")
-    assert(sheet.getRow(0).getCell(13).getStringCellValue == "Hakukohteen oid SV")
-    assert(sheet.getRow(0).getCell(14).getStringCellValue == "Hak.tila SV")
-    assert(sheet.getRow(0).getCell(15).getStringCellValue == "raportti.hakukohteenUlkoinenTunniste")
-    assert(sheet.getRow(0).getCell(16).getStringCellValue == "raportti.haunNimi")
-    assert(sheet.getRow(0).getCell(17).getStringCellValue == "raportti.hakuaika")
-    assert(sheet.getRow(0).getCell(18).getStringCellValue == "raportti.hakutapa")
-    assert(sheet.getRow(0).getCell(19).getStringCellValue == "raportti.hakukohteenAloituspaikat")
-    assert(sheet.getRow(0).getCell(20).getStringCellValue == "raportti.ensikertalaistenAloituspaikat")
-    assert(sheet.getRow(0).getCell(21) == null)
+    assert(sheet.getRow(0).getCell(21).getStringCellValue == "raportti.valintaperuste")
+    assert(sheet.getRow(0).getCell(22) == null)
 
     assert(
       sheet.getRow(1).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
@@ -1901,7 +1870,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(1).getCell(18).getStringCellValue == "Separata antagningar")
     assert(sheet.getRow(1).getCell(19).getNumericCellValue == 15)
     assert(sheet.getRow(1).getCell(20).getNumericCellValue == 10)
-    assert(sheet.getRow(1).getCell(21) == null)
+    assert(
+      sheet
+        .getRow(1)
+        .getCell(21)
+        .getStringCellValue == "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
+    )
+    assert(sheet.getRow(1).getCell(22) == null)
 
     assert(
       sheet.getRow(2).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
@@ -1931,7 +1906,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(2).getCell(18).getStringCellValue == "Separata antagningar")
     assert(sheet.getRow(2).getCell(19).getNumericCellValue == 8)
     assert(sheet.getRow(2).getCell(20).getStringCellValue == "-")
-    assert(sheet.getRow(2).getCell(21) == null)
+    assert(
+      sheet
+        .getRow(2)
+        .getCell(21)
+        .getStringCellValue == "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
+    )
+    assert(sheet.getRow(2).getCell(22) == null)
 
     assert(
       sheet.getRow(3).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
@@ -1966,7 +1947,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(3).getCell(18).getStringCellValue == "Separata antagningar")
     assert(sheet.getRow(3).getCell(19).getNumericCellValue == 12)
     assert(sheet.getRow(3).getCell(20).getStringCellValue == "-")
-    assert(sheet.getRow(3).getCell(21) == null)
+    assert(
+      sheet
+        .getRow(3)
+        .getCell(21)
+        .getStringCellValue == "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
+    )
+    assert(sheet.getRow(3).getCell(22) == null)
 
     assert(
       sheet.getRow(4).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
@@ -2003,7 +1990,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(4).getCell(18).getStringCellValue == "Separata antagningar")
     assert(sheet.getRow(4).getCell(19).getNumericCellValue == 14)
     assert(sheet.getRow(4).getCell(20).getNumericCellValue == 10)
-    assert(sheet.getRow(4).getCell(21) == null)
+    assert(
+      sheet
+        .getRow(4)
+        .getCell(21)
+        .getStringCellValue == "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
+    )
+    assert(sheet.getRow(4).getCell(22) == null)
 
     assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 5)
     assert(wb.getSheetAt(0).getRow(6) == null)
