@@ -2,11 +2,7 @@ package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.KorkeakouluKoulutusToteutusHakukohdeResult
 import fi.oph.ovara.backend.utils.RepositoryUtils
-import fi.oph.ovara.backend.utils.RepositoryUtils.{
-  makeEqualsQueryStrOfOptional,
-  makeOptionalHakukohderyhmatSubSelectQueryStr,
-  makeOptionalJarjestyspaikkaQuery
-}
+import fi.oph.ovara.backend.utils.RepositoryUtils.{buildTutkinnonTasoFilters, makeEqualsQueryStrOfOptional, makeOptionalHakukohderyhmatSubSelectQueryStr, makeOptionalJarjestyspaikkaQuery}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.{Component, Repository}
 import slick.dbio.Effect
@@ -24,7 +20,8 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
       haku: List[String],
       koulutuksenTila: Option[String],
       toteutuksenTila: Option[String],
-      hakukohteenTila: Option[String]
+      hakukohteenTila: Option[String],
+      tutkinnonTasot: List[String]
   ): SqlStreamingAction[Vector[
     KorkeakouluKoulutusToteutusHakukohdeResult
   ], KorkeakouluKoulutusToteutusHakukohdeResult, Effect] = {
@@ -32,6 +29,9 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
       makeOptionalJarjestyspaikkaQuery(selectedKayttooikeusOrganisaatiot)
 
     val optionalHakukohderyhmaSubSelect = makeOptionalHakukohderyhmatSubSelectQueryStr(hakukohderyhmat)
+    val tutkinnonTasoQueryStr = buildTutkinnonTasoFilters(tutkinnonTasot, "hk") match
+      case Some(queryStr) => queryStr
+      case None => ""
 
     val query = sql"""SELECT hk.organisaatio_nimi,
                  k.koulutus_nimi,
@@ -81,6 +81,7 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
           #${makeEqualsQueryStrOfOptional("AND", "k.tila", koulutuksenTila)}
           #${makeEqualsQueryStrOfOptional("AND", "t.tila", toteutuksenTila)}
           #${makeEqualsQueryStrOfOptional("AND", "hk.tila", hakukohteenTila)}
+          #$tutkinnonTasoQueryStr
           """.as[KorkeakouluKoulutusToteutusHakukohdeResult]
 
     LOG.debug(s"selectWithParams: ${query.statements.head}")

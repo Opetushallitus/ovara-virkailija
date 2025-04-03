@@ -26,6 +26,7 @@ import {
 import { LanguageCode } from '@/app/lib/types/common';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
 import { Hakukohderyhma } from '@/app/components/form/hakukohderyhma';
+import { KkTutkinnonTaso } from '@/app/components/form/kk-tutkinnon-taso';
 import { isEmpty } from 'remeda';
 
 export default function KoulutuksetToteutuksetHakukohteet() {
@@ -82,6 +83,7 @@ export default function KoulutuksetToteutuksetHakukohteet() {
           <KoulutuksenTila />
           <ToteutuksenTila />
           <HakukohteenTila />
+          <KkTutkinnonTaso />
           <FormButtons
             disabled={isDisabled}
             downloadExcel={() =>
