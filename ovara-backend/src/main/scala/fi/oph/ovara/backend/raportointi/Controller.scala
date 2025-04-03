@@ -50,6 +50,10 @@ class Controller(
     }
   }
 
+  private def getListParamAsScalaList(listParam: util.Collection[String]) = {
+    if (listParam == null) List() else listParam.asScala.toList
+  }
+
   @GetMapping(path = Array("healthcheck"))
   def healthcheck = "Ovara application is running!"
 
@@ -85,14 +89,15 @@ class Controller(
   @GetMapping(path = Array("haut"))
   def haut(
       @RequestParam("alkamiskausi", required = false) alkamiskaudet: java.util.Collection[String],
+      @RequestParam("selectedHaut", required = false) selectedHaut: java.util.Collection[String],
       @RequestParam("haun_tyyppi", required = false) haun_tyyppi: String
   ): String = {
     val alkamiskaudetList =
-      if (alkamiskaudet == null) List() else alkamiskaudet.asScala.toList
-
+      getListParamAsScalaList(alkamiskaudet)
+    val selectedHautList = getListParamAsScalaList(selectedHaut)
     val haunTyyppi = if (haun_tyyppi == null) "" else haun_tyyppi
 
-    mapper.writeValueAsString(commonService.getHaut(alkamiskaudetList, haunTyyppi))
+    mapper.writeValueAsString(commonService.getHaut(alkamiskaudetList, selectedHautList, haunTyyppi))
   }
 
   @GetMapping(path = Array("hakukohteet"))
@@ -103,10 +108,10 @@ class Controller(
       @RequestParam("hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String]
   ): String = mapper.writeValueAsString(
     commonService.getHakukohteet(
-      if (oppilaitos == null) List() else oppilaitos.asScala.toList,
-      if (toimipiste == null) List() else toimipiste.asScala.toList,
-      if (haku == null) List() else haku.asScala.toList,
-      if (hakukohderyhmat == null) List() else hakukohderyhmat.asScala.toList
+      getListParamAsScalaList(oppilaitos),
+      getListParamAsScalaList(toimipiste),
+      getListParamAsScalaList(haku),
+      getListParamAsScalaList(hakukohderyhmat)
     )
   )
 
@@ -132,8 +137,9 @@ class Controller(
   def maakunnat: String = mapper.writeValueAsString(commonService.getMaakunnat)
 
   @GetMapping(path = Array("kunnat"))
-  def kunnat(@RequestParam("maakunnat", required = false) maakunnat: java.util.Collection[String]): String =
-    mapper.writeValueAsString(commonService.getKunnat(if (maakunnat == null) List() else maakunnat.asScala.toList))
+  def kunnat(@RequestParam("maakunnat", required = false) maakunnat: java.util.Collection[String],
+             @RequestParam("selectedKunnat", required = false) selectedKunnat: java.util.Collection[String]): String =
+    mapper.writeValueAsString(commonService.getKunnat(getListParamAsScalaList(maakunnat), getListParamAsScalaList(selectedKunnat)))
 
   @GetMapping(path = Array("koulutusalat1"))
   def koulutusalat1: String = mapper.writeValueAsString(commonService.getKoulutusalat1)

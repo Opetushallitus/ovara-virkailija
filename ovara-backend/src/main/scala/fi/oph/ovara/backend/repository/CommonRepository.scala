@@ -29,6 +29,7 @@ class CommonRepository extends Extractors {
 
   def selectDistinctExistingHaut(
       alkamiskaudet: List[String] = List(),
+      selectedHaut: List[String] = List(),
       haunTyyppi: String
   ): SqlStreamingAction[Vector[Haku], Haku, Effect] = {
     val alkamiskaudetAndHenkKohtSuunnitelma =
@@ -39,6 +40,7 @@ class CommonRepository extends Extractors {
     } else {
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(alkamiskaudetAndHenkKohtSuunnitelma)
     }
+    val selectedHautQueryStr = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.haku_oid", selectedHaut)
 
     sql"""SELECT DISTINCT h.haku_oid, h.haku_nimi
           FROM pub.pub_dim_haku h
@@ -49,7 +51,8 @@ class CommonRepository extends Extractors {
           ON h.haku_oid = alkamiskaudet.haku_oid
           WHERE h.haun_tyyppi = $haunTyyppi
           AND h.tila != 'poistettu'
-          #$alkamiskaudetQueryStr""".as[Haku]
+          #$alkamiskaudetQueryStr
+          #$selectedHautQueryStr""".as[Haku]
   }
 
   def selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(

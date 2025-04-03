@@ -37,8 +37,8 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     LOG.info("Emptying alkamisvuodet cache")
   }
 
-  def getHaut(alkamiskaudet: List[String], haunTyyppi: String): Vector[Haku] = {
-    db.run(commonRepository.selectDistinctExistingHaut(alkamiskaudet, haunTyyppi), "selectDistinctExistingHaut")
+  def getHaut(alkamiskaudet: List[String], selectedHaut: List[String], haunTyyppi: String): Vector[Haku] = {
+    db.run(commonRepository.selectDistinctExistingHaut(alkamiskaudet, selectedHaut, haunTyyppi), "selectDistinctExistingHaut")
   }
 
   def getHakukohteet(
