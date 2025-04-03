@@ -26,14 +26,29 @@ import {
 import { LanguageCode } from '@/app/lib/types/common';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
 import { Hakukohderyhma } from '@/app/components/form/hakukohderyhma';
+import { isEmpty } from 'remeda';
 
 export default function KoulutuksetToteutuksetHakukohteet() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const hasKkRights = hasOvaraKkRole(user?.authorities);
-  const { selectedAlkamiskaudet, selectedHaut } = useCommonSearchParams();
+  const {
+    selectedAlkamiskaudet,
+    selectedHaut,
+    selectedOppilaitokset,
+    selectedToimipisteet,
+    selectedHakukohderyhmat,
+  } = useCommonSearchParams();
   const { data: organisaatiot } = useFetchOrganisaatiohierarkiat();
+
+  const isDisabled =
+    [selectedAlkamiskaudet || [], selectedHaut || []].some(isEmpty) ||
+    [
+      selectedOppilaitokset || [],
+      selectedToimipisteet || [],
+      selectedHakukohderyhmat || [],
+    ].every(isEmpty);
 
   const [isLoading, setIsLoading] = useState(false);
   const queryParamsStr = useSearchParams().toString();
@@ -47,6 +62,9 @@ export default function KoulutuksetToteutuksetHakukohteet() {
           <KoulutuksenAlkaminen />
           <Haku haunTyyppi="korkeakoulu" />
           <Divider />
+          <OphTypography>
+            {t('raportti.vahintaan-yksi-vaihtoehdoista')}
+          </OphTypography>
           <Box>
             <OppilaitosValikko
               locale={locale}
@@ -65,7 +83,7 @@ export default function KoulutuksetToteutuksetHakukohteet() {
           <ToteutuksenTila />
           <HakukohteenTila />
           <FormButtons
-            disabled={!selectedAlkamiskaudet || !selectedHaut}
+            disabled={isDisabled}
             downloadExcel={() =>
               downloadExcel(
                 'kk-koulutukset-toteutukset-hakukohteet',
