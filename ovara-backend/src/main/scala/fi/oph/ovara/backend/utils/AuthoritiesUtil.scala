@@ -1,5 +1,6 @@
 package fi.oph.ovara.backend.utils
 
+import fi.oph.ovara.backend.utils.Constants.OPH_PAAKAYTTAJA_OID
 import org.springframework.security.core.GrantedAuthority
 
 import java.util
@@ -17,4 +18,9 @@ object AuthoritiesUtil {
     val raportointiOidRegex: Regex = """([0-9]\.?)+$""".r
     authorities.flatMap(role => raportointiOidRegex.findFirstIn(role)).distinct
   }
+
+  def hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot: List[String]): Boolean = {
+    kayttooikeusOrganisaatiot.contains(OPH_PAAKAYTTAJA_OID)
+  }
+  
 }

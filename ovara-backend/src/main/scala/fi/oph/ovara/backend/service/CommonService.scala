@@ -117,7 +117,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     val user             = userService.getEnrichedUserDetails
     val kayttooikeusOids = AuthoritiesUtil.getKayttooikeusOids(user.authorities)
     val hakukohderyhmaOids =
-      if (hasOPHPaakayttajaRights(kayttooikeusOids))
+      if (AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOids))
         List() // ei rajata listaa pääkäyttäjälle
       else
         kayttooikeusOids
@@ -153,36 +153,48 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
   }
 
   def getToimipistehierarkiat(toimipisteet: List[String]): List[OrganisaatioHierarkia] = {
-    val hierarkiat = db
-      .run(
-        commonRepository.selectToimipisteDescendants(toimipisteet),
-        "selectToimipisteDescendants"
-      )
-      .toList
+    if (toimipisteet.isEmpty) {
+      List()
+    } else {
+      val hierarkiat = db
+        .run(
+          commonRepository.selectToimipisteDescendants(toimipisteet),
+          "selectToimipisteDescendants"
+        )
+        .toList
 
-    hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+      hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+    }
   }
 
   def getOppilaitoshierarkiat(oppilaitokset: List[String]): List[OrganisaatioHierarkia] = {
-    val hierarkiat = db
-      .run(
-        commonRepository.selectOppilaitosDescendants(oppilaitokset),
-        "selectOppilaitosDescendants"
-      )
-      .toList
+    if (oppilaitokset.isEmpty) {
+      List()
+    } else {
+      val hierarkiat = db
+        .run(
+          commonRepository.selectOppilaitosDescendants(oppilaitokset),
+          "selectOppilaitosDescendants"
+        )
+        .toList
 
-    hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+      hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+    }
   }
 
   def getKoulutustoimijahierarkia(koulutustoimijat: List[String]): List[OrganisaatioHierarkia] = {
-    val hierarkiat = db
-      .run(
-        commonRepository.selectKoulutustoimijaDescendants(koulutustoimijat),
-        "selectKoulutustoimijaDescendants"
-      )
-      .toList
+    if (koulutustoimijat.isEmpty) {
+      List()
+    } else {
+      val hierarkiat = db
+        .run(
+          commonRepository.selectKoulutustoimijaDescendants(koulutustoimijat),
+          "selectKoulutustoimijaDescendants"
+        )
+        .toList
 
-    hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+      hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+    }
   }
 
   def getDistinctKoulutustoimijat(organisaatioOids: List[String]): List[Organisaatio] = {
@@ -190,10 +202,6 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       commonRepository.selectDistinctKoulutustoimijat(organisaatioOids),
       "selectDistinctKoulutustoimijat"
     ).toList
-  }
-
-  private def hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot: List[String]) = {
-    kayttooikeusOrganisaatiot.contains(OPH_PAAKAYTTAJA_OID)
   }
 
   def getAllowedOrgsFromOrgSelection(
@@ -228,7 +236,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       } else {
         val koulutustoimijahierarkia = getKoulutustoimijahierarkia(kayttooikeusOrganisaatioOids)
 
-        val hierarkiat = if (hasOPHPaakayttajaRights(kayttooikeusOrganisaatioOids)) {
+        val hierarkiat = if (AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatioOids)) {
           koulutustoimijahierarkia
         } else {
           val oppilaitoshierarkia = getOppilaitoshierarkiat(oppilaitosOids)
@@ -245,7 +253,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     val selectedOrgsDescendantOids =
       hierarkiatWithExistingOrgs.flatMap(hierarkia => OrganisaatioUtils.getDescendantOids(hierarkia)).distinct
 
-    if (hasOPHPaakayttajaRights(kayttooikeusOrganisaatioOids)) {
+    if (AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatioOids)) {
       (selectedOrgsDescendantOids, hierarkiatWithExistingOrgs, raporttityyppi)
     } else {
       val childKayttooikeusOrgs = hierarkiatWithExistingOrgs.flatMap(hierarkia =>
