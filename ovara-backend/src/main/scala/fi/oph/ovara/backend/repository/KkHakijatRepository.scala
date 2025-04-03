@@ -2,7 +2,7 @@ package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.KkHakija
 import fi.oph.ovara.backend.utils.RepositoryUtils
-import fi.oph.ovara.backend.utils.RepositoryUtils.makeListOfValuesQueryStr
+import fi.oph.ovara.backend.utils.RepositoryUtils.*
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.{Component, Repository}
 import slick.dbio.Effect
@@ -26,38 +26,31 @@ class KkHakijatRepository extends Extractors {
       kansalaisuus: List[String],
       markkinointilupa: Option[Boolean]
   ): SqlStreamingAction[Vector[KkHakija], KkHakija, Effect] = {
-    val hakuStr                     = RepositoryUtils.makeListOfValuesQueryStr(haut)
-    val raportointiorganisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusOrganisaatiot)
+    val hakuStr                     = makeListOfValuesQueryStr(haut)
+    val raportointiorganisaatiotStr = makeListOfValuesQueryStr(kayttooikeusOrganisaatiot)
 
-    val vastaanottotiedotAsDbValues = RepositoryUtils.mapVastaanottotiedotToDbValues(vastaanottotieto)
-    val valintatiedotAsDbValues     = RepositoryUtils.mapValintatiedotToDbValues(valintatieto)
+    val vastaanottotiedotAsDbValues = mapVastaanottotiedotToDbValues(vastaanottotieto)
+    val valintatiedotAsDbValues     = mapValintatiedotToDbValues(valintatieto)
     val optionalHakukohdeQuery =
-      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hk.hakukohde_oid", hakukohteet)
+      makeOptionalListOfValuesQueryStr("AND", "hk.hakukohde_oid", hakukohteet)
     val optionalValintatietoQuery =
-      RepositoryUtils.makeOptionalListOfValuesQueryStr(
+      makeOptionalListOfValuesQueryStr(
         "AND",
         "ht.valintatapajonot->0->>'valinnan_tila'",
         valintatiedotAsDbValues
       )
     val optionalVastaanottotietoQuery =
-      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.vastaanottotieto", vastaanottotiedotAsDbValues)
+      makeOptionalListOfValuesQueryStr("AND", "ht.vastaanottotieto", vastaanottotiedotAsDbValues)
 
     val optionalKansalaisuusQuery =
-      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hlo.kansalaisuusluokka", kansalaisuus)
+      makeOptionalListOfValuesQueryStr("AND", "hlo.kansalaisuusluokka", kansalaisuus)
     val optionalMarkkinointilupaQuery =
-      RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "hlo.koulutusmarkkinointilupa", markkinointilupa)
+      makeEqualsQueryStrOfOptionalBoolean("AND", "hlo.koulutusmarkkinointilupa", markkinointilupa)
 
     val optionalJarjestyspaikkaQuery =
-      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hk.jarjestyspaikka_oid", kayttooikeusOrganisaatiot)
+      makeOptionalJarjestyspaikkaQuery(kayttooikeusOrganisaatiot)
 
-    val hakukohderyhmatStr = makeListOfValuesQueryStr(hakukohderyhmat)
-    val optionalHakukohderyhmaSubSelect = if (hakukohderyhmatStr.isEmpty) {
-      ""
-    } else {
-      "AND hk.hakukohde_oid IN (" +
-        "SELECT hkr_hk.hakukohde_oid FROM pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk " +
-        s"WHERE hkr_hk.hakukohderyhma_oid IN ($hakukohderyhmatStr))"
-    }
+    val optionalHakukohderyhmaSubSelect = makeOptionalHakukohderyhmatSubSelectQueryStr(hakukohderyhmat)
 
     val query = sql"""SELECT hlo.sukunimi, hlo.etunimet, hlo.hetu, hlo.syntymaaika,
                  hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid, hk.organisaatio_nimi,

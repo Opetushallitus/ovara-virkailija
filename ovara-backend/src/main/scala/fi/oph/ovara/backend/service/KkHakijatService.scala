@@ -50,9 +50,11 @@ class KkHakijatService(
       oppilaitosOids = oppilaitokset
     )
 
+    val allowedHakukohderyhmat = kayttooikeusOrganisaatiot intersect hakukohderyhmat
+
     val query = kkHakijatRepository.selectWithParams(
       kayttooikeusOrganisaatiot = orgOidsForQuery,
-      hakukohderyhmat = hakukohderyhmat,
+      hakukohderyhmat = allowedHakukohderyhmat,
       haut = haku,
       oppilaitokset = oppilaitokset,
       toimipisteet = toimipisteet,
