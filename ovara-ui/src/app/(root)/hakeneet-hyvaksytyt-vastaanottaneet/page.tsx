@@ -42,6 +42,15 @@ export default function Hakutilasto() {
     selectedHaut &&
     selectedTulostustapa
   );
+
+  const tulostustavat = [
+    'koulutustoimijoittain',
+    'oppilaitoksittain',
+    'toimipisteittain',
+    'koulutusaloittain',
+    'hakukohteittain',
+  ];
+
   const [isLoading, setIsLoading] = useState(false);
   const queryParamsStr = queryParams.toString();
   return (
@@ -52,7 +61,7 @@ export default function Hakutilasto() {
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
           <KoulutuksenAlkaminen />
           <Haku haunTyyppi={'toinen_aste'} />
-          <Tulostustapa />
+          <Tulostustapa tulostustavat={tulostustavat} />
           <OrganisaatioValikot />
           <Hakukohde locale={locale} t={t} />
           <Opetuskieli />

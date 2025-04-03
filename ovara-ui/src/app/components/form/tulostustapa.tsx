@@ -3,32 +3,14 @@ import { useTranslate } from '@tolgee/react';
 import { LocalizedSelect } from '@/app/components/form/localized-select';
 import { useHakeneetSearchParams } from '@/app/hooks/searchParams/useHakeneetSearchParams';
 
-const tulostustavat = ({
+const tulostustavatTranslations = ({
+  tulostustavat,
   t,
-  kk,
 }: {
+  tulostustavat: Array<string>;
   t: (key: string) => string;
-  kk?: boolean;
 }) => {
-  const tavat = kk
-    ? [
-        'koulutustoimijoittain',
-        'oppilaitoksittain',
-        'toimipisteittain',
-        'okm-ohjauksen-aloittain',
-        'hauittain',
-        'hakukohteittain',
-        'hakukohderyhmittain',
-        'kansalaisuuksittain',
-      ]
-    : [
-        'koulutustoimijoittain',
-        'oppilaitoksittain',
-        'toimipisteittain',
-        'koulutusaloittain',
-        'hakukohteittain',
-      ];
-  return tavat.map((tulostustapa) => {
+  return tulostustavat.map((tulostustapa) => {
     return {
       value: tulostustapa,
       label: t(`raportti.tulostustapa.${tulostustapa}`),
@@ -36,7 +18,13 @@ const tulostustavat = ({
   });
 };
 
-export const Tulostustapa = ({ kk }: { kk?: boolean }) => {
+export const Tulostustapa = ({
+  tulostustavat,
+  defaultValue = '',
+}: {
+  tulostustavat: Array<string>;
+  defaultValue?: string;
+}) => {
   const { t } = useTranslate();
   const { selectedTulostustapa, setSelectedTulostustapa } =
     useHakeneetSearchParams();
@@ -51,8 +39,8 @@ export const Tulostustapa = ({ kk }: { kk?: boolean }) => {
     <LocalizedSelect
       id={id}
       label={t(`raportti.${id}`)}
-      value={selectedTulostustapa ?? ''}
-      options={tulostustavat({ t, kk })}
+      value={selectedTulostustapa ?? defaultValue}
+      options={tulostustavatTranslations({ tulostustavat, t })}
       onChange={changeTulostustapa}
       required={true}
     />

@@ -44,6 +44,18 @@ export default function KkHakutilasto() {
     selectedHaut &&
     selectedTulostustapa
   );
+
+  const tulostustavat = [
+    'koulutustoimijoittain',
+    'oppilaitoksittain',
+    'toimipisteittain',
+    'okm-ohjauksen-aloittain',
+    'hauittain',
+    'hakukohteittain',
+    'hakukohderyhmittain',
+    'kansalaisuuksittain',
+  ];
+
   const [isLoading, setIsLoading] = useState(false);
   const queryParamsStr = queryParams.toString();
   return (
@@ -54,7 +66,7 @@ export default function KkHakutilasto() {
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
           <KoulutuksenAlkaminen />
           <Haku haunTyyppi={'korkeakoulu'} />
-          <Tulostustapa kk={true} />
+          <Tulostustapa kk={true} tulostustavat={tulostustavat} />
           <OrganisaatioValikot />
           <Hakukohderyhma />
           <Hakukohde locale={locale} t={t} />

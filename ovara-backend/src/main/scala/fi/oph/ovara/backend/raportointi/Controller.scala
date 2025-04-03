@@ -264,6 +264,7 @@ class Controller(
   @GetMapping(path = Array("kk-koulutukset-toteutukset-hakukohteet"))
   def kk_koulutukset_toteutukset_hakukohteet(
       @RequestParam("haku") haku: java.util.Collection[String],
+      @RequestParam("tulostustapa", defaultValue = "koulutuksittain") tulostustapa: String,
       @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
       @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
       @RequestParam("hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
@@ -292,7 +293,8 @@ class Controller(
       maybeKoulutuksenTila,
       maybeToteutuksenTila,
       maybeHakukohteenTila,
-      tutkinnonTasoList
+      tutkinnonTasoList,
+      tulostustapa
     )
 
     val raporttiParams = Map(
