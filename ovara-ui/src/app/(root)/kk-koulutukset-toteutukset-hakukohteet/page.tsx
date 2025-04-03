@@ -28,6 +28,7 @@ import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatio
 import { Hakukohderyhma } from '@/app/components/form/hakukohderyhma';
 import { KkTutkinnonTaso } from '@/app/components/form/kk-tutkinnon-taso';
 import { isEmpty } from 'remeda';
+import { Tulostustapa } from '@/app/components/form/tulostustapa';
 
 export default function KoulutuksetToteutuksetHakukohteet() {
   const { t } = useTranslate();
@@ -53,6 +54,9 @@ export default function KoulutuksetToteutuksetHakukohteet() {
 
   const [isLoading, setIsLoading] = useState(false);
   const queryParamsStr = useSearchParams().toString();
+
+  const KOULUTUKSITTAIN = 'koulutuksittain';
+  const tulostustavat = [KOULUTUKSITTAIN, 'toteutuksittain', 'hakukohteittain'];
 
   return (
     <MainContainer>
@@ -80,6 +84,10 @@ export default function KoulutuksetToteutuksetHakukohteet() {
             <Hakukohderyhma />
           </Box>
           <Divider />
+          <Tulostustapa
+            tulostustavat={tulostustavat}
+            defaultValue={KOULUTUKSITTAIN}
+          />
           <KoulutuksenTila />
           <ToteutuksenTila />
           <HakukohteenTila />

@@ -27,7 +27,8 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetService(
       koulutuksenTila: Option[String],
       toteutuksenTila: Option[String],
       hakukohteenTila: Option[String],
-      tutkinnonTasot: List[String]
+      tutkinnonTasot: List[String],
+      tulostustapa: String
   ): XSSFWorkbook = {
     val user                      = userService.getEnrichedUserDetails
     val asiointikieli             = user.asiointikieli.getOrElse("fi")
@@ -56,18 +57,11 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetService(
       "selectWithParams"
     )
 
-    val sorted =
-      queryResult.sortBy(resultRow =>
-        (
-          resultRow.oppilaitosJaToimipiste.get(Kieli.withName(asiointikieli)),
-          resultRow.koulutuksenNimi.get(Kieli.withName(asiointikieli))
-        )
-      )
-
     ExcelWriter.writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
-      sorted,
+      queryResult,
       asiointikieli,
-      translations
+      translations,
+      tulostustapa
     )
   }
 }

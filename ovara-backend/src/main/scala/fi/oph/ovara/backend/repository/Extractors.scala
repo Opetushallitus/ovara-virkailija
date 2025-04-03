@@ -1,7 +1,17 @@
 package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.*
-import fi.oph.ovara.backend.utils.ExtractorUtils.{extractAlkamiskausi, extractHakuaika, extractValintatapajonot}
+import fi.oph.ovara.backend.utils.ExtractorUtils.{
+  extractAlkamiskausi,
+  extractArray,
+  extractDateOption,
+  extractHakuaika,
+  extractKielistetty,
+  extractKoulutuksenAlkamisaika,
+  extractMap,
+  extractOpintojenlaajuus,
+  extractValintatapajonot
+}
 import fi.oph.ovara.backend.utils.GenericOvaraJsonFormats
 import org.json4s.jackson.Serialization.read
 import slick.jdbc.*
@@ -10,16 +20,6 @@ import java.sql.Date
 import java.time.LocalDate
 
 trait Extractors extends GenericOvaraJsonFormats {
-  private def extractKielistetty(json: Option[String]): Kielistetty =
-    json.map(read[Map[Kieli, String]]).getOrElse(Map())
-
-  private def extractArray(json: Option[String]): List[String] = {
-    json.map(read[List[String]]).getOrElse(List())
-  }
-
-  private def extractMap(json: Option[String]): Map[String, String] =
-    json.map(read[Map[String, String]]).getOrElse(Map())
-
   implicit val getHakuResult: GetResult[Haku] = GetResult(r =>
     Haku(
       haku_oid = r.nextString(),
@@ -98,38 +98,6 @@ trait Extractors extends GenericOvaraJsonFormats {
 
   implicit val getKorkeakouluKoulutuksetToteutuksetHakukohteetResult
       : GetResult[KorkeakouluKoulutusToteutusHakukohdeResult] = {
-
-    def extractOpintojenlaajuus(laajuusnumero: Option[String], laajuusyksikko: Option[String]): Kielistetty = {
-      val kielistettyLaajuusyksikko = extractKielistetty(laajuusyksikko)
-      laajuusnumero match {
-        case Some(numero) =>
-          kielistettyLaajuusyksikko.map((kieli: Kieli, yksikko: String) => kieli -> s"$numero $yksikko")
-        case None => Map()
-      }
-    }
-
-    def extractKoulutuksenAlkamisaika(
-        alkamiskausikoodiuri: Option[String],
-        alkamivuosi: Option[String],
-        alkamiskausiJsonObject: Option[String],
-        kausienNimet: Option[String]
-    ): Kielistetty | Option[LocalDate] = {
-      val alkamiskausi            = extractAlkamiskausi(alkamiskausiJsonObject)
-      val kielistetytKausienNimet = extractKielistetty(kausienNimet)
-      alkamiskausi match {
-        case Some(ak: Alkamiskausi) if ak.alkamiskausityyppi == "tarkka alkamisajankohta" =>
-          ak.koulutuksenAlkamispaivamaara
-        case _ =>
-          alkamiskausikoodiuri match {
-            case Some(_) if kielistetytKausienNimet.nonEmpty =>
-              kielistetytKausienNimet.map((kieli: Kieli, nimi: String) =>
-                kieli -> s"$nimi ${alkamivuosi.getOrElse("")}"
-              )
-            case _ => Map()
-          }
-      }
-    }
-
     GetResult(r => {
       KorkeakouluKoulutusToteutusHakukohdeResult(
         oppilaitosJaToimipiste = extractKielistetty(r.nextStringOption()),
@@ -174,13 +142,6 @@ trait Extractors extends GenericOvaraJsonFormats {
       children = r.nextStringOption().map(read[List[OrganisaatioHierarkia]]).getOrElse(List())
     )
   )
-
-  private def extractDateOption(date: Option[Date]) = {
-    date match {
-      case Some(d) => Some(d.toLocalDate)
-      case None    => None
-    }
-  }
 
   implicit val getToisenAsteenHakijaResult: GetResult[ToisenAsteenHakija] = GetResult(r =>
     ToisenAsteenHakija(
@@ -254,7 +215,7 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   )
 
-  def extractHakeneetHyvaksytytVastaanottaneetCommonFields(
+  private def extractHakeneetHyvaksytytVastaanottaneetCommonFields(
       r: PositionedResult
   ): (Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int) = {
     (
@@ -359,7 +320,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       )
     }
 
-  def extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(
+  private def extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(
       r: PositionedResult
   ): (Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int) = {
     (
