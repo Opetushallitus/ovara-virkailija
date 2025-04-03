@@ -21,9 +21,9 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetService(
 
   def get(
       haku: List[String],
-      koulutustoimija: Option[String],
       oppilaitokset: List[String],
       toimipisteet: List[String],
+      hakukohderyhmat: List[String],
       koulutuksenTila: Option[String],
       toteutuksenTila: Option[String],
       hakukohteenTila: Option[String],
@@ -35,16 +35,18 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetService(
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
     val translations              = lokalisointiService.getOvaraTranslations(asiointikieli)
 
-    val (orgOidsForQuery, _, raporttityyppi) = commonService.getAllowedOrgsFromOrgSelection(
+    val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
-      koulutustoimijaOid = koulutustoimija,
       toimipisteOids = toimipisteet,
       oppilaitosOids = oppilaitokset
     )
 
+    val allowedHakukohderyhmat = kayttooikeusOrganisaatiot intersect hakukohderyhmat
+
     val queryResult = db.run(
       korkeakouluKoulutuksetToteutuksetHakukohteetRepository.selectWithParams(
         orgOidsForQuery,
+        allowedHakukohderyhmat,
         haku,
         koulutuksenTila,
         toteutuksenTila,
