@@ -261,6 +261,7 @@ class Controller(
       @RequestParam("koulutuksen-tila", required = false) koulutuksenTila: String,
       @RequestParam("toteutuksen-tila", required = false) toteutuksenTila: String,
       @RequestParam("hakukohteen-tila", required = false) hakukohteenTila: String,
+      @RequestParam("tutkinnon-taso", required = false) tutkinnonTaso: java.util.Collection[String],
       request: HttpServletRequest,
       response: HttpServletResponse
   ): Unit = {
@@ -272,6 +273,7 @@ class Controller(
     val toimipisteList     = if (toimipiste == null) List() else toimipiste.asScala.toList
     val hakukohderyhmaList = if (hakukohderyhmat == null) List() else hakukohderyhmat.asScala.toList
     val hakuList           = if (haku == null) List() else haku.asScala.toList
+    val tutkinnonTasoList = if (tutkinnonTaso == null) List() else tutkinnonTaso.asScala.toList
 
     val wb = kkKoulutuksetToteutuksetHakukohteetService.get(
       hakuList,
@@ -281,7 +283,7 @@ class Controller(
       maybeKoulutuksenTila,
       maybeToteutuksenTila,
       maybeHakukohteenTila,
-      None
+      tutkinnonTasoList
     )
 
     val raporttiParams = Map(
@@ -291,7 +293,8 @@ class Controller(
       "hakukohderyhmat" -> Option(hakukohderyhmaList).filterNot(_.isEmpty),
       "koulutuksenTila" -> maybeKoulutuksenTila,
       "toteutuksenTila" -> maybeToteutuksenTila,
-      "hakukohteenTila" -> maybeHakukohteenTila
+      "hakukohteenTila" -> maybeHakukohteenTila,
+      "tutkinnonTaso"    -> Option(tutkinnonTasoList).filterNot(_.isEmpty),
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
     sendExcel(Some(wb), response, request, "kk-koulutukset-toteutukset-hakukohteet", raporttiParams)

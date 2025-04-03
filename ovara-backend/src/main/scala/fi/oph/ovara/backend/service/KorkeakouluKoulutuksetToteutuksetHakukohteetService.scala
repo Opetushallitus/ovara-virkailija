@@ -27,7 +27,7 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetService(
       koulutuksenTila: Option[String],
       toteutuksenTila: Option[String],
       hakukohteenTila: Option[String],
-      valintakoe: Option[Boolean]
+      tutkinnonTasot: List[String]
   ): XSSFWorkbook = {
     val user                      = userService.getEnrichedUserDetails
     val asiointikieli             = user.asiointikieli.getOrElse("fi")
@@ -50,7 +50,8 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetService(
         haku,
         koulutuksenTila,
         toteutuksenTila,
-        hakukohteenTila
+        hakukohteenTila,
+        tutkinnonTasot
       ),
       "selectWithParams"
     )
