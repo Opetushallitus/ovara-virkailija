@@ -39,6 +39,7 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
                  k.tila AS koulutuksen_tila,
                  k.koulutus_koodi,
                  k.ulkoinen_tunniste,
+                 k.kk_tutkinnon_taso,
                  k.opintojenlaajuus,
                  k.laajuusyksikko_nimi,
                  t.toteutus_nimi,

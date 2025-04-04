@@ -182,15 +182,15 @@ object ExcelWriterUtils {
     val cell = createCell(row, cellStyle, cellIndex)
     val value = maybeTila match {
       case Some(tila) =>
-        if (tila == "tallennettu") {
+        val tilaKey = if (tila == "tallennettu") {
           "luonnos"
         } else {
           tila
         }
+        getTranslationForCellValue(tilaKey, translations)
       case None => "-"
     }
-    val translation = getTranslationForCellValue(value, translations)
-    cell.setCellValue(translation)
+    cell.setCellValue(value)
     cellIndex + 1
   }
 
@@ -240,6 +240,37 @@ object ExcelWriterUtils {
     }
 
     cell.setCellValue(value)
+    cellIndex + 1
+  }
+
+  def writeTutkinnonTasoToCell(
+      row: XSSFRow,
+      cellStyle: XSSFCellStyle,
+      cellIndex: Int,
+      tutkinnonTaso: Option[Int],
+      translations: Map[String, String]
+  ): Int = {
+    val tutkinnonTasoValue = tutkinnonTaso match {
+      case Some(value) =>
+        val tasoKey = if (value == 1) {
+          "alempi"
+        } else if (value == 2) {
+          "ylempi"
+        } else if (value == 3) {
+          "alempiJaYlempi"
+        } else if (value == 4) {
+          "jatkotutkinto"
+        } else if (value == 5) {
+          "muu"
+        } else {
+          ""
+        }
+        val translationKey = s"tutkinnontaso.$tasoKey"
+        getTranslationForCellValue(translationKey, translations)
+      case None => "-"
+    }
+    val cell = createCell(row, cellStyle, cellIndex)
+    cell.setCellValue(tutkinnonTasoValue)
     cellIndex + 1
   }
 

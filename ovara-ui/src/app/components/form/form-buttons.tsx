@@ -20,7 +20,7 @@ export const FormButtons = ({
   fieldsToClear?: Array<() => void>;
 }) => {
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'end' }}>
+    <Box sx={{ display: 'flex', justifyContent: 'end', paddingTop: '1rem' }}>
       <Stack direction="row" spacing={2}>
         <TyhjennaHakuehdotButton fieldsToClear={fieldsToClear} />
         <MuodostaExcelButton
