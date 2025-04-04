@@ -40,7 +40,14 @@ class CommonRepository extends Extractors {
     } else {
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(alkamiskaudetAndHenkKohtSuunnitelma)
     }
-    val selectedHautQueryStr = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.haku_oid", selectedHaut)
+    val selectedHautQueryStr = RepositoryUtils.makeOptionalListOfValuesQueryStr("", "h.haku_oid", selectedHaut)
+
+    val combinedQueryStr = (alkamiskaudetQueryStr, selectedHautQueryStr) match {
+      case (a, b) if a.nonEmpty && b.nonEmpty => s"AND ($a OR $b)"
+      case (a, _) if a.nonEmpty => s"AND $a"
+      case (_, b) if b.nonEmpty => s"AND $b"
+      case _ => ""
+    }
 
     sql"""SELECT DISTINCT h.haku_oid, h.haku_nimi
           FROM pub.pub_dim_haku h
@@ -51,8 +58,7 @@ class CommonRepository extends Extractors {
           ON h.haku_oid = alkamiskaudet.haku_oid
           WHERE h.haun_tyyppi = $haunTyyppi
           AND h.tila != 'poistettu'
-          #$alkamiskaudetQueryStr
-          #$selectedHautQueryStr""".as[Haku]
+          #$combinedQueryStr""".as[Haku]
   }
 
   def selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(

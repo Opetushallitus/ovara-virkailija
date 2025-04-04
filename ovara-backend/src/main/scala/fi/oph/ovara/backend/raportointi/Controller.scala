@@ -90,7 +90,7 @@ class Controller(
   @GetMapping(path = Array("haut"))
   def haut(
       @RequestParam("alkamiskausi", required = false) alkamiskaudet: java.util.Collection[String],
-      @RequestParam("selectedHaut", required = false) selectedHaut: java.util.Collection[String],
+      @RequestParam("haku", required = false) selectedHaut: java.util.Collection[String],
       @RequestParam("haun_tyyppi", required = false) haun_tyyppi: String
   ): String = {
     val alkamiskaudetList =

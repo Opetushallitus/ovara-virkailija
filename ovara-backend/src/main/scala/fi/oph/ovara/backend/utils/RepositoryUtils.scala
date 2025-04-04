@@ -130,7 +130,7 @@ object RepositoryUtils {
       ) {
         ""
       } else {
-        "AND ("
+        "("
       }
 
     val alkamiskaudetAndVuodet = alkamiskaudetAndHenkKohtSuunnitelma._1
