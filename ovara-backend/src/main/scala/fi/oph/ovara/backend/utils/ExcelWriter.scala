@@ -416,6 +416,7 @@ object ExcelWriter {
       cellIndex = writeOptionTilaToCell(resultRow, bodyTextCellStyle, cellIndex, result.koulutuksenTila, translations)
       cellIndex = writeOptionKoodiToCell(resultRow, bodyTextCellStyle, cellIndex, result.koulutuskoodi)
       cellIndex = writeOptionStrToCell(resultRow, bodyTextCellStyle, cellIndex, result.koulutuksenUlkoinenTunniste)
+      cellIndex = writeTutkinnonTasoToCell(resultRow, bodyTextCellStyle, cellIndex, result.tutkinnonTaso, translations)
       cellIndex =
         writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.opintojenLaajuus, asiointikieli)
       cellIndex = writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.toteutuksenNimi, asiointikieli)
@@ -523,6 +524,7 @@ object ExcelWriter {
       cellIndex = writeOptionTilaToCell(resultRow, bodyTextCellStyle, cellIndex, result.koulutuksenTila, translations)
       cellIndex = writeOptionKoodiToCell(resultRow, bodyTextCellStyle, cellIndex, result.koulutuskoodi)
       cellIndex = writeOptionStrToCell(resultRow, bodyTextCellStyle, cellIndex, result.koulutuksenUlkoinenTunniste)
+      cellIndex = writeTutkinnonTasoToCell(resultRow, bodyTextCellStyle, cellIndex, result.tutkinnonTaso, translations)
       cellIndex =
         writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.opintojenLaajuus, asiointikieli)
 
@@ -572,7 +574,8 @@ object ExcelWriter {
               "koulutuksenTila",
               "koulutuskoodi",
               "koulutuksenUlkoinenTunniste",
-              "opintojenLaajuus"
+              "opintojenLaajuus",
+              "tutkinnonTaso"
             ).contains(title)
           )
 
@@ -625,6 +628,7 @@ object ExcelWriter {
           "koulutuksenTila",
           "koulutuskoodi",
           "koulutuksenUlkoinenTunniste",
+          "tutkinnonTaso",
           "opintojenLaajuus"
         )
 
@@ -654,6 +658,7 @@ object ExcelWriter {
               resultRow.koulutuksenNimi.get(Kieli.withName(asiointikieli))
             )
           )
+
         val titles = classOf[KorkeakouluKoulutusToteutusHakukohdeResult].getDeclaredFields
           .map(_.getName)
           .toList
