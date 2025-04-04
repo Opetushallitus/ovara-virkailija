@@ -482,6 +482,53 @@ object ExcelWriter {
     })
   }
 
+  private def writeKorkeakouluKoulutuksetToteutuksetHakukohteetHakukohteittainRows(
+      sheet: XSSFSheet,
+      bodyTextCellStyle: XSSFCellStyle,
+      currentRowIndex: Int,
+      korkeakouluKoulutuksetToteutuksetHakukohteetResults: Seq[KorkeakouluKoulutusToteutusHakukohdeResult],
+      asiointikieli: String,
+      translations: Map[String, String]
+  ): Unit = {
+    var rowIndex = currentRowIndex
+    korkeakouluKoulutuksetToteutuksetHakukohteetResults.foreach(result => {
+      val resultRow = sheet.createRow(rowIndex)
+      rowIndex += 1
+      var cellIndex = 0
+
+      cellIndex = writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.oppilaitosJaToimipiste, asiointikieli)
+      cellIndex = writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakukohteenNimi, asiointikieli)
+      cellIndex = writeStrToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakukohdeOid)
+      cellIndex = writeOptionTilaToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakukohteenTila, translations)
+      cellIndex = writeOptionStrToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakukohteenUlkoinenTunniste)
+      cellIndex = writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.haunNimi, asiointikieli)
+      cellIndex = writeOptionHakuaikaToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakuaika)
+      cellIndex = writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakutapa, asiointikieli)
+      cellIndex = writeOptionIntToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakukohteenAloituspaikat)
+      cellIndex = writeOptionIntToCell(resultRow, bodyTextCellStyle, cellIndex, result.ensikertalaistenAloituspaikat)
+      cellIndex = writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.valintaperuste, asiointikieli)
+      cellIndex = writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.toteutuksenNimi, asiointikieli)
+      cellIndex = writeStrToCell(resultRow, bodyTextCellStyle, cellIndex, result.toteutusOid)
+      cellIndex = writeOptionTilaToCell(resultRow, bodyTextCellStyle, cellIndex, result.toteutuksenTila, translations)
+      cellIndex = writeOptionStrToCell(resultRow, bodyTextCellStyle, cellIndex, result.toteutuksenUlkoinenTunniste)
+      cellIndex = writeKoulutuksenAlkamisaikaToCell(
+        resultRow,
+        bodyTextCellStyle,
+        cellIndex,
+        result.koulutuksenAlkamisaika,
+        asiointikieli
+      )
+      cellIndex = writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.koulutuksenNimi, asiointikieli)
+      cellIndex = writeStrToCell(resultRow, bodyTextCellStyle, cellIndex, result.koulutusOid)
+      cellIndex = writeOptionTilaToCell(resultRow, bodyTextCellStyle, cellIndex, result.koulutuksenTila, translations)
+      cellIndex = writeOptionKoodiToCell(resultRow, bodyTextCellStyle, cellIndex, result.koulutuskoodi)
+      cellIndex = writeOptionStrToCell(resultRow, bodyTextCellStyle, cellIndex, result.koulutuksenUlkoinenTunniste)
+      cellIndex =
+        writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.opintojenLaajuus, asiointikieli)
+
+    })
+  }
+
   def writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
       korkeakouluKoulutuksetToteutuksetHakukohteetResults: Seq[KorkeakouluKoulutusToteutusHakukohdeResult],
       asiointikieli: String,
@@ -538,6 +585,58 @@ object ExcelWriter {
         )
 
         writeKorkeakouluKoulutuksetToteutuksetHakukohteetToteutuksittainRows(
+          sheet = sheet,
+          bodyTextCellStyle = bodyTextCellStyle,
+          currentRowIndex = currentRowIndex,
+          korkeakouluKoulutuksetToteutuksetHakukohteetResults = sorted,
+          asiointikieli = asiointikieli,
+          translations = translations
+        )
+
+        titles.zipWithIndex
+      } else if (tulostustapa == "hakukohteittain") {
+        val sorted =
+          korkeakouluKoulutuksetToteutuksetHakukohteetResults.sortBy(resultRow =>
+            (
+              resultRow.oppilaitosJaToimipiste.get(Kieli.withName(asiointikieli)),
+              resultRow.hakukohteenNimi.get(Kieli.withName(asiointikieli))
+            )
+          )
+
+        val titles = List(
+          "oppilaitosJaToimipiste",
+          "hakukohteenNimi",
+          "hakukohdeOid",
+          "hakukohteenTila",
+          "hakukohteenUlkoinenTunniste",
+          "haunNimi",
+          "hakuaika",
+          "hakutapa",
+          "hakukohteenAloituspaikat",
+          "ensikertalaistenAloituspaikat",
+          "valintaperuste",
+          "toteutuksenNimi",
+          "toteutusOid",
+          "toteutuksenTila",
+          "toteutuksenUlkoinenTunniste",
+          "koulutuksenAlkamisaika",
+          "koulutuksenNimi",
+          "koulutusOid",
+          "koulutuksenTila",
+          "koulutuskoodi",
+          "koulutuksenUlkoinenTunniste",
+          "opintojenLaajuus"
+        )
+
+        currentRowIndex = createHeadingRow(
+          sheet = sheet,
+          translations = translations,
+          currentRowIndex = currentRowIndex,
+          fieldNames = titles,
+          headingCellStyle = headingCellStyle
+        )
+
+        writeKorkeakouluKoulutuksetToteutuksetHakukohteetHakukohteittainRows(
           sheet = sheet,
           bodyTextCellStyle = bodyTextCellStyle,
           currentRowIndex = currentRowIndex,

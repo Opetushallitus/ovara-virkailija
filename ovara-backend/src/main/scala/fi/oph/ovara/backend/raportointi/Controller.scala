@@ -77,7 +77,7 @@ class Controller(
 
   @GetMapping(path = Array("session"))
   def response: ResponseEntity[Map[String, String]] = {
-    // Palautetaan jokin paluuarvo koska client-kirjasto sellaise haluaa
+    // Palautetaan jokin paluuarvo koska client-kirjasto sellaisen haluaa
     ResponseEntity.ok(Map("status" -> "ok"))
   }
 
