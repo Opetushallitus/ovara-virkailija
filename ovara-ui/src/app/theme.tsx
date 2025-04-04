@@ -48,6 +48,13 @@ export const THEME_OVERRIDES: ThemeOptions = {
         }),
       },
     },
+    MuiAutocomplete: {
+      styleOverrides: {
+        root: {
+          padding: '5px', // lisätään vähän paddingia jotta on tilaa focusreunukselle
+        },
+      },
+    },
   },
 };
 

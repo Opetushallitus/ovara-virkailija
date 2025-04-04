@@ -31,21 +31,29 @@ export const KoulutusalaValikot = () => {
   });
 
   const koulutusalat2data = useQuery({
-    queryKey: ['fetchKoulutusalat2', selectedKoulutusalat1],
+    queryKey: [
+      'fetchKoulutusalat2',
+      selectedKoulutusalat1,
+      selectedKoulutusalat2,
+    ],
     queryFn: () =>
       doApiFetch('koulutusalat2', {
         queryParams: selectedKoulutusalat1
-          ? `?koulutusalat1=${selectedKoulutusalat1}`
+          ? `?koulutusalat1=${selectedKoulutusalat1}&selectedKoulutusalat2=${selectedKoulutusalat2 ? selectedKoulutusalat2 : []}`
           : null,
       }),
   });
 
   const koulutusalat3data = useQuery({
-    queryKey: ['fetchKoulutusalat3', selectedKoulutusalat2],
+    queryKey: [
+      'fetchKoulutusalat3',
+      selectedKoulutusalat2,
+      selectedKoulutusalat3,
+    ],
     queryFn: () =>
       doApiFetch('koulutusalat3', {
-        queryParams: selectedKoulutusalat1
-          ? `?koulutusalat2=${selectedKoulutusalat2}`
+        queryParams: selectedKoulutusalat2
+          ? `?koulutusalat2=${selectedKoulutusalat2}&selectedKoulutusalat3=${selectedKoulutusalat3 ? selectedKoulutusalat3 : []}`
           : null,
       }),
   });

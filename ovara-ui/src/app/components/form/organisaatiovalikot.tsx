@@ -26,9 +26,8 @@ const getOrganisaatioOptions = (
     return orgs.map((org) => {
       return {
         value: org.organisaatio_oid,
-        // TODO: Jos org tila jätetään labeliin, täytyy lisätä käännös
         label: org.organisaatio_nimi[locale as LanguageCode]
-          ? `${org.organisaatio_nimi[locale as LanguageCode]} (${org.tila})`
+          ? `${org.organisaatio_nimi[locale as LanguageCode]}`
           : '',
       };
     });
@@ -63,6 +62,7 @@ export const OrganisaatioValikot = () => {
 
   const toimipisteet = getToimipisteetToShow(
     organisaatiot,
+    selectedToimipisteet,
     selectedOppilaitokset,
     selectedKoulutustoimija,
   );
@@ -72,6 +72,9 @@ export const OrganisaatioValikot = () => {
     value: SelectOption | null,
   ) => {
     setSelectedKoulutustoimija(isNullish(value) ? null : value?.value);
+    // tyhjätään oppilaitos ja toimipisteet
+    setSelectedOppilaitokset(null);
+    setSelectedToimipisteet(null);
   };
 
   const changeOppilaitokset = (
@@ -179,6 +182,7 @@ export const ToimipisteValikko = ({
 
   const toimipisteet = getToimipisteetToShow(
     organisaatiot,
+    selectedToimipisteet,
     selectedOppilaitokset,
     selectedKoulutustoimija,
   );

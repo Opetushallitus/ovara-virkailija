@@ -111,6 +111,10 @@ const getUniqueOrganisaatiotByOrganisaatiotyyppi = (
   );
 };
 
+const isNullishOrEmpty = <T>(list: Array<T> | null | undefined): boolean => {
+  return isNullish(list) || isEmpty(list);
+};
+
 export const getKoulutustoimijatToShow = (
   organisaatiot: Array<OrganisaatioHierarkia> | null,
 ) => {
@@ -140,6 +144,7 @@ export const getOppilaitoksetToShow = (
 
 export const getToimipisteetToShow = (
   hierarkiat: Array<OrganisaatioHierarkia> | null,
+  selectedToimipisteOids: Array<string> | null,
   selectedOppilaitosOids: Array<string> | null,
   selectedKoulutustoimija: string | null,
 ) => {
@@ -148,7 +153,7 @@ export const getToimipisteetToShow = (
     TOIMIPISTEORGANISAATIOTYYPPI,
   );
 
-  if (isNullish(selectedOppilaitosOids) || isEmpty(selectedOppilaitosOids)) {
+  if (isNullishOrEmpty(selectedOppilaitosOids)) {
     if (isNullish(selectedKoulutustoimija)) {
       return toimipisteet;
     }
@@ -158,7 +163,11 @@ export const getToimipisteetToShow = (
     });
   } else {
     return toimipisteet.filter((o) => {
-      return o.parent_oids.some((oid) => selectedOppilaitosOids?.includes(oid));
+      return (
+        o.parent_oids.some((oid) => selectedOppilaitosOids?.includes(oid)) ||
+        (!isNullishOrEmpty(selectedToimipisteOids) &&
+          selectedToimipisteOids?.includes(o.organisaatio_oid))
+      );
     });
   }
 };

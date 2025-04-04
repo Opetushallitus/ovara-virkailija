@@ -29,11 +29,11 @@ export const MaakuntaKuntaValikot = () => {
   });
 
   const kunnatData = useQuery({
-    queryKey: ['fetchKunnat', selectedMaakunnat],
+    queryKey: ['fetchKunnat', selectedMaakunnat, selectedKunnat],
     queryFn: () =>
       doApiFetch('kunnat', {
         queryParams: selectedMaakunnat
-          ? `?maakunnat=${selectedMaakunnat}`
+          ? `?maakunnat=${selectedMaakunnat}&selectedKunnat=${selectedKunnat}`
           : null,
       }),
   });

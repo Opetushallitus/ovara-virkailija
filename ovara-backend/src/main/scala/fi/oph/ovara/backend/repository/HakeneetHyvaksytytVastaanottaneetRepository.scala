@@ -124,8 +124,8 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_1", koulutusalat1)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_2", koulutusalat2)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_3", koulutusalat3)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.sijaintimaakunta", maakunnat)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.sijaintikunta", kunnat)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintimaakunta", maakunnat)).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintikunta", kunnat)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.harkinnanvaraisuuden_syy", harkinnanvaraisuudetWithSureValues)).filter(_.nonEmpty),
       Option(RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "he.sukupuoli", sukupuoli)).filter(_.nonEmpty),
       buildOpetuskieletFilter(opetuskielet)

@@ -67,19 +67,21 @@ object OrganisaatioUtils {
     }
   }
 
-  def filterExistingOrgs(hierarkia: OrganisaatioHierarkia): Option[OrganisaatioHierarkia] = {
+  def filterActiveOrgsWithoutPeruskoulu(hierarkia: OrganisaatioHierarkia): Option[OrganisaatioHierarkia] = {
     val children = hierarkia.children
 
-    if (hierarkia.tila == "POISTETTU") {
+    if (hierarkia.tila != "AKTIIVINEN" || 
+      hierarkia.oppilaitostyyppi.contains("oppilaitostyyppi_11#1") ||
+      hierarkia.oppilaitostyyppi.contains("oppilaitostyyppi_12#1")) {
       None
     } else {
-      val filteredChildHierarkiat = children.flatMap(child => filterExistingOrgs(child))
+      val filteredChildHierarkiat = children.flatMap(child => filterActiveOrgsWithoutPeruskoulu(child))
       Some(hierarkia.copy(children = filteredChildHierarkiat))
     }
   }
 
-  def filterExistingOrgs(hierarkiat: List[OrganisaatioHierarkia]): List[OrganisaatioHierarkia] = {
-    hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterExistingOrgs(hierarkia))
+  def filterOnlyWantedOrgs(hierarkiat: List[OrganisaatioHierarkia]): List[OrganisaatioHierarkia] = {
+    hierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterActiveOrgsWithoutPeruskoulu(hierarkia))
   }
 
   def addKoulutustoimijaParentToHierarkiaDescendants(

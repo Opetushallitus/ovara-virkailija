@@ -24,8 +24,8 @@ export const Hakukohde = ({
     useCommonSearchParams();
 
   const queryParams = useQueryParams();
-  const haku = queryParams.get('haku');
-  const fetchEnabled = !isNullish(haku);
+  const haut = queryParams.get('haku');
+  const fetchEnabled = !isNullish(haut);
 
   const queryParamsStr = queryParams.toString();
   const { data } = useFetchHakukohteet(queryParamsStr, fetchEnabled);
