@@ -1,22 +1,25 @@
 package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.*
-import fi.oph.ovara.backend.utils.ExtractorUtils.extractValintatapajonot
+import fi.oph.ovara.backend.utils.ExtractorUtils.{
+  extractAlkamiskausi,
+  extractArray,
+  extractDateOption,
+  extractHakuaika,
+  extractKielistetty,
+  extractKoulutuksenAlkamisaika,
+  extractMap,
+  extractOpintojenlaajuus,
+  extractValintatapajonot
+}
 import fi.oph.ovara.backend.utils.GenericOvaraJsonFormats
 import org.json4s.jackson.Serialization.read
 import slick.jdbc.*
 
+import java.sql.Date
+import java.time.LocalDate
+
 trait Extractors extends GenericOvaraJsonFormats {
-  private def extractKielistetty(json: Option[String]): Kielistetty =
-    json.map(read[Map[Kieli, String]]).getOrElse(Map())
-
-  private def extractArray(json: Option[String]): List[String] = {
-    json.map(read[List[String]]).getOrElse(List())
-  }
-
-  private def extractMap(json: Option[String]): Map[String, String] =
-    json.map(read[Map[String, String]]).getOrElse(Map())
-
   implicit val getHakuResult: GetResult[Haku] = GetResult(r =>
     Haku(
       haku_oid = r.nextString(),
@@ -74,7 +77,7 @@ trait Extractors extends GenericOvaraJsonFormats {
   implicit val getKoulutuksetToteutuksetHakukohteetResult: GetResult[OrganisaationKoulutusToteutusHakukohde] = {
     GetResult(r => {
       val kth = KoulutusToteutusHakukohdeResult(
-        hakukohdeNimi = extractKielistetty(r.nextStringOption()),
+        hakukohteenNimi = extractKielistetty(r.nextStringOption()),
         hakukohdeOid = r.nextString(),
         koulutuksenTila = r.nextStringOption(),
         toteutuksenTila = r.nextStringOption(),
@@ -93,6 +96,42 @@ trait Extractors extends GenericOvaraJsonFormats {
     })
   }
 
+  implicit val getKorkeakouluKoulutuksetToteutuksetHakukohteetResult
+      : GetResult[KorkeakouluKoulutusToteutusHakukohdeResult] = {
+    GetResult(r => {
+      KorkeakouluKoulutusToteutusHakukohdeResult(
+        oppilaitosJaToimipiste = extractKielistetty(r.nextStringOption()),
+        koulutuksenNimi = extractKielistetty(r.nextStringOption()),
+        koulutusOid = r.nextString(),
+        koulutuksenTila = r.nextStringOption(),
+        koulutuskoodi = r.nextStringOption(),
+        koulutuksenUlkoinenTunniste = r.nextStringOption(),
+        tutkinnonTaso = r.nextIntOption(),
+        opintojenLaajuus = extractOpintojenlaajuus(r.nextStringOption(), r.nextStringOption()),
+        toteutuksenNimi = extractKielistetty(r.nextStringOption()),
+        toteutusOid = r.nextString(),
+        toteutuksenTila = r.nextStringOption(),
+        toteutuksenUlkoinenTunniste = r.nextStringOption(),
+        koulutuksenAlkamisaika = extractKoulutuksenAlkamisaika(
+          r.nextStringOption(),
+          r.nextStringOption(),
+          r.nextStringOption(),
+          r.nextStringOption()
+        ),
+        hakukohteenNimi = extractKielistetty(r.nextStringOption()),
+        hakukohdeOid = r.nextString(),
+        hakukohteenTila = r.nextStringOption(),
+        hakukohteenUlkoinenTunniste = r.nextStringOption(),
+        haunNimi = extractKielistetty(r.nextStringOption()),
+        hakuaika = extractHakuaika(r.nextStringOption()),
+        hakutapa = extractKielistetty(r.nextStringOption()),
+        hakukohteenAloituspaikat = r.nextIntOption(),
+        ensikertalaistenAloituspaikat = r.nextIntOption(),
+        valintaperuste = extractKielistetty(r.nextStringOption())
+      )
+    })
+  }
+
   implicit val getOrganisaatioHierarkiaResult: GetResult[OrganisaatioHierarkia] = GetResult(r =>
     OrganisaatioHierarkia(
       organisaatio_oid = r.nextString(),
@@ -104,13 +143,6 @@ trait Extractors extends GenericOvaraJsonFormats {
       children = r.nextStringOption().map(read[List[OrganisaatioHierarkia]]).getOrElse(List())
     )
   )
-
-  def getNextDateOption(r: PositionedResult) = {
-    r.nextDateOption() match {
-      case Some(date) => Some(date.toLocalDate)
-      case None       => None
-    }
-  }
 
   implicit val getToisenAsteenHakijaResult: GetResult[ToisenAsteenHakija] = GetResult(r =>
     ToisenAsteenHakija(
@@ -131,7 +163,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       kokonaispisteet = r.nextStringOption(),
       hylkaamisenTaiPeruuntumisenSyy = extractKielistetty(r.nextStringOption()),
       vastaanottotieto = r.nextStringOption(),
-      viimVastaanottopaiva = getNextDateOption(r),
+      viimVastaanottopaiva = extractDateOption(r.nextDateOption()),
       ilmoittautuminen = r.nextStringOption(),
       harkinnanvaraisuus = r.nextStringOption(),
       soraAiempi = r.nextBooleanOption(),
@@ -151,7 +183,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       hakijanSukunimi = r.nextString(),
       hakijanEtunimi = r.nextString(),
       hetu = r.nextStringOption(),
-      syntymaAika = getNextDateOption(r),
+      syntymaAika = extractDateOption(r.nextDateOption()),
       kansalaisuus = extractKielistetty(r.nextStringOption()),
       oppijanumero = r.nextString(),
       hakemusOid = r.nextString(),
@@ -161,10 +193,10 @@ trait Extractors extends GenericOvaraJsonFormats {
       prioriteetti = r.nextInt(),
       valintatieto = r.nextStringOption(),
       ehdollisestiHyvaksytty = r.nextBooleanOption(),
-      valintatiedonPvm = getNextDateOption(r),
+      valintatiedonPvm = extractDateOption(r.nextDateOption()),
       valintatapajonot = extractValintatapajonot(r.nextStringOption()),
       vastaanottotieto = r.nextStringOption(),
-      viimVastaanottopaiva = getNextDateOption(r),
+      viimVastaanottopaiva = extractDateOption(r.nextDateOption()),
       ensikertalainen = r.nextBooleanOption(),
       ilmoittautuminen = r.nextStringOption(),
       pohjakoulutus = r.nextStringOption(),
@@ -184,7 +216,7 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   )
 
-  def extractHakeneetHyvaksytytVastaanottaneetCommonFields(
+  private def extractHakeneetHyvaksytytVastaanottaneetCommonFields(
       r: PositionedResult
   ): (Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int) = {
     (
@@ -289,7 +321,9 @@ trait Extractors extends GenericOvaraJsonFormats {
       )
     }
 
-  def extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(r: PositionedResult): (Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int) = {
+  private def extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(
+      r: PositionedResult
+  ): (Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int) = {
     (
       r.nextInt(), // hakijat
       r.nextInt(), // ensisijaisia
@@ -307,17 +341,18 @@ trait Extractors extends GenericOvaraJsonFormats {
       r.nextInt(), // toive3
       r.nextInt(), // toive4
       r.nextInt(), // toive5
-      r.nextInt(), // toive6
+      r.nextInt()  // toive6
     )
   }
 
-  implicit val getKkHakeneetHyvaksytytVastaanottaneetOrgNimellaResult: GetResult[KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella] = GetResult { r =>
+  implicit val getKkHakeneetHyvaksytytVastaanottaneetOrgNimellaResult
+      : GetResult[KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella] = GetResult { r =>
     val hakukohdeNimi    = extractKielistetty(r.nextStringOption())
     val organisaatioNimi = extractKielistetty(r.nextStringOption())
     val commonFields     = extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(r)
 
     KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella(
-      otsikko          = hakukohdeNimi,
+      otsikko = hakukohdeNimi,
       organisaatioNimi = organisaatioNimi,
       commonFields._1,
       commonFields._2,
@@ -339,7 +374,8 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   }
 
-  implicit val getKkHakeneetHyvaksytytVastaanottaneetToimipisteittainResult: GetResult[KkHakeneetHyvaksytytVastaanottaneetToimipisteittain] = GetResult { r =>
+  implicit val getKkHakeneetHyvaksytytVastaanottaneetToimipisteittainResult
+      : GetResult[KkHakeneetHyvaksytytVastaanottaneetToimipisteittain] = GetResult { r =>
     val toimipiste       = r.nextString()
     val organisaatioNimi = extractKielistetty(r.nextStringOption())
     val commonFields     = extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(r)
