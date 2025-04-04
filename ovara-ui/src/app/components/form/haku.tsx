@@ -18,13 +18,14 @@ export const Haku = ({ haunTyyppi }: { haunTyyppi: string }) => {
   const user = useAuthorizedUser();
   const locale = (user?.asiointikieli ?? 'fi') as LanguageCode;
 
-  const { selectedHaut, setSelectedHaut, selectedAlkamiskaudet } =
-    useCommonSearchParams();
-  const fetchEnabled = !isNullish(selectedAlkamiskaudet);
+  const { selectedHaut, setSelectedHaut } = useCommonSearchParams();
   const queryParams = useSearchParams();
   const queryParamsStr = queryParams.toString();
   const queryParamsWithHauntyyppi = new URLSearchParams(queryParamsStr);
   queryParamsWithHauntyyppi.set('haun_tyyppi', haunTyyppi);
+
+  const alkamiskausiQueryParam = queryParams.get('alkamiskausi');
+  const fetchEnabled = !isNullish(alkamiskausiQueryParam);
 
   const { data } = useFetchHaut(
     queryParamsWithHauntyyppi.toString(),
