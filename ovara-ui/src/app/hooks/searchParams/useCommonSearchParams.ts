@@ -18,6 +18,11 @@ export const useCommonSearchParams = () => {
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
+  const [haunTyyppi, setHauntyyppi] = useQueryState(
+    'haun_tyyppi',
+    DEFAULT_NUQS_OPTIONS,
+  );
+
   const [selectedKoulutustoimija, setSelectedKoulutustoimija] = useQueryState(
     'koulutustoimija',
     DEFAULT_NUQS_OPTIONS,
@@ -118,5 +123,7 @@ export const useCommonSearchParams = () => {
     selectedHakukohderyhmat,
     setSelectedHakukohderyhmat,
     emptyAllCommonParams,
+    haunTyyppi,
+    setHauntyyppi,
   };
 };

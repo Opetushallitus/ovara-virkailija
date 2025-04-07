@@ -111,7 +111,9 @@ const getUniqueOrganisaatiotByOrganisaatiotyyppi = (
   );
 };
 
-const isNullishOrEmpty = <T>(list: Array<T> | null | undefined): boolean => {
+export const isNullishOrEmpty = <T>(
+  list: Array<T> | null | undefined,
+): boolean => {
   return isNullish(list) || isEmpty(list);
 };
 
