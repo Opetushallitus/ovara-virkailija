@@ -406,7 +406,6 @@ class Controller(
 
   @GetMapping(path = Array("hakeneet-hyvaksytyt-vastaanottaneet"))
   def hakeneet_hyvaksytyt_vastaanottaneet(
-      @RequestParam("alkamiskausi") alkamiskausi: java.util.Collection[String],
       @RequestParam("haku") haku: java.util.Collection[String],
       @RequestParam("tulostustapa") tulostustapa: String,
       @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
