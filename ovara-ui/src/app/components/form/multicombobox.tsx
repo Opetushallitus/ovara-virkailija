@@ -2,6 +2,8 @@ import { useTranslate } from '@tolgee/react';
 import { Autocomplete, Chip, TextField } from '@mui/material';
 import { OvaraFormControl } from '@/app/components/form/ovara-form-control';
 import { find, isEmpty } from 'remeda';
+import { LanguageCode } from '@/app/lib/types/common';
+import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 
 export type SelectOption = {
   label: string;
@@ -15,6 +17,7 @@ type MultiComboBoxProps = {
   label: string;
   value: Array<string> | undefined;
   required?: boolean;
+  sortOptions?: boolean;
   sx?: Record<string, string | number>;
 };
 
@@ -25,9 +28,12 @@ export const MultiComboBox = ({
   label,
   value,
   required,
+  sortOptions = true,
   ...props
 }: MultiComboBoxProps) => {
   const { t } = useTranslate();
+  const user = useAuthorizedUser();
+  const locale = (user?.asiointikieli ?? 'fi') as LanguageCode;
 
   const getValueFromOptions = (value: Array<string>) => {
     return value.flatMap((v) => {
@@ -35,6 +41,12 @@ export const MultiComboBox = ({
       return match ? [match] : [];
     });
   };
+
+  const sortedOptions = sortOptions
+    ? [...options].sort((a, b) =>
+        new Intl.Collator(locale).compare(a.label, b.label),
+      )
+    : options;
 
   return (
     <OvaraFormControl
@@ -47,7 +59,7 @@ export const MultiComboBox = ({
           sx={{ width: '100%', overflow: 'hidden' }}
           onChange={onChange}
           value={value ? getValueFromOptions(value) : []}
-          options={options}
+          options={sortedOptions}
           filterSelectedOptions
           isOptionEqualToValue={(option, selected) => {
             return option.value === selected.value;
@@ -76,6 +88,7 @@ type ComboBoxProps = {
   label: string;
   value?: string;
   required?: boolean;
+  sortOptions?: boolean;
 };
 
 export const ComboBox = ({
@@ -85,12 +98,21 @@ export const ComboBox = ({
   label,
   value,
   required,
+  sortOptions = true,
 }: ComboBoxProps) => {
   const { t } = useTranslate();
+  const user = useAuthorizedUser();
+  const locale = (user?.asiointikieli ?? 'fi') as LanguageCode;
 
   const getValueFromOptions = (value: string | undefined) => {
     return find(options, (o) => o.value === value);
   };
+
+  const sortedOptions = sortOptions
+    ? [...options].sort((a, b) =>
+        new Intl.Collator(locale).compare(a.label, b.label),
+      )
+    : options;
 
   return (
     <OvaraFormControl
@@ -101,7 +123,7 @@ export const ComboBox = ({
           sx={{ width: '100%', overflow: 'hidden' }}
           value={getValueFromOptions(value) ?? null}
           onChange={onChange}
-          options={options}
+          options={sortedOptions}
           getOptionKey={(option) => option.value}
           renderInput={(params) => (
             <TextField {...params} placeholder={t('yleinen.valitse')} />

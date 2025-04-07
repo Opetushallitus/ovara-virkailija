@@ -194,7 +194,7 @@ describe('findOrganisaatioByOrganisaatiotyyppi', () => {
 
   test('should return all toimipisteet from koulutustoimija1 ', () => {
     const toimipiste1_1 = {
-      organisaatio_oid: '1.2.246.562.10.19461923609',
+      organisaatio_oid: TOIMIPISTE1_1_OID,
       organisaatio_nimi: {
         en: 'Pohjois-Iin koulu',
         fi: 'Pohjois-Iin koulu',
@@ -207,7 +207,7 @@ describe('findOrganisaatioByOrganisaatiotyyppi', () => {
         '1.2.246.562.10.10063814452',
         '1.2.246.562.10.27440356239',
         '1.2.246.562.10.00000000001',
-        '1.2.246.562.10.19461923609',
+        TOIMIPISTE1_1_OID,
       ],
       children: [],
     };
@@ -329,8 +329,10 @@ describe('findOrganisaatioByOrganisaatiotyyppi', () => {
   });
 });
 
+const TOIMIPISTE1_1_OID = '1.2.246.562.10.19461923609';
+
 const toimipiste1_1 = {
-  organisaatio_oid: '1.2.246.562.10.19461923609',
+  organisaatio_oid: TOIMIPISTE1_1_OID,
   organisaatio_nimi: {
     en: 'Pohjois-Iin koulu',
     fi: 'Pohjois-Iin koulu',
@@ -343,7 +345,7 @@ const toimipiste1_1 = {
     '1.2.246.562.10.10063814452',
     '1.2.246.562.10.27440356239',
     '1.2.246.562.10.00000000001',
-    '1.2.246.562.10.19461923609',
+    TOIMIPISTE1_1_OID,
   ],
   children: [],
 };
@@ -398,6 +400,8 @@ const koulutustoimija1 = {
   children: [oppilaitos1_1, oppilaitos1_2],
 };
 
+const OPPILAITOS2_1_OID = '1.2.246.562.10.10281960954';
+
 const toimipiste2_1_1 = {
   organisaatio_oid: '1.2.246.562.10.15270964875',
   organisaatio_nimi: {
@@ -409,7 +413,7 @@ const toimipiste2_1_1 = {
   oppilaitostyyppi: null,
   tila: 'AKTIIVINEN',
   parent_oids: [
-    '1.2.246.562.10.10281960954',
+    OPPILAITOS2_1_OID,
     '1.2.246.562.10.00000000001',
     '1.2.246.562.10.221157551210',
     '1.2.246.562.10.15270964875',
@@ -418,7 +422,7 @@ const toimipiste2_1_1 = {
 };
 
 const oppilaitos2_1 = {
-  organisaatio_oid: '1.2.246.562.10.10281960954',
+  organisaatio_oid: OPPILAITOS2_1_OID,
   organisaatio_nimi: {
     en: 'Nylands hotell- och restaurangskola',
     fi: 'Nylands hotell- och restaurangskola',
@@ -428,12 +432,14 @@ const oppilaitos2_1 = {
   oppilaitostyyppi: 'oppilaitostyyppi_11#1',
   tila: 'AKTIIVINEN',
   parent_oids: [
-    '1.2.246.562.10.10281960954',
+    OPPILAITOS2_1_OID,
     '1.2.246.562.10.00000000001',
     '1.2.246.562.10.221157551210',
   ],
   children: [toimipiste2_1_1],
 };
+
+const OPPILAITOS2_2_OID = '1.2.246.562.10.208433283510';
 
 const toimipiste2_2_1 = {
   organisaatio_oid: '1.2.246.562.10.61864390655',
@@ -446,7 +452,7 @@ const toimipiste2_2_1 = {
   oppilaitostyyppi: null,
   tila: 'AKTIIVINEN',
   parent_oids: [
-    '1.2.246.562.10.208433283510',
+    OPPILAITOS2_2_OID,
     '1.2.246.562.10.221157551210',
     '1.2.246.562.10.00000000001',
     '1.2.246.562.10.61864390655',
@@ -465,7 +471,7 @@ const toimipiste2_2_2 = {
   oppilaitostyyppi: null,
   tila: 'AKTIIVINEN',
   parent_oids: [
-    '1.2.246.562.10.208433283510',
+    OPPILAITOS2_2_OID,
     '1.2.246.562.10.221157551210',
     '1.2.246.562.10.00000000001',
     '1.2.246.562.10.61864390666',
@@ -484,7 +490,7 @@ const toimipiste2_2_3 = {
   oppilaitostyyppi: null,
   tila: 'AKTIIVINEN',
   parent_oids: [
-    '1.2.246.562.10.208433283510',
+    OPPILAITOS2_2_OID,
     '1.2.246.562.10.221157551210',
     '1.2.246.562.10.00000000001',
     '1.2.246.562.10.618643906665',
@@ -493,7 +499,7 @@ const toimipiste2_2_3 = {
 };
 
 const oppilaitos2_2 = {
-  organisaatio_oid: '1.2.246.562.10.208433283510',
+  organisaatio_oid: OPPILAITOS2_2_OID,
   organisaatio_nimi: {
     en: 'Överby trädgårds- och lantbruksskolor',
     fi: 'Överby trädgårds- och lantbruksskolor',
@@ -503,12 +509,14 @@ const oppilaitos2_2 = {
   oppilaitostyyppi: 'oppilaitostyyppi_11#1',
   tila: 'AKTIIVINEN',
   parent_oids: [
-    '1.2.246.562.10.208433283510',
+    OPPILAITOS2_2_OID,
     '1.2.246.562.10.221157551210',
     '1.2.246.562.10.00000000001',
   ],
   children: [toimipiste2_2_1, toimipiste2_2_2, toimipiste2_2_3],
 };
+
+const OPPILAITOS2_3_OID = '1.2.246.562.10.2084332835113';
 
 const toimipiste2_3_1 = {
   organisaatio_oid: '1.2.246.562.10.61864390667',
@@ -521,7 +529,7 @@ const toimipiste2_3_1 = {
   oppilaitostyyppi: null,
   tila: 'AKTIIVINEN',
   parent_oids: [
-    '1.2.246.562.10.2084332835113',
+    OPPILAITOS2_3_OID,
     '1.2.246.562.10.221157551210',
     '1.2.246.562.10.00000000001',
     '1.2.246.562.10.61864390667',
@@ -530,7 +538,7 @@ const toimipiste2_3_1 = {
 };
 
 const oppilaitos2_3 = {
-  organisaatio_oid: '1.2.246.562.10.2084332835113',
+  organisaatio_oid: OPPILAITOS2_3_OID,
   organisaatio_nimi: {
     en: 'Överby trädgårds- och lantbruksskolor oppilaitos 3',
     fi: 'Överby trädgårds- och lantbruksskolor oppilaitos 3',
@@ -540,7 +548,7 @@ const oppilaitos2_3 = {
   oppilaitostyyppi: 'oppilaitostyyppi_11#1',
   tila: 'AKTIIVINEN',
   parent_oids: [
-    '1.2.246.562.10.2084332835113',
+    OPPILAITOS2_3_OID,
     '1.2.246.562.10.221157551210',
     '1.2.246.562.10.00000000001',
   ],
@@ -592,7 +600,7 @@ describe('getOppilaitoksetToShow', () => {
 
 describe('getToimipisteetToShow', () => {
   test('should return all toimipisteet in hierarkia as no toimipiste has been selected', () => {
-    expect(getToimipisteetToShow(hierarkiat, null, null)).toEqual([
+    expect(getToimipisteetToShow(hierarkiat, null, null, null)).toEqual([
       toimipiste1_1,
       toimipiste2_1_1,
       toimipiste2_2_1,
@@ -602,9 +610,9 @@ describe('getToimipisteetToShow', () => {
     ]);
   });
 
-  test('should return only selected toimipiste', () => {
+  test('should return toimipisteet only for selected oppilaitos', () => {
     expect(
-      getToimipisteetToShow(hierarkiat, ['1.2.246.562.10.208433283510'], null),
+      getToimipisteetToShow(hierarkiat, null, [OPPILAITOS2_2_OID], null),
     ).toEqual([toimipiste2_2_1, toimipiste2_2_2, toimipiste2_2_3]);
   });
 
@@ -612,15 +620,32 @@ describe('getToimipisteetToShow', () => {
     expect(
       getToimipisteetToShow(
         hierarkiat,
-        ['1.2.246.562.10.10281960954', '1.2.246.562.10.2084332835113'],
+        null,
+        [OPPILAITOS2_1_OID, OPPILAITOS2_3_OID],
         null,
       ),
     ).toEqual([toimipiste2_1_1, toimipiste2_3_1]);
   });
 
+  test('should return all selected toimipisteet also not related to selected oppilaitos', () => {
+    expect(
+      getToimipisteetToShow(
+        hierarkiat,
+        [TOIMIPISTE1_1_OID],
+        [OPPILAITOS2_2_OID],
+        null,
+      ),
+    ).toEqual([
+      toimipiste1_1,
+      toimipiste2_2_1,
+      toimipiste2_2_2,
+      toimipiste2_2_3,
+    ]);
+  });
+
   test("should return toimipisteet under selected koulutustoimija1 when oppilaitos hasn't been selected", () => {
     expect(
-      getToimipisteetToShow(hierarkiat, [], '1.2.246.562.10.10063814452'),
+      getToimipisteetToShow(hierarkiat, [], [], '1.2.246.562.10.10063814452'),
     ).toEqual([toimipiste1_1]);
   });
 });
