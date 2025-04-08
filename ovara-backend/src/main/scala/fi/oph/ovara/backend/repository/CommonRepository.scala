@@ -65,7 +65,8 @@ class CommonRepository extends Extractors {
   def selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(
       orgs: List[String],
       haut: List[String],
-      hakukohderyhmat: List[String]
+      hakukohderyhmat: List[String],
+      hakukohteet: List[String]
   ): SqlStreamingAction[Vector[Hakukohde], Hakukohde, Effect] = {
     val organisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(orgs)
     val organisaatiotQueryStr = if (organisaatiotStr.isEmpty) {
@@ -86,7 +87,14 @@ class CommonRepository extends Extractors {
       s"AND hkr_hk.hakukohderyhma_oid in ($hakukohderyhmatStr)"
     }
 
-    sql"""SELECT DISTINCT hk.hakukohde_oid, hk.hakukohde_nimi
+    val hakukohteetStr = RepositoryUtils.makeListOfValuesQueryStr(hakukohteet)
+    val hakukohteetQueryStr = if (hakukohteetStr.isEmpty) {
+      ""
+    } else {
+      s"OR hk.hakukohde_oid in ($hakukohteetStr)"
+    }
+
+    val query = sql"""SELECT DISTINCT hk.hakukohde_oid, hk.hakukohde_nimi
           FROM pub.pub_dim_hakukohde hk
           JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
           ON hkr_hk.hakukohde_oid = hk.hakukohde_oid
@@ -94,7 +102,11 @@ class CommonRepository extends Extractors {
           #$organisaatiotQueryStr
           #$hautQueryStr
           #$hakukohderyhmatQueryStr
+          #$hakukohteetQueryStr
           """.as[Hakukohde]
+
+    LOG.debug(s"selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja: ${query.statements.head}")
+    query
   }
 
   def selectToisenAsteenPohjakoulutukset = {

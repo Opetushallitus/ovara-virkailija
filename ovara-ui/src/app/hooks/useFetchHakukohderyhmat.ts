@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { doApiFetch } from '@/app/lib/ovara-backend/api';
-import { isNullish } from 'remeda';
+import { isNullishOrEmpty } from '../lib/utils';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 
 const fetchHakukohderyhmat = (selectedHaut: Array<string> | null) => {
@@ -13,7 +13,7 @@ const fetchHakukohderyhmat = (selectedHaut: Array<string> | null) => {
 export const useFetchHakukohderyhmat = () => {
   const { selectedHaut } = useCommonSearchParams();
 
-  const fetchEnabled = !isNullish(selectedHaut);
+  const fetchEnabled = !isNullishOrEmpty(selectedHaut);
   return useQuery({
     queryKey: ['fetchHakukohderyhmat', selectedHaut],
     queryFn: () => fetchHakukohderyhmat(selectedHaut),
