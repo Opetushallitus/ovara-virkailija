@@ -34,6 +34,8 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetService(
     val asiointikieli             = user.asiointikieli.getOrElse("fi")
     val authorities               = user.authorities
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
+    val isOphPaakayttaja = AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)
+
     val translations              = lokalisointiService.getOvaraTranslations(asiointikieli)
 
     val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
@@ -42,7 +44,11 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetService(
       oppilaitosOids = oppilaitokset
     )
 
-    val allowedHakukohderyhmat = kayttooikeusOrganisaatiot intersect hakukohderyhmat
+    val allowedHakukohderyhmat = if (isOphPaakayttaja) {
+      hakukohderyhmat
+    } else {
+      kayttooikeusOrganisaatiot intersect hakukohderyhmat
+    }
 
     val queryResult = db.run(
       korkeakouluKoulutuksetToteutuksetHakukohteetRepository.selectWithParams(

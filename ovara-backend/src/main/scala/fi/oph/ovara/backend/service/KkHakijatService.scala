@@ -2,7 +2,6 @@ package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.domain.KkHakijaWithCombinedNimi
 import fi.oph.ovara.backend.repository.{KkHakijatRepository, OvaraDatabase}
-import fi.oph.ovara.backend.utils.Constants.KORKEAKOULURAPORTTI
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
@@ -43,6 +42,7 @@ class KkHakijatService(
 
     val authorities               = user.authorities
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
+    val isOphPaakayttaja          = AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)
 
     val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
@@ -50,7 +50,11 @@ class KkHakijatService(
       oppilaitosOids = oppilaitokset
     )
 
-    val allowedHakukohderyhmat = kayttooikeusOrganisaatiot intersect hakukohderyhmat
+    val allowedHakukohderyhmat = if (isOphPaakayttaja) {
+      hakukohderyhmat
+    } else {
+      kayttooikeusOrganisaatiot intersect hakukohderyhmat
+    }
 
     val query = kkHakijatRepository.selectWithParams(
       kayttooikeusOrganisaatiot = orgOidsForQuery,
