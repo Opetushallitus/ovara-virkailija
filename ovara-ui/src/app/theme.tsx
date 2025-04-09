@@ -55,6 +55,24 @@ export const THEME_OVERRIDES: ThemeOptions = {
         }),
       },
     },
+    MuiRadio: {
+      styleOverrides: {
+        root: {
+          paddingLeft: '0',
+          paddingRight: '0',
+        },
+      },
+    },
+    MuiFormControlLabel: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          marginLeft: 0,
+          '&.MuiFormControlLabel-labelPlacementEnd': {
+            marginRight: theme.spacing(2.5),
+          },
+        }),
+      },
+    },
     MuiAutocomplete: {
       styleOverrides: {
         root: {
