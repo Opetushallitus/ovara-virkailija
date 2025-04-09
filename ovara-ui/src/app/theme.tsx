@@ -40,6 +40,11 @@ export const THEME_OVERRIDES: ThemeOptions = {
       defaultProps: {
         loadingPosition: 'start',
       },
+      styleOverrides: {
+        root: {
+          minHeight: '40px',
+        },
+      },
     },
     MuiOutlinedInput: {
       styleOverrides: {
