@@ -79,9 +79,8 @@ export default function Hakijat() {
             />
           </Box>
           <Divider />
-          <Hakukohde locale={locale} t={t} sx={{ paddingTop: 0 }} />
+          <Hakukohde locale={locale} t={t} sx={{ marginTop: 0 }} />
           <Pohjakoulutus locale={locale} t={t} />
-          <Divider />
           <Valintatieto t={t} sx={{ paddingTop: 0 }} />
           <Vastaanottotieto t={t} />
           <Harkinnanvaraisuus t={t} />

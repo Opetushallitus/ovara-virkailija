@@ -68,7 +68,14 @@ export const MultiComboBox = ({
           renderTags={(value: Array<SelectOption>, getTagProps) => {
             return value?.map((option: SelectOption, index: number) => {
               const { key, ...tagProps } = getTagProps({ index });
-              return <Chip label={option?.label} key={key} {...tagProps} />;
+              return (
+                <Chip
+                  size="small"
+                  label={option?.label}
+                  key={key}
+                  {...tagProps}
+                />
+              );
             });
           }}
           renderInput={(params) => (

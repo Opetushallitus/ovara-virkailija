@@ -31,8 +31,8 @@ export const OvaraFormControl = ({
       {...props}
       sx={{
         flexDirection: 'row',
-        paddingTop: '20px',
         width: '100%',
+        marginTop: '10px',
         ...sx,
       }}
     >

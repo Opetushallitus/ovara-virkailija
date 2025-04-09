@@ -41,10 +41,17 @@ export const THEME_OVERRIDES: ThemeOptions = {
         loadingPosition: 'start',
       },
     },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          minHeight: '40px',
+        },
+      },
+    },
     MuiDivider: {
       styleOverrides: {
         root: ({ theme }) => ({
-          margin: theme.spacing(3, 0, 3, 0),
+          margin: theme.spacing(2.5, 0),
         }),
       },
     },
@@ -52,6 +59,11 @@ export const THEME_OVERRIDES: ThemeOptions = {
       styleOverrides: {
         root: {
           padding: '5px', // lisätään vähän paddingia jotta on tilaa focusreunukselle
+          '& .MuiOutlinedInput-root.MuiInputBase-sizeSmall': {
+            paddingTop: '5px',
+            paddingBottom: '5px',
+            paddingLeft: '5px',
+          },
         },
       },
     },

@@ -10,7 +10,7 @@ import {
 } from '@/app/components/form/tila';
 import { FormBox } from '@/app/components/form/form-box';
 import { FormButtons } from '@/app/components/form/form-buttons';
-import { Box, Divider } from '@mui/material';
+import { Divider } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { hasOvaraKkRole } from '@/app/lib/utils';
@@ -70,19 +70,17 @@ export default function KoulutuksetToteutuksetHakukohteet() {
           <OphTypography>
             {t('raportti.vahintaan-yksi-vaihtoehdoista')}
           </OphTypography>
-          <Box>
-            <OppilaitosValikko
-              locale={locale}
-              organisaatiot={organisaatiot}
-              t={t}
-            />
-            <ToimipisteValikko
-              locale={locale}
-              organisaatiot={organisaatiot}
-              t={t}
-            />
-            <Hakukohderyhma />
-          </Box>
+          <OppilaitosValikko
+            locale={locale}
+            organisaatiot={organisaatiot}
+            t={t}
+          />
+          <ToimipisteValikko
+            locale={locale}
+            organisaatiot={organisaatiot}
+            t={t}
+          />
+          <Hakukohderyhma />
           <Divider />
           <Tulostustapa
             tulostustavat={tulostustavat}
