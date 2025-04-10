@@ -5,7 +5,7 @@ import { FormBox } from '@/app/components/form/form-box';
 import { FormButtons } from '@/app/components/form/form-buttons';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
-import { hasOvaraKkRole } from '@/app/lib/utils';
+import { hasOvaraKkRole, isNullishOrEmpty } from '@/app/lib/utils';
 import { useSearchParams } from 'next/navigation';
 import { LanguageCode } from '@/app/lib/types/common';
 
@@ -56,6 +56,8 @@ export default function KkHakutilasto() {
     'kansalaisuuksittain',
   ];
 
+  const hakukohdeFetchEnabled = !isNullishOrEmpty(selectedHaut);
+
   const [isLoading, setIsLoading] = useState(false);
   const queryParamsStr = queryParams.toString();
   return (
@@ -69,7 +71,11 @@ export default function KkHakutilasto() {
           <Tulostustapa tulostustavat={tulostustavat} />
           <OrganisaatioValikot />
           <Hakukohderyhma />
-          <Hakukohde locale={locale} t={t} />
+          <Hakukohde
+            locale={locale}
+            t={t}
+            fetchEnabled={hakukohdeFetchEnabled}
+          />
           <OkmOhjauksenAlat />
           <Divider />
           <KkTutkinnonTaso />

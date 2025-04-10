@@ -67,20 +67,16 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       kayttooikeusOrganisaatiot intersect hakukohderyhmat
     }
 
-    if (allowedOrgOidsFromSelection.nonEmpty || allowedHakukohderyhmaOids.nonEmpty || hakukohteet.nonEmpty) {
-      db.run(
-        commonRepository
-          .selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(
-            allowedOrgOidsFromSelection,
-            haut,
-            allowedHakukohderyhmaOids,
-            hakukohteet
-          ),
-        "selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja"
-      )
-    } else {
-      Vector()
-    }
+    db.run(
+      commonRepository
+        .selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(
+          allowedOrgOidsFromSelection,
+          haut,
+          allowedHakukohderyhmaOids,
+          hakukohteet
+        ),
+      "selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja"
+    )
   }
 
   def getPohjakoulutukset: Seq[Koodi] = {

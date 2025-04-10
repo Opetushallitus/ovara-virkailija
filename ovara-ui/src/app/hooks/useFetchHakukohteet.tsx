@@ -43,7 +43,7 @@ const fetchHakukohteet = (
   });
 };
 
-export const useFetchHakukohteet = () => {
+export const useFetchHakukohteet = (fetchEnabled: boolean) => {
   const {
     selectedHaut,
     selectedOppilaitokset,
@@ -52,7 +52,6 @@ export const useFetchHakukohteet = () => {
     selectedHakukohteet,
   } = useCommonSearchParams();
 
-  const fetchEnabled = !isNullishOrEmpty(selectedHaut);
   return useQuery({
     queryKey: [
       'fetchHakukohteet',

@@ -12,16 +12,18 @@ type Hakukohde = {
 export const Hakukohde = ({
   locale,
   t,
+  fetchEnabled,
   ...props
 }: {
   locale: LanguageCode;
   t: (key: string) => string;
+  fetchEnabled: boolean;
   [key: string]: unknown;
 }) => {
   const { selectedHakukohteet, setSelectedHakukohteet } =
     useCommonSearchParams();
 
-  const { data } = useFetchHakukohteet();
+  const { data } = useFetchHakukohteet(fetchEnabled);
 
   const hakukohteet: Array<Hakukohde> = data || [];
 

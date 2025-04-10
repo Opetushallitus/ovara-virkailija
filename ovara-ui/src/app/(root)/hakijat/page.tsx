@@ -5,7 +5,7 @@ import { FormButtons } from '@/app/components/form/form-buttons';
 import { Box, Divider } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
-import { hasOvaraToinenAsteRole } from '@/app/lib/utils';
+import { hasOvaraToinenAsteRole, isNullishOrEmpty } from '@/app/lib/utils';
 import { useSearchParams } from 'next/navigation';
 import { LanguageCode } from '@/app/lib/types/common';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
@@ -39,20 +39,15 @@ export default function Hakijat() {
   const hasToinenAsteRights = hasOvaraToinenAsteRole(user?.authorities);
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const organisaatiot = useFetchOrganisaatiohierarkiat().data;
-  const {
-    selectedAlkamiskaudet,
-    selectedHaut,
-    selectedOppilaitokset,
-    selectedToimipisteet,
-  } = useCommonSearchParams();
+  const { selectedHaut, selectedOppilaitokset, selectedToimipisteet } =
+    useCommonSearchParams();
 
-  const isDisabled = !(
-    selectedAlkamiskaudet &&
-    selectedHaut &&
-    (selectedOppilaitokset || selectedToimipisteet)
-  );
   const [isLoading, setIsLoading] = useState(false);
   const queryParamsStr = useSearchParams().toString();
+
+  const fetchEnabled =
+    !isNullishOrEmpty(selectedHaut) &&
+    ![selectedOppilaitokset, selectedToimipisteet].every(isNullishOrEmpty);
 
   return (
     <MainContainer>
@@ -79,7 +74,12 @@ export default function Hakijat() {
             />
           </Box>
           <Divider />
-          <Hakukohde locale={locale} t={t} sx={{ marginTop: 0 }} />
+          <Hakukohde
+            locale={locale}
+            t={t}
+            sx={{ marginTop: 0 }}
+            fetchEnabled={fetchEnabled}
+          />
           <Pohjakoulutus locale={locale} t={t} />
           <Valintatieto t={t} sx={{ paddingTop: 0 }} />
           <Vastaanottotieto t={t} />
@@ -91,7 +91,7 @@ export default function Hakijat() {
           <Markkinointilupa t={t} />
           <Julkaisulupa t={t} />
           <FormButtons
-            disabled={isDisabled}
+            disabled={!fetchEnabled}
             downloadExcel={() =>
               downloadExcel('hakijat', queryParamsStr, setIsLoading)
             }

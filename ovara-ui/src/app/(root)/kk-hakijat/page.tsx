@@ -5,7 +5,7 @@ import { FormButtons } from '@/app/components/form/form-buttons';
 import { Box, Divider } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
-import { hasOvaraKkRole } from '@/app/lib/utils';
+import { hasOvaraKkRole, isNullishOrEmpty } from '@/app/lib/utils';
 import { LanguageCode } from '@/app/lib/types/common';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
 
@@ -30,7 +30,6 @@ import {
 } from '@/app/components/form/nayta';
 import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
-import { isEmpty } from 'remeda';
 import { Kansalaisuus } from '@/app/components/form/kansalaisuus';
 import { Hakukohderyhma } from '@/app/components/form/hakukohderyhma';
 import { MainContainer } from '@/app/components/main-container';
@@ -43,7 +42,6 @@ export default function KkHakijat() {
   const { data: organisaatiot } = useFetchOrganisaatiohierarkiat();
 
   const {
-    selectedAlkamiskaudet,
     selectedHaut,
     selectedOppilaitokset,
     selectedToimipisteet,
@@ -68,15 +66,15 @@ export default function KkHakijat() {
     selectedNaytaPostiosoite.toString(),
   );
 
-  const isDisabled =
-    [selectedAlkamiskaudet || [], selectedHaut || []].some(isEmpty) ||
-    [
-      selectedOppilaitokset || [],
-      selectedToimipisteet || [],
-      selectedHakukohderyhmat || [],
-    ].every(isEmpty);
-
   const [isLoading, setIsLoading] = useState(false);
+
+  const fetchEnabled =
+    !isNullishOrEmpty(selectedHaut) &&
+    ![
+      selectedOppilaitokset,
+      selectedToimipisteet,
+      selectedHakukohderyhmat,
+    ].every(isNullishOrEmpty);
 
   return (
     <MainContainer>
@@ -104,7 +102,12 @@ export default function KkHakijat() {
             <Hakukohderyhma />
           </Box>
           <Divider />
-          <Hakukohde locale={locale} t={t} sx={{ paddingTop: 0 }} />
+          <Hakukohde
+            locale={locale}
+            t={t}
+            fetchEnabled={fetchEnabled}
+            sx={{ paddingTop: 0 }}
+          />
           <Valintatieto t={t} />
           <Vastaanottotieto t={t} />
           <Kansalaisuus />
@@ -113,7 +116,7 @@ export default function KkHakijat() {
           <NaytaHetu t={t} />
           <NaytaPostiosoite t={t} />
           <FormButtons
-            disabled={isDisabled}
+            disabled={!fetchEnabled}
             downloadExcel={() =>
               downloadExcel(
                 'kk-hakijat',
