@@ -107,14 +107,14 @@ class Controller(
       @RequestParam("oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
       @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
       @RequestParam("hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
-      @RequestParam("hakukohteet", required = false) hakukohteet: java.util.Collection[String]
+      @RequestParam("hakukohteet", required = false) selectedHakukohteet: java.util.Collection[String]
   ): String = mapper.writeValueAsString(
     commonService.getHakukohteet(
       getListParamAsScalaList(oppilaitokset),
       getListParamAsScalaList(toimipisteet),
       getListParamAsScalaList(haut),
       getListParamAsScalaList(hakukohderyhmat),
-      getListParamAsScalaList(hakukohteet)
+      getListParamAsScalaList(selectedHakukohteet)
     )
   )
 
