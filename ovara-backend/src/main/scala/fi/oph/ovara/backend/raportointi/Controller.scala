@@ -89,32 +89,32 @@ class Controller(
 
   @GetMapping(path = Array("haut"))
   def haut(
-      @RequestParam("alkamiskausi", required = false) alkamiskaudet: java.util.Collection[String],
-      @RequestParam("haku", required = false) selectedHaut: java.util.Collection[String],
+      @RequestParam("alkamiskaudet", required = false) alkamiskaudet: java.util.Collection[String],
+      @RequestParam("haut", required = false) selectedHaut: java.util.Collection[String],
       @RequestParam("haun_tyyppi", required = false) haun_tyyppi: String
   ): String = {
     val alkamiskaudetList =
       getListParamAsScalaList(alkamiskaudet)
     val selectedHautList = getListParamAsScalaList(selectedHaut)
-    val haunTyyppi = if (haun_tyyppi == null) "" else haun_tyyppi
+    val haunTyyppi       = if (haun_tyyppi == null) "" else haun_tyyppi
 
     mapper.writeValueAsString(commonService.getHaut(alkamiskaudetList, selectedHautList, haunTyyppi))
   }
 
   @GetMapping(path = Array("hakukohteet"))
   def hakukohteet(
-      @RequestParam("haku") haku: java.util.Collection[String],
-      @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
-      @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
+      @RequestParam("haut") haut: java.util.Collection[String],
+      @RequestParam("oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
+      @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
       @RequestParam("hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
-      @RequestParam("hakukohde", required = false) hakukohde: java.util.Collection[String]
+      @RequestParam("hakukohteet", required = false) hakukohteet: java.util.Collection[String]
   ): String = mapper.writeValueAsString(
     commonService.getHakukohteet(
-      getListParamAsScalaList(oppilaitos),
-      getListParamAsScalaList(toimipiste),
-      getListParamAsScalaList(haku),
+      getListParamAsScalaList(oppilaitokset),
+      getListParamAsScalaList(toimipisteet),
+      getListParamAsScalaList(haut),
       getListParamAsScalaList(hakukohderyhmat),
-      getListParamAsScalaList(hakukohde)
+      getListParamAsScalaList(hakukohteet)
     )
   )
 
@@ -140,9 +140,13 @@ class Controller(
   def maakunnat: String = mapper.writeValueAsString(commonService.getMaakunnat)
 
   @GetMapping(path = Array("kunnat"))
-  def kunnat(@RequestParam("maakunnat", required = false) maakunnat: java.util.Collection[String],
-             @RequestParam("selectedKunnat", required = false) selectedKunnat: java.util.Collection[String]): String =
-    mapper.writeValueAsString(commonService.getKunnat(getListParamAsScalaList(maakunnat), getListParamAsScalaList(selectedKunnat)))
+  def kunnat(
+      @RequestParam("maakunnat", required = false) maakunnat: java.util.Collection[String],
+      @RequestParam("selectedKunnat", required = false) selectedKunnat: java.util.Collection[String]
+  ): String =
+    mapper.writeValueAsString(
+      commonService.getKunnat(getListParamAsScalaList(maakunnat), getListParamAsScalaList(selectedKunnat))
+    )
 
   @GetMapping(path = Array("koulutusalat1"))
   def koulutusalat1: String = mapper.writeValueAsString(commonService.getKoulutusalat1)
@@ -153,7 +157,10 @@ class Controller(
       @RequestParam("selectedKoulutusalat2", required = false) selectedKoulutusalat2: java.util.Collection[String]
   ): String =
     mapper.writeValueAsString(
-      commonService.getKoulutusalat2(getListParamAsScalaList(koulutusalat1), getListParamAsScalaList(selectedKoulutusalat2))
+      commonService.getKoulutusalat2(
+        getListParamAsScalaList(koulutusalat1),
+        getListParamAsScalaList(selectedKoulutusalat2)
+      )
     )
 
   @GetMapping(path = Array("koulutusalat3"))
@@ -162,12 +169,15 @@ class Controller(
       @RequestParam("selectedKoulutusalat3", required = false) selectedKoulutusalat3: java.util.Collection[String]
   ): String =
     mapper.writeValueAsString(
-      commonService.getKoulutusalat3(getListParamAsScalaList(koulutusalat2), getListParamAsScalaList(selectedKoulutusalat3))
+      commonService.getKoulutusalat3(
+        getListParamAsScalaList(koulutusalat2),
+        getListParamAsScalaList(selectedKoulutusalat3)
+      )
     )
 
   @GetMapping(path = Array("hakukohderyhmat"))
   def hakukohderyhmat(
-      @RequestParam("haku", required = true) haut: java.util.Collection[String]
+      @RequestParam("haut", required = true) haut: java.util.Collection[String]
   ): String =
     mapper.writeValueAsString(
       commonService.getHakukohderyhmat(getListParamAsScalaList(haut))
@@ -214,10 +224,10 @@ class Controller(
 
   @GetMapping(path = Array("koulutukset-toteutukset-hakukohteet"))
   def koulutukset_toteutukset_hakukohteet(
-      @RequestParam("haku") haku: java.util.Collection[String],
+      @RequestParam("haut") haut: java.util.Collection[String],
       @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
-      @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
-      @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
+      @RequestParam("oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
+      @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
       @RequestParam("koulutuksen-tila", required = false) koulutuksenTila: String,
       @RequestParam("toteutuksen-tila", required = false) toteutuksenTila: String,
       @RequestParam("hakukohteen-tila", required = false) hakukohteenTila: String,
@@ -234,9 +244,9 @@ class Controller(
     } else {
       Option(valintakoe.toBoolean)
     }
-    val oppilaitosList = getListParamAsScalaList(oppilaitos)
-    val toimipisteList = getListParamAsScalaList(toimipiste)
-    val hakuList       = getListParamAsScalaList(haku)
+    val oppilaitosList = getListParamAsScalaList(oppilaitokset)
+    val toimipisteList = getListParamAsScalaList(toimipisteet)
+    val hakuList       = getListParamAsScalaList(haut)
 
     val wb = koulutuksetToteutuksetHakukohteetService.get(
       hakuList,
@@ -250,10 +260,10 @@ class Controller(
     )
 
     val raporttiParams = Map(
-      "haku"            -> Option(hakuList).filterNot(_.isEmpty),
+      "haut"            -> Option(hakuList).filterNot(_.isEmpty),
       "koulutustoimija" -> maybeKoulutustoimija,
-      "oppilaitos"      -> Option(oppilaitosList).filterNot(_.isEmpty),
-      "toimipiste"      -> Option(toimipisteList).filterNot(_.isEmpty),
+      "oppilaitokset"   -> Option(oppilaitosList).filterNot(_.isEmpty),
+      "toimipisteet"    -> Option(toimipisteList).filterNot(_.isEmpty),
       "koulutuksenTila" -> maybeKoulutuksenTila,
       "toteutuksenTila" -> maybeToteutuksenTila,
       "hakukohteenTila" -> maybeHakukohteenTila,
@@ -265,15 +275,15 @@ class Controller(
 
   @GetMapping(path = Array("kk-koulutukset-toteutukset-hakukohteet"))
   def kk_koulutukset_toteutukset_hakukohteet(
-      @RequestParam("haku") haku: java.util.Collection[String],
+      @RequestParam("haut") haut: java.util.Collection[String],
       @RequestParam("tulostustapa", defaultValue = "koulutuksittain") tulostustapa: String,
-      @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
-      @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
+      @RequestParam("oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
+      @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
       @RequestParam("hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
       @RequestParam("koulutuksen-tila", required = false) koulutuksenTila: String,
       @RequestParam("toteutuksen-tila", required = false) toteutuksenTila: String,
       @RequestParam("hakukohteen-tila", required = false) hakukohteenTila: String,
-      @RequestParam("tutkinnon-taso", required = false) tutkinnonTaso: java.util.Collection[String],
+      @RequestParam("tutkinnon-tasot", required = false) tutkinnonTasot: java.util.Collection[String],
       request: HttpServletRequest,
       response: HttpServletResponse
   ): Unit = {
@@ -281,11 +291,11 @@ class Controller(
     val maybeToteutuksenTila = Option(toteutuksenTila)
     val maybeHakukohteenTila = Option(hakukohteenTila)
 
-    val oppilaitosList     = if (oppilaitos == null) List() else oppilaitos.asScala.toList
-    val toimipisteList     = if (toimipiste == null) List() else toimipiste.asScala.toList
+    val oppilaitosList     = if (oppilaitokset == null) List() else oppilaitokset.asScala.toList
+    val toimipisteList     = if (toimipisteet == null) List() else toimipisteet.asScala.toList
     val hakukohderyhmaList = if (hakukohderyhmat == null) List() else hakukohderyhmat.asScala.toList
-    val hakuList           = if (haku == null) List() else haku.asScala.toList
-    val tutkinnonTasoList = if (tutkinnonTaso == null) List() else tutkinnonTaso.asScala.toList
+    val hakuList           = if (haut == null) List() else haut.asScala.toList
+    val tutkinnonTasoList  = if (tutkinnonTasot == null) List() else tutkinnonTasot.asScala.toList
 
     val wb = kkKoulutuksetToteutuksetHakukohteetService.get(
       hakuList,
@@ -300,14 +310,14 @@ class Controller(
     )
 
     val raporttiParams = Map(
-      "haku"            -> Option(hakuList).filterNot(_.isEmpty),
-      "oppilaitos"      -> Option(oppilaitosList).filterNot(_.isEmpty),
-      "toimipiste"      -> Option(toimipisteList).filterNot(_.isEmpty),
+      "haut"            -> Option(hakuList).filterNot(_.isEmpty),
+      "oppilaitokset"   -> Option(oppilaitosList).filterNot(_.isEmpty),
+      "toimipisteet"    -> Option(toimipisteList).filterNot(_.isEmpty),
       "hakukohderyhmat" -> Option(hakukohderyhmaList).filterNot(_.isEmpty),
       "koulutuksenTila" -> maybeKoulutuksenTila,
       "toteutuksenTila" -> maybeToteutuksenTila,
       "hakukohteenTila" -> maybeHakukohteenTila,
-      "tutkinnonTaso"    -> Option(tutkinnonTasoList).filterNot(_.isEmpty),
+      "tutkinnonTasot"  -> Option(tutkinnonTasoList).filterNot(_.isEmpty)
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
     sendExcel(Some(wb), response, request, "kk-koulutukset-toteutukset-hakukohteet", raporttiParams)
@@ -315,14 +325,14 @@ class Controller(
 
   @GetMapping(path = Array("hakijat"))
   def hakijat(
-      @RequestParam("haku") haku: java.util.Collection[String],
-      @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
-      @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
-      @RequestParam("hakukohde", required = false) hakukohde: java.util.Collection[String],
-      @RequestParam("pohjakoulutus", required = false) pohjakoulutus: java.util.Collection[String],
-      @RequestParam("valintatieto", required = false) valintatieto: java.util.Collection[String],
-      @RequestParam("vastaanottotieto", required = false) vastaanottotieto: java.util.Collection[String],
-      @RequestParam("harkinnanvaraisuus", required = false) harkinnanvaraisuus: java.util.Collection[String],
+      @RequestParam("haut") haut: java.util.Collection[String],
+      @RequestParam("oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
+      @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
+      @RequestParam("hakukohteet", required = false) hakukohteet: java.util.Collection[String],
+      @RequestParam("pohjakoulutukset", required = false) pohjakoulutukset: java.util.Collection[String],
+      @RequestParam("valintatiedot", required = false) valintatiedot: java.util.Collection[String],
+      @RequestParam("vastaanottotiedot", required = false) vastaanottotiedot: java.util.Collection[String],
+      @RequestParam("harkinnanvaraisuudet", required = false) harkinnanvaraisuudet: java.util.Collection[String],
       @RequestParam("kaksoistutkinto", required = false) kaksoistutkinto: String,
       @RequestParam("urheilijatutkinto", required = false) urheilijatutkinto: String,
       @RequestParam("sora_terveys", required = false) soraterveys: String,
@@ -332,14 +342,14 @@ class Controller(
       request: HttpServletRequest,
       response: HttpServletResponse
   ): Unit = {
-    val hakuList               = getListParamAsScalaList(haku)
-    val oppilaitosList         = getListParamAsScalaList(oppilaitos)
-    val toimipisteList         = getListParamAsScalaList(toimipiste)
-    val hakukohdeList          = getListParamAsScalaList(hakukohde)
-    val pohjakoulutusList      = getListParamAsScalaList(pohjakoulutus)
-    val valintatietoList       = getListParamAsScalaList(valintatieto)
-    val vastaanottotietoList   = getListParamAsScalaList(vastaanottotieto)
-    val harkinnanvaraisuusList = getListParamAsScalaList(harkinnanvaraisuus)
+    val hakuList               = getListParamAsScalaList(haut)
+    val oppilaitosList         = getListParamAsScalaList(oppilaitokset)
+    val toimipisteList         = getListParamAsScalaList(toimipisteet)
+    val hakukohdeList          = getListParamAsScalaList(hakukohteet)
+    val pohjakoulutusList      = getListParamAsScalaList(pohjakoulutukset)
+    val valintatietoList       = getListParamAsScalaList(valintatiedot)
+    val vastaanottotietoList   = getListParamAsScalaList(vastaanottotiedot)
+    val harkinnanvaraisuusList = getListParamAsScalaList(harkinnanvaraisuudet)
 
     val maybeKaksoistutkintoKiinnostaa   = strToOptionBoolean(kaksoistutkinto)
     val maybeUrheilijatutkintoKiinnostaa = strToOptionBoolean(urheilijatutkinto)
@@ -371,20 +381,20 @@ class Controller(
     }
 
     val raporttiParams = Map(
-      "haku"               -> Option(hakuList).filterNot(_.isEmpty),
-      "oppilaitos"         -> Option(oppilaitosList).filterNot(_.isEmpty),
-      "toimipiste"         -> Option(toimipisteList).filterNot(_.isEmpty),
-      "hakukohde"          -> Option(hakukohdeList).filterNot(_.isEmpty),
-      "pohjakoulutus"      -> Option(pohjakoulutusList).filterNot(_.isEmpty),
-      "valintatieto"       -> Option(vastaanottotietoList).filterNot(_.isEmpty),
-      "vastaanottotieto"   -> Option(vastaanottotietoList).filterNot(_.isEmpty),
-      "harkinnanvaraisuus" -> Option(harkinnanvaraisuusList).filterNot(_.isEmpty),
-      "kaksoistutkinto"    -> maybeKaksoistutkintoKiinnostaa,
-      "urheilijatutkinto"  -> maybeUrheilijatutkintoKiinnostaa,
-      "soraTerveys"        -> maybeSoraTerveys,
-      "soraAiempi"         -> maybeSoraAiempi,
-      "markkinointilupa"   -> maybeMarkkinointilupa,
-      "julkaisulupa"       -> maybeJulkaisulupa
+      "haut"                 -> Option(hakuList).filterNot(_.isEmpty),
+      "oppilaitokset"        -> Option(oppilaitosList).filterNot(_.isEmpty),
+      "toimipisteet"         -> Option(toimipisteList).filterNot(_.isEmpty),
+      "hakukohteet"          -> Option(hakukohdeList).filterNot(_.isEmpty),
+      "pohjakoulutukset"     -> Option(pohjakoulutusList).filterNot(_.isEmpty),
+      "valintatiedot"        -> Option(vastaanottotietoList).filterNot(_.isEmpty),
+      "vastaanottotiedot"    -> Option(vastaanottotietoList).filterNot(_.isEmpty),
+      "harkinnanvaraisuudet" -> Option(harkinnanvaraisuusList).filterNot(_.isEmpty),
+      "kaksoistutkinto"      -> maybeKaksoistutkintoKiinnostaa,
+      "urheilijatutkinto"    -> maybeUrheilijatutkintoKiinnostaa,
+      "soraTerveys"          -> maybeSoraTerveys,
+      "soraAiempi"           -> maybeSoraAiempi,
+      "markkinointilupa"     -> maybeMarkkinointilupa,
+      "julkaisulupa"         -> maybeJulkaisulupa
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
     sendExcel(maybeWb, response, request, "hakijat", raporttiParams)
@@ -392,14 +402,14 @@ class Controller(
 
   @GetMapping(path = Array("kk-hakijat"))
   def kk_hakijat(
-      @RequestParam("haku") haku: java.util.Collection[String],
-      @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
-      @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
-      @RequestParam("hakukohde", required = false) hakukohde: java.util.Collection[String],
-      @RequestParam("valintatieto", required = false) valintatieto: java.util.Collection[String],
-      @RequestParam("vastaanottotieto", required = false) vastaanottotieto: java.util.Collection[String],
+      @RequestParam("haut") haut: java.util.Collection[String],
+      @RequestParam("oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
+      @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
+      @RequestParam("hakukohteet", required = false) hakukohteet: java.util.Collection[String],
+      @RequestParam("valintatiedot", required = false) valintatiedot: java.util.Collection[String],
+      @RequestParam("vastaanottotiedot", required = false) vastaanottotiedot: java.util.Collection[String],
       @RequestParam("hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
-      @RequestParam("kansalaisuus", required = false) kansalaisuus: java.util.Collection[String],
+      @RequestParam("kansalaisuusluokat", required = false) kansalaisuusluokat: java.util.Collection[String],
       @RequestParam("markkinointilupa", required = false) markkinointilupa: String,
       @RequestParam("nayta-yo-arvosanat", required = true) naytaYoArvosanat: String,
       @RequestParam("nayta-hetu", required = true) naytaHetu: String,
@@ -407,14 +417,14 @@ class Controller(
       request: HttpServletRequest,
       response: HttpServletResponse
   ): Unit = {
-    val hakuList             = getListParamAsScalaList(haku)
-    val oppilaitosList       = getListParamAsScalaList(oppilaitos)
-    val toimipisteList       = getListParamAsScalaList(toimipiste)
-    val hakukohdeList        = getListParamAsScalaList(hakukohde)
-    val valintatietoList     = getListParamAsScalaList(valintatieto)
-    val vastaanottotietoList = getListParamAsScalaList(vastaanottotieto)
+    val hakuList             = getListParamAsScalaList(haut)
+    val oppilaitosList       = getListParamAsScalaList(oppilaitokset)
+    val toimipisteList       = getListParamAsScalaList(toimipisteet)
+    val hakukohdeList        = getListParamAsScalaList(hakukohteet)
+    val valintatietoList     = getListParamAsScalaList(valintatiedot)
+    val vastaanottotietoList = getListParamAsScalaList(vastaanottotiedot)
     val hakukohderyhmaList   = getListParamAsScalaList(hakukohderyhmat)
-    val kansalaisuusList     = getListParamAsScalaList(kansalaisuus)
+    val kansalaisuusList     = getListParamAsScalaList(kansalaisuusluokat)
 
     val maybeMarkkinointilupa = strToOptionBoolean(markkinointilupa)
 
@@ -439,18 +449,18 @@ class Controller(
     }
 
     val raporttiParams = Map(
-      "haku"             -> Option(hakuList).filterNot(_.isEmpty),
-      "oppilaitos"       -> Option(oppilaitosList).filterNot(_.isEmpty),
-      "toimipiste"       -> Option(toimipisteList).filterNot(_.isEmpty),
-      "hakukohde"        -> Option(hakukohdeList).filterNot(_.isEmpty),
-      "valintatieto"     -> Option(vastaanottotietoList).filterNot(_.isEmpty),
-      "vastaanottotieto" -> Option(vastaanottotietoList).filterNot(_.isEmpty),
-      "hakukohderyhmat"  -> Option(vastaanottotietoList).filterNot(_.isEmpty),
-      "kansalaisuus"     -> Option(kansalaisuusList).filterNot(_.isEmpty),
-      "markkinointilupa" -> maybeMarkkinointilupa,
-      "naytaYoArvosanat" -> naytaYoArvosanat,
-      "naytaHetu"        -> naytaHetu,
-      "naytaPostiosoite" -> naytaPostiosoite
+      "haut"               -> Option(hakuList).filterNot(_.isEmpty),
+      "oppilaitokset"      -> Option(oppilaitosList).filterNot(_.isEmpty),
+      "toimipisteet"       -> Option(toimipisteList).filterNot(_.isEmpty),
+      "hakukohteet"        -> Option(hakukohdeList).filterNot(_.isEmpty),
+      "valintatiedot"      -> Option(vastaanottotietoList).filterNot(_.isEmpty),
+      "vastaanottotiedot"  -> Option(vastaanottotietoList).filterNot(_.isEmpty),
+      "hakukohderyhmat"    -> Option(vastaanottotietoList).filterNot(_.isEmpty),
+      "kansalaisuusluokat" -> Option(kansalaisuusList).filterNot(_.isEmpty),
+      "markkinointilupa"   -> maybeMarkkinointilupa,
+      "naytaYoArvosanat"   -> naytaYoArvosanat,
+      "naytaHetu"          -> naytaHetu,
+      "naytaPostiosoite"   -> naytaPostiosoite
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
     sendExcel(maybeWb, response, request, "kk-hakijat", raporttiParams)
@@ -458,19 +468,19 @@ class Controller(
 
   @GetMapping(path = Array("hakeneet-hyvaksytyt-vastaanottaneet"))
   def hakeneet_hyvaksytyt_vastaanottaneet(
-      @RequestParam("haku") haku: java.util.Collection[String],
+      @RequestParam("haut") haut: java.util.Collection[String],
       @RequestParam("tulostustapa") tulostustapa: String,
       @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
-      @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
-      @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
-      @RequestParam("hakukohde", required = false) hakukohde: java.util.Collection[String],
-      @RequestParam("koulutusala1", required = false) koulutusala1: java.util.Collection[String],
-      @RequestParam("koulutusala2", required = false) koulutusala2: java.util.Collection[String],
-      @RequestParam("koulutusala3", required = false) koulutusala3: java.util.Collection[String],
-      @RequestParam("opetuskieli", required = false) opetuskieli: java.util.Collection[String],
-      @RequestParam("maakunta", required = false) maakunta: java.util.Collection[String],
-      @RequestParam("kunta", required = false) kunta: java.util.Collection[String],
-      @RequestParam("harkinnanvaraisuus", required = false) harkinnanvaraisuudet: java.util.Collection[String],
+      @RequestParam("oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
+      @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
+      @RequestParam("hakukohteet", required = false) hakukohteet: java.util.Collection[String],
+      @RequestParam("koulutusalat1", required = false) koulutusalat1: java.util.Collection[String],
+      @RequestParam("koulutusalat2", required = false) koulutusalat2: java.util.Collection[String],
+      @RequestParam("koulutusalat3", required = false) koulutusalat3: java.util.Collection[String],
+      @RequestParam("opetuskielet", required = false) opetuskielet: java.util.Collection[String],
+      @RequestParam("maakunnat", required = false) maakunnat: java.util.Collection[String],
+      @RequestParam("kunnat", required = false) kunnat: java.util.Collection[String],
+      @RequestParam("harkinnanvaraisuudet", required = false) harkinnanvaraisuudet: java.util.Collection[String],
       @RequestParam("nayta-hakutoiveet", required = false) naytaHakutoiveet: String,
       @RequestParam("sukupuoli", required = false) sukupuoli: String,
       request: HttpServletRequest,
@@ -480,17 +490,17 @@ class Controller(
     val tulostustapaValinta            = Option(tulostustapa).getOrElse("hakukohteittain")
     val naytaHakutoiveetBool           = Option(naytaHakutoiveet).exists(_.toBoolean)
     val maybeSukupuoli: Option[String] = if (sukupuoli == "neutral") None else Option(sukupuoli)
-    val hakuList                       = getListParamAsScalaList(haku)
-    val oppilaitosList                 = getListParamAsScalaList(oppilaitos)
-    val toimipisteList                 = getListParamAsScalaList(toimipiste)
-    val hakukohdeList                  = getListParamAsScalaList(hakukohde)
-    val koulutusala1List               = getListParamAsScalaList(koulutusala1)
-    val koulutusala2List               = getListParamAsScalaList(koulutusala2)
-    val koulutusala3List               = getListParamAsScalaList(koulutusala3)
-    val maakuntaList                   = getListParamAsScalaList(maakunta).map("maakunta_" + _)
-    val kuntaList                      = getListParamAsScalaList(kunta).map("kunta_" + _)
+    val hakuList                       = getListParamAsScalaList(haut)
+    val oppilaitosList                 = getListParamAsScalaList(oppilaitokset)
+    val toimipisteList                 = getListParamAsScalaList(toimipisteet)
+    val hakukohdeList                  = getListParamAsScalaList(hakukohteet)
+    val koulutusala1List               = getListParamAsScalaList(koulutusalat1)
+    val koulutusala2List               = getListParamAsScalaList(koulutusalat2)
+    val koulutusala3List               = getListParamAsScalaList(koulutusalat3)
+    val maakuntaList                   = getListParamAsScalaList(maakunnat).map("maakunta_" + _)
+    val kuntaList                      = getListParamAsScalaList(kunnat).map("kunta_" + _)
     val opetuskieliList =
-      getListParamAsScalaList(opetuskieli).map("oppilaitoksenopetuskieli_" + _)
+      getListParamAsScalaList(opetuskielet).map("oppilaitoksenopetuskieli_" + _)
     val harkinnanvaraisuusList = getListParamAsScalaList(harkinnanvaraisuudet)
 
     val wb = hakeneetHyvaksytytVastaanottaneetService.get(
@@ -512,17 +522,17 @@ class Controller(
     )
 
     val raporttiParams = Map(
-      "haku"                 -> Option(hakuList).filterNot(_.isEmpty),
+      "haut"                 -> Option(hakuList).filterNot(_.isEmpty),
       "koulutustoimija"      -> maybeKoulutustoimija,
-      "oppilaitos"           -> Option(oppilaitosList).filterNot(_.isEmpty),
-      "toimipiste"           -> Option(toimipisteList).filterNot(_.isEmpty),
-      "hakukohde"            -> Option(hakukohdeList).filterNot(_.isEmpty),
-      "koulutusala1"         -> Option(koulutusala1).filterNot(_.isEmpty),
-      "koulutusala2"         -> Option(koulutusala2).filterNot(_.isEmpty),
-      "koulutusala3"         -> Option(koulutusala3).filterNot(_.isEmpty),
-      "opetuskieli"          -> Option(opetuskieliList).filterNot(_.isEmpty),
-      "maakunta"             -> Option(maakuntaList).filterNot(_.isEmpty),
-      "kunta"                -> Option(kuntaList).filterNot(_.isEmpty),
+      "oppilaitokset"        -> Option(oppilaitosList).filterNot(_.isEmpty),
+      "toimipisteet"         -> Option(toimipisteList).filterNot(_.isEmpty),
+      "hakukohteet"          -> Option(hakukohdeList).filterNot(_.isEmpty),
+      "koulutusalat1"        -> Option(koulutusalat1).filterNot(_.isEmpty),
+      "koulutusalat2"        -> Option(koulutusalat2).filterNot(_.isEmpty),
+      "koulutusalat3"        -> Option(koulutusalat3).filterNot(_.isEmpty),
+      "opetuskielet"         -> Option(opetuskieliList).filterNot(_.isEmpty),
+      "maakunnat"            -> Option(maakuntaList).filterNot(_.isEmpty),
+      "kunnat"               -> Option(kuntaList).filterNot(_.isEmpty),
       "harkinnanvaraisuudet" -> Option(harkinnanvaraisuusList).filterNot(_.isEmpty),
       "naytaHakutoiveet"     -> naytaHakutoiveetBool,
       "sukupuoli"            -> maybeSukupuoli
@@ -533,17 +543,17 @@ class Controller(
 
   @GetMapping(path = Array("kk-hakeneet-hyvaksytyt-vastaanottaneet"))
   def kk_hakeneet_hyvaksytyt_vastaanottaneet(
-      @RequestParam("haku") haku: java.util.Collection[String],
+      @RequestParam("haut") haut: java.util.Collection[String],
       @RequestParam("tulostustapa") tulostustapa: String,
       @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
-      @RequestParam("oppilaitos", required = false) oppilaitos: java.util.Collection[String],
-      @RequestParam("toimipiste", required = false) toimipiste: java.util.Collection[String],
-      @RequestParam("hakukohde", required = false) hakukohde: java.util.Collection[String],
+      @RequestParam("oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
+      @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
+      @RequestParam("hakukohteet", required = false) hakukohteet: java.util.Collection[String],
       @RequestParam("hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
-      @RequestParam("okm-ohjauksen-ala", required = false) okmOhjauksenAla: java.util.Collection[String],
-      @RequestParam("tutkinnon-taso", required = false) tutkinnonTaso: java.util.Collection[String],
-      @RequestParam("aidinkieli", required = false) aidinkieli: java.util.Collection[String],
-      @RequestParam("kansalaisuus", required = false) kansalaisuus: java.util.Collection[String],
+      @RequestParam("okm-ohjauksen-alat", required = false) okmOhjauksenAlat: java.util.Collection[String],
+      @RequestParam("tutkinnon-tasot", required = false) tutkinnonTasot: java.util.Collection[String],
+      @RequestParam("aidinkielet", required = false) aidinkielet: java.util.Collection[String],
+      @RequestParam("kansalaisuusluokat", required = false) kansalaisuusluokat: java.util.Collection[String],
       @RequestParam("sukupuoli", required = false) sukupuoli: String,
       @RequestParam("ensikertalainen", required = false) ensikertalainen: String,
       @RequestParam("nayta-hakutoiveet", required = false) naytaHakutoiveet: String,
@@ -555,15 +565,15 @@ class Controller(
     val naytaHakutoiveetBool                  = Option(naytaHakutoiveet).exists(_.toBoolean)
     val maybeSukupuoli: Option[String]        = if (sukupuoli == "neutral") None else Option(sukupuoli)
     val maybeEnsikertalainen: Option[Boolean] = strToOptionBoolean(ensikertalainen)
-    val hakuList                              = if (haku == null) List() else haku.asScala.toList
-    val oppilaitosList                        = if (oppilaitos == null) List() else oppilaitos.asScala.toList
-    val toimipisteList                        = if (toimipiste == null) List() else toimipiste.asScala.toList
-    val hakukohdeList                         = if (hakukohde == null) List() else hakukohde.asScala.toList
+    val hakuList                              = if (haut == null) List() else haut.asScala.toList
+    val oppilaitosList                        = if (oppilaitokset == null) List() else oppilaitokset.asScala.toList
+    val toimipisteList                        = if (toimipisteet == null) List() else toimipisteet.asScala.toList
+    val hakukohdeList                         = if (hakukohteet == null) List() else hakukohteet.asScala.toList
     val hakukohdeRyhmaList                    = if (hakukohderyhmat == null) List() else hakukohderyhmat.asScala.toList
-    val okmOhjauksenAlaList                   = if (okmOhjauksenAla == null) List() else okmOhjauksenAla.asScala.toList
-    val tutkinnonTasoList                     = if (tutkinnonTaso == null) List() else tutkinnonTaso.asScala.toList
-    val aidinkieliList                        = if (aidinkieli == null) List() else aidinkieli.asScala.toList
-    val kansalaisuusList                      = if (kansalaisuus == null) List() else kansalaisuus.asScala.toList
+    val okmOhjauksenAlaList                   = if (okmOhjauksenAlat == null) List() else okmOhjauksenAlat.asScala.toList
+    val tutkinnonTasoList                     = if (tutkinnonTasot == null) List() else tutkinnonTasot.asScala.toList
+    val aidinkieliList                        = if (aidinkielet == null) List() else aidinkielet.asScala.toList
+    val kansalaisuusList                      = if (kansalaisuusluokat == null) List() else kansalaisuusluokat.asScala.toList
 
     val wb = kkHakeneetHyvaksytytVastaanottaneetService.get(
       hakuList,
@@ -583,19 +593,19 @@ class Controller(
     )
 
     val raporttiParams = Map(
-      "haku"             -> Option(hakuList).filterNot(_.isEmpty),
-      "koulutustoimija"  -> maybeKoulutustoimija,
-      "oppilaitos"       -> Option(oppilaitosList).filterNot(_.isEmpty),
-      "toimipiste"       -> Option(toimipisteList).filterNot(_.isEmpty),
-      "hakukohde"        -> Option(hakukohdeList).filterNot(_.isEmpty),
-      "hakukohderyhma"   -> Option(hakukohdeRyhmaList).filterNot(_.isEmpty),
-      "okmOhjauksenAla"  -> Option(okmOhjauksenAlaList).filterNot(_.isEmpty),
-      "tutkinnonTaso"    -> Option(tutkinnonTasoList).filterNot(_.isEmpty),
-      "aidinkieli"       -> Option(aidinkieliList).filterNot(_.isEmpty),
-      "kansalaisuus"     -> Option(kansalaisuusList).filterNot(_.isEmpty),
-      "sukupuoli"        -> maybeSukupuoli,
-      "ensikertalainen"  -> maybeEnsikertalainen,
-      "naytaHakutoiveet" -> naytaHakutoiveetBool
+      "haut"               -> Option(hakuList).filterNot(_.isEmpty),
+      "koulutustoimija"    -> maybeKoulutustoimija,
+      "oppilaitokset"      -> Option(oppilaitosList).filterNot(_.isEmpty),
+      "toimipisteet"       -> Option(toimipisteList).filterNot(_.isEmpty),
+      "hakukohteet"        -> Option(hakukohdeList).filterNot(_.isEmpty),
+      "hakukohderyhmat"    -> Option(hakukohdeRyhmaList).filterNot(_.isEmpty),
+      "okmOhjauksenAlat"   -> Option(okmOhjauksenAlaList).filterNot(_.isEmpty),
+      "tutkinnonTasot"     -> Option(tutkinnonTasoList).filterNot(_.isEmpty),
+      "aidinkielet"        -> Option(aidinkieliList).filterNot(_.isEmpty),
+      "kansalaisuusluokat" -> Option(kansalaisuusList).filterNot(_.isEmpty),
+      "sukupuoli"          -> maybeSukupuoli,
+      "ensikertalainen"    -> maybeEnsikertalainen,
+      "naytaHakutoiveet"   -> naytaHakutoiveetBool
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
     sendExcel(Some(wb), response, request, "kk-hakeneet-hyvaksytyt-vastaanottaneet", raporttiParams)

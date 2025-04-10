@@ -14,32 +14,32 @@ export const useHakeneetSearchParams = () => {
   );
 
   const [selectedOpetuskielet, setSelectedOpetuskielet] = useQueryState(
-    'opetuskieli',
+    'opetuskielet',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
   const [selectedMaakunnat, setSelectedMaakunnat] = useQueryState(
-    'maakunta',
+    'maakunnat',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
   const [selectedKunnat, setSelectedKunnat] = useQueryState(
-    'kunta',
+    'kunnat',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
   const [selectedKoulutusalat1, setSelectedKoulutusalat1] = useQueryState(
-    'koulutusala1',
+    'koulutusalat1',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
   const [selectedKoulutusalat2, setSelectedKoulutusalat2] = useQueryState(
-    'koulutusala2',
+    'koulutusalat2',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
   const [selectedKoulutusalat3, setSelectedKoulutusalat3] = useQueryState(
-    'koulutusala3',
+    'koulutusalat3',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
@@ -53,13 +53,13 @@ export const useHakeneetSearchParams = () => {
     parseAsString.withOptions(DEFAULT_NUQS_OPTIONS).withDefault('neutral'),
   );
 
-  const [selectedTutkinnonTaso, setSelectedTutkinnonTaso] = useQueryState(
-    'tutkinnon-taso',
+  const [selectedTutkinnonTasot, setSelectedTutkinnonTasot] = useQueryState(
+    'tutkinnon-tasot',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
-  const [selectedAidinkieli, setSelectedAidinkieli] = useQueryState(
-    'aidinkieli',
+  const [selectedAidinkielet, setSelectedAidinkielet] = useQueryState(
+    'aidinkielet',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
@@ -69,7 +69,7 @@ export const useHakeneetSearchParams = () => {
   );
 
   const [selectedOkmOhjauksenAlat, setSelectedOkmOhjauksenAlat] = useQueryState(
-    'okm-ohjauksen-ala',
+    'okm-ohjauksen-alat',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
@@ -84,8 +84,8 @@ export const useHakeneetSearchParams = () => {
     setSelectedKoulutusalat3(null);
     setSelectedNaytaHakutoiveet(null);
     setSelectedSukupuoli(null);
-    setSelectedTutkinnonTaso(null);
-    setSelectedAidinkieli(null);
+    setSelectedTutkinnonTasot(null);
+    setSelectedAidinkielet(null);
     setSelectedEnsikertalainen(null);
     setSelectedOkmOhjauksenAlat(null);
   };
@@ -109,10 +109,10 @@ export const useHakeneetSearchParams = () => {
     setSelectedNaytaHakutoiveet,
     selectedSukupuoli,
     setSelectedSukupuoli,
-    selectedTutkinnonTaso,
-    setSelectedTutkinnonTaso,
-    selectedAidinkieli,
-    setSelectedAidinkieli,
+    selectedTutkinnonTasot,
+    setSelectedTutkinnonTasot,
+    selectedAidinkielet,
+    setSelectedAidinkielet,
     selectedEnsikertalainen,
     setSelectedEnsikertalainen,
     selectedOkmOhjauksenAlat,

@@ -15,15 +15,15 @@ export const Valintatieto = ({
     'VARALLA',
   ];
 
-  const { selectedValintatieto, setSelectedValintatieto } =
+  const { selectedValintatiedot, setSelectedValintatiedot } =
     useHakijatSearchParams();
 
   return (
     <OvaraCheckboxGroup
       id={'valintatieto'}
       options={valintatiedotSelection}
-      selectedValues={selectedValintatieto}
-      setSelectedValues={setSelectedValintatieto}
+      selectedValues={selectedValintatiedot}
+      setSelectedValues={setSelectedValintatiedot}
       t={t}
       {...props}
     />

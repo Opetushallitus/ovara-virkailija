@@ -2,7 +2,12 @@ package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.KorkeakouluKoulutusToteutusHakukohdeResult
 import fi.oph.ovara.backend.utils.RepositoryUtils
-import fi.oph.ovara.backend.utils.RepositoryUtils.{buildTutkinnonTasoFilters, makeEqualsQueryStrOfOptional, makeOptionalHakukohderyhmatSubSelectQueryStr, makeOptionalJarjestyspaikkaQuery}
+import fi.oph.ovara.backend.utils.RepositoryUtils.{
+  buildTutkinnonTasoFilters,
+  makeEqualsQueryStrOfOptional,
+  makeOptionalHakukohderyhmatSubSelectQueryStr,
+  makeOptionalJarjestyspaikkaQuery
+}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.{Component, Repository}
 import slick.dbio.Effect
@@ -17,7 +22,7 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
   def selectWithParams(
       selectedKayttooikeusOrganisaatiot: List[String],
       hakukohderyhmat: List[String],
-      haku: List[String],
+      haut: List[String],
       koulutuksenTila: Option[String],
       toteutuksenTila: Option[String],
       hakukohteenTila: Option[String],
@@ -29,9 +34,10 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
       makeOptionalJarjestyspaikkaQuery(selectedKayttooikeusOrganisaatiot)
 
     val optionalHakukohderyhmaSubSelect = makeOptionalHakukohderyhmatSubSelectQueryStr(hakukohderyhmat)
-    val tutkinnonTasoQueryStr = buildTutkinnonTasoFilters(tutkinnonTasot, "hk") match
+    val tutkinnonTasoQueryStr = buildTutkinnonTasoFilters(tutkinnonTasot, "hk") match {
       case Some(queryStr) => queryStr
-      case None => ""
+      case None           => ""
+    }
 
     val query = sql"""SELECT hk.organisaatio_nimi,
                  k.koulutus_nimi,
@@ -76,7 +82,7 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
             FROM pub.pub_dim_haku pdh
             ) AS haku_ja_hakuaika
           ON haku_ja_hakuaika.haku_oid = hk.haku_oid
-          WHERE h.haku_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(haku)})
+          WHERE h.haku_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(haut)})
           #$optionalJarjestyspaikkaQuery
           #$optionalHakukohderyhmaSubSelect
           #${makeEqualsQueryStrOfOptional("AND", "k.tila", koulutuksenTila)}

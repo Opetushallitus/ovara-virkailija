@@ -7,15 +7,15 @@ export const Kansalaisuus = () => {
   const { t } = useTranslate();
   const kansalaisuusSelection = ['1', '2', '3'];
 
-  const { selectedKansalaisuus, setSelectedKansalaisuus } =
+  const { selectedKansalaisuusluokat, setSelectedKansalaisuusluokat } =
     useCommonSearchParams();
 
   return (
     <OvaraCheckboxGroup
       id={'kansalaisuus'}
       options={kansalaisuusSelection}
-      selectedValues={selectedKansalaisuus}
-      setSelectedValues={setSelectedKansalaisuus}
+      selectedValues={selectedKansalaisuusluokat}
+      setSelectedValues={setSelectedKansalaisuusluokat}
       t={t}
       getTranslation={getKansalaisuusTranslation}
     />

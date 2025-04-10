@@ -20,11 +20,11 @@ const fetchHakukohteet = (
   selectedHakukohteet: Array<string> | null,
 ) => {
   const oppilaitoksetQueryStr = createQueryParamStr(
-    'oppilaitos',
+    'oppilaitokset',
     selectedOppilaitokset,
   );
   const toimipisteetQueryStr = createQueryParamStr(
-    'toimipiste',
+    'toimipisteet',
     selectedToimipisteet,
   );
   const hakukohderyhmatQueryStr = createQueryParamStr(
@@ -32,11 +32,11 @@ const fetchHakukohteet = (
     selectedHakukohderyhmat,
   );
   const hakukohteetQueryStr = createQueryParamStr(
-    'hakukohde',
+    'hakukohteet',
     selectedHakukohteet,
   );
 
-  const paramsStr = `?haku=${selectedHaut?.toString()}${oppilaitoksetQueryStr}${toimipisteetQueryStr}${hakukohderyhmatQueryStr}${hakukohteetQueryStr}`;
+  const paramsStr = `?haut=${selectedHaut?.toString()}${oppilaitoksetQueryStr}${toimipisteetQueryStr}${hakukohderyhmatQueryStr}${hakukohteetQueryStr}`;
 
   return doApiFetch('hakukohteet', {
     queryParams: paramsStr ?? null,

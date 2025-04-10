@@ -22,14 +22,14 @@ class KkHakijatService(
   val db: OvaraDatabase = null
 
   def get(
-      haku: List[String],
+      haut: List[String],
       oppilaitokset: List[String],
       toimipisteet: List[String],
       hakukohteet: List[String],
-      valintatieto: List[String],
-      vastaanottotieto: List[String],
+      valintatiedot: List[String],
+      vastaanottotiedot: List[String],
       hakukohderyhmat: List[String],
-      kansalaisuus: List[String],
+      kansalaisuusluokat: List[String],
       markkinointilupa: Option[Boolean],
       naytaYoArvosanat: Boolean,
       naytaHetu: Boolean,
@@ -59,13 +59,13 @@ class KkHakijatService(
     val query = kkHakijatRepository.selectWithParams(
       kayttooikeusOrganisaatiot = orgOidsForQuery,
       hakukohderyhmat = allowedHakukohderyhmat,
-      haut = haku,
+      haut = haut,
       oppilaitokset = oppilaitokset,
       toimipisteet = toimipisteet,
       hakukohteet = hakukohteet,
-      valintatieto = valintatieto,
-      vastaanottotieto = vastaanottotieto,
-      kansalaisuus = kansalaisuus,
+      valintatiedot = valintatiedot,
+      vastaanottotiedot = vastaanottotiedot,
+      kansalaisuusluokat = kansalaisuusluokat,
       markkinointilupa = markkinointilupa
     )
 

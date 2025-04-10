@@ -14,7 +14,7 @@ class KoulutuksetToteutuksetHakukohteetRepository extends Extractors {
 
   def selectWithParams(
       selectedKayttooikeusOrganisaatiot: List[String],
-      haku: List[String],
+      haut: List[String],
       koulutuksenTila: Option[String],
       toteutuksenTila: Option[String],
       hakukohteenTila: Option[String],
@@ -42,7 +42,7 @@ class KoulutuksetToteutuksetHakukohteetRepository extends Extractors {
           ON k.koulutus_oid = t.koulutus_oid
           JOIN pub.pub_dim_organisaatio o
           ON jarjestyspaikka_oid = o.organisaatio_oid
-          WHERE h.haku_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(haku)})
+          WHERE h.haku_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(haut)})
           AND (hk.jarjestyspaikka_oid IN (#$raportointiorganisaatiotStr))
           #${RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "k.tila", koulutuksenTila)}
           #${RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "t.tila", toteutuksenTila)}

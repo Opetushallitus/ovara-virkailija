@@ -1,6 +1,5 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.Kieli
 import fi.oph.ovara.backend.repository.{KorkeakouluKoulutuksetToteutuksetHakukohteetRepository, OvaraDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -20,7 +19,7 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetService(
   val db: OvaraDatabase = null
 
   def get(
-      haku: List[String],
+      haut: List[String],
       oppilaitokset: List[String],
       toimipisteet: List[String],
       hakukohderyhmat: List[String],
@@ -34,9 +33,9 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetService(
     val asiointikieli             = user.asiointikieli.getOrElse("fi")
     val authorities               = user.authorities
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
-    val isOphPaakayttaja = AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)
+    val isOphPaakayttaja          = AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)
 
-    val translations              = lokalisointiService.getOvaraTranslations(asiointikieli)
+    val translations = lokalisointiService.getOvaraTranslations(asiointikieli)
 
     val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
@@ -54,7 +53,7 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetService(
       korkeakouluKoulutuksetToteutuksetHakukohteetRepository.selectWithParams(
         orgOidsForQuery,
         allowedHakukohderyhmat,
-        haku,
+        haut,
         koulutuksenTila,
         toteutuksenTila,
         hakukohteenTila,

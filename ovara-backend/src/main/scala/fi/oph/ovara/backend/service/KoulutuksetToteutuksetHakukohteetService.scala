@@ -1,7 +1,6 @@
 package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.repository.{KoulutuksetToteutuksetHakukohteetRepository, OvaraDatabase}
-import fi.oph.ovara.backend.utils.Constants.*
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter, OrganisaatioUtils}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,7 +19,7 @@ class KoulutuksetToteutuksetHakukohteetService(
   val db: OvaraDatabase = null
 
   def get(
-      haku: List[String],
+      haut: List[String],
       koulutustoimija: Option[String],
       oppilaitokset: List[String],
       toimipisteet: List[String],
@@ -45,7 +44,7 @@ class KoulutuksetToteutuksetHakukohteetService(
     val queryResult = db.run(
       koulutuksetToteutuksetHakukohteetRepository.selectWithParams(
         orgOidsForQuery,
-        haku,
+        haut,
         koulutuksenTila,
         toteutuksenTila,
         hakukohteenTila,
