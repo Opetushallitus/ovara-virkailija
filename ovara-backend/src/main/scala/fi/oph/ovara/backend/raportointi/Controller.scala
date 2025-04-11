@@ -4,8 +4,15 @@ import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, Ser
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.UserResponse
 import fi.oph.ovara.backend.service.*
-import fi.oph.ovara.backend.utils.AuditLog
-import fi.oph.ovara.backend.utils.AuditOperation.KoulutuksetToteutuksetHakukohteet
+import fi.oph.ovara.backend.utils.AuditOperation.{
+  HakeneetHyvaksytytVastaanottaneet,
+  KkHakeneetHyvaksytytVastaanottaneet,
+  KkHakijat,
+  KorkeakouluKoulutuksetToteutuksetHakukohteet,
+  KoulutuksetToteutuksetHakukohteet,
+  ToisenAsteenHakijat
+}
+import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.apache.poi.ss.usermodel.Workbook
 import org.slf4j.{Logger, LoggerFactory}
@@ -33,7 +40,7 @@ class Controller(
     userService: UserService,
     val auditLog: AuditLog = AuditLog
 ) {
-  val LOG: Logger = LoggerFactory.getLogger(classOf[Controller]);
+  val LOG: Logger = LoggerFactory.getLogger(classOf[Controller])
 
   @Value("${ovara.ui.url}")
   val ovaraUiUrl: String = null
@@ -192,10 +199,11 @@ class Controller(
       response: HttpServletResponse,
       request: HttpServletRequest,
       id: String,
-      raporttiParamsForLogs: Map[String, Any]
+      raporttiParamsForLogs: Map[String, Any],
+      auditOperation: AuditOperation
   ): Unit = {
     try {
-      auditLog.logWithParams(request, KoulutuksetToteutuksetHakukohteet, raporttiParamsForLogs)
+      auditLog.logWithParams(request, auditOperation, raporttiParamsForLogs)
       wb match {
         case Some(wb) =>
           LOG.info(s"Sending excel in the response")
@@ -270,7 +278,14 @@ class Controller(
       "valintakoe"      -> maybeValintakoe
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
-    sendExcel(Some(wb), response, request, "koulutukset-toteutukset-hakukohteet", raporttiParams)
+    sendExcel(
+      Some(wb),
+      response,
+      request,
+      "koulutukset-toteutukset-hakukohteet",
+      raporttiParams,
+      KoulutuksetToteutuksetHakukohteet
+    )
   }
 
   @GetMapping(path = Array("kk-koulutukset-toteutukset-hakukohteet"))
@@ -320,7 +335,14 @@ class Controller(
       "tutkinnonTasot"  -> Option(tutkinnonTasoList).filterNot(_.isEmpty)
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
-    sendExcel(Some(wb), response, request, "kk-koulutukset-toteutukset-hakukohteet", raporttiParams)
+    sendExcel(
+      Some(wb),
+      response,
+      request,
+      "kk-koulutukset-toteutukset-hakukohteet",
+      raporttiParams,
+      KorkeakouluKoulutuksetToteutuksetHakukohteet
+    )
   }
 
   @GetMapping(path = Array("hakijat"))
@@ -397,7 +419,7 @@ class Controller(
       "julkaisulupa"         -> maybeJulkaisulupa
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
-    sendExcel(maybeWb, response, request, "hakijat", raporttiParams)
+    sendExcel(maybeWb, response, request, "hakijat", raporttiParams, ToisenAsteenHakijat)
   }
 
   @GetMapping(path = Array("kk-hakijat"))
@@ -463,7 +485,7 @@ class Controller(
       "naytaPostiosoite"   -> naytaPostiosoite
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
-    sendExcel(maybeWb, response, request, "kk-hakijat", raporttiParams)
+    sendExcel(maybeWb, response, request, "kk-hakijat", raporttiParams, KkHakijat)
   }
 
   @GetMapping(path = Array("hakeneet-hyvaksytyt-vastaanottaneet"))
@@ -538,7 +560,14 @@ class Controller(
       "sukupuoli"            -> maybeSukupuoli
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
-    sendExcel(Some(wb), response, request, "hakeneet-hyvaksytyt-vastaanottaneet", raporttiParams)
+    sendExcel(
+      Some(wb),
+      response,
+      request,
+      "hakeneet-hyvaksytyt-vastaanottaneet",
+      raporttiParams,
+      HakeneetHyvaksytytVastaanottaneet
+    )
   }
 
   @GetMapping(path = Array("kk-hakeneet-hyvaksytyt-vastaanottaneet"))
@@ -608,7 +637,14 @@ class Controller(
       "naytaHakutoiveet"   -> naytaHakutoiveetBool
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
-    sendExcel(Some(wb), response, request, "kk-hakeneet-hyvaksytyt-vastaanottaneet", raporttiParams)
+    sendExcel(
+      Some(wb),
+      response,
+      request,
+      "kk-hakeneet-hyvaksytyt-vastaanottaneet",
+      raporttiParams,
+      KkHakeneetHyvaksytytVastaanottaneet
+    )
   }
 
 }

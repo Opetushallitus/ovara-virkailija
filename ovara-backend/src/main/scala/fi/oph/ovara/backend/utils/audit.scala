@@ -39,7 +39,7 @@ class AuditLog(val logger: Logger) {
     }
   }
 
-  val mapper = {
+  val mapper: ObjectMapper = {
     // luodaan objectmapper jonka pitäisi pystyä serialisoimaan "kaikki mahdollinen"
     val mapper = new ObjectMapper()
     mapper.registerModule(DefaultScalaModule)
@@ -48,7 +48,7 @@ class AuditLog(val logger: Logger) {
     mapper
   }
 
-  def toJson(value: Any): String = {
+  private def toJson(value: Any): String = {
     try {
       mapper.writeValueAsString(value)
     } catch {
@@ -59,16 +59,16 @@ class AuditLog(val logger: Logger) {
   }
 
   def getUser(request: HttpServletRequest): User = {
-    val userOid = getCurrentPersonOid()
+    val userOid = getCurrentPersonOid
     val ip = getInetAddress(request)
-    new User(userOid, ip, request.getSession(false).getId(), Option(request.getHeader("User-Agent")).getOrElse("Tuntematon user agent"))
+    new User(userOid, ip, request.getSession(false).getId, Option(request.getHeader("User-Agent")).getOrElse("Tuntematon user agent"))
   }
 
-  def getCurrentPersonOid(): Oid = {
-    val authentication: Authentication = SecurityContextHolder.getContext().getAuthentication()
+  private def getCurrentPersonOid: Oid = {
+    val authentication: Authentication = SecurityContextHolder.getContext.getAuthentication
     if (authentication != null) {
       try {
-        new Oid(authentication.getName())
+        new Oid(authentication.getName)
       } catch {
         case e: Exception =>
           errorLogger.error(s"Käyttäjän oidin luonti epäonnistui: ${authentication.getName}")
@@ -79,7 +79,7 @@ class AuditLog(val logger: Logger) {
     }
   }
 
-  def getInetAddress(request: HttpServletRequest): InetAddress = {
+  private def getInetAddress(request: HttpServletRequest): InetAddress = {
     InetAddress.getByName(HttpServletRequestUtils.getRemoteAddress(request))
   }
 }
@@ -95,6 +95,26 @@ object AuditOperation {
 
   case object KoulutuksetToteutuksetHakukohteet extends AuditOperation {
     val name = "KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET"
+  }
+
+  case object KorkeakouluKoulutuksetToteutuksetHakukohteet extends AuditOperation {
+    val name = "KK-KOULUTUKSET_TOTEUTUKSET_HAKUKOHTEET"
+  }
+
+  case object ToisenAsteenHakijat extends AuditOperation {
+    val name = "TOISEN-ASTEEN-HAKIJAT"
+  }
+
+  case object KkHakijat extends AuditOperation {
+    val name = "KK-HAKIJAT"
+  }
+
+  case object HakeneetHyvaksytytVastaanottaneet extends AuditOperation {
+    val name = "HAKENEET-HYVAKSYTYT-VASTAANOTTANEET"
+  }
+
+  case object KkHakeneetHyvaksytytVastaanottaneet extends AuditOperation {
+    val name = "KK-HAKENEET-HYVAKSYTYT-VASTAANOTTANEET"
   }
 }
 
