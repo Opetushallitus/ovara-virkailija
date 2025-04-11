@@ -23,7 +23,6 @@ import {
   OppilaitosValikko,
   ToimipisteValikko,
 } from '@/app/components/form/organisaatiovalikot';
-import { LanguageCode } from '@/app/lib/types/common';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
 import { Hakukohderyhma } from '@/app/components/form/hakukohderyhma';
 import { KkTutkinnonTaso } from '@/app/components/form/kk-tutkinnon-taso';
@@ -33,7 +32,6 @@ import { Tulostustapa } from '@/app/components/form/tulostustapa';
 export default function KoulutuksetToteutuksetHakukohteet() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
-  const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const hasKkRights = hasOvaraKkRole(user?.authorities);
   const {
     selectedAlkamiskaudet,
@@ -70,16 +68,8 @@ export default function KoulutuksetToteutuksetHakukohteet() {
           <OphTypography>
             {t('raportti.vahintaan-yksi-vaihtoehdoista')}
           </OphTypography>
-          <OppilaitosValikko
-            locale={locale}
-            organisaatiot={organisaatiot}
-            t={t}
-          />
-          <ToimipisteValikko
-            locale={locale}
-            organisaatiot={organisaatiot}
-            t={t}
-          />
+          <OppilaitosValikko organisaatiot={organisaatiot} />
+          <ToimipisteValikko organisaatiot={organisaatiot} />
           <Hakukohderyhma />
           <Divider />
           <Tulostustapa

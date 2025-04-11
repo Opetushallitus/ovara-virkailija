@@ -7,7 +7,6 @@ import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { hasOvaraKkRole, isNullishOrEmpty } from '@/app/lib/utils';
 import { useSearchParams } from 'next/navigation';
-import { LanguageCode } from '@/app/lib/types/common';
 
 import { KoulutuksenAlkaminen } from '@/app/components/form/koulutuksen-alkaminen';
 import { Haku } from '@/app/components/form/haku';
@@ -33,7 +32,6 @@ export default function KkHakutilasto() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const hasKkRights = hasOvaraKkRole(user?.authorities);
-  const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const queryParams = useSearchParams();
 
   const { selectedAlkamiskaudet, selectedHaut } = useCommonSearchParams();
@@ -71,11 +69,7 @@ export default function KkHakutilasto() {
           <Tulostustapa tulostustavat={tulostustavat} />
           <OrganisaatioValikot />
           <Hakukohderyhma />
-          <Hakukohde
-            locale={locale}
-            t={t}
-            fetchEnabled={hakukohdeFetchEnabled}
-          />
+          <Hakukohde fetchEnabled={hakukohdeFetchEnabled} />
           <OkmOhjauksenAlat />
           <Divider />
           <KkTutkinnonTaso />

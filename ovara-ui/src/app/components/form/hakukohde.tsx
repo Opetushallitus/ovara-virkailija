@@ -1,3 +1,5 @@
+import { useTranslate } from '@tolgee/react';
+import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { MultiComboBox } from '@/app/components/form/multicombobox';
 import { useFetchHakukohteet } from '@/app/hooks/useFetchHakukohteet';
 import { Kielistetty, LanguageCode } from '@/app/lib/types/common';
@@ -10,16 +12,16 @@ type Hakukohde = {
 };
 
 export const Hakukohde = ({
-  locale,
-  t,
   fetchEnabled,
   ...props
 }: {
-  locale: LanguageCode;
-  t: (key: string) => string;
   fetchEnabled: boolean;
   [key: string]: unknown;
 }) => {
+  const { t } = useTranslate();
+  const user = useAuthorizedUser();
+  const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
+
   const { selectedHakukohteet, setSelectedHakukohteet } =
     useCommonSearchParams();
 

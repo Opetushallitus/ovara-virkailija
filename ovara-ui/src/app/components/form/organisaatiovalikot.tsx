@@ -123,14 +123,14 @@ export const OrganisaatioValikot = () => {
 };
 
 export const OppilaitosValikko = ({
-  locale,
   organisaatiot,
-  t,
 }: {
-  locale: string;
   organisaatiot: Array<OrganisaatioHierarkia> | null;
-  t: (key: string) => string;
 }) => {
+  const { t } = useTranslate();
+  const user = useAuthorizedUser();
+  const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
+
   const {
     selectedOppilaitokset,
     setSelectedOppilaitokset,
@@ -165,14 +165,14 @@ export const OppilaitosValikko = ({
 };
 
 export const ToimipisteValikko = ({
-  locale,
   organisaatiot,
-  t,
 }: {
-  locale: string;
   organisaatiot: Array<OrganisaatioHierarkia> | null;
-  t: (key: string) => string;
 }) => {
+  const { t } = useTranslate();
+  const user = useAuthorizedUser();
+  const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
+
   const {
     selectedToimipisteet,
     setSelectedToimipisteet,

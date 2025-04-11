@@ -6,7 +6,6 @@ import { Box, Divider } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { hasOvaraKkRole, isNullishOrEmpty } from '@/app/lib/utils';
-import { LanguageCode } from '@/app/lib/types/common';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
 
 import { KoulutuksenAlkaminen } from '@/app/components/form/koulutuksen-alkaminen';
@@ -38,7 +37,6 @@ export default function KkHakijat() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const hasKkRights = hasOvaraKkRole(user?.authorities);
-  const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const { data: organisaatiot } = useFetchOrganisaatiohierarkiat();
 
   const {
@@ -89,32 +87,19 @@ export default function KkHakijat() {
             {t('raportti.vahintaan-yksi-vaihtoehdoista')}
           </OphTypography>
           <Box>
-            <OppilaitosValikko
-              locale={locale}
-              organisaatiot={organisaatiot}
-              t={t}
-            />
-            <ToimipisteValikko
-              locale={locale}
-              organisaatiot={organisaatiot}
-              t={t}
-            />
+            <OppilaitosValikko organisaatiot={organisaatiot} />
+            <ToimipisteValikko organisaatiot={organisaatiot} />
             <Hakukohderyhma />
           </Box>
           <Divider />
-          <Hakukohde
-            locale={locale}
-            t={t}
-            fetchEnabled={fetchEnabled}
-            sx={{ paddingTop: 0 }}
-          />
-          <Valintatieto t={t} />
-          <Vastaanottotieto t={t} />
+          <Hakukohde fetchEnabled={fetchEnabled} sx={{ paddingTop: 0 }} />
+          <Valintatieto />
+          <Vastaanottotieto />
           <Kansalaisuus />
-          <Markkinointilupa t={t} />
-          <NaytaYoArvosanat t={t} />
-          <NaytaHetu t={t} />
-          <NaytaPostiosoite t={t} />
+          <Markkinointilupa />
+          <NaytaYoArvosanat />
+          <NaytaHetu />
+          <NaytaPostiosoite />
           <FormButtons
             disabled={!fetchEnabled}
             downloadExcel={() =>

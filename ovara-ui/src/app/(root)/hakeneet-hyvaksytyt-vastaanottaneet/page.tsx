@@ -7,7 +7,6 @@ import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { hasOvaraToinenAsteRole, isNullishOrEmpty } from '@/app/lib/utils';
 import { useSearchParams } from 'next/navigation';
-import { LanguageCode } from '@/app/lib/types/common';
 
 import { KoulutuksenAlkaminen } from '@/app/components/form/koulutuksen-alkaminen';
 import { Haku } from '@/app/components/form/haku';
@@ -31,7 +30,6 @@ export default function Hakutilasto() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const hasToinenAsteRights = hasOvaraToinenAsteRole(user?.authorities);
-  const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const queryParams = useSearchParams();
 
   const { selectedAlkamiskaudet, selectedHaut } = useCommonSearchParams();
@@ -65,15 +63,11 @@ export default function Hakutilasto() {
           <Haku haunTyyppi={'toinen_aste'} />
           <Tulostustapa tulostustavat={tulostustavat} />
           <OrganisaatioValikot />
-          <Hakukohde
-            locale={locale}
-            t={t}
-            fetchEnabled={hakukohdeFetchEnabled}
-          />
+          <Hakukohde fetchEnabled={hakukohdeFetchEnabled} />
           <Opetuskieli />
           <KoulutusalaValikot />
           <MaakuntaKuntaValikot />
-          <Harkinnanvaraisuus t={t} />
+          <Harkinnanvaraisuus />
           <Divider />
           <Sukupuoli />
           <NaytaHakutoiveet />
