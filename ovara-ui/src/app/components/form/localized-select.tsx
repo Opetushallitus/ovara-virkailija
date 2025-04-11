@@ -20,6 +20,7 @@ export const LocalizedSelect = (props: LocalizedSelectProps) => {
 
   return (
     <OvaraFormControl
+      sx={{ padding: '5px' }}
       label={required ? `${label} *` : label}
       renderInput={() => (
         <OphSelect

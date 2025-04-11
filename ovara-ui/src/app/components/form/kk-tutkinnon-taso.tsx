@@ -6,15 +6,15 @@ export const KkTutkinnonTaso = () => {
   const { t } = useTranslate();
   const tasot = ['alempi-ja-ylempi', 'alempi', 'ylempi'];
 
-  const { selectedTutkinnonTaso, setSelectedTutkinnonTaso } =
+  const { selectedTutkinnonTasot, setSelectedTutkinnonTasot } =
     useHakeneetSearchParams();
 
   return (
     <OvaraCheckboxGroup
       id={'kk-tutkinnon-taso'}
       options={tasot}
-      selectedValues={selectedTutkinnonTaso}
-      setSelectedValues={setSelectedTutkinnonTaso}
+      selectedValues={selectedTutkinnonTasot}
+      setSelectedValues={setSelectedTutkinnonTasot}
       t={t}
     />
   );

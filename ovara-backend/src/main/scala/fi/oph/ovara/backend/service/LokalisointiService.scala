@@ -8,13 +8,14 @@ import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.{CacheEvict, Cacheable}
 import org.springframework.context.annotation.Bean
 import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.{Component, Service}
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.util.retry.Retry
 
 import java.time.Duration
 
 @Component
+@Service
 class LokalisointiService(userService: UserService, webClientBuilder: WebClient.Builder) {
   implicit val formats: Formats = DefaultFormats
 

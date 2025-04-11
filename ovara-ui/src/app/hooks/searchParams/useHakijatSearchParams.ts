@@ -9,14 +9,15 @@ import { DEFAULT_NUQS_OPTIONS } from '@/app/lib/constants';
 
 export const useHakijatSearchParams = () => {
   const [selectedPohjakoulutukset, setSelectedPohjakoulutukset] = useQueryState(
-    'pohjakoulutus',
+    'pohjakoulutukset',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
-  const [selectedVastaanottotieto, setSelectedVastaanottotieto] = useQueryState(
-    'vastaanottotieto',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedVastaanottotiedot, setSelectedVastaanottotiedot] =
+    useQueryState(
+      'vastaanottotiedot',
+      parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+    );
 
   const [selectedMarkkinointilupa, setSelectedMarkkinointilupa] = useQueryState(
     'markkinointilupa',
@@ -28,8 +29,8 @@ export const useHakijatSearchParams = () => {
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
-  const [selectedValintatieto, setSelectedValintatieto] = useQueryState(
-    'valintatieto',
+  const [selectedValintatiedot, setSelectedValintatiedot] = useQueryState(
+    'valintatiedot',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
@@ -72,10 +73,10 @@ export const useHakijatSearchParams = () => {
   const emptyAllHakijatParams = () => {
     console.debug('EMPTY ALL HAKIJAT PARAMS');
     setSelectedPohjakoulutukset(null);
-    setSelectedVastaanottotieto(null);
+    setSelectedVastaanottotiedot(null);
     setSelectedMarkkinointilupa(null);
     setSelectedJulkaisulupa(null);
-    setSelectedValintatieto(null);
+    setSelectedValintatiedot(null);
     setSelectedKaksoistutkinto(null);
     setSelectedUrheilijatutkinto(null);
     setSelectedSoraTerveys(null);
@@ -88,14 +89,14 @@ export const useHakijatSearchParams = () => {
   return {
     selectedPohjakoulutukset,
     setSelectedPohjakoulutukset,
-    selectedVastaanottotieto,
-    setSelectedVastaanottotieto,
+    selectedVastaanottotiedot,
+    setSelectedVastaanottotiedot,
     selectedMarkkinointilupa,
     setSelectedMarkkinointilupa,
     selectedJulkaisulupa,
     setSelectedJulkaisulupa,
-    selectedValintatieto,
-    setSelectedValintatieto,
+    selectedValintatiedot,
+    setSelectedValintatiedot,
     selectedKaksoistutkinto,
     setSelectedKaksoistutkinto,
     selectedUrheilijatutkinto,

@@ -40,11 +40,41 @@ export const THEME_OVERRIDES: ThemeOptions = {
       defaultProps: {
         loadingPosition: 'start',
       },
+      styleOverrides: {
+        root: {
+          minHeight: '40px',
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          minHeight: '40px',
+        },
+      },
     },
     MuiDivider: {
       styleOverrides: {
         root: ({ theme }) => ({
-          margin: theme.spacing(3, 0, 3, 0),
+          margin: theme.spacing(2.5, 0),
+        }),
+      },
+    },
+    MuiRadio: {
+      styleOverrides: {
+        root: {
+          paddingLeft: '0',
+          paddingRight: '0',
+        },
+      },
+    },
+    MuiFormControlLabel: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          marginLeft: 0,
+          '&.MuiFormControlLabel-labelPlacementEnd': {
+            marginRight: theme.spacing(2.5),
+          },
         }),
       },
     },
@@ -52,6 +82,11 @@ export const THEME_OVERRIDES: ThemeOptions = {
       styleOverrides: {
         root: {
           padding: '5px', // lisätään vähän paddingia jotta on tilaa focusreunukselle
+          '& .MuiOutlinedInput-root.MuiInputBase-sizeSmall': {
+            paddingTop: '5px',
+            paddingBottom: '5px',
+            paddingLeft: '5px',
+          },
         },
       },
     },

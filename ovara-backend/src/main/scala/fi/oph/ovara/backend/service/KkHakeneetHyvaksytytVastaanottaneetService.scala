@@ -22,7 +22,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
   val db: OvaraDatabase = null
 
   def get(
-           haku: List[String],
+           haut: List[String],
            tulostustapa: String,
            koulutustoimija: Option[String],
            oppilaitokset: List[String],
@@ -61,7 +61,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       case "hauittain" =>
         val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHauittainWithParams(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-          haut = haku,
+          haut = haut,
           hakukohteet = hakukohteet,
           hakukohderyhmat = hakukohderyhmarajaus,
           okmOhjauksenAlat = okmOhjauksenAlat,
@@ -75,7 +75,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       case "hakukohteittain" =>
         val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-          haut = haku,
+          haut = haut,
           hakukohteet = hakukohteet,
           hakukohderyhmat = hakukohderyhmarajaus,
           okmOhjauksenAlat = okmOhjauksenAlat,
@@ -89,7 +89,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       case "toimipisteittain" =>
         val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-          haut = haku,
+          haut = haut,
           hakukohteet = hakukohteet,
           hakukohderyhmat = hakukohderyhmarajaus,
           okmOhjauksenAlat = okmOhjauksenAlat,
@@ -103,7 +103,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       case "okm-ohjauksen-aloittain" =>
         val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectOkmOhjauksenAloittainWithParams(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-          haut = haku,
+          haut = haut,
           hakukohteet = hakukohteet,
           hakukohderyhmat = hakukohderyhmarajaus,
           okmOhjauksenAlat = okmOhjauksenAlat,
@@ -117,7 +117,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       case "kansalaisuuksittain" =>
         val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectKansalaisuuksittainWithParams(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-          haut = haku,
+          haut = haut,
           hakukohteet = hakukohteet,
           hakukohderyhmat = hakukohderyhmarajaus,
           okmOhjauksenAlat = okmOhjauksenAlat,
@@ -131,7 +131,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       case "hakukohderyhmittain" =>
         val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakukohderyhmittainWithParams(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-          haut = haku,
+          haut = haut,
           hakukohteet = hakukohteet,
           hakukohderyhmat = hakukohderyhmarajaus,
           okmOhjauksenAlat = okmOhjauksenAlat,
@@ -145,7 +145,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       case _ =>
         val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-          haut = haku,
+          haut = haut,
           hakukohteet = hakukohteet,
           hakukohderyhmat = hakukohderyhmarajaus,
           okmOhjauksenAlat = okmOhjauksenAlat,
@@ -161,7 +161,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
     val vainEnsikertalaiset = ensikertalainen.getOrElse(false)
     val sumQuery = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams(
       selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-      haut = haku,
+      haut = haut,
       hakukohteet = hakukohteet,
       hakukohderyhmat = hakukohderyhmarajaus,
       okmOhjauksenAlat = okmOhjauksenAlat,
@@ -174,7 +174,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
 
     val ensikertalaisetSumQuery = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams(
       selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-      haut = haku,
+      haut = haut,
       hakukohteet = hakukohteet,
       hakukohderyhmat = hakukohderyhmarajaus,
       okmOhjauksenAlat = okmOhjauksenAlat,
@@ -187,7 +187,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
 
     val maksuvelvollisetSumQuery = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams(
       selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-      haut = haku,
+      haut = haut,
       hakukohteet = hakukohteet,
       hakukohderyhmat = hakukohderyhmarajaus,
       okmOhjauksenAlat = okmOhjauksenAlat,

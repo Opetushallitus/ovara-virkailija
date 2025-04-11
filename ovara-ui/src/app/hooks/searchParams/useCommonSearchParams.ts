@@ -9,13 +9,18 @@ import { DEFAULT_NUQS_OPTIONS } from '@/app/lib/constants';
 
 export const useCommonSearchParams = () => {
   const [selectedAlkamiskaudet, setSelectedAlkamiskaudet] = useQueryState(
-    'alkamiskausi',
+    'alkamiskaudet',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
   const [selectedHaut, setSelectedHaut] = useQueryState(
-    'haku',
+    'haut',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+  );
+
+  const [haunTyyppi, setHauntyyppi] = useQueryState(
+    'haun_tyyppi',
+    DEFAULT_NUQS_OPTIONS,
   );
 
   const [selectedKoulutustoimija, setSelectedKoulutustoimija] = useQueryState(
@@ -24,12 +29,12 @@ export const useCommonSearchParams = () => {
   );
 
   const [selectedOppilaitokset, setSelectedOppilaitokset] = useQueryState(
-    'oppilaitos',
+    'oppilaitokset',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
   const [selectedToimipisteet, setSelectedToimipisteet] = useQueryState(
-    'toimipiste',
+    'toimipisteet',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
@@ -54,20 +59,21 @@ export const useCommonSearchParams = () => {
   );
 
   const [selectedHakukohteet, setSelectedHakukohteet] = useQueryState(
-    'hakukohde',
+    'hakukohteet',
     parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
-  const [selectedHarkinnanvaraisuus, setSelectedHarkinnanvaraisuus] =
+  const [selectedHarkinnanvaraisuudet, setSelectedHarkinnanvaraisuudet] =
     useQueryState(
-      'harkinnanvaraisuus',
+      'harkinnanvaraisuudet',
       parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
     );
 
-  const [selectedKansalaisuus, setSelectedKansalaisuus] = useQueryState(
-    'kansalaisuus',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedKansalaisuusluokat, setSelectedKansalaisuusluokat] =
+    useQueryState(
+      'kansalaisuusluokat',
+      parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+    );
 
   const [selectedHakukohderyhmat, setSelectedHakukohderyhmat] = useQueryState(
     'hakukohderyhmat',
@@ -85,8 +91,8 @@ export const useCommonSearchParams = () => {
     setSelectedHakukohteenTila(null);
     setSelectedValintakoe(null);
     setSelectedHakukohteet(null);
-    setSelectedHarkinnanvaraisuus(null);
-    setSelectedKansalaisuus(null);
+    setSelectedHarkinnanvaraisuudet(null);
+    setSelectedKansalaisuusluokat(null);
     setSelectedHakukohderyhmat(null);
   };
 
@@ -111,12 +117,14 @@ export const useCommonSearchParams = () => {
     setSelectedValintakoe,
     selectedHakukohteet,
     setSelectedHakukohteet,
-    selectedHarkinnanvaraisuus,
-    setSelectedHarkinnanvaraisuus,
-    selectedKansalaisuus,
-    setSelectedKansalaisuus,
+    selectedHarkinnanvaraisuudet,
+    setSelectedHarkinnanvaraisuudet,
+    selectedKansalaisuusluokat,
+    setSelectedKansalaisuusluokat,
     selectedHakukohderyhmat,
     setSelectedHakukohderyhmat,
     emptyAllCommonParams,
+    haunTyyppi,
+    setHauntyyppi,
   };
 };

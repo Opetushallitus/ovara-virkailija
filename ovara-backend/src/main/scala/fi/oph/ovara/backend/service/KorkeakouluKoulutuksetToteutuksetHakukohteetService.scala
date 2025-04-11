@@ -1,15 +1,15 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.repository.{KoulutuksetToteutuksetHakukohteetRepository, OvaraDatabase}
-import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter, OrganisaatioUtils}
+import fi.oph.ovara.backend.repository.{KorkeakouluKoulutuksetToteutuksetHakukohteetRepository, OvaraDatabase}
+import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.{Component, Service}
 
 @Component
 @Service
-class KoulutuksetToteutuksetHakukohteetService(
-    koulutuksetToteutuksetHakukohteetRepository: KoulutuksetToteutuksetHakukohteetRepository,
+class KorkeakouluKoulutuksetToteutuksetHakukohteetService(
+    korkeakouluKoulutuksetToteutuksetHakukohteetRepository: KorkeakouluKoulutuksetToteutuksetHakukohteetRepository,
     userService: UserService,
     commonService: CommonService,
     lokalisointiService: LokalisointiService
@@ -20,52 +20,53 @@ class KoulutuksetToteutuksetHakukohteetService(
 
   def get(
       haut: List[String],
-      koulutustoimija: Option[String],
       oppilaitokset: List[String],
       toimipisteet: List[String],
+      hakukohderyhmat: List[String],
       koulutuksenTila: Option[String],
       toteutuksenTila: Option[String],
       hakukohteenTila: Option[String],
-      valintakoe: Option[Boolean]
+      tutkinnonTasot: List[String],
+      tulostustapa: String
   ): XSSFWorkbook = {
     val user                      = userService.getEnrichedUserDetails
     val asiointikieli             = user.asiointikieli.getOrElse("fi")
     val authorities               = user.authorities
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
-    val translations              = lokalisointiService.getOvaraTranslations(asiointikieli)
+    val isOphPaakayttaja          = AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)
 
-    val (orgOidsForQuery, hierarkiat, raporttityyppi) = commonService.getAllowedOrgsFromOrgSelection(
+    val translations = lokalisointiService.getOvaraTranslations(asiointikieli)
+
+    val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
-      koulutustoimijaOid = koulutustoimija,
       toimipisteOids = toimipisteet,
       oppilaitosOids = oppilaitokset
     )
 
+    val allowedHakukohderyhmat = if (isOphPaakayttaja) {
+      hakukohderyhmat
+    } else {
+      kayttooikeusOrganisaatiot intersect hakukohderyhmat
+    }
+
     val queryResult = db.run(
-      koulutuksetToteutuksetHakukohteetRepository.selectWithParams(
+      korkeakouluKoulutuksetToteutuksetHakukohteetRepository.selectWithParams(
         orgOidsForQuery,
+        allowedHakukohderyhmat,
         haut,
         koulutuksenTila,
         toteutuksenTila,
         hakukohteenTila,
-        valintakoe
+        tutkinnonTasot
       ),
       "selectWithParams"
     )
 
-    val groupedQueryResult = queryResult.groupBy(_.organisaatio_oid)
-
-    val organisaationKoulutuksetHakukohteetToteutukset =
-      OrganisaatioUtils.mapOrganisaationHakukohteetToParents(
-        hierarkiat,
-        groupedQueryResult
-      )
-
-    ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
-      organisaationKoulutuksetHakukohteetToteutukset,
+    ExcelWriter.writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
+      queryResult,
       asiointikieli,
-      raporttityyppi,
-      translations
+      translations,
+      tulostustapa
     )
   }
 }

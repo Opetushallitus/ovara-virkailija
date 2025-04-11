@@ -1,10 +1,8 @@
 import { MultiComboBox } from '@/app/components/form/multicombobox';
 import { useFetchHakukohteet } from '@/app/hooks/useFetchHakukohteet';
 import { Kielistetty, LanguageCode } from '@/app/lib/types/common';
-import { useSearchParams as useQueryParams } from 'next/navigation';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { changeMultiComboBoxSelection } from './utils';
-import { isNullish } from 'remeda';
 
 type Hakukohde = {
   hakukohde_oid: string;
@@ -14,21 +12,18 @@ type Hakukohde = {
 export const Hakukohde = ({
   locale,
   t,
+  fetchEnabled,
   ...props
 }: {
   locale: LanguageCode;
   t: (key: string) => string;
+  fetchEnabled: boolean;
   [key: string]: unknown;
 }) => {
   const { selectedHakukohteet, setSelectedHakukohteet } =
     useCommonSearchParams();
 
-  const queryParams = useQueryParams();
-  const haut = queryParams.get('haku');
-  const fetchEnabled = !isNullish(haut);
-
-  const queryParamsStr = queryParams.toString();
-  const { data } = useFetchHakukohteet(queryParamsStr, fetchEnabled);
+  const { data } = useFetchHakukohteet(fetchEnabled);
 
   const hakukohteet: Array<Hakukohde> = data || [];
 

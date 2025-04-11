@@ -2,7 +2,7 @@ import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearc
 import { OvaraCheckboxGroup } from './OvaraCheckboxGroup';
 
 export const Vastaanottotieto = ({ t }: { t: (key: string) => string }) => {
-  const { selectedVastaanottotieto, setSelectedVastaanottotieto } =
+  const { selectedVastaanottotiedot, setSelectedVastaanottotiedot } =
     useHakijatSearchParams();
 
   const toisenAsteenNaytettavatVastaanottotilat = [
@@ -15,8 +15,8 @@ export const Vastaanottotieto = ({ t }: { t: (key: string) => string }) => {
     <OvaraCheckboxGroup
       id={'vastaanottotieto'}
       options={toisenAsteenNaytettavatVastaanottotilat}
-      selectedValues={selectedVastaanottotieto}
-      setSelectedValues={setSelectedVastaanottotieto}
+      selectedValues={selectedVastaanottotiedot}
+      setSelectedValues={setSelectedVastaanottotiedot}
       t={t}
     />
   );

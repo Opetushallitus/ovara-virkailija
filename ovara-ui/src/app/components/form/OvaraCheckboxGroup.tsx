@@ -29,6 +29,7 @@ export const OvaraCheckboxGroup = ({
       sx={{
         ...sx,
         display: 'flex',
+        marginTop: '20px',
       }}
       label={t(`raportti.${id}`)}
       renderInput={() => (
@@ -40,6 +41,7 @@ export const OvaraCheckboxGroup = ({
                   display: 'flex',
                   flexDirection: 'row',
                   columnGap: 3,
+                  width: '100%',
                 }
           }
         >

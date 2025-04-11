@@ -1,6 +1,7 @@
 import { styled } from '@mui/material';
 
-export const FormBox = styled('form')(({ theme }) => ({
-  padding: theme.spacing(2.5),
+export const FormBox = styled('form')({
+  display: 'flex',
+  flexDirection: 'column',
   width: '100%',
-}));
+});

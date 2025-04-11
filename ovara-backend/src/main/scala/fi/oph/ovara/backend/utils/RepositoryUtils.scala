@@ -150,9 +150,9 @@ object RepositoryUtils {
     if (operator.isEmpty) {
       ""
     } else {
-    s"$operator$hlokohtSuunnitelmaQueryStr" +
-      s"$eiAlkamiskauttaQueryStr" +
-      s"$alkamiskaudetQueryStr)"
+      s"$operator$hlokohtSuunnitelmaQueryStr" +
+        s"$eiAlkamiskauttaQueryStr" +
+        s"$alkamiskaudetQueryStr)"
     }
   }
 
@@ -177,9 +177,9 @@ object RepositoryUtils {
 
   def mapVastaanottotiedotToDbValues(vastaanottotiedot: List[String]): List[String] = {
     vastaanottotiedot.flatMap {
-      case s: String if s == "PERUNUT" => s :: List("EI_VASTAANOTETTU_MAARA_AIKANA")
+      case s: String if s == "PERUNUT"        => s :: List("EI_VASTAANOTETTU_MAARA_AIKANA")
       case s: String if s == "VASTAANOTTANUT" => List(s"${s}_SITOVASTI")
-      case s: String => List(s)
+      case s: String                          => List(s)
     }
   }
 
@@ -192,9 +192,9 @@ object RepositoryUtils {
   }
 
   def buildTutkinnonTasoFilters(
-                                 tutkinnonTasot: List[String],
-                                 hakukohdeTable: String
-                               ): Option[String] = {
+      tutkinnonTasot: List[String],
+      hakukohdeTable: String
+  ): Option[String] = {
     if (tutkinnonTasot.nonEmpty) {
       var conditions = List[String]()
       if (tutkinnonTasot.contains("alempi-ja-ylempi")) {
@@ -207,8 +207,26 @@ object RepositoryUtils {
         conditions = conditions :+ s"${hakukohdeTable}.alempi_kk_aste = false AND $hakukohdeTable.ylempi_kk_aste = true"
       }
       Some(s"AND (" + conditions.mkString(" OR ") + ")")
-    }
-    else
+    } else
       None
+  }
+
+  def makeOptionalJarjestyspaikkaQuery(selectedKayttooikeusOrganisaatiot: List[String]): String = {
+    RepositoryUtils.makeOptionalListOfValuesQueryStr(
+      "AND",
+      "hk.jarjestyspaikka_oid",
+      selectedKayttooikeusOrganisaatiot
+    )
+  }
+  
+  def makeOptionalHakukohderyhmatSubSelectQueryStr(hakukohderyhmat: List[String]): String = {
+    val hakukohderyhmatStr = makeListOfValuesQueryStr(hakukohderyhmat)
+    if (hakukohderyhmatStr.isEmpty) {
+      ""
+    } else {
+      "AND hk.hakukohde_oid IN (" +
+        "SELECT hkr_hk.hakukohde_oid FROM pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk " +
+        s"WHERE hkr_hk.hakukohderyhma_oid IN ($hakukohderyhmatStr))"
+    }
   }
 }

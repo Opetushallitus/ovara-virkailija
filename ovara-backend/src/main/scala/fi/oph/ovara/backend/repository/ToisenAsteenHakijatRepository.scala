@@ -2,13 +2,17 @@ package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.ToisenAsteenHakija
 import fi.oph.ovara.backend.utils.RepositoryUtils
-import org.springframework.stereotype.Component
+import org.slf4j.{Logger, LoggerFactory}
+import org.springframework.stereotype.{Component, Repository}
 import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api.*
 import slick.sql.SqlStreamingAction
 
 @Component
+@Repository
 class ToisenAsteenHakijatRepository extends Extractors {
+  val LOG: Logger = LoggerFactory.getLogger(classOf[ToisenAsteenHakijatRepository])
+
   def selectWithParams(
       kayttooikeusOrganisaatiot: List[String],
       haut: List[String],
@@ -70,7 +74,7 @@ class ToisenAsteenHakijatRepository extends Extractors {
 
     // Toisella asteella kirjoitushetkellä käytössä vain yksi valintatapajono, minkä takia varasija, kokonaispisteet ja hylk_tai_per_syy
     // haetaan jonon ensimmäisestä ja siis ainoasta valintatapajonosta.
-    sql"""SELECT hlo.sukunimi, hlo.etunimet, hlo.turvakielto,
+    val query = sql"""SELECT hlo.sukunimi, hlo.etunimet, hlo.turvakielto,
                  hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid, hk.oppilaitos_nimi, hk.toimipiste_nimi,
                  hk.hakukohde_nimi, ht.hakutoivenumero, ht2.kaksoistutkinto_kiinnostaa, ht2.urheilijatutkinto_kiinnostaa,
                  ht.valintatieto, ht.valintatapajonot->0->>'varasijan_numero' as varasija,
@@ -99,5 +103,9 @@ class ToisenAsteenHakijatRepository extends Extractors {
           #$optionalJulkaisulupaQuery
           #$optionalHarkinnanvaraisuusQuery
           """.as[ToisenAsteenHakija]
+
+    LOG.debug(s"selectWithParams: ${query.statements.head}")
+
+    query
   }
 }

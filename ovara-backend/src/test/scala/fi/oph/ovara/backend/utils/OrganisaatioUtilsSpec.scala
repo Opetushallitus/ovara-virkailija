@@ -237,7 +237,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
 
     val kth2 = kth.copy(koulutusToteutusHakukohde =
       kth._2.copy(
-        hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
+        hakukohteenNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
         hakukohdeOid = "1.2.246.562.20.00000000000000041886"
       )
     )
@@ -319,7 +319,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
 
     val kth2 = kth.copy(
       koulutusToteutusHakukohde = kth._2.copy(
-        hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
+        hakukohteenNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
         hakukohdeOid = "1.2.246.562.20.00000000000000041886"
       )
     )
@@ -460,7 +460,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
 
     val kth2 = kth.copy(koulutusToteutusHakukohde =
       kth._2.copy(
-        hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
+        hakukohteenNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
         hakukohdeOid = "1.2.246.562.20.00000000000000041886"
       )
     )
@@ -621,7 +621,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
 
     val kth2 = kth.copy(koulutusToteutusHakukohde =
       kth._2.copy(
-        hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
+        hakukohteenNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
         hakukohdeOid = "1.2.246.562.20.00000000000000041886"
       )
     )
@@ -764,7 +764,7 @@ class OrganisaatioUtilsSpec extends AnyFlatSpec {
 
     val kth2 = kth.copy(koulutusToteutusHakukohde =
       kth._2.copy(
-        hakukohdeNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
+        hakukohteenNimi = Map(En -> "hakukohde 2 en", Fi -> "hakukohde 2 fi", Sv -> "hakukohde 2 sv"),
         hakukohdeOid = "1.2.246.562.20.00000000000000041886"
       )
     )

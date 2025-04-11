@@ -21,6 +21,7 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
   "koulutukset_toteutukset_hakukohteet" should "log audit parameters correctly" in {
     val mockCommonService                            = mock(classOf[CommonService])
     val mockKoulutuksetToteutuksetHakukohteetService = mock(classOf[KoulutuksetToteutuksetHakukohteetService])
+    val mockKkKoulutuksetToteutuksetHakukohteetService = mock(classOf[KorkeakouluKoulutuksetToteutuksetHakukohteetService])
     val mockUserService                              = mock(classOf[UserService])
     val mockHakijatService                           = mock(classOf[ToisenAsteenHakijatService])
     val mockKkHakijatService                         = mock(classOf[KkHakijatService])
@@ -40,6 +41,7 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
     val controller = new Controller(
       mockCommonService,
       mockKoulutuksetToteutuksetHakukohteetService,
+      mockKkKoulutuksetToteutuksetHakukohteetService,
       mockHakijatService,
       mockKkHakijatService,
       mockHakeneetHyvaksytytVastaanottaneetService,
@@ -88,9 +90,9 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
       "valintakoe"      -> true,
       "toteutuksenTila" -> "julkaistu",
       "koulutustoimija" -> "koulutustoimija1",
-      "haku"            -> List("1.2.246.562.29.00000000000000049925"),
+      "haut"            -> List("1.2.246.562.29.00000000000000049925"),
       "koulutuksenTila" -> "julkaistu",
-      "oppilaitos"      -> List("oppilaitos1"),
+      "oppilaitokset"      -> List("oppilaitos1"),
       "hakukohteenTila" -> "julkaistu"
     )
 

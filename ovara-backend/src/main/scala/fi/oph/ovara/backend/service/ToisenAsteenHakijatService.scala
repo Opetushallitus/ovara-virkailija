@@ -22,13 +22,13 @@ class ToisenAsteenHakijatService(
   val db: OvaraDatabase = null
 
   def get(
-      haku: List[String],
+      haut: List[String],
       oppilaitokset: List[String],
       toimipisteet: List[String],
       hakukohteet: List[String],
       pohjakoulutukset: List[String],
-      valintatieto: List[String],
-      vastaanottotieto: List[String],
+      valintatiedot: List[String],
+      vastaanottotiedot: List[String],
       harkinnanvaraisuudet: List[String],
       kaksoistutkintoKiinnostaa: Option[Boolean],
       urheilijatutkintoKiinnostaa: Option[Boolean],
@@ -53,13 +53,13 @@ class ToisenAsteenHakijatService(
 
     val query = toisenAsteenHakijatRepository.selectWithParams(
       kayttooikeusOrganisaatiot = orgOidsForQuery,
-      haut = haku,
+      haut = haut,
       oppilaitokset = oppilaitokset,
       toimipisteet = toimipisteet,
       hakukohteet = hakukohteet,
       pohjakoulutukset = pohjakoulutukset,
-      valintatieto = valintatieto,
-      vastaanottotieto = vastaanottotieto,
+      valintatieto = valintatiedot,
+      vastaanottotieto = vastaanottotiedot,
       harkinnanvaraisuudet = harkinnanvaraisuudet,
       kaksoistutkintoKiinnostaa = kaksoistutkintoKiinnostaa,
       urheilijatutkintoKiinnostaa = urheilijatutkintoKiinnostaa,

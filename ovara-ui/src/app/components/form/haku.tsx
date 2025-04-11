@@ -4,9 +4,8 @@ import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { Kielistetty, LanguageCode } from '@/app/lib/types/common';
 import { useFetchHaut } from '@/app/hooks/useFetchHaut';
-import { useSearchParams } from 'next/navigation';
 import { changeMultiComboBoxSelection } from '@/app/components/form/utils';
-import { isNullish } from 'remeda';
+import { useEffect } from 'react';
 
 type Haku = {
   haku_oid: string;
@@ -18,18 +17,14 @@ export const Haku = ({ haunTyyppi }: { haunTyyppi: string }) => {
   const user = useAuthorizedUser();
   const locale = (user?.asiointikieli ?? 'fi') as LanguageCode;
 
-  const { selectedHaut, setSelectedHaut, selectedAlkamiskaudet } =
+  const { selectedHaut, setSelectedHaut, setHauntyyppi } =
     useCommonSearchParams();
-  const fetchEnabled = !isNullish(selectedAlkamiskaudet);
-  const queryParams = useSearchParams();
-  const queryParamsStr = queryParams.toString();
-  const queryParamsWithHauntyyppi = new URLSearchParams(queryParamsStr);
-  queryParamsWithHauntyyppi.set('haun_tyyppi', haunTyyppi);
 
-  const { data } = useFetchHaut(
-    queryParamsWithHauntyyppi.toString(),
-    fetchEnabled,
-  );
+  useEffect(() => {
+    setHauntyyppi(haunTyyppi);
+  }, [haunTyyppi, setHauntyyppi]);
+
+  const { data } = useFetchHaut();
 
   const haut: Haku[] = data || [];
 

@@ -20,7 +20,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
   val db: OvaraDatabase = null
 
   def get(
-           haku: List[String],
+           haut: List[String],
            tulostustapa: String,
            koulutustoimija: Option[String],
            oppilaitokset: List[String],
@@ -53,7 +53,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
       case "hakukohteittain" =>
         val query = hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-          haut = haku,
+          haut = haut,
           hakukohteet = hakukohteet,
           koulutusalat1 = koulutusalat1,
           koulutusalat2 = koulutusalat2,
@@ -68,7 +68,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
       case "koulutusaloittain" =>
         val query = hakeneetHyvaksytytVastaanottaneetRepository.selectKoulutusaloittainWithParams(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-          haut = haku,
+          haut = haut,
           hakukohteet = hakukohteet,
           koulutusalat1 = koulutusalat1,
           koulutusalat2 = koulutusalat2,
@@ -83,7 +83,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
       case "toimipisteittain" =>
         val query = hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-          haut = haku,
+          haut = haut,
           hakukohteet = hakukohteet,
           koulutusalat1 = koulutusalat1,
           koulutusalat2 = koulutusalat2,
@@ -98,7 +98,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
       case _ =>
         val query = hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams(
           selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-          haut = haku,
+          haut = haut,
           hakukohteet = hakukohteet,
           koulutusalat1 = koulutusalat1,
           koulutusalat2 = koulutusalat2,
@@ -114,7 +114,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
 
     val sumQuery = hakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams(
       selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-      haut = haku,
+      haut = haut,
       hakukohteet = hakukohteet,
       koulutusalat1 = koulutusalat1,
       koulutusalat2 = koulutusalat2,

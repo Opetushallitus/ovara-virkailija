@@ -6,15 +6,15 @@ export const Aidinkieli = () => {
   const { t } = useTranslate();
   const tasot = ['fi', 'sv', 'muu'];
 
-  const { selectedAidinkieli, setSelectedAidinkieli } =
+  const { selectedAidinkielet, setSelectedAidinkielet } =
     useHakeneetSearchParams();
 
   return (
     <OvaraCheckboxGroup
       id={'aidinkieli'}
       options={tasot}
-      selectedValues={selectedAidinkieli}
-      setSelectedValues={setSelectedAidinkieli}
+      selectedValues={selectedAidinkielet}
+      setSelectedValues={setSelectedAidinkielet}
       t={t}
     />
   );

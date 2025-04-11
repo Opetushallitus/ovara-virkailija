@@ -10,15 +10,15 @@ export const Harkinnanvaraisuus = ({ t }: { t: (key: string) => string }) => {
     queryFn: () => doApiFetch('harkinnanvaraisuudet'),
   });
 
-  const { selectedHarkinnanvaraisuus, setSelectedHarkinnanvaraisuus } =
+  const { selectedHarkinnanvaraisuudet, setSelectedHarkinnanvaraisuudet } =
     useCommonSearchParams();
 
   return (
     <OvaraCheckboxGroup
       id={'harkinnanvaraisuus'}
       options={harkinnanvaraisuudet}
-      selectedValues={selectedHarkinnanvaraisuus}
-      setSelectedValues={setSelectedHarkinnanvaraisuus}
+      selectedValues={selectedHarkinnanvaraisuudet}
+      setSelectedValues={setSelectedHarkinnanvaraisuudet}
       t={t}
       getTranslation={getHarkinnanvaraisuusTranslation}
       boxSx={{ columns: 3, width: '100%' }}

@@ -5,7 +5,7 @@ import { FormBox } from '@/app/components/form/form-box';
 import { FormButtons } from '@/app/components/form/form-buttons';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
-import { hasOvaraToinenAsteRole } from '@/app/lib/utils';
+import { hasOvaraToinenAsteRole, isNullishOrEmpty } from '@/app/lib/utils';
 import { useSearchParams } from 'next/navigation';
 import { LanguageCode } from '@/app/lib/types/common';
 
@@ -42,6 +42,17 @@ export default function Hakutilasto() {
     selectedHaut &&
     selectedTulostustapa
   );
+
+  const tulostustavat = [
+    'koulutustoimijoittain',
+    'oppilaitoksittain',
+    'toimipisteittain',
+    'koulutusaloittain',
+    'hakukohteittain',
+  ];
+
+  const hakukohdeFetchEnabled = !isNullishOrEmpty(selectedHaut);
+
   const [isLoading, setIsLoading] = useState(false);
   const queryParamsStr = queryParams.toString();
   return (
@@ -52,9 +63,13 @@ export default function Hakutilasto() {
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
           <KoulutuksenAlkaminen />
           <Haku haunTyyppi={'toinen_aste'} />
-          <Tulostustapa />
+          <Tulostustapa tulostustavat={tulostustavat} />
           <OrganisaatioValikot />
-          <Hakukohde locale={locale} t={t} />
+          <Hakukohde
+            locale={locale}
+            t={t}
+            fetchEnabled={hakukohdeFetchEnabled}
+          />
           <Opetuskieli />
           <KoulutusalaValikot />
           <MaakuntaKuntaValikot />
