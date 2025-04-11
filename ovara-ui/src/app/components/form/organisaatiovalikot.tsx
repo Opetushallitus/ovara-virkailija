@@ -122,7 +122,7 @@ export const OrganisaatioValikot = () => {
   );
 };
 
-export const OppilaitosValikko = ({
+export const Oppilaitos = ({
   organisaatiot,
 }: {
   organisaatiot: Array<OrganisaatioHierarkia> | null;
@@ -164,7 +164,7 @@ export const OppilaitosValikko = ({
   );
 };
 
-export const ToimipisteValikko = ({
+export const Toimipiste = ({
   organisaatiot,
 }: {
   organisaatiot: Array<OrganisaatioHierarkia> | null;

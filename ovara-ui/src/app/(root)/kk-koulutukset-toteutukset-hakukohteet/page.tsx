@@ -20,8 +20,8 @@ import { downloadExcel } from '@/app/components/form/utils';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { MainContainer } from '@/app/components/main-container';
 import {
-  OppilaitosValikko,
-  ToimipisteValikko,
+  Oppilaitos,
+  Toimipiste,
 } from '@/app/components/form/organisaatiovalikot';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
 import { Hakukohderyhma } from '@/app/components/form/hakukohderyhma';
@@ -68,8 +68,8 @@ export default function KoulutuksetToteutuksetHakukohteet() {
           <OphTypography>
             {t('raportti.vahintaan-yksi-vaihtoehdoista')}
           </OphTypography>
-          <OppilaitosValikko organisaatiot={organisaatiot} />
-          <ToimipisteValikko organisaatiot={organisaatiot} />
+          <Oppilaitos organisaatiot={organisaatiot} />
+          <Toimipiste organisaatiot={organisaatiot} />
           <Hakukohderyhma />
           <Divider />
           <Tulostustapa

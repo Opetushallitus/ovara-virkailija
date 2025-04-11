@@ -12,8 +12,8 @@ import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatio
 import { KoulutuksenAlkaminen } from '@/app/components/form/koulutuksen-alkaminen';
 import { Haku } from '@/app/components/form/haku';
 import {
-  OppilaitosValikko,
-  ToimipisteValikko,
+  Oppilaitos,
+  Toimipiste,
 } from '@/app/components/form/organisaatiovalikot';
 import { Hakukohde } from '@/app/components/form/hakukohde';
 import { Vastaanottotieto } from '@/app/components/form/vastaanottotieto';
@@ -60,8 +60,8 @@ export default function Hakijat() {
             {t('raportti.oppilaitos-tai-toimipiste')}
           </OphTypography>
           <Box>
-            <OppilaitosValikko organisaatiot={organisaatiot} />
-            <ToimipisteValikko organisaatiot={organisaatiot} />
+            <Oppilaitos organisaatiot={organisaatiot} />
+            <Toimipiste organisaatiot={organisaatiot} />
           </Box>
           <Divider />
           <Hakukohde sx={{ marginTop: 0 }} fetchEnabled={fetchEnabled} />
