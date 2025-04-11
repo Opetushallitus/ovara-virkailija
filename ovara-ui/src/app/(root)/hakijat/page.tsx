@@ -7,14 +7,13 @@ import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { hasOvaraToinenAsteRole, isNullishOrEmpty } from '@/app/lib/utils';
 import { useSearchParams } from 'next/navigation';
-import { LanguageCode } from '@/app/lib/types/common';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
 
 import { KoulutuksenAlkaminen } from '@/app/components/form/koulutuksen-alkaminen';
 import { Haku } from '@/app/components/form/haku';
 import {
-  OppilaitosValikko,
-  ToimipisteValikko,
+  Oppilaitos,
+  Toimipiste,
 } from '@/app/components/form/organisaatiovalikot';
 import { Hakukohde } from '@/app/components/form/hakukohde';
 import { Vastaanottotieto } from '@/app/components/form/vastaanottotieto';
@@ -37,7 +36,6 @@ export default function Hakijat() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const hasToinenAsteRights = hasOvaraToinenAsteRole(user?.authorities);
-  const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
   const organisaatiot = useFetchOrganisaatiohierarkiat().data;
   const { selectedHaut, selectedOppilaitokset, selectedToimipisteet } =
     useCommonSearchParams();
@@ -62,34 +60,21 @@ export default function Hakijat() {
             {t('raportti.oppilaitos-tai-toimipiste')}
           </OphTypography>
           <Box>
-            <OppilaitosValikko
-              locale={locale}
-              organisaatiot={organisaatiot}
-              t={t}
-            />
-            <ToimipisteValikko
-              locale={locale}
-              organisaatiot={organisaatiot}
-              t={t}
-            />
+            <Oppilaitos organisaatiot={organisaatiot} />
+            <Toimipiste organisaatiot={organisaatiot} />
           </Box>
           <Divider />
-          <Hakukohde
-            locale={locale}
-            t={t}
-            sx={{ marginTop: 0 }}
-            fetchEnabled={fetchEnabled}
-          />
-          <Pohjakoulutus locale={locale} t={t} />
-          <Valintatieto t={t} sx={{ paddingTop: 0 }} />
-          <Vastaanottotieto t={t} />
-          <Harkinnanvaraisuus t={t} />
-          <Kaksoistutkinto t={t} />
-          <Urheilijatutkinto t={t} />
-          <SoraTerveys t={t} />
-          <SoraAiempi t={t} />
-          <Markkinointilupa t={t} />
-          <Julkaisulupa t={t} />
+          <Hakukohde sx={{ marginTop: 0 }} fetchEnabled={fetchEnabled} />
+          <Pohjakoulutus />
+          <Valintatieto sx={{ paddingTop: 0 }} />
+          <Vastaanottotieto />
+          <Harkinnanvaraisuus />
+          <Kaksoistutkinto />
+          <Urheilijatutkinto />
+          <SoraTerveys />
+          <SoraAiempi />
+          <Markkinointilupa />
+          <Julkaisulupa />
           <FormButtons
             disabled={!fetchEnabled}
             downloadExcel={() =>

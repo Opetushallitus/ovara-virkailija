@@ -14,8 +14,8 @@ export default function Header() {
   const currentRoute = usePathname();
   const isHome = currentRoute == '/';
   const headerTranslationKey = isHome
-    ? 'home'
-    : currentRoute.match(/([a-z]+-?)+/gm)?.join('.');
+    ? 'header.home'
+    : `raporttilista.${currentRoute.match(/([a-z]+-?)+/gm)?.join('.')}`;
   return (
     <header
       style={{
@@ -42,7 +42,7 @@ export default function Header() {
         )}
         <Typography variant="h1">
           {isHome ? '' : '> '}
-          {t(`header.${headerTranslationKey}`)}
+          {t(headerTranslationKey)}
         </Typography>
       </PageContent>
     </header>

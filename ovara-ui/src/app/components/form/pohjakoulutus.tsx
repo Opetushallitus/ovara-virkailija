@@ -1,3 +1,5 @@
+import { useTranslate } from '@tolgee/react';
+import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { MultiComboBox } from '@/app/components/form/multicombobox';
 import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
 import { useQuery } from '@tanstack/react-query';
@@ -5,13 +7,11 @@ import { doApiFetch } from '@/app/lib/ovara-backend/api';
 import { changeMultiComboBoxSelection } from './utils';
 import { Koodi, LanguageCode } from '@/app/lib/types/common';
 
-export const Pohjakoulutus = ({
-  t,
-  locale,
-}: {
-  t: (key: string) => string;
-  locale: string;
-}) => {
+export const Pohjakoulutus = () => {
+  const { t } = useTranslate();
+  const user = useAuthorizedUser();
+  const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
+
   const { data: pohjakoulutukset } = useQuery({
     queryKey: ['fetchPohjakoulutukset'],
     queryFn: () => doApiFetch('pohjakoulutukset-toinen-aste'),

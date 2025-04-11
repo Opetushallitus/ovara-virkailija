@@ -1,3 +1,4 @@
+import { useTranslate } from '@tolgee/react';
 import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
 import { OvaraRadioGroup } from '@/app/components/form/ovara-radio-group';
 import { RADIOGROUP_BOOLEAN_OPTIONS } from '@/app/lib/constants';
@@ -6,7 +7,9 @@ import {
   getSelectedRadioGroupValue,
 } from '@/app/components/form/utils';
 
-export const NaytaYoArvosanat = ({ t }: { t: (key: string) => string }) => {
+export const NaytaYoArvosanat = () => {
+  const { t } = useTranslate();
+
   const { selectedNaytaYoArvosanat, setSelectedNaytaYoArvosanat } =
     useHakijatSearchParams();
 
@@ -22,7 +25,9 @@ export const NaytaYoArvosanat = ({ t }: { t: (key: string) => string }) => {
   );
 };
 
-export const NaytaHetu = ({ t }: { t: (key: string) => string }) => {
+export const NaytaHetu = () => {
+  const { t } = useTranslate();
+
   const { selectedNaytaHetu, setSelectedNaytaHetu } = useHakijatSearchParams();
 
   return (
@@ -35,7 +40,9 @@ export const NaytaHetu = ({ t }: { t: (key: string) => string }) => {
   );
 };
 
-export const NaytaPostiosoite = ({ t }: { t: (key: string) => string }) => {
+export const NaytaPostiosoite = () => {
+  const { t } = useTranslate();
+
   const { selectedNaytaPostiosoite, setSelectedNaytaPostiosoite } =
     useHakijatSearchParams();
 

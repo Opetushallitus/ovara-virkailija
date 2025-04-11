@@ -1,3 +1,4 @@
+import { useTranslate } from '@tolgee/react';
 import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
 import { OvaraRadioGroup } from '@/app/components/form/ovara-radio-group';
 import { RADIOGROUP_OPTIONS } from '@/app/lib/constants';
@@ -6,7 +7,9 @@ import {
   getSelectedRadioGroupValue,
 } from '@/app/components/form/utils';
 
-export const SoraAiempi = ({ t }: { t: (key: string) => string }) => {
+export const SoraAiempi = () => {
+  const { t } = useTranslate();
+
   const { selectedSoraAiempi, setSelectedSoraAiempi } =
     useHakijatSearchParams();
 

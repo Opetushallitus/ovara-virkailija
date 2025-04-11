@@ -35,37 +35,36 @@ const getOrganisaatioOptions = (
 };
 
 export const OrganisaatioValikot = () => {
+  const organisaatiot = useFetchOrganisaatiohierarkiat().data;
+
+  return (
+    <Box>
+      <Koulutustoimija organisaatiot={organisaatiot} />
+      <Oppilaitos organisaatiot={organisaatiot} />
+      <Toimipiste organisaatiot={organisaatiot} />
+    </Box>
+  );
+};
+
+export const Koulutustoimija = ({
+  organisaatiot,
+}: {
+  organisaatiot: Array<OrganisaatioHierarkia> | null;
+}) => {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
-  const organisaatiot = useFetchOrganisaatiohierarkiat().data;
 
   const {
     selectedKoulutustoimija,
     setSelectedKoulutustoimija,
-    selectedOppilaitokset,
     setSelectedOppilaitokset,
-    selectedToimipisteet,
     setSelectedToimipisteet,
   } = useCommonSearchParams();
 
   const koulutustoimija_id = 'koulutustoimija';
-  const oppilaitos_id = 'oppilaitos';
-  const toimipiste_id = 'toimipiste';
 
   const koulutustoimijat = getKoulutustoimijatToShow(organisaatiot);
-
-  const oppilaitokset = getOppilaitoksetToShow(
-    organisaatiot,
-    selectedKoulutustoimija,
-  );
-
-  const toimipisteet = getToimipisteetToShow(
-    organisaatiot,
-    selectedToimipisteet,
-    selectedOppilaitokset,
-    selectedKoulutustoimija,
-  );
 
   const changeKoulutustoimija = (
     _: React.SyntheticEvent,
@@ -77,24 +76,6 @@ export const OrganisaatioValikot = () => {
     setSelectedToimipisteet(null);
   };
 
-  const changeOppilaitokset = (
-    _: React.SyntheticEvent,
-    value: Array<SelectOption>,
-  ) => {
-    return setSelectedOppilaitokset(
-      isEmpty(value) ? null : value?.map((v) => v.value),
-    );
-  };
-
-  const changeToimipisteet = (
-    _: React.SyntheticEvent,
-    value: Array<SelectOption>,
-  ) => {
-    return setSelectedToimipisteet(
-      isEmpty(value) ? null : value?.map((v) => v.value),
-    );
-  };
-
   return (
     <Box>
       <ComboBox
@@ -104,33 +85,19 @@ export const OrganisaatioValikot = () => {
         options={getOrganisaatioOptions(locale, koulutustoimijat)}
         onChange={changeKoulutustoimija}
       />
-      <MultiComboBox
-        id={oppilaitos_id}
-        label={t(`raportti.${oppilaitos_id}`)}
-        value={selectedOppilaitokset ?? []}
-        options={getOrganisaatioOptions(locale, oppilaitokset)}
-        onChange={changeOppilaitokset}
-      />
-      <MultiComboBox
-        id={toimipiste_id}
-        label={t(`raportti.${toimipiste_id}`)}
-        value={selectedToimipisteet ?? []}
-        options={getOrganisaatioOptions(locale, toimipisteet)}
-        onChange={changeToimipisteet}
-      />
     </Box>
   );
 };
 
-export const OppilaitosValikko = ({
-  locale,
+export const Oppilaitos = ({
   organisaatiot,
-  t,
 }: {
-  locale: string;
   organisaatiot: Array<OrganisaatioHierarkia> | null;
-  t: (key: string) => string;
 }) => {
+  const { t } = useTranslate();
+  const user = useAuthorizedUser();
+  const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
+
   const {
     selectedOppilaitokset,
     setSelectedOppilaitokset,
@@ -164,15 +131,15 @@ export const OppilaitosValikko = ({
   );
 };
 
-export const ToimipisteValikko = ({
-  locale,
+export const Toimipiste = ({
   organisaatiot,
-  t,
 }: {
-  locale: string;
   organisaatiot: Array<OrganisaatioHierarkia> | null;
-  t: (key: string) => string;
 }) => {
+  const { t } = useTranslate();
+  const user = useAuthorizedUser();
+  const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
+
   const {
     selectedToimipisteet,
     setSelectedToimipisteet,
