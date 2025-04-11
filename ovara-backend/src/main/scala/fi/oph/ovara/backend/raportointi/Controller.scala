@@ -291,11 +291,11 @@ class Controller(
     val maybeToteutuksenTila = Option(toteutuksenTila)
     val maybeHakukohteenTila = Option(hakukohteenTila)
 
-    val oppilaitosList     = if (oppilaitokset == null) List() else oppilaitokset.asScala.toList
-    val toimipisteList     = if (toimipisteet == null) List() else toimipisteet.asScala.toList
-    val hakukohderyhmaList = if (hakukohderyhmat == null) List() else hakukohderyhmat.asScala.toList
-    val hakuList           = if (haut == null) List() else haut.asScala.toList
-    val tutkinnonTasoList  = if (tutkinnonTasot == null) List() else tutkinnonTasot.asScala.toList
+    val oppilaitosList     = getListParamAsScalaList(oppilaitokset)
+    val toimipisteList     = getListParamAsScalaList(toimipisteet)
+    val hakukohderyhmaList = getListParamAsScalaList(hakukohderyhmat)
+    val hakuList           = getListParamAsScalaList(haut)
+    val tutkinnonTasoList  = getListParamAsScalaList(tutkinnonTasot)
 
     val wb = kkKoulutuksetToteutuksetHakukohteetService.get(
       hakuList,
@@ -565,15 +565,15 @@ class Controller(
     val naytaHakutoiveetBool                  = Option(naytaHakutoiveet).exists(_.toBoolean)
     val maybeSukupuoli: Option[String]        = if (sukupuoli == "neutral") None else Option(sukupuoli)
     val maybeEnsikertalainen: Option[Boolean] = strToOptionBoolean(ensikertalainen)
-    val hakuList                              = if (haut == null) List() else haut.asScala.toList
-    val oppilaitosList                        = if (oppilaitokset == null) List() else oppilaitokset.asScala.toList
-    val toimipisteList                        = if (toimipisteet == null) List() else toimipisteet.asScala.toList
-    val hakukohdeList                         = if (hakukohteet == null) List() else hakukohteet.asScala.toList
-    val hakukohdeRyhmaList                    = if (hakukohderyhmat == null) List() else hakukohderyhmat.asScala.toList
-    val okmOhjauksenAlaList                   = if (okmOhjauksenAlat == null) List() else okmOhjauksenAlat.asScala.toList
-    val tutkinnonTasoList                     = if (tutkinnonTasot == null) List() else tutkinnonTasot.asScala.toList
-    val aidinkieliList                        = if (aidinkielet == null) List() else aidinkielet.asScala.toList
-    val kansalaisuusList                      = if (kansalaisuusluokat == null) List() else kansalaisuusluokat.asScala.toList
+    val hakuList                              = getListParamAsScalaList(haut)
+    val oppilaitosList                        = getListParamAsScalaList(oppilaitokset)
+    val toimipisteList                        = getListParamAsScalaList(toimipisteet)
+    val hakukohdeList                         = getListParamAsScalaList(hakukohteet)
+    val hakukohdeRyhmaList                    = getListParamAsScalaList(hakukohderyhmat)
+    val okmOhjauksenAlaList                   = getListParamAsScalaList(okmOhjauksenAlat)
+    val tutkinnonTasoList                     = getListParamAsScalaList(tutkinnonTasot)
+    val aidinkieliList                        = getListParamAsScalaList(aidinkielet)
+    val kansalaisuusList                      = getListParamAsScalaList(kansalaisuusluokat)
 
     val wb = kkHakeneetHyvaksytytVastaanottaneetService.get(
       hakuList,
