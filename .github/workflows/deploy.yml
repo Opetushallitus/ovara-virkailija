@@ -29,7 +29,7 @@ jobs:
       - uses: ./.github/actions/setup-next-env
       - name: Install CDK dependencies
         run: |
-          cd cdk
+          cd ./ovara-ui/cdk
           npm ci --prefer-offline
           npm install -g aws-cdk
       - name: Configure AWS utility-role credentials
@@ -55,5 +55,5 @@ jobs:
         env:
           SKIP_OPENNEXT_BUILD: true
         run: |
-          cd cdk
+          cd ./ovara-ui/cdk
           cdk deploy OvaraUISovellusStack --require-approval never -c "environment=${{ inputs.environment }}"
