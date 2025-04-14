@@ -40,7 +40,7 @@ jobs:
           aws-region: eu-west-1
       - name: Download build from s3
         env:
-          bucket: ${{ secrets.CDK_DEPLOYMENTS_BUCKET_NAME }}
+          bucket: ${{ secrets.BUCKET_NAME }}
         run: |
           aws s3 cp --no-progress s3://"$bucket"/ovara-ui/ga-${{inputs.build-number}}.zip build.zip
           unzip build.zip
