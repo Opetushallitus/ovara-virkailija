@@ -3,6 +3,7 @@ import { Construct } from 'constructs';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import { Nextjs } from 'cdk-nextjs-standalone';
+import * as logs from 'aws-cdk-lib/aws-logs';
 import { PriceClass } from 'aws-cdk-lib/aws-cloudfront';
 
 interface OvaraUIStackProps extends cdk.StackProps {
@@ -47,8 +48,8 @@ export class OvaraUISovellusStack extends cdk.Stack {
       },
     );
 
-    const nextjs = new Nextjs(this, 'OvaraUI', {
-      nextjsPath: '..', // relative path from your project root to NextJS
+    const nextjs = new Nextjs(this, `${props.environmentName}-OvaraUI`, {
+      nextjsPath: '..', // relative path from project root to NextJS
       ...(props.skipBuild
         ? {
             buildCommand:
@@ -70,6 +71,13 @@ export class OvaraUISovellusStack extends cdk.Stack {
         nextjsDistribution: {
           distributionProps: {
             priceClass: PriceClass.PRICE_CLASS_100,
+          },
+        },
+        nextjsServer: {
+          functionProps: {
+            logGroup: new logs.LogGroup(this, 'Ovara-ui NextJs Server', {
+              logGroupName: `/aws/lambda/${props.environmentName}-ovara-ui`,
+            }),
           },
         },
       },
