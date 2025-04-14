@@ -5,7 +5,7 @@ runs:
   steps:
     - uses: actions/setup-node@v4
       with:
-        node-version-file: '.nvmrc'
+        node-version-file: 'ovara-ui/.nvmrc'
         cache: 'npm'
         cache-dependency-path: ovara-ui/package-lock.json
         registry-url: 'https://npm.pkg.github.com'
