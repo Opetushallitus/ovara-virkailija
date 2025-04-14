@@ -42,7 +42,7 @@ jobs:
         env:
           bucket: ${{ secrets.CDK_DEPLOYMENTS_BUCKET_NAME }}
         run: |
-          aws s3 cp --no-progress s3://"$bucket"/ovara-ui/ga-${{github.run_number}}.zip build.zip
+          aws s3 cp --no-progress s3://"$bucket"/ovara-ui/ga-${{inputs.build-number}}.zip build.zip
           unzip build.zip
           cp -R .next/standalone/.next/server .next/server # OpenNext v3 needs server-files also in .next/server
       - name: Configure AWS dev-role credentials
