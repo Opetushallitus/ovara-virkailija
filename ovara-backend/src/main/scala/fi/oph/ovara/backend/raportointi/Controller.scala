@@ -4,14 +4,8 @@ import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, Ser
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.UserResponse
 import fi.oph.ovara.backend.service.*
-import fi.oph.ovara.backend.utils.AuditOperation.{
-  HakeneetHyvaksytytVastaanottaneet,
-  KkHakeneetHyvaksytytVastaanottaneet,
-  KkHakijat,
-  KorkeakouluKoulutuksetToteutuksetHakukohteet,
-  KoulutuksetToteutuksetHakukohteet,
-  ToisenAsteenHakijat
-}
+import fi.oph.ovara.backend.utils.AuditOperation.{HakeneetHyvaksytytVastaanottaneet, KkHakeneetHyvaksytytVastaanottaneet, KkHakijat, KorkeakouluKoulutuksetToteutuksetHakukohteet, KoulutuksetToteutuksetHakukohteet, ToisenAsteenHakijat}
+import fi.oph.ovara.backend.utils.ParameterValidator.{validateHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams}
 import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.apache.poi.ss.usermodel.Workbook
@@ -26,6 +20,12 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util
 import scala.jdk.CollectionConverters.*
+
+case class ErrorResponse(
+                          status: Int,
+                          message: String,
+                          details: Option[List[String]] = None
+                        )
 
 @RestController
 @RequestMapping(path = Array("api"))
@@ -54,7 +54,13 @@ class Controller(
     if (str == null) {
       None
     } else {
-      Option(str.toBoolean)
+      try {
+        Option(str.toBoolean)
+      } catch {
+        case _: Exception =>
+          // jos ei validi boolean, palautetaan None
+          None
+      }
     }
   }
 
@@ -247,14 +253,33 @@ class Controller(
     val maybeKoulutuksenTila = Option(koulutuksenTila)
     val maybeToteutuksenTila = Option(toteutuksenTila)
     val maybeHakukohteenTila = Option(hakukohteenTila)
-    val maybeValintakoe = if (valintakoe == null) {
-      None
-    } else {
-      Option(valintakoe.toBoolean)
-    }
+    val maybeValintakoe = strToOptionBoolean(valintakoe)
     val oppilaitosList = getListParamAsScalaList(oppilaitokset)
     val toimipisteList = getListParamAsScalaList(toimipisteet)
     val hakuList       = getListParamAsScalaList(haut)
+
+    val validationErrors = validateKoulutuksetToteutuksetHakukohteetParams(
+      hakuList,
+      maybeKoulutustoimija,
+      oppilaitosList,
+      toimipisteList,
+      maybeKoulutuksenTila,
+      maybeToteutuksenTila,
+      maybeHakukohteenTila,
+      valintakoe
+    )
+
+    if (validationErrors.nonEmpty) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
+      response.setContentType("application/json")
+      val errorResponse = ErrorResponse(
+        status = 400,
+        message = "validation.error",
+        details = Some(validationErrors)
+      )
+      response.getWriter.write(mapper.writeValueAsString(errorResponse))
+      return
+    }
 
     val wb = koulutuksetToteutuksetHakukohteetService.get(
       hakuList,
@@ -311,6 +336,30 @@ class Controller(
     val hakukohderyhmaList = getListParamAsScalaList(hakukohderyhmat)
     val hakuList           = getListParamAsScalaList(haut)
     val tutkinnonTasoList  = getListParamAsScalaList(tutkinnonTasot)
+
+    val validationErrors = validateKkKoulutuksetToteutuksetHakukohteetParams(
+      hakuList,
+      oppilaitosList,
+      toimipisteList,
+      hakukohderyhmaList,
+      tulostustapa,
+      maybeKoulutuksenTila,
+      maybeToteutuksenTila,
+      maybeHakukohteenTila,
+      tutkinnonTasoList
+    )
+
+    if (validationErrors.nonEmpty) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
+      response.setContentType("application/json")
+      val errorResponse = ErrorResponse(
+        status = 400,
+        message = "validation.error",
+        details = Some(validationErrors)
+      )
+      response.getWriter.write(mapper.writeValueAsString(errorResponse))
+      return
+    }
 
     val wb = kkKoulutuksetToteutuksetHakukohteetService.get(
       hakuList,
@@ -379,6 +428,34 @@ class Controller(
     val maybeSoraAiempi                  = strToOptionBoolean(soraAiempi)
     val maybeMarkkinointilupa            = strToOptionBoolean(markkinointilupa)
     val maybeJulkaisulupa                = strToOptionBoolean(julkaisulupa)
+
+    val validationErrors = validateHakijatParams(
+      hakuList,
+      oppilaitosList,
+      toimipisteList,
+      pohjakoulutusList,
+      valintatietoList,
+      vastaanottotietoList,
+      harkinnanvaraisuusList,
+      kaksoistutkinto,
+      urheilijatutkinto,
+      soraterveys,
+      soraAiempi,
+      markkinointilupa,
+      julkaisulupa
+    )
+
+    if (validationErrors.nonEmpty) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
+      response.setContentType("application/json")
+      val errorResponse = ErrorResponse(
+        status = 400,
+        message = "validation.error",
+        details = Some(validationErrors)
+      )
+      response.getWriter.write(mapper.writeValueAsString(errorResponse))
+      return
+    }
 
     val maybeWb = if (oppilaitosList.nonEmpty || toimipisteList.nonEmpty) {
       val wb = hakijatService.get(
