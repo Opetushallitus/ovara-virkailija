@@ -172,10 +172,113 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
     errors should contain("valintatiedot.invalid")
     errors should contain("vastaanottotiedot.invalid")
     errors should contain("hakukohderyhmat.invalid.oid")
-    errors should contain("kansalaisuudet.invalid")
+    errors should contain("kansalaisuusluokat.invalid")
     errors should contain("markkinointilupa.invalid")
     errors should contain("nayta-yo-arvosanat.invalid")
     errors should contain("nayta-hetu.invalid")
     errors should contain("nayta-postiosoite.invalid")
+  }
+
+  "validateHakeneetHyvaksytytVastaanottaneetParams" should "return errors for invalid parameters" in {
+    val hakuList = List("invalid-oid")
+    val tulostustapa = "invalid-tulostustapa"
+    val koulutustoimija = Some("invalid-koulutustoimija")
+    val oppilaitosList = List("invalid-oid")
+    val toimipisteList = List("1.2.246.999.10.1000000000000000001")
+    val hakukohteetList = List("invalid-oid")
+    val koulutusala1List = List("foo")
+    val koulutusala2List = List("bar")
+    val koulutusala3List = List("baz")
+    val opetuskieliList = List("invalid-kieli")
+    val maakuntaList = List("invalid-maakunta")
+    val kuntaList = List("invalid-kunta")
+    val harkinnanvaraisuusList = List("FOOBAR''")
+    val hakukohderyhmaList = List("invalid-oid")
+    val sukupuoli = Some("invalid-sukupuoli")
+    val invalidBoolean = "invalid-boolean"
+
+    val errors = ParameterValidator.validateHakeneetHyvaksytytVastaanottaneetParams(
+      hakuList,
+      tulostustapa,
+      koulutustoimija,
+      oppilaitosList,
+      toimipisteList,
+      hakukohteetList,
+      koulutusala1List,
+      koulutusala2List,
+      koulutusala3List,
+      opetuskieliList,
+      maakuntaList,
+      kuntaList,
+      harkinnanvaraisuusList,
+      sukupuoli,
+      invalidBoolean,
+    )
+
+    errors.length shouldEqual 15
+    errors should contain("haut.invalid.oid")
+    errors should contain("tulostustapa.invalid")
+    errors should contain("koulutustoimija.invalid.org")
+    errors should contain("oppilaitokset.invalid.org")
+    errors should contain("toimipisteet.invalid.org")
+    errors should contain("hakukohteet.invalid.oid")
+    errors should contain("koulutusalat1.invalid")
+    errors should contain("koulutusalat2.invalid")
+    errors should contain("koulutusalat3.invalid")
+    errors should contain("opetuskielet.invalid")
+    errors should contain("maakunnat.invalid")
+    errors should contain("kunnat.invalid")
+    errors should contain("harkinnanvaraisuudet.invalid")
+    errors should contain("sukupuoli.invalid")
+    errors should contain("nayta-hakutoiveet.invalid")
+  }
+
+  "validateKkHakeneetHyvaksytytVastaanottaneetParams" should "return errors for invalid parameters" in {
+    val hakuList = List("invalid-oid")
+    val tulostustapa = "invalid-tulostustapa"
+    val koulutustoimija = Some("invalid-koulutustoimija")
+    val oppilaitosList = List("invalid-oid")
+    val toimipisteList = List("1.2.246.999.10.1000000000000000001")
+    val hakukohteetList = List("invalid-oid")
+    val hakukohderyhmaList = List("invalid-oid")
+    val okmOhjauksenAlaList = List("foo")
+    val tutkinnonTasoList = List("bar")
+    val aidinkieliList = List("baz'")
+    val kansalaisuusList = List("invalid-kansalaisuus")
+    val sukupuoli = Some("invalid-sukupuoli")
+    val invalidBoolean = "invalid-boolean"
+
+    val errors = ParameterValidator.validateKkHakeneetHyvaksytytVastaanottaneetParams(
+      hakuList,
+      tulostustapa,
+      koulutustoimija,
+      oppilaitosList,
+      toimipisteList,
+      hakukohteetList,
+      hakukohderyhmaList,
+      okmOhjauksenAlaList,
+      tutkinnonTasoList,
+      aidinkieliList,
+      kansalaisuusList,
+      sukupuoli,
+      invalidBoolean,
+      invalidBoolean
+    )
+
+    errors.length shouldEqual 14
+    errors should contain("haut.invalid.oid")
+    errors should contain("tulostustapa.invalid")
+    errors should contain("koulutustoimija.invalid.org")
+    errors should contain("oppilaitokset.invalid.org")
+    errors should contain("toimipisteet.invalid.org")
+    errors should contain("hakukohteet.invalid.oid")
+    errors should contain("hakukohderyhmat.invalid.oid")
+    errors should contain("okm-ohjauksen-alat.invalid")
+    errors should contain("tutkinnontasot.invalid")
+    errors should contain("aidinkielet.invalid")
+    errors should contain("kansalaisuusluokat.invalid")
+    errors should contain("sukupuoli.invalid")
+    errors should contain("ensikertalainen.invalid")
+    errors should contain("nayta-hakutoiveet.invalid")
   }
 }
