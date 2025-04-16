@@ -189,7 +189,7 @@ object ParameterValidator {
       validateAlphanumericList(valintatietoList, "valintatiedot"),
       validateAlphanumericList(vastaanottotietoList, "vastaanottotiedot"),
       validateOidList(hakukohderyhmaList, "hakukohderyhmat"),
-      validateNumericList(kansalaisuusList, "kansalaisuudet"),
+      validateNumericList(kansalaisuusList, "kansalaisuusluokat"),
       validateBoolean(markkinointilupa, "markkinointilupa"),
       validateBoolean(naytaYoArvosanat, "nayta-yo-arvosanat"),
       validateBoolean(naytaHetu, "nayta-hetu"),
@@ -197,5 +197,83 @@ object ParameterValidator {
     ).flatten
 
     errors
-  }  
+  }
+
+  def validateHakeneetHyvaksytytVastaanottaneetParams(
+                               hakuList: List[String],
+                               tulostustapa: String,
+                               maybeKoulutustoimija: Option[String],
+                               oppilaitosList: List[String],
+                               toimipisteList: List[String],
+                               hakukohdeList: List[String],
+                               koulutusala1List: List[String],
+                               koulutusala2List: List[String],
+                               koulutusala3List: List[String],
+                               opetuskieliList: List[String],
+                               maakuntaList: List[String],
+                               kuntaList: List[String],
+                               harkinnanvaraisuusList: List[String],
+                               maybeSukupuoli: Option[String],
+                               naytaHakutoiveet: String,
+                             ): List[String] = {
+
+    val errors = List(
+      validateNonEmpty(hakuList, "haut"),
+      validateOidList(hakuList, "haut"),
+      valueBelongsToSetOfValidValues(Some(tulostustapa), "tulostustapa", TULOSTUSTAVAT),
+      validateOrganisaatioOid(maybeKoulutustoimija, "koulutustoimija"),
+      validateOrganisaatioOidList(oppilaitosList, "oppilaitokset"),
+      validateOrganisaatioOidList(toimipisteList, "toimipisteet"),
+      validateOidList(hakukohdeList, "hakukohteet"),
+      validateNumericList(koulutusala1List, "koulutusalat1"),
+      validateNumericList(koulutusala2List, "koulutusalat2"),
+      validateNumericList(koulutusala3List, "koulutusalat3"),
+      validateNumericList(opetuskieliList, "opetuskielet"),
+      validateNumericList(maakuntaList, "maakunnat"),
+      validateNumericList(kuntaList, "kunnat"),
+      validateAlphanumericList(harkinnanvaraisuusList, "harkinnanvaraisuudet"),
+      validateNumeric(maybeSukupuoli, "sukupuoli"),
+      validateBoolean(naytaHakutoiveet, "nayta-hakutoiveet"),
+    ).flatten
+
+    errors
+  }
+
+  def validateKkHakeneetHyvaksytytVastaanottaneetParams(
+                                                       hakuList: List[String],
+                                                       tulostustapa: String,
+                                                       maybeKoulutustoimija: Option[String],
+                                                       oppilaitosList: List[String],
+                                                       toimipisteList: List[String],
+                                                       hakukohdeList: List[String],
+                                                       hakukohdeRyhmaList: List[String],
+                                                       okmOhjauksenAlaList: List[String],
+                                                       tutkinnonTasoList: List[String],
+                                                       aidinkieliList: List[String],
+                                                       kansalaisuusList: List[String],
+                                                       maybeSukupuoli: Option[String],
+                                                       maybeEnsikertalainen: String,
+                                                       naytaHakutoiveet: String,
+                                                     ): List[String] = {
+
+    val errors = List(
+      validateNonEmpty(hakuList, "haut"),
+      validateOidList(hakuList, "haut"),
+      valueBelongsToSetOfValidValues(Some(tulostustapa), "tulostustapa", TULOSTUSTAVAT),
+      validateOrganisaatioOid(maybeKoulutustoimija, "koulutustoimija"),
+      validateOrganisaatioOidList(oppilaitosList, "oppilaitokset"),
+      validateOrganisaatioOidList(toimipisteList, "toimipisteet"),
+      validateOidList(hakukohdeList, "hakukohteet"),
+      validateOidList(hakukohdeRyhmaList, "hakukohderyhmat"),
+      validateNumericList(okmOhjauksenAlaList, "okm-ohjauksen-alat"),
+      valuesBelongToSetOfValidValues(tutkinnonTasoList, "tutkinnontasot", KK_TUTKINNON_TASOT),
+      validateAlphanumericList(aidinkieliList, "aidinkielet"),
+      validateNumericList(kansalaisuusList, "kansalaisuusluokat"),
+      validateNumeric(maybeSukupuoli, "sukupuoli"),
+      validateBoolean(maybeEnsikertalainen, "ensikertalainen"),
+      validateBoolean(naytaHakutoiveet, "nayta-hakutoiveet"),
+    ).flatten
+
+    errors
+  }
 }
