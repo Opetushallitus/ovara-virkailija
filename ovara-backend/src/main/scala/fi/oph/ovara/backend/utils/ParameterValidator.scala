@@ -131,6 +131,7 @@ object ParameterValidator {
                              hakuList: List[String],
                              oppilaitosList: List[String],
                              toimipisteList: List[String],
+                             hakukohteetList: List[String],
                              pohjakoulutusList: List[String],
                              valintatietoList: List[String],
                              vastaanottotietoList: List[String],
@@ -148,6 +149,7 @@ object ParameterValidator {
       validateOidList(hakuList, "haut"),
       validateOrganisaatioOidList(oppilaitosList, "oppilaitokset"),
       validateOrganisaatioOidList(toimipisteList, "toimipisteet"),
+      validateOidList(hakukohteetList, "hakukohteet"),
       validateNumericList(pohjakoulutusList, "pohjakoulutukset"),
       validateAlphanumericList(valintatietoList, "valintatiedot"),
       validateAlphanumericList(vastaanottotietoList, "vastaanottotiedot"),
@@ -162,4 +164,38 @@ object ParameterValidator {
 
     errors
   }
+
+  def validateKkHakijatParams(
+                             hakuList: List[String],
+                             oppilaitosList: List[String],
+                             toimipisteList: List[String],
+                             hakukohdeList: List[String],
+                             valintatietoList: List[String],
+                             vastaanottotietoList: List[String],
+                             hakukohderyhmaList: List[String],
+                             kansalaisuusList: List[String],
+                             markkinointilupa: String,
+                             naytaYoArvosanat: String,
+                             naytaHetu: String,
+                             naytaPostiosoite: String,
+                           ): List[String] = {
+
+    val errors = List(
+      validateNonEmpty(hakuList, "haut"),
+      validateOidList(hakuList, "haut"),
+      validateOrganisaatioOidList(oppilaitosList, "oppilaitokset"),
+      validateOrganisaatioOidList(toimipisteList, "toimipisteet"),
+      validateOidList(hakukohdeList, "hakukohteet"),
+      validateAlphanumericList(valintatietoList, "valintatiedot"),
+      validateAlphanumericList(vastaanottotietoList, "vastaanottotiedot"),
+      validateOidList(hakukohderyhmaList, "hakukohderyhmat"),
+      validateNumericList(kansalaisuusList, "kansalaisuudet"),
+      validateBoolean(markkinointilupa, "markkinointilupa"),
+      validateBoolean(naytaYoArvosanat, "nayta-yo-arvosanat"),
+      validateBoolean(naytaHetu, "nayta-hetu"),
+      validateBoolean(naytaPostiosoite, "nayta-postiosoite"),
+    ).flatten
+
+    errors
+  }  
 }

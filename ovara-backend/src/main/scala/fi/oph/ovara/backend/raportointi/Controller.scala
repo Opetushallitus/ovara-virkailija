@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.UserResponse
 import fi.oph.ovara.backend.service.*
 import fi.oph.ovara.backend.utils.AuditOperation.{HakeneetHyvaksytytVastaanottaneet, KkHakeneetHyvaksytytVastaanottaneet, KkHakijat, KorkeakouluKoulutuksetToteutuksetHakukohteet, KoulutuksetToteutuksetHakukohteet, ToisenAsteenHakijat}
-import fi.oph.ovara.backend.utils.ParameterValidator.{validateHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams}
+import fi.oph.ovara.backend.utils.ParameterValidator.{validateHakijatParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams}
 import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.apache.poi.ss.usermodel.Workbook
@@ -433,6 +433,7 @@ class Controller(
       hakuList,
       oppilaitosList,
       toimipisteList,
+      hakukohdeList,
       pohjakoulutusList,
       valintatietoList,
       vastaanottotietoList,
@@ -527,6 +528,33 @@ class Controller(
 
     val maybeMarkkinointilupa = strToOptionBoolean(markkinointilupa)
 
+    val validationErrors = validateKkHakijatParams(
+      hakuList,
+      oppilaitosList,
+      toimipisteList,
+      hakukohdeList,
+      valintatietoList,
+      vastaanottotietoList,
+      hakukohderyhmaList,
+      kansalaisuusList,
+      markkinointilupa,
+      naytaYoArvosanat,
+      naytaHetu,
+      naytaPostiosoite,
+    )
+
+    if (validationErrors.nonEmpty) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
+      response.setContentType("application/json")
+      val errorResponse = ErrorResponse(
+        status = 400,
+        message = "validation.error",
+        details = Some(validationErrors)
+      )
+      response.getWriter.write(mapper.writeValueAsString(errorResponse))
+      return
+    }
+    
     val maybeWb = if (oppilaitosList.nonEmpty || toimipisteList.nonEmpty || hakukohderyhmaList.nonEmpty) {
       val wb = kkHakijatService.get(
         hakuList,
