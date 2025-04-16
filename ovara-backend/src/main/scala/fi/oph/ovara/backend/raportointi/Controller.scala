@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.UserResponse
 import fi.oph.ovara.backend.service.*
 import fi.oph.ovara.backend.utils.AuditOperation.{HakeneetHyvaksytytVastaanottaneet, KkHakeneetHyvaksytytVastaanottaneet, KkHakijat, KorkeakouluKoulutuksetToteutuksetHakukohteet, KoulutuksetToteutuksetHakukohteet, ToisenAsteenHakijat}
-import fi.oph.ovara.backend.utils.ParameterValidator.{validateHakijatParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams}
+import fi.oph.ovara.backend.utils.ParameterValidator.{validateHakeneetHyvaksytytVastaanottaneetParams, validateHakijatParams, validateKkHakeneetHyvaksytytVastaanottaneetParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams}
 import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.apache.poi.ss.usermodel.Workbook
@@ -554,7 +554,7 @@ class Controller(
       response.getWriter.write(mapper.writeValueAsString(errorResponse))
       return
     }
-    
+
     val maybeWb = if (oppilaitosList.nonEmpty || toimipisteList.nonEmpty || hakukohderyhmaList.nonEmpty) {
       val wb = kkHakijatService.get(
         hakuList,
@@ -615,7 +615,7 @@ class Controller(
   ): Unit = {
     val maybeKoulutustoimija           = Option(koulutustoimija)
     val tulostustapaValinta            = Option(tulostustapa).getOrElse("hakukohteittain")
-    val naytaHakutoiveetBool           = Option(naytaHakutoiveet).exists(_.toBoolean)
+    val naytaHakutoiveetBool           = strToOptionBoolean(naytaHakutoiveet).getOrElse(false)
     val maybeSukupuoli: Option[String] = if (sukupuoli == "neutral") None else Option(sukupuoli)
     val hakuList                       = getListParamAsScalaList(haut)
     val oppilaitosList                 = getListParamAsScalaList(oppilaitokset)
@@ -629,6 +629,36 @@ class Controller(
     val opetuskieliList =
       getListParamAsScalaList(opetuskielet).map("oppilaitoksenopetuskieli_" + _)
     val harkinnanvaraisuusList = getListParamAsScalaList(harkinnanvaraisuudet)
+
+    val validationErrors = validateHakeneetHyvaksytytVastaanottaneetParams(
+      hakuList,
+      tulostustapa,
+      maybeKoulutustoimija,
+      oppilaitosList,
+      toimipisteList,
+      hakukohdeList,
+      koulutusala1List,
+      koulutusala2List,
+      koulutusala3List,
+      opetuskieliList,
+      maakuntaList,
+      kuntaList,
+      harkinnanvaraisuusList,
+      maybeSukupuoli,
+      naytaHakutoiveet,
+    )
+
+    if (validationErrors.nonEmpty) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
+      response.setContentType("application/json")
+      val errorResponse = ErrorResponse(
+        status = 400,
+        message = "validation.error",
+        details = Some(validationErrors)
+      )
+      response.getWriter.write(mapper.writeValueAsString(errorResponse))
+      return
+    }
 
     val wb = hakeneetHyvaksytytVastaanottaneetService.get(
       hakuList,
@@ -696,7 +726,7 @@ class Controller(
   ): Unit = {
     val maybeKoulutustoimija                  = Option(koulutustoimija)
     val tulostustapaValinta                   = Option(tulostustapa).getOrElse("hakukohteittain")
-    val naytaHakutoiveetBool                  = Option(naytaHakutoiveet).exists(_.toBoolean)
+    val naytaHakutoiveetBool                  = strToOptionBoolean(naytaHakutoiveet).getOrElse(false)
     val maybeSukupuoli: Option[String]        = if (sukupuoli == "neutral") None else Option(sukupuoli)
     val maybeEnsikertalainen: Option[Boolean] = strToOptionBoolean(ensikertalainen)
     val hakuList                              = getListParamAsScalaList(haut)
@@ -708,6 +738,36 @@ class Controller(
     val tutkinnonTasoList                     = getListParamAsScalaList(tutkinnonTasot)
     val aidinkieliList                        = getListParamAsScalaList(aidinkielet)
     val kansalaisuusList                      = getListParamAsScalaList(kansalaisuusluokat)
+
+    val validationErrors = validateKkHakeneetHyvaksytytVastaanottaneetParams(
+      hakuList,
+      tulostustapa,
+      maybeKoulutustoimija,
+      oppilaitosList,
+      toimipisteList,
+      hakukohdeList,
+      hakukohdeRyhmaList,
+      okmOhjauksenAlaList,
+      tutkinnonTasoList,
+      aidinkieliList,
+      kansalaisuusList,
+      maybeSukupuoli,
+      ensikertalainen,
+      naytaHakutoiveet,
+    )
+
+    if (validationErrors.nonEmpty) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
+      response.setContentType("application/json")
+      val errorResponse = ErrorResponse(
+        status = 400,
+        message = "validation.error",
+        details = Some(validationErrors)
+      )
+      response.getWriter.write(mapper.writeValueAsString(errorResponse))
+      return
+    }
+
 
     val wb = kkHakeneetHyvaksytytVastaanottaneetService.get(
       hakuList,
