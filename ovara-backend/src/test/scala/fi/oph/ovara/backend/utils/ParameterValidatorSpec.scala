@@ -97,6 +97,7 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
     val hakuList = List("invalid-oid")
     val oppilaitosList = List("invalid-oid")
     val toimipisteList = List("1.2.246.999.10.1000000000000000001")
+    val hakukohteetList = List("invalid-oid")
     val pohjakoulutusList = List("abc")
     val valintatietoList = List("hyvaksytty'||pg_sleep(20)–")
     val vastaanottotietoList = List("FOOBAR'")
@@ -107,6 +108,7 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
       hakuList,
       oppilaitosList,
       toimipisteList,
+      hakukohteetList,
       pohjakoulutusList,
       valintatietoList,
       vastaanottotietoList,
@@ -119,9 +121,11 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
       invalidBoolean,
     )
 
-    errors.length shouldEqual 13
+    errors.length shouldEqual 14
     errors should contain("haut.invalid.oid")
     errors should contain("oppilaitokset.invalid.org")
+    errors should contain("toimipisteet.invalid.org")
+    errors should contain("hakukohteet.invalid.oid")
     errors should contain("pohjakoulutukset.invalid")
     errors should contain("valintatiedot.invalid")
     errors should contain("harkinnanvaraisuudet.invalid")
@@ -132,5 +136,46 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
     errors should contain("sora-aiempi.invalid")
     errors should contain("markkinointilupa.invalid")
     errors should contain("julkaisulupa.invalid")
+  }
+
+  "validateKkHakijatParams" should "return errors for invalid parameters" in {
+    val hakuList = List("invalid-oid")
+    val oppilaitosList = List("invalid-oid")
+    val toimipisteList = List("1.2.246.999.10.1000000000000000001")
+    val hakukohteetList = List("invalid-oid")
+    val valintatietoList = List("hyvaksytty'||pg_sleep(20)–")
+    val vastaanottotietoList = List("FOOBAR'")
+    val hakukohderyhmaList = List("invalid-oid")
+    val kansalaisuusList = List("abc")
+    val invalidBoolean = "invalid-boolean"
+
+    val errors = ParameterValidator.validateKkHakijatParams(
+      hakuList,
+      oppilaitosList,
+      toimipisteList,
+      hakukohteetList,
+      valintatietoList,
+      vastaanottotietoList,
+      hakukohderyhmaList,
+      kansalaisuusList,
+      invalidBoolean,
+      invalidBoolean,
+      invalidBoolean,
+      invalidBoolean,
+    )
+
+    errors.length shouldEqual 12
+    errors should contain("haut.invalid.oid")
+    errors should contain("oppilaitokset.invalid.org")
+    errors should contain("toimipisteet.invalid.org")
+    errors should contain("hakukohteet.invalid.oid")
+    errors should contain("valintatiedot.invalid")
+    errors should contain("vastaanottotiedot.invalid")
+    errors should contain("hakukohderyhmat.invalid.oid")
+    errors should contain("kansalaisuudet.invalid")
+    errors should contain("markkinointilupa.invalid")
+    errors should contain("nayta-yo-arvosanat.invalid")
+    errors should contain("nayta-hetu.invalid")
+    errors should contain("nayta-postiosoite.invalid")
   }
 }
