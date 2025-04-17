@@ -153,5 +153,5 @@ jobs:
         run: |
           cd ovara-ui
           SKIP_TYPECHECK=true npm run build
-          zip -r ga-${{github.run_number}}.zip .next/*.* .next/BUILD_ID .next/static .next/standalone public
+          zip -r ga-${{github.run_number}}.zip .next/*.* .next/BUILD_ID .next/server .next/static .next/standalone public # OpenNext v3 needs server-files also in .next/server
           aws s3 cp --no-progress ga-${{github.run_number}}.zip s3://"$bucket"/ovara-ui/ga-${{github.run_number}}.zip
