@@ -43,10 +43,9 @@ jobs:
           bucket: ${{ secrets.BUCKET_NAME }}
           SKIP_OPENNEXT_BUILD: true
         run: |
-          pwd
+          cd ovara-ui
           aws s3 cp --no-progress s3://"$bucket"/ovara-ui/ga-${{inputs.build-number}}.zip build.zip
           unzip build.zip
-          ls
           cp -R .next/standalone/.next/server .next/server # OpenNext v3 needs server-files also in .next/server
       - name: Configure AWS dev-role credentials
         uses: aws-actions/configure-aws-credentials@v4.1.0
