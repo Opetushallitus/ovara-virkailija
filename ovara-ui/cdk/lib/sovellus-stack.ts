@@ -8,7 +8,6 @@ import { PriceClass } from 'aws-cdk-lib/aws-cloudfront';
 
 interface OvaraUIStackProps extends cdk.StackProps {
   environmentName: string;
-  skipBuild: boolean;
 }
 
 export class OvaraUISovellusStack extends cdk.Stack {
@@ -50,12 +49,6 @@ export class OvaraUISovellusStack extends cdk.Stack {
 
     const nextjs = new Nextjs(this, `${props.environmentName}-OvaraUI`, {
       nextjsPath: '..', // relative path from project root to NextJS
-      ...(props.skipBuild
-        ? {
-            buildCommand:
-              'npx --yes open-next@^2 build -- --build-command "npm run noop"',
-          }
-        : {}),
       basePath: '/ovara',
       environment: {
         SKIP_TYPECHECK: 'true',
