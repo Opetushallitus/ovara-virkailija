@@ -16,7 +16,7 @@ import scala.concurrent.duration.Duration
 @Component
 @Repository
 class OvaraDatabase(
-    @Value("${spring.datasource.url}") url: String,
+    @Value("${app.readonly.datasource.url}") url: String,
     @Value("${spring.datasource.username}") username: String,
     @Value("${spring.datasource.password}") password: String
 ) {

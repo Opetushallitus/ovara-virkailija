@@ -3,6 +3,8 @@
 spring.datasource.url={{host_postgresql_ovara}}
 spring.datasource.username={{ovara_backend_postgresql_username}}
 spring.datasource.password={{ovara_backend_postgresql_password}}
+app.readonly.datasource.url={{host_postgresql_ovara_readonly}}
+
 session.schema.name={{ovara_backend_session_schema}}
 flyway.locations=classpath:db/migration
 flyway.schemas=ovara_virkailija
