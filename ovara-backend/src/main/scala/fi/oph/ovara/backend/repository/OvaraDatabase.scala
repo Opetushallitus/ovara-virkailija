@@ -13,29 +13,14 @@ import java.util.concurrent.TimeUnit
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-@Component
-@Repository
-class OvaraDatabase(
-    @Value("${app.readonly.datasource.url}") url: String,
-    @Value("${spring.datasource.username}") username: String,
-    @Value("${spring.datasource.password}") password: String
-) {
+abstract class OvaraDatabase {
 
   val LOG = LoggerFactory.getLogger(classOf[OvaraDatabase]);
 
-  private def hikariConfig: HikariConfig = {
-    val config = new HikariConfig()
-    config.setJdbcUrl(url)
-    config.setUsername(username)
-    config.setPassword(password)
-    val maxPoolSize = 10
-    config.setMaximumPoolSize(maxPoolSize)
-    config.setMinimumIdle(1)
-    config
-  }
+  protected def hikariConfig: HikariConfig
 
   @Bean
-  val db = {
+  lazy val db: Database = {
     val executor = AsyncExecutor("ovara", hikariConfig.getMaximumPoolSize, 1000)
     Database.forDataSource(
       new HikariDataSource(hikariConfig),

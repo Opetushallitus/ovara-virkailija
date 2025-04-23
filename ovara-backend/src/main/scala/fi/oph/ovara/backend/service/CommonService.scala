@@ -1,13 +1,8 @@
 package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.domain.*
-import fi.oph.ovara.backend.repository.{CommonRepository, OvaraDatabase}
-import fi.oph.ovara.backend.utils.Constants.{
-  KOULUTUSTOIMIJARAPORTTI,
-  OPH_PAAKAYTTAJA_OID,
-  OPPILAITOSRAPORTTI,
-  TOIMIPISTERAPORTTI
-}
+import fi.oph.ovara.backend.repository.{CommonRepository, ReadOnlyDatabase}
+import fi.oph.ovara.backend.utils.Constants.{KOULUTUSTOIMIJARAPORTTI, OPH_PAAKAYTTAJA_OID, OPPILAITOSRAPORTTI, TOIMIPISTERAPORTTI}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, OrganisaatioUtils}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,7 +15,7 @@ import org.springframework.stereotype.{Component, Service}
 @Service
 class CommonService(commonRepository: CommonRepository, userService: UserService) {
   @Autowired
-  val db: OvaraDatabase = null
+  val db: ReadOnlyDatabase = null
 
   @Autowired
   val cacheManager: CacheManager = null

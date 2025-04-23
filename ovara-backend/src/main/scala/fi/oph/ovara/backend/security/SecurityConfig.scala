@@ -65,7 +65,7 @@ class SecurityConfig  {
     "/j_spring_cas_security_check"
   ).setJsessionName("JSESSIONID").build())
 
-  @Bean
+  @Bean(name = Array("sessionDataSource"))
   @SpringSessionDataSource
   def sessionDatasource(@Value("${spring.datasource.url}") url: String,
                         @Value("${spring.datasource.username}") username: String,

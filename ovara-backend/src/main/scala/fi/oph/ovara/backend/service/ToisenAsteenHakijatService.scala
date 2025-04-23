@@ -1,7 +1,7 @@
 package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.domain.ToisenAsteenHakijaWithCombinedNimi
-import fi.oph.ovara.backend.repository.{OvaraDatabase, ToisenAsteenHakijatRepository}
+import fi.oph.ovara.backend.repository.{ReadOnlyDatabase, ToisenAsteenHakijatRepository}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
@@ -19,7 +19,7 @@ class ToisenAsteenHakijatService(
   val LOG: Logger = LoggerFactory.getLogger(classOf[ToisenAsteenHakijatService]);
 
   @Autowired
-  val db: OvaraDatabase = null
+  val db: ReadOnlyDatabase = null
 
   def get(
       haut: List[String],
