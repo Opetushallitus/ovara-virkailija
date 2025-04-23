@@ -1,0 +1,3 @@
+{
+  "acknowledged-issue-numbers": [32775]
+} // tämä hiljentää herjan että cdk package.jsonissa on aws-cdk ja aws-cdk-lib eri versiot
