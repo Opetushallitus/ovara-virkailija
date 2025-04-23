@@ -12,6 +12,8 @@ Backend käyttää Java Corretton versiota 21.
 Backendiä ajetaan IDEA:ssa. Kehitysympäristön konfiguraatio määritellään `application-dev.properties`-nimisessä tiedostossa
 ````
 spring.datasource.url=jdbc:postgresql://localhost:5432/ovara
+#readonly datasource url, voit käyttää samaa kantayhteyttä molempiin datasourceihin lokaalisti
+app.readonly.datasource.url=jdbc:postgresql://localhost:5432/ovara
 spring.datasource.username=app
 spring.datasource.password=app
 session.schema.name=ovara_virkailija
