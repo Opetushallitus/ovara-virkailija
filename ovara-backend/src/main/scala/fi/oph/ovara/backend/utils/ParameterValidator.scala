@@ -57,6 +57,10 @@ object ParameterValidator {
     opt.filter(_.nonEmpty).collect {
       case value if !numericRegex.matches(value) => s"$fieldName.invalid"
     }
+  def validateAlphanumeric(opt: Option[String], fieldName: String): Option[String] =
+    opt.filter(_.nonEmpty).collect {
+      case value if !alphanumericPattern.matches(value) => s"$fieldName.invalid"
+    }
 
   def validateNumericList(list: List[String], fieldName: String): List[String] =
     list.filterNot(numericRegex.matches).map(invalid => s"$fieldName.invalid")

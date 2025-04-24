@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.UserResponse
 import fi.oph.ovara.backend.service.*
 import fi.oph.ovara.backend.utils.AuditOperation.{HakeneetHyvaksytytVastaanottaneet, KkHakeneetHyvaksytytVastaanottaneet, KkHakijat, KorkeakouluKoulutuksetToteutuksetHakukohteet, KoulutuksetToteutuksetHakukohteet, ToisenAsteenHakijat}
-import fi.oph.ovara.backend.utils.ParameterValidator.{validateHakeneetHyvaksytytVastaanottaneetParams, validateHakijatParams, validateKkHakeneetHyvaksytytVastaanottaneetParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams}
+import fi.oph.ovara.backend.utils.ParameterValidator.{validateAlphanumeric, validateAlphanumericList, validateHakeneetHyvaksytytVastaanottaneetParams, validateHakijatParams, validateKkHakeneetHyvaksytytVastaanottaneetParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams, validateNumericList, validateOid, validateOidList, validateOrganisaatioOidList}
 import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.apache.poi.ss.usermodel.Workbook
@@ -105,13 +105,28 @@ class Controller(
       @RequestParam("alkamiskaudet", required = false) alkamiskaudet: java.util.Collection[String],
       @RequestParam("haut", required = false) selectedHaut: java.util.Collection[String],
       @RequestParam("haun_tyyppi", required = false) haun_tyyppi: String
-  ): String = {
+  ): ResponseEntity[Any] = {
     val alkamiskaudetList =
       getListParamAsScalaList(alkamiskaudet)
     val selectedHautList = getListParamAsScalaList(selectedHaut)
     val haunTyyppi       = if (haun_tyyppi == null) "" else haun_tyyppi
 
-    mapper.writeValueAsString(commonService.getHaut(alkamiskaudetList, selectedHautList, haunTyyppi))
+    val errors = List(
+      validateAlphanumericList(alkamiskaudetList, "alkamiskaudet"),
+      validateOidList(selectedHautList, "haut"),
+      validateAlphanumeric(Some(haunTyyppi), "haun-tyyppi")
+    ).flatten
+    if (errors.nonEmpty) {
+      val errorResponse = ErrorResponse(
+        status = 400,
+        message = "validation.error",
+        details = Some(errors)
+      )
+      ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(errorResponse)
+    } else {
+      val result = commonService.getHaut(alkamiskaudetList, selectedHautList, haunTyyppi)
+      ResponseEntity.ok(mapper.writeValueAsString(result))
+    }
   }
 
   @GetMapping(path = Array("hakukohteet"))
@@ -121,15 +136,32 @@ class Controller(
       @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
       @RequestParam("hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
       @RequestParam("hakukohteet", required = false) selectedHakukohteet: java.util.Collection[String]
-  ): String = mapper.writeValueAsString(
-    commonService.getHakukohteet(
-      getListParamAsScalaList(oppilaitokset),
-      getListParamAsScalaList(toimipisteet),
-      getListParamAsScalaList(haut),
-      getListParamAsScalaList(hakukohderyhmat),
-      getListParamAsScalaList(selectedHakukohteet)
-    )
-  )
+  ):  ResponseEntity[Any] = {
+    val errors = List(
+      validateOrganisaatioOidList(getListParamAsScalaList(oppilaitokset), "oppilaitokset"),
+      validateOrganisaatioOidList(getListParamAsScalaList(toimipisteet), "toimipisteet"),
+      validateOidList(getListParamAsScalaList(haut), "haut"),
+      validateOidList(getListParamAsScalaList(hakukohderyhmat), "hakukohderyhmat"),
+      validateOidList(getListParamAsScalaList(selectedHakukohteet), "hakukohteet"),
+    ).flatten
+    if (errors.nonEmpty) {
+      val errorResponse = ErrorResponse(
+        status = 400,
+        message = "validation.error",
+        details = Some(errors)
+      )
+      ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(errorResponse)
+    } else {
+      val result = commonService.getHakukohteet(
+        getListParamAsScalaList(oppilaitokset),
+        getListParamAsScalaList(toimipisteet),
+        getListParamAsScalaList(haut),
+        getListParamAsScalaList(hakukohderyhmat),
+        getListParamAsScalaList(selectedHakukohteet)
+      )
+      ResponseEntity.ok(mapper.writeValueAsString(result))
+    }
+  }
 
   @GetMapping(path = Array("pohjakoulutukset-toinen-aste"))
   def pohjakoulutuksetToinenAste(): String = mapper.writeValueAsString(commonService.getPohjakoulutukset)
@@ -156,10 +188,25 @@ class Controller(
   def kunnat(
       @RequestParam("maakunnat", required = false) maakunnat: java.util.Collection[String],
       @RequestParam("selectedKunnat", required = false) selectedKunnat: java.util.Collection[String]
-  ): String =
-    mapper.writeValueAsString(
-      commonService.getKunnat(getListParamAsScalaList(maakunnat), getListParamAsScalaList(selectedKunnat))
-    )
+  ): ResponseEntity[Any] = {
+    val errors = List(
+      validateNumericList(getListParamAsScalaList(maakunnat), "maakunnat"),
+      validateNumericList(getListParamAsScalaList(selectedKunnat), "kunnat")
+    ).flatten
+    if (errors.nonEmpty) {
+      val errorResponse = ErrorResponse(
+        status = 400,
+        message = "validation.error",
+        details = Some(errors)
+      )
+      ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(errorResponse)
+    } else {
+      ResponseEntity.ok(mapper.writeValueAsString(
+        commonService.getKunnat(getListParamAsScalaList(maakunnat), getListParamAsScalaList(selectedKunnat))
+      ))
+    }
+  }
+
 
   @GetMapping(path = Array("koulutusalat1"))
   def koulutusalat1: String = mapper.writeValueAsString(commonService.getKoulutusalat1)
@@ -168,36 +215,70 @@ class Controller(
   def koulutusalat2(
       @RequestParam("koulutusalat1", required = false) koulutusalat1: java.util.Collection[String],
       @RequestParam("selectedKoulutusalat2", required = false) selectedKoulutusalat2: java.util.Collection[String]
-  ): String =
-    mapper.writeValueAsString(
-      commonService.getKoulutusalat2(
-        getListParamAsScalaList(koulutusalat1),
-        getListParamAsScalaList(selectedKoulutusalat2)
+  ): ResponseEntity[Any] = {
+    val errors = List(
+      validateNumericList(getListParamAsScalaList(koulutusalat1), "koulutusalat1"),
+      validateNumericList(getListParamAsScalaList(selectedKoulutusalat2), "koulutusalat2")
+    ).flatten
+    if (errors.nonEmpty) {
+      val errorResponse = ErrorResponse(
+        status = 400,
+        message = "validation.error",
+        details = Some(errors)
       )
-    )
+      ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(errorResponse)
+    } else {
+      ResponseEntity.ok(mapper.writeValueAsString(
+        commonService.getKoulutusalat2(getListParamAsScalaList(koulutusalat1), getListParamAsScalaList(selectedKoulutusalat2))
+      ))
+    }
+  }
 
   @GetMapping(path = Array("koulutusalat3"))
   def koulutusalat3(
       @RequestParam("koulutusalat2", required = false) koulutusalat2: java.util.Collection[String],
       @RequestParam("selectedKoulutusalat3", required = false) selectedKoulutusalat3: java.util.Collection[String]
-  ): String =
-    mapper.writeValueAsString(
-      commonService.getKoulutusalat3(
-        getListParamAsScalaList(koulutusalat2),
-        getListParamAsScalaList(selectedKoulutusalat3)
+  ): ResponseEntity[Any] = {
+    val errors = List(
+      validateNumericList(getListParamAsScalaList(koulutusalat2), "koulutusalat2"),
+      validateNumericList(getListParamAsScalaList(selectedKoulutusalat3), "koulutusalat3")
+    ).flatten
+    if (errors.nonEmpty) {
+      val errorResponse = ErrorResponse(
+        status = 400,
+        message = "validation.error",
+        details = Some(errors)
       )
-    )
+      ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(errorResponse)
+    } else {
+      ResponseEntity.ok(mapper.writeValueAsString(
+        commonService.getKoulutusalat3(getListParamAsScalaList(koulutusalat2), getListParamAsScalaList(selectedKoulutusalat3))
+      ))
+    }
+  }
 
   @GetMapping(path = Array("hakukohderyhmat"))
   def hakukohderyhmat(
       @RequestParam("haut", required = true) haut: java.util.Collection[String]
-  ): String =
-    mapper.writeValueAsString(
-      commonService.getHakukohderyhmat(getListParamAsScalaList(haut))
-    )
+  ): ResponseEntity[Any] = {
+    val errors = validateOidList(getListParamAsScalaList(haut), "haut")
+    if (errors.nonEmpty) {
+      val errorResponse = ErrorResponse(
+        status = 400,
+        message = "validation.error",
+        details = Some(errors)
+      )
+      ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(errorResponse)
+    } else {
+      ResponseEntity.ok(mapper.writeValueAsString(
+        commonService.getHakukohderyhmat(getListParamAsScalaList(haut))
+      ))
+    }
+  }
 
   @GetMapping(path = Array("okm-ohjauksen-alat"))
   def okmOhjauksenAlat: String = mapper.writeValueAsString(commonService.getOkmOhjauksenAlat)
+
   // RAPORTIT
 
   private def sendExcel(
