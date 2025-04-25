@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.security
 
-import fi.oph.ovara.backend.repository.OvaraDatabase
+import fi.oph.ovara.backend.repository.WriteDatabase
 import org.apereo.cas.client.session.SessionMappingStorage
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.{Autowired, Value}
@@ -13,7 +13,7 @@ class SessionConfiguration {
   val LOG = LoggerFactory.getLogger(classOf[SessionConfiguration])
 
   @Autowired
-  val db: OvaraDatabase = null
+  val db: WriteDatabase = null
 
   @Value("${session.schema.name}")
   val schema: String = null

@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.repository.{KoulutuksetToteutuksetHakukohteetRepository, OvaraDatabase}
+import fi.oph.ovara.backend.repository.{KoulutuksetToteutuksetHakukohteetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter, OrganisaatioUtils}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,7 +16,7 @@ class KoulutuksetToteutuksetHakukohteetService(
 ) {
 
   @Autowired
-  val db: OvaraDatabase = null
+  val db: ReadOnlyDatabase = null
 
   def get(
       haut: List[String],
