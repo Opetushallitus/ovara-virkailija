@@ -117,6 +117,7 @@ class Controller(
       validateAlphanumeric(Some(haunTyyppi), "haun-tyyppi")
     ).flatten.distinct
     if (errors.nonEmpty) {
+      LOG.warn(s"haut parametrien validointivirhe: ${errors.mkString(", ")}")
       val errorResponse = ErrorResponse(
         status = 400,
         message = "validation.error",
@@ -145,6 +146,7 @@ class Controller(
       validateOidList(getListParamAsScalaList(selectedHakukohteet), "hakukohteet"),
     ).flatten.distinct
     if (errors.nonEmpty) {
+      LOG.warn(s"hakuohteet parametrien validointivirhe: ${errors.mkString(", ")}")
       val errorResponse = ErrorResponse(
         status = 400,
         message = "validation.error",
@@ -194,6 +196,7 @@ class Controller(
       validateNumericList(getListParamAsScalaList(selectedKunnat), "kunnat")
     ).flatten.distinct
     if (errors.nonEmpty) {
+      LOG.warn(s"kunnat parametrien validointivirhe: ${errors.mkString(", ")}")
       val errorResponse = ErrorResponse(
         status = 400,
         message = "validation.error",
@@ -221,6 +224,7 @@ class Controller(
       validateNumericList(getListParamAsScalaList(selectedKoulutusalat2), "koulutusalat2")
     ).flatten.distinct
     if (errors.nonEmpty) {
+      LOG.warn(s"koulutusalat2 parametrien validointivirhe: ${errors.mkString(", ")}")
       val errorResponse = ErrorResponse(
         status = 400,
         message = "validation.error",
@@ -244,6 +248,7 @@ class Controller(
       validateNumericList(getListParamAsScalaList(selectedKoulutusalat3), "koulutusalat3")
     ).flatten.distinct
     if (errors.nonEmpty) {
+      LOG.warn(s"koulutusalat3 parametrien validointivirhe: ${errors.mkString(", ")}")
       val errorResponse = ErrorResponse(
         status = 400,
         message = "validation.error",
@@ -263,6 +268,7 @@ class Controller(
   ): ResponseEntity[Any] = {
     val errors = validateOidList(getListParamAsScalaList(haut), "haut")
     if (errors.nonEmpty) {
+      LOG.warn(s"hakukohderyhmät parametrien validointivirhe: ${errors.mkString(", ")}")
       val errorResponse = ErrorResponse(
         status = 400,
         message = "validation.error",
@@ -351,6 +357,7 @@ class Controller(
     )
 
     if (validationErrors.nonEmpty) {
+      LOG.warn(s"koul-tot-hakukohteet parametrien validointivirhe: ${validationErrors.mkString(", ")}")
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
       response.setContentType("application/json")
       val errorResponse = ErrorResponse(
@@ -431,6 +438,7 @@ class Controller(
     )
 
     if (validationErrors.nonEmpty) {
+      LOG.warn(s"kk-koul-tot-hakukohteet parametrien validointivirhe: ${validationErrors.mkString(", ")}")
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
       response.setContentType("application/json")
       val errorResponse = ErrorResponse(
@@ -528,6 +536,7 @@ class Controller(
     )
 
     if (validationErrors.nonEmpty) {
+      LOG.warn(s"hakijat parametrien validointivirhe: ${validationErrors.mkString(", ")}")
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
       response.setContentType("application/json")
       val errorResponse = ErrorResponse(
@@ -625,6 +634,7 @@ class Controller(
     )
 
     if (validationErrors.nonEmpty) {
+      LOG.warn(s"kk-hakijat parametrien validointivirhe: ${validationErrors.mkString(", ")}")
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
       response.setContentType("application/json")
       val errorResponse = ErrorResponse(
@@ -730,6 +740,7 @@ class Controller(
     )
 
     if (validationErrors.nonEmpty) {
+      LOG.warn(s"tilastoraportti parametrien validointivirhe: ${validationErrors.mkString(", ")}")
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
       response.setContentType("application/json")
       val errorResponse = ErrorResponse(
@@ -838,6 +849,7 @@ class Controller(
     )
 
     if (validationErrors.nonEmpty) {
+      LOG.warn(s"kk-tilastoraportti parametrien validointivirhe: ${validationErrors.mkString(", ")}")
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
       response.setContentType("application/json")
       val errorResponse = ErrorResponse(
