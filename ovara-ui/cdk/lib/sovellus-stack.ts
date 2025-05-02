@@ -17,12 +17,14 @@ export class OvaraUISovellusStack extends cdk.Stack {
     const publicHostedZones: { [p: string]: string } = {
       hahtuva: 'hahtuvaopintopolku.fi',
       pallero: 'testiopintopolku.fi',
+      sade: 'opintopolku.fi',
       untuva: 'untuvaopintopolku.fi',
     };
 
     const publicHostedZoneIds: { [p: string]: string } = {
       hahtuva: 'Z20VS6J64SGAG9',
       pallero: 'Z175BBXSKVCV3B',
+      sade: 'ZNMCY72OCXY4M',
       untuva: 'Z1399RU36FG2N9',
     };
 
