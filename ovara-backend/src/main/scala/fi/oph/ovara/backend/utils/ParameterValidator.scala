@@ -100,7 +100,7 @@ object ParameterValidator {
       validateBoolean(valintakoe, "valintakoe"),
     ).flatten
 
-    errors
+    errors.distinct
   }
 
   def validateKkKoulutuksetToteutuksetHakukohteetParams(
@@ -128,7 +128,7 @@ object ParameterValidator {
       valuesBelongToSetOfValidValues(tutkinnonTasoList, "tutkinnontasot", KK_TUTKINNON_TASOT),
     ).flatten
 
-    errors
+    errors.distinct
   }
 
   def validateHakijatParams(
@@ -166,7 +166,7 @@ object ParameterValidator {
       validateBoolean(julkaisulupa, "julkaisulupa")
     ).flatten
 
-    errors
+    errors.distinct
   }
 
   def validateKkHakijatParams(
@@ -200,7 +200,7 @@ object ParameterValidator {
       validateBoolean(naytaPostiosoite, "nayta-postiosoite"),
     ).flatten
 
-    errors
+    errors.distinct
   }
 
   def validateHakeneetHyvaksytytVastaanottaneetParams(
@@ -240,7 +240,7 @@ object ParameterValidator {
       validateBoolean(naytaHakutoiveet, "nayta-hakutoiveet"),
     ).flatten
 
-    errors
+    errors.distinct
   }
 
   def validateKkHakeneetHyvaksytytVastaanottaneetParams(
@@ -278,6 +278,6 @@ object ParameterValidator {
       validateBoolean(naytaHakutoiveet, "nayta-hakutoiveet"),
     ).flatten
 
-    errors
+    errors.distinct
   }
 }
