@@ -42,9 +42,23 @@ export async function apiFetch(
         },
       },
     );
-    return response.status >= 400
-      ? Promise.reject(new FetchError(response, (await response.text()) ?? ''))
-      : Promise.resolve(response);
+    if (response.status >= 400) {
+      let body: unknown;
+      try {
+        const clone = response.clone();
+        body = await clone.json();
+      } catch {
+        try {
+          const clone = response.clone();
+          body = await clone.text();
+        } catch {
+          body = undefined;
+        }
+      }
+      throw new FetchError(response, body);
+    }
+
+    return response;
   } catch (e) {
     console.error('Fetching data failed!');
     return Promise.reject(e);

@@ -115,14 +115,14 @@ class Controller(
       validateAlphanumericList(alkamiskaudetList, "alkamiskaudet"),
       validateOidList(selectedHautList, "haut"),
       validateAlphanumeric(Some(haunTyyppi), "haun-tyyppi")
-    ).flatten
+    ).flatten.distinct
     if (errors.nonEmpty) {
       val errorResponse = ErrorResponse(
         status = 400,
         message = "validation.error",
         details = Some(errors)
       )
-      ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(errorResponse)
+      ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(mapper.writeValueAsString(errorResponse))
     } else {
       val result = commonService.getHaut(alkamiskaudetList, selectedHautList, haunTyyppi)
       ResponseEntity.ok(mapper.writeValueAsString(result))
@@ -143,7 +143,7 @@ class Controller(
       validateOidList(getListParamAsScalaList(haut), "haut"),
       validateOidList(getListParamAsScalaList(hakukohderyhmat), "hakukohderyhmat"),
       validateOidList(getListParamAsScalaList(selectedHakukohteet), "hakukohteet"),
-    ).flatten
+    ).flatten.distinct
     if (errors.nonEmpty) {
       val errorResponse = ErrorResponse(
         status = 400,
@@ -192,7 +192,7 @@ class Controller(
     val errors = List(
       validateNumericList(getListParamAsScalaList(maakunnat), "maakunnat"),
       validateNumericList(getListParamAsScalaList(selectedKunnat), "kunnat")
-    ).flatten
+    ).flatten.distinct
     if (errors.nonEmpty) {
       val errorResponse = ErrorResponse(
         status = 400,
@@ -219,7 +219,7 @@ class Controller(
     val errors = List(
       validateNumericList(getListParamAsScalaList(koulutusalat1), "koulutusalat1"),
       validateNumericList(getListParamAsScalaList(selectedKoulutusalat2), "koulutusalat2")
-    ).flatten
+    ).flatten.distinct
     if (errors.nonEmpty) {
       val errorResponse = ErrorResponse(
         status = 400,
@@ -242,7 +242,7 @@ class Controller(
     val errors = List(
       validateNumericList(getListParamAsScalaList(koulutusalat2), "koulutusalat2"),
       validateNumericList(getListParamAsScalaList(selectedKoulutusalat3), "koulutusalat3")
-    ).flatten
+    ).flatten.distinct
     if (errors.nonEmpty) {
       val errorResponse = ErrorResponse(
         status = 400,
