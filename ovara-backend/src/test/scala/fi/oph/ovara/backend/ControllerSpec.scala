@@ -149,7 +149,6 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
     val hakukohteenTila = "julkaistu"
     val valintakoe = null
 
-    // Mock the response writer
 
     when(mockResponse.getWriter).thenReturn(mockWriter)
 
