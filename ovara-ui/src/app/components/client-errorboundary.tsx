@@ -36,7 +36,7 @@ export function ClientErrorBoundary({ children }: { children: ReactNode }) {
     <ErrorBoundary
       fallbackRender={({ error, resetErrorBoundary }) => (
         <ErrorComponent
-          title={t('virhe.sovellusvirhe') /* <-- now using t function */}
+          title={t('virhe.sovellusvirhe')}
           message={error.message}
           retry={resetErrorBoundary}
         />
