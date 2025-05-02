@@ -46,14 +46,20 @@ export async function apiFetch(
       let body: unknown;
       try {
         const clone = response.clone();
-        body = await clone.json();
-      } catch {
-        try {
-          const clone = response.clone();
-          body = await clone.text();
-        } catch {
-          body = undefined;
+        const contentType = clone.headers.get('content-type') || '';
+
+        if (contentType.includes('application/json')) {
+          body = await clone.json();
+        } else {
+          // varmistetaan ettei springin error page vuoda käliin
+          const text = await clone.text();
+          body =
+            text.startsWith('<!DOCTYPE html') || text.includes('<html')
+              ? 'virhe.palvelin'
+              : text;
         }
+      } catch {
+        body = 'virhe.tuntematon';
       }
       throw new FetchError(response, body);
     }
