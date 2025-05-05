@@ -16,7 +16,7 @@ object ParameterValidator {
 
 
   val TULOSTUSTAVAT = Set("koulutustoimijoittain", "oppilaitoksittain", "toimipisteittain", "hauittain", "hakukohteittain", "hakukohderyhmittain",
-    "okm-ohjauksen-aloittain", "koulutusaloittain", "kansalaisuuksittain")
+    "okm-ohjauksen-aloittain", "koulutusaloittain", "kansalaisuuksittain", "koulutuksittain", "toteutuksittain")
   val TILAT = Set("julkaistu", "tallennettu", "arkistoitu")
   val KK_TUTKINNON_TASOT = Set("alempi-ja-ylempi", "alempi", "ylempi")
 

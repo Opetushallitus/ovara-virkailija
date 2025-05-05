@@ -86,28 +86,33 @@ export const getKoodiOptions = (locale: string, koodit: Array<Koodi>) => {
 export const downloadExcel = async (
   raporttiEndpoint: string,
   queryParamsStr: string,
-  setIsLoading: (v: boolean) => void,
-) => {
-  setIsLoading(true);
+): Promise<void> => {
   const response = await apiFetch(
     raporttiEndpoint,
-    {
-      queryParams: `?${queryParamsStr}`,
-    },
+    { queryParams: `?${queryParamsStr}` },
     'no-store',
   );
 
-  const contentDisposition = response.headers.get('content-disposition')!;
-  const filename = contentDisposition.match(/.*filename=(.*)/)![1];
+  const contentDisposition = response.headers.get('content-disposition');
+  if (!contentDisposition) {
+    throw new Error('Missing content-disposition header');
+  }
+
+  const match = contentDisposition.match(/.*filename=(.*)/);
+  if (!match) {
+    throw new Error('Filename not found in header');
+  }
+
+  const filename = match[1];
+  const blob = await response.blob();
 
   const link = document.createElement('a');
   link.style.display = 'none';
-  link.href = URL.createObjectURL(await response.blob());
+  link.href = URL.createObjectURL(blob);
   link.download = filename;
 
   document.body.appendChild(link);
   link.click();
-  setIsLoading(false);
 
   setTimeout(() => {
     URL.revokeObjectURL(link.href);
