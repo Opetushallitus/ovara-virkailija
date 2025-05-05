@@ -10,6 +10,7 @@ import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.{CacheEvict, Cacheable}
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.{Component, Service}
+import scala.util.{Try, Failure, Success}
 
 @Component
 @Service
@@ -20,11 +21,18 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
   @Autowired
   val cacheManager: CacheManager = null
 
-  val LOG: Logger = LoggerFactory.getLogger(classOf[LokalisointiService])
+  val LOG: Logger = LoggerFactory.getLogger(classOf[CommonService])
 
   @Cacheable(value = Array("alkamisvuodet"), key = "#root.methodName")
-  def getAlkamisvuodet: Vector[String] = {
-    db.run(commonRepository.selectDistinctAlkamisvuodet(), "selectDistinctAlkamisvuodet")
+  def getAlkamisvuodet: Either[String, Vector[String]] = {
+    Try {
+      db.run(commonRepository.selectDistinctAlkamisvuodet(), "selectDistinctAlkamisvuodet")
+    } match {
+      case Success(result) => Right(result)
+      case Failure(exception) =>
+        LOG.error("Error fetching alkamisvuodet", exception)
+        Left("virhe.tietokanta")
+    }
   }
 
   @CacheEvict(value = Array("alkamisvuodet"), allEntries = true)
@@ -33,22 +41,29 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     LOG.info("Emptying alkamisvuodet cache")
   }
 
-  def getHaut(alkamiskaudet: List[String], selectedHaut: List[String], haunTyyppi: String): Vector[Haku] = {
-    db.run(
-      commonRepository.selectDistinctExistingHaut(alkamiskaudet, selectedHaut, haunTyyppi),
-      "selectDistinctExistingHaut"
-    )
+  def getHaut(alkamiskaudet: List[String], selectedHaut: List[String], haunTyyppi: String): Either[String, Vector[Haku]] = {
+    Try {
+      db.run(
+        commonRepository.selectDistinctExistingHaut(alkamiskaudet, selectedHaut, haunTyyppi),
+        "selectDistinctExistingHaut"
+      )
+    } match {
+      case Success(result) => Right(result)
+      case Failure(exception) =>
+        LOG.error("Error fetching haut", exception)
+        Left("virhe.tietokanta")
+    }
   }
 
   def getHakukohteet(
-      oppilaitokset: List[String],
-      toimipisteet: List[String],
-      haut: List[String],
-      hakukohderyhmat: List[String],
-      hakukohteet: List[String]
-  ): Vector[Hakukohde] = {
-    val user                      = userService.getEnrichedUserDetails
-    val authorities               = user.authorities
+                      oppilaitokset: List[String],
+                      toimipisteet: List[String],
+                      haut: List[String],
+                      hakukohderyhmat: List[String],
+                      hakukohteet: List[String]
+                    ): Either[String, Vector[Hakukohde]] = {
+    val user = userService.getEnrichedUserDetails
+    val authorities = user.authorities
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
 
     val allowedOrgOidsFromSelection =
@@ -62,105 +77,201 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       kayttooikeusOrganisaatiot intersect hakukohderyhmat
     }
 
-    db.run(
-      commonRepository
-        .selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(
-          allowedOrgOidsFromSelection,
-          haut,
-          allowedHakukohderyhmaOids,
-          hakukohteet
-        ),
-      "selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja"
-    )
-  }
-
-  def getPohjakoulutukset: Seq[Koodi] = {
-    db.run(commonRepository.selectToisenAsteenPohjakoulutukset, "selectToisenAsteenPohjakoulutukset")
-  }
-
-  def getHarkinnanvaraisuudet: Vector[String] = {
-    db.run(commonRepository.selectDistinctHarkinnanvaraisuudet(), "selectDistinctHarkinnanvaraisuudet")
-  }
-
-  def getValintatiedot: Vector[String] = {
-    db.run(commonRepository.selectDistinctValintatiedot, "selectDistinctValintatiedot")
-  }
-
-  def getVastaanottotiedot: Vector[String] = {
-    db.run(commonRepository.selectDistinctVastaanottotiedot, "selectDistinctVastaanottotiedot")
-  }
-
-  def getOpetuskielet: Vector[Koodi] = {
-    db.run(commonRepository.selectDistinctOpetuskielet, "selectDistinctOpetuskielet")
-  }
-
-  def getMaakunnat: Vector[Koodi] = {
-    db.run(commonRepository.selectDistinctMaakunnat, "selectDistinctMaakunnat")
-  }
-
-  def getKunnat(maakunnat: List[String], selectedKunnat: List[String]): Vector[Koodi] = {
-    db.run(commonRepository.selectDistinctKunnat(maakunnat, selectedKunnat), "selectDistinctKunnat")
-  }
-
-  def getKoulutusalat1: Vector[Koodi] = {
-    db.run(commonRepository.selectDistinctKoulutusalat1(), "selectDistinctKoulutusalat1")
-  }
-
-  def getKoulutusalat2(koulutusalat1: List[String], selectedKoulutusalat2: List[String]): Vector[Koodi] = {
-    db.run(
-      commonRepository.selectDistinctKoulutusalat2(koulutusalat1, selectedKoulutusalat2),
-      "selectDistinctKoulutusalat2"
-    )
-  }
-
-  def getKoulutusalat3(koulutusalat2: List[String], selectedKoulutusalat3: List[String]): Vector[Koodi] = {
-    db.run(
-      commonRepository.selectDistinctKoulutusalat3(koulutusalat2, selectedKoulutusalat3),
-      "selectDistinctKoulutusalat3"
-    )
-  }
-
-  def getOkmOhjauksenAlat: Vector[Koodi] = {
-    db.run(commonRepository.selectDistinctOkmOhjauksenAlat, "selectDistinctOkmOhjauksenAlat")
-  }
-
-  def getHakukohderyhmat(haut: List[String]): Vector[Hakukohderyhma] = {
-    val user             = userService.getEnrichedUserDetails
-    val kayttooikeusOids = AuthoritiesUtil.getKayttooikeusOids(user.authorities)
-    val hakukohderyhmaOids =
-      if (AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOids))
-        List() // ei rajata listaa pääkäyttäjälle
-      else
-        kayttooikeusOids
-    db.run(commonRepository.selectHakukohderyhmat(hakukohderyhmaOids, haut), "selectHakukohderyhmat")
-  }
-
-  def getOrganisaatioHierarkiatWithUserRights: List[OrganisaatioHierarkia] = {
-    val user          = userService.getEnrichedUserDetails
-    val organisaatiot = AuthoritiesUtil.getKayttooikeusOids(user.authorities)
-
-    val parentOids = if (organisaatiot.contains(OPH_PAAKAYTTAJA_OID)) {
-      List(OPH_PAAKAYTTAJA_OID)
-    } else {
-      val parentChildOrgs = db.run(commonRepository.selectChildOrganisaatiot(organisaatiot), "selectChildOrganisaatiot")
-      parentChildOrgs.groupBy(_.parent_oid).keys.toList
+    Try {
+      db.run(
+        commonRepository
+          .selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(
+            allowedOrgOidsFromSelection,
+            haut,
+            allowedHakukohderyhmaOids,
+            hakukohteet
+          ),
+        "selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja"
+      )
+    } match {
+      case Success(result) => Right(result)
+      case Failure(exception) =>
+        LOG.error("Error fetching hakukohteet", exception)
+        Left("virhe.tietokanta")
     }
+  }
 
-    // TODO: Haetaan käyttäjän organisaatioille organisaatiotyyppi ja sen perusteella haetaan kannasta toimipisteet, oppilaitokset ja koulutustoimijat?
-    // TODO: Nyt haetaan kaikilla parentOidseilla joka tasolta riippumatta parentoidin organisaation tyypistä
-    val koulutustoimijahierarkia = getKoulutustoimijahierarkia(parentOids)
-
-    val kayttoOikeushierarkiat = if (organisaatiot.contains(OPH_PAAKAYTTAJA_OID)) {
-      koulutustoimijahierarkia
-    } else {
-      val oppilaitoshierarkia = getOppilaitoshierarkiat(parentOids)
-
-      val toimipistehierarkia = getToimipistehierarkiat(parentOids)
-
-      koulutustoimijahierarkia concat oppilaitoshierarkia concat toimipistehierarkia
+  def getPohjakoulutukset: Either[String, Seq[Koodi]] = {
+    Try {
+      db.run(commonRepository.selectToisenAsteenPohjakoulutukset, "selectToisenAsteenPohjakoulutukset")
+    } match {
+      case Success(result) => Right(result)
+      case Failure(exception) =>
+        LOG.error("Error fetching pohjakoulutukset", exception)
+        Left("virhe.tietokanta")
     }
+  }
 
-    kayttoOikeushierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterActiveOrgsWithoutPeruskoulu(hierarkia))
+  def getHarkinnanvaraisuudet: Either[String, Vector[String]] = {
+    Try {
+      db.run(commonRepository.selectDistinctHarkinnanvaraisuudet(), "selectDistinctHarkinnanvaraisuudet")
+    } match {
+      case Success(result) => Right(result)
+      case Failure(exception) =>
+        LOG.error("Error fetching harkinnanvaraisuudet", exception)
+        Left("virhe.tietokanta")
+    }
+  }
+
+  def getValintatiedot: Either[String, Vector[String]] = {
+    Try {
+      db.run(commonRepository.selectDistinctValintatiedot, "selectDistinctValintatiedot")
+    } match {
+      case Success(result) => Right(result)
+      case Failure(exception) =>
+        LOG.error("Error fetching valintatiedot", exception)
+        Left("virhe.tietokanta")
+    }
+  }
+
+  def getVastaanottotiedot: Either[String, Vector[String]] = {
+    Try {
+      db.run(commonRepository.selectDistinctVastaanottotiedot, "selectDistinctVastaanottotiedot")
+    } match {
+      case Success(result) => Right(result)
+      case Failure(exception) =>
+        LOG.error("Error fetching vastaanottotiedot", exception)
+        Left("virhe.tietokanta")
+    }
+  }
+
+  def getOpetuskielet: Either[String, Vector[Koodi]] = {
+    Try {
+      db.run(commonRepository.selectDistinctOpetuskielet, "selectDistinctOpetuskielet")
+    } match {
+      case Success(result) => Right(result)
+      case Failure(exception) =>
+        LOG.error("Error fetching opetuskielet", exception)
+        Left("virhe.tietokanta")
+    }
+  }
+
+  def getMaakunnat: Either[String, Vector[Koodi]] = {
+    Try {
+      db.run(commonRepository.selectDistinctMaakunnat, "selectDistinctMaakunnat")
+    } match {
+      case Success(result) => Right(result)
+      case Failure(exception) =>
+        LOG.error("Error fetching maakunnat", exception)
+        Left("virhe.tietokanta")
+    }
+  }
+
+  def getKunnat(maakunnat: List[String], selectedKunnat: List[String]): Either[String, Vector[Koodi]] = {
+    Try {
+      db.run(commonRepository.selectDistinctKunnat(maakunnat, selectedKunnat), "selectDistinctKunnat")
+    } match {
+      case Success(result) => Right(result)
+      case Failure(exception) =>
+        LOG.error("Error fetching kunnat", exception)
+        Left("virhe.tietokanta")
+    }
+  }
+
+  def getKoulutusalat1: Either[String, Vector[Koodi]] = {
+    Try {
+      db.run(commonRepository.selectDistinctKoulutusalat1(), "selectDistinctKoulutusalat1")
+    } match {
+      case Success(result) => Right(result)
+      case Failure(exception) =>
+        LOG.error("Error fetching koulutusalat1", exception)
+        Left("virhe.tietokanta")
+    }
+  }
+
+  def getKoulutusalat2(koulutusalat1: List[String], selectedKoulutusalat2: List[String]): Either[String, Vector[Koodi]] = {
+    Try {
+      db.run(
+        commonRepository.selectDistinctKoulutusalat2(koulutusalat1, selectedKoulutusalat2),
+        "selectDistinctKoulutusalat2"
+      )
+    } match {
+      case Success(result) => Right(result)
+      case Failure(exception) =>
+        LOG.error("Error fetching koulutusalat2", exception)
+        Left("virhe.tietokanta")
+    }
+  }
+
+  def getKoulutusalat3(koulutusalat2: List[String], selectedKoulutusalat3: List[String]): Either[String, Vector[Koodi]] = {
+    Try {
+      db.run(
+        commonRepository.selectDistinctKoulutusalat3(koulutusalat2, selectedKoulutusalat3),
+        "selectDistinctKoulutusalat3"
+      )
+    } match {
+      case Success(result) => Right(result)
+      case Failure(exception) =>
+        LOG.error("Error fetching koulutusalat3", exception)
+        Left("virhe.tietokanta")
+    }
+  }
+
+  def getOkmOhjauksenAlat: Either[String, Vector[Koodi]] = {
+    Try {
+      db.run(commonRepository.selectDistinctOkmOhjauksenAlat, "selectDistinctOkmOhjauksenAlat")
+    } match {
+      case Success(result) => Right(result)
+      case Failure(exception) =>
+        LOG.error("Error fetching okm-ohjauksen-alat", exception)
+        Left("virhe.tietokanta")
+    }
+  }
+
+  def getHakukohderyhmat(haut: List[String]): Either[String, Vector[Hakukohderyhma]] = {
+    Try {
+      val user = userService.getEnrichedUserDetails
+      val kayttooikeusOids = AuthoritiesUtil.getKayttooikeusOids(user.authorities)
+      val hakukohderyhmaOids =
+        if (AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOids))
+          List() // ei rajata listaa pääkäyttäjälle
+        else
+          kayttooikeusOids
+      db.run(commonRepository.selectHakukohderyhmat(hakukohderyhmaOids, haut), "selectHakukohderyhmat")
+    } match {
+      case Success(result) => Right(result)
+      case Failure(exception) =>
+        LOG.error("Error fetching hakukohderyhmat", exception)
+        Left("virhe.tietokanta")
+    }
+  }
+
+  def getOrganisaatioHierarkiatWithUserRights: Either[String, List[OrganisaatioHierarkia]] = {
+    Try {
+      val user = userService.getEnrichedUserDetails
+      val organisaatiot = AuthoritiesUtil.getKayttooikeusOids(user.authorities)
+
+      val parentOids = if (organisaatiot.contains(OPH_PAAKAYTTAJA_OID)) {
+        List(OPH_PAAKAYTTAJA_OID)
+      } else {
+        val parentChildOrgs = db.run(commonRepository.selectChildOrganisaatiot(organisaatiot), "selectChildOrganisaatiot")
+        parentChildOrgs.groupBy(_.parent_oid).keys.toList
+      }
+
+      // TODO: Haetaan käyttäjän organisaatioille organisaatiotyyppi ja sen perusteella haetaan kannasta toimipisteet, oppilaitokset ja koulutustoimijat?
+      // TODO: Nyt haetaan kaikilla parentOidseilla joka tasolta riippumatta parentoidin organisaation tyypistä
+      val koulutustoimijahierarkia = getKoulutustoimijahierarkia(parentOids)
+
+      val kayttoOikeushierarkiat = if (organisaatiot.contains(OPH_PAAKAYTTAJA_OID)) {
+        koulutustoimijahierarkia
+      } else {
+        val oppilaitoshierarkia = getOppilaitoshierarkiat(parentOids)
+        val toimipistehierarkia = getToimipistehierarkiat(parentOids)
+        koulutustoimijahierarkia ++ oppilaitoshierarkia ++ toimipistehierarkia
+      }
+
+      kayttoOikeushierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterActiveOrgsWithoutPeruskoulu(hierarkia))
+    } match {
+      case Success(result) => Right(result)
+      case Failure(exception) =>
+        LOG.error("Error fetching organisaatio hierarkiat with user rights", exception)
+        Left("virhe.tietokanta")
+    }
   }
 
   def getToimipistehierarkiat(toimipisteet: List[String]): List[OrganisaatioHierarkia] = {

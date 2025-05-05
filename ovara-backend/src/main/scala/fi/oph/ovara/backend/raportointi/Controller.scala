@@ -11,10 +11,11 @@ import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.apache.poi.ss.usermodel.Workbook
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.{HttpHeaders, ResponseEntity}
+import org.springframework.http.{HttpHeaders, HttpStatus, ResponseEntity}
 import org.springframework.security.web.csrf.CsrfToken
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
 import org.springframework.web.servlet.view.RedirectView
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -68,6 +69,33 @@ class Controller(
     if (listParam == null) List() else listParam.asScala.toList
   }
 
+  private def handleRequest[T](
+                        validationErrors: List[String],
+                        mapper: ObjectMapper
+                      )(block: => Either[String, T]): ResponseEntity[String] = {
+    if (validationErrors.nonEmpty) {
+      // validointivirheistä palautetaan yksityiskohtia
+      val errorResponse = ErrorResponse(
+        status = HttpServletResponse.SC_BAD_REQUEST,
+        message = "validation.error",
+        details = Some(validationErrors)
+      )
+      ResponseEntity
+        .status(HttpServletResponse.SC_BAD_REQUEST)
+        .body(mapper.writeValueAsString(errorResponse))
+    } else {
+      block match {
+        case Right(result) =>
+          ResponseEntity.ok(mapper.writeValueAsString(result))
+        case Left(errorMessage) =>
+          // odottamattomista virheistä vain virheviesti
+          ResponseEntity
+            .status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+            .body(mapper.writeValueAsString(errorMessage))
+      }
+    }
+  }
+
   @GetMapping(path = Array("healthcheck"))
   def healthcheck = "Ovara application is running!"
 
@@ -98,195 +126,244 @@ class Controller(
   def csrf(csrfToken: CsrfToken): String = mapper.writeValueAsString(csrfToken)
 
   @GetMapping(path = Array("alkamisvuodet"))
-  def alkamisvuodet: String = mapper.writeValueAsString(commonService.getAlkamisvuodet)
+  def alkamisvuodet: ResponseEntity[String] = {
+    handleRequest(Nil, mapper) {
+      commonService.getAlkamisvuodet
+    }
+  }
 
   @GetMapping(path = Array("haut"))
   def haut(
-      @RequestParam("alkamiskaudet", required = false) alkamiskaudet: java.util.Collection[String],
-      @RequestParam("haut", required = false) selectedHaut: java.util.Collection[String],
-      @RequestParam("haun_tyyppi", required = false) haun_tyyppi: String
-  ): ResponseEntity[Any] = {
-    val alkamiskaudetList =
-      getListParamAsScalaList(alkamiskaudet)
-    val selectedHautList = getListParamAsScalaList(selectedHaut)
-    val haunTyyppi       = if (haun_tyyppi == null) "" else haun_tyyppi
-
+            @RequestParam("alkamiskaudet", required = false) alkamiskaudet: java.util.Collection[String],
+            @RequestParam("haut", required = false) selectedHaut: java.util.Collection[String],
+            @RequestParam("haun_tyyppi", required = false) haun_tyyppi: String
+          ): ResponseEntity[String] = {
     val errors = List(
-      validateAlphanumericList(alkamiskaudetList, "alkamiskaudet"),
-      validateOidList(selectedHautList, "haut"),
-      validateAlphanumeric(Some(haunTyyppi), "haun-tyyppi")
+      validateAlphanumericList(getListParamAsScalaList(alkamiskaudet), "alkamiskaudet"),
+      validateOidList(getListParamAsScalaList(selectedHaut), "haut"),
+      validateAlphanumeric(Option(haun_tyyppi), "haun-tyyppi")
     ).flatten.distinct
-    if (errors.nonEmpty) {
-      LOG.warn(s"haut parametrien validointivirhe: ${errors.mkString(", ")}")
-      val errorResponse = ErrorResponse(
-        status = 400,
-        message = "validation.error",
-        details = Some(errors)
+
+    handleRequest(errors, mapper) {
+      commonService.getHaut(
+        getListParamAsScalaList(alkamiskaudet),
+        getListParamAsScalaList(selectedHaut),
+        Option(haun_tyyppi).getOrElse("")
       )
-      ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(mapper.writeValueAsString(errorResponse))
-    } else {
-      val result = commonService.getHaut(alkamiskaudetList, selectedHautList, haunTyyppi)
-      ResponseEntity.ok(mapper.writeValueAsString(result))
     }
   }
 
   @GetMapping(path = Array("hakukohteet"))
   def hakukohteet(
-      @RequestParam("haut") haut: java.util.Collection[String],
-      @RequestParam("oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
-      @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
-      @RequestParam("hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
-      @RequestParam("hakukohteet", required = false) selectedHakukohteet: java.util.Collection[String]
-  ):  ResponseEntity[Any] = {
+                   @RequestParam("haut") haut: java.util.Collection[String],
+                   @RequestParam("oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
+                   @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
+                   @RequestParam("hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
+                   @RequestParam("hakukohteet", required = false) selectedHakukohteet: java.util.Collection[String]
+                 ): ResponseEntity[String] = {
     val errors = List(
       validateOrganisaatioOidList(getListParamAsScalaList(oppilaitokset), "oppilaitokset"),
       validateOrganisaatioOidList(getListParamAsScalaList(toimipisteet), "toimipisteet"),
       validateOidList(getListParamAsScalaList(haut), "haut"),
       validateOidList(getListParamAsScalaList(hakukohderyhmat), "hakukohderyhmat"),
-      validateOidList(getListParamAsScalaList(selectedHakukohteet), "hakukohteet"),
+      validateOidList(getListParamAsScalaList(selectedHakukohteet), "hakukohteet")
     ).flatten.distinct
-    if (errors.nonEmpty) {
-      LOG.warn(s"hakuohteet parametrien validointivirhe: ${errors.mkString(", ")}")
-      val errorResponse = ErrorResponse(
-        status = 400,
-        message = "validation.error",
-        details = Some(errors)
-      )
-      ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(errorResponse)
-    } else {
-      val result = commonService.getHakukohteet(
+
+    handleRequest(errors, mapper) {
+      commonService.getHakukohteet(
         getListParamAsScalaList(oppilaitokset),
         getListParamAsScalaList(toimipisteet),
         getListParamAsScalaList(haut),
         getListParamAsScalaList(hakukohderyhmat),
         getListParamAsScalaList(selectedHakukohteet)
       )
-      ResponseEntity.ok(mapper.writeValueAsString(result))
     }
   }
 
   @GetMapping(path = Array("pohjakoulutukset-toinen-aste"))
-  def pohjakoulutuksetToinenAste(): String = mapper.writeValueAsString(commonService.getPohjakoulutukset)
+  def pohjakoulutuksetToinenAste(): ResponseEntity[String] = {
+    handleRequest(Nil, mapper) {
+      commonService.getPohjakoulutukset
+    }
+  }
 
   @GetMapping(path = Array("organisaatiot"))
-  def organisaatiot: String = mapper.writeValueAsString(commonService.getOrganisaatioHierarkiatWithUserRights)
+  def organisaatiot: ResponseEntity[String] = {
+    handleRequest(Nil, mapper) {
+      commonService.getOrganisaatioHierarkiatWithUserRights
+    }
+  }
 
   @GetMapping(path = Array("harkinnanvaraisuudet"))
-  def harkinnanvaraisuudet: String = mapper.writeValueAsString(commonService.getHarkinnanvaraisuudet)
+  def harkinnanvaraisuudet: ResponseEntity[String] = {
+    handleRequest(Nil, mapper) {
+      commonService.getHarkinnanvaraisuudet
+    }
+  }
 
   @GetMapping(path = Array("valintatiedot"))
-  def valintatiedot: String = mapper.writeValueAsString(commonService.getValintatiedot)
+  def valintatiedot: ResponseEntity[String] = {
+    handleRequest(Nil, mapper) {
+      commonService.getValintatiedot
+    }
+  }
 
   @GetMapping(path = Array("vastaanottotiedot"))
-  def vastaanottotiedot: String = mapper.writeValueAsString(commonService.getVastaanottotiedot)
+  def vastaanottotiedot: ResponseEntity[String] = {
+    handleRequest(Nil, mapper) {
+      commonService.getVastaanottotiedot
+    }
+  }
 
   @GetMapping(path = Array("opetuskielet"))
-  def opetuskielet: String = mapper.writeValueAsString(commonService.getOpetuskielet)
+  def opetuskielet: ResponseEntity[String] = {
+    handleRequest(Nil, mapper) {
+      commonService.getOpetuskielet
+    }
+  }
 
   @GetMapping(path = Array("maakunnat"))
-  def maakunnat: String = mapper.writeValueAsString(commonService.getMaakunnat)
+  def maakunnat: ResponseEntity[String] = {
+    handleRequest(Nil, mapper) {
+      commonService.getMaakunnat
+    }
+  }
 
   @GetMapping(path = Array("kunnat"))
   def kunnat(
-      @RequestParam("maakunnat", required = false) maakunnat: java.util.Collection[String],
-      @RequestParam("selectedKunnat", required = false) selectedKunnat: java.util.Collection[String]
-  ): ResponseEntity[Any] = {
+              @RequestParam("maakunnat", required = false) maakunnat: java.util.Collection[String],
+              @RequestParam("selectedKunnat", required = false) selectedKunnat: java.util.Collection[String]
+            ): ResponseEntity[String] = {
     val errors = List(
       validateNumericList(getListParamAsScalaList(maakunnat), "maakunnat"),
       validateNumericList(getListParamAsScalaList(selectedKunnat), "kunnat")
     ).flatten.distinct
-    if (errors.nonEmpty) {
-      LOG.warn(s"kunnat parametrien validointivirhe: ${errors.mkString(", ")}")
-      val errorResponse = ErrorResponse(
-        status = 400,
-        message = "validation.error",
-        details = Some(errors)
+
+    handleRequest(errors, mapper) {
+      commonService.getKunnat(
+        getListParamAsScalaList(maakunnat),
+        getListParamAsScalaList(selectedKunnat)
       )
-      ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(errorResponse)
-    } else {
-      ResponseEntity.ok(mapper.writeValueAsString(
-        commonService.getKunnat(getListParamAsScalaList(maakunnat), getListParamAsScalaList(selectedKunnat))
-      ))
     }
   }
 
-
   @GetMapping(path = Array("koulutusalat1"))
-  def koulutusalat1: String = mapper.writeValueAsString(commonService.getKoulutusalat1)
+  def koulutusalat1: ResponseEntity[String] = {
+    handleRequest(Nil, mapper) {
+      commonService.getKoulutusalat1
+    }
+  }
 
   @GetMapping(path = Array("koulutusalat2"))
   def koulutusalat2(
-      @RequestParam("koulutusalat1", required = false) koulutusalat1: java.util.Collection[String],
-      @RequestParam("selectedKoulutusalat2", required = false) selectedKoulutusalat2: java.util.Collection[String]
-  ): ResponseEntity[Any] = {
+                     @RequestParam("koulutusalat1", required = false) koulutusalat1: java.util.Collection[String],
+                     @RequestParam("selectedKoulutusalat2", required = false) selectedKoulutusalat2: java.util.Collection[String]
+                   ): ResponseEntity[String] = {
     val errors = List(
       validateNumericList(getListParamAsScalaList(koulutusalat1), "koulutusalat1"),
       validateNumericList(getListParamAsScalaList(selectedKoulutusalat2), "koulutusalat2")
     ).flatten.distinct
-    if (errors.nonEmpty) {
-      LOG.warn(s"koulutusalat2 parametrien validointivirhe: ${errors.mkString(", ")}")
-      val errorResponse = ErrorResponse(
-        status = 400,
-        message = "validation.error",
-        details = Some(errors)
+
+    handleRequest(errors, mapper) {
+      commonService.getKoulutusalat2(
+        getListParamAsScalaList(koulutusalat1),
+        getListParamAsScalaList(selectedKoulutusalat2)
       )
-      ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(errorResponse)
-    } else {
-      ResponseEntity.ok(mapper.writeValueAsString(
-        commonService.getKoulutusalat2(getListParamAsScalaList(koulutusalat1), getListParamAsScalaList(selectedKoulutusalat2))
-      ))
     }
   }
 
   @GetMapping(path = Array("koulutusalat3"))
   def koulutusalat3(
-      @RequestParam("koulutusalat2", required = false) koulutusalat2: java.util.Collection[String],
-      @RequestParam("selectedKoulutusalat3", required = false) selectedKoulutusalat3: java.util.Collection[String]
-  ): ResponseEntity[Any] = {
+                     @RequestParam("koulutusalat2", required = false) koulutusalat2: java.util.Collection[String],
+                     @RequestParam("selectedKoulutusalat3", required = false) selectedKoulutusalat3: java.util.Collection[String]
+                   ): ResponseEntity[String] = {
     val errors = List(
       validateNumericList(getListParamAsScalaList(koulutusalat2), "koulutusalat2"),
       validateNumericList(getListParamAsScalaList(selectedKoulutusalat3), "koulutusalat3")
     ).flatten.distinct
-    if (errors.nonEmpty) {
-      LOG.warn(s"koulutusalat3 parametrien validointivirhe: ${errors.mkString(", ")}")
-      val errorResponse = ErrorResponse(
-        status = 400,
-        message = "validation.error",
-        details = Some(errors)
+
+    handleRequest(errors, mapper) {
+      commonService.getKoulutusalat3(
+        getListParamAsScalaList(koulutusalat2),
+        getListParamAsScalaList(selectedKoulutusalat3)
       )
-      ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(errorResponse)
-    } else {
-      ResponseEntity.ok(mapper.writeValueAsString(
-        commonService.getKoulutusalat3(getListParamAsScalaList(koulutusalat2), getListParamAsScalaList(selectedKoulutusalat3))
-      ))
     }
   }
 
   @GetMapping(path = Array("hakukohderyhmat"))
   def hakukohderyhmat(
-      @RequestParam("haut", required = true) haut: java.util.Collection[String]
-  ): ResponseEntity[Any] = {
+                       @RequestParam("haut", required = true) haut: java.util.Collection[String]
+                     ): ResponseEntity[String] = {
     val errors = validateOidList(getListParamAsScalaList(haut), "haut")
-    if (errors.nonEmpty) {
-      LOG.warn(s"hakukohderyhmät parametrien validointivirhe: ${errors.mkString(", ")}")
-      val errorResponse = ErrorResponse(
-        status = 400,
-        message = "validation.error",
-        details = Some(errors)
-      )
-      ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(errorResponse)
-    } else {
-      ResponseEntity.ok(mapper.writeValueAsString(
-        commonService.getHakukohderyhmat(getListParamAsScalaList(haut))
-      ))
+
+    handleRequest(errors, mapper) {
+      commonService.getHakukohderyhmat(getListParamAsScalaList(haut))
     }
   }
 
   @GetMapping(path = Array("okm-ohjauksen-alat"))
-  def okmOhjauksenAlat: String = mapper.writeValueAsString(commonService.getOkmOhjauksenAlat)
+  def okmOhjauksenAlat: ResponseEntity[String] = {
+    handleRequest(Nil, mapper) {
+      commonService.getOkmOhjauksenAlat
+    }
+  }
 
   // RAPORTIT
 
+  private def handleExcelRequest(
+                                  validationErrors: List[String],
+                                  response: HttpServletResponse,
+                                  request: HttpServletRequest,
+                                  id: String,
+                                  raporttiParams: Map[String, Any],
+                                  auditOperation: AuditOperation,
+                                  mapper: ObjectMapper
+                                )(block: => Either[String, XSSFWorkbook]): Unit = {
+    if (validationErrors.nonEmpty) {
+      LOG.warn(s"Excel parameter validation failed: ${validationErrors.mkString(", ")}")
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
+      response.setContentType("application/json")
+      val errorJson = mapper.writeValueAsString(Map(
+        "status" -> HttpServletResponse.SC_BAD_REQUEST,
+        "message" -> "validation.error",
+        "details" -> validationErrors.asJava
+      ))
+      response.getWriter.write(errorJson)
+      return
+    }
+
+    try {
+      block match {
+        case Right(wb) =>
+          auditLog.logWithParams(request, auditOperation, raporttiParams)
+          LOG.info(s"Sending Excel report: $id")
+          val dateTimeStr = LocalDateTime.now().withNano(0).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+          val out = response.getOutputStream
+          response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+          response.setHeader(
+            HttpHeaders.CONTENT_DISPOSITION,
+            s"attachment; filename=$id-$dateTimeStr.xlsx"
+          )
+          response.setHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Content-Disposition")
+          wb.write(out)
+          out.close()
+          wb.close()
+
+        case Left(errorKey) =>
+          LOG.error(s"Excel report generation failed ($id): $errorKey")
+          response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+          response.setContentType("application/json")
+          response.getWriter.write(mapper.writeValueAsString(errorKey))
+      }
+    } catch {
+      case e: Exception =>
+        LOG.error(s"Unexpected error while generating Excel ($id): ${e.getMessage}", e)
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+        response.setContentType("application/json")
+        response.getWriter.write(mapper.writeValueAsString("unexpected.error"))
+    }
+  }  
+  
   private def sendExcel(
       wb: Option[Workbook],
       response: HttpServletResponse,
@@ -355,31 +432,7 @@ class Controller(
       maybeHakukohteenTila,
       valintakoe
     )
-
-    if (validationErrors.nonEmpty) {
-      LOG.warn(s"koul-tot-hakukohteet parametrien validointivirhe: ${validationErrors.mkString(", ")}")
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
-      response.setContentType("application/json")
-      val errorResponse = ErrorResponse(
-        status = 400,
-        message = "validation.error",
-        details = Some(validationErrors)
-      )
-      response.getWriter.write(mapper.writeValueAsString(errorResponse))
-      return
-    }
-
-    val wb = koulutuksetToteutuksetHakukohteetService.get(
-      hakuList,
-      maybeKoulutustoimija,
-      oppilaitosList,
-      toimipisteList,
-      maybeKoulutuksenTila,
-      maybeToteutuksenTila,
-      maybeHakukohteenTila,
-      maybeValintakoe
-    )
-
+    
     val raporttiParams = Map(
       "haut"            -> Option(hakuList).filterNot(_.isEmpty),
       "koulutustoimija" -> maybeKoulutustoimija,
@@ -391,14 +444,26 @@ class Controller(
       "valintakoe"      -> maybeValintakoe
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
-    sendExcel(
-      Some(wb),
-      response,
-      request,
-      "koulutukset-toteutukset-hakukohteet",
-      raporttiParams,
-      KoulutuksetToteutuksetHakukohteet
-    )
+    handleExcelRequest(
+      validationErrors = validationErrors,
+      response = response,
+      request = request,
+      id = "koulutukset-toteutukset-hakukohteet",
+      raporttiParams = raporttiParams,
+      auditOperation = KoulutuksetToteutuksetHakukohteet,
+      mapper = mapper
+    ) {
+      koulutuksetToteutuksetHakukohteetService.get(
+        hakuList,
+        maybeKoulutustoimija,
+        oppilaitosList,
+        toimipisteList,
+        maybeKoulutuksenTila,
+        maybeToteutuksenTila,
+        maybeHakukohteenTila,
+        maybeValintakoe
+      )
+    }
   }
 
   @GetMapping(path = Array("kk-koulutukset-toteutukset-hakukohteet"))
@@ -437,31 +502,6 @@ class Controller(
       tutkinnonTasoList
     )
 
-    if (validationErrors.nonEmpty) {
-      LOG.warn(s"kk-koul-tot-hakukohteet parametrien validointivirhe: ${validationErrors.mkString(", ")}")
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
-      response.setContentType("application/json")
-      val errorResponse = ErrorResponse(
-        status = 400,
-        message = "validation.error",
-        details = Some(validationErrors)
-      )
-      response.getWriter.write(mapper.writeValueAsString(errorResponse))
-      return
-    }
-
-    val wb = kkKoulutuksetToteutuksetHakukohteetService.get(
-      hakuList,
-      oppilaitosList,
-      toimipisteList,
-      hakukohderyhmaList,
-      maybeKoulutuksenTila,
-      maybeToteutuksenTila,
-      maybeHakukohteenTila,
-      tutkinnonTasoList,
-      tulostustapa
-    )
-
     val raporttiParams = Map(
       "haut"            -> Option(hakuList).filterNot(_.isEmpty),
       "oppilaitokset"   -> Option(oppilaitosList).filterNot(_.isEmpty),
@@ -471,16 +511,29 @@ class Controller(
       "toteutuksenTila" -> maybeToteutuksenTila,
       "hakukohteenTila" -> maybeHakukohteenTila,
       "tutkinnonTasot"  -> Option(tutkinnonTasoList).filterNot(_.isEmpty)
-    ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
+    ).collect { case (key, Some(value)) => key -> value }
 
-    sendExcel(
-      Some(wb),
-      response,
-      request,
-      "kk-koulutukset-toteutukset-hakukohteet",
-      raporttiParams,
-      KorkeakouluKoulutuksetToteutuksetHakukohteet
-    )
+    handleExcelRequest(
+      validationErrors = validationErrors,
+      response = response,
+      request = request,
+      id = "kk-koulutukset-toteutukset-hakukohteet",
+      raporttiParams = raporttiParams,
+      auditOperation = KorkeakouluKoulutuksetToteutuksetHakukohteet,
+      mapper = mapper
+    ) {
+      kkKoulutuksetToteutuksetHakukohteetService.get(
+        hakuList,
+        oppilaitosList,
+        toimipisteList,
+        hakukohderyhmaList,
+        maybeKoulutuksenTila,
+        maybeToteutuksenTila,
+        maybeHakukohteenTila,
+        tutkinnonTasoList,
+        tulostustapa
+      )
+    }
   }
 
   @GetMapping(path = Array("hakijat"))
@@ -533,42 +586,7 @@ class Controller(
       soraAiempi,
       markkinointilupa,
       julkaisulupa
-    )
-
-    if (validationErrors.nonEmpty) {
-      LOG.warn(s"hakijat parametrien validointivirhe: ${validationErrors.mkString(", ")}")
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
-      response.setContentType("application/json")
-      val errorResponse = ErrorResponse(
-        status = 400,
-        message = "validation.error",
-        details = Some(validationErrors)
-      )
-      response.getWriter.write(mapper.writeValueAsString(errorResponse))
-      return
-    }
-
-    val maybeWb = if (oppilaitosList.nonEmpty || toimipisteList.nonEmpty) {
-      val wb = hakijatService.get(
-        hakuList,
-        oppilaitosList,
-        toimipisteList,
-        hakukohdeList,
-        pohjakoulutusList,
-        valintatietoList,
-        vastaanottotietoList,
-        harkinnanvaraisuusList,
-        maybeKaksoistutkintoKiinnostaa,
-        maybeUrheilijatutkintoKiinnostaa,
-        maybeSoraTerveys,
-        maybeSoraAiempi,
-        maybeMarkkinointilupa,
-        maybeJulkaisulupa
-      )
-      Some(wb)
-    } else {
-      None
-    }
+    ) ++ Option.when(oppilaitosList.isEmpty && toimipisteList.isEmpty)("error.required.missing").toList
 
     val raporttiParams = Map(
       "haut"                 -> Option(hakuList).filterNot(_.isEmpty),
@@ -585,10 +603,40 @@ class Controller(
       "soraAiempi"           -> maybeSoraAiempi,
       "markkinointilupa"     -> maybeMarkkinointilupa,
       "julkaisulupa"         -> maybeJulkaisulupa
-    ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
+    ).collect { case (key, Some(value)) => key -> value }
 
-    sendExcel(maybeWb, response, request, "hakijat", raporttiParams, ToisenAsteenHakijat)
+    handleExcelRequest(
+      validationErrors = validationErrors,
+      response = response,
+      request = request,
+      id = "hakijat",
+      raporttiParams = raporttiParams,
+      auditOperation = ToisenAsteenHakijat,
+      mapper = mapper
+    ) {
+      if (validationErrors.nonEmpty) {
+        Left("validation.error")
+      } else {
+        hakijatService.get(
+          hakuList,
+          oppilaitosList,
+          toimipisteList,
+          hakukohdeList,
+          pohjakoulutusList,
+          valintatietoList,
+          vastaanottotietoList,
+          harkinnanvaraisuusList,
+          maybeKaksoistutkintoKiinnostaa,
+          maybeUrheilijatutkintoKiinnostaa,
+          maybeSoraTerveys,
+          maybeSoraAiempi,
+          maybeMarkkinointilupa,
+          maybeJulkaisulupa
+        )
+      }
+    }
   }
+  
 
   @GetMapping(path = Array("kk-hakijat"))
   def kk_hakijat(
@@ -631,23 +679,33 @@ class Controller(
       naytaYoArvosanat,
       naytaHetu,
       naytaPostiosoite,
-    )
+    ) ++ Option.when(oppilaitosList.isEmpty && toimipisteList.isEmpty && hakukohderyhmaList.isEmpty)("error.required.missing").toList
 
-    if (validationErrors.nonEmpty) {
-      LOG.warn(s"kk-hakijat parametrien validointivirhe: ${validationErrors.mkString(", ")}")
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
-      response.setContentType("application/json")
-      val errorResponse = ErrorResponse(
-        status = 400,
-        message = "validation.error",
-        details = Some(validationErrors)
-      )
-      response.getWriter.write(mapper.writeValueAsString(errorResponse))
-      return
-    }
+    val raporttiParams = Map(
+      "haut" -> Option(hakuList).filterNot(_.isEmpty),
+      "oppilaitokset" -> Option(oppilaitosList).filterNot(_.isEmpty),
+      "toimipisteet" -> Option(toimipisteList).filterNot(_.isEmpty),
+      "hakukohteet" -> Option(hakukohdeList).filterNot(_.isEmpty),
+      "valintatiedot" -> Option(valintatietoList).filterNot(_.isEmpty),
+      "vastaanottotiedot" -> Option(vastaanottotietoList).filterNot(_.isEmpty),
+      "hakukohderyhmat" -> Option(hakukohderyhmaList).filterNot(_.isEmpty),
+      "kansalaisuusluokat" -> Option(kansalaisuusList).filterNot(_.isEmpty),
+      "markkinointilupa" -> maybeMarkkinointilupa,
+      "naytaYoArvosanat" -> naytaYoArvosanat,
+      "naytaHetu" -> naytaHetu,
+      "naytaPostiosoite" -> naytaPostiosoite
+    ).collect { case (key, Some(value)) => key -> value }
 
-    val maybeWb = if (oppilaitosList.nonEmpty || toimipisteList.nonEmpty || hakukohderyhmaList.nonEmpty) {
-      val wb = kkHakijatService.get(
+    handleExcelRequest(
+      validationErrors = validationErrors,
+      response = response,
+      request = request,
+      id = "kk-hakijat",
+      raporttiParams = raporttiParams,
+      auditOperation = KkHakijat,
+      mapper = mapper
+    ) {
+      kkHakijatService.get(
         hakuList,
         oppilaitosList,
         toimipisteList,
@@ -661,27 +719,7 @@ class Controller(
         naytaHetu.toBoolean,
         naytaPostiosoite.toBoolean
       )
-      Some(wb)
-    } else {
-      None
     }
-
-    val raporttiParams = Map(
-      "haut"               -> Option(hakuList).filterNot(_.isEmpty),
-      "oppilaitokset"      -> Option(oppilaitosList).filterNot(_.isEmpty),
-      "toimipisteet"       -> Option(toimipisteList).filterNot(_.isEmpty),
-      "hakukohteet"        -> Option(hakukohdeList).filterNot(_.isEmpty),
-      "valintatiedot"      -> Option(vastaanottotietoList).filterNot(_.isEmpty),
-      "vastaanottotiedot"  -> Option(vastaanottotietoList).filterNot(_.isEmpty),
-      "hakukohderyhmat"    -> Option(vastaanottotietoList).filterNot(_.isEmpty),
-      "kansalaisuusluokat" -> Option(kansalaisuusList).filterNot(_.isEmpty),
-      "markkinointilupa"   -> maybeMarkkinointilupa,
-      "naytaYoArvosanat"   -> naytaYoArvosanat,
-      "naytaHetu"          -> naytaHetu,
-      "naytaPostiosoite"   -> naytaPostiosoite
-    ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
-
-    sendExcel(maybeWb, response, request, "kk-hakijat", raporttiParams, KkHakijat)
   }
 
   @GetMapping(path = Array("hakeneet-hyvaksytyt-vastaanottaneet"))
@@ -739,62 +777,52 @@ class Controller(
       naytaHakutoiveet,
     )
 
-    if (validationErrors.nonEmpty) {
-      LOG.warn(s"tilastoraportti parametrien validointivirhe: ${validationErrors.mkString(", ")}")
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
-      response.setContentType("application/json")
-      val errorResponse = ErrorResponse(
-        status = 400,
-        message = "validation.error",
-        details = Some(validationErrors)
-      )
-      response.getWriter.write(mapper.writeValueAsString(errorResponse))
-      return
-    }
-
-    val wb = hakeneetHyvaksytytVastaanottaneetService.get(
-      hakuList,
-      tulostustapaValinta,
-      maybeKoulutustoimija,
-      oppilaitosList,
-      toimipisteList,
-      hakukohdeList,
-      koulutusala1List,
-      koulutusala2List,
-      koulutusala3List,
-      opetuskieliList,
-      maakuntaList,
-      kuntaList,
-      harkinnanvaraisuusList,
-      maybeSukupuoli,
-      naytaHakutoiveetBool
-    )
-
     val raporttiParams = Map(
-      "haut"                 -> Option(hakuList).filterNot(_.isEmpty),
-      "koulutustoimija"      -> maybeKoulutustoimija,
-      "oppilaitokset"        -> Option(oppilaitosList).filterNot(_.isEmpty),
-      "toimipisteet"         -> Option(toimipisteList).filterNot(_.isEmpty),
-      "hakukohteet"          -> Option(hakukohdeList).filterNot(_.isEmpty),
-      "koulutusalat1"        -> Option(koulutusalat1).filterNot(_.isEmpty),
-      "koulutusalat2"        -> Option(koulutusalat2).filterNot(_.isEmpty),
-      "koulutusalat3"        -> Option(koulutusalat3).filterNot(_.isEmpty),
-      "opetuskielet"         -> Option(opetuskieliList).filterNot(_.isEmpty),
-      "maakunnat"            -> Option(maakuntaList).filterNot(_.isEmpty),
-      "kunnat"               -> Option(kuntaList).filterNot(_.isEmpty),
+      "haut" -> Option(hakuList).filterNot(_.isEmpty),
+      "tulostustapa" -> Option(tulostustapaValinta),
+      "koulutustoimija" -> maybeKoulutustoimija,
+      "oppilaitokset" -> Option(oppilaitosList).filterNot(_.isEmpty),
+      "toimipisteet" -> Option(toimipisteList).filterNot(_.isEmpty),
+      "hakukohteet" -> Option(hakukohdeList).filterNot(_.isEmpty),
+      "koulutusalat1" -> Option(koulutusalat1).filterNot(_.isEmpty),
+      "koulutusalat2" -> Option(koulutusalat2).filterNot(_.isEmpty),
+      "koulutusalat3" -> Option(koulutusalat3).filterNot(_.isEmpty),
+      "opetuskielet" -> Option(opetuskieliList).filterNot(_.isEmpty),
+      "maakunnat" -> Option(maakuntaList).filterNot(_.isEmpty),
+      "kunnat" -> Option(kuntaList).filterNot(_.isEmpty),
       "harkinnanvaraisuudet" -> Option(harkinnanvaraisuusList).filterNot(_.isEmpty),
-      "naytaHakutoiveet"     -> naytaHakutoiveetBool,
-      "sukupuoli"            -> maybeSukupuoli
+      "naytaHakutoiveet" -> naytaHakutoiveetBool,
+      "sukupuoli" -> maybeSukupuoli
     ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
 
-    sendExcel(
-      Some(wb),
-      response,
-      request,
-      "hakeneet-hyvaksytyt-vastaanottaneet",
-      raporttiParams,
-      HakeneetHyvaksytytVastaanottaneet
-    )
+
+    handleExcelRequest(
+      validationErrors = validationErrors,
+      response = response,
+      request = request,
+      id = "hakeneet-hyvaksytyt-vastaanottaneet",
+      raporttiParams = raporttiParams,
+      auditOperation = HakeneetHyvaksytytVastaanottaneet,
+      mapper = mapper
+    ) {
+      hakeneetHyvaksytytVastaanottaneetService.get(
+        hakuList,
+        tulostustapaValinta,
+        maybeKoulutustoimija,
+        oppilaitosList,
+        toimipisteList,
+        hakukohdeList,
+        koulutusala1List,
+        koulutusala2List,
+        koulutusala3List,
+        opetuskieliList,
+        maakuntaList,
+        kuntaList,
+        harkinnanvaraisuusList,
+        maybeSukupuoli,
+        naytaHakutoiveetBool
+      )
+    }
   }
 
   @GetMapping(path = Array("kk-hakeneet-hyvaksytyt-vastaanottaneet"))
@@ -816,20 +844,20 @@ class Controller(
       request: HttpServletRequest,
       response: HttpServletResponse
   ): Unit = {
-    val maybeKoulutustoimija                  = Option(koulutustoimija)
-    val tulostustapaValinta                   = Option(tulostustapa).getOrElse("hakukohteittain")
-    val naytaHakutoiveetBool                  = strToOptionBoolean(naytaHakutoiveet).getOrElse(false)
-    val maybeSukupuoli: Option[String]        = if (sukupuoli == "neutral") None else Option(sukupuoli)
+    val maybeKoulutustoimija = Option(koulutustoimija)
+    val tulostustapaValinta = Option(tulostustapa).getOrElse("hakukohteittain")
+    val naytaHakutoiveetBool = strToOptionBoolean(naytaHakutoiveet).getOrElse(false)
+    val maybeSukupuoli: Option[String] = if (sukupuoli == "neutral") None else Option(sukupuoli)
     val maybeEnsikertalainen: Option[Boolean] = strToOptionBoolean(ensikertalainen)
-    val hakuList                              = getListParamAsScalaList(haut)
-    val oppilaitosList                        = getListParamAsScalaList(oppilaitokset)
-    val toimipisteList                        = getListParamAsScalaList(toimipisteet)
-    val hakukohdeList                         = getListParamAsScalaList(hakukohteet)
-    val hakukohdeRyhmaList                    = getListParamAsScalaList(hakukohderyhmat)
-    val okmOhjauksenAlaList                   = getListParamAsScalaList(okmOhjauksenAlat)
-    val tutkinnonTasoList                     = getListParamAsScalaList(tutkinnonTasot)
-    val aidinkieliList                        = getListParamAsScalaList(aidinkielet)
-    val kansalaisuusList                      = getListParamAsScalaList(kansalaisuusluokat)
+    val hakuList = getListParamAsScalaList(haut)
+    val oppilaitosList = getListParamAsScalaList(oppilaitokset)
+    val toimipisteList = getListParamAsScalaList(toimipisteet)
+    val hakukohdeList = getListParamAsScalaList(hakukohteet)
+    val hakukohderyhmaList = getListParamAsScalaList(hakukohderyhmat)
+    val okmOhjauksenAlaList = getListParamAsScalaList(okmOhjauksenAlat)
+    val tutkinnonTasoList = getListParamAsScalaList(tutkinnonTasot)
+    val aidinkieliList = getListParamAsScalaList(aidinkielet)
+    val kansalaisuusList = getListParamAsScalaList(kansalaisuusluokat)
 
     val validationErrors = validateKkHakeneetHyvaksytytVastaanottaneetParams(
       hakuList,
@@ -838,7 +866,7 @@ class Controller(
       oppilaitosList,
       toimipisteList,
       hakukohdeList,
-      hakukohdeRyhmaList,
+      hakukohderyhmaList,
       okmOhjauksenAlaList,
       tutkinnonTasoList,
       aidinkieliList,
@@ -848,61 +876,49 @@ class Controller(
       naytaHakutoiveet,
     )
 
-    if (validationErrors.nonEmpty) {
-      LOG.warn(s"kk-tilastoraportti parametrien validointivirhe: ${validationErrors.mkString(", ")}")
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
-      response.setContentType("application/json")
-      val errorResponse = ErrorResponse(
-        status = 400,
-        message = "validation.error",
-        details = Some(validationErrors)
-      )
-      response.getWriter.write(mapper.writeValueAsString(errorResponse))
-      return
-    }
-
-
-    val wb = kkHakeneetHyvaksytytVastaanottaneetService.get(
-      hakuList,
-      tulostustapaValinta,
-      maybeKoulutustoimija,
-      oppilaitosList,
-      toimipisteList,
-      hakukohdeList,
-      hakukohdeRyhmaList,
-      okmOhjauksenAlaList,
-      tutkinnonTasoList,
-      aidinkieliList,
-      kansalaisuusList,
-      maybeSukupuoli,
-      maybeEnsikertalainen,
-      naytaHakutoiveetBool
-    )
-
     val raporttiParams = Map(
-      "haut"               -> Option(hakuList).filterNot(_.isEmpty),
-      "koulutustoimija"    -> maybeKoulutustoimija,
-      "oppilaitokset"      -> Option(oppilaitosList).filterNot(_.isEmpty),
-      "toimipisteet"       -> Option(toimipisteList).filterNot(_.isEmpty),
-      "hakukohteet"        -> Option(hakukohdeList).filterNot(_.isEmpty),
-      "hakukohderyhmat"    -> Option(hakukohdeRyhmaList).filterNot(_.isEmpty),
-      "okmOhjauksenAlat"   -> Option(okmOhjauksenAlaList).filterNot(_.isEmpty),
-      "tutkinnonTasot"     -> Option(tutkinnonTasoList).filterNot(_.isEmpty),
-      "aidinkielet"        -> Option(aidinkieliList).filterNot(_.isEmpty),
+      "haut" -> Option(hakuList).filterNot(_.isEmpty),
+      "tulostustapa" -> Option(tulostustapaValinta),
+      "koulutustoimija" -> maybeKoulutustoimija,
+      "oppilaitokset" -> Option(oppilaitosList).filterNot(_.isEmpty),
+      "toimipisteet" -> Option(toimipisteList).filterNot(_.isEmpty),
+      "hakukohteet" -> Option(hakukohdeList).filterNot(_.isEmpty),
+      "hakukohderyhmat" -> Option(hakukohderyhmaList).filterNot(_.isEmpty),
+      "okmOhjauksenAlat" -> Option(okmOhjauksenAlaList).filterNot(_.isEmpty),
+      "tutkinnonTasot" -> Option(tutkinnonTasoList).filterNot(_.isEmpty),
+      "aidinkielet" -> Option(aidinkieliList).filterNot(_.isEmpty),
       "kansalaisuusluokat" -> Option(kansalaisuusList).filterNot(_.isEmpty),
-      "sukupuoli"          -> maybeSukupuoli,
-      "ensikertalainen"    -> maybeEnsikertalainen,
-      "naytaHakutoiveet"   -> naytaHakutoiveetBool
-    ).collect { case (key, Some(value)) => key -> value } // jätetään pois tyhjät parametrit
+      "sukupuoli" -> maybeSukupuoli,
+      "ensikertalainen" -> maybeEnsikertalainen,
+      "naytaHakutoiveet" -> naytaHakutoiveetBool
+    ).collect { case (key, Some(value)) => key -> value }
 
-    sendExcel(
-      Some(wb),
-      response,
-      request,
-      "kk-hakeneet-hyvaksytyt-vastaanottaneet",
-      raporttiParams,
-      KkHakeneetHyvaksytytVastaanottaneet
-    )
+    handleExcelRequest(
+      validationErrors = validationErrors,
+      response = response,
+      request = request,
+      id = "kk-hakeneet-hyvaksytyt-vastaanottaneet",
+      raporttiParams = raporttiParams,
+      auditOperation = KkHakeneetHyvaksytytVastaanottaneet,
+      mapper = mapper
+    ) {
+      kkHakeneetHyvaksytytVastaanottaneetService.get(
+        hakuList,
+        tulostustapaValinta,
+        maybeKoulutustoimija,
+        oppilaitosList,
+        toimipisteList,
+        hakukohdeList,
+        hakukohderyhmaList,
+        okmOhjauksenAlaList,
+        tutkinnonTasoList,
+        aidinkieliList,
+        kansalaisuusList,
+        maybeSukupuoli,
+        maybeEnsikertalainen,
+        naytaHakutoiveetBool
+      )
+    }
   }
 
 }

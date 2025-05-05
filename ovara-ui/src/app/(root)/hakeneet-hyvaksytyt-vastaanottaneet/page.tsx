@@ -21,10 +21,10 @@ import { NaytaHakutoiveet } from '@/app/components/form/nayta-hakutoiveet';
 import { Sukupuoli } from '@/app/components/form/sukupuoli';
 import { Harkinnanvaraisuus } from '@/app/components/form/harkinnanvaraisuus';
 import { downloadExcel } from '@/app/components/form/utils';
-import { useState } from 'react';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { KoulutusalaValikot } from '@/app/components/form/koulutusalavalikot';
 import { MaakuntaKuntaValikot } from '@/app/components/form/maakunta-kunta';
+import { useDownloadWithErrorBoundary } from '@/app/hooks/useDownloadWithErrorBoundary';
 
 export default function Hakutilasto() {
   const { t } = useTranslate();
@@ -34,6 +34,7 @@ export default function Hakutilasto() {
 
   const { selectedAlkamiskaudet, selectedHaut } = useCommonSearchParams();
   const { selectedTulostustapa } = useHakeneetSearchParams();
+  const { run, isLoading } = useDownloadWithErrorBoundary();
 
   const isDisabled = !(
     selectedAlkamiskaudet &&
@@ -51,8 +52,12 @@ export default function Hakutilasto() {
 
   const hakukohdeFetchEnabled = !isNullishOrEmpty(selectedHaut);
 
-  const [isLoading, setIsLoading] = useState(false);
   const queryParamsStr = queryParams.toString();
+  const handleDownload = () =>
+    run(() =>
+      downloadExcel('hakeneet-hyvaksytyt-vastaanottaneet', queryParamsStr),
+    );
+
   return (
     <MainContainer>
       {hasToinenAsteRights ? (
@@ -71,16 +76,7 @@ export default function Hakutilasto() {
           <Divider />
           <Sukupuoli />
           <NaytaHakutoiveet />
-          <FormButtons
-            disabled={isDisabled}
-            downloadExcel={() =>
-              downloadExcel(
-                'hakeneet-hyvaksytyt-vastaanottaneet',
-                queryParamsStr,
-                setIsLoading,
-              )
-            }
-          />
+          <FormButtons disabled={isDisabled} downloadExcel={handleDownload} />
         </FormBox>
       ) : null}
     </MainContainer>

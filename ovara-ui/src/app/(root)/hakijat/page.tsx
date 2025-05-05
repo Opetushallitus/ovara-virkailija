@@ -20,7 +20,6 @@ import { Vastaanottotieto } from '@/app/components/form/vastaanottotieto';
 import { Markkinointilupa } from '@/app/components/form/markkinointilupa';
 import { Julkaisulupa } from '@/app/components/form/julkaisulupa';
 import { Harkinnanvaraisuus } from '@/app/components/form/harkinnanvaraisuus';
-import { useState } from 'react';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { downloadExcel } from '@/app/components/form/utils';
 import { Valintatieto } from '@/app/components/form/valintatieto';
@@ -31,6 +30,7 @@ import { Urheilijatutkinto } from '@/app/components/form/Urheilijatutkinto';
 import { Pohjakoulutus } from '@/app/components/form/pohjakoulutus';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { MainContainer } from '@/app/components/main-container';
+import { useDownloadWithErrorBoundary } from '@/app/hooks/useDownloadWithErrorBoundary';
 
 export default function Hakijat() {
   const { t } = useTranslate();
@@ -40,9 +40,11 @@ export default function Hakijat() {
   const { selectedHaut, selectedOppilaitokset, selectedToimipisteet } =
     useCommonSearchParams();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const { run, isLoading } = useDownloadWithErrorBoundary();
   const queryParamsStr = useSearchParams().toString();
 
+  const handleDownload = () =>
+    run(() => downloadExcel('hakijat', queryParamsStr));
   const fetchEnabled =
     !isNullishOrEmpty(selectedHaut) &&
     ![selectedOppilaitokset, selectedToimipisteet].every(isNullishOrEmpty);
@@ -77,9 +79,7 @@ export default function Hakijat() {
           <Julkaisulupa />
           <FormButtons
             disabled={!fetchEnabled}
-            downloadExcel={() =>
-              downloadExcel('hakijat', queryParamsStr, setIsLoading)
-            }
+            downloadExcel={handleDownload}
           />
         </FormBox>
       ) : null}
