@@ -3,7 +3,11 @@ export const DOMAIN =
 
 export const OVARA_BACKEND =
   process.env.OVARA_BACKEND ?? process.env.VIRKAILIJA_URL;
-
+const isServer = typeof window === 'undefined';
+console.info('isServer: ', isServer);
+console.info('DOMAIN: ', DOMAIN);
+console.info('OVARA_BACKEND: ', OVARA_BACKEND);
+console.info('VIRKAILIJA_URL: ', process.env.VIRKAILIJA_URL);
 export const isLocalhost = DOMAIN.includes('localhost');
 
 export const isDev = process.env.NODE_ENV === 'development';
