@@ -7,6 +7,7 @@ import fi.oph.ovara.backend.service.*
 import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation}
 import fi.vm.sade.auditlog.*
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.json4s.jackson.JsonMethods.mapper
 import org.mockito.{ArgumentCaptor, ArgumentMatchers}
 import org.mockito.ArgumentMatchers.{any, argThat}
@@ -64,6 +65,19 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
     val stringWriter = new StringWriter()
     val printWriter = new PrintWriter(stringWriter)
     when(mockResponse.getWriter).thenReturn(printWriter)
+
+    val fakeWorkbook = new XSSFWorkbook()
+    // Mock the service to return a Right value
+    when(mockKoulutuksetToteutuksetHakukohteetService.get(
+      any(),
+      any(),
+      any(),
+      any(),
+      any(),
+      any(),
+      any(),
+      any()
+    )).thenReturn(Right(fakeWorkbook))
 
     controller.koulutukset_toteutukset_hakukohteet(
       haku,

@@ -362,42 +362,6 @@ class Controller(
         response.setContentType("application/json")
         response.getWriter.write(mapper.writeValueAsString("unexpected.error"))
     }
-  }  
-  
-  private def sendExcel(
-      wb: Option[Workbook],
-      response: HttpServletResponse,
-      request: HttpServletRequest,
-      id: String,
-      raporttiParamsForLogs: Map[String, Any],
-      auditOperation: AuditOperation
-  ): Unit = {
-    try {
-      auditLog.logWithParams(request, auditOperation, raporttiParamsForLogs)
-      wb match {
-        case Some(wb) =>
-          LOG.info(s"Sending excel in the response")
-          val date: LocalDateTime = LocalDateTime.now().withNano(0)
-          val dateTimeStr         = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-          val out                 = response.getOutputStream
-          response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-          response.setHeader(
-            HttpHeaders.CONTENT_DISPOSITION,
-            s"attachment; filename=$id-$dateTimeStr.xlsx"
-          )
-          response.setHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Content-Disposition")
-          wb.write(out)
-          out.close()
-          wb.close()
-        case None =>
-          LOG.error("Could not create excel.")
-          response.sendError(400)
-      }
-    } catch {
-      case e: Exception =>
-        LOG.error(s"Error sending excel: ${e.getMessage}")
-        response.sendError(500)
-    }
   }
 
   @GetMapping(path = Array("koulutukset-toteutukset-hakukohteet"))
@@ -636,7 +600,7 @@ class Controller(
       }
     }
   }
-  
+
 
   @GetMapping(path = Array("kk-hakijat"))
   def kk_hakijat(
