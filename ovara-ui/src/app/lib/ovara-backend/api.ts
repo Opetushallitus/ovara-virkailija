@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 let _csrfToken: string;
 const loginUrl = `${configuration.ovaraBackendApiUrl}/login`;
 const isServer = typeof window === 'undefined';
-console.info('isServer: ', isServer);
+
 async function csrfToken() {
   if (!_csrfToken) {
     const response = await fetch(`${configuration.ovaraBackendApiUrl}/csrf`, {

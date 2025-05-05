@@ -2,10 +2,10 @@ export const DOMAIN =
   process.env.APP_URL ?? process.env.VIRKAILIJA_URL ?? 'https://localhost:3405';
 
 export const OVARA_BACKEND =
-  process.env.OVARA_BACKEND ?? process.env.VIRKAILIJA_URL;
-const isServer = typeof window === 'undefined';
-console.info('isServer: ', isServer);
-console.info('DOMAIN: ', DOMAIN);
+  process.env.OVARA_BACKEND ??
+  process.env.VIRKAILIJA_URL ??
+  process.env.NEXT_PUBLIC_BACKEND_URL;
+
 console.info('OVARA_BACKEND: ', OVARA_BACKEND);
 console.info('VIRKAILIJA_URL: ', process.env.VIRKAILIJA_URL);
 export const isLocalhost = DOMAIN.includes('localhost');
