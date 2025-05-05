@@ -1,4 +1,3 @@
-'use server';
 export const DOMAIN =
   process.env.APP_URL ?? process.env.VIRKAILIJA_URL ?? 'https://localhost:3405';
 
