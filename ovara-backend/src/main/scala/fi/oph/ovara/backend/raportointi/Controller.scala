@@ -396,7 +396,7 @@ class Controller(
       maybeHakukohteenTila,
       valintakoe
     )
-    
+
     val raporttiParams = Map(
       "haut"            -> Option(hakuList).filterNot(_.isEmpty),
       "koulutustoimija" -> maybeKoulutustoimija,
@@ -708,7 +708,7 @@ class Controller(
   ): Unit = {
     val maybeKoulutustoimija           = Option(koulutustoimija)
     val tulostustapaValinta            = Option(tulostustapa).getOrElse("hakukohteittain")
-    val naytaHakutoiveetBool           = strToOptionBoolean(naytaHakutoiveet).getOrElse(false)
+    val naytaHakutoiveetBool           = strToOptionBoolean(naytaHakutoiveet).getOrElse(true) // oletuksena näytetään
     val maybeSukupuoli: Option[String] = if (sukupuoli == "neutral") None else Option(sukupuoli)
     val hakuList                       = getListParamAsScalaList(haut)
     val oppilaitosList                 = getListParamAsScalaList(oppilaitokset)
@@ -810,7 +810,7 @@ class Controller(
   ): Unit = {
     val maybeKoulutustoimija = Option(koulutustoimija)
     val tulostustapaValinta = Option(tulostustapa).getOrElse("hakukohteittain")
-    val naytaHakutoiveetBool = strToOptionBoolean(naytaHakutoiveet).getOrElse(false)
+    val naytaHakutoiveetBool = strToOptionBoolean(naytaHakutoiveet).getOrElse(true)
     val maybeSukupuoli: Option[String] = if (sukupuoli == "neutral") None else Option(sukupuoli)
     val maybeEnsikertalainen: Option[Boolean] = strToOptionBoolean(ensikertalainen)
     val hakuList = getListParamAsScalaList(haut)
