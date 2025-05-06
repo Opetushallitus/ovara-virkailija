@@ -37,8 +37,7 @@ export class OvaraUISovellusStack extends cdk.Stack {
       },
     );
 
-    const domainName = `virkailija.${publicHostedZones[props.environmentName]}`;
-    //const domainName = `ovara-virkailija.${publicHostedZones[props.environmentName]}`;
+    const domainName = `ovara-virkailija.${publicHostedZones[props.environmentName]}`;
 
     const certificate = new acm.DnsValidatedCertificate(
       this,
