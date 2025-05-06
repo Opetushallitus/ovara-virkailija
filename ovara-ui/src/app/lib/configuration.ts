@@ -2,9 +2,7 @@ export const DOMAIN =
   process.env.APP_URL ?? process.env.VIRKAILIJA_URL ?? 'https://localhost:3405';
 
 export const OVARA_BACKEND =
-  process.env.OVARA_BACKEND ??
-  process.env.VIRKAILIJA_URL ??
-  process.env.NEXT_PUBLIC_BACKEND_URL;
+  process.env.OVARA_BACKEND ?? process.env.VIRKAILIJA_URL;
 
 console.info('OVARA_BACKEND: ', OVARA_BACKEND);
 console.info('VIRKAILIJA_URL: ', process.env.VIRKAILIJA_URL);

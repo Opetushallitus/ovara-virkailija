@@ -1,3 +1,4 @@
+'use server';
 import { configuration } from '../configuration';
 import { FetchError, PermissionError } from '@/app/lib/common';
 import { redirect } from 'next/navigation';

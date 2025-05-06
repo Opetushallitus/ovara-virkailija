@@ -56,7 +56,6 @@ export class OvaraUISovellusStack extends cdk.Stack {
         SKIP_TYPECHECK: 'true',
         STANDALONE: 'true',
         VIRKAILIJA_URL: `https://virkailija.${publicHostedZones[props.environmentName]}`,
-        NEXT_PUBLIC_BACKEND_URL: `https://virkailija.${publicHostedZones[props.environmentName]}`,
       },
       domainProps: {
         domainName,
