@@ -193,7 +193,6 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
     val maakuntaList = List("invalid-maakunta")
     val kuntaList = List("invalid-kunta")
     val harkinnanvaraisuusList = List("FOOBAR''")
-    val hakukohderyhmaList = List("invalid-oid")
     val sukupuoli = Some("invalid-sukupuoli")
     val invalidBoolean = "invalid-boolean"
 
@@ -231,6 +230,44 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
     errors should contain("harkinnanvaraisuudet.invalid")
     errors should contain("sukupuoli.invalid")
     errors should contain("nayta-hakutoiveet.invalid")
+  }
+
+  it should "return no errors for valid parameters" in {
+    val hakuList = List("1.2.246.562.29.00000000000000056840")
+    val tulostustapa = "hakukohteittain"
+    val koulutustoimija = Some("1.2.246.562.10.346830761110")
+    val oppilaitosList = List("1.2.246.562.10.52251087186")
+    val toimipisteList = List("1.2.246.562.10.55711304158")
+    val hakukohteetList = List("1.2.246.562.20.00000000000000059958")
+    val koulutusala1List = List("09")
+    val koulutusala2List = List("092")
+    val koulutusala3List = List("0922")
+    val opetuskieliList = List("1")
+    val maakuntaList = List("21")
+    val kuntaList = List("004")
+    val harkinnanvaraisuusList = List("ATARU_EI_PAATTOTODISTUSTA")
+    val sukupuoli = Some("2")
+    val naytaHakutoiveet = "false"
+
+    val errors = ParameterValidator.validateHakeneetHyvaksytytVastaanottaneetParams(
+      hakuList,
+      tulostustapa,
+      koulutustoimija,
+      oppilaitosList,
+      toimipisteList,
+      hakukohteetList,
+      koulutusala1List,
+      koulutusala2List,
+      koulutusala3List,
+      opetuskieliList,
+      maakuntaList,
+      kuntaList,
+      harkinnanvaraisuusList,
+      sukupuoli,
+      naytaHakutoiveet,
+    )
+
+    errors shouldBe empty
   }
 
   "validateKkHakeneetHyvaksytytVastaanottaneetParams" should "return errors for invalid parameters" in {

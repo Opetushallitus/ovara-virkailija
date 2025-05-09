@@ -722,7 +722,7 @@ class Controller(
     val opetuskieliList =
       getListParamAsScalaList(opetuskielet).map("oppilaitoksenopetuskieli_" + _)
     val harkinnanvaraisuusList = getListParamAsScalaList(harkinnanvaraisuudet)
-
+    
     val validationErrors = validateHakeneetHyvaksytytVastaanottaneetParams(
       hakuList,
       tulostustapa,
