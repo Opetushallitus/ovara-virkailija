@@ -46,6 +46,14 @@ export const nextConfig = {
     DEV: process.env.DEV,
   },
   output: isStandalone ? 'standalone' : undefined,
+  experimental: {
+    serverActions: {
+      allowedOrigins: [
+        'virkailija.opintopolku.fi',
+        'virkailija.testiopintopolku.fi',
+      ],
+    },
+  },
 };
 
 export default nextConfig;
