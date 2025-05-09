@@ -16,11 +16,11 @@ import { Divider } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { hasOvaraToinenAsteRole } from '@/app/lib/utils';
-import { useState } from 'react';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { downloadExcel } from '@/app/components/form/utils';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { MainContainer } from '@/app/components/main-container';
+import { useDownloadWithErrorBoundary } from '@/app/hooks/useDownloadWithErrorBoundary';
 
 export default function KoulutuksetToteutuksetHakukohteet() {
   const { t } = useTranslate();
@@ -28,8 +28,12 @@ export default function KoulutuksetToteutuksetHakukohteet() {
   const hasToinenAsteRights = hasOvaraToinenAsteRole(user?.authorities);
   const { selectedAlkamiskaudet, selectedHaut } = useCommonSearchParams();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const { run, isLoading } = useDownloadWithErrorBoundary();
   const queryParamsStr = useSearchParams().toString();
+  const handleDownload = () =>
+    run(() =>
+      downloadExcel('koulutukset-toteutukset-hakukohteet', queryParamsStr),
+    );
 
   return (
     <MainContainer>
@@ -47,13 +51,7 @@ export default function KoulutuksetToteutuksetHakukohteet() {
           <Divider />
           <FormButtons
             disabled={!selectedAlkamiskaudet || !selectedHaut}
-            downloadExcel={() =>
-              downloadExcel(
-                'koulutukset-toteutukset-hakukohteet',
-                queryParamsStr,
-                setIsLoading,
-              )
-            }
+            downloadExcel={handleDownload}
           />
         </FormBox>
       ) : null}

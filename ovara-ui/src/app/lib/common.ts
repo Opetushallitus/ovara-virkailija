@@ -1,10 +1,12 @@
 export class FetchError extends Error {
   response: Response;
-  constructor(response: Response, message: string = 'Fetch error') {
-    super(message);
-    // Set the prototype explicitly.
+  body: unknown;
+
+  constructor(response: Response, body: unknown = 'error.api-fetch') {
+    super(typeof body === 'string' ? body : 'error.api-fetch');
     Object.setPrototypeOf(this, FetchError.prototype);
     this.response = response;
+    this.body = body;
   }
 }
 

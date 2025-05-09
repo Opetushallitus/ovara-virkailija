@@ -14,7 +14,6 @@ import { Divider } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
 import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
 import { hasOvaraKkRole } from '@/app/lib/utils';
-import { useState } from 'react';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { downloadExcel } from '@/app/components/form/utils';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
@@ -28,6 +27,7 @@ import { Hakukohderyhma } from '@/app/components/form/hakukohderyhma';
 import { KkTutkinnonTaso } from '@/app/components/form/kk-tutkinnon-taso';
 import { isEmpty } from 'remeda';
 import { Tulostustapa } from '@/app/components/form/tulostustapa';
+import { useDownloadWithErrorBoundary } from '@/app/hooks/useDownloadWithErrorBoundary';
 
 export default function KoulutuksetToteutuksetHakukohteet() {
   const { t } = useTranslate();
@@ -49,18 +49,22 @@ export default function KoulutuksetToteutuksetHakukohteet() {
       selectedToimipisteet || [],
       selectedHakukohderyhmat || [],
     ].every(isEmpty);
+  const { run, isLoading } = useDownloadWithErrorBoundary();
 
-  const [isLoading, setIsLoading] = useState(false);
   const queryParamsStr = useSearchParams().toString();
 
   const KOULUTUKSITTAIN = 'koulutuksittain';
   const tulostustavat = [KOULUTUKSITTAIN, 'toteutuksittain', 'hakukohteittain'];
+  const handleDownload = () =>
+    run(() =>
+      downloadExcel('kk-koulutukset-toteutukset-hakukohteet', queryParamsStr),
+    );
 
   return (
     <MainContainer>
       {hasKkRights ? (
         <FormBox>
-          {isLoading && <SpinnerModal open={isLoading} />}
+          {isLoading && <SpinnerModal open />}
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
           <KoulutuksenAlkaminen />
           <Haku haunTyyppi="korkeakoulu" />
@@ -80,16 +84,7 @@ export default function KoulutuksetToteutuksetHakukohteet() {
           <ToteutuksenTila />
           <HakukohteenTila />
           <KkTutkinnonTaso />
-          <FormButtons
-            disabled={isDisabled}
-            downloadExcel={() =>
-              downloadExcel(
-                'kk-koulutukset-toteutukset-hakukohteet',
-                queryParamsStr,
-                setIsLoading,
-              )
-            }
-          />
+          <FormButtons disabled={isDisabled} downloadExcel={handleDownload} />
         </FormBox>
       ) : null}
     </MainContainer>

@@ -8,6 +8,8 @@ import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.{Component, Service}
 
+import scala.util.{Failure, Success, Try}
+
 @Component
 @Service
 class KkHakijatService(
@@ -34,7 +36,7 @@ class KkHakijatService(
       naytaYoArvosanat: Boolean,
       naytaHetu: Boolean,
       naytaPostiosoite: Boolean
-  ): XSSFWorkbook = {
+  ): Either[String, XSSFWorkbook] = {
     val user          = userService.getEnrichedUserDetails
     val asiointikieli = user.asiointikieli.getOrElse("fi")
 
@@ -56,31 +58,39 @@ class KkHakijatService(
       kayttooikeusOrganisaatiot intersect hakukohderyhmat
     }
 
-    val query = kkHakijatRepository.selectWithParams(
-      kayttooikeusOrganisaatiot = orgOidsForQuery,
-      hakukohderyhmat = allowedHakukohderyhmat,
-      haut = haut,
-      oppilaitokset = oppilaitokset,
-      toimipisteet = toimipisteet,
-      hakukohteet = hakukohteet,
-      valintatiedot = valintatiedot,
-      vastaanottotiedot = vastaanottotiedot,
-      kansalaisuusluokat = kansalaisuusluokat,
-      markkinointilupa = markkinointilupa
-    )
+    Try {
+      val queryResult = db.run(
+        kkHakijatRepository.selectWithParams(
+          kayttooikeusOrganisaatiot = orgOidsForQuery,
+          hakukohderyhmat = allowedHakukohderyhmat,
+          haut = haut,
+          oppilaitokset = oppilaitokset,
+          toimipisteet = toimipisteet,
+          hakukohteet = hakukohteet,
+          valintatiedot = valintatiedot,
+          vastaanottotiedot = vastaanottotiedot,
+          kansalaisuusluokat = kansalaisuusluokat,
+          markkinointilupa = markkinointilupa
+        ),
+        "kkHakijatRepository.selectWithParams"
+      )
 
-    val queryResult = db.run(query, "kkHakijatRepository.selectWithParams")
-    val sorted =
-      queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi, resultRow.hakijanEtunimi, resultRow.oppijanumero))
-    val sortedListwithCombinedNimi = sorted.map(sortedResult => KkHakijaWithCombinedNimi(sortedResult))
+      val sorted = queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi, resultRow.hakijanEtunimi, resultRow.oppijanumero))
+      val sortedListwithCombinedNimi = sorted.map(sortedResult => KkHakijaWithCombinedNimi(sortedResult))
 
-    ExcelWriter.writeKkHakijatRaportti(
-      sortedListwithCombinedNimi,
-      asiointikieli,
-      translations,
-      Some(naytaYoArvosanat),
-      Some(naytaHetu),
-      Some(naytaPostiosoite)
-    )
+      ExcelWriter.writeKkHakijatRaportti(
+        sortedListwithCombinedNimi,
+        asiointikieli,
+        translations,
+        Some(naytaYoArvosanat),
+        Some(naytaHetu),
+        Some(naytaPostiosoite)
+      )
+    } match {
+      case Success(excelFile) => Right(excelFile)
+      case Failure(exception) =>
+        LOG.error("Error generating Excel report", exception)
+        Left("virhe.tietokanta")
+    }
   }
 }

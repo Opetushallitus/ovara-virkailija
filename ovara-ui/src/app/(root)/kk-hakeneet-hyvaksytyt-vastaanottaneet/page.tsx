@@ -19,7 +19,6 @@ import { Divider } from '@mui/material';
 import { NaytaHakutoiveet } from '@/app/components/form/nayta-hakutoiveet';
 import { Sukupuoli } from '@/app/components/form/sukupuoli';
 import { downloadExcel } from '@/app/components/form/utils';
-import { useState } from 'react';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { Kansalaisuus } from '@/app/components/form/kansalaisuus';
 import { KkTutkinnonTaso } from '@/app/components/form/kk-tutkinnon-taso';
@@ -27,6 +26,7 @@ import { Aidinkieli } from '@/app/components/form/aidinkieli';
 import { OkmOhjauksenAlat } from '@/app/components/form/okm-ohjauksen-ala';
 import { Ensikertalainen } from '@/app/components/form/ensikertalainen';
 import { Hakukohderyhma } from '@/app/components/form/hakukohderyhma';
+import { useDownloadWithErrorBoundary } from '@/app/hooks/useDownloadWithErrorBoundary';
 
 export default function KkHakutilasto() {
   const { t } = useTranslate();
@@ -56,8 +56,13 @@ export default function KkHakutilasto() {
 
   const hakukohdeFetchEnabled = !isNullishOrEmpty(selectedHaut);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const { run, isLoading } = useDownloadWithErrorBoundary();
   const queryParamsStr = queryParams.toString();
+  const handleDownload = () =>
+    run(() =>
+      downloadExcel('kk-hakeneet-hyvaksytyt-vastaanottaneet', queryParamsStr),
+    );
+
   return (
     <MainContainer>
       {hasKkRights ? (
@@ -78,16 +83,7 @@ export default function KkHakutilasto() {
           <Sukupuoli />
           <Ensikertalainen />
           <NaytaHakutoiveet />
-          <FormButtons
-            disabled={isDisabled}
-            downloadExcel={() =>
-              downloadExcel(
-                'kk-hakeneet-hyvaksytyt-vastaanottaneet',
-                queryParamsStr,
-                setIsLoading,
-              )
-            }
-          />
+          <FormButtons disabled={isDisabled} downloadExcel={handleDownload} />
         </FormBox>
       ) : null}
     </MainContainer>

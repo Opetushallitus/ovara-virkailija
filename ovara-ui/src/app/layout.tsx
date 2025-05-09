@@ -8,6 +8,7 @@ import { THEME_OVERRIDES } from '@/app/theme';
 import { AuthorizedUserProvider } from './contexts/AuthorizedUserProvider';
 import LocalizationProvider from './components/localization-provider';
 import ReactQueryClientProvider from '@/app/components/react-query-client-provider';
+import { ClientErrorBoundary } from '@/app/components/client-errorboundary';
 
 export const metadata: Metadata = {
   title: 'Opiskelijavalinnan raportointi',
@@ -16,11 +17,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html>
+    <html lang="fi">
       <Script src={configuration.raamitUrl} />
       <body>
         <AppRouterCacheProvider>
@@ -28,7 +29,9 @@ export default function RootLayout({
             <ReactQueryClientProvider>
               <AuthorizedUserProvider>
                 <LocalizationProvider>
-                  <NuqsAdapter>{children}</NuqsAdapter>
+                  <ClientErrorBoundary>
+                    <NuqsAdapter>{children}</NuqsAdapter>
+                  </ClientErrorBoundary>
                 </LocalizationProvider>
               </AuthorizedUserProvider>
             </ReactQueryClientProvider>

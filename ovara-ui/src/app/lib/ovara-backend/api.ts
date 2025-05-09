@@ -42,9 +42,29 @@ export async function apiFetch(
         },
       },
     );
-    return response.status >= 400
-      ? Promise.reject(new FetchError(response, (await response.text()) ?? ''))
-      : Promise.resolve(response);
+    if (response.status >= 400) {
+      let body: unknown;
+      try {
+        const clone = response.clone();
+        const contentType = clone.headers.get('content-type') || '';
+
+        if (contentType.includes('application/json')) {
+          body = await clone.json();
+        } else {
+          // varmistetaan ettei springin error page vuoda käliin
+          const text = await clone.text();
+          body =
+            text.startsWith('<!DOCTYPE html') || text.includes('<html')
+              ? 'virhe.palvelin'
+              : text;
+        }
+      } catch {
+        body = 'virhe.tuntematon';
+      }
+      throw new FetchError(response, body);
+    }
+
+    return response;
   } catch (e) {
     console.error('Fetching data failed!');
     return Promise.reject(e);

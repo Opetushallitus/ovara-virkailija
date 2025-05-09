@@ -40,6 +40,27 @@ class OvaraBackendApplicationTests {
         mvc.perform(MockMvcRequestBuilders.get("/api/session"))
           .andExpect(status().isOk)
           .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+    }
+
+    @Test
+    @WithMockUser(username = "testuser", roles = Array("USER"))
+    def testInvalidHautRequestWithValidationError(): Unit = {
+        mvc.perform(MockMvcRequestBuilders
+            .get("/api/haut")
+            .param("alkamiskaudet", "foo'")
+            .param("haut", "123,456")
+            .param("haun_tyyppi", "blaa*")
+            .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isBadRequest)
+          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+          .andExpect(content().json(
+              """{
+              "status": 400,
+              "message": "validation.error",
+              "details": ["alkamiskaudet.invalid", "haut.invalid.oid", "haun-tyyppi.invalid"]
+            }"""))
     }
 
 }
