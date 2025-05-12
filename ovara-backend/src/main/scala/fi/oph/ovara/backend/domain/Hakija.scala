@@ -19,6 +19,7 @@ abstract class Hakija {
   val lahiosoite: Option[String]
   val postinumero: Option[String]
   val postitoimipaikka: Option[String]
+  val sahkoposti: Option[String]
 }
 
 case class ToisenAsteenHakija(
@@ -50,7 +51,8 @@ case class ToisenAsteenHakija(
     sahkoinenViestintalupa: Option[Boolean],
     lahiosoite: Option[String],
     postinumero: Option[String],
-    postitoimipaikka: Option[String]
+    postitoimipaikka: Option[String],
+    sahkoposti: Option[String]
 ) extends Hakija
 
 case class ToisenAsteenHakijaWithCombinedNimi(
@@ -81,7 +83,8 @@ case class ToisenAsteenHakijaWithCombinedNimi(
     sahkoinenViestintalupa: Option[Boolean],
     lahiosoite: Option[String],
     postinumero: Option[String],
-    postitoimipaikka: Option[String]
+    postitoimipaikka: Option[String],
+    sahkoposti: Option[String]
 ) extends Hakija
 
 object ToisenAsteenHakijaWithCombinedNimi {
@@ -114,7 +117,8 @@ object ToisenAsteenHakijaWithCombinedNimi {
       sahkoinenViestintalupa = hakija.sahkoinenViestintalupa,
       lahiosoite = hakija.lahiosoite,
       postinumero = hakija.postinumero,
-      postitoimipaikka = hakija.postitoimipaikka
+      postitoimipaikka = hakija.postitoimipaikka,
+      sahkoposti = hakija.sahkoposti
     )
   }
 }
