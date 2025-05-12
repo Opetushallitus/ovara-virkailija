@@ -104,7 +104,7 @@ class ToisenAsteenHakijatRepository extends Extractors {
           #$optionalHarkinnanvaraisuusQuery
           """.as[ToisenAsteenHakija]
 
-    LOG.debug(s"selectWithParams: ${query.statements.head}")
+    LOG.info(s"selectWithParams: ${query.statements.head}")
 
     query
   }
