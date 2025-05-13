@@ -38,7 +38,7 @@ export const Hakukohde = ({
         return {
           value: hakukohde?.hakukohde_oid,
           label: hakukohde?.hakukohde_nimi[locale]
-            ? `${hakukohde.hakukohde_nimi[locale]} (${hakukohde.hakukohde_oid})`
+            ? `${hakukohde.hakukohde_nimi[locale]}`
             : '',
         };
       })}
