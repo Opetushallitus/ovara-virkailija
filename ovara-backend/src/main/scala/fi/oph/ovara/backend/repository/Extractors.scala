@@ -169,12 +169,13 @@ trait Extractors extends GenericOvaraJsonFormats {
       soraAiempi = r.nextBooleanOption(),
       soraTerveys = r.nextBooleanOption(),
       pohjakoulutus = extractKielistetty(r.nextStringOption()),
-      julkaisulupa = r.nextBooleanOption(),
       markkinointilupa = r.nextBooleanOption(),
+      julkaisulupa = r.nextBooleanOption(),
       sahkoinenViestintalupa = r.nextBooleanOption(),
       lahiosoite = r.nextStringOption(),
       postinumero = r.nextStringOption(),
-      postitoimipaikka = r.nextStringOption()
+      postitoimipaikka = r.nextStringOption(),
+      sahkoposti = r.nextStringOption()
     )
   )
 

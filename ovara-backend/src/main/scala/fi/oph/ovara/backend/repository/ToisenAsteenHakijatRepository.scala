@@ -81,7 +81,7 @@ class ToisenAsteenHakijatRepository extends Extractors {
                  ht.valintatapajonot->0->>'pisteet' as kokonaispisteet, ht.valintatapajonot->0->>'valinnantilan_kuvauksen_teksti' as hylk_tai_per_syy,
                  ht.vastaanottotieto, ht.viimeinen_vastaanottopaiva, ht.ilmoittautumisen_tila, ht2.harkinnanvaraisuuden_syy,
                  ht2.sora_aiempi, ht2.sora_terveys, ht2.pohjakoulutus_nimi, hlo.koulutusmarkkinointilupa,
-                 hlo.valintatuloksen_julkaisulupa, hlo.sahkoinenviestintalupa, hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka
+                 hlo.valintatuloksen_julkaisulupa, hlo.sahkoinenviestintalupa, hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka, hlo.sahkoposti
           FROM pub.pub_dim_henkilo hlo
           JOIN pub.pub_dim_hakutoive ht
           ON ht.henkilo_hakemus_id = hlo.henkilo_hakemus_id

@@ -18,7 +18,6 @@ import { Hakukohde } from '@/app/components/form/hakukohde';
 import { Vastaanottotieto } from '@/app/components/form/vastaanottotieto';
 import { Markkinointilupa } from '@/app/components/form/markkinointilupa';
 import { useSearchParams as useQueryParams } from 'next/navigation';
-import { useState } from 'react';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { downloadExcel } from '@/app/components/form/utils';
 import { Valintatieto } from '@/app/components/form/valintatieto';
@@ -32,6 +31,7 @@ import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchP
 import { Kansalaisuus } from '@/app/components/form/kansalaisuus';
 import { Hakukohderyhma } from '@/app/components/form/hakukohderyhma';
 import { MainContainer } from '@/app/components/main-container';
+import { useDownloadWithErrorBoundary } from '@/app/hooks/useDownloadWithErrorBoundary';
 
 export default function KkHakijat() {
   const { t } = useTranslate();
@@ -64,8 +64,9 @@ export default function KkHakijat() {
     selectedNaytaPostiosoite.toString(),
   );
 
-  const [isLoading, setIsLoading] = useState(false);
-
+  const { run, isLoading } = useDownloadWithErrorBoundary();
+  const handleDownload = () =>
+    run(() => downloadExcel('kk-hakijat', queryParamsWithDefaults.toString()));
   const fetchEnabled =
     !isNullishOrEmpty(selectedHaut) &&
     ![
@@ -102,13 +103,7 @@ export default function KkHakijat() {
           <NaytaPostiosoite />
           <FormButtons
             disabled={!fetchEnabled}
-            downloadExcel={() =>
-              downloadExcel(
-                'kk-hakijat',
-                queryParamsWithDefaults.toString(),
-                setIsLoading,
-              )
-            }
+            downloadExcel={handleDownload}
           />
         </FormBox>
       ) : null}
