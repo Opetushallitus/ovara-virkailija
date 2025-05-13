@@ -204,7 +204,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
         maksuvelvollinen = Some("obligated")
       )
 
-      val collator: Collator = Collator.getInstance(Locale.of(asiointikieli))
+      val collator: Collator = Collator.getInstance(new Locale(asiointikieli))
       collator.setStrength(Collator.PRIMARY)
       val sortedResult = queryResult.sortWith { (a, b) =>
         collator.compare(a.otsikko.getOrElse(Kieli.withName(asiointikieli), ""), b.otsikko.getOrElse(Kieli.withName(asiointikieli), "")) < 0
