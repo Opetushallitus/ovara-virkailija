@@ -8,6 +8,8 @@ import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.{Component, Service}
 
+import java.text.Collator
+import java.util.Locale
 import scala.util.{Failure, Success, Try}
 
 @Component
@@ -202,7 +204,11 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
         maksuvelvollinen = Some("obligated")
       )
 
-      val sortedResult = queryResult.sortBy(resultRow => resultRow.otsikko.get(Kieli.withName(asiointikieli)))
+      val collator: Collator = Collator.getInstance(Locale.of(asiointikieli))
+      collator.setStrength(Collator.PRIMARY)
+      val sortedResult = queryResult.sortWith { (a, b) =>
+        collator.compare(a.otsikko.getOrElse(Kieli.withName(asiointikieli), ""), b.otsikko.getOrElse(Kieli.withName(asiointikieli), "")) < 0
+      }
       val sumQueryResult = db.run(sumQuery, "kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams")
       val ensikertalaisetSumQueryResult =
         if (vainEnsikertalaiset)
