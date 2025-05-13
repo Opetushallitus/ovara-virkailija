@@ -1,321 +1,252 @@
 package fi.oph.ovara.backend.utils
 
+import fi.oph.ovara.backend.raportointi.dto.{RawHakeneetHyvaksytytVastaanottaneetParams, RawHakijatParams, RawKkHakeneetHyvaksytytVastaanottaneetParams, RawKkHakijatParams, RawKoulutuksetToteutuksetHakukohteetParams, ValidatedHakeneetHyvaksytytVastaanottaneetParams, ValidatedKkHakeneetHyvaksytytVastaanottaneetParams, ValidatedKoulutuksetToteutuksetHakukohteetParams}
+import fi.oph.ovara.backend.utils.AuditOperation.KoulutuksetToteutuksetHakukohteet
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
 
   "validateKoulutuksetToteutuksetHakukohteetParams" should "return errors for invalid parameters" in {
-    val hakuList = List("invalid-oid")
-    val maybeKoulutustoimija = Some("1234")
-    val oppilaitosList = List("invalid-oid")
-    val toimipisteList = List("1.2.246.562.10.1000000000000000001")
-    val maybeKoulutuksenTila = Some("invalid-tila")
-    val maybeToteutuksenTila = Some("julkaistu")
-    val maybeHakukohteenTila = None
-    val valintakoe = "invalid-valintakoe"
-
-    val errors = ParameterValidator.validateKoulutuksetToteutuksetHakukohteetParams(
-      hakuList,
-      maybeKoulutustoimija,
-      oppilaitosList,
-      toimipisteList,
-      maybeKoulutuksenTila,
-      maybeToteutuksenTila,
-      maybeHakukohteenTila,
-      valintakoe
+    val params = RawKoulutuksetToteutuksetHakukohteetParams(
+      haut = List("invalid-oid"),
+      koulutustoimija = Some("1234"),
+      oppilaitokset = List("invalid-oid"),
+      toimipisteet = List("1.2.246.562.10.1000000000000000001"),
+      koulutuksenTila = Some("invalid-tila"),
+      toteutuksenTila = Some("julkaistu"),
+      hakukohteenTila = None,
+      valintakoe = "invalid-valintakoe"
     )
 
-    errors should contain("haut.invalid.oid")
-    errors should contain("koulutustoimija.invalid.org")
-    errors should contain("oppilaitokset.invalid.org")
-    errors should contain("koulutuksen-tila.invalid")
-    errors should contain("valintakoe.invalid")
-    errors.length shouldEqual 5
+    val result = ParameterValidator.validateKoulutuksetToteutuksetHakukohteetParams(params)
+
+    result shouldBe Left(List(
+      "haut.invalid.oid",
+      "koulutustoimija.invalid.org",
+      "oppilaitokset.invalid.org",
+      "koulutuksen-tila.invalid",
+      "valintakoe.invalid"
+    ))
   }
 
   it should "return no errors for valid parameters" in {
-    val hakuList = List("1.2.246.562.29.00000000000000049925")
-    val maybeKoulutustoimija = Some("1.2.246.562.10.1000000000000000000")
-    val oppilaitosList = List("1.2.246.562.10.1000000000000000001")
-    val toimipisteList = List("1.2.246.562.10.1000000000000000002")
-    val maybeKoulutuksenTila = Some("julkaistu")
-    val maybeToteutuksenTila = Some("julkaistu")
-    val maybeHakukohteenTila = Some("julkaistu")
-    val valintakoe = "false"
-
-    val errors = ParameterValidator.validateKoulutuksetToteutuksetHakukohteetParams(
-      hakuList,
-      maybeKoulutustoimija,
-      oppilaitosList,
-      toimipisteList,
-      maybeKoulutuksenTila,
-      maybeToteutuksenTila,
-      maybeHakukohteenTila,
-      valintakoe
+    val params = RawKoulutuksetToteutuksetHakukohteetParams(
+      haut = List("1.2.246.562.29.00000000000000049925"),
+      koulutustoimija = Some("1.2.246.562.10.1000000000000000000"),
+      oppilaitokset = List("1.2.246.562.10.1000000000000000001"),
+      toimipisteet = List("1.2.246.562.10.1000000000000000002"),
+      koulutuksenTila = Some("julkaistu"),
+      toteutuksenTila = Some("julkaistu"),
+      hakukohteenTila = Some("julkaistu"),
+      valintakoe = "false"
     )
 
-    errors shouldBe empty
+    val result = ParameterValidator.validateKoulutuksetToteutuksetHakukohteetParams(params)
+
+    val expected =  ValidatedKoulutuksetToteutuksetHakukohteetParams(
+      haut = List("1.2.246.562.29.00000000000000049925"),
+      koulutustoimija = Some("1.2.246.562.10.1000000000000000000"),
+      oppilaitokset = List("1.2.246.562.10.1000000000000000001"),
+      toimipisteet = List("1.2.246.562.10.1000000000000000002"),
+      koulutuksenTila = Some("julkaistu"),
+      toteutuksenTila = Some("julkaistu"),
+      hakukohteenTila = Some("julkaistu"),
+      valintakoe = Some(false))
+
+    result shouldBe Right(expected)
   }
 
-  "validateKkKoulutuksetToteutuksetHakukohteetParams" should "return errors for invalid parameters" in {
-    val hakuList = List("invalid-oid")
-    val oppilaitosList = List("invalid-oid")
-    val toimipisteList = List("1.2.246.999.10.1000000000000000001")
-    val hakukohderyhmaList = List("invalid-oid")
-    val tulostustapa = "invalid-tulostustapa"
-    val maybeKoulutuksenTila = Some("invalid-tila")
-    val maybeToteutuksenTila = Some("invalid-tila")
-    val maybeHakukohteenTila = Some("invalid-tila")
-    val tutkinnonTasoList = List("invalid-taso")
-
-    val errors = ParameterValidator.validateKkKoulutuksetToteutuksetHakukohteetParams(
-      hakuList,
-      oppilaitosList,
-      toimipisteList,
-      hakukohderyhmaList,
-      tulostustapa,
-      maybeKoulutuksenTila,
-      maybeToteutuksenTila,
-      maybeHakukohteenTila,
-      tutkinnonTasoList,
-    )
-
-    errors.length shouldEqual 9
-    errors should contain("haut.invalid.oid")
-    errors should contain("oppilaitokset.invalid.org")
-    errors should contain("toimipisteet.invalid.org")
-    errors should contain("hakukohderyhmat.invalid.oid")
-    errors should contain("tulostustapa.invalid")
-    errors should contain("koulutuksen-tila.invalid")
-    errors should contain("toteutuksen-tila.invalid")
-    errors should contain("hakukohteen-tila.invalid")
-    errors should contain("tutkinnontasot.invalid")
-  }
 
   "validateHakijatParams" should "return errors for invalid parameters" in {
-    val hakuList = List("invalid-oid")
-    val oppilaitosList = List("invalid-oid")
-    val toimipisteList = List("1.2.246.999.10.1000000000000000001")
-    val hakukohteetList = List("invalid-oid")
-    val pohjakoulutusList = List("abc")
-    val valintatietoList = List("hyvaksytty'||pg_sleep(20)–")
-    val vastaanottotietoList = List("FOOBAR'")
-    val harkinnanvaraisuusList = List("FOOBAR'")
-    val invalidBoolean = "invalid-boolean"
-
-    val errors = ParameterValidator.validateHakijatParams(
-      hakuList,
-      oppilaitosList,
-      toimipisteList,
-      hakukohteetList,
-      pohjakoulutusList,
-      valintatietoList,
-      vastaanottotietoList,
-      harkinnanvaraisuusList,
-      invalidBoolean,
-      invalidBoolean,
-      invalidBoolean,
-      invalidBoolean,
-      invalidBoolean,
-      invalidBoolean,
+    val params = RawHakijatParams(
+      haut = List("invalid-oid"),
+      oppilaitokset = List("invalid-oid"),
+      toimipisteet = List("1.2.246.999.10.1000000000000000001"),
+      hakukohteet = List("invalid-oid"),
+      pohjakoulutukset = List("abc"),
+      valintatiedot = List("hyvaksytty'||pg_sleep(20)–"),
+      vastaanottotiedot = List("FOOBAR'"),
+      harkinnanvaraisuudet = List("FOOBAR'"),
+      kaksoistutkinto = "invalid-boolean",
+      urheilijatutkinto = "invalid-boolean",
+      soraTerveys = "invalid-boolean",
+      soraAiempi = "invalid-boolean",
+      markkinointilupa = "invalid-boolean",
+      julkaisulupa = "invalid-boolean"
     )
 
-    errors.length shouldEqual 14
-    errors should contain("haut.invalid.oid")
-    errors should contain("oppilaitokset.invalid.org")
-    errors should contain("toimipisteet.invalid.org")
-    errors should contain("hakukohteet.invalid.oid")
-    errors should contain("pohjakoulutukset.invalid")
-    errors should contain("valintatiedot.invalid")
-    errors should contain("harkinnanvaraisuudet.invalid")
-    errors should contain("vastaanottotiedot.invalid")
-    errors should contain("kaksoistutkinto-kiinnostaa.invalid")
-    errors should contain("urheilijatutkinto-kiinnostaa.invalid")
-    errors should contain("soraterveys.invalid")
-    errors should contain("sora-aiempi.invalid")
-    errors should contain("markkinointilupa.invalid")
-    errors should contain("julkaisulupa.invalid")
+    val result = ParameterValidator.validateHakijatParams(params)
+
+    result shouldBe Left(List(
+      "haut.invalid.oid",
+      "oppilaitokset.invalid.org",
+      "toimipisteet.invalid.org",
+      "hakukohteet.invalid.oid",
+      "pohjakoulutukset.invalid",
+      "valintatiedot.invalid",
+      "vastaanottotiedot.invalid",
+      "harkinnanvaraisuudet.invalid",
+      "kaksoistutkinto-kiinnostaa.invalid",
+      "urheilijatutkinto-kiinnostaa.invalid",
+      "soraterveys.invalid",
+      "sora-aiempi.invalid",
+      "markkinointilupa.invalid",
+      "julkaisulupa.invalid"
+    ))
   }
 
   "validateKkHakijatParams" should "return errors for invalid parameters" in {
-    val hakuList = List("invalid-oid")
-    val oppilaitosList = List("invalid-oid")
-    val toimipisteList = List("1.2.246.999.10.1000000000000000001")
-    val hakukohteetList = List("invalid-oid")
-    val valintatietoList = List("hyvaksytty'||pg_sleep(20)–")
-    val vastaanottotietoList = List("FOOBAR'")
-    val hakukohderyhmaList = List("invalid-oid")
-    val kansalaisuusList = List("abc")
-    val invalidBoolean = "invalid-boolean"
-
-    val errors = ParameterValidator.validateKkHakijatParams(
-      hakuList,
-      oppilaitosList,
-      toimipisteList,
-      hakukohteetList,
-      valintatietoList,
-      vastaanottotietoList,
-      hakukohderyhmaList,
-      kansalaisuusList,
-      invalidBoolean,
-      invalidBoolean,
-      invalidBoolean,
-      invalidBoolean,
+    val params = RawKkHakijatParams(
+      haut = List("invalid-oid"),
+      oppilaitokset = List("invalid-oid"),
+      toimipisteet = List("1.2.246.999.10.1000000000000000001"),
+      hakukohteet = List("invalid-oid"),
+      valintatiedot = List("hyvaksytty'||pg_sleep(20)–"),
+      vastaanottotiedot = List("FOOBAR'"),
+      hakukohderyhmat = List("invalid-oid"),
+      kansalaisuusluokat = List("abc"),
+      markkinointilupa = "invalid-boolean",
+      naytaYoArvosanat = "invalid-boolean",
+      naytaHetu = "invalid-boolean",
+      naytaPostiosoite = "invalid-boolean"
     )
 
-    errors.length shouldEqual 12
-    errors should contain("haut.invalid.oid")
-    errors should contain("oppilaitokset.invalid.org")
-    errors should contain("toimipisteet.invalid.org")
-    errors should contain("hakukohteet.invalid.oid")
-    errors should contain("valintatiedot.invalid")
-    errors should contain("vastaanottotiedot.invalid")
-    errors should contain("hakukohderyhmat.invalid.oid")
-    errors should contain("kansalaisuusluokat.invalid")
-    errors should contain("markkinointilupa.invalid")
-    errors should contain("nayta-yo-arvosanat.invalid")
-    errors should contain("nayta-hetu.invalid")
-    errors should contain("nayta-postiosoite.invalid")
+    val result = ParameterValidator.validateKkHakijatParams(params)
+
+    result shouldBe Left(List(
+      "haut.invalid.oid",
+      "oppilaitokset.invalid.org",
+      "toimipisteet.invalid.org",
+      "hakukohteet.invalid.oid",
+      "valintatiedot.invalid",
+      "vastaanottotiedot.invalid",
+      "hakukohderyhmat.invalid.oid",
+      "kansalaisuusluokat.invalid",
+      "markkinointilupa.invalid",
+      "nayta-yo-arvosanat.invalid",
+      "nayta-hetu.invalid",
+      "nayta-postiosoite.invalid"
+    ))
   }
 
   "validateHakeneetHyvaksytytVastaanottaneetParams" should "return errors for invalid parameters" in {
-    val hakuList = List("invalid-oid")
-    val tulostustapa = "invalid-tulostustapa"
-    val koulutustoimija = Some("invalid-koulutustoimija")
-    val oppilaitosList = List("invalid-oid")
-    val toimipisteList = List("1.2.246.999.10.1000000000000000001")
-    val hakukohteetList = List("invalid-oid")
-    val koulutusala1List = List("foo")
-    val koulutusala2List = List("bar")
-    val koulutusala3List = List("baz")
-    val opetuskieliList = List("invalid*-kieli")
-    val maakuntaList = List("invalid*-maakunta")
-    val kuntaList = List("invalid*-kunta")
-    val harkinnanvaraisuusList = List("FOOBAR''")
-    val sukupuoli = Some("invalid-sukupuoli")
-    val invalidBoolean = "invalid-boolean"
-
-    val errors = ParameterValidator.validateHakeneetHyvaksytytVastaanottaneetParams(
-      hakuList,
-      tulostustapa,
-      koulutustoimija,
-      oppilaitosList,
-      toimipisteList,
-      hakukohteetList,
-      koulutusala1List,
-      koulutusala2List,
-      koulutusala3List,
-      opetuskieliList,
-      maakuntaList,
-      kuntaList,
-      harkinnanvaraisuusList,
-      sukupuoli,
-      invalidBoolean,
+    val params = RawHakeneetHyvaksytytVastaanottaneetParams(
+      haut = List("invalid-oid"),
+      tulostustapa = "invalid-tulostustapa",
+      koulutustoimija = Some("invalid-koulutustoimija"),
+      oppilaitokset = List("invalid-oid"),
+      toimipisteet = List("1.2.246.999.10.1000000000000000001"),
+      hakukohteet = List("invalid-oid"),
+      koulutusalat1 = List("foo"),
+      koulutusalat2 = List("bar"),
+      koulutusalat3 = List("baz"),
+      opetuskielet = List("invalid*-kieli"),
+      maakunnat = List("invalid*-maakunta"),
+      kunnat = List("invalid*-kunta"),
+      harkinnanvaraisuudet = List("FOOBAR''"),
+      sukupuoli = Some("invalid-sukupuoli"),
+      naytaHakutoiveet = "invalid-boolean"
     )
 
-    errors.length shouldEqual 15
-    errors should contain("haut.invalid.oid")
-    errors should contain("tulostustapa.invalid")
-    errors should contain("koulutustoimija.invalid.org")
-    errors should contain("oppilaitokset.invalid.org")
-    errors should contain("toimipisteet.invalid.org")
-    errors should contain("hakukohteet.invalid.oid")
-    errors should contain("koulutusalat1.invalid")
-    errors should contain("koulutusalat2.invalid")
-    errors should contain("koulutusalat3.invalid")
-    errors should contain("opetuskielet.invalid")
-    errors should contain("maakunnat.invalid")
-    errors should contain("kunnat.invalid")
-    errors should contain("harkinnanvaraisuudet.invalid")
-    errors should contain("sukupuoli.invalid")
-    errors should contain("nayta-hakutoiveet.invalid")
-  }
+    val result = ParameterValidator.validateHakeneetHyvaksytytVastaanottaneetParams(params)
 
-  it should "return no errors for valid parameters" in {
-    val hakuList = List("1.2.246.562.29.00000000000000056840")
-    val tulostustapa = "hakukohteittain"
-    val koulutustoimija = Some("1.2.246.562.10.346830761110")
-    val oppilaitosList = List("1.2.246.562.10.52251087186")
-    val toimipisteList = List("1.2.246.562.10.55711304158")
-    val hakukohteetList = List("1.2.246.562.20.00000000000000059958")
-    val koulutusala1List = List("09")
-    val koulutusala2List = List("092")
-    val koulutusala3List = List("0922")
-    val opetuskieliList = List("oppilaitoksenopetuskieli_1")
-    val maakuntaList = List("maakunta_21")
-    val kuntaList = List("kunta_004")
-    val harkinnanvaraisuusList = List("ATARU_EI_PAATTOTODISTUSTA")
-    val sukupuoli = Some("2")
-    val naytaHakutoiveet = "false"
-
-    val errors = ParameterValidator.validateHakeneetHyvaksytytVastaanottaneetParams(
-      hakuList,
-      tulostustapa,
-      koulutustoimija,
-      oppilaitosList,
-      toimipisteList,
-      hakukohteetList,
-      koulutusala1List,
-      koulutusala2List,
-      koulutusala3List,
-      opetuskieliList,
-      maakuntaList,
-      kuntaList,
-      harkinnanvaraisuusList,
-      sukupuoli,
-      naytaHakutoiveet,
-    )
-
-    errors shouldBe empty
+    result shouldBe Left(List(
+      "haut.invalid.oid",
+      "tulostustapa.invalid",
+      "koulutustoimija.invalid.org",
+      "oppilaitokset.invalid.org",
+      "toimipisteet.invalid.org",
+      "hakukohteet.invalid.oid",
+      "koulutusalat1.invalid",
+      "koulutusalat2.invalid",
+      "koulutusalat3.invalid",
+      "opetuskielet.invalid",
+      "maakunnat.invalid",
+      "kunnat.invalid",
+      "harkinnanvaraisuudet.invalid",
+      "sukupuoli.invalid",
+      "nayta-hakutoiveet.invalid"
+    ))
   }
 
   "validateKkHakeneetHyvaksytytVastaanottaneetParams" should "return errors for invalid parameters" in {
-    val hakuList = List("invalid-oid")
-    val tulostustapa = "invalid-tulostustapa"
-    val koulutustoimija = Some("invalid-koulutustoimija")
-    val oppilaitosList = List("invalid-oid")
-    val toimipisteList = List("1.2.246.999.10.1000000000000000001")
-    val hakukohteetList = List("invalid-oid")
-    val hakukohderyhmaList = List("invalid-oid")
-    val okmOhjauksenAlaList = List("foo")
-    val tutkinnonTasoList = List("bar")
-    val aidinkieliList = List("baz'")
-    val kansalaisuusList = List("invalid-kansalaisuus")
-    val sukupuoli = Some("invalid-sukupuoli")
-    val invalidBoolean = "invalid-boolean"
-
-    val errors = ParameterValidator.validateKkHakeneetHyvaksytytVastaanottaneetParams(
-      hakuList,
-      tulostustapa,
-      koulutustoimija,
-      oppilaitosList,
-      toimipisteList,
-      hakukohteetList,
-      hakukohderyhmaList,
-      okmOhjauksenAlaList,
-      tutkinnonTasoList,
-      aidinkieliList,
-      kansalaisuusList,
-      sukupuoli,
-      invalidBoolean,
-      invalidBoolean
+    val params = RawKkHakeneetHyvaksytytVastaanottaneetParams(
+      haut = List("invalid-oid"),
+      tulostustapa = "invalid-tulostustapa",
+      koulutustoimija = Some("invalid-koulutustoimija"),
+      oppilaitokset = List("invalid-oid"),
+      toimipisteet = List("1.2.246.999.10.1000000000000000001"),
+      hakukohteet = List("invalid-oid"),
+      hakukohderyhmat = List("invalid-oid"),
+      okmOhjauksenAlat = List("foo"),
+      tutkinnonTasot = List("bar"),
+      aidinkielet = List("baz'"),
+      kansalaisuusluokat = List("invalid-kansalaisuus"),
+      sukupuoli = Some("invalid-sukupuoli"),
+      ensikertalainen = "invalid-boolean",
+      naytaHakutoiveet = "invalid-boolean"
     )
 
-    errors.length shouldEqual 14
-    errors should contain("haut.invalid.oid")
-    errors should contain("tulostustapa.invalid")
-    errors should contain("koulutustoimija.invalid.org")
-    errors should contain("oppilaitokset.invalid.org")
-    errors should contain("toimipisteet.invalid.org")
-    errors should contain("hakukohteet.invalid.oid")
-    errors should contain("hakukohderyhmat.invalid.oid")
-    errors should contain("okm-ohjauksen-alat.invalid")
-    errors should contain("tutkinnontasot.invalid")
-    errors should contain("aidinkielet.invalid")
-    errors should contain("kansalaisuusluokat.invalid")
-    errors should contain("sukupuoli.invalid")
-    errors should contain("ensikertalainen.invalid")
-    errors should contain("nayta-hakutoiveet.invalid")
+    val result = ParameterValidator.validateKkHakeneetHyvaksytytVastaanottaneetParams(params)
+
+    result shouldBe Left(List(
+      "haut.invalid.oid",
+      "tulostustapa.invalid",
+      "koulutustoimija.invalid.org",
+      "oppilaitokset.invalid.org",
+      "toimipisteet.invalid.org",
+      "hakukohteet.invalid.oid",
+      "hakukohderyhmat.invalid.oid",
+      "okm-ohjauksen-alat.invalid",
+      "tutkinnontasot.invalid",
+      "aidinkielet.invalid",
+      "kansalaisuusluokat.invalid",
+      "sukupuoli.invalid",
+      "ensikertalainen.invalid",
+      "nayta-hakutoiveet.invalid"
+    ))
+  }
+
+  it should "return no errors for valid parameters" in {
+
+    val params = RawHakeneetHyvaksytytVastaanottaneetParams(
+      haut = List("1.2.246.562.29.00000000000000056840"),
+      tulostustapa = "hakukohteittain",
+      koulutustoimija = Some("1.2.246.562.10.346830761110"),
+      oppilaitokset = List("1.2.246.562.10.52251087186"),
+      toimipisteet = List("1.2.246.562.10.55711304158"),
+      hakukohteet = List("1.2.246.562.20.00000000000000059958"),
+      koulutusalat1 = List("09"),
+      koulutusalat2 = List("092"),
+      koulutusalat3 = List("0922"),
+      opetuskielet = List("oppilaitoksenopetuskieli_1"),
+      maakunnat = List("maakunta_21"),
+      kunnat = List("kunta_004"),
+      harkinnanvaraisuudet = List("ATARU_EI_PAATTOTODISTUSTA"),
+      sukupuoli = Some("2"),
+      naytaHakutoiveet = "true"
+    )
+
+    val expected = ValidatedHakeneetHyvaksytytVastaanottaneetParams(
+      haut = List("1.2.246.562.29.00000000000000056840"),
+      tulostustapa = "hakukohteittain",
+      koulutustoimija = Some("1.2.246.562.10.346830761110"),
+      oppilaitokset = List("1.2.246.562.10.52251087186"),
+      toimipisteet = List("1.2.246.562.10.55711304158"),
+      hakukohteet = List("1.2.246.562.20.00000000000000059958"),
+      koulutusalat1 = List("09"),
+      koulutusalat2 = List("092"),
+      koulutusalat3 = List("0922"),
+      opetuskielet = List("oppilaitoksenopetuskieli_1"),
+      maakunnat = List("maakunta_21"),
+      kunnat = List("kunta_004"),
+      harkinnanvaraisuudet = List("ATARU_EI_PAATTOTODISTUSTA"),
+      sukupuoli = Some("2"),
+      naytaHakutoiveet = true,
+    )
+    val result = ParameterValidator.validateHakeneetHyvaksytytVastaanottaneetParams(params)
+
+    result shouldBe Right(expected)
   }
 }
