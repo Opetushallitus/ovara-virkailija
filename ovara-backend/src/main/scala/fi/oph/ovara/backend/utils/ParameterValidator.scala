@@ -88,17 +88,16 @@ object ParameterValidator {
 
   def validateKoulutuksetToteutuksetHakukohteetParams(params: RawKoulutuksetToteutuksetHakukohteetParams
                                                      ): Either[List[String], ValidatedKoulutuksetToteutuksetHakukohteetParams] = {
-    import params._
     val errors = List(
-      validateNonEmpty(haut, "haut"),
-      validateOidList(haut, "haut"),
-      validateOrganisaatioOid(koulutustoimija, "koulutustoimija"),
-      validateOrganisaatioOidList(oppilaitokset, "oppilaitokset"),
-      validateOrganisaatioOidList(toimipisteet, "toimipisteet"),
-      valueBelongsToSetOfValidValues(koulutuksenTila, "koulutuksen-tila", TILAT),
-      valueBelongsToSetOfValidValues(toteutuksenTila, "toteutuksen-tila", TILAT),
-      valueBelongsToSetOfValidValues(hakukohteenTila, "hakukohteen-tila", TILAT),
-      validateBoolean(valintakoe, "valintakoe"),
+      validateNonEmpty(params.haut, "haut"),
+      validateOidList(params.haut, "haut"),
+      validateOrganisaatioOid(params.koulutustoimija, "koulutustoimija"),
+      validateOrganisaatioOidList(params.oppilaitokset, "oppilaitokset"),
+      validateOrganisaatioOidList(params.toimipisteet, "toimipisteet"),
+      valueBelongsToSetOfValidValues(params.koulutuksenTila, "koulutuksen-tila", TILAT),
+      valueBelongsToSetOfValidValues(params.toteutuksenTila, "toteutuksen-tila", TILAT),
+      valueBelongsToSetOfValidValues(params.hakukohteenTila, "hakukohteen-tila", TILAT),
+      validateBoolean(params.valintakoe, "valintakoe"),
     ).flatten
 
     if(errors.nonEmpty) {
@@ -106,14 +105,14 @@ object ParameterValidator {
     } else {
       Right(
         ValidatedKoulutuksetToteutuksetHakukohteetParams(
-          haut,
-          koulutustoimija,
-          oppilaitokset,
-          toimipisteet,
-          koulutuksenTila,
-          toteutuksenTila,
-          hakukohteenTila,
-          strToOptionBoolean(valintakoe)
+          params.haut,
+          params.koulutustoimija,
+          params.oppilaitokset,
+          params.toimipisteet,
+          params.koulutuksenTila,
+          params.toteutuksenTila,
+          params.hakukohteenTila,
+          strToOptionBoolean(params.valintakoe)
         )
       )
     }
@@ -121,19 +120,17 @@ object ParameterValidator {
 
   def validateKkKoulutuksetToteutuksetHakukohteetParams(params: RawKkKoulutuksetToteutuksetHakukohteetParams
                                                        ): Either[List[String], ValidatedKkKoulutuksetToteutuksetHakukohteetParams] = {
-    import params._
-
     val errors = List(
-      validateNonEmpty(haut, "haut"),
-      validateOidList(haut, "haut"),
-      validateOrganisaatioOidList(oppilaitokset, "oppilaitokset"),
-      validateOrganisaatioOidList(toimipisteet, "toimipisteet"),
-      validateOidList(hakukohderyhmat, "hakukohderyhmat"),
-      valueBelongsToSetOfValidValues(Some(tulostustapa), "tulostustapa", TULOSTUSTAVAT),
-      valueBelongsToSetOfValidValues(koulutuksenTila, "koulutuksen-tila", TILAT),
-      valueBelongsToSetOfValidValues(toteutuksenTila, "toteutuksen-tila", TILAT),
-      valueBelongsToSetOfValidValues(hakukohteenTila, "hakukohteen-tila", TILAT),
-      valuesBelongToSetOfValidValues(tutkinnonTasot, "tutkinnontasot", KK_TUTKINNON_TASOT)
+      validateNonEmpty(params.haut, "haut"),
+      validateOidList(params.haut, "haut"),
+      validateOrganisaatioOidList(params.oppilaitokset, "oppilaitokset"),
+      validateOrganisaatioOidList(params.toimipisteet, "toimipisteet"),
+      validateOidList(params.hakukohderyhmat, "hakukohderyhmat"),
+      valueBelongsToSetOfValidValues(Some(params.tulostustapa), "tulostustapa", TULOSTUSTAVAT),
+      valueBelongsToSetOfValidValues(params.koulutuksenTila, "koulutuksen-tila", TILAT),
+      valueBelongsToSetOfValidValues(params.toteutuksenTila, "toteutuksen-tila", TILAT),
+      valueBelongsToSetOfValidValues(params.hakukohteenTila, "hakukohteen-tila", TILAT),
+      valuesBelongToSetOfValidValues(params.tutkinnonTasot, "tutkinnontasot", KK_TUTKINNON_TASOT)
     ).flatten
 
     if (errors.nonEmpty) {
@@ -141,86 +138,86 @@ object ParameterValidator {
     } else {
       Right(
         ValidatedKkKoulutuksetToteutuksetHakukohteetParams(
-          haut,
-          tulostustapa,
-          oppilaitokset,
-          toimipisteet,
-          hakukohderyhmat,
-          koulutuksenTila,
-          toteutuksenTila,
-          hakukohteenTila,
-          tutkinnonTasot
+          params.haut,
+          params.tulostustapa,
+          params.oppilaitokset,
+          params.toimipisteet,
+          params.hakukohderyhmat,
+          params.koulutuksenTila,
+          params.toteutuksenTila,
+          params.hakukohteenTila,
+          params.tutkinnonTasot
         )
       )
     }
   }
 
   def validateHakijatParams(params: RawHakijatParams): Either[List[String], ValidatedHakijatParams] = {
-    import params._
+
     val errors = List(
-      validateNonEmpty(haut, "haut"),
-      validateOidList(haut, "haut"),
-      validateOrganisaatioOidList(oppilaitokset, "oppilaitokset"),
-      validateOrganisaatioOidList(toimipisteet, "toimipisteet"),
-      validateOidList(hakukohteet, "hakukohteet"),
-      validateNumericList(pohjakoulutukset, "pohjakoulutukset"),
-      validateAlphanumericList(valintatiedot, "valintatiedot"),
-      validateAlphanumericList(vastaanottotiedot, "vastaanottotiedot"),
-      validateAlphanumericList(harkinnanvaraisuudet, "harkinnanvaraisuudet"),
-      validateBoolean(kaksoistutkinto, "kaksoistutkinto-kiinnostaa"),
-      validateBoolean(urheilijatutkinto, "urheilijatutkinto-kiinnostaa"),
-      validateBoolean(soraTerveys, "soraterveys"),
-      validateBoolean(soraAiempi, "sora-aiempi"),
-      validateBoolean(markkinointilupa, "markkinointilupa"),
-      validateBoolean(julkaisulupa, "julkaisulupa")
+      validateNonEmpty(params.haut, "haut"),
+      validateOidList(params.haut, "haut"),
+      validateOrganisaatioOidList(params.oppilaitokset, "oppilaitokset"),
+      validateOrganisaatioOidList(params.toimipisteet, "toimipisteet"),
+      validateOidList(params.hakukohteet, "hakukohteet"),
+      validateNumericList(params.pohjakoulutukset, "pohjakoulutukset"),
+      validateAlphanumericList(params.valintatiedot, "valintatiedot"),
+      validateAlphanumericList(params.vastaanottotiedot, "vastaanottotiedot"),
+      validateAlphanumericList(params.harkinnanvaraisuudet, "harkinnanvaraisuudet"),
+      validateBoolean(params.kaksoistutkinto, "kaksoistutkinto-kiinnostaa"),
+      validateBoolean(params.urheilijatutkinto, "urheilijatutkinto-kiinnostaa"),
+      validateBoolean(params.soraTerveys, "soraterveys"),
+      validateBoolean(params.soraAiempi, "sora-aiempi"),
+      validateBoolean(params.markkinointilupa, "markkinointilupa"),
+      validateBoolean(params.julkaisulupa, "julkaisulupa")
     ).flatten
 
-    val combinedErrors = errors ++ Option.when(oppilaitokset.isEmpty && toimipisteet.isEmpty)("error.required.missing").toList
+    val combinedErrors = errors ++ Option.when(params.oppilaitokset.isEmpty && params.toimipisteet.isEmpty)("error.required.missing").toList
 
     if (combinedErrors.nonEmpty) {
       Left(combinedErrors.distinct)
     } else {
       Right(
         ValidatedHakijatParams(
-          haut,
-          oppilaitokset,
-          toimipisteet,
-          hakukohteet,
-          pohjakoulutukset,
-          valintatiedot,
-          vastaanottotiedot,
-          harkinnanvaraisuudet,
-          strToOptionBoolean(kaksoistutkinto),
-          strToOptionBoolean(urheilijatutkinto),
-          strToOptionBoolean(soraTerveys),
-          strToOptionBoolean(soraAiempi),
-          strToOptionBoolean(markkinointilupa),
-          strToOptionBoolean(julkaisulupa)
+          params.haut,
+          params.oppilaitokset,
+          params.toimipisteet,
+          params.hakukohteet,
+          params.pohjakoulutukset,
+          params.valintatiedot,
+          params.vastaanottotiedot,
+          params.harkinnanvaraisuudet,
+          strToOptionBoolean(params.kaksoistutkinto),
+          strToOptionBoolean(params.urheilijatutkinto),
+          strToOptionBoolean(params.soraTerveys),
+          strToOptionBoolean(params.soraAiempi),
+          strToOptionBoolean(params.markkinointilupa),
+          strToOptionBoolean(params.julkaisulupa)
         )
       )
     }
   }
 
   def validateKkHakijatParams(params: RawKkHakijatParams): Either[List[String], ValidatedKkHakijatParams] = {
-    import params._
+
     val errors = List(
-      validateNonEmpty(haut, "haut"),
-      validateOidList(haut, "haut"),
-      validateOrganisaatioOidList(oppilaitokset, "oppilaitokset"),
-      validateOrganisaatioOidList(toimipisteet, "toimipisteet"),
-      validateOidList(hakukohteet, "hakukohteet"),
-      validateAlphanumericList(valintatiedot, "valintatiedot"),
-      validateAlphanumericList(vastaanottotiedot, "vastaanottotiedot"),
-      validateOidList(hakukohderyhmat, "hakukohderyhmat"),
-      validateNumericList(kansalaisuusluokat, "kansalaisuusluokat"),
-      validateBoolean(markkinointilupa, "markkinointilupa"),
-      validateBoolean(naytaYoArvosanat, "nayta-yo-arvosanat"),
-      validateBoolean(naytaHetu, "nayta-hetu"),
-      validateBoolean(naytaPostiosoite, "nayta-postiosoite")
+      validateNonEmpty(params.haut, "haut"),
+      validateOidList(params.haut, "haut"),
+      validateOrganisaatioOidList(params.oppilaitokset, "oppilaitokset"),
+      validateOrganisaatioOidList(params.toimipisteet, "toimipisteet"),
+      validateOidList(params.hakukohteet, "hakukohteet"),
+      validateAlphanumericList(params.valintatiedot, "valintatiedot"),
+      validateAlphanumericList(params.vastaanottotiedot, "vastaanottotiedot"),
+      validateOidList(params.hakukohderyhmat, "hakukohderyhmat"),
+      validateNumericList(params.kansalaisuusluokat, "kansalaisuusluokat"),
+      validateBoolean(params.markkinointilupa, "markkinointilupa"),
+      validateBoolean(params.naytaYoArvosanat, "nayta-yo-arvosanat"),
+      validateBoolean(params.naytaHetu, "nayta-hetu"),
+      validateBoolean(params.naytaPostiosoite, "nayta-postiosoite")
     ).flatten
 
     val combinedErrors = errors ++ Option.when(
-      oppilaitokset.isEmpty && toimipisteet.isEmpty && hakukohderyhmat.isEmpty
+      params.oppilaitokset.isEmpty && params.toimipisteet.isEmpty && params.hakukohderyhmat.isEmpty
     )("error.required.missing").toList
 
     if (combinedErrors.nonEmpty) {
@@ -228,18 +225,18 @@ object ParameterValidator {
     } else {
       Right(
         ValidatedKkHakijatParams(
-          haut,
-          oppilaitokset,
-          toimipisteet,
-          hakukohteet,
-          valintatiedot,
-          vastaanottotiedot,
-          hakukohderyhmat,
-          kansalaisuusluokat,
-          strToOptionBoolean(markkinointilupa),
-          naytaYoArvosanat.toBoolean,
-          naytaHetu.toBoolean,
-          naytaPostiosoite.toBoolean
+          params.haut,
+          params.oppilaitokset,
+          params.toimipisteet,
+          params.hakukohteet,
+          params.valintatiedot,
+          params.vastaanottotiedot,
+          params.hakukohderyhmat,
+          params.kansalaisuusluokat,
+          strToOptionBoolean(params.markkinointilupa),
+          params.naytaYoArvosanat.toBoolean,
+          params.naytaHetu.toBoolean,
+          params.naytaPostiosoite.toBoolean
         )
       )
     }
@@ -248,25 +245,24 @@ object ParameterValidator {
   def validateHakeneetHyvaksytytVastaanottaneetParams(
                                                        params: RawHakeneetHyvaksytytVastaanottaneetParams
                                                      ): Either[List[String], ValidatedHakeneetHyvaksytytVastaanottaneetParams] = {
-    import params._
 
     val errors = List(
-      validateNonEmpty(haut, "haut"),
-      validateOidList(haut, "haut"),
-      valueBelongsToSetOfValidValues(Some(tulostustapa), "tulostustapa", TULOSTUSTAVAT),
-      validateOrganisaatioOid(koulutustoimija, "koulutustoimija"),
-      validateOrganisaatioOidList(oppilaitokset, "oppilaitokset"),
-      validateOrganisaatioOidList(toimipisteet, "toimipisteet"),
-      validateOidList(hakukohteet, "hakukohteet"),
-      validateNumericList(koulutusalat1, "koulutusalat1"),
-      validateNumericList(koulutusalat2, "koulutusalat2"),
-      validateNumericList(koulutusalat3, "koulutusalat3"),
-      validateAlphanumericList(opetuskielet, "opetuskielet"),
-      validateAlphanumericList(maakunnat, "maakunnat"),
-      validateAlphanumericList(kunnat, "kunnat"),
-      validateAlphanumericList(harkinnanvaraisuudet, "harkinnanvaraisuudet"),
-      validateNumeric(sukupuoli, "sukupuoli"),
-      validateBoolean(naytaHakutoiveet, "nayta-hakutoiveet")
+      validateNonEmpty(params.haut, "haut"),
+      validateOidList(params.haut, "haut"),
+      valueBelongsToSetOfValidValues(Some(params.tulostustapa), "tulostustapa", TULOSTUSTAVAT),
+      validateOrganisaatioOid(params.koulutustoimija, "koulutustoimija"),
+      validateOrganisaatioOidList(params.oppilaitokset, "oppilaitokset"),
+      validateOrganisaatioOidList(params.toimipisteet, "toimipisteet"),
+      validateOidList(params.hakukohteet, "hakukohteet"),
+      validateNumericList(params.koulutusalat1, "koulutusalat1"),
+      validateNumericList(params.koulutusalat2, "koulutusalat2"),
+      validateNumericList(params.koulutusalat3, "koulutusalat3"),
+      validateAlphanumericList(params.opetuskielet, "opetuskielet"),
+      validateAlphanumericList(params.maakunnat, "maakunnat"),
+      validateAlphanumericList(params.kunnat, "kunnat"),
+      validateAlphanumericList(params.harkinnanvaraisuudet, "harkinnanvaraisuudet"),
+      validateNumeric(params.sukupuoli, "sukupuoli"),
+      validateBoolean(params.naytaHakutoiveet, "nayta-hakutoiveet")
     ).flatten
 
     if (errors.nonEmpty) {
@@ -274,21 +270,21 @@ object ParameterValidator {
     } else {
       Right(
         ValidatedHakeneetHyvaksytytVastaanottaneetParams(
-          haut,
-          tulostustapa,
-          koulutustoimija,
-          oppilaitokset,
-          toimipisteet,
-          hakukohteet,
-          koulutusalat1,
-          koulutusalat2,
-          koulutusalat3,
-          opetuskielet,
-          maakunnat,
-          kunnat,
-          harkinnanvaraisuudet,
-          strToOptionBoolean(naytaHakutoiveet).getOrElse(true),
-          sukupuoli
+          params.haut,
+          params.tulostustapa,
+          params.koulutustoimija,
+          params.oppilaitokset,
+          params.toimipisteet,
+          params.hakukohteet,
+          params.koulutusalat1,
+          params.koulutusalat2,
+          params.koulutusalat3,
+          params.opetuskielet,
+          params.maakunnat,
+          params.kunnat,
+          params.harkinnanvaraisuudet,
+          strToOptionBoolean(params.naytaHakutoiveet).getOrElse(true),
+          params.sukupuoli
         )
       )
     }
@@ -297,24 +293,23 @@ object ParameterValidator {
   def validateKkHakeneetHyvaksytytVastaanottaneetParams(
                                                          params: RawKkHakeneetHyvaksytytVastaanottaneetParams
                                                        ): Either[List[String], ValidatedKkHakeneetHyvaksytytVastaanottaneetParams] = {
-    import params._
 
     val errors = List(
-      validateNonEmpty(haut, "haut"),
-      validateOidList(haut, "haut"),
-      valueBelongsToSetOfValidValues(Some(tulostustapa), "tulostustapa", TULOSTUSTAVAT),
-      validateOrganisaatioOid(koulutustoimija, "koulutustoimija"),
-      validateOrganisaatioOidList(oppilaitokset, "oppilaitokset"),
-      validateOrganisaatioOidList(toimipisteet, "toimipisteet"),
-      validateOidList(hakukohteet, "hakukohteet"),
-      validateOidList(hakukohderyhmat, "hakukohderyhmat"),
-      validateNumericList(okmOhjauksenAlat, "okm-ohjauksen-alat"),
-      valuesBelongToSetOfValidValues(tutkinnonTasot, "tutkinnontasot", KK_TUTKINNON_TASOT),
-      validateAlphanumericList(aidinkielet, "aidinkielet"),
-      validateNumericList(kansalaisuusluokat, "kansalaisuusluokat"),
-      validateNumeric(sukupuoli, "sukupuoli"),
-      validateBoolean(ensikertalainen, "ensikertalainen"),
-      validateBoolean(naytaHakutoiveet, "nayta-hakutoiveet")
+      validateNonEmpty(params.haut, "haut"),
+      validateOidList(params.haut, "haut"),
+      valueBelongsToSetOfValidValues(Some(params.tulostustapa), "tulostustapa", TULOSTUSTAVAT),
+      validateOrganisaatioOid(params.koulutustoimija, "koulutustoimija"),
+      validateOrganisaatioOidList(params.oppilaitokset, "oppilaitokset"),
+      validateOrganisaatioOidList(params.toimipisteet, "toimipisteet"),
+      validateOidList(params.hakukohteet, "hakukohteet"),
+      validateOidList(params.hakukohderyhmat, "hakukohderyhmat"),
+      validateNumericList(params.okmOhjauksenAlat, "okm-ohjauksen-alat"),
+      valuesBelongToSetOfValidValues(params.tutkinnonTasot, "tutkinnontasot", KK_TUTKINNON_TASOT),
+      validateAlphanumericList(params.aidinkielet, "aidinkielet"),
+      validateNumericList(params.kansalaisuusluokat, "kansalaisuusluokat"),
+      validateNumeric(params.sukupuoli, "sukupuoli"),
+      validateBoolean(params.ensikertalainen, "ensikertalainen"),
+      validateBoolean(params.naytaHakutoiveet, "nayta-hakutoiveet")
     ).flatten
 
     if (errors.nonEmpty) {
@@ -322,20 +317,20 @@ object ParameterValidator {
     } else {
       Right(
         ValidatedKkHakeneetHyvaksytytVastaanottaneetParams(
-          haut,
-          tulostustapa,
-          koulutustoimija,
-          oppilaitokset,
-          toimipisteet,
-          hakukohteet,
-          hakukohderyhmat,
-          okmOhjauksenAlat,
-          tutkinnonTasot,
-          aidinkielet,
-          kansalaisuusluokat,
-          sukupuoli,
-          strToOptionBoolean(ensikertalainen),
-          strToOptionBoolean(naytaHakutoiveet).getOrElse(true)
+          params.haut,
+          params.tulostustapa,
+          params.koulutustoimija,
+          params.oppilaitokset,
+          params.toimipisteet,
+          params.hakukohteet,
+          params.hakukohderyhmat,
+          params.okmOhjauksenAlat,
+          params.tutkinnonTasot,
+          params.aidinkielet,
+          params.kansalaisuusluokat,
+          params.sukupuoli,
+          strToOptionBoolean(params.ensikertalainen),
+          strToOptionBoolean(params.naytaHakutoiveet).getOrElse(true)
         )
       )
     }
