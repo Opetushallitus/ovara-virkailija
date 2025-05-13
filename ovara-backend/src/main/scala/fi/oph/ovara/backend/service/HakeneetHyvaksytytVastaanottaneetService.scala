@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.HakeneetHyvaksytytVastaanottaneetResult
+import fi.oph.ovara.backend.domain.{HakeneetHyvaksytytVastaanottaneetResult, Kieli}
 import fi.oph.ovara.backend.repository.{HakeneetHyvaksytytVastaanottaneetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -121,6 +121,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
           db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams")
       }
 
+      val sortedResult = queryResult.sortBy(resultRow => resultRow.otsikko.get(Kieli.withName(asiointikieli)))
       val sumQuery = hakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams(
         selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
         haut = haut,
@@ -140,7 +141,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
       ExcelWriter.writeHakeneetHyvaksytytVastaanottaneetRaportti(
         asiointikieli,
         translations,
-        queryResult.toList,
+        sortedResult.toList,
         sumQueryResult,
         naytaHakutoiveet,
         tulostustapa
