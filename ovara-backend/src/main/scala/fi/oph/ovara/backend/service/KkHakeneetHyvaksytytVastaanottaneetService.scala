@@ -202,6 +202,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
         maksuvelvollinen = Some("obligated")
       )
 
+      val sortedResult = queryResult.sortBy(resultRow => resultRow.otsikko.get(Kieli.withName(asiointikieli)))
       val sumQueryResult = db.run(sumQuery, "kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams")
       val ensikertalaisetSumQueryResult =
         if (vainEnsikertalaiset)
@@ -212,7 +213,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       ExcelWriter.writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
         asiointikieli,
         translations,
-        queryResult.toList,
+        sortedResult.toList,
         sumQueryResult,
         ensikertalaisetSumQueryResult,
         maksuvelvollisetSumQueryResult,
