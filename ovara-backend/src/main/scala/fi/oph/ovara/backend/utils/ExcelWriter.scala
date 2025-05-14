@@ -1138,13 +1138,6 @@ object ExcelWriter {
         hakijanHakutoiveRow,
         bodyTextCellStyle,
         cellIndex,
-        hakutoive.julkaisulupa,
-        translations
-      )
-      cellIndex = writeOptionBooleanToCell(
-        hakijanHakutoiveRow,
-        bodyTextCellStyle,
-        cellIndex,
         hakutoive.markkinointilupa,
         translations
       )

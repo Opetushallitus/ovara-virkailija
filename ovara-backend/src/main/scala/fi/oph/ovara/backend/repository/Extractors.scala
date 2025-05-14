@@ -203,7 +203,6 @@ trait Extractors extends GenericOvaraJsonFormats {
       pohjakoulutus = r.nextStringOption(),
       maksuvelvollisuus = r.nextStringOption(),
       hakemusmaksunTila = r.nextStringOption(),
-      julkaisulupa = r.nextBooleanOption(),
       markkinointilupa = r.nextBooleanOption(),
       sahkoinenViestintalupa = r.nextBooleanOption(),
       lahiosoite = r.nextStringOption(),
