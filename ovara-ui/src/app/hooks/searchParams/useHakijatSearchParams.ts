@@ -61,7 +61,7 @@ export const useHakijatSearchParams = () => {
 
   const [selectedNaytaYoArvosanat, setSelectedNaytaYoArvosanat] = useQueryState(
     'nayta-yo-arvosanat',
-    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS).withDefault(true),
+    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS).withDefault(false),
   );
 
   const [selectedNaytaHetu, setSelectedNaytaHetu] = useQueryState(
