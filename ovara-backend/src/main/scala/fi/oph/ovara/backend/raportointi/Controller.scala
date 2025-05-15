@@ -11,7 +11,7 @@ import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.{HttpHeaders, ResponseEntity}
+import org.springframework.http.{HttpHeaders, MediaType, ResponseEntity}
 import org.springframework.security.web.csrf.CsrfToken
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
 import org.springframework.web.servlet.view.RedirectView
@@ -106,7 +106,9 @@ class Controller(
   @GetMapping(path = Array("session"))
   def response: ResponseEntity[String] = {
     // Palautetaan jokin paluuarvo koska client-kirjasto sellaisen haluaa
-    ResponseEntity.ok(mapper.writeValueAsString(Map("status" -> "ok")))
+    ResponseEntity.ok()
+      .contentType(MediaType.APPLICATION_JSON)
+      .body(mapper.writeValueAsString(Map("status" -> "ok")))
   }
 
   @GetMapping(path = Array("csrf"))
