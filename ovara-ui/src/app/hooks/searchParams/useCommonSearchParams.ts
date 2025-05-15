@@ -6,81 +6,120 @@ import {
   useQueryState,
 } from 'nuqs';
 import { DEFAULT_NUQS_OPTIONS } from '@/app/lib/constants';
+import { useQueryStateWithLocalStorage } from '@/app/hooks/searchParams/useQueryStateWithLocalStorage';
 
 export const useCommonSearchParams = () => {
-  const [selectedAlkamiskaudet, setSelectedAlkamiskaudet] = useQueryState(
-    'alkamiskaudet',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedAlkamiskaudet, setSelectedAlkamiskaudet] =
+    useQueryStateWithLocalStorage('alkamiskaudet', {
+      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      defaultValue: [],
+    });
 
-  const [selectedHaut, setSelectedHaut] = useQueryState(
+  const [selectedHaut, setSelectedHaut] = useQueryStateWithLocalStorage(
     'haut',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+    {
+      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      defaultValue: [],
+    },
   );
 
-  const [haunTyyppi, setHauntyyppi] = useQueryState(
-    'haun_tyyppi',
-    DEFAULT_NUQS_OPTIONS,
-  );
+  const [haunTyyppi, setHauntyyppi] = useQueryStateWithLocalStorage<
+    string | null
+  >('haun_tyyppi', {
+    ...DEFAULT_NUQS_OPTIONS,
+    parse: (value) => (value === null ? null : String(value)), // Handle null and string values
+    defaultValue: null,
+  });
 
-  const [selectedKoulutustoimija, setSelectedKoulutustoimija] = useQueryState(
-    'koulutustoimija',
-    DEFAULT_NUQS_OPTIONS,
-  );
+  const [selectedKoulutustoimija, setSelectedKoulutustoimija] =
+    useQueryStateWithLocalStorage<string | null>('koulutustoimija', {
+      ...DEFAULT_NUQS_OPTIONS,
+      parse: (value) => (value === null ? null : String(value)), // Handle null and string values
+      defaultValue: null,
+    });
 
-  const [selectedOppilaitokset, setSelectedOppilaitokset] = useQueryState(
-    'oppilaitokset',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedOppilaitokset, setSelectedOppilaitokset] =
+    useQueryStateWithLocalStorage('oppilaitokset', {
+      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      defaultValue: [],
+    });
 
-  const [selectedToimipisteet, setSelectedToimipisteet] = useQueryState(
-    'toimipisteet',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedToimipisteet, setSelectedToimipisteet] =
+    useQueryStateWithLocalStorage('toimipisteet', {
+      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      defaultValue: [],
+    });
 
-  const [selectedKoulutuksenTila, setSelectedKoulutuksenTila] = useQueryState(
-    'koulutuksen-tila',
-    DEFAULT_NUQS_OPTIONS,
-  );
+  const [selectedKoulutuksenTila, setSelectedKoulutuksenTila] =
+    useQueryStateWithLocalStorage<string | null>('koulutuksen-tila', {
+      ...DEFAULT_NUQS_OPTIONS,
+      parse: (value) => (value === null ? null : String(value)),
+      defaultValue: null,
+    });
 
-  const [selectedToteutuksenTila, setSelectedToteutuksenTila] = useQueryState(
-    'toteutuksen-tila',
-    DEFAULT_NUQS_OPTIONS,
-  );
+  const [selectedToteutuksenTila, setSelectedToteutuksenTila] =
+    useQueryStateWithLocalStorage<string | null>('toteutuksen-tila', {
+      ...DEFAULT_NUQS_OPTIONS,
+      parse: (value) => (value === null ? null : String(value)),
+      defaultValue: null,
+    });
 
-  const [selectedHakukohteenTila, setSelectedHakukohteenTila] = useQueryState(
-    'hakukohteen-tila',
-    DEFAULT_NUQS_OPTIONS,
-  );
+  const [selectedHakukohteenTila, setSelectedHakukohteenTila] =
+    useQueryStateWithLocalStorage<string | null>('hakukohteen-tila', {
+      ...DEFAULT_NUQS_OPTIONS,
+      parse: (value) => (value === null ? null : String(value)),
+      defaultValue: null,
+    });
 
+  // TODO fix boolean parsing
   const [selectedValintakoe, setSelectedValintakoe] = useQueryState(
     'valintakoe',
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
-  const [selectedHakukohteet, setSelectedHakukohteet] = useQueryState(
-    'hakukohteet',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedHakukohteet, setSelectedHakukohteet] =
+    useQueryStateWithLocalStorage('hakukohteet', {
+      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      defaultValue: [],
+    });
 
   const [selectedHarkinnanvaraisuudet, setSelectedHarkinnanvaraisuudet] =
-    useQueryState(
-      'harkinnanvaraisuudet',
-      parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-    );
+    useQueryStateWithLocalStorage('harkinnanvaraisuudet', {
+      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      defaultValue: [],
+    });
 
   const [selectedKansalaisuusluokat, setSelectedKansalaisuusluokat] =
-    useQueryState(
-      'kansalaisuusluokat',
-      parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-    );
+    useQueryStateWithLocalStorage('kansalaisuusluokat', {
+      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      defaultValue: [],
+    });
 
-  const [selectedHakukohderyhmat, setSelectedHakukohderyhmat] = useQueryState(
-    'hakukohderyhmat',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedHakukohderyhmat, setSelectedHakukohderyhmat] =
+    useQueryStateWithLocalStorage('hakukohderyhmat', {
+      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      defaultValue: [],
+    });
 
   const emptyAllCommonParams = () => {
+    const keysToClear = [
+      'alkamiskaudet',
+      'haut',
+      'koulutustoimija',
+      'oppilaitokset',
+      'toimipisteet',
+      'koulutuksen-tila',
+      'toteutuksen-tila',
+      'hakukohteen-tila',
+      'valintakoe',
+      'hakukohteet',
+      'harkinnanvaraisuudet',
+      'kansalaisuusluokat',
+      'hakukohderyhmat',
+      'haun_tyyppi',
+    ];
+
+    keysToClear.forEach((key) => localStorage.removeItem(key));
     setSelectedAlkamiskaudet(null);
     setSelectedHaut(null);
     setSelectedKoulutustoimija(null);

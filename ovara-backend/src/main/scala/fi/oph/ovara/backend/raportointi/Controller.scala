@@ -104,9 +104,9 @@ class Controller(
   def login = RedirectView(ovaraUiUrl)
 
   @GetMapping(path = Array("session"))
-  def response: ResponseEntity[Map[String, String]] = {
+  def response: ResponseEntity[String] = {
     // Palautetaan jokin paluuarvo koska client-kirjasto sellaisen haluaa
-    ResponseEntity.ok(Map("status" -> "ok"))
+    ResponseEntity.ok(mapper.writeValueAsString(Map("status" -> "ok")))
   }
 
   @GetMapping(path = Array("csrf"))
