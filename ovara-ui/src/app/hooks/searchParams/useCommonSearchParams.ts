@@ -23,13 +23,10 @@ export const useCommonSearchParams = () => {
     },
   );
 
-  const [haunTyyppi, setHauntyyppi] = useQueryStateWithLocalStorage<
-    string | null
-  >('haun_tyyppi', {
-    ...DEFAULT_NUQS_OPTIONS,
-    parse: (value) => (value === null ? null : String(value)), // Handle null and string values
-    defaultValue: null,
-  });
+  const [haunTyyppi, setHauntyyppi] = useQueryState(
+    'haun_tyyppi',
+    DEFAULT_NUQS_OPTIONS,
+  );
 
   const [selectedKoulutustoimija, setSelectedKoulutustoimija] =
     useQueryStateWithLocalStorage<string | null>('koulutustoimija', {
@@ -116,7 +113,6 @@ export const useCommonSearchParams = () => {
       'harkinnanvaraisuudet',
       'kansalaisuusluokat',
       'hakukohderyhmat',
-      'haun_tyyppi',
     ];
 
     keysToClear.forEach((key) => localStorage.removeItem(key));

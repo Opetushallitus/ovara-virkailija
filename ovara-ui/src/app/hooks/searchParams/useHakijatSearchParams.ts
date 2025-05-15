@@ -6,19 +6,22 @@ import {
   useQueryState,
 } from 'nuqs';
 import { DEFAULT_NUQS_OPTIONS } from '@/app/lib/constants';
+import { useQueryStateWithLocalStorage } from './useQueryStateWithLocalStorage';
 
 export const useHakijatSearchParams = () => {
-  const [selectedPohjakoulutukset, setSelectedPohjakoulutukset] = useQueryState(
-    'pohjakoulutukset',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedPohjakoulutukset, setSelectedPohjakoulutukset] =
+    useQueryStateWithLocalStorage('pohjakoulutukset', {
+      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      defaultValue: [],
+    });
 
   const [selectedVastaanottotiedot, setSelectedVastaanottotiedot] =
-    useQueryState(
-      'vastaanottotiedot',
-      parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-    );
+    useQueryStateWithLocalStorage('vastaanottotiedot', {
+      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      defaultValue: [],
+    });
 
+  // TODO fix boolean parsing
   const [selectedMarkkinointilupa, setSelectedMarkkinointilupa] = useQueryState(
     'markkinointilupa',
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
@@ -29,10 +32,11 @@ export const useHakijatSearchParams = () => {
     parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
   );
 
-  const [selectedValintatiedot, setSelectedValintatiedot] = useQueryState(
-    'valintatiedot',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedValintatiedot, setSelectedValintatiedot] =
+    useQueryStateWithLocalStorage('valintatiedot', {
+      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      defaultValue: [],
+    });
 
   const [selectedKaksoistutkinto, setSelectedKaksoistutkinto] = useQueryState(
     'kaksoistutkinto',
@@ -72,6 +76,15 @@ export const useHakijatSearchParams = () => {
 
   const emptyAllHakijatParams = () => {
     console.debug('EMPTY ALL HAKIJAT PARAMS');
+    const keysToClear = [
+      'pohjakoulutukset',
+      'vastaanottotiedot',
+      'markkinointilupa',
+      'valintatiedot',
+    ];
+
+    keysToClear.forEach((key) => localStorage.removeItem(key));
+
     setSelectedPohjakoulutukset(null);
     setSelectedVastaanottotiedot(null);
     setSelectedMarkkinointilupa(null);
