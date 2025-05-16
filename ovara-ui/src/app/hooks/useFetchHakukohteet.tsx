@@ -55,7 +55,10 @@ const fetchHakukohteet = (
   });
 };
 
-export const useFetchHakukohteet = (fetchEnabled: boolean) => {
+export const useFetchHakukohteet = (
+  fetchEnabled: boolean,
+  includeKoulutustoimija: boolean = false,
+) => {
   const {
     selectedHaut,
     selectedKoulutustoimija,
@@ -70,7 +73,9 @@ export const useFetchHakukohteet = (fetchEnabled: boolean) => {
       'fetchHakukohteet',
       {
         selectedHaut,
-        selectedKoulutustoimija,
+        selectedKoulutustoimija: includeKoulutustoimija
+          ? selectedKoulutustoimija
+          : null,
         selectedOppilaitokset,
         selectedToimipisteet,
         selectedHakukohderyhmat,
@@ -80,7 +85,7 @@ export const useFetchHakukohteet = (fetchEnabled: boolean) => {
     queryFn: () =>
       fetchHakukohteet(
         selectedHaut,
-        selectedKoulutustoimija,
+        includeKoulutustoimija ? selectedKoulutustoimija : null,
         selectedOppilaitokset,
         selectedToimipisteet,
         selectedHakukohderyhmat,

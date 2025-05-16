@@ -13,9 +13,11 @@ type Hakukohde = {
 
 export const Hakukohde = ({
   fetchEnabled,
+  includeKoulutustoimija = false,
   ...props
 }: {
   fetchEnabled: boolean;
+  includeKoulutustoimija?: boolean;
   [key: string]: unknown;
 }) => {
   const { t } = useTranslate();
@@ -25,7 +27,7 @@ export const Hakukohde = ({
   const { selectedHakukohteet, setSelectedHakukohteet } =
     useCommonSearchParams();
 
-  const { data } = useFetchHakukohteet(fetchEnabled);
+  const { data } = useFetchHakukohteet(fetchEnabled, includeKoulutustoimija);
 
   const hakukohteet: Array<Hakukohde> = data || [];
 

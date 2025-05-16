@@ -1,17 +1,7 @@
 package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.*
-import fi.oph.ovara.backend.utils.ExtractorUtils.{
-  extractAlkamiskausi,
-  extractArray,
-  extractDateOption,
-  extractHakuaika,
-  extractKielistetty,
-  extractKoulutuksenAlkamisaika,
-  extractMap,
-  extractOpintojenlaajuus,
-  extractValintatapajonot
-}
+import fi.oph.ovara.backend.utils.ExtractorUtils.{extractAlkamiskausi, extractArray, extractCommaSeparatedString, extractDateOption, extractHakuaika, extractKielistetty, extractKoulutuksenAlkamisaika, extractMap, extractOpintojenlaajuus, extractValintatapajonot}
 import fi.oph.ovara.backend.utils.GenericOvaraJsonFormats
 import org.json4s.jackson.Serialization.read
 import slick.jdbc.*
@@ -200,7 +190,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       viimVastaanottopaiva = extractDateOption(r.nextDateOption()),
       ensikertalainen = r.nextBooleanOption(),
       ilmoittautuminen = r.nextStringOption(),
-      pohjakoulutus = r.nextStringOption(),
+      pohjakoulutus = extractCommaSeparatedString(r.nextStringOption()),
       maksuvelvollisuus = r.nextStringOption(),
       hakemusmaksunTila = r.nextStringOption(),
       markkinointilupa = r.nextBooleanOption(),
