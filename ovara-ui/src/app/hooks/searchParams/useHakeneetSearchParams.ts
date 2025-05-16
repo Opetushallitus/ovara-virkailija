@@ -1,12 +1,11 @@
 'use client';
-import {
-  parseAsArrayOf,
-  parseAsBoolean,
-  parseAsString,
-  useQueryState,
-} from 'nuqs';
+import { parseAsArrayOf, parseAsString } from 'nuqs';
 import { DEFAULT_NUQS_OPTIONS } from '@/app/lib/constants';
 import { useQueryStateWithLocalStorage } from '@/app/hooks/searchParams/useQueryStateWithLocalStorage';
+import {
+  createBooleanOptions,
+  createNullableBooleanOptions,
+} from './paramUtil';
 
 export const useHakeneetSearchParams = () => {
   const [selectedTulostustapa, setSelectedTulostustapa] =
@@ -54,11 +53,11 @@ export const useHakeneetSearchParams = () => {
       defaultValue: [],
     });
 
-  // TODO fix boolean parsing
-  const [selectedNaytaHakutoiveet, setSelectedNaytaHakutoiveet] = useQueryState(
-    'nayta-hakutoiveet',
-    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS).withDefault(true),
-  );
+  const [selectedNaytaHakutoiveet, setSelectedNaytaHakutoiveet] =
+    useQueryStateWithLocalStorage<boolean>(
+      'nayta-hakutoiveet',
+      createBooleanOptions(true),
+    );
 
   const [selectedSukupuoli, setSelectedSukupuoli] =
     useQueryStateWithLocalStorage<string | null>('sukupuoli', {
@@ -79,11 +78,11 @@ export const useHakeneetSearchParams = () => {
       defaultValue: [],
     });
 
-  // TODO fix boolean parsing
-  const [selectedEnsikertalainen, setSelectedEnsikertalainen] = useQueryState(
-    'ensikertalainen',
-    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedEnsikertalainen, setSelectedEnsikertalainen] =
+    useQueryStateWithLocalStorage<boolean | null>(
+      'ensikertalainen',
+      createNullableBooleanOptions(null),
+    );
 
   const [selectedOkmOhjauksenAlat, setSelectedOkmOhjauksenAlat] =
     useQueryStateWithLocalStorage('okm-ohjauksen-alat', {
@@ -101,9 +100,11 @@ export const useHakeneetSearchParams = () => {
       'koulutusalat1',
       'koulutusalat2',
       'koulutusalat3',
+      'nayta-hakutoiveet',
       'sukupuoli',
       'tutkinnon-tasot',
       'aidinkielet',
+      'ensikertalainen',
       'okm-ohjauksen-alat',
     ];
 

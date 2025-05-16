@@ -1,12 +1,8 @@
 'use client';
-import {
-  parseAsArrayOf,
-  parseAsBoolean,
-  parseAsString,
-  useQueryState,
-} from 'nuqs';
+import { parseAsArrayOf, parseAsString, useQueryState } from 'nuqs';
 import { DEFAULT_NUQS_OPTIONS } from '@/app/lib/constants';
 import { useQueryStateWithLocalStorage } from '@/app/hooks/searchParams/useQueryStateWithLocalStorage';
+import { createNullableBooleanOptions } from './paramUtil';
 
 export const useCommonSearchParams = () => {
   const [selectedAlkamiskaudet, setSelectedAlkamiskaudet] =
@@ -68,11 +64,11 @@ export const useCommonSearchParams = () => {
       defaultValue: null,
     });
 
-  // TODO fix boolean parsing
-  const [selectedValintakoe, setSelectedValintakoe] = useQueryState(
-    'valintakoe',
-    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedValintakoe, setSelectedValintakoe] =
+    useQueryStateWithLocalStorage<boolean | null>(
+      'valintakoe',
+      createNullableBooleanOptions(null),
+    );
 
   const [selectedHakukohteet, setSelectedHakukohteet] =
     useQueryStateWithLocalStorage('hakukohteet', {
