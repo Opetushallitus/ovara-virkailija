@@ -1063,7 +1063,11 @@ object ExcelWriter {
         hakutoive.hakukelpoisuus,
         translations
       )
-      cellIndex = writeIntToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.prioriteetti)
+      if (hakutoive.prioriteetti < 0) {
+        cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, "-")
+      } else {
+        cellIndex = writeIntToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.prioriteetti)
+      }
       cellIndex = writeOptionTranslationToCell(
         hakijanHakutoiveRow,
         bodyTextCellStyle,
