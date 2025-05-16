@@ -34,14 +34,24 @@ const getOrganisaatioOptions = (
   }
 };
 
-export const OrganisaatioValikot = () => {
+export const OrganisaatioValikot = ({
+  includeKoulutustoimija = true,
+}: {
+  includeKoulutustoimija?: boolean;
+}) => {
   const organisaatiot = useFetchOrganisaatiohierarkiat().data;
 
   return (
     <Box>
       <Koulutustoimija organisaatiot={organisaatiot} />
-      <Oppilaitos organisaatiot={organisaatiot} />
-      <Toimipiste organisaatiot={organisaatiot} />
+      <Oppilaitos
+        organisaatiot={organisaatiot}
+        includeKoulutustoimija={includeKoulutustoimija}
+      />
+      <Toimipiste
+        organisaatiot={organisaatiot}
+        includeKoulutustoimija={includeKoulutustoimija}
+      />
     </Box>
   );
 };
@@ -91,8 +101,10 @@ export const Koulutustoimija = ({
 
 export const Oppilaitos = ({
   organisaatiot,
+  includeKoulutustoimija = false,
 }: {
   organisaatiot: Array<OrganisaatioHierarkia> | null;
+  includeKoulutustoimija?: boolean;
 }) => {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
@@ -106,7 +118,7 @@ export const Oppilaitos = ({
 
   const oppilaitokset = getOppilaitoksetToShow(
     organisaatiot,
-    selectedKoulutustoimija,
+    includeKoulutustoimija ? selectedKoulutustoimija : null,
   );
 
   const changeOppilaitokset = (
@@ -133,8 +145,10 @@ export const Oppilaitos = ({
 
 export const Toimipiste = ({
   organisaatiot,
+  includeKoulutustoimija = false,
 }: {
   organisaatiot: Array<OrganisaatioHierarkia> | null;
+  includeKoulutustoimija?: boolean;
 }) => {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
@@ -151,7 +165,7 @@ export const Toimipiste = ({
     organisaatiot,
     selectedToimipisteet,
     selectedOppilaitokset,
-    selectedKoulutustoimija,
+    includeKoulutustoimija ? selectedKoulutustoimija : null,
   );
 
   const changeToimipisteet = (

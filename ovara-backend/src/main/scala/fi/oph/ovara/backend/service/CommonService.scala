@@ -56,6 +56,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
   }
 
   def getHakukohteet(
+                      koulutustoimija: Option[String],
                       oppilaitokset: List[String],
                       toimipisteet: List[String],
                       haut: List[String],
@@ -67,7 +68,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
 
     val allowedOrgOidsFromSelection =
-      getAllowedOrgOidsFromOrgSelection(kayttooikeusOrganisaatiot, oppilaitokset, toimipisteet)
+      getAllowedOrgOidsFromOrgSelection(kayttooikeusOrganisaatiot, oppilaitokset, toimipisteet, koulutustoimija)
 
     val isOphPaakayttaja = AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)
 

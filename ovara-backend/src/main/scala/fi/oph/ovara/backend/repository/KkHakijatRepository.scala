@@ -58,7 +58,7 @@ class KkHakijatRepository extends Extractors {
                  ht.ehdollisesti_hyvaksytty, ht.valintatiedon_pvm, ht.valintatapajonot,
                  ht.vastaanottotieto, ht.viimeinen_vastaanottopaiva, ht.ensikertalainen,
                  ht.ilmoittautumisen_tila, kkh.pohjakoulutus, kkh.maksuvelvollisuus, hlo.hakemusmaksun_tila,
-                 hlo.valintatuloksen_julkaisulupa, hlo.koulutusmarkkinointilupa, hlo.sahkoinenviestintalupa,
+                 hlo.koulutusmarkkinointilupa, hlo.sahkoinenviestintalupa,
                  hlo.lahiosoite, hlo.postinumero, hlo.postitoimipaikka, hlo.kotikunta_nimi,
                  hlo.asuinmaa_nimi, hlo.puhelin, hlo.sahkoposti, yo.arvosanat
           FROM pub.pub_dim_henkilo hlo

@@ -34,4 +34,10 @@ class ExtractorUtilsSpec extends AnyFlatSpec {
       )
     )
   }
+  "extractCommaSeparatedString" should "return None for an empty list and a comma-separated string for a non-empty list" in {
+    assert(ExtractorUtils.extractCommaSeparatedString(None) == None)
+    assert(ExtractorUtils.extractCommaSeparatedString(Some("[]")) == None)
+    assert(ExtractorUtils.extractCommaSeparatedString(Some("""["amv", "yo"]""")) == Some("amv,yo"))
+    assert(ExtractorUtils.extractCommaSeparatedString(Some("""["amv", "muu", "yo"]""")) == Some("amv,muu,yo"))
+  }
 }

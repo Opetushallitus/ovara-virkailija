@@ -74,7 +74,10 @@ export default function KkHakutilasto() {
           <Tulostustapa tulostustavat={tulostustavat} />
           <OrganisaatioValikot />
           <Hakukohderyhma />
-          <Hakukohde fetchEnabled={hakukohdeFetchEnabled} />
+          <Hakukohde
+            fetchEnabled={hakukohdeFetchEnabled}
+            includeKoulutustoimija={true}
+          />
           <OkmOhjauksenAlat />
           <Divider />
           <KkTutkinnonTaso />

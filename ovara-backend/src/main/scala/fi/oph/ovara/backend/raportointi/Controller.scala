@@ -3,15 +3,15 @@ package fi.oph.ovara.backend.raportointi
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.UserResponse
-import fi.oph.ovara.backend.raportointi.dto.{RawHakeneetHyvaksytytVastaanottaneetParams, RawKkHakeneetHyvaksytytVastaanottaneetParams, RawHakijatParams, RawKkHakijatParams, RawKkKoulutuksetToteutuksetHakukohteetParams, RawKoulutuksetToteutuksetHakukohteetParams, buildHakeneetHyvaksytytVastaanottaneetAuditParams, buildKkHakeneetHyvaksytytVastaanottaneetAuditParams, buildHakijatAuditParams, buildKkHakijatAuditParams, buildKkKoulutuksetToteutuksetHakukohteetAuditParams, buildKoulutuksetToteutuksetHakukohteetAuditParams}
+import fi.oph.ovara.backend.raportointi.dto.{RawHakeneetHyvaksytytVastaanottaneetParams, RawHakijatParams, RawKkHakeneetHyvaksytytVastaanottaneetParams, RawKkHakijatParams, RawKkKoulutuksetToteutuksetHakukohteetParams, RawKoulutuksetToteutuksetHakukohteetParams, buildHakeneetHyvaksytytVastaanottaneetAuditParams, buildHakijatAuditParams, buildKkHakeneetHyvaksytytVastaanottaneetAuditParams, buildKkHakijatAuditParams, buildKkKoulutuksetToteutuksetHakukohteetAuditParams, buildKoulutuksetToteutuksetHakukohteetAuditParams}
 import fi.oph.ovara.backend.service.*
 import fi.oph.ovara.backend.utils.AuditOperation.{HakeneetHyvaksytytVastaanottaneet, KkHakeneetHyvaksytytVastaanottaneet, KkHakijat, KorkeakouluKoulutuksetToteutuksetHakukohteet, KoulutuksetToteutuksetHakukohteet, ToisenAsteenHakijat}
-import fi.oph.ovara.backend.utils.ParameterValidator.{validateAlphanumeric, validateAlphanumericList, validateHakeneetHyvaksytytVastaanottaneetParams, validateHakijatParams, validateKkHakeneetHyvaksytytVastaanottaneetParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams, validateNumericList, validateOid, validateOidList, validateOrganisaatioOidList}
+import fi.oph.ovara.backend.utils.ParameterValidator.{validateAlphanumeric, validateAlphanumericList, validateHakeneetHyvaksytytVastaanottaneetParams, validateHakijatParams, validateKkHakeneetHyvaksytytVastaanottaneetParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams, validateNumericList, validateOid, validateOidList, validateOrganisaatioOid, validateOrganisaatioOidList}
 import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.{HttpHeaders, ResponseEntity}
+import org.springframework.http.{HttpHeaders, MediaType, ResponseEntity}
 import org.springframework.security.web.csrf.CsrfToken
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
 import org.springframework.web.servlet.view.RedirectView
@@ -104,9 +104,11 @@ class Controller(
   def login = RedirectView(ovaraUiUrl)
 
   @GetMapping(path = Array("session"))
-  def response: ResponseEntity[Map[String, String]] = {
+  def response: ResponseEntity[String] = {
     // Palautetaan jokin paluuarvo koska client-kirjasto sellaisen haluaa
-    ResponseEntity.ok(Map("status" -> "ok"))
+    ResponseEntity.ok()
+      .contentType(MediaType.APPLICATION_JSON)
+      .body(mapper.writeValueAsString(Map("status" -> "ok")))
   }
 
   @GetMapping(path = Array("csrf"))
@@ -143,12 +145,14 @@ class Controller(
   @GetMapping(path = Array("hakukohteet"))
   def hakukohteet(
                    @RequestParam("haut") haut: java.util.Collection[String],
+                   @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
                    @RequestParam("oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
                    @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
                    @RequestParam("hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
                    @RequestParam("hakukohteet", required = false) selectedHakukohteet: java.util.Collection[String]
                  ): ResponseEntity[String] = {
     val errors = List(
+      validateOrganisaatioOid(Option(koulutustoimija), "koulutustoimija"),
       validateOrganisaatioOidList(getListParamAsScalaList(oppilaitokset), "oppilaitokset"),
       validateOrganisaatioOidList(getListParamAsScalaList(toimipisteet), "toimipisteet"),
       validateOidList(getListParamAsScalaList(haut), "haut"),
@@ -158,6 +162,7 @@ class Controller(
 
     handleRequest(errors, mapper) {
       commonService.getHakukohteet(
+        Option(koulutustoimija),
         getListParamAsScalaList(oppilaitokset),
         getListParamAsScalaList(toimipisteet),
         getListParamAsScalaList(haut),

@@ -1063,7 +1063,11 @@ object ExcelWriter {
         hakutoive.hakukelpoisuus,
         translations
       )
-      cellIndex = writeIntToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.prioriteetti)
+      if (hakutoive.prioriteetti < 0) {
+        cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, "-")
+      } else {
+        cellIndex = writeIntToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.prioriteetti)
+      }
       cellIndex = writeOptionTranslationToCell(
         hakijanHakutoiveRow,
         bodyTextCellStyle,
@@ -1132,13 +1136,6 @@ object ExcelWriter {
         bodyTextCellStyle,
         cellIndex,
         hakutoive.hakemusmaksunTila,
-        translations
-      )
-      cellIndex = writeOptionBooleanToCell(
-        hakijanHakutoiveRow,
-        bodyTextCellStyle,
-        cellIndex,
-        hakutoive.julkaisulupa,
         translations
       )
       cellIndex = writeOptionBooleanToCell(

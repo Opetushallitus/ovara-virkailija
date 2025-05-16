@@ -14,7 +14,6 @@ abstract class Hakija {
   val viimVastaanottopaiva: Option[LocalDate]
   val ilmoittautuminen: Option[String]
   val markkinointilupa: Option[Boolean]
-  val julkaisulupa: Option[Boolean]
   val sahkoinenViestintalupa: Option[Boolean]
   val lahiosoite: Option[String]
   val postinumero: Option[String]
@@ -146,7 +145,6 @@ case class KkHakija(
     pohjakoulutus: Option[String],
     maksuvelvollisuus: Option[String],
     hakemusmaksunTila: Option[String],
-    julkaisulupa: Option[Boolean],
     markkinointilupa: Option[Boolean],
     sahkoinenViestintalupa: Option[Boolean],
     lahiosoite: Option[String],
@@ -181,7 +179,6 @@ case class KkHakijaWithCombinedNimi(
     pohjakoulutus: Option[String],
     maksuvelvollisuus: Option[String],
     hakemusmaksunTila: Option[String],
-    julkaisulupa: Option[Boolean],
     markkinointilupa: Option[Boolean],
     sahkoinenViestintalupa: Option[Boolean],
     lahiosoite: Option[String],
@@ -218,7 +215,6 @@ object KkHakijaWithCombinedNimi {
       pohjakoulutus = hakija.pohjakoulutus,
       maksuvelvollisuus = hakija.maksuvelvollisuus,
       hakemusmaksunTila = hakija.hakemusmaksunTila,
-      julkaisulupa = hakija.julkaisulupa,
       markkinointilupa = hakija.markkinointilupa,
       sahkoinenViestintalupa = hakija.sahkoinenViestintalupa,
       lahiosoite = hakija.lahiosoite,

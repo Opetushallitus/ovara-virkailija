@@ -40,7 +40,6 @@ class OvaraBackendApplicationTests {
         mvc.perform(MockMvcRequestBuilders.get("/api/session"))
           .andExpect(status().isOk)
           .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
     }
 
     @Test

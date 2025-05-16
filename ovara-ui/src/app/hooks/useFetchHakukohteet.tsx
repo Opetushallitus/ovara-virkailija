@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { doApiFetch } from '@/app/lib/ovara-backend/api';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { isNullishOrEmpty } from '../lib/utils';
+import { isNullish } from 'remeda';
 
 const createQueryParamStr = (
   paramName: string,
@@ -12,13 +13,24 @@ const createQueryParamStr = (
     : `&${paramName}=${selectedValues?.toString()}`;
 };
 
+const createQueryParam = (paramName: string, selectedValue: string | null) => {
+  return isNullish(selectedValue)
+    ? ''
+    : `&${paramName}=${selectedValue?.toString()}`;
+};
+
 const fetchHakukohteet = (
   selectedHaut: Array<string> | null,
+  selectedKoulutustoimija: string | null,
   selectedOppilaitokset: Array<string> | null,
   selectedToimipisteet: Array<string> | null,
   selectedHakukohderyhmat: Array<string> | null,
   selectedHakukohteet: Array<string> | null,
 ) => {
+  const koulutustoimijatQueryStr = createQueryParam(
+    'koulutustoimija',
+    selectedKoulutustoimija,
+  );
   const oppilaitoksetQueryStr = createQueryParamStr(
     'oppilaitokset',
     selectedOppilaitokset,
@@ -36,16 +48,20 @@ const fetchHakukohteet = (
     selectedHakukohteet,
   );
 
-  const paramsStr = `?haut=${selectedHaut?.toString()}${oppilaitoksetQueryStr}${toimipisteetQueryStr}${hakukohderyhmatQueryStr}${hakukohteetQueryStr}`;
+  const paramsStr = `?haut=${selectedHaut?.toString()}${koulutustoimijatQueryStr}${oppilaitoksetQueryStr}${toimipisteetQueryStr}${hakukohderyhmatQueryStr}${hakukohteetQueryStr}`;
 
   return doApiFetch('hakukohteet', {
     queryParams: paramsStr ?? null,
   });
 };
 
-export const useFetchHakukohteet = (fetchEnabled: boolean) => {
+export const useFetchHakukohteet = (
+  fetchEnabled: boolean,
+  includeKoulutustoimija: boolean = false,
+) => {
   const {
     selectedHaut,
+    selectedKoulutustoimija,
     selectedOppilaitokset,
     selectedToimipisteet,
     selectedHakukohderyhmat,
@@ -57,6 +73,9 @@ export const useFetchHakukohteet = (fetchEnabled: boolean) => {
       'fetchHakukohteet',
       {
         selectedHaut,
+        selectedKoulutustoimija: includeKoulutustoimija
+          ? selectedKoulutustoimija
+          : null,
         selectedOppilaitokset,
         selectedToimipisteet,
         selectedHakukohderyhmat,
@@ -66,6 +85,7 @@ export const useFetchHakukohteet = (fetchEnabled: boolean) => {
     queryFn: () =>
       fetchHakukohteet(
         selectedHaut,
+        includeKoulutustoimija ? selectedKoulutustoimija : null,
         selectedOppilaitokset,
         selectedToimipisteet,
         selectedHakukohderyhmat,

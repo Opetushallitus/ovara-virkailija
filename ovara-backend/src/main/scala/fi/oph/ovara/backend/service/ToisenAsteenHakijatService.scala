@@ -86,7 +86,7 @@ class ToisenAsteenHakijatService(
       case Success(excelFile) => Right(excelFile)
       case Failure(exception) =>
         LOG.error("Error generating Excel report", exception)
-        Left("virhe.raportti") 
+        Left("virhe.raportti")
     }
   }
 }
