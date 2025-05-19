@@ -21,6 +21,5 @@ export const OPPILAITOSORGANISAATIOTYYPPI = '02';
 export const TOIMIPISTEORGANISAATIOTYYPPI = '03';
 
 export const DEFAULT_NUQS_OPTIONS = {
-  history: 'push',
-  clearOnDefault: true,
+  clearOnDefault: false, // pidetään myös default-arvot url-parametreissä
 } as const;
