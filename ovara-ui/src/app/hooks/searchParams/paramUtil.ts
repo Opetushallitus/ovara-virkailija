@@ -1,14 +1,13 @@
-import { DEFAULT_NUQS_OPTIONS } from '@/app/lib/constants';
 import { parseAsBoolean } from 'nuqs';
 
 export const createBooleanOptions = (defaultValue: boolean) => ({
-  ...parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
+  ...parseAsBoolean.withOptions({ clearOnDefault: false }), // default-ervo aina parametreihin jos on oletuksena kyllä/ei
   defaultValue,
   eq: (a: boolean, b: boolean) => a === b,
 });
 
 export const createNullableBooleanOptions = (defaultValue: boolean | null) => ({
-  ...parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
+  ...parseAsBoolean,
   parse: (value: string | null) => (value === null ? null : value === 'true'),
   serialize: (value: boolean | null) => (value === null ? '' : String(value)),
   defaultValue,

@@ -1,6 +1,5 @@
 'use client';
 import { parseAsArrayOf, parseAsString } from 'nuqs';
-import { DEFAULT_NUQS_OPTIONS } from '@/app/lib/constants';
 import { useQueryStateWithLocalStorage } from './useQueryStateWithLocalStorage';
 import {
   createBooleanOptions,
@@ -10,13 +9,13 @@ import {
 export const useHakijatSearchParams = () => {
   const [selectedPohjakoulutukset, setSelectedPohjakoulutukset] =
     useQueryStateWithLocalStorage('pohjakoulutukset', {
-      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
   const [selectedVastaanottotiedot, setSelectedVastaanottotiedot] =
     useQueryStateWithLocalStorage('vastaanottotiedot', {
-      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
@@ -34,7 +33,7 @@ export const useHakijatSearchParams = () => {
 
   const [selectedValintatiedot, setSelectedValintatiedot] =
     useQueryStateWithLocalStorage('valintatiedot', {
-      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 

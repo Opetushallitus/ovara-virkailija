@@ -1,6 +1,5 @@
 'use client';
 import { parseAsArrayOf, parseAsString } from 'nuqs';
-import { DEFAULT_NUQS_OPTIONS } from '@/app/lib/constants';
 import { useQueryStateWithLocalStorage } from '@/app/hooks/searchParams/useQueryStateWithLocalStorage';
 import {
   createBooleanOptions,
@@ -10,46 +9,45 @@ import {
 export const useHakeneetSearchParams = () => {
   const [selectedTulostustapa, setSelectedTulostustapa] =
     useQueryStateWithLocalStorage<string | null>('tulostustapa', {
-      ...DEFAULT_NUQS_OPTIONS,
       parse: (value) => (value === null ? null : String(value)),
       defaultValue: null,
     });
 
   const [selectedOpetuskielet, setSelectedOpetuskielet] =
     useQueryStateWithLocalStorage('opetuskielet', {
-      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
   const [selectedMaakunnat, setSelectedMaakunnat] =
     useQueryStateWithLocalStorage('maakunnat', {
-      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
   const [selectedKunnat, setSelectedKunnat] = useQueryStateWithLocalStorage(
     'kunnat',
     {
-      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     },
   );
 
   const [selectedKoulutusalat1, setSelectedKoulutusalat1] =
     useQueryStateWithLocalStorage('koulutusalat1', {
-      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
   const [selectedKoulutusalat2, setSelectedKoulutusalat2] =
     useQueryStateWithLocalStorage('koulutusalat2', {
-      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
   const [selectedKoulutusalat3, setSelectedKoulutusalat3] =
     useQueryStateWithLocalStorage('koulutusalat3', {
-      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
@@ -61,20 +59,19 @@ export const useHakeneetSearchParams = () => {
 
   const [selectedSukupuoli, setSelectedSukupuoli] =
     useQueryStateWithLocalStorage<string | null>('sukupuoli', {
-      ...DEFAULT_NUQS_OPTIONS,
       parse: (value) => (value === null ? null : String(value)),
       defaultValue: 'neutral',
     });
 
   const [selectedTutkinnonTasot, setSelectedTutkinnonTasot] =
     useQueryStateWithLocalStorage('tutkinnon-tasot', {
-      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
   const [selectedAidinkielet, setSelectedAidinkielet] =
     useQueryStateWithLocalStorage('aidinkielet', {
-      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
@@ -86,7 +83,7 @@ export const useHakeneetSearchParams = () => {
 
   const [selectedOkmOhjauksenAlat, setSelectedOkmOhjauksenAlat] =
     useQueryStateWithLocalStorage('okm-ohjauksen-alat', {
-      ...parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+      ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
