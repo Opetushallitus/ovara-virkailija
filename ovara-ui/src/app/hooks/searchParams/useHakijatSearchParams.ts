@@ -1,5 +1,5 @@
 'use client';
-import { parseAsArrayOf, parseAsBoolean, parseAsString } from 'nuqs';
+import { parseAsArrayOf, parseAsString } from 'nuqs';
 import { DEFAULT_NUQS_OPTIONS } from '@/app/lib/constants';
 import { useQueryStateWithLocalStorage } from './useQueryStateWithLocalStorage';
 import {
@@ -69,11 +69,10 @@ export const useHakijatSearchParams = () => {
     );
 
   const [selectedNaytaHetu, setSelectedNaytaHetu] =
-    useQueryStateWithLocalStorage<boolean>('nayta-hetu', {
-      ...parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
-      defaultValue: true,
-      eq: (a, b) => a === b,
-    });
+    useQueryStateWithLocalStorage<boolean>(
+      'nayta-hetu',
+      createBooleanOptions(true),
+    );
 
   const [selectedNaytaPostiosoite, setSelectedNaytaPostiosoite] =
     useQueryStateWithLocalStorage<boolean>(
