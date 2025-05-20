@@ -51,6 +51,6 @@ def buildKkHakeneetHyvaksytytVastaanottaneetAuditParams(
     "kansalaisuusluokat" -> Option(params.kansalaisuusluokat).filter(_.nonEmpty),
     "sukupuoli" -> params.sukupuoli,
     "ensikertalainen" -> params.ensikertalainen,
-    "naytaHakutoiveet" -> params.naytaHakutoiveet
+    "naytaHakutoiveet" -> Option(params.naytaHakutoiveet)
   ).collect { case (key, Some(value)) => key -> value }
 }

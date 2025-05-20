@@ -41,8 +41,8 @@ def buildKkHakijatAuditParams(valid: ValidatedKkHakijatParams): Map[String, Any]
     "hakukohderyhmat" -> Option(valid.hakukohderyhmat).filter(_.nonEmpty),
     "kansalaisuusluokat" -> Option(valid.kansalaisuusluokat).filter(_.nonEmpty),
     "markkinointilupa" -> valid.markkinointilupa,
-    "naytaYoArvosanat" -> valid.naytaYoArvosanat,
-    "naytaHetu" -> valid.naytaHetu,
-    "naytaPostiosoite" -> valid.naytaPostiosoite
+    "naytaYoArvosanat" -> Option(valid.naytaYoArvosanat),
+    "naytaHetu" -> Option(valid.naytaHetu),
+    "naytaPostiosoite" -> Option(valid.naytaPostiosoite)
   ).collect { case (key, Some(value)) => key -> value }
 }
