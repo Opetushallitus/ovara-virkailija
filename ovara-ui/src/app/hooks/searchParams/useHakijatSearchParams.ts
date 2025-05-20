@@ -1,10 +1,10 @@
 'use client';
 import { parseAsArrayOf, parseAsString } from 'nuqs';
-import { useQueryStateWithLocalStorage } from './useQueryStateWithLocalStorage';
 import {
-  createBooleanOptions,
-  createNullableBooleanOptions,
-} from './paramUtil';
+  useBooleanQueryStateWithOptions,
+  useQueryStateWithLocalStorage,
+} from './useQueryStateWithLocalStorage';
+import { createNullableBooleanOptions } from './paramUtil';
 
 export const useHakijatSearchParams = () => {
   const [selectedPohjakoulutukset, setSelectedPohjakoulutukset] =
@@ -62,22 +62,13 @@ export const useHakijatSearchParams = () => {
     );
 
   const [selectedNaytaYoArvosanat, setSelectedNaytaYoArvosanat] =
-    useQueryStateWithLocalStorage<boolean>(
-      'nayta-yo-arvosanat',
-      createBooleanOptions(false),
-    );
+    useBooleanQueryStateWithOptions('nayta-yo-arvosanat', false);
 
   const [selectedNaytaHetu, setSelectedNaytaHetu] =
-    useQueryStateWithLocalStorage<boolean>(
-      'nayta-hetu',
-      createBooleanOptions(true),
-    );
+    useBooleanQueryStateWithOptions('nayta-hetu', true);
 
   const [selectedNaytaPostiosoite, setSelectedNaytaPostiosoite] =
-    useQueryStateWithLocalStorage<boolean>(
-      'nayta-postiosoite',
-      createBooleanOptions(true),
-    );
+    useBooleanQueryStateWithOptions('nayta-postiosoite', true);
 
   const emptyAllHakijatParams = () => {
     console.debug('EMPTY ALL HAKIJAT PARAMS');

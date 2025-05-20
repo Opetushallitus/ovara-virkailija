@@ -1,10 +1,10 @@
 'use client';
 import { parseAsArrayOf, parseAsString } from 'nuqs';
-import { useQueryStateWithLocalStorage } from '@/app/hooks/searchParams/useQueryStateWithLocalStorage';
 import {
-  createBooleanOptions,
-  createNullableBooleanOptions,
-} from './paramUtil';
+  useBooleanQueryStateWithOptions,
+  useQueryStateWithLocalStorage,
+} from '@/app/hooks/searchParams/useQueryStateWithLocalStorage';
+import { createNullableBooleanOptions } from './paramUtil';
 
 export const useHakeneetSearchParams = () => {
   const [selectedTulostustapa, setSelectedTulostustapa] =
@@ -52,10 +52,7 @@ export const useHakeneetSearchParams = () => {
     });
 
   const [selectedNaytaHakutoiveet, setSelectedNaytaHakutoiveet] =
-    useQueryStateWithLocalStorage<boolean>(
-      'nayta-hakutoiveet',
-      createBooleanOptions(true),
-    );
+    useBooleanQueryStateWithOptions('nayta-hakutoiveet', true);
 
   const [selectedSukupuoli, setSelectedSukupuoli] =
     useQueryStateWithLocalStorage<string | null>('sukupuoli', {

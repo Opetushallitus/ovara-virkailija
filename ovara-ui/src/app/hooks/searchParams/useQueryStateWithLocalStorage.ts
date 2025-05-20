@@ -1,4 +1,4 @@
-import { useQueryState, UseQueryStateOptions } from 'nuqs';
+import { parseAsBoolean, useQueryState, UseQueryStateOptions } from 'nuqs';
 import { useCallback, useEffect } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -9,19 +9,19 @@ export const useQueryStateWithLocalStorage = <T>(
     defaultValue: T;
   },
 ) => {
-  // queryState is never null, it defaults to the defaultValue
+  // queryStateen defaultValue
   const [queryState, setQueryState] = useQueryState<T>(key, options);
 
-  // localStorageState defaults to null
+  // localStoragessa oletuksena null
   const [localStorageState, setLocalStorageState] = useLocalStorage<
     ReturnType<UseQueryStateOptions<T>['parse']>
   >(key, queryState);
 
   useEffect(() => {
-    // If queryState is the same as localStorageState, do nothing
+    // jos arvo on jo localStoragessa, ei tehdä mitään
     if (queryState === localStorageState) return;
 
-    // If queryState is default (nothing there) and localStorageState is there, set localStorageState to queryState
+    // queryState on default (tyhjä) ja localStorageStatessa arvo, asetetaan queryState localstorageen
     if (
       queryState === options.defaultValue &&
       localStorageState !== null &&
@@ -51,4 +51,29 @@ export const useQueryStateWithLocalStorage = <T>(
   );
 
   return [queryState, setState] as const;
+};
+
+export const useBooleanQueryStateWithOptions = (
+  key: string,
+  defaultValue: boolean,
+  clearOnDefault: boolean = false, // ei tyhjätä parametreista true/false default-arvoa
+) => {
+  const booleanOptions = parseAsBoolean.withOptions({ clearOnDefault });
+
+  const [queryState, setQueryState] = useQueryStateWithLocalStorage<boolean>(
+    key,
+    {
+      defaultValue,
+      ...booleanOptions, // Spread booleanOptions to include parse, serialize, and eq
+    },
+  );
+
+  useEffect(() => {
+    // asetetaan true/false default-arvo searchParamsiin
+    if (!window.location.search.includes(key)) {
+      setQueryState(defaultValue);
+    }
+  }, [key, defaultValue, setQueryState]);
+
+  return [queryState, setQueryState] as const;
 };
