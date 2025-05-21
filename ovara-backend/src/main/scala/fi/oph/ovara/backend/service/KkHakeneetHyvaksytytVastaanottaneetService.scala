@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.{HakeneetHyvaksytytVastaanottaneetResult, KkHakeneetHyvaksytytVastaanottaneetResult}
+import fi.oph.ovara.backend.domain.{HakeneetHyvaksytytVastaanottaneetResult, Kieli, KkHakeneetHyvaksytytVastaanottaneetResult}
 import fi.oph.ovara.backend.repository.{KkHakeneetHyvaksytytVastaanottaneetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -8,6 +8,8 @@ import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.{Component, Service}
 
+import java.text.Collator
+import java.util.Locale
 import scala.util.{Failure, Success, Try}
 
 @Component
@@ -202,6 +204,11 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
         maksuvelvollinen = Some("obligated")
       )
 
+      val collator: Collator = Collator.getInstance(new Locale(asiointikieli))
+      collator.setStrength(Collator.PRIMARY)
+      val sortedResult = queryResult.sortWith { (a, b) =>
+        collator.compare(a.otsikko.getOrElse(Kieli.withName(asiointikieli), ""), b.otsikko.getOrElse(Kieli.withName(asiointikieli), "")) < 0
+      }
       val sumQueryResult = db.run(sumQuery, "kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams")
       val ensikertalaisetSumQueryResult =
         if (vainEnsikertalaiset)
@@ -212,7 +219,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       ExcelWriter.writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
         asiointikieli,
         translations,
-        queryResult.toList,
+        sortedResult.toList,
         sumQueryResult,
         ensikertalaisetSumQueryResult,
         maksuvelvollisetSumQueryResult,

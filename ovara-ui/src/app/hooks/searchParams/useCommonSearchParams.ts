@@ -1,86 +1,109 @@
 'use client';
-import {
-  parseAsArrayOf,
-  parseAsBoolean,
-  parseAsString,
-  useQueryState,
-} from 'nuqs';
-import { DEFAULT_NUQS_OPTIONS } from '@/app/lib/constants';
+import { parseAsArrayOf, parseAsString, useQueryState } from 'nuqs';
+import { useQueryStateWithLocalStorage } from '@/app/hooks/searchParams/useQueryStateWithLocalStorage';
+import { createNullableBooleanOptions } from './paramUtil';
 
 export const useCommonSearchParams = () => {
-  const [selectedAlkamiskaudet, setSelectedAlkamiskaudet] = useQueryState(
-    'alkamiskaudet',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedAlkamiskaudet, setSelectedAlkamiskaudet] =
+    useQueryStateWithLocalStorage('alkamiskaudet', {
+      ...parseAsArrayOf(parseAsString),
+      defaultValue: [],
+    });
 
-  const [selectedHaut, setSelectedHaut] = useQueryState(
+  const [selectedHaut, setSelectedHaut] = useQueryStateWithLocalStorage(
     'haut',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+    {
+      ...parseAsArrayOf(parseAsString),
+      defaultValue: [],
+    },
   );
 
-  const [haunTyyppi, setHauntyyppi] = useQueryState(
-    'haun_tyyppi',
-    DEFAULT_NUQS_OPTIONS,
-  );
+  const [haunTyyppi, setHauntyyppi] = useQueryState('haun_tyyppi');
 
-  const [selectedKoulutustoimija, setSelectedKoulutustoimija] = useQueryState(
-    'koulutustoimija',
-    DEFAULT_NUQS_OPTIONS,
-  );
+  const [selectedKoulutustoimija, setSelectedKoulutustoimija] =
+    useQueryStateWithLocalStorage<string | null>('koulutustoimija', {
+      parse: (value) => (value === null ? null : String(value)), // Handle null and string values
+      defaultValue: null,
+    });
 
-  const [selectedOppilaitokset, setSelectedOppilaitokset] = useQueryState(
-    'oppilaitokset',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedOppilaitokset, setSelectedOppilaitokset] =
+    useQueryStateWithLocalStorage('oppilaitokset', {
+      ...parseAsArrayOf(parseAsString),
+      defaultValue: [],
+    });
 
-  const [selectedToimipisteet, setSelectedToimipisteet] = useQueryState(
-    'toimipisteet',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedToimipisteet, setSelectedToimipisteet] =
+    useQueryStateWithLocalStorage('toimipisteet', {
+      ...parseAsArrayOf(parseAsString),
+      defaultValue: [],
+    });
 
-  const [selectedKoulutuksenTila, setSelectedKoulutuksenTila] = useQueryState(
-    'koulutuksen-tila',
-    DEFAULT_NUQS_OPTIONS,
-  );
+  const [selectedKoulutuksenTila, setSelectedKoulutuksenTila] =
+    useQueryStateWithLocalStorage<string | null>('koulutuksen-tila', {
+      parse: (value) => (value === null ? null : String(value)),
+      defaultValue: null,
+    });
 
-  const [selectedToteutuksenTila, setSelectedToteutuksenTila] = useQueryState(
-    'toteutuksen-tila',
-    DEFAULT_NUQS_OPTIONS,
-  );
+  const [selectedToteutuksenTila, setSelectedToteutuksenTila] =
+    useQueryStateWithLocalStorage<string | null>('toteutuksen-tila', {
+      parse: (value) => (value === null ? null : String(value)),
+      defaultValue: null,
+    });
 
-  const [selectedHakukohteenTila, setSelectedHakukohteenTila] = useQueryState(
-    'hakukohteen-tila',
-    DEFAULT_NUQS_OPTIONS,
-  );
+  const [selectedHakukohteenTila, setSelectedHakukohteenTila] =
+    useQueryStateWithLocalStorage<string | null>('hakukohteen-tila', {
+      parse: (value) => (value === null ? null : String(value)),
+      defaultValue: null,
+    });
 
-  const [selectedValintakoe, setSelectedValintakoe] = useQueryState(
-    'valintakoe',
-    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedValintakoe, setSelectedValintakoe] =
+    useQueryStateWithLocalStorage<boolean | null>(
+      'valintakoe',
+      createNullableBooleanOptions(null),
+    );
 
-  const [selectedHakukohteet, setSelectedHakukohteet] = useQueryState(
-    'hakukohteet',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedHakukohteet, setSelectedHakukohteet] =
+    useQueryStateWithLocalStorage('hakukohteet', {
+      ...parseAsArrayOf(parseAsString),
+      defaultValue: [],
+    });
 
   const [selectedHarkinnanvaraisuudet, setSelectedHarkinnanvaraisuudet] =
-    useQueryState(
-      'harkinnanvaraisuudet',
-      parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-    );
+    useQueryStateWithLocalStorage('harkinnanvaraisuudet', {
+      ...parseAsArrayOf(parseAsString),
+      defaultValue: [],
+    });
 
   const [selectedKansalaisuusluokat, setSelectedKansalaisuusluokat] =
-    useQueryState(
-      'kansalaisuusluokat',
-      parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-    );
+    useQueryStateWithLocalStorage('kansalaisuusluokat', {
+      ...parseAsArrayOf(parseAsString),
+      defaultValue: [],
+    });
 
-  const [selectedHakukohderyhmat, setSelectedHakukohderyhmat] = useQueryState(
-    'hakukohderyhmat',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedHakukohderyhmat, setSelectedHakukohderyhmat] =
+    useQueryStateWithLocalStorage('hakukohderyhmat', {
+      ...parseAsArrayOf(parseAsString),
+      defaultValue: [],
+    });
 
   const emptyAllCommonParams = () => {
+    const keysToClear = [
+      'alkamiskaudet',
+      'haut',
+      'koulutustoimija',
+      'oppilaitokset',
+      'toimipisteet',
+      'koulutuksen-tila',
+      'toteutuksen-tila',
+      'hakukohteen-tila',
+      'valintakoe',
+      'hakukohteet',
+      'harkinnanvaraisuudet',
+      'kansalaisuusluokat',
+      'hakukohderyhmat',
+    ];
+
+    keysToClear.forEach((key) => localStorage.removeItem(key));
     setSelectedAlkamiskaudet(null);
     setSelectedHaut(null);
     setSelectedKoulutustoimija(null);

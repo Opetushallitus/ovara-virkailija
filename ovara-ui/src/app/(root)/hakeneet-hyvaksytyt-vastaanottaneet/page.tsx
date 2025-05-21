@@ -68,7 +68,10 @@ export default function Hakutilasto() {
           <Haku haunTyyppi={'toinen_aste'} />
           <Tulostustapa tulostustavat={tulostustavat} />
           <OrganisaatioValikot />
-          <Hakukohde fetchEnabled={hakukohdeFetchEnabled} />
+          <Hakukohde
+            fetchEnabled={hakukohdeFetchEnabled}
+            includeKoulutustoimija={true}
+          />
           <Opetuskieli />
           <KoulutusalaValikot />
           <MaakuntaKuntaValikot />

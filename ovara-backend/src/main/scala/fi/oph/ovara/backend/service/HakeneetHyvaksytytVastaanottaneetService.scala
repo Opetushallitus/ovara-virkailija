@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.HakeneetHyvaksytytVastaanottaneetResult
+import fi.oph.ovara.backend.domain.{HakeneetHyvaksytytVastaanottaneetResult, Kieli}
 import fi.oph.ovara.backend.repository.{HakeneetHyvaksytytVastaanottaneetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -8,6 +8,8 @@ import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.{Component, Service}
 
+import java.text.Collator
+import java.util.Locale
 import scala.util.{Failure, Success, Try}
 
 @Component
@@ -121,6 +123,11 @@ class HakeneetHyvaksytytVastaanottaneetService(
           db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams")
       }
 
+      val collator: Collator = Collator.getInstance(new Locale(asiointikieli))
+      collator.setStrength(Collator.PRIMARY)
+      val sortedResult = queryResult.sortWith { (a, b) =>
+        collator.compare(a.otsikko.getOrElse(Kieli.withName(asiointikieli), ""), b.otsikko.getOrElse(Kieli.withName(asiointikieli), "")) < 0
+      }
       val sumQuery = hakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams(
         selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
         haut = haut,
@@ -140,7 +147,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
       ExcelWriter.writeHakeneetHyvaksytytVastaanottaneetRaportti(
         asiointikieli,
         translations,
-        queryResult.toList,
+        sortedResult.toList,
         sumQueryResult,
         naytaHakutoiveet,
         tulostustapa

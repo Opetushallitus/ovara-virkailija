@@ -33,7 +33,7 @@ export const MaakuntaKuntaValikot = () => {
     queryFn: () =>
       doApiFetch('kunnat', {
         queryParams: selectedMaakunnat
-          ? `?maakunnat=${selectedMaakunnat}&selectedKunnat=${selectedKunnat}`
+          ? `?maakunnat=${selectedMaakunnat}&selectedKunnat=${selectedKunnat ? selectedKunnat : []}`
           : null,
       }),
   });

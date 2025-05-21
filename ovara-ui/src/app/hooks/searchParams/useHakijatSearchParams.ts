@@ -1,77 +1,94 @@
 'use client';
+import { parseAsArrayOf, parseAsString } from 'nuqs';
 import {
-  parseAsArrayOf,
-  parseAsBoolean,
-  parseAsString,
-  useQueryState,
-} from 'nuqs';
-import { DEFAULT_NUQS_OPTIONS } from '@/app/lib/constants';
+  useBooleanQueryStateWithOptions,
+  useQueryStateWithLocalStorage,
+} from './useQueryStateWithLocalStorage';
+import { createNullableBooleanOptions } from './paramUtil';
 
 export const useHakijatSearchParams = () => {
-  const [selectedPohjakoulutukset, setSelectedPohjakoulutukset] = useQueryState(
-    'pohjakoulutukset',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedPohjakoulutukset, setSelectedPohjakoulutukset] =
+    useQueryStateWithLocalStorage('pohjakoulutukset', {
+      ...parseAsArrayOf(parseAsString),
+      defaultValue: [],
+    });
 
   const [selectedVastaanottotiedot, setSelectedVastaanottotiedot] =
-    useQueryState(
-      'vastaanottotiedot',
-      parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
+    useQueryStateWithLocalStorage('vastaanottotiedot', {
+      ...parseAsArrayOf(parseAsString),
+      defaultValue: [],
+    });
+
+  const [selectedMarkkinointilupa, setSelectedMarkkinointilupa] =
+    useQueryStateWithLocalStorage<boolean | null>(
+      'markkinointilupa',
+      createNullableBooleanOptions(null),
     );
 
-  const [selectedMarkkinointilupa, setSelectedMarkkinointilupa] = useQueryState(
-    'markkinointilupa',
-    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedJulkaisulupa, setSelectedJulkaisulupa] =
+    useQueryStateWithLocalStorage<boolean | null>(
+      'julkaisulupa',
+      createNullableBooleanOptions(null),
+    );
 
-  const [selectedJulkaisulupa, setSelectedJulkaisulupa] = useQueryState(
-    'julkaisulupa',
-    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedValintatiedot, setSelectedValintatiedot] =
+    useQueryStateWithLocalStorage('valintatiedot', {
+      ...parseAsArrayOf(parseAsString),
+      defaultValue: [],
+    });
 
-  const [selectedValintatiedot, setSelectedValintatiedot] = useQueryState(
-    'valintatiedot',
-    parseAsArrayOf(parseAsString).withOptions(DEFAULT_NUQS_OPTIONS),
-  );
-
-  const [selectedKaksoistutkinto, setSelectedKaksoistutkinto] = useQueryState(
-    'kaksoistutkinto',
-    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedKaksoistutkinto, setSelectedKaksoistutkinto] =
+    useQueryStateWithLocalStorage<boolean | null>(
+      'kaksoistutkinto',
+      createNullableBooleanOptions(null),
+    );
 
   const [selectedUrheilijatutkinto, setSelectedUrheilijatutkinto] =
-    useQueryState(
+    useQueryStateWithLocalStorage<boolean | null>(
       'urheilijatutkinto',
-      parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
+      createNullableBooleanOptions(null),
     );
 
-  const [selectedSoraTerveys, setSelectedSoraTerveys] = useQueryState(
-    'sora_terveys',
-    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedSoraTerveys, setSelectedSoraTerveys] =
+    useQueryStateWithLocalStorage<boolean | null>(
+      'sora_terveys',
+      createNullableBooleanOptions(null),
+    );
 
-  const [selectedSoraAiempi, setSelectedSoraAiempi] = useQueryState(
-    'sora_aiempi',
-    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS),
-  );
+  const [selectedSoraAiempi, setSelectedSoraAiempi] =
+    useQueryStateWithLocalStorage<boolean | null>(
+      'sora_aiempi',
+      createNullableBooleanOptions(null),
+    );
 
-  const [selectedNaytaYoArvosanat, setSelectedNaytaYoArvosanat] = useQueryState(
-    'nayta-yo-arvosanat',
-    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS).withDefault(true),
-  );
+  const [selectedNaytaYoArvosanat, setSelectedNaytaYoArvosanat] =
+    useBooleanQueryStateWithOptions('nayta-yo-arvosanat', false);
 
-  const [selectedNaytaHetu, setSelectedNaytaHetu] = useQueryState(
-    'nayta-hetu',
-    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS).withDefault(true),
-  );
+  const [selectedNaytaHetu, setSelectedNaytaHetu] =
+    useBooleanQueryStateWithOptions('nayta-hetu', true);
 
-  const [selectedNaytaPostiosoite, setSelectedNaytaPostiosoite] = useQueryState(
-    'nayta-postiosoite',
-    parseAsBoolean.withOptions(DEFAULT_NUQS_OPTIONS).withDefault(true),
-  );
+  const [selectedNaytaPostiosoite, setSelectedNaytaPostiosoite] =
+    useBooleanQueryStateWithOptions('nayta-postiosoite', true);
 
   const emptyAllHakijatParams = () => {
     console.debug('EMPTY ALL HAKIJAT PARAMS');
+    const keysToClear = [
+      'pohjakoulutukset',
+      'vastaanottotiedot',
+      'markkinointilupa',
+      'julkaisulupa',
+      'valintatiedot',
+      'kaksoistutkinto',
+      'urheilijatutkinto',
+      'sora-terveys',
+      'sora-aiempi',
+      'nayta-yo-arvosanat',
+      'nayta-hetu',
+      'nayta-postiosoite',
+    ];
+
+    keysToClear.forEach((key) => localStorage.removeItem(key));
+
     setSelectedPohjakoulutukset(null);
     setSelectedVastaanottotiedot(null);
     setSelectedMarkkinointilupa(null);
