@@ -53,7 +53,7 @@ def buildHakeneetHyvaksytytVastaanottaneetAuditParams(
     "maakunnat" -> Option(params.maakunnat).filter(_.nonEmpty),
     "kunnat" -> Option(params.kunnat).filter(_.nonEmpty),
     "harkinnanvaraisuudet" -> Option(params.harkinnanvaraisuudet).filter(_.nonEmpty),
-    "naytaHakutoiveet" -> params.naytaHakutoiveet,
+    "naytaHakutoiveet" -> Option(params.naytaHakutoiveet),
     "sukupuoli" -> params.sukupuoli
   ).collect { case (key, Some(value)) => key -> value }
 }
