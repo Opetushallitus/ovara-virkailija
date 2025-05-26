@@ -9,6 +9,7 @@ import { AuthorizedUserProvider } from './contexts/AuthorizedUserProvider';
 import LocalizationProvider from './components/localization-provider';
 import ReactQueryClientProvider from '@/app/components/react-query-client-provider';
 import { ClientErrorBoundary } from '@/app/components/client-errorboundary';
+import { ConfigurationProvider } from './components/configuration-provider';
 
 export const metadata: Metadata = {
   title: 'Opiskelijavalinnan raportointi',
@@ -26,15 +27,17 @@ export default function RootLayout({
       <body>
         <AppRouterCacheProvider>
           <OphNextJsThemeProvider variant="oph" overrides={THEME_OVERRIDES}>
-            <ReactQueryClientProvider>
-              <AuthorizedUserProvider>
-                <LocalizationProvider>
-                  <ClientErrorBoundary>
-                    <NuqsAdapter>{children}</NuqsAdapter>
-                  </ClientErrorBoundary>
-                </LocalizationProvider>
-              </AuthorizedUserProvider>
-            </ReactQueryClientProvider>
+            <ConfigurationProvider config={configuration}>
+              <ReactQueryClientProvider>
+                <AuthorizedUserProvider>
+                  <LocalizationProvider>
+                    <ClientErrorBoundary>
+                      <NuqsAdapter>{children}</NuqsAdapter>
+                    </ClientErrorBoundary>
+                  </LocalizationProvider>
+                </AuthorizedUserProvider>
+              </ReactQueryClientProvider>
+            </ConfigurationProvider>
           </OphNextJsThemeProvider>
         </AppRouterCacheProvider>
       </body>
