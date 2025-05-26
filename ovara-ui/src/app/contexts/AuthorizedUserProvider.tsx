@@ -20,11 +20,11 @@ export function AuthorizedUserProvider({ children }: { children: ReactNode }) {
     },
     refetchInterval: 60000, // Pollataan session voimassaoloa 60 sekunnin välein
     staleTime: 0, // Ei cachea
-    enabled: true,
+    enabled: !!user,
     retry: false,
   });
 
-  if (isLoading) {
+  if (isLoading || user === null) {
     return <FullSpinner />;
   }
 

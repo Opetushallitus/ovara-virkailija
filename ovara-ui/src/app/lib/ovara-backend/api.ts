@@ -42,6 +42,10 @@ export async function apiFetch(
         },
       },
     );
+    if (response.status === 401) {
+      redirectToLogin();
+      return null; // Palautetaan null login-flowta odotellessa
+    }
     if (response.status >= 400) {
       let body: unknown;
       try {
@@ -75,10 +79,6 @@ const isUnauthenticated = (response: Response) => {
   return response?.status === 401;
 };
 
-const isRedirected = (response: Response) => {
-  return response.redirected;
-};
-
 const redirectToLogin = () => {
   if (isServer) {
     redirect(loginUrl);
@@ -91,7 +91,10 @@ const noContent = (response: Response) => {
   return response.status === 204;
 };
 
-const responseToData = async (res: Response) => {
+const responseToData = async (res: Response | null) => {
+  if (!res || !(res instanceof Response)) {
+    return {}; // 401 tilanteiden paluuarvo
+  }
   if (noContent(res)) {
     return {};
   }
@@ -110,18 +113,12 @@ export const doApiFetch = async (
 ) => {
   try {
     const response = await apiFetch(resource, options, cache);
-    const responseUrl = new URL(response.url);
-    if (
-      isRedirected(response) &&
-      responseUrl.pathname.startsWith('/cas/login')
-    ) {
-      redirectToLogin();
-    }
     return responseToData(response);
   } catch (error: unknown) {
     if (error instanceof FetchError) {
       if (isUnauthenticated(error.response)) {
         redirectToLogin();
+        return {}; // 401 tilanteita ei käsitellä virheenä
       }
       if (error.response.status === 403) {
         return Promise.reject(new PermissionError());
