@@ -73,6 +73,7 @@ export function ErrorView({
   error: (Error & { digest?: string }) | FetchError;
   reset: () => void;
 }) {
+  console.log('error view:', error);
   const { t } = useTranslate();
 
   if (error instanceof FetchError) {

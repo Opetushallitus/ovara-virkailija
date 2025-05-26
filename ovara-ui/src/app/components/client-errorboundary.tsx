@@ -30,6 +30,7 @@ const ErrorComponent = ({
 };
 
 export function ClientErrorBoundary({ children }: { children: ReactNode }) {
+  console.log('client error boundary render');
   const { t } = useTranslate();
 
   return (

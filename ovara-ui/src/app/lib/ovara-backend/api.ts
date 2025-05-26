@@ -114,12 +114,14 @@ export const doApiFetch = async (
   options?: Options,
   cache?: string,
 ) => {
+  console.log('doApiFetch ', resource);
   try {
     const response = await apiFetch(resource, options, cache);
     return responseToData(response);
   } catch (error: unknown) {
     if (error instanceof FetchError) {
       if (isUnauthenticated(error.response)) {
+        console.log('doApiFetch: 401, redirecting to login');
         redirectToLogin();
         return {}; // 401 tilanteita ei käsitellä virheenä
       }
