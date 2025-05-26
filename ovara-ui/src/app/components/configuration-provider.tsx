@@ -1,0 +1,30 @@
+'use client';
+
+import { createContext, useContext } from 'react';
+import { Configuration } from '@/app/lib/configuration/configuration';
+
+const ConfigurationContext = createContext<Configuration | null>(null);
+
+export function ConfigurationProvider({
+  children,
+  config,
+}: {
+  children: React.ReactNode;
+  config: Configuration;
+}) {
+  return (
+    <ConfigurationContext.Provider value={config}>
+      {children}
+    </ConfigurationContext.Provider>
+  );
+}
+
+export function useConfiguration() {
+  const context = useContext(ConfigurationContext);
+  if (!context) {
+    throw new Error(
+      'useConfiguration must be used within a ConfigurationProvider',
+    );
+  }
+  return context;
+}

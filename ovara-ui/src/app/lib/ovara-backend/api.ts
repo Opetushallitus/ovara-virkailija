@@ -1,12 +1,12 @@
-import { configuration } from '../configuration';
 import { FetchError, PermissionError } from '@/app/lib/common';
 import { redirect } from 'next/navigation';
+import { getConfiguration } from '@/app/lib/configuration/serverConfiguration';
 
 let _csrfToken: string;
-const loginUrl = `${configuration.ovaraBackendApiUrl}/login`;
 const isServer = typeof window === 'undefined';
 
 async function csrfToken() {
+  const configuration = await getConfiguration();
   if (!_csrfToken) {
     const response = await fetch(`${configuration.ovaraBackendApiUrl}/csrf`, {
       credentials: 'include',
@@ -30,6 +30,7 @@ export async function apiFetch(
 ) {
   try {
     const queryParams = options?.queryParams ? options.queryParams : '';
+    const configuration = await getConfiguration();
     const response = await fetch(
       `${configuration.ovaraBackendApiUrl}/${resource}${queryParams}`,
       {
@@ -42,6 +43,10 @@ export async function apiFetch(
         },
       },
     );
+    if (response.status === 401) {
+      redirectToLogin();
+      return null; // Palautetaan null login-flowta odotellessa
+    }
     if (response.status >= 400) {
       let body: unknown;
       try {
@@ -75,11 +80,9 @@ const isUnauthenticated = (response: Response) => {
   return response?.status === 401;
 };
 
-const isRedirected = (response: Response) => {
-  return response.redirected;
-};
-
-const redirectToLogin = () => {
+const redirectToLogin = async () => {
+  const configuration = await getConfiguration();
+  const loginUrl = `${configuration.ovaraBackendApiUrl}/login`;
   if (isServer) {
     redirect(loginUrl);
   } else {
@@ -91,7 +94,10 @@ const noContent = (response: Response) => {
   return response.status === 204;
 };
 
-const responseToData = async (res: Response) => {
+const responseToData = async (res: Response | null) => {
+  if (!res || !(res instanceof Response)) {
+    return {}; // 401 tilanteiden paluuarvo
+  }
   if (noContent(res)) {
     return {};
   }
@@ -110,18 +116,12 @@ export const doApiFetch = async (
 ) => {
   try {
     const response = await apiFetch(resource, options, cache);
-    const responseUrl = new URL(response.url);
-    if (
-      isRedirected(response) &&
-      responseUrl.pathname.startsWith('/cas/login')
-    ) {
-      redirectToLogin();
-    }
     return responseToData(response);
   } catch (error: unknown) {
     if (error instanceof FetchError) {
       if (isUnauthenticated(error.response)) {
         redirectToLogin();
+        return {}; // 401 tilanteita ei käsitellä virheenä
       }
       if (error.response.status === 403) {
         return Promise.reject(new PermissionError());
