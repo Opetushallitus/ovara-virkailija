@@ -23,7 +23,7 @@ export const OkmOhjauksenAlat = () => {
     queryFn: () => doApiFetch('okm-ohjauksen-alat'),
   });
 
-  const maakunnat: Array<Koodi> = okmOhjauksenAlaData.data || [];
+  const ohjausalat: Array<Koodi> = okmOhjauksenAlaData.data || [];
 
   const okm_ohjauksen_alat_id = 'okm-ohjauksen-alat';
 
@@ -32,7 +32,7 @@ export const OkmOhjauksenAlat = () => {
       id={okm_ohjauksen_alat_id}
       label={t(`raportti.${okm_ohjauksen_alat_id}`)}
       value={selectedOkmOhjauksenAlat ?? []}
-      options={getKoodiOptions(locale, maakunnat)}
+      options={getKoodiOptions(locale, ohjausalat)}
       onChange={(e, value) =>
         changeMultiComboBoxSelection(e, value, setSelectedOkmOhjauksenAlat)
       }

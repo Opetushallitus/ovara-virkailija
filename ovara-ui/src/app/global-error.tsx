@@ -3,7 +3,7 @@
 import { ErrorView } from '@/app/components/error-view';
 import { THEME_OVERRIDES } from '@/app/theme';
 import { OphNextJsThemeProvider } from '@opetushallitus/oph-design-system/next/theme';
-import { OvaraTolgeeProvider } from '@/app/components/ovara-tolgee-provider';
+import { OvaraTolgeeProvider } from '@/app/components/providers/ovara-tolgee-provider';
 import { MainContainer } from '@/app/components/main-container';
 import Header from '@/app/components/header';
 import { PageLayout } from '@/app/components/page-layout';

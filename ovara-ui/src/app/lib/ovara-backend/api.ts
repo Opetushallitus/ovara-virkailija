@@ -1,20 +1,26 @@
-import { configuration } from '../configuration';
 import { FetchError, PermissionError } from '@/app/lib/common';
 import { redirect } from 'next/navigation';
+import { getConfiguration } from '@/app/lib/configuration/client-configuration';
+import { configuration } from '@/app/lib/configuration/configuration';
 
 let _csrfToken: string;
-const loginUrl = `${configuration.ovaraBackendApiUrl}/login`;
 const isServer = typeof window === 'undefined';
+console.log('isServer', isServer);
+
+function getRuntimeConfiguration() {
+  return isServer ? configuration : getConfiguration();
+}
 
 async function csrfToken() {
   if (!_csrfToken) {
-    const response = await fetch(`${configuration.ovaraBackendApiUrl}/csrf`, {
+    const config = getRuntimeConfiguration();
+    const { ovaraBackendApiUrl } = config;
+    const response = await fetch(`${ovaraBackendApiUrl}/csrf`, {
       credentials: 'include',
     });
     const data = await response.json();
     _csrfToken = data.token;
   }
-
   return _csrfToken;
 }
 
@@ -29,9 +35,11 @@ export async function apiFetch(
   cache?: string,
 ) {
   try {
+    const config = getRuntimeConfiguration();
+    const { ovaraBackendApiUrl } = config;
     const queryParams = options?.queryParams ? options.queryParams : '';
     const response = await fetch(
-      `${configuration.ovaraBackendApiUrl}/${resource}${queryParams}`,
+      `${ovaraBackendApiUrl}/${resource}${queryParams}`,
       {
         ...options,
         credentials: 'include',
@@ -75,11 +83,9 @@ export async function apiFetch(
   }
 }
 
-const isUnauthenticated = (response: Response) => {
-  return response?.status === 401;
-};
-
 const redirectToLogin = () => {
+  const { ovaraBackendApiUrl } = getRuntimeConfiguration();
+  const loginUrl = `${ovaraBackendApiUrl}/login`;
   if (isServer) {
     redirect(loginUrl);
   } else {
@@ -87,17 +93,11 @@ const redirectToLogin = () => {
   }
 };
 
-const noContent = (response: Response) => {
-  return response.status === 204;
-};
+const noContent = (response: Response) => response.status === 204;
 
 const responseToData = async (res: Response | null) => {
-  if (!res || !(res instanceof Response)) {
-    return {}; // 401 tilanteiden paluuarvo
-  }
-  if (noContent(res)) {
-    return {};
-  }
+  if (!res || !(res instanceof Response)) return {};
+  if (noContent(res)) return {};
   try {
     return await res.json();
   } catch (e) {
@@ -116,11 +116,11 @@ export const doApiFetch = async (
     return responseToData(response);
   } catch (error: unknown) {
     if (error instanceof FetchError) {
-      if (isUnauthenticated(error.response)) {
+      if (error.response?.status === 401) {
         redirectToLogin();
-        return {}; // 401 tilanteita ei käsitellä virheenä
+        return {};
       }
-      if (error.response.status === 403) {
+      if (error.response?.status === 403) {
         return Promise.reject(new PermissionError());
       }
     }

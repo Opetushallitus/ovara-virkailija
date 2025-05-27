@@ -46,6 +46,7 @@ class OnrService {
   }
 
   private def fetch(url: String): Either[Throwable, String] = {
+    LOG.info(s"Fetching asiointikieli from oppijanumerorekisteri")
     val req = new RequestBuilder()
       .setMethod("GET")
       .setUrl(url)
