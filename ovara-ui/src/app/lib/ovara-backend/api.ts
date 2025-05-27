@@ -5,7 +5,6 @@ import { configuration } from '@/app/lib/configuration/configuration';
 
 let _csrfToken: string;
 const isServer = typeof window === 'undefined';
-console.log('isServer', isServer);
 
 function getRuntimeConfiguration() {
   return isServer ? configuration : getConfiguration();

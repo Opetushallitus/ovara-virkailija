@@ -21,7 +21,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  console.log(configuration);
   return (
     <html lang="fi">
       <Script src={configuration.raamitUrl} />
