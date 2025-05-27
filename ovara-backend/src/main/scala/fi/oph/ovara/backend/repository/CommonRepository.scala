@@ -60,7 +60,7 @@ class CommonRepository extends Extractors {
                      ELSE jsonb_build_array(koulutuksen_alkamiskausi)
                    END
                  ) AS alkamiskausi
-          FROM pub.pub_dim_haku h2
+          FROM pub.pub_dim_kontrolli_haku h2
         ) alkamiskaudet
           ON h.haku_oid = alkamiskaudet.haku_oid
           WHERE h.haun_tyyppi = $haunTyyppi
