@@ -256,7 +256,7 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List((2024, "kausi_s")), true, true)
       ) == "(alkamiskausi->>'type' = 'henkkoht' " +
-        "OR koulutuksen_alkamiskausi IS NULL " +
+        "OR alkamiskausi->>'type' = 'eialkamiskautta' " +
         "OR (alkamiskausi->>'koulutuksenAlkamisvuosi' = '2024' " +
         "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s'))"
     )
@@ -266,7 +266,7 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List(), false, true)
-      ) == "(koulutuksen_alkamiskausi IS NULL)"
+      ) == "(alkamiskausi->>'type' = 'eialkamiskautta')"
     )
   }
 
@@ -275,7 +275,7 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List(), true, true)
       ) == "(alkamiskausi->>'type' = 'henkkoht' " +
-        "OR koulutuksen_alkamiskausi IS NULL)"
+        "OR alkamiskausi->>'type' = 'eialkamiskautta')"
     )
   }
 
@@ -283,7 +283,7 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List((2024, "kausi_s")), false, true)
-      ) == "(koulutuksen_alkamiskausi IS NULL " +
+      ) == "(alkamiskausi->>'type' = 'eialkamiskautta' " +
         "OR (alkamiskausi->>'koulutuksenAlkamisvuosi' = '2024' " +
         "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s'))"
     )
