@@ -34,12 +34,8 @@ class OnrService {
     LOG.info("Fetching asiointikieli from oppijanumerorekisteri")
     val url = s"$opintopolku_virkailija_domain/oppijanumerorekisteri-service/henkilo/$personOid/asiointiKieli"
     fetch(url) match {
-      case Left(e)  => 
-        LOG.error(s"Error fetching asiointikieli", e)
-        Left(e)
-      case Right(o) => 
-        LOG.info(s"Fetched asiointikieli")
-        Right(o)
+      case Left(e)  => Left(e)
+      case Right(o) => Right(o)
     }
   }
 
@@ -50,7 +46,6 @@ class OnrService {
   }
 
   private def fetch(url: String): Either[Throwable, String] = {
-    LOG.info(s"Fetching asiointikieli from oppijanumerorekisteri")
     val req = new RequestBuilder()
       .setMethod("GET")
       .setUrl(url)

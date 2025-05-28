@@ -21,7 +21,7 @@ class UserService(onrService: OnrService, authenticationFacade: AuthenticationFa
         case Left(e) => None
         case Right(v) => Some(v)
       }
-      LOG.info("haettu asiointikieli")
+
       User(
         userOid = username,
         authorities = AuthoritiesUtil.getOvaraAuthorities(principal.getAuthorities),
