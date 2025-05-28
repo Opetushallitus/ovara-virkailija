@@ -3,16 +3,20 @@
 import { MainContainer } from '../components/main-container';
 import { ListTable } from '../components/table/table';
 import { KK_RAPORTIT, TOISEN_ASTEEN_RAPORTIT } from '@/app/lib/constants';
-import { useAuthorizedUser } from '../contexts/AuthorizedUserProvider';
+import { useAuthorizedUser } from '../components/providers/authorized-user-provider';
 import {
   hasOvaraRole,
   hasOvaraToinenAsteRole,
   hasOvaraKkRole,
 } from '../lib/utils';
+import { FullSpinner } from '@/app/components/full-spinner';
 
 export default function Home() {
   const user = useAuthorizedUser();
 
+  if (!user) {
+    return <FullSpinner />;
+  }
   const userRoles = user?.authorities;
   const hasOvaraUserRights = hasOvaraRole(userRoles);
   const hasToinenAsteRights = hasOvaraToinenAsteRole(userRoles);

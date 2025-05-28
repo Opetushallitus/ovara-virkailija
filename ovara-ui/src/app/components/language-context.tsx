@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useMemo } from 'react';
 import type { LanguageCode } from '@/app/lib/types/common';
-import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
+import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 
 const LanguageContext = createContext<LanguageCode>('fi');
 

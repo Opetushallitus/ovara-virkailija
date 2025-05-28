@@ -1,5 +1,5 @@
 import { useTranslate } from '@tolgee/react';
-import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
+import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import { MultiComboBox } from '@/app/components/form/multicombobox';
 import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
 import { useQuery } from '@tanstack/react-query';

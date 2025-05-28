@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode, useEffect } from 'react';
-import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
+import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import type { LanguageCode } from '@/app/lib/types/common';
 import { OvaraTolgeeProvider } from '@/app/components/providers/ovara-tolgee-provider';
 

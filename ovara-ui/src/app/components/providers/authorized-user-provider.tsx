@@ -5,6 +5,8 @@ import { User } from '@/app/lib/types/common';
 import { useQuery } from '@tanstack/react-query';
 import { doApiFetch } from '@/app/lib/ovara-backend/api';
 import { FullSpinner } from '@/app/components/full-spinner';
+import { PermissionError } from '@/app/lib/common';
+import { hasOvaraRole } from '@/app/lib/utils';
 
 const AuthorizedUserContext = createContext<User | null>(null);
 
@@ -28,6 +30,11 @@ export function AuthorizedUserProvider({ children }: { children: ReactNode }) {
     return <FullSpinner />;
   }
 
+  const hasPermission = user && hasOvaraRole(user.authorities);
+
+  if (!hasPermission) {
+    throw new PermissionError();
+  }
   return (
     <AuthorizedUserContext.Provider value={user}>
       {children}

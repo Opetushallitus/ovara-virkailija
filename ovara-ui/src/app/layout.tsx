@@ -5,7 +5,7 @@ import Script from 'next/script';
 import { configuration } from './lib/configuration/configuration';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { THEME_OVERRIDES } from '@/app/theme';
-import { AuthorizedUserProvider } from './contexts/AuthorizedUserProvider';
+import { AuthorizedUserProvider } from './components/providers/authorized-user-provider';
 import LocalizationProvider from './components/providers/localization-provider';
 import ReactQueryClientProvider from '@/app/components/providers/react-query-client-provider';
 import { ClientErrorBoundary } from '@/app/components/client-errorboundary';

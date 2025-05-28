@@ -4,7 +4,7 @@ import { FormBox } from '@/app/components/form/form-box';
 import { FormButtons } from '@/app/components/form/form-buttons';
 import { Box, Divider } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
+import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import { hasOvaraToinenAsteRole, isNullishOrEmpty } from '@/app/lib/utils';
 import { useSearchParams } from 'next/navigation';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
