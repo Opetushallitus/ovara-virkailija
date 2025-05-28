@@ -3,7 +3,7 @@ import { Autocomplete, Chip, TextField } from '@mui/material';
 import { OvaraFormControl } from '@/app/components/form/ovara-form-control';
 import { find, isEmpty } from 'remeda';
 import { LanguageCode } from '@/app/lib/types/common';
-import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
+import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 
 export type SelectOption = {
   label: string;

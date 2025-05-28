@@ -119,7 +119,7 @@ object RepositoryUtils {
         ""
       }
 
-      s"${operator}koulutuksen_alkamiskausi IS NULL"
+      s"${operator}alkamiskausi->>'type' = 'eialkamiskautta'"
     } else {
       ""
     }
@@ -218,7 +218,7 @@ object RepositoryUtils {
       selectedKayttooikeusOrganisaatiot
     )
   }
-  
+
   def makeOptionalHakukohderyhmatSubSelectQueryStr(hakukohderyhmat: List[String]): String = {
     val hakukohderyhmatStr = makeListOfValuesQueryStr(hakukohderyhmat)
     if (hakukohderyhmatStr.isEmpty) {
