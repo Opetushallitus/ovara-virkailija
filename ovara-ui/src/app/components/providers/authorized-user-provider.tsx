@@ -7,6 +7,7 @@ import { doApiFetch } from '@/app/lib/ovara-backend/api';
 import { FullSpinner } from '@/app/components/full-spinner';
 import { PermissionError } from '@/app/lib/common';
 import { hasOvaraRole } from '@/app/lib/utils';
+import { isNullish } from 'remeda';
 
 const AuthorizedUserContext = createContext<User | null>(null);
 
@@ -22,11 +23,11 @@ export function AuthorizedUserProvider({ children }: { children: ReactNode }) {
     },
     refetchInterval: 60000, // Pollataan session voimassaoloa 60 sekunnin välein
     staleTime: 0, // Ei cachea
-    enabled: !!user,
+    enabled: !isNullish(user),
     retry: false,
   });
 
-  if (isLoading || user === null) {
+  if (isLoading || isNullish(user)) {
     return <FullSpinner />;
   }
 

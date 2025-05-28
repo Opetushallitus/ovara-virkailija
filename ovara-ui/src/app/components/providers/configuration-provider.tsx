@@ -19,7 +19,6 @@ export function ConfigurationProvider({
   configuration: Configuration;
   children: React.ReactNode;
 }) {
-  // Set immediately during render — not delayed in useEffect
   if (typeof window !== 'undefined') {
     setConfiguration(configuration);
   }
