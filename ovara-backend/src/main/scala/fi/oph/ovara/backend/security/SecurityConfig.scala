@@ -57,7 +57,6 @@ class SecurityConfig  {
   val LOG: Logger = LoggerFactory.getLogger(classOf[SecurityConfig])
   @Bean
   def createCasClient(): CasClient = {
-    LOG.info("Creating CAS client")
     CasClientBuilder.build(CasConfig.CasConfigBuilder(
       cas_username,
       cas_password,
