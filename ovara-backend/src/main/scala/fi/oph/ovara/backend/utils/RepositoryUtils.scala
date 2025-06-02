@@ -97,8 +97,7 @@ object RepositoryUtils {
   def makeHakuTableAlkamiskausiQueryStr(alkamiskausi: (Int, String)): String = {
     val vuosi = alkamiskausi._1
     val kausi = alkamiskausi._2
-    s"(alkamiskausi->>'koulutuksenAlkamisvuosi' = '$vuosi' " +
-      s"AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ '$kausi')"
+    s"koulutuksen_alkamiskausi @> '[{\"koulutuksenAlkamisvuosi\": $vuosi, \"koulutuksenAlkamiskausiKoodiUri\": \"$kausi#1\"}]'::jsonb"
   }
 
   def makeHakuQueryWithAlkamiskausiParams(
@@ -106,7 +105,7 @@ object RepositoryUtils {
   ): String = {
     val hlokohtSuunnitelma = alkamiskaudetAndHenkKohtSuunnitelma._2
     val hlokohtSuunnitelmaQueryStr = if (hlokohtSuunnitelma) {
-      s"alkamiskausi->>'type' = 'henkkoht'"
+      s"h.koulutuksen_alkamiskausi @> '[{\"type\": \"henkkoht\"}]'::jsonb"
     } else {
       ""
     }
@@ -119,7 +118,7 @@ object RepositoryUtils {
         ""
       }
 
-      s"${operator}alkamiskausi->>'type' = 'eialkamiskautta'"
+      s"${operator}h.koulutuksen_alkamiskausi@> '[{\"type\": \"eialkamiskautta\"}]'::jsonb"
     } else {
       ""
     }

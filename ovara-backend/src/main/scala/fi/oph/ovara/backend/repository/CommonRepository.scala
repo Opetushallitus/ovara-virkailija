@@ -50,21 +50,9 @@ class CommonRepository extends Extractors {
       case _ => ""
     }
 
-    val query = sql"""SELECT DISTINCT h.haku_oid, h.haku_nimi
-          FROM pub.pub_dim_haku h
-          LEFT JOIN (
-           SELECT haku_oid,
-                 jsonb_array_elements(
-                   CASE
-                     WHEN jsonb_typeof(koulutuksen_alkamiskausi) = 'array' THEN koulutuksen_alkamiskausi
-                     ELSE jsonb_build_array(koulutuksen_alkamiskausi)
-                   END
-                 ) AS alkamiskausi
-          FROM pub.pub_dim_kontrolli_haku h2
-        ) alkamiskaudet
-          ON h.haku_oid = alkamiskaudet.haku_oid
+    val query = sql"""SELECT h.haku_oid, h.haku_nimi
+          FROM pub.pub_dim_kontrolli_haku h
           WHERE h.haun_tyyppi = $haunTyyppi
-          AND h.tila != 'poistettu'
           #$combinedQueryStr""".as[Haku]
     LOG.info(query.statements.head)
     query
