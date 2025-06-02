@@ -97,7 +97,7 @@ object RepositoryUtils {
   def makeHakuTableAlkamiskausiQueryStr(alkamiskausi: (Int, String)): String = {
     val vuosi = alkamiskausi._1
     val kausi = alkamiskausi._2
-    s"koulutuksen_alkamiskausi @> '[{\"koulutuksenAlkamisvuosi\": $vuosi, \"koulutuksenAlkamiskausiKoodiUri\": \"$kausi#1\"}]'::jsonb"
+    s"h.koulutuksen_alkamiskausi @> '[{\"koulutuksenAlkamisvuosi\": $vuosi, \"koulutuksenAlkamiskausiKoodiUri\": \"$kausi#1\"}]'::jsonb"
   }
 
   def makeHakuQueryWithAlkamiskausiParams(
