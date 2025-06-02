@@ -18,3 +18,10 @@ export const configuration = {
   virkailijaUrl: DOMAIN,
   lokalisointiPrefix: `${DOMAIN}/lokalisointi/tolgee`,
 } as const;
+
+export type Configuration = {
+  raamitUrl: string;
+  ovaraBackendApiUrl: string;
+  virkailijaUrl: string;
+  lokalisointiPrefix: string;
+};

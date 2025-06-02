@@ -1,6 +1,6 @@
 import { Koodi, LanguageCode } from '@/app/lib/types/common';
 import { useTranslate } from '@tolgee/react';
-import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
+import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import { useHakeneetSearchParams } from '@/app/hooks/searchParams/useHakeneetSearchParams';
 import { useQuery } from '@tanstack/react-query';
 import { doApiFetch } from '@/app/lib/ovara-backend/api';

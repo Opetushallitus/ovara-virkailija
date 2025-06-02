@@ -202,8 +202,7 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuTableAlkamiskausiQueryStr(
         (2024, "kausi_s")
-      ) == "(alkamiskausi->>'koulutuksenAlkamisvuosi' = '2024' "
-        + "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s')"
+      ) == "h.koulutuksen_alkamiskausi @> '[{\"koulutuksenAlkamisvuosi\": 2024, \"koulutuksenAlkamiskausiKoodiUri\": \"kausi_s#1\"}]'::jsonb"
     )
   }
 
@@ -215,7 +214,7 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List(), true, false)
-      ) == "(alkamiskausi->>'type' = 'henkkoht')"
+      ) == "(h.koulutuksen_alkamiskausi @> '[{\"type\": \"henkkoht\"}]'::jsonb)"
     )
   }
 
@@ -223,8 +222,8 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List((2024, "kausi_s")), false, false)
-      ) == "((alkamiskausi->>'koulutuksenAlkamisvuosi' = '2024' " +
-        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s'))"
+      ) == "(h.koulutuksen_alkamiskausi @> '[{\"koulutuksenAlkamisvuosi\": 2024, " +
+        "\"koulutuksenAlkamiskausiKoodiUri\": \"kausi_s#1\"}]'::jsonb)"
     )
   }
 
@@ -232,8 +231,8 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List((2021, "kausi_k")), false, false)
-      ) == "((alkamiskausi->>'koulutuksenAlkamisvuosi' = '2021' " +
-        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_k'))"
+      ) == "(h.koulutuksen_alkamiskausi @> '[{\"koulutuksenAlkamisvuosi\": 2021, " +
+        "\"koulutuksenAlkamiskausiKoodiUri\": \"kausi_k#1\"}]'::jsonb)"
     )
   }
 
@@ -241,13 +240,13 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List((2021, "kausi_k"), (2024, "kausi_s")), true, false)
-      ) == "(alkamiskausi->>'type' = 'henkkoht' " +
+      ) == "(h.koulutuksen_alkamiskausi @> '[{\"type\": \"henkkoht\"}]'::jsonb " +
         // 2021_kevat haulla
-        "OR (alkamiskausi->>'koulutuksenAlkamisvuosi' = '2021' " +
-        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_k') " +
+        "OR h.koulutuksen_alkamiskausi @> '[{\"koulutuksenAlkamisvuosi\": 2021, " +
+        "\"koulutuksenAlkamiskausiKoodiUri\": \"kausi_k#1\"}]'::jsonb " +
         // 2024_syksy haulla
-        "OR (alkamiskausi->>'koulutuksenAlkamisvuosi' = '2024' " +
-        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s'))"
+        "OR h.koulutuksen_alkamiskausi @> '[{\"koulutuksenAlkamisvuosi\": 2024, " +
+        "\"koulutuksenAlkamiskausiKoodiUri\": \"kausi_s#1\"}]'::jsonb)"
     )
   }
 
@@ -255,10 +254,9 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List((2024, "kausi_s")), true, true)
-      ) == "(alkamiskausi->>'type' = 'henkkoht' " +
-        "OR koulutuksen_alkamiskausi IS NULL " +
-        "OR (alkamiskausi->>'koulutuksenAlkamisvuosi' = '2024' " +
-        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s'))"
+      ) == "(h.koulutuksen_alkamiskausi @> '[{\"type\": \"henkkoht\"}]'::jsonb " +
+        "OR h.koulutuksen_alkamiskausi@> '[{\"type\": \"eialkamiskautta\"}]'::jsonb " +
+        "OR h.koulutuksen_alkamiskausi @> '[{\"koulutuksenAlkamisvuosi\": 2024, \"koulutuksenAlkamiskausiKoodiUri\": \"kausi_s#1\"}]'::jsonb)"
     )
   }
 
@@ -266,7 +264,7 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List(), false, true)
-      ) == "(koulutuksen_alkamiskausi IS NULL)"
+      ) == "(h.koulutuksen_alkamiskausi@> '[{\"type\": \"eialkamiskautta\"}]'::jsonb)"
     )
   }
 
@@ -274,8 +272,8 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List(), true, true)
-      ) == "(alkamiskausi->>'type' = 'henkkoht' " +
-        "OR koulutuksen_alkamiskausi IS NULL)"
+      ) == "(h.koulutuksen_alkamiskausi @> '[{\"type\": \"henkkoht\"}]'::jsonb OR " +
+        "h.koulutuksen_alkamiskausi@> '[{\"type\": \"eialkamiskautta\"}]'::jsonb)"
     )
   }
 
@@ -283,9 +281,8 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     assert(
       RepositoryUtils.makeHakuQueryWithAlkamiskausiParams(
         (List((2024, "kausi_s")), false, true)
-      ) == "(koulutuksen_alkamiskausi IS NULL " +
-        "OR (alkamiskausi->>'koulutuksenAlkamisvuosi' = '2024' " +
-        "AND alkamiskausi->>'koulutuksenAlkamiskausiKoodiUri' ^@ 'kausi_s'))"
+      ) == "(h.koulutuksen_alkamiskausi@> '[{\"type\": \"eialkamiskautta\"}]'::jsonb OR " +
+        "h.koulutuksen_alkamiskausi @> '[{\"koulutuksenAlkamisvuosi\": 2024, \"koulutuksenAlkamiskausiKoodiUri\": \"kausi_s#1\"}]'::jsonb)"
     )
   }
 

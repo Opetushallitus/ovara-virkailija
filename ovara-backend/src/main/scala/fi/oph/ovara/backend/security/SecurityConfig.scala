@@ -7,7 +7,7 @@ import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl
 import fi.vm.sade.javautils.nio.cas.{CasClient, CasClientBuilder, CasConfig}
 import org.apereo.cas.client.session.{SessionMappingStorage, SingleSignOutFilter}
 import org.apereo.cas.client.validation.{Cas20ServiceTicketValidator, TicketValidator}
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.{Bean, Configuration}
 import org.springframework.core.annotation.Order
@@ -54,16 +54,19 @@ class SecurityConfig  {
   @Bean
   def auditLog(): AuditLog = AuditLog
 
+  val LOG: Logger = LoggerFactory.getLogger(classOf[SecurityConfig])
   @Bean
-  def createCasClient(): CasClient = CasClientBuilder.build(CasConfig.CasConfigBuilder(
-    cas_username,
-    cas_password,
-    s"$opintopolku_virkailija_domain/cas",
-    s"$opintopolku_virkailija_domain/oppijanumerorekisteri-service",
-    CALLER_ID,
-    CALLER_ID,
-    "/j_spring_cas_security_check"
-  ).setJsessionName("JSESSIONID").build())
+  def createCasClient(): CasClient = {
+    CasClientBuilder.build(CasConfig.CasConfigBuilder(
+      cas_username,
+      cas_password,
+      s"$opintopolku_virkailija_domain/cas",
+      s"$opintopolku_virkailija_domain/oppijanumerorekisteri-service",
+      CALLER_ID,
+      CALLER_ID,
+      "/j_spring_cas_security_check"
+    ).setJsessionName("JSESSIONID").build())
+  }
 
   @Bean(name = Array("sessionDataSource"))
   @SpringSessionDataSource

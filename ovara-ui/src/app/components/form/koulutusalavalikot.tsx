@@ -1,6 +1,6 @@
 import { Koodi, LanguageCode } from '@/app/lib/types/common';
 import { useTranslate } from '@tolgee/react';
-import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
+import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import { MultiComboBox } from '@/app/components/form/multicombobox';
 import { Box } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';

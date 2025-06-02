@@ -14,7 +14,7 @@ import { Valintakoe } from '@/app/components/form/valintakoe';
 import { FormButtons } from '@/app/components/form/form-buttons';
 import { Divider } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
-import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
+import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import { hasOvaraToinenAsteRole } from '@/app/lib/utils';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { downloadExcel } from '@/app/components/form/utils';

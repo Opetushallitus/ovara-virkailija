@@ -1,7 +1,7 @@
 import { MultiComboBox } from '@/app/components/form/multicombobox';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { useTranslate } from '@tolgee/react';
-import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
+import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import { Kielistetty, LanguageCode } from '@/app/lib/types/common';
 import { useFetchHaut } from '@/app/hooks/useFetchHaut';
 import { changeMultiComboBoxSelection } from '@/app/components/form/utils';

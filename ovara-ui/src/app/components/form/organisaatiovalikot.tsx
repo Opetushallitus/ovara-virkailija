@@ -3,7 +3,7 @@ import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchP
 import { Box } from '@mui/material';
 import { isEmpty, isNullish } from 'remeda';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
-import { useAuthorizedUser } from '@/app/contexts/AuthorizedUserProvider';
+import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import { LanguageCode, OrganisaatioHierarkia } from '@/app/lib/types/common';
 import {
   ComboBox,
