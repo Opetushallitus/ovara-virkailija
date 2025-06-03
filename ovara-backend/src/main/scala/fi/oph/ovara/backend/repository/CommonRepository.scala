@@ -92,7 +92,7 @@ class CommonRepository extends Extractors {
 
     val query = sql"""SELECT DISTINCT hk.hakukohde_oid, hk.hakukohde_nimi
           FROM pub.pub_dim_hakukohde hk
-          JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
+          LEFT JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
           ON hkr_hk.hakukohde_oid = hk.hakukohde_oid
           WHERE hk.tila != 'poistettu'
           #$organisaatiotQueryStr
