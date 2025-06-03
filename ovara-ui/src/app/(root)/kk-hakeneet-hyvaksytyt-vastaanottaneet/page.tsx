@@ -27,6 +27,7 @@ import { OkmOhjauksenAlat } from '@/app/components/form/okm-ohjauksen-ala';
 import { Ensikertalainen } from '@/app/components/form/ensikertalainen';
 import { Hakukohderyhma } from '@/app/components/form/hakukohderyhma';
 import { useDownloadWithErrorBoundary } from '@/app/hooks/useDownloadWithErrorBoundary';
+import { isNullish } from 'remeda';
 
 export default function KkHakutilasto() {
   const { t } = useTranslate();
@@ -37,11 +38,10 @@ export default function KkHakutilasto() {
   const { selectedAlkamiskaudet, selectedHaut } = useCommonSearchParams();
   const { selectedTulostustapa } = useHakeneetSearchParams();
 
-  const isDisabled = !(
-    selectedAlkamiskaudet &&
-    selectedHaut &&
-    selectedTulostustapa
-  );
+  const isDisabled =
+    isNullishOrEmpty(selectedAlkamiskaudet) ||
+    isNullishOrEmpty(selectedHaut) ||
+    isNullish(selectedTulostustapa);
 
   const tulostustavat = [
     'koulutustoimijoittain',
@@ -77,6 +77,7 @@ export default function KkHakutilasto() {
           <Hakukohde
             fetchEnabled={hakukohdeFetchEnabled}
             includeKoulutustoimija={true}
+            includeHakukohderyhma={true}
           />
           <OkmOhjauksenAlat />
           <Divider />
