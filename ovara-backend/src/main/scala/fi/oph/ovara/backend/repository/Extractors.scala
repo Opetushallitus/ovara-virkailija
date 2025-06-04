@@ -1,13 +1,10 @@
 package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.*
-import fi.oph.ovara.backend.utils.ExtractorUtils.{extractAlkamiskausi, extractArray, extractCommaSeparatedString, extractDateOption, extractHakuaika, extractKielistetty, extractKoulutuksenAlkamisaika, extractMap, extractOpintojenlaajuus, extractValintatapajonot}
+import fi.oph.ovara.backend.utils.ExtractorUtils.{extractArray, extractCommaSeparatedString, extractDateOption, extractHakuaika, extractKielistetty, extractKoulutuksenAlkamisaika, extractMap, extractOpintojenlaajuus, extractValintatapajonot}
 import fi.oph.ovara.backend.utils.GenericOvaraJsonFormats
 import org.json4s.jackson.Serialization.read
 import slick.jdbc.*
-
-import java.sql.Date
-import java.time.LocalDate
 
 trait Extractors extends GenericOvaraJsonFormats {
   implicit val getHakuResult: GetResult[Haku] = GetResult(r =>

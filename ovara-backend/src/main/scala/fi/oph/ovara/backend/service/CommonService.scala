@@ -404,7 +404,11 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       } else if (koulutustoimijaOid.isDefined) {
         getKoulutustoimijahierarkia(List(koulutustoimijaOid.get))
       } else {
-        List()
+        getOrganisaatioHierarkiatWithUserRights match {
+          case Right(hierarkiat) => hierarkiat
+          case Left(error) =>
+            throw new RuntimeException(error)
+        }
       }
 
     val hierarkiatWithExistingOrgs = OrganisaatioUtils.filterOnlyWantedOrgs(hierarkiat)
