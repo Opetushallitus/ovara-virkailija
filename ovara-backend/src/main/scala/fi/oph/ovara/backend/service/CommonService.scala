@@ -357,18 +357,18 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
         }
         (hierarkiat, KOULUTUSTOIMIJARAPORTTI)
       } else {
-        val koulutustoimijahierarkia = getKoulutustoimijahierarkia(kayttooikeusOrganisaatioOids)
+        val hierarkiat =
+          if (AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatioOids)) {
+            getKoulutustoimijahierarkia(kayttooikeusOrganisaatioOids)
+          } else {
+            // ei-pääkäyttäjälle haetaan hierarkiat oikeuksien perusteella
+            val toimipisteHierarkia = getToimipistehierarkiat(kayttooikeusOrganisaatioOids)
+            val oppilaitosHierarkia = getOppilaitoshierarkiat(kayttooikeusOrganisaatioOids)
+            val koulutustoimijaHierarkia = getKoulutustoimijahierarkia(kayttooikeusOrganisaatioOids)
+            toimipisteHierarkia ++ oppilaitosHierarkia ++ koulutustoimijaHierarkia
+          }
 
-        val hierarkiat = if (AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatioOids)) {
-          koulutustoimijahierarkia
-        } else {
-          val oppilaitoshierarkia = getOppilaitoshierarkiat(oppilaitosOids)
-
-          val toimipistehierarkia = getToimipistehierarkiat(toimipisteOids)
-
-          koulutustoimijahierarkia concat oppilaitoshierarkia concat toimipistehierarkia
-        }
-        (hierarkiat, "koulutustoimijaraportti")
+        (hierarkiat, KOULUTUSTOIMIJARAPORTTI)
       }
 
     val hierarkiatWithExistingOrgs = OrganisaatioUtils.filterOnlyWantedOrgs(hierarkiat)
