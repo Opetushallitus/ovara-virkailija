@@ -212,6 +212,12 @@ class CommonRepository extends Extractors {
           FROM pub.pub_dim_koodisto_okmohjauksenala oo""".as[Koodi]
   }
 
+  def selectDistinctYokokeet: SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
+    sql"""SELECT yo.koodiarvo, yo.koodinimi
+          FROM pub.pub_dim_koodisto_yokokeet yo
+       """.as[Koodi]
+  }
+
   def selectDistinctOrganisaatiot(
       organisaatiot: List[String]
   ): SqlStreamingAction[Vector[Organisaatio], Organisaatio, Effect] = {
