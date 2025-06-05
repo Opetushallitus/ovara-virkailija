@@ -3945,7 +3945,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
 
     assert(wb.getNumberOfSheets == 1)
-    assert(wb.getSheetAt(1) == null)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
@@ -4112,7 +4111,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
 
     assert(wb.getNumberOfSheets == 1)
-    assert(wb.getSheetAt(1) == null)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
