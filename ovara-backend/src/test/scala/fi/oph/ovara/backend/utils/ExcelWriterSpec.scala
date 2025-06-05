@@ -3092,6 +3092,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
   )
 
+  val yokokeet = Vector(Koodi("A", Map(En -> "Äidinkielen koe, suomi", Fi -> "Äidinkielen koe", Sv -> "Provet i modersmålet, finska")),
+    Koodi("M", Map(En -> "Matematiikan koe", Fi -> "Matematiikan koe", Sv -> "Matematikprovet")),
+    Koodi("BB", Map(En -> "Biologian koe", Fi -> "Biologian koe", Sv -> "Biologi provet")),
+    Koodi("EA", Map(En -> "Englannin koe", Fi -> "Englannin koe", Sv -> "Engelska provet")))
+
   "writeKkHakijatRaportti" should "return excel with two result rows for kk-hakijat with hetu, postiosoite and arvosanat" in {
     val kkHakijatResult =
       Vector(
@@ -3112,10 +3117,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
         translations = translations,
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(true),
-        maybeNaytaPostiosoite = Some(true)
+        maybeNaytaPostiosoite = Some(true),
+        yokokeet = yokokeet
       )
 
-    assert(wb.getNumberOfSheets == 1)
+    assert(wb.getNumberOfSheets == 2)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0).getStringCellValue == "Hakija SV")
@@ -3267,10 +3273,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
         translations = translations,
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(false),
-        maybeNaytaPostiosoite = Some(false)
+        maybeNaytaPostiosoite = Some(false),
+        yokokeet = yokokeet
       )
 
-    assert(wb.getNumberOfSheets == 1)
+    assert(wb.getNumberOfSheets == 2)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0).getStringCellValue == "Hakija SV")
@@ -3417,10 +3424,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
         translations = translations,
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(true),
-        maybeNaytaPostiosoite = Some(false)
+        maybeNaytaPostiosoite = Some(false),
+        yokokeet = yokokeet
       )
 
-    assert(wb.getNumberOfSheets == 1)
+    assert(wb.getNumberOfSheets == 2)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
@@ -3518,10 +3526,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
         translations = translations,
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(false),
-        maybeNaytaPostiosoite = Some(true)
+        maybeNaytaPostiosoite = Some(true),
+        yokokeet = yokokeet
       )
 
-    assert(wb.getNumberOfSheets == 1)
+    assert(wb.getNumberOfSheets == 2)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
@@ -3710,10 +3719,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
         translations = translations,
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(false),
-        maybeNaytaPostiosoite = Some(false)
+        maybeNaytaPostiosoite = Some(false),
+        yokokeet = yokokeet
       )
 
-    assert(wb.getNumberOfSheets == 1)
+    assert(wb.getNumberOfSheets == 2)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
@@ -3883,7 +3893,41 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(4) == null)
   }
 
-  it should "return excel without arvosanat when nayta arvosanat is false" in {
+  it should "return excel with yokokeet sheet when naytaYoArvosanat is true" in {
+    val kkHakijatResult = Vector(kkHakijatRautiainenWithValintatapajonot, kkHakijaLehtoWithValintatapajonot)
+
+    val wb =
+      ExcelWriter.writeKkHakijatRaportti(
+        hakijoidenHakutoiveet = kkHakijatResult,
+        asiointikieli = userLng,
+        translations = translations,
+        maybeNaytaYoArvosanat = Some(true),
+        maybeNaytaHetu = Some(false),
+        maybeNaytaPostiosoite = Some(false),
+        yokokeet = yokokeet
+      )
+
+    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getSheetAt(1).getRow(1) != null)
+
+    assert(wb.getSheetAt(1).getRow(0).getCell(0).getStringCellValue == "raportti.yokoelyhenne")
+    assert(wb.getSheetAt(1).getRow(0).getCell(1).getStringCellValue == "raportti.yokoeselite")
+    assert(wb.getSheetAt(1).getRow(0).getCell(2) == null)
+    assert(wb.getSheetAt(1).getRow(1).getCell(0).getStringCellValue == "A")
+    assert(wb.getSheetAt(1).getRow(1).getCell(1).getStringCellValue == "Provet i modersmålet, finska")
+    assert(wb.getSheetAt(1).getRow(2).getCell(0).getStringCellValue == "M")
+    assert(wb.getSheetAt(1).getRow(2).getCell(1).getStringCellValue == "Matematikprovet")
+    assert(wb.getSheetAt(1).getRow(3).getCell(0).getStringCellValue == "BB")
+    assert(wb.getSheetAt(1).getRow(3).getCell(1).getStringCellValue == "Biologi provet")
+    assert(wb.getSheetAt(1).getRow(4).getCell(0).getStringCellValue == "EA")
+    assert(wb.getSheetAt(1).getRow(4).getCell(1).getStringCellValue == "Engelska provet")
+
+    assert(wb.getSheetAt(1).getPhysicalNumberOfRows == 5)
+    assert(wb.getSheetAt(1).getRow(5) == null)
+  }
+
+
+  it should "return excel without arvosanat and yokokeet sheet when nayta arvosanat is false" in {
     val kkHakijatResult = Vector(
       kkHakijatRautiainenWithValintatapajonot,
       kkHakijaLehtoWithValintatapajonot
@@ -3896,10 +3940,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
         translations = translations,
         maybeNaytaYoArvosanat = Some(false),
         maybeNaytaHetu = Some(true),
-        maybeNaytaPostiosoite = Some(true)
+        maybeNaytaPostiosoite = Some(true),
+        yokokeet = Vector()
       )
 
     assert(wb.getNumberOfSheets == 1)
+    assert(wb.getSheetAt(1) == null)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
@@ -4051,7 +4097,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(4) == null)
   }
 
-  it should "return excel without arvosanat in the heading when they don't exist" in {
+  it should "return excel without arvosanat in the heading and without yokokeet sheet when they don't exist" in {
     val kkHakijatResult = Vector(kkHakijatRautiainenWithValintatapajonot)
 
     val wb =
@@ -4061,10 +4107,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
         translations = translations,
         maybeNaytaYoArvosanat = None,
         maybeNaytaHetu = Some(false),
-        maybeNaytaPostiosoite = Some(false)
+        maybeNaytaPostiosoite = Some(false),
+        yokokeet = Vector()
       )
 
     assert(wb.getNumberOfSheets == 1)
+    assert(wb.getSheetAt(1) == null)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
@@ -4177,10 +4225,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
         translations = translations,
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(true),
-        maybeNaytaPostiosoite = Some(false)
+        maybeNaytaPostiosoite = Some(false),
+        yokokeet = yokokeet
       )
 
-    assert(wb.getNumberOfSheets == 1)
+    assert(wb.getNumberOfSheets == 2)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)

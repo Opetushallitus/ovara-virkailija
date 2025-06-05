@@ -78,9 +78,14 @@ class KkHakijatService(
 
       val sorted = queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi, resultRow.hakijanEtunimi, resultRow.oppijanumero))
       val sortedListwithCombinedNimi = sorted.map(sortedResult => KkHakijaWithCombinedNimi(sortedResult))
-      
-      val yokokeet = db.run(commonRepository.selectDistinctYokokeet, "selectDistinctYokokeet")
-      
+
+      val yokokeet = {
+        if(Some(naytaYoArvosanat).getOrElse(false))
+          db.run(commonRepository.selectDistinctYokokeet, "selectDistinctYokokeet")
+        else
+          Vector()
+      }
+
       ExcelWriter.writeKkHakijatRaportti(
         sortedListwithCombinedNimi,
         asiointikieli,
