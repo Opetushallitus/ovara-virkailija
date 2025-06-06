@@ -1,7 +1,7 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.KkHakijaWithCombinedNimi
-import fi.oph.ovara.backend.repository.{KkHakijatRepository, ReadOnlyDatabase}
+import fi.oph.ovara.backend.domain.{KkHakijaWithCombinedNimi, Koodi}
+import fi.oph.ovara.backend.repository.{CommonRepository, KkHakijatRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
@@ -14,6 +14,7 @@ import scala.util.{Failure, Success, Try}
 @Service
 class KkHakijatService(
     kkHakijatRepository: KkHakijatRepository,
+    commonRepository: CommonRepository,
     userService: UserService,
     commonService: CommonService,
     lokalisointiService: LokalisointiService
@@ -78,13 +79,21 @@ class KkHakijatService(
       val sorted = queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi, resultRow.hakijanEtunimi, resultRow.oppijanumero))
       val sortedListwithCombinedNimi = sorted.map(sortedResult => KkHakijaWithCombinedNimi(sortedResult))
 
+      val yokokeet = {
+        if(Some(naytaYoArvosanat).getOrElse(false))
+          db.run(commonRepository.selectDistinctYokokeet, "selectDistinctYokokeet")
+        else
+          Vector()
+      }
+
       ExcelWriter.writeKkHakijatRaportti(
         sortedListwithCombinedNimi,
         asiointikieli,
         translations,
         Some(naytaYoArvosanat),
         Some(naytaHetu),
-        Some(naytaPostiosoite)
+        Some(naytaPostiosoite),
+        yokokeet
       )
     } match {
       case Success(excelFile) => Right(excelFile)

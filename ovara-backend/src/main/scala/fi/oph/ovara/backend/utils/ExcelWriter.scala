@@ -1183,7 +1183,8 @@ object ExcelWriter {
       translations: Map[String, String],
       maybeNaytaYoArvosanat: Option[Boolean] = None,
       maybeNaytaHetu: Option[Boolean] = None,
-      maybeNaytaPostiosoite: Option[Boolean] = None
+      maybeNaytaPostiosoite: Option[Boolean] = None,
+      yokokeet: Vector[Koodi]
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new excel from db results")
@@ -1260,6 +1261,33 @@ object ExcelWriter {
     // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
     headingFieldNames.zipWithIndex.foreach { case (title, index) =>
       sheet.autoSizeColumn(index)
+    }
+
+    // yo-kokeiden selitteet jos yo-arvosanat näkyvissä
+    if (naytaArvosanat) {
+      val yoKokeetSheet: XSSFSheet = workbook.createSheet()
+      workbook.setSheetName(
+        1,
+        WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yo-kokeet", "raportti.yo-kokeet"))
+      )
+      var yokokeetRowIndex = 0
+      // otsikkorivi
+      val yoKoeTitles = List("yokoelyhenne", "yokoeselite")
+      yokokeetRowIndex = createHeadingRow(yoKokeetSheet, translations, yokokeetRowIndex, yoKoeTitles, headingCellStyle)
+      // yo-kokeiden selitteet koodistosta
+      yokokeet.foreach { yokoe =>
+        val row = yoKokeetSheet.createRow(yokokeetRowIndex)
+        val yoRowData = List(
+          yokoe.koodiarvo,
+          yokoe.koodinimi(Kieli.withName(asiointikieli))
+        )
+        createRowCells(yoRowData, row, workbook, createBodyTextCellStyle(workbook))
+        yokokeetRowIndex += 1
+      }
+      // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
+      yoKoeTitles.zipWithIndex.foreach { case (title, index) =>
+        yoKokeetSheet.autoSizeColumn(index)
+      }
     }
 
     try {
