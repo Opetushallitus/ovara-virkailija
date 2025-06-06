@@ -25,6 +25,7 @@ import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { KoulutusalaValikot } from '@/app/components/form/koulutusalavalikot';
 import { MaakuntaKuntaValikot } from '@/app/components/form/maakunta-kunta';
 import { useDownloadWithErrorBoundary } from '@/app/hooks/useDownloadWithErrorBoundary';
+import { isNullish } from 'remeda';
 
 export default function Hakutilasto() {
   const { t } = useTranslate();
@@ -36,11 +37,10 @@ export default function Hakutilasto() {
   const { selectedTulostustapa } = useHakeneetSearchParams();
   const { run, isLoading } = useDownloadWithErrorBoundary();
 
-  const isDisabled = !(
-    selectedAlkamiskaudet &&
-    selectedHaut &&
-    selectedTulostustapa
-  );
+  const isDisabled =
+    isNullishOrEmpty(selectedAlkamiskaudet) ||
+    isNullishOrEmpty(selectedHaut) ||
+    isNullish(selectedTulostustapa);
 
   const tulostustavat = [
     'koulutustoimijoittain',

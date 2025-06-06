@@ -1,4 +1,7 @@
-import { MultiComboBox } from '@/app/components/form/multicombobox';
+import {
+  MultiComboBox,
+  SelectOption,
+} from '@/app/components/form/multicombobox';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
@@ -17,8 +20,12 @@ export const Haku = ({ haunTyyppi }: { haunTyyppi: string }) => {
   const user = useAuthorizedUser();
   const locale = (user?.asiointikieli ?? 'fi') as LanguageCode;
 
-  const { selectedHaut, setSelectedHaut, setHauntyyppi } =
-    useCommonSearchParams();
+  const {
+    selectedHaut,
+    setSelectedHaut,
+    setSelectedHakukohderyhmat,
+    setHauntyyppi,
+  } = useCommonSearchParams();
 
   useEffect(() => {
     setHauntyyppi(haunTyyppi);
@@ -27,6 +34,12 @@ export const Haku = ({ haunTyyppi }: { haunTyyppi: string }) => {
   const { data } = useFetchHaut();
 
   const haut: Haku[] = data || [];
+
+  const changeHaku = (_: React.SyntheticEvent, value: Array<SelectOption>) => {
+    // tyhjennetään hakukohderyhmävalinta jos haku muuttuu
+    setSelectedHakukohderyhmat(null);
+    changeMultiComboBoxSelection(_, value, setSelectedHaut);
+  };
 
   return (
     <MultiComboBox
@@ -39,9 +52,7 @@ export const Haku = ({ haunTyyppi }: { haunTyyppi: string }) => {
           label: haku.haku_nimi[locale] || '',
         };
       })}
-      onChange={(e, value) =>
-        changeMultiComboBoxSelection(e, value, setSelectedHaut)
-      }
+      onChange={(e, value) => changeHaku(e, value)}
       required={true}
     />
   );

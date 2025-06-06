@@ -15,7 +15,7 @@ import { FormButtons } from '@/app/components/form/form-buttons';
 import { Divider } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
 import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
-import { hasOvaraToinenAsteRole } from '@/app/lib/utils';
+import { hasOvaraToinenAsteRole, isNullishOrEmpty } from '@/app/lib/utils';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { downloadExcel } from '@/app/components/form/utils';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
@@ -50,7 +50,10 @@ export default function KoulutuksetToteutuksetHakukohteet() {
           <Valintakoe />
           <Divider />
           <FormButtons
-            disabled={!selectedAlkamiskaudet || !selectedHaut}
+            disabled={
+              isNullishOrEmpty(selectedAlkamiskaudet) ||
+              isNullishOrEmpty(selectedHaut)
+            }
             downloadExcel={handleDownload}
           />
         </FormBox>

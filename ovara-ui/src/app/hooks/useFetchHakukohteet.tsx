@@ -58,6 +58,7 @@ const fetchHakukohteet = (
 export const useFetchHakukohteet = (
   fetchEnabled: boolean,
   includeKoulutustoimija: boolean = false,
+  includeHakukohderyhma: boolean = false,
 ) => {
   const {
     selectedHaut,
@@ -78,7 +79,9 @@ export const useFetchHakukohteet = (
           : null,
         selectedOppilaitokset,
         selectedToimipisteet,
-        selectedHakukohderyhmat,
+        selectedHakukohderyhmat: includeHakukohderyhma
+          ? selectedHakukohderyhmat
+          : null,
         selectedHakukohteet,
       },
     ],
@@ -88,7 +91,7 @@ export const useFetchHakukohteet = (
         includeKoulutustoimija ? selectedKoulutustoimija : null,
         selectedOppilaitokset,
         selectedToimipisteet,
-        selectedHakukohderyhmat,
+        includeHakukohderyhma ? selectedHakukohderyhmat : null,
         selectedHakukohteet,
       ),
     enabled: fetchEnabled,

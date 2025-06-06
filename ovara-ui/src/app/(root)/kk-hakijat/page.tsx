@@ -93,7 +93,11 @@ export default function KkHakijat() {
             <Hakukohderyhma />
           </Box>
           <Divider />
-          <Hakukohde fetchEnabled={fetchEnabled} sx={{ paddingTop: 0 }} />
+          <Hakukohde
+            fetchEnabled={fetchEnabled}
+            includeHakukohderyhma={true}
+            sx={{ paddingTop: 0 }}
+          />
           <Valintatieto />
           <Vastaanottotieto />
           <Kansalaisuus />
