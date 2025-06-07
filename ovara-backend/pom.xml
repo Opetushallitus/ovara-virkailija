@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.3</version>
+        <version>3.4.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>fi.oph.ovara</groupId>
@@ -28,9 +28,16 @@
     </scm>
     <properties>
         <scala.version>3.5.0</scala.version>
-        <java.cas.version>1.2.2-SNAPSHOT</java.cas.version>
+        <java.cas.version>1.2.3-SNAPSHOT</java.cas.version>
         <scalatest.version>3.2.19</scalatest.version>
-        <flyway.version>11.3.4</flyway.version>
+        <flyway.version>11.8.1</flyway.version>
+        <slick.version>3.6.1</slick.version>
+        <spring-context.version>6.2.6</spring-context.version>
+        <jackson.version>2.18.3</jackson.version>
+        <json4s.version>4.1.0-M8</json4s.version>
+        <apache.poi.version>5.4.0</apache.poi.version>
+        <slf4j.version>2.0.16</slf4j.version>
+        <auditlogger.version>9.2.5-SNAPSHOT</auditlogger.version>
 
     </properties>
     <dependencyManagement>
@@ -56,6 +63,22 @@
                 <groupId>org.scala-lang</groupId>
                 <artifactId>scala3-library_3</artifactId>
                 <version>${scala.version}</version>
+            </dependency>
+            <!-- Jackson 2.19 toi rikkovia muutoksia -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
             </dependency>
             <!-- Commons IO -->
             <dependency>
@@ -121,7 +144,6 @@
             <version>${flyway.version}</version>
             <scope>runtime</scope>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -148,7 +170,7 @@
         <dependency>
             <groupId>com.typesafe.slick</groupId>
             <artifactId>slick_3</artifactId>
-            <version>3.5.0-M5</version>
+            <version>${slick.version}</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
@@ -175,7 +197,7 @@
         <dependency>
             <groupId>fi.vm.sade</groupId>
             <artifactId>auditlogger</artifactId>
-            <version>9.2.5-SNAPSHOT</version>
+            <version>${auditlogger.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -192,7 +214,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
-            <version>6.2.3</version>
+            <version>${spring-context.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -206,7 +228,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-scala_3</artifactId>
-            <version>2.18.3</version>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.scalatest</groupId>
@@ -221,17 +243,17 @@
         <dependency>
             <groupId>org.json4s</groupId>
             <artifactId>json4s-jackson_3</artifactId>
-            <version>4.1.0-M8</version>
+            <version>${json4s.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>5.4.0</version>
+            <version>${apache.poi.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>2.0.16</version>
+            <version>${slf4j.version}</version>
         </dependency>
     </dependencies>
 

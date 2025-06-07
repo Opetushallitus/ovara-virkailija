@@ -2,7 +2,7 @@ package fi.oph.ovara.backend.security
 
 import com.zaxxer.hikari.HikariDataSource
 import fi.oph.ovara.backend.OvaraBackendApplication.CALLER_ID
-import fi.oph.ovara.backend.utils.AuditLog
+import fi.oph.ovara.backend.utils.{AuditLog, AuditLogObj}
 import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl
 import fi.vm.sade.javautils.nio.cas.{CasClient, CasClientBuilder, CasConfig}
 import org.apereo.cas.client.session.{SessionMappingStorage, SingleSignOutFilter}
@@ -52,7 +52,7 @@ class SecurityConfig  {
   private val schema = null
 
   @Bean
-  def auditLog(): AuditLog = AuditLog
+  def auditLog(): AuditLog = AuditLogObj
 
   val LOG: Logger = LoggerFactory.getLogger(classOf[SecurityConfig])
   @Bean
@@ -65,7 +65,9 @@ class SecurityConfig  {
       CALLER_ID,
       CALLER_ID,
       "/j_spring_cas_security_check"
-    ).setJsessionName("JSESSIONID").build())
+    ).setJsessionName("JSESSIONID")
+      .setNumberOfRetries(2)
+      .build())
   }
 
   @Bean(name = Array("sessionDataSource"))

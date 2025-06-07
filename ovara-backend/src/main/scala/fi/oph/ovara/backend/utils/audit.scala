@@ -20,7 +20,7 @@ object AuditLogger extends Logger {
   override def log(msg: String): Unit = logger.info(msg)
 }
 
-object AuditLog extends AuditLog(AuditLogger)
+object AuditLogObj extends AuditLog(AuditLogger)
 
 class AuditLog(val logger: Logger) {
 

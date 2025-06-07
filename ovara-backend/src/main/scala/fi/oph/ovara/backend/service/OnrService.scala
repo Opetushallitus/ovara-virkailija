@@ -14,6 +14,7 @@ import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.jdk.javaapi.FutureConverters.asScala
+import java.time.{Duration => JavaDuration}
 
 @Component
 @Service
@@ -49,6 +50,7 @@ class OnrService {
     val req = new RequestBuilder()
       .setMethod("GET")
       .setUrl(url)
+      .setRequestTimeout(JavaDuration.ofMillis(5000))
       .build()
     try {
       val result = asScala(client.execute(req)).map {
@@ -60,7 +62,7 @@ class OnrService {
           )
           Left(new RuntimeException("Failed to fetch asiointikieli: " + r.getResponseBody()))
       }
-      Await.result(result, Duration(10, TimeUnit.SECONDS))
+      Await.result(result, Duration(5, TimeUnit.SECONDS))
     } catch {
       case e: Throwable =>
         Left(e)
