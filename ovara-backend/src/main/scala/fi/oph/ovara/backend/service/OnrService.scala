@@ -35,7 +35,9 @@ class OnrService {
     LOG.info("Fetching asiointikieli from oppijanumerorekisteri")
     val url = s"$opintopolku_virkailija_domain/oppijanumerorekisteri-service/henkilo/$personOid/asiointiKieli"
     fetch(url) match {
-      case Left(e)  => Left(e)
+      case Left(e)  =>
+        LOG.info(s"Failed to fetch asiointikieli for personOid $personOid: ${e.getMessage}")
+        Left(e)
       case Right(o) => Right(o)
     }
   }
@@ -53,8 +55,10 @@ class OnrService {
       .setRequestTimeout(JavaDuration.ofMillis(5000))
       .build()
     try {
+      LOG.info(s"Doing api call to oppijanumerorekisteri: $url")
       val result = asScala(client.execute(req)).map {
         case r if r.getStatusCode == 200 =>
+          LOG.info(s"Successfully fetched asiointikieli")
           Right(r.getResponseBody())
         case r =>
           LOG.error(
@@ -65,6 +69,7 @@ class OnrService {
       Await.result(result, Duration(5, TimeUnit.SECONDS))
     } catch {
       case e: Throwable =>
+        LOG.error(s"Error fetching asiointikieli from oppijanumerorekisteri: ${e.getMessage}", e)
         Left(e)
     }
   }
@@ -72,6 +77,7 @@ class OnrService {
   @CachePut(Array("asiointikieli"))
   private def updateCached(personOid: String, value: String): Unit = {
     val asiointikieliCache = cacheManager.getCache("asiointikieli")
+    LOG.info(s"Updating asiointikieli cache for personOid $personOid")
     asiointikieliCache.put(personOid, value)
   }
 }
