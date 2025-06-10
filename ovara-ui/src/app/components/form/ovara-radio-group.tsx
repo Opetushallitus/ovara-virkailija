@@ -1,12 +1,13 @@
 import { useTranslate } from '@tolgee/react';
-import {
-  Box,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  SelectChangeEvent,
-} from '@mui/material';
+import { Box, SelectChangeEvent } from '@mui/material';
 import { OvaraFormControl } from '@/app/components/form/ovara-form-control';
+import { OphRadioGroup } from '@opetushallitus/oph-design-system';
+
+// TODO importoi oph-design-systemistä sitten kun on exportoitu siellä
+interface OphRadioOption<T> {
+  value: T;
+  label: string;
+}
 
 type RadioGroupProps = {
   onChange: (e: SelectChangeEvent) => void;
@@ -27,35 +28,26 @@ export const OvaraRadioGroup = ({
 }: RadioGroupProps) => {
   const { t } = useTranslate();
 
+  const radioOptions: OphRadioOption<string>[] = options.map((option) => ({
+    value: option,
+    label: labels ? labels[option] : t(`raportti.radio-group.${option}`),
+  }));
+
   return (
     <Box>
       {options && (
         <OvaraFormControl
           label={required ? `${label} *` : label}
-          renderInput={() => (
-            <RadioGroup
+          renderInput={({ labelId }) => (
+            <OphRadioGroup
               sx={{ width: '100%' }}
+              options={radioOptions}
               row
-              aria-labelledby={label}
               defaultValue={options ? options[0] : null}
               onChange={onChange}
               value={value}
-            >
-              {options?.map((option) => {
-                return (
-                  <FormControlLabel
-                    key={option}
-                    value={option}
-                    control={<Radio />}
-                    label={
-                      labels
-                        ? labels[option]
-                        : t(`raportti.radio-group.${option}`)
-                    }
-                  />
-                );
-              })}
-            </RadioGroup>
+              labelId={labelId}
+            />
           )}
         />
       )}

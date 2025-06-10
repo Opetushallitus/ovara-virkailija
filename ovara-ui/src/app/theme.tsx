@@ -60,14 +60,6 @@ export const THEME_OVERRIDES: ThemeOptions = {
         }),
       },
     },
-    MuiRadio: {
-      styleOverrides: {
-        root: {
-          paddingLeft: '0',
-          paddingRight: '0',
-        },
-      },
-    },
     MuiFormControlLabel: {
       styleOverrides: {
         root: ({ theme }) => ({
