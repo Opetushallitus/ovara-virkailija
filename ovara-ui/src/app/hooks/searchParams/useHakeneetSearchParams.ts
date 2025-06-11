@@ -8,25 +8,25 @@ import { createNullableBooleanOptions } from './paramUtil';
 
 export const useHakeneetSearchParams = () => {
   const [selectedTulostustapa, setSelectedTulostustapa] =
-    useQueryStateWithLocalStorage<string | null>('tulostustapa', {
+    useQueryStateWithLocalStorage<string | null>('ovara_tulostustapa', {
       parse: (value) => (value === null ? null : String(value)),
       defaultValue: null,
     });
 
   const [selectedOpetuskielet, setSelectedOpetuskielet] =
-    useQueryStateWithLocalStorage('opetuskielet', {
+    useQueryStateWithLocalStorage('ovara_opetuskielet', {
       ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
   const [selectedMaakunnat, setSelectedMaakunnat] =
-    useQueryStateWithLocalStorage('maakunnat', {
+    useQueryStateWithLocalStorage('ovara_maakunnat', {
       ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
   const [selectedKunnat, setSelectedKunnat] = useQueryStateWithLocalStorage(
-    'kunnat',
+    'ovara_kunnat',
     {
       ...parseAsArrayOf(parseAsString),
       defaultValue: [],
@@ -34,52 +34,52 @@ export const useHakeneetSearchParams = () => {
   );
 
   const [selectedKoulutusalat1, setSelectedKoulutusalat1] =
-    useQueryStateWithLocalStorage('koulutusalat1', {
+    useQueryStateWithLocalStorage('ovara_koulutusalat1', {
       ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
   const [selectedKoulutusalat2, setSelectedKoulutusalat2] =
-    useQueryStateWithLocalStorage('koulutusalat2', {
+    useQueryStateWithLocalStorage('ovara_koulutusalat2', {
       ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
   const [selectedKoulutusalat3, setSelectedKoulutusalat3] =
-    useQueryStateWithLocalStorage('koulutusalat3', {
+    useQueryStateWithLocalStorage('ovara_koulutusalat3', {
       ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
   const [selectedNaytaHakutoiveet, setSelectedNaytaHakutoiveet] =
-    useBooleanQueryStateWithOptions('nayta-hakutoiveet', true);
+    useBooleanQueryStateWithOptions('ovara_nayta-hakutoiveet', true);
 
   const [selectedSukupuoli, setSelectedSukupuoli] =
-    useQueryStateWithLocalStorage<string | null>('sukupuoli', {
+    useQueryStateWithLocalStorage<string | null>('ovara_sukupuoli', {
       parse: (value) => (value === null ? null : String(value)),
       defaultValue: 'neutral',
     });
 
   const [selectedTutkinnonTasot, setSelectedTutkinnonTasot] =
-    useQueryStateWithLocalStorage('tutkinnon-tasot', {
+    useQueryStateWithLocalStorage('ovara_tutkinnon-tasot', {
       ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
   const [selectedAidinkielet, setSelectedAidinkielet] =
-    useQueryStateWithLocalStorage('aidinkielet', {
+    useQueryStateWithLocalStorage('ovara_aidinkielet', {
       ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
   const [selectedEnsikertalainen, setSelectedEnsikertalainen] =
     useQueryStateWithLocalStorage<boolean | null>(
-      'ensikertalainen',
+      'ovara_ensikertalainen',
       createNullableBooleanOptions(null),
     );
 
   const [selectedOkmOhjauksenAlat, setSelectedOkmOhjauksenAlat] =
-    useQueryStateWithLocalStorage('okm-ohjauksen-alat', {
+    useQueryStateWithLocalStorage('ovara_okm-ohjauksen-alat', {
       ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
@@ -87,19 +87,19 @@ export const useHakeneetSearchParams = () => {
   const emptyAllHakeneetParams = () => {
     console.debug('EMPTY ALL HAKENEET-HYVÄKSYTYT-VASTAANOTTANEET PARAMS');
     const keysToClear = [
-      'tulostustapa',
-      'opetuskielet',
-      'maakunnat',
-      'kunnat',
-      'koulutusalat1',
-      'koulutusalat2',
-      'koulutusalat3',
-      'nayta-hakutoiveet',
-      'sukupuoli',
-      'tutkinnon-tasot',
-      'aidinkielet',
-      'ensikertalainen',
-      'okm-ohjauksen-alat',
+      'ovara_tulostustapa',
+      'ovara_opetuskielet',
+      'ovara_maakunnat',
+      'ovara_kunnat',
+      'ovara_koulutusalat1',
+      'ovara_koulutusalat2',
+      'ovara_koulutusalat3',
+      'ovara_nayta-hakutoiveet',
+      'ovara_sukupuoli',
+      'ovara_tutkinnon-tasot',
+      'ovara_aidinkielet',
+      'ovara_ensikertalainen',
+      'ovara_okm-ohjauksen-alat',
     ];
 
     keysToClear.forEach((key) => localStorage.removeItem(key));

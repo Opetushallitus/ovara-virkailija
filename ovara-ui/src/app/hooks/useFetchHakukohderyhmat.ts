@@ -4,7 +4,7 @@ import { isNullishOrEmpty } from '../lib/utils';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 
 const fetchHakukohderyhmat = (selectedHaut: Array<string> | null) => {
-  const paramsStr = `?haut=${selectedHaut?.toString()}`;
+  const paramsStr = `?ovara_haut=${selectedHaut?.toString()}`;
   return doApiFetch('hakukohderyhmat', {
     queryParams: paramsStr ?? null,
   });

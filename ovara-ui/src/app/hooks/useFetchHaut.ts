@@ -8,7 +8,7 @@ const fetchHaut = (
   selectedAlkamiskaudet: Array<string> | null,
   haunTyyppi: string | null,
 ) => {
-  const paramsStr = `?haun_tyyppi=${haunTyyppi}&alkamiskaudet=${selectedAlkamiskaudet?.toString()}`;
+  const paramsStr = `?ovara_haun_tyyppi=${haunTyyppi}&alkamiskaudet=${selectedAlkamiskaudet?.toString()}`;
   return doApiFetch('haut', {
     queryParams: paramsStr ?? null,
   });

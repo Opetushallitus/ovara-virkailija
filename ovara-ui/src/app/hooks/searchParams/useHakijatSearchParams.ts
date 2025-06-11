@@ -8,83 +8,83 @@ import { createNullableBooleanOptions } from './paramUtil';
 
 export const useHakijatSearchParams = () => {
   const [selectedPohjakoulutukset, setSelectedPohjakoulutukset] =
-    useQueryStateWithLocalStorage('pohjakoulutukset', {
+    useQueryStateWithLocalStorage('ovara_pohjakoulutukset', {
       ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
   const [selectedVastaanottotiedot, setSelectedVastaanottotiedot] =
-    useQueryStateWithLocalStorage('vastaanottotiedot', {
+    useQueryStateWithLocalStorage('ovara_vastaanottotiedot', {
       ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
   const [selectedMarkkinointilupa, setSelectedMarkkinointilupa] =
     useQueryStateWithLocalStorage<boolean | null>(
-      'markkinointilupa',
+      'ovara_markkinointilupa',
       createNullableBooleanOptions(null),
     );
 
   const [selectedJulkaisulupa, setSelectedJulkaisulupa] =
     useQueryStateWithLocalStorage<boolean | null>(
-      'julkaisulupa',
+      'ovara_julkaisulupa',
       createNullableBooleanOptions(null),
     );
 
   const [selectedValintatiedot, setSelectedValintatiedot] =
-    useQueryStateWithLocalStorage('valintatiedot', {
+    useQueryStateWithLocalStorage('ovara_valintatiedot', {
       ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });
 
   const [selectedKaksoistutkinto, setSelectedKaksoistutkinto] =
     useQueryStateWithLocalStorage<boolean | null>(
-      'kaksoistutkinto',
+      'ovara_kaksoistutkinto',
       createNullableBooleanOptions(null),
     );
 
   const [selectedUrheilijatutkinto, setSelectedUrheilijatutkinto] =
     useQueryStateWithLocalStorage<boolean | null>(
-      'urheilijatutkinto',
+      'ovara_urheilijatutkinto',
       createNullableBooleanOptions(null),
     );
 
   const [selectedSoraTerveys, setSelectedSoraTerveys] =
     useQueryStateWithLocalStorage<boolean | null>(
-      'sora_terveys',
+      'ovara_sora_terveys',
       createNullableBooleanOptions(null),
     );
 
   const [selectedSoraAiempi, setSelectedSoraAiempi] =
     useQueryStateWithLocalStorage<boolean | null>(
-      'sora_aiempi',
+      'ovara_sora_aiempi',
       createNullableBooleanOptions(null),
     );
 
   const [selectedNaytaYoArvosanat, setSelectedNaytaYoArvosanat] =
-    useBooleanQueryStateWithOptions('nayta-yo-arvosanat', false);
+    useBooleanQueryStateWithOptions('ovara_nayta-yo-arvosanat', false);
 
   const [selectedNaytaHetu, setSelectedNaytaHetu] =
-    useBooleanQueryStateWithOptions('nayta-hetu', true);
+    useBooleanQueryStateWithOptions('ovara_nayta-hetu', true);
 
   const [selectedNaytaPostiosoite, setSelectedNaytaPostiosoite] =
-    useBooleanQueryStateWithOptions('nayta-postiosoite', true);
+    useBooleanQueryStateWithOptions('ovara_nayta-postiosoite', true);
 
   const emptyAllHakijatParams = () => {
     console.debug('EMPTY ALL HAKIJAT PARAMS');
     const keysToClear = [
-      'pohjakoulutukset',
-      'vastaanottotiedot',
-      'markkinointilupa',
-      'julkaisulupa',
-      'valintatiedot',
-      'kaksoistutkinto',
-      'urheilijatutkinto',
-      'sora-terveys',
-      'sora-aiempi',
-      'nayta-yo-arvosanat',
-      'nayta-hetu',
-      'nayta-postiosoite',
+      'ovara_pohjakoulutukset',
+      'ovara_vastaanottotiedot',
+      'ovara_markkinointilupa',
+      'ovara_julkaisulupa',
+      'ovara_valintatiedot',
+      'ovara_kaksoistutkinto',
+      'ovara_urheilijatutkinto',
+      'ovara_sora-terveys',
+      'ovara_sora-aiempi',
+      'ovara_nayta-yo-arvosanat',
+      'ovara_nayta-hetu',
+      'ovara_nayta-postiosoite',
     ];
 
     keysToClear.forEach((key) => localStorage.removeItem(key));
