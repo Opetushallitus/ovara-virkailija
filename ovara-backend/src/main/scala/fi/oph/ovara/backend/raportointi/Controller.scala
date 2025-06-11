@@ -123,9 +123,9 @@ class Controller(
 
   @GetMapping(path = Array("haut"))
   def haut(
-            @RequestParam("alkamiskaudet", required = false) alkamiskaudet: java.util.Collection[String],
-            @RequestParam("haut", required = false) selectedHaut: java.util.Collection[String],
-            @RequestParam("haun_tyyppi", required = false) haun_tyyppi: String
+            @RequestParam("ovara_alkamiskaudet", required = false) alkamiskaudet: java.util.Collection[String],
+            @RequestParam("ovara_haut", required = false) selectedHaut: java.util.Collection[String],
+            @RequestParam("ovara_haun_tyyppi", required = false) haun_tyyppi: String
           ): ResponseEntity[String] = {
     val errors = List(
       validateAlphanumericList(getListParamAsScalaList(alkamiskaudet), "alkamiskaudet"),
@@ -144,12 +144,12 @@ class Controller(
 
   @GetMapping(path = Array("hakukohteet"))
   def hakukohteet(
-                   @RequestParam("haut") haut: java.util.Collection[String],
-                   @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
-                   @RequestParam("oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
-                   @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
-                   @RequestParam("hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
-                   @RequestParam("hakukohteet", required = false) selectedHakukohteet: java.util.Collection[String]
+                   @RequestParam("ovara_haut") haut: java.util.Collection[String],
+                   @RequestParam("ovara_koulutustoimija", required = false) koulutustoimija: String,
+                   @RequestParam("ovara_oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
+                   @RequestParam("ovara_toimipisteet", required = false) toimipisteet: java.util.Collection[String],
+                   @RequestParam("ovara_hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
+                   @RequestParam("ovara_hakukohteet", required = false) selectedHakukohteet: java.util.Collection[String]
                  ): ResponseEntity[String] = {
     val errors = List(
       validateOrganisaatioOid(Option(koulutustoimija), "koulutustoimija"),
@@ -223,8 +223,8 @@ class Controller(
 
   @GetMapping(path = Array("kunnat"))
   def kunnat(
-              @RequestParam("maakunnat", required = false) maakunnat: java.util.Collection[String],
-              @RequestParam("selectedKunnat", required = false) selectedKunnat: java.util.Collection[String]
+              @RequestParam("ovara_maakunnat", required = false) maakunnat: java.util.Collection[String],
+              @RequestParam("ovara_selectedKunnat", required = false) selectedKunnat: java.util.Collection[String]
             ): ResponseEntity[String] = {
     val errors = List(
       validateNumericList(getListParamAsScalaList(maakunnat), "maakunnat"),
@@ -248,8 +248,8 @@ class Controller(
 
   @GetMapping(path = Array("koulutusalat2"))
   def koulutusalat2(
-                     @RequestParam("koulutusalat1", required = false) koulutusalat1: java.util.Collection[String],
-                     @RequestParam("selectedKoulutusalat2", required = false) selectedKoulutusalat2: java.util.Collection[String]
+                     @RequestParam("ovara_koulutusalat1", required = false) koulutusalat1: java.util.Collection[String],
+                     @RequestParam("ovara_selectedKoulutusalat2", required = false) selectedKoulutusalat2: java.util.Collection[String]
                    ): ResponseEntity[String] = {
     val errors = List(
       validateNumericList(getListParamAsScalaList(koulutusalat1), "koulutusalat1"),
@@ -266,8 +266,8 @@ class Controller(
 
   @GetMapping(path = Array("koulutusalat3"))
   def koulutusalat3(
-                     @RequestParam("koulutusalat2", required = false) koulutusalat2: java.util.Collection[String],
-                     @RequestParam("selectedKoulutusalat3", required = false) selectedKoulutusalat3: java.util.Collection[String]
+                     @RequestParam("ovara_koulutusalat2", required = false) koulutusalat2: java.util.Collection[String],
+                     @RequestParam("ovara_selectedKoulutusalat3", required = false) selectedKoulutusalat3: java.util.Collection[String]
                    ): ResponseEntity[String] = {
     val errors = List(
       validateNumericList(getListParamAsScalaList(koulutusalat2), "koulutusalat2"),
@@ -284,7 +284,7 @@ class Controller(
 
   @GetMapping(path = Array("hakukohderyhmat"))
   def hakukohderyhmat(
-                       @RequestParam("haut", required = true) haut: java.util.Collection[String]
+                       @RequestParam("ovara_haut", required = true) haut: java.util.Collection[String]
                      ): ResponseEntity[String] = {
     val errors = validateOidList(getListParamAsScalaList(haut), "haut")
 
@@ -357,14 +357,14 @@ class Controller(
 
   @GetMapping(path = Array("koulutukset-toteutukset-hakukohteet"))
   def koulutukset_toteutukset_hakukohteet(
-                                           @RequestParam("haut") haut: java.util.Collection[String],
-                                           @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
-                                           @RequestParam("oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
-                                           @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
-                                           @RequestParam("koulutuksen-tila", required = false) koulutuksenTila: String,
-                                           @RequestParam("toteutuksen-tila", required = false) toteutuksenTila: String,
-                                           @RequestParam("hakukohteen-tila", required = false) hakukohteenTila: String,
-                                           @RequestParam("valintakoe", required = false) valintakoe: String,
+                                           @RequestParam("ovara_haut") haut: java.util.Collection[String],
+                                           @RequestParam("ovara_koulutustoimija", required = false) koulutustoimija: String,
+                                           @RequestParam("ovara_oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
+                                           @RequestParam("ovara_toimipisteet", required = false) toimipisteet: java.util.Collection[String],
+                                           @RequestParam("ovara_koulutuksen-tila", required = false) koulutuksenTila: String,
+                                           @RequestParam("ovara_toteutuksen-tila", required = false) toteutuksenTila: String,
+                                           @RequestParam("ovara_hakukohteen-tila", required = false) hakukohteenTila: String,
+                                           @RequestParam("ovara_valintakoe", required = false) valintakoe: String,
                                            request: HttpServletRequest,
                                            response: HttpServletResponse
                                          ): Unit = {
@@ -411,15 +411,15 @@ class Controller(
 
   @GetMapping(path = Array("kk-koulutukset-toteutukset-hakukohteet"))
   def kk_koulutukset_toteutukset_hakukohteet(
-                                              @RequestParam("haut") haut: java.util.Collection[String],
-                                              @RequestParam("tulostustapa", defaultValue = "koulutuksittain") tulostustapa: String,
-                                              @RequestParam("oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
-                                              @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
-                                              @RequestParam("hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
-                                              @RequestParam("koulutuksen-tila", required = false) koulutuksenTila: String,
-                                              @RequestParam("toteutuksen-tila", required = false) toteutuksenTila: String,
-                                              @RequestParam("hakukohteen-tila", required = false) hakukohteenTila: String,
-                                              @RequestParam("tutkinnon-tasot", required = false) tutkinnonTasot: java.util.Collection[String],
+                                              @RequestParam("ovara_haut") haut: java.util.Collection[String],
+                                              @RequestParam("ovara_tulostustapa", defaultValue = "koulutuksittain") tulostustapa: String,
+                                              @RequestParam("ovara_oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
+                                              @RequestParam("ovara_toimipisteet", required = false) toimipisteet: java.util.Collection[String],
+                                              @RequestParam("ovara_hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
+                                              @RequestParam("ovara_koulutuksen-tila", required = false) koulutuksenTila: String,
+                                              @RequestParam("ovara_toteutuksen-tila", required = false) toteutuksenTila: String,
+                                              @RequestParam("ovara_hakukohteen-tila", required = false) hakukohteenTila: String,
+                                              @RequestParam("ovara_tutkinnon-tasot", required = false) tutkinnonTasot: java.util.Collection[String],
                                               request: HttpServletRequest,
                                               response: HttpServletResponse
                                             ): Unit = {
@@ -468,20 +468,20 @@ class Controller(
 
   @GetMapping(path = Array("hakijat"))
   def hakijat(
-      @RequestParam("haut") haut: java.util.Collection[String],
-      @RequestParam("oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
-      @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
-      @RequestParam("hakukohteet", required = false) hakukohteet: java.util.Collection[String],
-      @RequestParam("pohjakoulutukset", required = false) pohjakoulutukset: java.util.Collection[String],
-      @RequestParam("valintatiedot", required = false) valintatiedot: java.util.Collection[String],
-      @RequestParam("vastaanottotiedot", required = false) vastaanottotiedot: java.util.Collection[String],
-      @RequestParam("harkinnanvaraisuudet", required = false) harkinnanvaraisuudet: java.util.Collection[String],
-      @RequestParam("kaksoistutkinto", required = false) kaksoistutkinto: String,
-      @RequestParam("urheilijatutkinto", required = false) urheilijatutkinto: String,
-      @RequestParam("sora_terveys", required = false) soraterveys: String,
-      @RequestParam("sora_aiempi", required = false) soraAiempi: String,
-      @RequestParam("markkinointilupa", required = false) markkinointilupa: String,
-      @RequestParam("julkaisulupa", required = false) julkaisulupa: String,
+      @RequestParam("ovara_haut") haut: java.util.Collection[String],
+      @RequestParam("ovara_oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
+      @RequestParam("ovara_toimipisteet", required = false) toimipisteet: java.util.Collection[String],
+      @RequestParam("ovara_hakukohteet", required = false) hakukohteet: java.util.Collection[String],
+      @RequestParam("ovara_pohjakoulutukset", required = false) pohjakoulutukset: java.util.Collection[String],
+      @RequestParam("ovara_valintatiedot", required = false) valintatiedot: java.util.Collection[String],
+      @RequestParam("ovara_vastaanottotiedot", required = false) vastaanottotiedot: java.util.Collection[String],
+      @RequestParam("ovara_harkinnanvaraisuudet", required = false) harkinnanvaraisuudet: java.util.Collection[String],
+      @RequestParam("ovara_kaksoistutkinto", required = false) kaksoistutkinto: String,
+      @RequestParam("ovara_urheilijatutkinto", required = false) urheilijatutkinto: String,
+      @RequestParam("ovara_sora_terveys", required = false) soraterveys: String,
+      @RequestParam("ovara_sora_aiempi", required = false) soraAiempi: String,
+      @RequestParam("ovara_markkinointilupa", required = false) markkinointilupa: String,
+      @RequestParam("ovara_julkaisulupa", required = false) julkaisulupa: String,
       request: HttpServletRequest,
       response: HttpServletResponse
   ): Unit = {
@@ -541,18 +541,18 @@ class Controller(
 
   @GetMapping(path = Array("kk-hakijat"))
   def kk_hakijat(
-                  @RequestParam("haut") haut: java.util.Collection[String],
-                  @RequestParam("oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
-                  @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
-                  @RequestParam("hakukohteet", required = false) hakukohteet: java.util.Collection[String],
-                  @RequestParam("valintatiedot", required = false) valintatiedot: java.util.Collection[String],
-                  @RequestParam("vastaanottotiedot", required = false) vastaanottotiedot: java.util.Collection[String],
-                  @RequestParam("hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
-                  @RequestParam("kansalaisuusluokat", required = false) kansalaisuusluokat: java.util.Collection[String],
-                  @RequestParam("markkinointilupa", required = false) markkinointilupa: String,
-                  @RequestParam("nayta-yo-arvosanat", required = true) naytaYoArvosanat: String,
-                  @RequestParam("nayta-hetu", required = true) naytaHetu: String,
-                  @RequestParam("nayta-postiosoite", required = true) naytaPostiosoite: String,
+                  @RequestParam("ovara_haut") haut: java.util.Collection[String],
+                  @RequestParam("ovara_oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
+                  @RequestParam("ovara_toimipisteet", required = false) toimipisteet: java.util.Collection[String],
+                  @RequestParam("ovara_hakukohteet", required = false) hakukohteet: java.util.Collection[String],
+                  @RequestParam("ovara_valintatiedot", required = false) valintatiedot: java.util.Collection[String],
+                  @RequestParam("ovara_vastaanottotiedot", required = false) vastaanottotiedot: java.util.Collection[String],
+                  @RequestParam("ovara_hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
+                  @RequestParam("ovara_kansalaisuusluokat", required = false) kansalaisuusluokat: java.util.Collection[String],
+                  @RequestParam("ovara_markkinointilupa", required = false) markkinointilupa: String,
+                  @RequestParam("ovara_nayta-yo-arvosanat", required = true) naytaYoArvosanat: String,
+                  @RequestParam("ovara_nayta-hetu", required = true) naytaHetu: String,
+                  @RequestParam("ovara_nayta-postiosoite", required = true) naytaPostiosoite: String,
                   request: HttpServletRequest,
                   response: HttpServletResponse
                 ): Unit = {
@@ -607,21 +607,21 @@ class Controller(
 
   @GetMapping(path = Array("hakeneet-hyvaksytyt-vastaanottaneet"))
   def hakeneet_hyvaksytyt_vastaanottaneet(
-                                           @RequestParam("haut") haut: java.util.Collection[String],
-                                           @RequestParam("tulostustapa") tulostustapa: String,
-                                           @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
-                                           @RequestParam("oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
-                                           @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
-                                           @RequestParam("hakukohteet", required = false) hakukohteet: java.util.Collection[String],
-                                           @RequestParam("koulutusalat1", required = false) koulutusalat1: java.util.Collection[String],
-                                           @RequestParam("koulutusalat2", required = false) koulutusalat2: java.util.Collection[String],
-                                           @RequestParam("koulutusalat3", required = false) koulutusalat3: java.util.Collection[String],
-                                           @RequestParam("opetuskielet", required = false) opetuskielet: java.util.Collection[String],
-                                           @RequestParam("maakunnat", required = false) maakunnat: java.util.Collection[String],
-                                           @RequestParam("kunnat", required = false) kunnat: java.util.Collection[String],
-                                           @RequestParam("harkinnanvaraisuudet", required = false) harkinnanvaraisuudet: java.util.Collection[String],
-                                           @RequestParam("nayta-hakutoiveet", required = false) naytaHakutoiveet: String,
-                                           @RequestParam("sukupuoli", required = false) sukupuoli: String,
+                                           @RequestParam("ovara_haut") haut: java.util.Collection[String],
+                                           @RequestParam("ovara_tulostustapa") tulostustapa: String,
+                                           @RequestParam("ovara_koulutustoimija", required = false) koulutustoimija: String,
+                                           @RequestParam("ovara_oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
+                                           @RequestParam("ovara_toimipisteet", required = false) toimipisteet: java.util.Collection[String],
+                                           @RequestParam("ovara_hakukohteet", required = false) hakukohteet: java.util.Collection[String],
+                                           @RequestParam("ovara_koulutusalat1", required = false) koulutusalat1: java.util.Collection[String],
+                                           @RequestParam("ovara_koulutusalat2", required = false) koulutusalat2: java.util.Collection[String],
+                                           @RequestParam("ovara_koulutusalat3", required = false) koulutusalat3: java.util.Collection[String],
+                                           @RequestParam("ovara_opetuskielet", required = false) opetuskielet: java.util.Collection[String],
+                                           @RequestParam("ovara_maakunnat", required = false) maakunnat: java.util.Collection[String],
+                                           @RequestParam("ovara_kunnat", required = false) kunnat: java.util.Collection[String],
+                                           @RequestParam("ovara_harkinnanvaraisuudet", required = false) harkinnanvaraisuudet: java.util.Collection[String],
+                                           @RequestParam("ovara_nayta-hakutoiveet", required = false) naytaHakutoiveet: String,
+                                           @RequestParam("ovara_sukupuoli", required = false) sukupuoli: String,
                                            request: HttpServletRequest,
                                            response: HttpServletResponse
                                          ): Unit = {
@@ -682,20 +682,20 @@ class Controller(
 
   @GetMapping(path = Array("kk-hakeneet-hyvaksytyt-vastaanottaneet"))
   def kk_hakeneet_hyvaksytyt_vastaanottaneet(
-                                              @RequestParam("haut") haut: java.util.Collection[String],
-                                              @RequestParam("tulostustapa") tulostustapa: String,
-                                              @RequestParam("koulutustoimija", required = false) koulutustoimija: String,
-                                              @RequestParam("oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
-                                              @RequestParam("toimipisteet", required = false) toimipisteet: java.util.Collection[String],
-                                              @RequestParam("hakukohteet", required = false) hakukohteet: java.util.Collection[String],
-                                              @RequestParam("hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
-                                              @RequestParam("okm-ohjauksen-alat", required = false) okmOhjauksenAlat: java.util.Collection[String],
-                                              @RequestParam("tutkinnon-tasot", required = false) tutkinnonTasot: java.util.Collection[String],
-                                              @RequestParam("aidinkielet", required = false) aidinkielet: java.util.Collection[String],
-                                              @RequestParam("kansalaisuusluokat", required = false) kansalaisuusluokat: java.util.Collection[String],
-                                              @RequestParam("sukupuoli", required = false) sukupuoli: String,
-                                              @RequestParam("ensikertalainen", required = false) ensikertalainen: String,
-                                              @RequestParam("nayta-hakutoiveet", required = false) naytaHakutoiveet: String,
+                                              @RequestParam("ovara_haut") haut: java.util.Collection[String],
+                                              @RequestParam("ovara_tulostustapa") tulostustapa: String,
+                                              @RequestParam("ovara_koulutustoimija", required = false) koulutustoimija: String,
+                                              @RequestParam("ovara_oppilaitokset", required = false) oppilaitokset: java.util.Collection[String],
+                                              @RequestParam("ovara_toimipisteet", required = false) toimipisteet: java.util.Collection[String],
+                                              @RequestParam("ovara_hakukohteet", required = false) hakukohteet: java.util.Collection[String],
+                                              @RequestParam("ovara_hakukohderyhmat", required = false) hakukohderyhmat: java.util.Collection[String],
+                                              @RequestParam("ovara_okm-ohjauksen-alat", required = false) okmOhjauksenAlat: java.util.Collection[String],
+                                              @RequestParam("ovara_tutkinnon-tasot", required = false) tutkinnonTasot: java.util.Collection[String],
+                                              @RequestParam("ovara_aidinkielet", required = false) aidinkielet: java.util.Collection[String],
+                                              @RequestParam("ovara_kansalaisuusluokat", required = false) kansalaisuusluokat: java.util.Collection[String],
+                                              @RequestParam("ovara_sukupuoli", required = false) sukupuoli: String,
+                                              @RequestParam("ovara_ensikertalainen", required = false) ensikertalainen: String,
+                                              @RequestParam("ovara_nayta-hakutoiveet", required = false) naytaHakutoiveet: String,
                                               request: HttpServletRequest,
                                               response: HttpServletResponse
                                             ): Unit = {

@@ -47,9 +47,9 @@ class OvaraBackendApplicationTests {
     def testInvalidHautRequestWithValidationError(): Unit = {
         mvc.perform(MockMvcRequestBuilders
             .get("/api/haut")
-            .param("alkamiskaudet", "foo'")
-            .param("haut", "123,456")
-            .param("haun_tyyppi", "blaa*")
+            .param("ovara_alkamiskaudet", "foo'")
+            .param("ovara_haut", "123,456")
+            .param("ovara_haun_tyyppi", "blaa*")
             .accept(MediaType.APPLICATION_JSON)
           )
           .andExpect(status().isBadRequest)
