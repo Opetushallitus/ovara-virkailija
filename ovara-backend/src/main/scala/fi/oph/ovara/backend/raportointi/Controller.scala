@@ -7,7 +7,7 @@ import fi.oph.ovara.backend.raportointi.dto.{RawHakeneetHyvaksytytVastaanottanee
 import fi.oph.ovara.backend.service.*
 import fi.oph.ovara.backend.utils.AuditOperation.{HakeneetHyvaksytytVastaanottaneet, KkHakeneetHyvaksytytVastaanottaneet, KkHakijat, KorkeakouluKoulutuksetToteutuksetHakukohteet, KoulutuksetToteutuksetHakukohteet, ToisenAsteenHakijat}
 import fi.oph.ovara.backend.utils.ParameterValidator.{validateAlphanumeric, validateAlphanumericList, validateHakeneetHyvaksytytVastaanottaneetParams, validateHakijatParams, validateKkHakeneetHyvaksytytVastaanottaneetParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams, validateNumericList, validateOid, validateOidList, validateOrganisaatioOid, validateOrganisaatioOidList}
-import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation}
+import fi.oph.ovara.backend.utils.{AuditLog, AuditLogObj, AuditOperation}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
@@ -39,7 +39,7 @@ class Controller(
     hakeneetHyvaksytytVastaanottaneetService: HakeneetHyvaksytytVastaanottaneetService,
     kkHakeneetHyvaksytytVastaanottaneetService: KkHakeneetHyvaksytytVastaanottaneetService,
     userService: UserService,
-    val auditLog: AuditLog = AuditLog
+    val auditLog: AuditLog = AuditLogObj
 ) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[Controller])
 

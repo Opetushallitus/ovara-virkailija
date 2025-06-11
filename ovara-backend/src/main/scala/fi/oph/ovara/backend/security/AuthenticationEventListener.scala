@@ -1,7 +1,7 @@
 package fi.oph.ovara.backend.security
 
 import fi.oph.ovara.backend.utils.AuditLog
-import fi.oph.ovara.backend.utils.AuditLog.{audit, getUser}
+import fi.oph.ovara.backend.utils.AuditLogObj.{audit, getUser}
 import fi.oph.ovara.backend.utils.AuditOperation.Login
 import fi.vm.sade.auditlog.{Changes, Target}
 import jakarta.servlet.http.HttpServletRequest

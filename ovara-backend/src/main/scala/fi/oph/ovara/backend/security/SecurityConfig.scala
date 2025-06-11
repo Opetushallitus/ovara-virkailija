@@ -2,13 +2,14 @@ package fi.oph.ovara.backend.security
 
 import com.zaxxer.hikari.HikariDataSource
 import fi.oph.ovara.backend.OvaraBackendApplication.CALLER_ID
-import fi.oph.ovara.backend.utils.AuditLog
+import fi.oph.ovara.backend.utils.{AuditLog, AuditLogObj}
 import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl
 import fi.vm.sade.javautils.nio.cas.{CasClient, CasClientBuilder, CasConfig}
-import org.apereo.cas.client.session.{SessionMappingStorage, SingleSignOutFilter}
+import org.apereo.cas.client.session.{SessionMappingStorage, SingleSignOutFilter, SingleSignOutHttpSessionListener}
 import org.apereo.cas.client.validation.{Cas20ServiceTicketValidator, TicketValidator}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.web.servlet.ServletListenerRegistrationBean
 import org.springframework.context.annotation.{Bean, Configuration}
 import org.springframework.core.annotation.Order
 import org.springframework.core.env.Environment
@@ -52,7 +53,7 @@ class SecurityConfig  {
   private val schema = null
 
   @Bean
-  def auditLog(): AuditLog = AuditLog
+  def auditLog(): AuditLog = AuditLogObj
 
   val LOG: Logger = LoggerFactory.getLogger(classOf[SecurityConfig])
   @Bean
@@ -65,7 +66,9 @@ class SecurityConfig  {
       CALLER_ID,
       CALLER_ID,
       "/j_spring_cas_security_check"
-    ).setJsessionName("JSESSIONID").build())
+    ).setJsessionName("JSESSIONID")
+      .setNumberOfRetries(2)
+      .build())
   }
 
   @Bean(name = Array("sessionDataSource"))
@@ -98,17 +101,8 @@ class SecurityConfig  {
   }
 
   @Bean
-  def casAuthenticationEntrypoint(environment: Environment, serviceProperties: ServiceProperties): CasAuthenticationEntryPoint = {
-    val casAuthenticationEntryPoint = CasAuthenticationEntryPoint()
-    casAuthenticationEntryPoint.setLoginUrl(cas_url + "/login")
-    casAuthenticationEntryPoint.setServiceProperties(serviceProperties)
-    casAuthenticationEntryPoint
-  }
-
-  @Bean
-  def ticketValidator(): TicketValidator = {
-    Cas20ServiceTicketValidator(cas_url)
-  }
+  def ticketValidator(): TicketValidator =
+    new Cas20ServiceTicketValidator(cas_url)
 
   @Bean
   def casAuthenticationProvider(serviceProperties: ServiceProperties, ticketValidator: TicketValidator): CasAuthenticationProvider = {
@@ -138,8 +132,39 @@ class SecurityConfig  {
   }
 
   @Bean
-  def casFilterChain(http: HttpSecurity, authenticationFilter: CasAuthenticationFilter, sessionMappingStorage: SessionMappingStorage, securityContextRepository: SecurityContextRepository, casAuthenticationEntryPoint: CasAuthenticationEntryPoint): SecurityFilterChain = {
+  def casAuthenticationEntrypoint(environment: Environment, serviceProperties: ServiceProperties): CasAuthenticationEntryPoint = {
+    val casAuthenticationEntryPoint = CasAuthenticationEntryPoint()
+    casAuthenticationEntryPoint.setLoginUrl(cas_url + "/login")
+    casAuthenticationEntryPoint.setServiceProperties(serviceProperties)
+    casAuthenticationEntryPoint
+  }
 
+  //
+  // Käsitellään CASilta tuleva SLO-pyyntö
+  //
+  @Bean
+  def singleLogoutFilter(sessionMappingStorage: SessionMappingStorage): SingleSignOutFilter = {
+    SingleSignOutFilter.setSessionMappingStorage(sessionMappingStorage)
+    val singleSignOutFilter: SingleSignOutFilter = new SingleSignOutFilter();
+    singleSignOutFilter.setIgnoreInitConfiguration(true);
+    singleSignOutFilter
+  }
+
+  @Bean
+  def singleSignOutHttpSessionListener(): ServletListenerRegistrationBean[SingleSignOutHttpSessionListener] = {
+    val listener = new ServletListenerRegistrationBean[SingleSignOutHttpSessionListener]()
+    listener.setListener(new SingleSignOutHttpSessionListener())
+    listener.setOrder(1)
+    listener
+  }
+
+  @Bean
+  @Order(2)
+  def casFilterChain(http: HttpSecurity,
+                     authenticationFilter: CasAuthenticationFilter,
+                     sessionMappingStorage: SessionMappingStorage,
+                     securityContextRepository: SecurityContextRepository,
+                     casAuthenticationEntryPoint: CasAuthenticationEntryPoint): SecurityFilterChain = {
     val SWAGGER_WHITELIST = List(
       "/swagger-resources",
       "/swagger-resources/**",
@@ -185,16 +210,6 @@ class SecurityConfig  {
       .build()
   }
 
-  //
-  // Käsitellään CASilta tuleva SLO-pyyntö
-  //
-  @Bean
-  def singleLogoutFilter(sessionMappingStorage: SessionMappingStorage): SingleSignOutFilter = {
-    SingleSignOutFilter.setSessionMappingStorage(sessionMappingStorage)
-    val singleSignOutFilter: SingleSignOutFilter = new SingleSignOutFilter();
-    singleSignOutFilter.setIgnoreInitConfiguration(true);
-    singleSignOutFilter
-  }
 
   @Bean
   def cookieSerializer(): CookieSerializer = {
