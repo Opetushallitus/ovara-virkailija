@@ -228,12 +228,16 @@ trait Extractors extends GenericOvaraJsonFormats {
 
   implicit val getHakeneetHyvaksytytVastaanottaneetHakukohteittainResult
       : GetResult[HakeneetHyvaksytytVastaanottaneetHakukohteittain] = GetResult { r =>
+    val hakukohdeOid     = r.nextString()
     val hakukohdeNimi    = extractKielistetty(r.nextStringOption())
+    val hakuOid          = r.nextString()
+    val hakuNimi         = extractKielistetty(r.nextStringOption())
     val organisaatioNimi = extractKielistetty(r.nextStringOption())
     val commonFields     = extractHakeneetHyvaksytytVastaanottaneetCommonFields(r)
 
     HakeneetHyvaksytytVastaanottaneetHakukohteittain(
       hakukohdeNimi = hakukohdeNimi,
+      hakuNimi = hakuNimi,
       organisaatioNimi = organisaatioNimi,
       commonFields._1,
       commonFields._2,

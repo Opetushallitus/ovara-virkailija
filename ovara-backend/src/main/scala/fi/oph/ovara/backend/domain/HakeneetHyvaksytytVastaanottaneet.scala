@@ -23,6 +23,7 @@ abstract class HakeneetHyvaksytytVastaanottaneetBase {
 
 case class HakeneetHyvaksytytVastaanottaneetHakukohteittain(
                                                              hakukohdeNimi: Kielistetty,
+                                                             hakuNimi: Kielistetty,
                                                              organisaatioNimi: Kielistetty,
                                                              hakijat: Int,
                                                              ensisijaisia: Int,
@@ -82,28 +83,6 @@ case class HakeneetHyvaksytytVastaanottaneetResult(
 }
 
 object HakeneetHyvaksytytVastaanottaneetResult {
-  def apply(hakukohteittain: HakeneetHyvaksytytVastaanottaneetHakukohteittain): HakeneetHyvaksytytVastaanottaneetResult = {
-    val combinedName: Kielistetty = mergeKielistetty(hakukohteittain.hakukohdeNimi, hakukohteittain.organisaatioNimi)
-    new HakeneetHyvaksytytVastaanottaneetResult(
-      otsikko = combinedName,
-      hakijat = hakukohteittain.hakijat,
-      ensisijaisia = hakukohteittain.ensisijaisia,
-      varasija = hakukohteittain.varasija,
-      hyvaksytyt = hakukohteittain.hyvaksytyt,
-      vastaanottaneet = hakukohteittain.vastaanottaneet,
-      lasna = hakukohteittain.lasna,
-      poissa = hakukohteittain.poissa,
-      ilmYht = hakukohteittain.ilmYht,
-      aloituspaikat = hakukohteittain.aloituspaikat,
-      toive1 = hakukohteittain.toive1,
-      toive2 = hakukohteittain.toive2,
-      toive3 = hakukohteittain.toive3,
-      toive4 = hakukohteittain.toive4,
-      toive5 = hakukohteittain.toive5,
-      toive6 = hakukohteittain.toive6,
-      toive7 = hakukohteittain.toive7
-    )
-  }
 
   def apply(toimipisteittain: HakeneetHyvaksytytVastaanottaneetToimipisteittain): HakeneetHyvaksytytVastaanottaneetResult = {
     new HakeneetHyvaksytytVastaanottaneetResult(

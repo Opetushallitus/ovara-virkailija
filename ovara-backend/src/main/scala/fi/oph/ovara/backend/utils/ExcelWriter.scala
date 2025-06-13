@@ -1299,10 +1299,10 @@ object ExcelWriter {
     }
   }
 
-  def writeHakeneetHyvaksytytVastaanottaneetRaportti(
+  def writeHakeneetHyvaksytytVastaanottaneetRaportti[T <: HakeneetHyvaksytytVastaanottaneetResult | HakeneetHyvaksytytVastaanottaneetHakukohteittain](
       asiointikieli: String,
       translations: Map[String, String],
-      data: List[HakeneetHyvaksytytVastaanottaneetResult],
+      data: List[T],
       yksittaisetHakijat: Int,
       naytaHakutoiveet: Boolean,
       tulostustapa: String
@@ -1321,89 +1321,104 @@ object ExcelWriter {
     var currentRowIndex = 0
 
     val otsikko = tulostustapa match {
-      case "hakukohteittain"       => "hakukohde"
-      case "oppilaitoksittain"     => "oppilaitos"
-      case "toimipisteittain"      => "toimipiste"
-      case "koulutustoimijoittain" => "koulutustoimija"
-      case "koulutusaloittain"     => "koulutusala"
+      case "hakukohteittain"       => List("hakukohde", "organisaatio", "haku")
+      case "oppilaitoksittain"     => List("oppilaitos")
+      case "toimipisteittain"      => List("toimipiste")
+      case "koulutustoimijoittain" => List("koulutustoimija")
+      case "koulutusaloittain"     => List("koulutusala")
     }
+
     val fieldNames =
       if (naytaHakutoiveet)
-        List(otsikko) ++ HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES ++ HAKUTOIVEET_TITLES
+        otsikko ++ HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES ++ HAKUTOIVEET_TITLES
       else
-        List(otsikko) ++ HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES
+        otsikko ++ HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES
     val fieldNamesWithIndex = fieldNames.zipWithIndex
 
     currentRowIndex = createHeadingRow(sheet, translations, currentRowIndex, fieldNames, headingCellStyle)
 
     data.foreach { item =>
       val dataRow = sheet.createRow(currentRowIndex)
-      val rowData = List(
-        item.otsikko(Kieli.withName(asiointikieli)),
-        item.hakijat,
-        item.ensisijaisia,
-        item.varasija,
-        item.hyvaksytyt,
-        item.vastaanottaneet,
-        item.lasna,
-        item.poissa,
-        item.ilmYht,
-        item.aloituspaikat
-      ) ++ (if (naytaHakutoiveet) {
-              List(
-                item.toive1,
-                item.toive2,
-                item.toive3,
-                item.toive4,
-                item.toive5,
-                item.toive6,
-                item.toive7
-              )
-            } else {
-              List()
-            })
+      val rowData = item match {
+        case result: HakeneetHyvaksytytVastaanottaneetResult =>
+          List(
+            result.otsikko(Kieli.withName(asiointikieli)),
+            result.hakijat,
+            result.ensisijaisia,
+            result.varasija,
+            result.hyvaksytyt,
+            result.vastaanottaneet,
+            result.lasna,
+            result.poissa,
+            result.ilmYht,
+            result.aloituspaikat
+          ) ++ generateHakutoiveet(naytaHakutoiveet, item)
+        case hakukohteittain: HakeneetHyvaksytytVastaanottaneetHakukohteittain =>
+          List(
+            hakukohteittain.hakukohdeNimi(Kieli.withName(asiointikieli)),
+            hakukohteittain.organisaatioNimi(Kieli.withName(asiointikieli)),
+            hakukohteittain.hakuNimi(Kieli.withName(asiointikieli)),
+            hakukohteittain.hakijat,
+            hakukohteittain.ensisijaisia,
+            hakukohteittain.varasija,
+            hakukohteittain.hyvaksytyt,
+            hakukohteittain.vastaanottaneet,
+            hakukohteittain.lasna,
+            hakukohteittain.poissa,
+            hakukohteittain.ilmYht,
+            hakukohteittain.aloituspaikat
+          ) ++ generateHakutoiveet(naytaHakutoiveet, hakukohteittain)
+      }
       createRowCells(rowData, dataRow, workbook, createBodyTextCellStyle(workbook))
       currentRowIndex += 1
     }
 
     // yhteensä-rivi
     val summaryRow = sheet.createRow(currentRowIndex)
-    val summaryData = List(
-      translations.getOrElse("raportti.yhteensa", "raportti.yhteensa"),
-      data.map(_.hakijat).sum,
-      data.map(_.ensisijaisia).sum,
-      data.map(_.varasija).sum,
-      data.map(_.hyvaksytyt).sum,
-      data.map(_.vastaanottaneet).sum,
-      data.map(_.lasna).sum,
-      data.map(_.poissa).sum,
-      data.map(_.ilmYht).sum,
-      data.map(_.aloituspaikat).sum
-    ) ++ (if (naytaHakutoiveet) {
-            List(
-              data.map(_.toive1).sum,
-              data.map(_.toive2).sum,
-              data.map(_.toive3).sum,
-              data.map(_.toive4).sum,
-              data.map(_.toive5).sum,
-              data.map(_.toive6).sum,
-              data.map(_.toive7).sum
-            )
-          } else {
-            List()
-          })
+    if (tulostustapa == "hakukohteittain") {
+      val summaryData = List("", "") ++ List(
+        translations.getOrElse("raportti.yhteensa", "raportti.yhteensa"),
+        data.map(_.hakijat).sum,
+        data.map(_.ensisijaisia).sum,
+        data.map(_.varasija).sum,
+        data.map(_.hyvaksytyt).sum,
+        data.map(_.vastaanottaneet).sum,
+        data.map(_.lasna).sum,
+        data.map(_.poissa).sum,
+        data.map(_.ilmYht).sum,
+        data.map(_.aloituspaikat).sum
+      ) ++ generateHakutoiveetSum(data, naytaHakutoiveet)
+      createHakukohteittainSummaryRowCells(summaryData, summaryRow, workbook, createSummaryCellStyle(workbook))
+      currentRowIndex += 1
+      // yksittäiset hakijat -rivi
+      val hakijatSummaryRow = sheet.createRow(currentRowIndex)
+      val hakijatSummaryData = List(
+        "", "", // 2 tyhjää solua rivin alkuun jotta summa tulee kohdalleen
+        translations.getOrElse("raportti.yksittaiset-hakijat", "raportti.yksittaiset-hakijat"),
+        yksittaisetHakijat)
+      createHakukohteittainSummaryRowCells(hakijatSummaryData, hakijatSummaryRow, workbook, createSummaryCellStyle(workbook))
+    } else {
+      val summaryData = List(
+        translations.getOrElse("raportti.yhteensa", "raportti.yhteensa"),
+        data.map(_.hakijat).sum,
+        data.map(_.ensisijaisia).sum,
+        data.map(_.varasija).sum,
+        data.map(_.hyvaksytyt).sum,
+        data.map(_.vastaanottaneet).sum,
+        data.map(_.lasna).sum,
+        data.map(_.poissa).sum,
+        data.map(_.ilmYht).sum,
+        data.map(_.aloituspaikat).sum
+      ) ++ generateHakutoiveetSum(data, naytaHakutoiveet)
 
-    createRowCells(summaryData, summaryRow, workbook, createSummaryCellStyle(workbook))
-    currentRowIndex += 1
-
-    // yksittäiset hakijat -rivi
-    val hakijatSummaryRow = sheet.createRow(currentRowIndex)
-    val hakijatSummaryData = List(
-      translations.getOrElse("raportti.yksittaiset-hakijat", "raportti.yksittaiset-hakijat"),
-      yksittaisetHakijat
-    )
-
-    createRowCells(hakijatSummaryData, hakijatSummaryRow, workbook, createSummaryCellStyle(workbook))
+      createRowCells(summaryData, summaryRow, workbook, createSummaryCellStyle(workbook))
+      currentRowIndex += 1
+      // yksittäiset hakijat -rivi
+      val hakijatSummaryRow = sheet.createRow(currentRowIndex)
+      val hakijatSummaryData = List(translations.getOrElse("raportti.yksittaiset-hakijat", "raportti.yksittaiset-hakijat"),
+        yksittaisetHakijat)
+      createRowCells(hakijatSummaryData, hakijatSummaryRow, workbook, createSummaryCellStyle(workbook))
+    }
 
     // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
     fieldNamesWithIndex.foreach { case (title, index) =>
@@ -1416,6 +1431,38 @@ object ExcelWriter {
       case e: Exception =>
         LOG.error(s"Error creating excel: ${e.getMessage}")
         throw e
+    }
+  }
+
+  private def generateHakutoiveet[T <: HakeneetHyvaksytytVastaanottaneetResult | HakeneetHyvaksytytVastaanottaneetHakukohteittain](naytaHakutoiveet: Boolean, item: T) = {
+    (if (naytaHakutoiveet) {
+      List(
+        item.toive1,
+        item.toive2,
+        item.toive3,
+        item.toive4,
+        item.toive5,
+        item.toive6,
+        item.toive7
+      )
+    } else {
+      List()
+    })
+  }
+
+  private def generateHakutoiveetSum[T <: HakeneetHyvaksytytVastaanottaneetResult | HakeneetHyvaksytytVastaanottaneetHakukohteittain](data: List[T], naytaHakutoiveet: Boolean) = {
+    if (naytaHakutoiveet) {
+      List(
+        data.map(_.toive1).sum,
+        data.map(_.toive2).sum,
+        data.map(_.toive3).sum,
+        data.map(_.toive4).sum,
+        data.map(_.toive5).sum,
+        data.map(_.toive6).sum,
+        data.map(_.toive7).sum
+      )
+    } else {
+      List()
     }
   }
 
@@ -1601,6 +1648,27 @@ object ExcelWriter {
       value match {
         case intValue: Int => cell.setCellValue(intValue)
         case _             => cell.setCellValue(value.toString)
+      }
+    }
+  }
+
+  private def createHakukohteittainSummaryRowCells(
+                              rowData: List[String | Int],
+                              row: XSSFRow,
+                              workbook: XSSFWorkbook,
+                              headingCellStyle: XSSFCellStyle
+                            ): Unit = {
+    val numericCellStyle = createNumericCellStyle(workbook)
+    rowData.zipWithIndex.foreach { case (value, index) =>
+      val cell = row.createCell(index)
+      if (index == 2) {
+        cell.setCellStyle(headingCellStyle)
+      } else {
+        cell.setCellStyle(numericCellStyle)
+      }
+      value match {
+        case intValue: Int => cell.setCellValue(intValue)
+        case _ => cell.setCellValue(value.toString)
       }
     }
   }
