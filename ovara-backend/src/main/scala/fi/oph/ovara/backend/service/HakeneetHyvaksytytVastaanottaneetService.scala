@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.{HakeneetHyvaksytytVastaanottaneetResult, Kieli}
+import fi.oph.ovara.backend.domain.{HakeneetHyvaksytytVastaanottaneetHakukohteittain, HakeneetHyvaksytytVastaanottaneetResult, Kieli}
 import fi.oph.ovara.backend.repository.{HakeneetHyvaksytytVastaanottaneetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -73,7 +73,6 @@ class HakeneetHyvaksytytVastaanottaneetService(
             sukupuoli = sukupuoli
           )
           db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams")
-            .map(r => HakeneetHyvaksytytVastaanottaneetResult(r))
         case "koulutusaloittain" =>
           val query = hakeneetHyvaksytytVastaanottaneetRepository.selectKoulutusaloittainWithParams(
             selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
@@ -125,8 +124,22 @@ class HakeneetHyvaksytytVastaanottaneetService(
 
       val collator: Collator = Collator.getInstance(new Locale(asiointikieli))
       collator.setStrength(Collator.PRIMARY)
-      val sortedResult = queryResult.sortWith { (a, b) =>
-        collator.compare(a.otsikko.getOrElse(Kieli.withName(asiointikieli), ""), b.otsikko.getOrElse(Kieli.withName(asiointikieli), "")) < 0
+      val sortedResult = queryResult.sortWith {
+        case (a: HakeneetHyvaksytytVastaanottaneetHakukohteittain, b: HakeneetHyvaksytytVastaanottaneetHakukohteittain) =>
+          val primaryComparison = collator.compare(
+            a.hakukohdeNimi.getOrElse(Kieli.withName(asiointikieli), ""),
+            b.hakukohdeNimi.getOrElse(Kieli.withName(asiointikieli), "")
+          )
+          if (primaryComparison == 0) {
+            collator.compare(
+              a.organisaatioNimi.getOrElse(Kieli.withName(asiointikieli), ""),
+              b.organisaatioNimi.getOrElse(Kieli.withName(asiointikieli), "")
+            ) < 0
+          } else {
+            primaryComparison < 0
+          }
+        case (a: HakeneetHyvaksytytVastaanottaneetResult, b: HakeneetHyvaksytytVastaanottaneetResult) =>
+          collator.compare(a.otsikko.getOrElse(Kieli.withName(asiointikieli), ""), b.otsikko.getOrElse(Kieli.withName(asiointikieli), "")) < 0
       }
       val sumQuery = hakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams(
         selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
