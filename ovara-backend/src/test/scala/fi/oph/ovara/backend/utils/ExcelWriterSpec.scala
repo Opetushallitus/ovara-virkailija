@@ -17,6 +17,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     "raportti.turvakielto"                      -> "Turvakielto SV",
     "raportti.kansalaisuus"                     -> "Kansalaisuus SV",
     "raportti.hakukohteenNimi"                  -> "Hakukohde SV",
+    "raportti.haku"                             -> "Haku SV",
     "raportti.kaksoistutkintoKiinnostaa"        -> "Kaksoistutkinto kiinnostaa SV",
     "raportti.markkinointilupa"                 -> "LupaMark SV",
     "raportti.kylla"                            -> "Ja",
@@ -43,6 +44,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     "raportti.puhelinnumero"                    -> "Puhelinnumero SV",
     "raportti.not-obligated"                    -> "Ei velvollinen",
     "raportti.obligated"                        -> "Velvollinen",
+    "raportti.organisaatio"                     -> "Organisaatio SV",
     "raportti.unreviewed"                       -> "Tarkastamatta SV",
     "raportti.vastaanottaneet"                  -> "Vastaanottaneet SV",
     "raportti.valintatiedonPvm"                 -> "Valintatiedon päivämäärä SV",
@@ -4311,13 +4313,23 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(4) == null)
   }
 
-  "writeHakeneetHyvaksytytVastaanottaneetRaportti" should "return excel with heading row, three result rows and two summary rows for tilastoraportti" in {
+  "writeHakeneetHyvaksytytVastaanottaneetRaportti" should "return excel with three heading columns, three result rows and two summary rows for hakukohteittain" in {
     val data = List(
-      HakeneetHyvaksytytVastaanottaneetResult(
-        otsikko = Map(
-          En -> "Ajoneuvoalan perustutkinto\nOSAO, Haukiputaan yksikkö",
-          Fi -> "Ajoneuvoalan perustutkinto\nOSAO, Haukiputaan yksikkö",
-          Sv -> "Grundexamen inom fordonsbranschen\nOSAO, Haukiputaan yksikkö"
+      HakeneetHyvaksytytVastaanottaneetHakukohteittain(
+        hakukohdeNimi = Map(
+          En -> "Ajoneuvoalan perustutkinto",
+          Fi -> "Ajoneuvoalan perustutkinto",
+          Sv -> "Grundexamen inom fordonsbranschen"
+        ),
+        hakuNimi = Map(
+          En -> "Joint application to upper secondary education and preparatory education 2024",
+          Fi -> "Perusopetuksen jälkeisen koulutuksen yhteishaku 2024",
+          Sv -> "Gemensam ansökan till utbildning efter den grundläggande utbildningen 2024"
+        ),
+        organisaatioNimi = Map(
+          En -> "OSAO, Haukiputaan yksikkö",
+          Fi -> "OSAO, Haukiputaan yksikkö",
+          Sv -> "OSAO, Haukiputaan yksikkö"
         ),
         hakijat = 354,
         ensisijaisia = 95,
@@ -4336,11 +4348,21 @@ class ExcelWriterSpec extends AnyFlatSpec {
         toive6 = 11,
         toive7 = 11
       ),
-      HakeneetHyvaksytytVastaanottaneetResult(
-        otsikko = Map(
-          En -> "Ajoneuvoalan perustutkinto\nOSAO, Muhoksen yksikkö",
-          Fi -> "Ajoneuvoalan perustutkinto\nOSAO, Muhoksen yksikkö",
-          Sv -> "Grundexamen inom fordonsbranschen\nOSAO, Muhoksen yksikkö"
+      HakeneetHyvaksytytVastaanottaneetHakukohteittain(
+        hakukohdeNimi = Map(
+          En -> "Ajoneuvoalan perustutkinto",
+          Fi -> "Ajoneuvoalan perustutkinto",
+          Sv -> "Grundexamen inom fordonsbranschen"
+        ),
+        hakuNimi = Map(
+          En -> "Joint application to upper secondary education and preparatory education 2024",
+          Fi -> "Perusopetuksen jälkeisen koulutuksen yhteishaku 2024",
+          Sv -> "Gemensam ansökan till utbildning efter den grundläggande utbildningen 2024"
+        ),
+        organisaatioNimi = Map(
+          En -> "OSAO, Muhoksen yksikkö",
+          Fi -> "OSAO, Muhoksen yksikkö",
+          Sv -> "OSAO, Muhoksen yksikkö"
         ),
         hakijat = 148,
         ensisijaisia = 39,
@@ -4359,11 +4381,21 @@ class ExcelWriterSpec extends AnyFlatSpec {
         toive6 = 14,
         toive7 = 7
       ),
-      HakeneetHyvaksytytVastaanottaneetResult(
-        otsikko = Map(
-          En -> "Elintarvikealan perustutkinto\nOSAO, Kaukovainion yksikkö, palvelut",
-          Fi -> "Elintarvikealan perustutkinto\nOSAO, Kaukovainion yksikkö, palvelut",
-          Sv -> "Grundexamen inom livsmedelsbranschen\nOSAO, Kaukovainion yksikkö, palvelut"
+      HakeneetHyvaksytytVastaanottaneetHakukohteittain(
+        hakukohdeNimi = Map(
+          En -> "Elintarvikealan perustutkinto",
+          Fi -> "Elintarvikealan perustutkinto",
+          Sv -> "Grundexamen inom livsmedelsbranschen"
+        ),
+        hakuNimi = Map(
+          En -> "Joint application to upper secondary education and preparatory education 2024",
+          Fi -> "Perusopetuksen jälkeisen koulutuksen yhteishaku 2024",
+          Sv -> "Gemensam ansökan till utbildning efter den grundläggande utbildningen 2024"
+        ),
+        organisaatioNimi = Map(
+          En -> "OSAO, Kaukovainion yksikkö, palvelut",
+          Fi -> "OSAO, Kaukovainion yksikkö, palvelut",
+          Sv -> "OSAO, Kaukovainion yksikkö, palvelut"
         ),
         hakijat = 112,
         ensisijaisia = 25,
@@ -4398,6 +4430,200 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Otsikkorivi
     val headingRow = sheet.getRow(0)
     assert(headingRow.getCell(0).getStringCellValue == "Hakukohde SV")
+    assert(headingRow.getCell(1).getStringCellValue == "Organisaatio SV")
+    assert(headingRow.getCell(2).getStringCellValue == "Haku SV")
+    assert(headingRow.getCell(3).getStringCellValue == "Hakijat SV")
+    assert(headingRow.getCell(4).getStringCellValue == "Ensisijaisia SV")
+    assert(headingRow.getCell(5).getStringCellValue == "Varasija SV")
+    assert(headingRow.getCell(6).getStringCellValue == "Hyväksytyt SV")
+    assert(headingRow.getCell(7).getStringCellValue == "Vastaanottaneet SV")
+    assert(headingRow.getCell(8).getStringCellValue == "Läsnä SV")
+    assert(headingRow.getCell(9).getStringCellValue == "Poissa SV")
+    assert(headingRow.getCell(10).getStringCellValue == "IlmYht SV")
+    assert(headingRow.getCell(11).getStringCellValue == "Aloituspaikat SV")
+    assert(headingRow.getCell(12).getStringCellValue == "Toive1 SV")
+    assert(headingRow.getCell(13).getStringCellValue == "Toive2 SV")
+    assert(headingRow.getCell(14).getStringCellValue == "Toive3 SV")
+    assert(headingRow.getCell(15).getStringCellValue == "Toive4 SV")
+    assert(headingRow.getCell(16).getStringCellValue == "Toive5 SV")
+    assert(headingRow.getCell(17).getStringCellValue == "Toive6 SV")
+    assert(headingRow.getCell(18).getStringCellValue == "Toive7 SV")
+    assert(headingRow.getCell(19) == null)
+
+    // Datarivit
+    assert(
+      sheet.getRow(1).getCell(0).getStringCellValue == "Grundexamen inom fordonsbranschen"
+    )
+    assert(sheet.getRow(1).getCell(1).getStringCellValue == "OSAO, Haukiputaan yksikkö")
+    assert(
+      sheet.getRow(1).getCell(2).getStringCellValue == "Gemensam ansökan till utbildning efter den grundläggande utbildningen 2024"
+    )
+    assert(sheet.getRow(1).getCell(3).getNumericCellValue == 354)
+    assert(sheet.getRow(1).getCell(4).getNumericCellValue == 95)
+    assert(sheet.getRow(1).getCell(5).getNumericCellValue == 354)
+    assert(sheet.getRow(1).getCell(6).getNumericCellValue == 100)
+    assert(sheet.getRow(1).getCell(7).getNumericCellValue == 0)
+    assert(sheet.getRow(1).getCell(8).getNumericCellValue == 0)
+    assert(sheet.getRow(1).getCell(9).getNumericCellValue == 0)
+    assert(sheet.getRow(1).getCell(10).getNumericCellValue == 0)
+    assert(sheet.getRow(1).getCell(11).getNumericCellValue == 100)
+    assert(sheet.getRow(1).getCell(12).getNumericCellValue == 95)
+    assert(sheet.getRow(1).getCell(13).getNumericCellValue == 91)
+    assert(sheet.getRow(1).getCell(14).getNumericCellValue == 76)
+    assert(sheet.getRow(1).getCell(15).getNumericCellValue == 45)
+    assert(sheet.getRow(1).getCell(16).getNumericCellValue == 25)
+    assert(sheet.getRow(1).getCell(17).getNumericCellValue == 11)
+    assert(sheet.getRow(1).getCell(18).getNumericCellValue == 11)
+    assert(sheet.getRow(1).getCell(19) == null)
+
+    assert(sheet.getRow(2).getCell(0).getStringCellValue == "Grundexamen inom fordonsbranschen")
+    assert(sheet.getRow(2).getCell(1).getStringCellValue == "OSAO, Muhoksen yksikkö")
+    assert(
+      sheet.getRow(2).getCell(2).getStringCellValue == "Gemensam ansökan till utbildning efter den grundläggande utbildningen 2024"
+    )
+    assert(sheet.getRow(2).getCell(3).getNumericCellValue == 148)
+    assert(sheet.getRow(2).getCell(4).getNumericCellValue == 39)
+    assert(sheet.getRow(2).getCell(5).getNumericCellValue == 148)
+    assert(sheet.getRow(2).getCell(6).getNumericCellValue == 16)
+    assert(sheet.getRow(2).getCell(7).getNumericCellValue == 0)
+    assert(sheet.getRow(2).getCell(8).getNumericCellValue == 0)
+    assert(sheet.getRow(2).getCell(9).getNumericCellValue == 0)
+    assert(sheet.getRow(2).getCell(10).getNumericCellValue == 0)
+    assert(sheet.getRow(2).getCell(11).getNumericCellValue == 24)
+    assert(sheet.getRow(2).getCell(12).getNumericCellValue == 39)
+    assert(sheet.getRow(2).getCell(13).getNumericCellValue == 29)
+    assert(sheet.getRow(2).getCell(14).getNumericCellValue == 33)
+    assert(sheet.getRow(2).getCell(15).getNumericCellValue == 14)
+    assert(sheet.getRow(2).getCell(16).getNumericCellValue == 12)
+    assert(sheet.getRow(2).getCell(17).getNumericCellValue == 14)
+    assert(sheet.getRow(2).getCell(18).getNumericCellValue == 7)
+    assert(sheet.getRow(2).getCell(19) == null)
+
+    assert(sheet.getRow(3).getCell(0).getStringCellValue == "Grundexamen inom livsmedelsbranschen")
+    assert(
+      sheet.getRow(3).getCell(1).getStringCellValue == "OSAO, Kaukovainion yksikkö, palvelut"
+    )
+    assert(
+      sheet.getRow(3).getCell(2).getStringCellValue == "Gemensam ansökan till utbildning efter den grundläggande utbildningen 2024"
+    )
+    assert(sheet.getRow(3).getCell(3).getNumericCellValue == 112)
+    assert(sheet.getRow(3).getCell(4).getNumericCellValue == 25)
+    assert(sheet.getRow(3).getCell(5).getNumericCellValue == 112)
+    assert(sheet.getRow(3).getCell(6).getNumericCellValue == 17)
+    assert(sheet.getRow(3).getCell(7).getNumericCellValue == 0)
+    assert(sheet.getRow(3).getCell(8).getNumericCellValue == 0)
+    assert(sheet.getRow(3).getCell(9).getNumericCellValue == 0)
+    assert(sheet.getRow(3).getCell(10).getNumericCellValue == 0)
+    assert(sheet.getRow(3).getCell(11).getNumericCellValue == 40)
+    assert(sheet.getRow(3).getCell(12).getNumericCellValue == 25)
+    assert(sheet.getRow(3).getCell(13).getNumericCellValue == 29)
+    assert(sheet.getRow(3).getCell(14).getNumericCellValue == 21)
+    assert(sheet.getRow(3).getCell(15).getNumericCellValue == 15)
+    assert(sheet.getRow(3).getCell(16).getNumericCellValue == 11)
+    assert(sheet.getRow(3).getCell(17).getNumericCellValue == 6)
+    assert(sheet.getRow(3).getCell(18).getNumericCellValue == 5)
+    assert(sheet.getRow(3).getCell(19) == null)
+
+    // summarivit
+    assert(sheet.getRow(4).getCell(0).getStringCellValue == "")
+    assert(sheet.getRow(4).getCell(1).getStringCellValue == "")
+    assert(sheet.getRow(4).getCell(2).getStringCellValue == "Yhteensä SV")
+    assert(sheet.getRow(4).getCell(3).getNumericCellValue == 614)
+    assert(sheet.getRow(4).getCell(0).getStringCellValue == "")
+    assert(sheet.getRow(4).getCell(1).getStringCellValue == "")
+    assert(sheet.getRow(5).getCell(2).getStringCellValue == "Yksittäiset hakijat SV")
+    assert(sheet.getRow(5).getCell(3).getNumericCellValue == 450)
+    assert(sheet.getPhysicalNumberOfRows == 6)
+
+  }
+
+  it should "return excel with one heading column, three result rows and two summary rows for toimipisteittäin" in {
+    val data = List(
+      HakeneetHyvaksytytVastaanottaneetResult(
+        otsikko = Map(
+          En -> "OSAO, Haukiputaan yksikkö",
+          Fi -> "OSAO, Haukiputaan yksikkö",
+          Sv -> "OSAO, Haukiputaan yksikkö"
+        ),
+        hakijat = 354,
+        ensisijaisia = 95,
+        varasija = 354,
+        hyvaksytyt = 100,
+        vastaanottaneet = 0,
+        lasna = 0,
+        poissa = 0,
+        ilmYht = 0,
+        aloituspaikat = 100,
+        toive1 = 95,
+        toive2 = 91,
+        toive3 = 76,
+        toive4 = 45,
+        toive5 = 25,
+        toive6 = 11,
+        toive7 = 11
+      ),
+      HakeneetHyvaksytytVastaanottaneetResult(
+        otsikko = Map(
+          En -> "OSAO, Muhoksen yksikkö",
+          Fi -> "OSAO, Muhoksen yksikkö",
+          Sv -> "OSAO, Muhoksen yksikkö"
+        ),
+        hakijat = 148,
+        ensisijaisia = 39,
+        varasija = 148,
+        hyvaksytyt = 16,
+        vastaanottaneet = 0,
+        lasna = 0,
+        poissa = 0,
+        ilmYht = 0,
+        aloituspaikat = 24,
+        toive1 = 39,
+        toive2 = 29,
+        toive3 = 33,
+        toive4 = 14,
+        toive5 = 12,
+        toive6 = 14,
+        toive7 = 7
+      ),
+      HakeneetHyvaksytytVastaanottaneetResult(
+        otsikko = Map(
+          En -> "OSAO, Kaukovainion yksikkö, palvelut",
+          Fi -> "OSAO, Kaukovainion yksikkö, palvelut",
+          Sv -> "OSAO, Kaukovainion yksikkö, palvelut"
+        ),
+        hakijat = 112,
+        ensisijaisia = 25,
+        varasija = 112,
+        hyvaksytyt = 17,
+        vastaanottaneet = 0,
+        lasna = 0,
+        poissa = 0,
+        ilmYht = 0,
+        aloituspaikat = 40,
+        toive1 = 25,
+        toive2 = 29,
+        toive3 = 21,
+        toive4 = 15,
+        toive5 = 11,
+        toive6 = 6,
+        toive7 = 5
+      )
+    )
+
+    val workbook = ExcelWriter.writeHakeneetHyvaksytytVastaanottaneetRaportti(
+      asiointikieli = "sv",
+      translations = translations,
+      data = data,
+      yksittaisetHakijat = 450,
+      naytaHakutoiveet = true,
+      tulostustapa = "toimipisteittain"
+    )
+
+    assert(workbook.getNumberOfSheets == 1)
+    val sheet = workbook.getSheetAt(0)
+    // Otsikkorivi
+    val headingRow = sheet.getRow(0)
+    assert(headingRow.getCell(0).getStringCellValue == "Toimipiste SV")
     assert(headingRow.getCell(1).getStringCellValue == "Hakijat SV")
     assert(headingRow.getCell(2).getStringCellValue == "Ensisijaisia SV")
     assert(headingRow.getCell(3).getStringCellValue == "Varasija SV")
@@ -4418,7 +4644,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     // Datarivit
     assert(
-      sheet.getRow(1).getCell(0).getStringCellValue == "Grundexamen inom fordonsbranschen\nOSAO, Haukiputaan yksikkö"
+      sheet.getRow(1).getCell(0).getStringCellValue == "OSAO, Haukiputaan yksikkö"
     )
     assert(sheet.getRow(1).getCell(1).getNumericCellValue == 354)
     assert(sheet.getRow(1).getCell(2).getNumericCellValue == 95)
@@ -4439,7 +4665,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(1).getCell(16).getNumericCellValue == 11)
     assert(sheet.getRow(1).getCell(17) == null)
 
-    assert(sheet.getRow(2).getCell(0).getStringCellValue == "Grundexamen inom fordonsbranschen\nOSAO, Muhoksen yksikkö")
+    assert(sheet.getRow(2).getCell(0).getStringCellValue == "OSAO, Muhoksen yksikkö")
     assert(sheet.getRow(2).getCell(1).getNumericCellValue == 148)
     assert(sheet.getRow(2).getCell(2).getNumericCellValue == 39)
     assert(sheet.getRow(2).getCell(3).getNumericCellValue == 148)
@@ -4462,7 +4688,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       sheet
         .getRow(3)
         .getCell(0)
-        .getStringCellValue == "Grundexamen inom livsmedelsbranschen\nOSAO, Kaukovainion yksikkö, palvelut"
+        .getStringCellValue == "OSAO, Kaukovainion yksikkö, palvelut"
     )
     assert(sheet.getRow(3).getCell(1).getNumericCellValue == 112)
     assert(sheet.getRow(3).getCell(2).getNumericCellValue == 25)
@@ -4599,14 +4825,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
       data = data,
       yksittaisetHakijat = 300,
       naytaHakutoiveet = false,
-      tulostustapa = "hakukohteittain"
+      tulostustapa = "toimipisteittain"
     )
 
     assert(workbook.getNumberOfSheets == 1)
     val sheet = workbook.getSheetAt(0)
     // Otsikkorivi
     val headingRow = sheet.getRow(0)
-    assert(headingRow.getCell(0).getStringCellValue == "Hakukohde SV")
+    assert(headingRow.getCell(0).getStringCellValue == "Toimipiste SV")
     assert(headingRow.getCell(1).getStringCellValue == "Hakijat SV")
     assert(headingRow.getCell(2).getStringCellValue == "Ensisijaisia SV")
     assert(headingRow.getCell(3).getStringCellValue == "Varasija SV")
@@ -4933,9 +5159,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val data = List(
       KkHakeneetHyvaksytytVastaanottaneetResult(
         otsikko = Map(
-          Fi -> "Arkkitehtuuri, tekniikan kandidaatti ja arkkitehti (3 v + 2 v) - DIA-yhteisvalinta\nAalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
-          En -> "Arkkitehtuuri, tekniikan kandidaatti ja arkkitehti (3 v + 2 v) - DIA-yhteisvalinta\nAalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
-          Sv -> "Arkitektur, teknologie kandidat och arkitekt (3 år + 2 år) - DIA gemensamma antagning\nAalto-universitetet, Högskolan för konst design och arkitektur"
+          Fi -> "Aalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
+          En -> "Aalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
+          Sv -> "Aalto-universitetet, Högskolan för konst design och arkitektur"
         ),
         hakijat = 815,
         ensisijaisia = 261,
@@ -4957,9 +5183,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
       ),
       KkHakeneetHyvaksytytVastaanottaneetResult(
         otsikko = Map(
-          Fi -> "Dokumentaarinen elokuva, taiteen kandidaatti ja maisteri (3 v + 2 v)\nAalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
-          En -> "Dokumentaarinen elokuva, taiteen kandidaatti ja maisteri (3 v + 2 v)\nAalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
-          Sv -> "Dokumentärfilm, konstkandidat och -magister (3 år + 2 år)\nAalto-universitetet, Högskolan för konst design och arkitektur"
+          Fi -> "Aalto-yliopisto, Kauppakorkeakoulu",
+          En -> "Aalto University, School of Business",
+          Sv -> "Aalto-universitetet, Handelshögskolan"
         ),
         hakijat = 41,
         ensisijaisia = 26,
@@ -4989,7 +5215,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       ensikertalaisetYksittaisetHakijat = 126,
       maksuvelvollisetYksittaisetHakijat = 2,
       naytaHakutoiveet = true,
-      tulostustapa = "hakukohteittain"
+      tulostustapa = "toimipisteittain"
     )
 
     assert(workbook.getNumberOfSheets == 1)
@@ -4997,7 +5223,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     // otsikkorivi
     val headingRow = sheet.getRow(0)
-    assert(headingRow.getCell(0).getStringCellValue == "Hakukohde SV")
+    assert(headingRow.getCell(0).getStringCellValue == "Toimipiste SV")
     assert(headingRow.getCell(1).getStringCellValue == "Hakijat SV")
     assert(headingRow.getCell(2).getStringCellValue == "Ensisijaisia SV")
     assert(headingRow.getCell(3).getStringCellValue == "Ensikertalaisia SV")
@@ -5021,7 +5247,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(
       dataRow1
         .getCell(0)
-        .getStringCellValue == "Arkitektur, teknologie kandidat och arkitekt (3 år + 2 år) - DIA gemensamma antagning\nAalto-universitetet, Högskolan för konst design och arkitektur"
+        .getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
     )
     assert(dataRow1.getCell(1).getNumericCellValue == 815)
     assert(dataRow1.getCell(2).getNumericCellValue == 261)
@@ -5046,7 +5272,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(
       dataRow2
         .getCell(0)
-        .getStringCellValue == "Dokumentärfilm, konstkandidat och -magister (3 år + 2 år)\nAalto-universitetet, Högskolan för konst design och arkitektur"
+        .getStringCellValue == "Aalto-universitetet, Handelshögskolan"
     )
     assert(dataRow2.getCell(1).getNumericCellValue == 41)
     assert(dataRow2.getCell(2).getNumericCellValue == 26)
@@ -5103,13 +5329,217 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(hakijatSummaryRow.getCell(9).getNumericCellValue == 2)
   }
 
+  it should "return excel with three title columns and summaries shifted accordingly if tulostustapa is hakukohteittain" in {
+    val data = List(
+      KkHakeneetHyvaksytytVastaanottaneetHakukohteittain(
+        hakukohdeNimi = Map(
+          Fi -> "Arkkitehtuuri, tekniikan kandidaatti ja arkkitehti (3 v + 2 v)",
+          En -> "Arkkitehtuuri, tekniikan kandidaatti ja arkkitehti (3 v + 2 v)",
+          Sv -> "Arkitektur, teknologie kandidat och arkitekt (3 år + 2 år)"
+        ),
+        organisaatioNimi = Map(
+          Fi -> "Aalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
+          En -> "Aalto University, School of Arts, Design and Architecture",
+          Sv -> "Aalto-universitetet, Högskolan för konst design och arkitektur"
+        ),
+        hakuNimi = Map(
+          Fi -> "DIA-yhteisvalinta 2024",
+          En -> "DIA joint application 2024",
+          Sv -> "DIA gemensamma antagning 2024"
+        ),
+        hakijat = 815,
+        ensisijaisia = 261,
+        ensikertalaisia = 120,
+        hyvaksytyt = 0,
+        vastaanottaneet = 0,
+        lasna = 0,
+        poissa = 0,
+        ilmYht = 0,
+        maksuvelvollisia = 1,
+        valinnanAloituspaikat = 55,
+        aloituspaikat = 55,
+        toive1 = 261,
+        toive2 = 0,
+        toive3 = 0,
+        toive4 = 0,
+        toive5 = 0,
+        toive6 = 0
+      ),
+      KkHakeneetHyvaksytytVastaanottaneetHakukohteittain(
+        hakukohdeNimi = Map(
+          Fi -> "Dokumentaarinen elokuva, taiteen kandidaatti ja maisteri (3 v + 2 v)",
+          En -> "Dokumentaarinen elokuva, taiteen kandidaatti ja maisteri (3 v + 2 v)",
+          Sv -> "Dokumentärfilm, konstkandidat och -magister (3 år + 2 år)"
+        ),
+        organisaatioNimi = Map(
+          Fi -> "Aalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
+          En -> "Aalto University, School of Arts, Design and Architecture",
+          Sv -> "Aalto-universitetet, Högskolan för konst design och arkitektur"
+        ),
+        hakuNimi = Map(
+          Fi -> "DIA-yhteisvalinta 2024",
+          En -> "DIA joint application 2024",
+          Sv -> "DIA gemensamma antagning 2024"
+        ),
+        hakijat = 41,
+        ensisijaisia = 26,
+        ensikertalaisia = 5,
+        hyvaksytyt = 0,
+        vastaanottaneet = 0,
+        lasna = 0,
+        poissa = 0,
+        ilmYht = 0,
+        maksuvelvollisia = 1,
+        valinnanAloituspaikat = 2,
+        aloituspaikat = 2,
+        toive1 = 26,
+        toive2 = 0,
+        toive3 = 0,
+        toive4 = 0,
+        toive5 = 0,
+        toive6 = 0
+      )
+    )
+
+    val workbook: XSSFWorkbook = ExcelWriter.writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
+      asiointikieli = "sv",
+      translations = translations,
+      data = data,
+      yksittaisetHakijat = 820,
+      ensikertalaisetYksittaisetHakijat = 126,
+      maksuvelvollisetYksittaisetHakijat = 2,
+      naytaHakutoiveet = true,
+      tulostustapa = "hakukohteittain"
+    )
+
+    assert(workbook.getNumberOfSheets == 1)
+    val sheet = workbook.getSheetAt(0)
+
+    // otsikkorivi
+    val headingRow = sheet.getRow(0)
+    assert(headingRow.getCell(0).getStringCellValue == "Hakukohde SV")
+    assert(headingRow.getCell(1).getStringCellValue == "Organisaatio SV")
+    assert(headingRow.getCell(2).getStringCellValue == "Haku SV")
+    assert(headingRow.getCell(3).getStringCellValue == "Hakijat SV")
+    assert(headingRow.getCell(4).getStringCellValue == "Ensisijaisia SV")
+    assert(headingRow.getCell(5).getStringCellValue == "Ensikertalaisia SV")
+    assert(headingRow.getCell(6).getStringCellValue == "Hyväksytyt SV")
+    assert(headingRow.getCell(7).getStringCellValue == "Vastaanottaneet SV")
+    assert(headingRow.getCell(8).getStringCellValue == "Läsnä SV")
+    assert(headingRow.getCell(9).getStringCellValue == "Poissa SV")
+    assert(headingRow.getCell(10).getStringCellValue == "IlmYht SV")
+    assert(headingRow.getCell(11).getStringCellValue == "Maksuvelvollisia SV")
+    assert(headingRow.getCell(12).getStringCellValue == "Valinnan aloituspaikat SV")
+    assert(headingRow.getCell(13).getStringCellValue == "Aloituspaikat SV")
+    assert(headingRow.getCell(14).getStringCellValue == "Toive1 SV")
+    assert(headingRow.getCell(15).getStringCellValue == "Toive2 SV")
+    assert(headingRow.getCell(16).getStringCellValue == "Toive3 SV")
+    assert(headingRow.getCell(17).getStringCellValue == "Toive4 SV")
+    assert(headingRow.getCell(18).getStringCellValue == "Toive5 SV")
+    assert(headingRow.getCell(19).getStringCellValue == "Toive6 SV")
+    assert(headingRow.getCell(20) == null)
+
+    val dataRow1 = sheet.getRow(1)
+    assert(
+      dataRow1
+        .getCell(0)
+        .getStringCellValue == "Arkitektur, teknologie kandidat och arkitekt (3 år + 2 år)"
+    )
+    assert(dataRow1.getCell(1).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur")
+    assert(dataRow1.getCell(2).getStringCellValue == "DIA gemensamma antagning 2024")
+    assert(dataRow1.getCell(3).getNumericCellValue == 815)
+    assert(dataRow1.getCell(4).getNumericCellValue == 261)
+    assert(dataRow1.getCell(5).getNumericCellValue == 120)
+    assert(dataRow1.getCell(6).getNumericCellValue == 0)
+    assert(dataRow1.getCell(7).getNumericCellValue == 0)
+    assert(dataRow1.getCell(8).getNumericCellValue == 0)
+    assert(dataRow1.getCell(9).getNumericCellValue == 0)
+    assert(dataRow1.getCell(10).getNumericCellValue == 0)
+    assert(dataRow1.getCell(11).getNumericCellValue == 1)
+    assert(dataRow1.getCell(12).getNumericCellValue == 55)
+    assert(dataRow1.getCell(13).getNumericCellValue == 55)
+    assert(dataRow1.getCell(14).getNumericCellValue == 261)
+    assert(dataRow1.getCell(15).getNumericCellValue == 0)
+    assert(dataRow1.getCell(16).getNumericCellValue == 0)
+    assert(dataRow1.getCell(17).getNumericCellValue == 0)
+    assert(dataRow1.getCell(18).getNumericCellValue == 0)
+    assert(dataRow1.getCell(19).getNumericCellValue == 0)
+    assert(dataRow1.getCell(20) == null)
+
+    val dataRow2 = sheet.getRow(2)
+    assert(
+      dataRow2
+        .getCell(0)
+        .getStringCellValue == "Dokumentärfilm, konstkandidat och -magister (3 år + 2 år)"
+    )
+    assert(dataRow2.getCell(1).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur")
+    assert(dataRow2.getCell(2).getStringCellValue == "DIA gemensamma antagning 2024")
+    assert(dataRow2.getCell(3).getNumericCellValue == 41)
+    assert(dataRow2.getCell(4).getNumericCellValue == 26)
+    assert(dataRow2.getCell(5).getNumericCellValue == 5)
+    assert(dataRow2.getCell(6).getNumericCellValue == 0)
+    assert(dataRow2.getCell(7).getNumericCellValue == 0)
+    assert(dataRow2.getCell(8).getNumericCellValue == 0)
+    assert(dataRow2.getCell(9).getNumericCellValue == 0)
+    assert(dataRow2.getCell(10).getNumericCellValue == 0)
+    assert(dataRow2.getCell(11).getNumericCellValue == 1)
+    assert(dataRow2.getCell(12).getNumericCellValue == 2)
+    assert(dataRow2.getCell(13).getNumericCellValue == 2)
+    assert(dataRow2.getCell(14).getNumericCellValue == 26)
+    assert(dataRow2.getCell(15).getNumericCellValue == 0)
+    assert(dataRow2.getCell(16).getNumericCellValue == 0)
+    assert(dataRow2.getCell(17).getNumericCellValue == 0)
+    assert(dataRow2.getCell(18).getNumericCellValue == 0)
+    assert(dataRow2.getCell(19).getNumericCellValue == 0)
+    assert(dataRow2.getCell(20) == null)
+
+    // yhteensä
+    val summaryRow = sheet.getRow(3)
+    assert(summaryRow.getCell(0).getStringCellValue == "")
+    assert(summaryRow.getCell(1).getStringCellValue == "")
+    assert(summaryRow.getCell(2).getStringCellValue == "Yhteensä SV")
+    assert(summaryRow.getCell(3).getNumericCellValue == 856)
+    assert(summaryRow.getCell(4).getNumericCellValue == 287)
+    assert(summaryRow.getCell(5).getNumericCellValue == 125)
+    assert(summaryRow.getCell(6).getNumericCellValue == 0)
+    assert(summaryRow.getCell(7).getNumericCellValue == 0)
+    assert(summaryRow.getCell(8).getNumericCellValue == 0)
+    assert(summaryRow.getCell(9).getNumericCellValue == 0)
+    assert(summaryRow.getCell(10).getNumericCellValue == 0)
+    assert(summaryRow.getCell(11).getNumericCellValue == 2)
+    assert(summaryRow.getCell(12).getNumericCellValue == 57)
+    assert(summaryRow.getCell(13).getNumericCellValue == 57)
+    assert(summaryRow.getCell(14).getNumericCellValue == 287)
+    assert(summaryRow.getCell(15).getNumericCellValue == 0)
+    assert(summaryRow.getCell(16).getNumericCellValue == 0)
+    assert(summaryRow.getCell(17).getNumericCellValue == 0)
+    assert(summaryRow.getCell(18).getNumericCellValue == 0)
+    assert(summaryRow.getCell(19).getNumericCellValue == 0)
+    assert(summaryRow.getCell(20) == null)
+
+    // yksittäiset hakijat lasketaan vaan tiettyihin sarakkeisiin
+    val hakijatSummaryRow = sheet.getRow(4)
+    assert(hakijatSummaryRow.getCell(0).getStringCellValue == "")
+    assert(hakijatSummaryRow.getCell(1).getStringCellValue == "")
+    assert(hakijatSummaryRow.getCell(2).getStringCellValue == "Yksittäiset hakijat SV")
+    assert(hakijatSummaryRow.getCell(3).getNumericCellValue == 820)
+    assert(hakijatSummaryRow.getCell(4).getStringCellValue == "")
+    assert(hakijatSummaryRow.getCell(5).getNumericCellValue == 126)
+    assert(hakijatSummaryRow.getCell(6).getStringCellValue == "")
+    assert(hakijatSummaryRow.getCell(7).getStringCellValue == "")
+    assert(hakijatSummaryRow.getCell(8).getStringCellValue == "")
+    assert(hakijatSummaryRow.getCell(9).getStringCellValue == "")
+    assert(hakijatSummaryRow.getCell(10).getStringCellValue == "")
+    assert(hakijatSummaryRow.getCell(11).getNumericCellValue == 2)
+  }
+
   it should "return excel without hakutoiveet columns if naytaHakutoiveet is false" in {
     val data = List(
       KkHakeneetHyvaksytytVastaanottaneetResult(
         otsikko = Map(
-          Fi -> "Arkkitehtuuri, tekniikan kandidaatti ja arkkitehti (3 v + 2 v) - DIA-yhteisvalinta\nAalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
-          En -> "Arkkitehtuuri, tekniikan kandidaatti ja arkkitehti (3 v + 2 v) - DIA-yhteisvalinta\nAalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
-          Sv -> "Arkitektur, teknologie kandidat och arkitekt (3 år + 2 år) - DIA gemensamma antagning\nAalto-universitetet, Högskolan för konst design och arkitektur"
+          Fi -> "Aalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
+          En -> "Aalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
+          Sv -> "Aalto-universitetet, Högskolan för konst design och arkitektur"
         ),
         hakijat = 815,
         ensisijaisia = 261,
@@ -5131,9 +5561,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
       ),
       KkHakeneetHyvaksytytVastaanottaneetResult(
         otsikko = Map(
-          Fi -> "Dokumentaarinen elokuva, taiteen kandidaatti ja maisteri (3 v + 2 v)\nAalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
-          En -> "Dokumentaarinen elokuva, taiteen kandidaatti ja maisteri (3 v + 2 v)\nAalto-yliopisto, Taiteiden ja suunnittelun korkeakoulu",
-          Sv -> "Dokumentärfilm, konstkandidat och -magister (3 år + 2 år)\nAalto-universitetet, Högskolan för konst design och arkitektur"
+          Fi -> "Aalto-yliopisto, Kauppakorkeakoulu",
+          En -> "Aalto-yliopisto, School of Business",
+          Sv -> "Aalto-universitetet, Handelshögskolan"
         ),
         hakijat = 41,
         ensisijaisia = 26,
@@ -5163,7 +5593,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       ensikertalaisetYksittaisetHakijat = 126,
       maksuvelvollisetYksittaisetHakijat = 2,
       naytaHakutoiveet = false,
-      tulostustapa = "hakukohteittain"
+      tulostustapa = "toimipisteittain"
     )
 
     assert(workbook.getNumberOfSheets == 1)
@@ -5171,7 +5601,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     // otsikkorivi
     val headingRow = sheet.getRow(0)
-    assert(headingRow.getCell(0).getStringCellValue == "Hakukohde SV")
+    assert(headingRow.getCell(0).getStringCellValue == "Toimipiste SV")
     assert(headingRow.getCell(1).getStringCellValue == "Hakijat SV")
     assert(headingRow.getCell(2).getStringCellValue == "Ensisijaisia SV")
     assert(headingRow.getCell(3).getStringCellValue == "Ensikertalaisia SV")
@@ -5189,7 +5619,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(
       dataRow1
         .getCell(0)
-        .getStringCellValue == "Arkitektur, teknologie kandidat och arkitekt (3 år + 2 år) - DIA gemensamma antagning\nAalto-universitetet, Högskolan för konst design och arkitektur"
+        .getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
     )
     assert(dataRow1.getCell(1).getNumericCellValue == 815)
     assert(dataRow1.getCell(2).getNumericCellValue == 261)
@@ -5208,7 +5638,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(
       dataRow2
         .getCell(0)
-        .getStringCellValue == "Dokumentärfilm, konstkandidat och -magister (3 år + 2 år)\nAalto-universitetet, Högskolan för konst design och arkitektur"
+        .getStringCellValue == "Aalto-universitetet, Handelshögskolan"
     )
     assert(dataRow2.getCell(1).getNumericCellValue == 41)
     assert(dataRow2.getCell(2).getNumericCellValue == 26)

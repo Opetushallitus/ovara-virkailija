@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.domain.{KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella, KkHakeneetHyvaksytytVastaanottaneetResult, KkHakeneetHyvaksytytVastaanottaneetToimipisteittain}
+import fi.oph.ovara.backend.domain.{KkHakeneetHyvaksytytVastaanottaneetHakukohteittain, KkHakeneetHyvaksytytVastaanottaneetHauittain, KkHakeneetHyvaksytytVastaanottaneetResult, KkHakeneetHyvaksytytVastaanottaneetToimipisteittain}
 import fi.oph.ovara.backend.utils.RepositoryUtils
 import fi.oph.ovara.backend.utils.RepositoryUtils.buildTutkinnonTasoFilters
 import org.slf4j.{Logger, LoggerFactory}
@@ -59,7 +59,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                        kansalaisuudet: List[String],
                                        sukupuoli: Option[String],
                                        ensikertalainen: Option[Boolean],
-                                     ): SqlStreamingAction[Vector[KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella], KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella, Effect] = {
+                                     ): SqlStreamingAction[Vector[KkHakeneetHyvaksytytVastaanottaneetHakukohteittain], KkHakeneetHyvaksytytVastaanottaneetHakukohteittain, Effect] = {
 
     val filters = buildFilters(
       haut, selectedKayttooikeusOrganisaatiot, hakukohteet, hakukohderyhmat, okmOhjauksenAlat, tutkinnonTasot, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen
@@ -67,7 +67,10 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
 
     val query =
       sql"""SELECT
-            h.hakukohde_nimi AS otsikko,
+            h.hakukohde_oid,
+            h.hakukohde_nimi,
+            h.haku_oid,
+            ha.haku_nimi,
             h.organisaatio_nimi,
             SUM(t.hakijat) AS hakijat,
             SUM(t.ensisijaisia) AS ensisijaisia,
@@ -88,8 +91,9 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
             SUM(t.toive_6) AS toive6
       FROM pub.pub_fct_raportti_tilastoraportti_kk t
       JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
+      JOIN pub.pub_dim_haku ha ON h.haku_oid = ha.haku_oid
       WHERE #$filters
-      GROUP BY h.hakukohde_nimi, h.organisaatio_nimi""".as[KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella]
+      GROUP BY h.hakukohde_oid, h.hakukohde_nimi, h.haku_oid, ha.haku_nimi""".as[KkHakeneetHyvaksytytVastaanottaneetHakukohteittain]
 
     LOG.debug(s"selectHakukohteittainWithParams: ${query.statements.head}")
     query
@@ -106,7 +110,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                        kansalaisuudet: List[String],
                                        sukupuoli: Option[String],
                                        ensikertalainen: Option[Boolean],
-                                     ): SqlStreamingAction[Vector[KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella], KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella, Effect] = {
+                                     ): SqlStreamingAction[Vector[KkHakeneetHyvaksytytVastaanottaneetHauittain], KkHakeneetHyvaksytytVastaanottaneetHauittain, Effect] = {
 
     val filters = buildFilters(
       haut, selectedKayttooikeusOrganisaatiot, hakukohteet, hakukohderyhmat, okmOhjauksenAlat, tutkinnonTasot, aidinkielet, kansalaisuudet, sukupuoli, ensikertalainen
@@ -158,7 +162,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
 	    ) a
       JOIN pub.pub_dim_hakukohde b on a.hakukohde_oid = b.hakukohde_oid
       JOIN pub.pub_dim_haku ha ON b.haku_oid = ha.haku_oid
-      GROUP BY 1,2""".as[KkHakeneetHyvaksytytVastaanottaneetOrganisaatioNimella]
+      GROUP BY 1,2""".as[KkHakeneetHyvaksytytVastaanottaneetHauittain]
 
     LOG.debug(s"selectHauittainWithParams: ${query.statements.head}")
     query
