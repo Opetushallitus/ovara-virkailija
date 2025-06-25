@@ -7,7 +7,9 @@ import { HostedZoneStack } from '../lib/hosted-zone-stack';
 
 const app = new cdk.App();
 const environmentName = app.node.tryGetContext('environment');
-const envUS = { region: 'us-east-1' };
+const account = process.env.CDK_DEFAULT_ACCOUNT!;
+const envEU = { account, region: 'eu-west-1' };
+const envUS = { account, region: 'us-east-1' };
 
 const publicHostedZones: { [p: string]: string } = {
   hahtuva: 'hahtuvaopintopolku.fi',
@@ -26,7 +28,7 @@ const publicHostedZoneIds: { [p: string]: string } = {
 const hostedZoneStack = new HostedZoneStack(
   app,
   'HostedZoneStack',
-  { env: envUS },
+  { env: envEU },
   environmentName,
   publicHostedZones,
   publicHostedZoneIds,
@@ -34,13 +36,17 @@ const hostedZoneStack = new HostedZoneStack(
 
 const domainName = `ovara-virkailija.${publicHostedZones[environmentName]}`;
 
-new OvaraCertificateStack(app, 'OvaraCertificateStack', {
-  env: envUS,
-  stackName: `${environmentName}-ovara-certificate`,
-  domain: domainName,
-  hostedZone: hostedZoneStack.hostedZone,
-  crossRegionReferences: true,
-});
+const certificateStack = new OvaraCertificateStack(
+  app,
+  'OvaraCertificateStack',
+  {
+    env: envUS,
+    stackName: `${environmentName}-ovara-certificate`,
+    domain: domainName,
+    hostedZone: hostedZoneStack.hostedZone,
+    crossRegionReferences: true,
+  },
+);
 
 new OvaraUISovellusStack(app, 'OvaraUISovellusStack', {
   stackName: `${environmentName}-ovara-ui`,
@@ -51,4 +57,6 @@ new OvaraUISovellusStack(app, 'OvaraUISovellusStack', {
   },
   domainName: domainName,
   hostedZone: hostedZoneStack.hostedZone,
+  certificate: certificateStack.certificate,
+  crossRegionReferences: true,
 });

@@ -10,20 +10,14 @@ interface OvaraUIStackProps extends cdk.StackProps {
   environmentName: string;
   domainName: string;
   hostedZone: route53.IHostedZone;
+  certificate: acm.ICertificate;
 }
 
 export class OvaraUISovellusStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: OvaraUIStackProps) {
     super(scope, id, props);
 
-    const certificateArn = cdk.Fn.importValue(
-      `${props.environmentName}-ovara-certificate-CertificateArn`,
-    );
-    const certificate = acm.Certificate.fromCertificateArn(
-      this,
-      'OvaraCertificateStack',
-      certificateArn,
-    );
+    const certificate = props.certificate;
 
     const nextjs = new Nextjs(this, `${props.environmentName}-OvaraUI`, {
       nextjsPath: '..', // relative path from project root to NextJS
