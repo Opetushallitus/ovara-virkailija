@@ -21,7 +21,7 @@ export class OvaraUISovellusStack extends cdk.Stack {
     );
     const certificate = acm.Certificate.fromCertificateArn(
       this,
-      'ImportedCertificate',
+      'SiteCertificate',
       certificateArn,
     );
 
