@@ -18,7 +18,7 @@ export class HostedZoneStack extends cdk.Stack {
       this,
       'PublicHostedZone',
       {
-        zoneName: `${publicHostedZones[environmentName]}.`,
+        zoneName: `${publicHostedZones[environmentName]}`,
         hostedZoneId: `${publicHostedZoneIds[environmentName]}`,
       },
     );
