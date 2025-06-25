@@ -67,4 +67,6 @@ jobs:
           SKIP_OPENNEXT_BUILD: true
         run: |
           cd ./ovara-ui/cdk
+          cdk deploy HostedZoneStack --require-approval never -c "environment=${{ inputs.environment }}"
+          cdk deploy OvaraCertificateStack --require-approval never -c "environment=${{ inputs.environment }}"
           cdk deploy OvaraUISovellusStack --require-approval never -c "environment=${{ inputs.environment }}"
