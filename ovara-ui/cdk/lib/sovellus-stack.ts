@@ -8,45 +8,21 @@ import { PriceClass } from 'aws-cdk-lib/aws-cloudfront';
 
 interface OvaraUIStackProps extends cdk.StackProps {
   environmentName: string;
+  domainName: string;
+  hostedZone: route53.IHostedZone;
 }
 
 export class OvaraUISovellusStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: OvaraUIStackProps) {
     super(scope, id, props);
 
-    const publicHostedZones: { [p: string]: string } = {
-      hahtuva: 'hahtuvaopintopolku.fi',
-      pallero: 'testiopintopolku.fi',
-      sade: 'opintopolku.fi',
-      untuva: 'untuvaopintopolku.fi',
-    };
-
-    const publicHostedZoneIds: { [p: string]: string } = {
-      hahtuva: 'Z20VS6J64SGAG9',
-      pallero: 'Z175BBXSKVCV3B',
-      sade: 'ZNMCY72OCXY4M',
-      untuva: 'Z1399RU36FG2N9',
-    };
-
-    const hostedZone = route53.HostedZone.fromHostedZoneAttributes(
-      this,
-      'PublicHostedZone',
-      {
-        zoneName: `${publicHostedZones[props.environmentName]}.`,
-        hostedZoneId: `${publicHostedZoneIds[props.environmentName]}`,
-      },
+    const certificateArn = cdk.Fn.importValue(
+      `${props.environmentName}-ovara-certificate-CertificateArn`,
     );
-
-    const domainName = `ovara-virkailija.${publicHostedZones[props.environmentName]}`;
-
-    const certificate = new acm.DnsValidatedCertificate(
+    const certificate = acm.Certificate.fromCertificateArn(
       this,
-      'SiteCertificate',
-      {
-        domainName,
-        hostedZone,
-        region: 'us-east-1', // Cloudfront only checks this region for certificates.
-      },
+      'ImportedCertificate',
+      certificateArn,
     );
 
     const nextjs = new Nextjs(this, `${props.environmentName}-OvaraUI`, {
@@ -55,12 +31,12 @@ export class OvaraUISovellusStack extends cdk.Stack {
       environment: {
         SKIP_TYPECHECK: 'true',
         STANDALONE: 'true',
-        VIRKAILIJA_URL: `https://virkailija.${publicHostedZones[props.environmentName]}`,
+        VIRKAILIJA_URL: `https://virkailija.${props.hostedZone.zoneName}`,
       },
       domainProps: {
-        domainName,
-        certificate,
-        hostedZone,
+        domainName: props.domainName,
+        certificate: certificate,
+        hostedZone: props.hostedZone,
       },
       overrides: {
         nextjsDistribution: {
