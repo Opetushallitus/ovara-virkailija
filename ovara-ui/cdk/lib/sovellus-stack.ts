@@ -17,8 +17,6 @@ export class OvaraUISovellusStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: OvaraUIStackProps) {
     super(scope, id, props);
 
-    const certificate = props.certificate;
-
     const nextjs = new Nextjs(this, `${props.environmentName}-OvaraUI`, {
       nextjsPath: '..', // relative path from project root to NextJS
       basePath: '/ovara',
@@ -29,7 +27,7 @@ export class OvaraUISovellusStack extends cdk.Stack {
       },
       domainProps: {
         domainName: props.domainName,
-        certificate: certificate,
+        certificate: props.certificate,
         hostedZone: props.hostedZone,
       },
       overrides: {

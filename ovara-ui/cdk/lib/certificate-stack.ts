@@ -17,10 +17,5 @@ export class OvaraCertificateStack extends cdk.Stack {
       domainName: props.domain,
       validation: acm.CertificateValidation.fromDns(props.hostedZone),
     });
-
-    new cdk.CfnOutput(this, 'CertificateArnExport', {
-      value: this.certificate.certificateArn,
-      exportName: `${props.stackName}-CertificateArn`,
-    });
   }
 }
