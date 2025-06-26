@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-if [ $# == 0  ] || [ $# -gt 3 ] 
+if [ $# == 0  ] || [ $# -gt 3 ]
 then
     echo 'please provide 1-3 arguments. Use -h or --help for usage information.'
     exit 0
@@ -17,7 +17,7 @@ case $key in
     echo '''
 Usage: deploy.sh [-h] [-d] environment deploy/build/loadup/loaddown
 
-Light weight version of cdk.sh in cloud-base 
+Light weight version of cdk.sh in cloud-base
 
 positional arguments:
   deploy                builds and deploys the stack to target environment, environment must be supplied.
@@ -120,5 +120,7 @@ if [[ "${deploy}" == "true" ]]; then
 
    echo "Building Lambda code, synhesizing CDK code and deploying to environment: $environment"
    cd "${git_root}/ovara-ui/cdk/"
-   aws-vault exec $aws_profile -- cdk deploy OvaraUISovellusStack -c "environment=$environment"
+   aws-vault exec $aws_profile -- cdk deploy HostedZoneStack -c "environment=${environment}"
+   aws-vault exec $aws_profile -- cdk deploy OvaraCertificateStack -c "environment=${environment}"
+   aws-vault exec $aws_profile -- cdk deploy OvaraUISovellusStack -c "environment=${environment}"
 fi
