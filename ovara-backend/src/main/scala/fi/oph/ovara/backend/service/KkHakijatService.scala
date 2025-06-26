@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.{KkHakijaWithCombinedNimi, Koodi}
+import fi.oph.ovara.backend.domain.{KkHakija, Koodi}
 import fi.oph.ovara.backend.repository.{CommonRepository, KkHakijatRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -76,8 +76,7 @@ class KkHakijatService(
         "kkHakijatRepository.selectWithParams"
       )
 
-      val sorted = queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi, resultRow.hakijanEtunimi, resultRow.oppijanumero))
-      val sortedListwithCombinedNimi = sorted.map(sortedResult => KkHakijaWithCombinedNimi(sortedResult))
+      val sortedList = queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi, resultRow.hakijanEtunimi, resultRow.oppijanumero))
 
       val yokokeet = {
         if(Some(naytaYoArvosanat).getOrElse(false))
@@ -87,7 +86,7 @@ class KkHakijatService(
       }
 
       ExcelWriter.writeKkHakijatRaportti(
-        sortedListwithCombinedNimi,
+        sortedList,
         asiointikieli,
         translations,
         Some(naytaYoArvosanat),

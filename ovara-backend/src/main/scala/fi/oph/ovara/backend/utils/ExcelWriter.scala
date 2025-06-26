@@ -745,7 +745,7 @@ object ExcelWriter {
       sheet: XSSFSheet,
       bodyTextCellStyle: XSSFCellStyle,
       currentRowIndex: Int,
-      hakijoidenHakutoiveet: Seq[ToisenAsteenHakijaWithCombinedNimi],
+      hakijoidenHakutoiveet: Seq[ToisenAsteenHakija],
       asiointikieli: String,
       translations: Map[String, String]
   ): Unit = {
@@ -755,7 +755,8 @@ object ExcelWriter {
       rowIndex += 1
       var cellIndex = 0
 
-      cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.hakija)
+      cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.hakijanSukunimi)
+      cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.hakijanEtunimi)
       cellIndex =
         writeOptionBooleanToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.turvakielto, translations)
 
@@ -889,7 +890,7 @@ object ExcelWriter {
   }
 
   def writeToisenAsteenHakijatRaportti(
-      hakijat: Seq[ToisenAsteenHakijaWithCombinedNimi],
+      hakijat: Seq[ToisenAsteenHakija],
       asiointikieli: String,
       translations: Map[String, String]
   ): XSSFWorkbook = {
@@ -909,7 +910,7 @@ object ExcelWriter {
 
     var currentRowIndex = 0
 
-    val fieldNames: List[String] = classOf[ToisenAsteenHakijaWithCombinedNimi].getDeclaredFields.map(_.getName).toList
+    val fieldNames: List[String] = classOf[ToisenAsteenHakija].getDeclaredFields.map(_.getName).toList
     val fieldNamesWithIndex      = fieldNames.zipWithIndex
 
     currentRowIndex = createHeadingRow(sheet, translations, currentRowIndex, fieldNames, headingCellStyle)
@@ -947,7 +948,7 @@ object ExcelWriter {
     val optionallyShowableFields = List("hetu", "arvosanat") ::: POSTIOSOITEFIELDS
 
     val fieldNames =
-      classOf[KkHakijaWithCombinedNimi].getDeclaredFields
+      classOf[KkHakija].getDeclaredFields
         .map(_.getName)
         .toList
 
@@ -1023,7 +1024,7 @@ object ExcelWriter {
       sheet: XSSFSheet,
       bodyTextCellStyle: XSSFCellStyle,
       currentRowIndex: Int,
-      hakijoidenHakutoiveet: Seq[KkHakijaWithCombinedNimi],
+      hakijoidenHakutoiveet: Seq[KkHakija],
       asiointikieli: String,
       translations: Map[String, String],
       naytaArvosanat: Boolean,
@@ -1038,7 +1039,9 @@ object ExcelWriter {
       rowIndex += 1
       var cellIndex = 0
 
-      cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.hakija)
+      cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.hakijanSukunimi)
+      cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.hakijanEtunimi)
+      cellIndex = writeOptionBooleanToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.turvakielto, translations)
 
       if (naytaHetu) {
         cellIndex = writeOptionStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.hetu)
@@ -1180,7 +1183,7 @@ object ExcelWriter {
   }
 
   def writeKkHakijatRaportti(
-      hakijoidenHakutoiveet: Seq[KkHakijaWithCombinedNimi],
+      hakijoidenHakutoiveet: Seq[KkHakija],
       asiointikieli: String,
       translations: Map[String, String],
       maybeNaytaYoArvosanat: Option[Boolean] = None,
@@ -1223,7 +1226,7 @@ object ExcelWriter {
         distinctSortedYoArvosanatInQueryResult
       )
 
-    val fieldNames: List[String] = classOf[KkHakijaWithCombinedNimi].getDeclaredFields.map(_.getName).toList
+    val fieldNames: List[String] = classOf[KkHakija].getDeclaredFields.map(_.getName).toList
 
     if (distinctSortedValintatapajonotInQueryResult.nonEmpty) {
       currentRowIndex = createHylkaamisenTaiPeruuntumisenSyyHeadingRow(
