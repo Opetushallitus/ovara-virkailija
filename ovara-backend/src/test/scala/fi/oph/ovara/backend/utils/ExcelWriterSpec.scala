@@ -1632,6 +1632,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         Fi -> "Aalto-yliopiston maisterihaku 2023",
         Sv -> "Aalto-universitetets magisteransökan 2023"
       ),
+      "1.2.246.562.29.00000000000000015722",
       Some(
         Hakuaika(
           alkaa = Some(LocalDate.from(ISO_LOCAL_DATE_TIME_FORMATTER.parse("2022-12-01T09:00"))),
@@ -1690,6 +1691,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         Fi -> "Aalto-yliopiston maisterihaku 2023",
         Sv -> "Aalto-universitetets magisteransökan 2023"
       ),
+      "1.2.246.562.29.00000000000000015722",
       Some(
         Hakuaika(
           Some(LocalDate.from(ISO_LOCAL_DATE_TIME_FORMATTER.parse("2022-12-01T09:00"))),
@@ -1745,6 +1747,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         Fi -> "Aalto-yliopiston maisterihaku 2023",
         Sv -> "Aalto-universitetets magisteransökan 2023"
       ),
+      "1.2.246.562.29.00000000000000015722",
       Some(
         Hakuaika(
           Some(LocalDate.from(ISO_LOCAL_DATE_TIME_FORMATTER.parse("2022-12-01T09:00"))),
@@ -1800,6 +1803,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         Fi -> "Aalto-yliopiston maisterihaku 2023",
         Sv -> "Aalto-universitetets magisteransökan 2023"
       ),
+      "1.2.246.562.29.00000000000000015722",
       Some(
         Hakuaika(
           Some(LocalDate.from(ISO_LOCAL_DATE_TIME_FORMATTER.parse("2022-12-01T09:00"))),
@@ -1844,12 +1848,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(0).getCell(15).getStringCellValue == "Hak.tila SV")
     assert(sheet.getRow(0).getCell(16).getStringCellValue == "raportti.hakukohteenUlkoinenTunniste")
     assert(sheet.getRow(0).getCell(17).getStringCellValue == "raportti.haunNimi")
-    assert(sheet.getRow(0).getCell(18).getStringCellValue == "raportti.hakuaika")
-    assert(sheet.getRow(0).getCell(19).getStringCellValue == "raportti.hakutapa")
-    assert(sheet.getRow(0).getCell(20).getStringCellValue == "raportti.hakukohteenAloituspaikat")
-    assert(sheet.getRow(0).getCell(21).getStringCellValue == "raportti.ensikertalaistenAloituspaikat")
-    assert(sheet.getRow(0).getCell(22).getStringCellValue == "raportti.valintaperuste")
-    assert(sheet.getRow(0).getCell(23) == null)
+    assert(sheet.getRow(0).getCell(18).getStringCellValue == "raportti.hakuOid")
+    assert(sheet.getRow(0).getCell(19).getStringCellValue == "raportti.hakuaika")
+    assert(sheet.getRow(0).getCell(20).getStringCellValue == "raportti.hakutapa")
+    assert(sheet.getRow(0).getCell(21).getStringCellValue == "raportti.hakukohteenAloituspaikat")
+    assert(sheet.getRow(0).getCell(22).getStringCellValue == "raportti.ensikertalaistenAloituspaikat")
+    assert(sheet.getRow(0).getCell(23).getStringCellValue == "raportti.valintaperuste")
+    assert(sheet.getRow(0).getCell(24) == null)
 
     assert(
       sheet.getRow(1).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
@@ -1876,17 +1881,18 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(1).getCell(15).getStringCellValue == "raportti.arkistoitu")
     assert(sheet.getRow(1).getCell(16).getStringCellValue == "-")
     assert(sheet.getRow(1).getCell(17).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
-    assert(sheet.getRow(1).getCell(18).getStringCellValue == "1.12.2022 - 2.1.2023")
-    assert(sheet.getRow(1).getCell(19).getStringCellValue == "Separata antagningar")
-    assert(sheet.getRow(1).getCell(20).getNumericCellValue == 8)
-    assert(sheet.getRow(1).getCell(21).getStringCellValue == "-")
+    assert(sheet.getRow(1).getCell(18).getStringCellValue == "1.2.246.562.29.00000000000000015722")
+    assert(sheet.getRow(1).getCell(19).getStringCellValue == "1.12.2022 - 2.1.2023")
+    assert(sheet.getRow(1).getCell(20).getStringCellValue == "Separata antagningar")
+    assert(sheet.getRow(1).getCell(21).getNumericCellValue == 8)
+    assert(sheet.getRow(1).getCell(22).getStringCellValue == "-")
     assert(
       sheet
         .getRow(1)
-        .getCell(22)
+        .getCell(23)
         .getStringCellValue == "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
     )
-    assert(sheet.getRow(1).getCell(23) == null)
+    assert(sheet.getRow(1).getCell(24) == null)
 
     assert(
       sheet.getRow(2).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
@@ -1918,17 +1924,18 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(2).getCell(15).getStringCellValue == "raportti.arkistoitu")
     assert(sheet.getRow(2).getCell(16).getStringCellValue == "ARTS20100")
     assert(sheet.getRow(2).getCell(17).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
-    assert(sheet.getRow(2).getCell(18).getStringCellValue == "1.12.2022 - 2.1.2023")
-    assert(sheet.getRow(2).getCell(19).getStringCellValue == "Separata antagningar")
-    assert(sheet.getRow(2).getCell(20).getNumericCellValue == 12)
-    assert(sheet.getRow(2).getCell(21).getStringCellValue == "-")
+    assert(sheet.getRow(2).getCell(18).getStringCellValue == "1.2.246.562.29.00000000000000015722")
+    assert(sheet.getRow(2).getCell(19).getStringCellValue == "1.12.2022 - 2.1.2023")
+    assert(sheet.getRow(2).getCell(20).getStringCellValue == "Separata antagningar")
+    assert(sheet.getRow(2).getCell(21).getNumericCellValue == 12)
+    assert(sheet.getRow(2).getCell(22).getStringCellValue == "-")
     assert(
       sheet
         .getRow(2)
-        .getCell(22)
+        .getCell(23)
         .getStringCellValue == "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
     )
-    assert(sheet.getRow(2).getCell(23) == null)
+    assert(sheet.getRow(2).getCell(24) == null)
 
     assert(
       sheet.getRow(3).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
@@ -1962,17 +1969,18 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(3).getCell(15).getStringCellValue == "raportti.arkistoitu")
     assert(sheet.getRow(3).getCell(16).getStringCellValue == "ARTS20200")
     assert(sheet.getRow(3).getCell(17).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
-    assert(sheet.getRow(3).getCell(18).getStringCellValue == "1.12.2022 - 2.1.2023")
-    assert(sheet.getRow(3).getCell(19).getStringCellValue == "Separata antagningar")
-    assert(sheet.getRow(3).getCell(20).getNumericCellValue == 14)
-    assert(sheet.getRow(3).getCell(21).getNumericCellValue == 10)
+    assert(sheet.getRow(3).getCell(18).getStringCellValue == "1.2.246.562.29.00000000000000015722")
+    assert(sheet.getRow(3).getCell(19).getStringCellValue == "1.12.2022 - 2.1.2023")
+    assert(sheet.getRow(3).getCell(20).getStringCellValue == "Separata antagningar")
+    assert(sheet.getRow(3).getCell(21).getNumericCellValue == 14)
+    assert(sheet.getRow(3).getCell(22).getNumericCellValue == 10)
     assert(
       sheet
         .getRow(3)
-        .getCell(22)
+        .getCell(23)
         .getStringCellValue == "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
     )
-    assert(sheet.getRow(3).getCell(23) == null)
+    assert(sheet.getRow(3).getCell(24) == null)
 
     assert(
       sheet.getRow(4).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
@@ -1999,17 +2007,18 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(4).getCell(15).getStringCellValue == "Luonnos SV")
     assert(sheet.getRow(4).getCell(16).getStringCellValue == "ARTS20503")
     assert(sheet.getRow(4).getCell(17).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
-    assert(sheet.getRow(4).getCell(18).getStringCellValue == "1.12.2022 - 2.1.2023")
-    assert(sheet.getRow(4).getCell(19).getStringCellValue == "Separata antagningar")
-    assert(sheet.getRow(4).getCell(20).getNumericCellValue == 15)
-    assert(sheet.getRow(4).getCell(21).getNumericCellValue == 10)
+    assert(sheet.getRow(4).getCell(18).getStringCellValue == "1.2.246.562.29.00000000000000015722")
+    assert(sheet.getRow(4).getCell(19).getStringCellValue == "1.12.2022 - 2.1.2023")
+    assert(sheet.getRow(4).getCell(20).getStringCellValue == "Separata antagningar")
+    assert(sheet.getRow(4).getCell(21).getNumericCellValue == 15)
+    assert(sheet.getRow(4).getCell(22).getNumericCellValue == 10)
     assert(
       sheet
         .getRow(4)
-        .getCell(22)
+        .getCell(23)
         .getStringCellValue == "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
     )
-    assert(sheet.getRow(4).getCell(23) == null)
+    assert(sheet.getRow(4).getCell(24) == null)
 
     assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 5)
     assert(wb.getSheetAt(0).getRow(6) == null)
@@ -2035,12 +2044,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(0).getCell(8).getStringCellValue == "Hak.tila SV")
     assert(sheet.getRow(0).getCell(9).getStringCellValue == "raportti.hakukohteenUlkoinenTunniste")
     assert(sheet.getRow(0).getCell(10).getStringCellValue == "raportti.haunNimi")
-    assert(sheet.getRow(0).getCell(11).getStringCellValue == "raportti.hakuaika")
-    assert(sheet.getRow(0).getCell(12).getStringCellValue == "raportti.hakutapa")
-    assert(sheet.getRow(0).getCell(13).getStringCellValue == "raportti.hakukohteenAloituspaikat")
-    assert(sheet.getRow(0).getCell(14).getStringCellValue == "raportti.ensikertalaistenAloituspaikat")
-    assert(sheet.getRow(0).getCell(15).getStringCellValue == "raportti.valintaperuste")
-    assert(sheet.getRow(0).getCell(16) == null)
+    assert(sheet.getRow(0).getCell(11).getStringCellValue == "raportti.hakuOid")
+    assert(sheet.getRow(0).getCell(12).getStringCellValue == "raportti.hakuaika")
+    assert(sheet.getRow(0).getCell(13).getStringCellValue == "raportti.hakutapa")
+    assert(sheet.getRow(0).getCell(14).getStringCellValue == "raportti.hakukohteenAloituspaikat")
+    assert(sheet.getRow(0).getCell(15).getStringCellValue == "raportti.ensikertalaistenAloituspaikat")
+    assert(sheet.getRow(0).getCell(16).getStringCellValue == "raportti.valintaperuste")
+    assert(sheet.getRow(0).getCell(17) == null)
 
     assert(
       sheet.getRow(1).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
@@ -2060,17 +2070,18 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(1).getCell(8).getStringCellValue == "raportti.arkistoitu")
     assert(sheet.getRow(1).getCell(9).getStringCellValue == "-")
     assert(sheet.getRow(1).getCell(10).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
-    assert(sheet.getRow(1).getCell(11).getStringCellValue == "1.12.2022 - 2.1.2023")
-    assert(sheet.getRow(1).getCell(12).getStringCellValue == "Separata antagningar")
-    assert(sheet.getRow(1).getCell(13).getNumericCellValue == 8)
-    assert(sheet.getRow(1).getCell(14).getStringCellValue == "-")
+    assert(sheet.getRow(1).getCell(11).getStringCellValue == "1.2.246.562.29.00000000000000015722")
+    assert(sheet.getRow(1).getCell(12).getStringCellValue == "1.12.2022 - 2.1.2023")
+    assert(sheet.getRow(1).getCell(13).getStringCellValue == "Separata antagningar")
+    assert(sheet.getRow(1).getCell(14).getNumericCellValue == 8)
+    assert(sheet.getRow(1).getCell(15).getStringCellValue == "-")
     assert(
       sheet
         .getRow(1)
-        .getCell(15)
+        .getCell(16)
         .getStringCellValue == "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
     )
-    assert(sheet.getRow(1).getCell(16) == null)
+    assert(sheet.getRow(1).getCell(17) == null)
 
     assert(
       sheet.getRow(2).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
@@ -2090,17 +2101,18 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(2).getCell(8).getStringCellValue == "raportti.arkistoitu")
     assert(sheet.getRow(2).getCell(9).getStringCellValue == "ARTS20100")
     assert(sheet.getRow(2).getCell(10).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
-    assert(sheet.getRow(2).getCell(11).getStringCellValue == "1.12.2022 - 2.1.2023")
-    assert(sheet.getRow(2).getCell(12).getStringCellValue == "Separata antagningar")
-    assert(sheet.getRow(2).getCell(13).getNumericCellValue == 12)
-    assert(sheet.getRow(2).getCell(14).getStringCellValue == "-")
+    assert(sheet.getRow(1).getCell(11).getStringCellValue == "1.2.246.562.29.00000000000000015722")
+    assert(sheet.getRow(2).getCell(12).getStringCellValue == "1.12.2022 - 2.1.2023")
+    assert(sheet.getRow(2).getCell(13).getStringCellValue == "Separata antagningar")
+    assert(sheet.getRow(2).getCell(14).getNumericCellValue == 12)
+    assert(sheet.getRow(2).getCell(15).getStringCellValue == "-")
     assert(
       sheet
         .getRow(2)
-        .getCell(15)
+        .getCell(16)
         .getStringCellValue == "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
     )
-    assert(sheet.getRow(2).getCell(16) == null)
+    assert(sheet.getRow(2).getCell(17) == null)
 
     assert(
       sheet.getRow(3).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
@@ -2122,17 +2134,18 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(3).getCell(8).getStringCellValue == "raportti.arkistoitu")
     assert(sheet.getRow(3).getCell(9).getStringCellValue == "ARTS20200")
     assert(sheet.getRow(3).getCell(10).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
-    assert(sheet.getRow(3).getCell(11).getStringCellValue == "1.12.2022 - 2.1.2023")
-    assert(sheet.getRow(3).getCell(12).getStringCellValue == "Separata antagningar")
-    assert(sheet.getRow(3).getCell(13).getNumericCellValue == 14)
-    assert(sheet.getRow(3).getCell(14).getNumericCellValue == 10)
+    assert(sheet.getRow(1).getCell(11).getStringCellValue == "1.2.246.562.29.00000000000000015722")
+    assert(sheet.getRow(3).getCell(12).getStringCellValue == "1.12.2022 - 2.1.2023")
+    assert(sheet.getRow(3).getCell(13).getStringCellValue == "Separata antagningar")
+    assert(sheet.getRow(3).getCell(14).getNumericCellValue == 14)
+    assert(sheet.getRow(3).getCell(15).getNumericCellValue == 10)
     assert(
       sheet
         .getRow(3)
-        .getCell(15)
+        .getCell(16)
         .getStringCellValue == "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
     )
-    assert(sheet.getRow(3).getCell(16) == null)
+    assert(sheet.getRow(3).getCell(17) == null)
 
     assert(
       sheet.getRow(4).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
@@ -2152,17 +2165,18 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(4).getCell(8).getStringCellValue == "Luonnos SV")
     assert(sheet.getRow(4).getCell(9).getStringCellValue == "ARTS20503")
     assert(sheet.getRow(4).getCell(10).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
-    assert(sheet.getRow(4).getCell(11).getStringCellValue == "1.12.2022 - 2.1.2023")
-    assert(sheet.getRow(4).getCell(12).getStringCellValue == "Separata antagningar")
-    assert(sheet.getRow(4).getCell(13).getNumericCellValue == 15)
-    assert(sheet.getRow(4).getCell(14).getNumericCellValue == 10)
+    assert(sheet.getRow(1).getCell(11).getStringCellValue == "1.2.246.562.29.00000000000000015722")
+    assert(sheet.getRow(4).getCell(12).getStringCellValue == "1.12.2022 - 2.1.2023")
+    assert(sheet.getRow(4).getCell(13).getStringCellValue == "Separata antagningar")
+    assert(sheet.getRow(4).getCell(14).getNumericCellValue == 15)
+    assert(sheet.getRow(4).getCell(15).getNumericCellValue == 10)
     assert(
       sheet
         .getRow(4)
-        .getCell(15)
+        .getCell(16)
         .getStringCellValue == "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
     )
-    assert(sheet.getRow(4).getCell(16) == null)
+    assert(sheet.getRow(4).getCell(17) == null)
 
     assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 5)
     assert(wb.getSheetAt(0).getRow(6) == null)
@@ -2183,24 +2197,25 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(0).getCell(3).getStringCellValue == "Hak.tila SV")
     assert(sheet.getRow(0).getCell(4).getStringCellValue == "raportti.hakukohteenUlkoinenTunniste")
     assert(sheet.getRow(0).getCell(5).getStringCellValue == "raportti.haunNimi")
-    assert(sheet.getRow(0).getCell(6).getStringCellValue == "raportti.hakuaika")
-    assert(sheet.getRow(0).getCell(7).getStringCellValue == "raportti.hakutapa")
-    assert(sheet.getRow(0).getCell(8).getStringCellValue == "raportti.hakukohteenAloituspaikat")
-    assert(sheet.getRow(0).getCell(9).getStringCellValue == "raportti.ensikertalaistenAloituspaikat")
-    assert(sheet.getRow(0).getCell(10).getStringCellValue == "raportti.valintaperuste")
-    assert(sheet.getRow(0).getCell(11).getStringCellValue == "raportti.toteutuksenNimi")
-    assert(sheet.getRow(0).getCell(12).getStringCellValue == "raportti.toteutusOid")
-    assert(sheet.getRow(0).getCell(13).getStringCellValue == "Tot.tila SV")
-    assert(sheet.getRow(0).getCell(14).getStringCellValue == "raportti.toteutuksenUlkoinenTunniste")
-    assert(sheet.getRow(0).getCell(15).getStringCellValue == "raportti.koulutuksenAlkamisaika")
-    assert(sheet.getRow(0).getCell(16).getStringCellValue == "raportti.koulutuksenNimi")
-    assert(sheet.getRow(0).getCell(17).getStringCellValue == "raportti.koulutusOid")
-    assert(sheet.getRow(0).getCell(18).getStringCellValue == "Kou.tila SV")
-    assert(sheet.getRow(0).getCell(19).getStringCellValue == "raportti.koulutuskoodi")
-    assert(sheet.getRow(0).getCell(20).getStringCellValue == "raportti.koulutuksenUlkoinenTunniste")
-    assert(sheet.getRow(0).getCell(21).getStringCellValue == "raportti.tutkinnonTaso")
-    assert(sheet.getRow(0).getCell(22).getStringCellValue == "raportti.opintojenLaajuus")
-    assert(sheet.getRow(0).getCell(23) == null)
+    assert(sheet.getRow(0).getCell(6).getStringCellValue == "raportti.hakuOid")
+    assert(sheet.getRow(0).getCell(7).getStringCellValue == "raportti.hakuaika")
+    assert(sheet.getRow(0).getCell(8).getStringCellValue == "raportti.hakutapa")
+    assert(sheet.getRow(0).getCell(9).getStringCellValue == "raportti.hakukohteenAloituspaikat")
+    assert(sheet.getRow(0).getCell(10).getStringCellValue == "raportti.ensikertalaistenAloituspaikat")
+    assert(sheet.getRow(0).getCell(11).getStringCellValue == "raportti.valintaperuste")
+    assert(sheet.getRow(0).getCell(12).getStringCellValue == "raportti.toteutuksenNimi")
+    assert(sheet.getRow(0).getCell(13).getStringCellValue == "raportti.toteutusOid")
+    assert(sheet.getRow(0).getCell(14).getStringCellValue == "Tot.tila SV")
+    assert(sheet.getRow(0).getCell(15).getStringCellValue == "raportti.toteutuksenUlkoinenTunniste")
+    assert(sheet.getRow(0).getCell(16).getStringCellValue == "raportti.koulutuksenAlkamisaika")
+    assert(sheet.getRow(0).getCell(17).getStringCellValue == "raportti.koulutuksenNimi")
+    assert(sheet.getRow(0).getCell(18).getStringCellValue == "raportti.koulutusOid")
+    assert(sheet.getRow(0).getCell(19).getStringCellValue == "Kou.tila SV")
+    assert(sheet.getRow(0).getCell(20).getStringCellValue == "raportti.koulutuskoodi")
+    assert(sheet.getRow(0).getCell(21).getStringCellValue == "raportti.koulutuksenUlkoinenTunniste")
+    assert(sheet.getRow(0).getCell(22).getStringCellValue == "raportti.tutkinnonTaso")
+    assert(sheet.getRow(0).getCell(23).getStringCellValue == "raportti.opintojenLaajuus")
+    assert(sheet.getRow(0).getCell(24) == null)
 
     assert(
       sheet.getRow(1).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
@@ -2210,34 +2225,35 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(1).getCell(3).getStringCellValue == "raportti.arkistoitu")
     assert(sheet.getRow(1).getCell(4).getStringCellValue == "-")
     assert(sheet.getRow(1).getCell(5).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
-    assert(sheet.getRow(1).getCell(6).getStringCellValue == "1.12.2022 - 2.1.2023")
-    assert(sheet.getRow(1).getCell(7).getStringCellValue == "Separata antagningar")
-    assert(sheet.getRow(1).getCell(8).getNumericCellValue == 8)
-    assert(sheet.getRow(1).getCell(9).getStringCellValue == "-")
+    assert(sheet.getRow(1).getCell(6).getStringCellValue == "1.2.246.562.29.00000000000000015722")
+    assert(sheet.getRow(1).getCell(7).getStringCellValue == "1.12.2022 - 2.1.2023")
+    assert(sheet.getRow(1).getCell(8).getStringCellValue == "Separata antagningar")
+    assert(sheet.getRow(1).getCell(9).getNumericCellValue == 8)
+    assert(sheet.getRow(1).getCell(10).getStringCellValue == "-")
     assert(
       sheet
         .getRow(1)
-        .getCell(10)
+        .getCell(11)
         .getStringCellValue == "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
     )
     assert(
       sheet
         .getRow(1)
-        .getCell(11)
+        .getCell(12)
         .getStringCellValue == "Animation, Master of Arts (Art and Design) (2 yrs) -toteutus SV"
     )
-    assert(sheet.getRow(1).getCell(12).getStringCellValue == "1.2.246.562.17.00000000000000008396")
-    assert(sheet.getRow(1).getCell(13).getStringCellValue == "Julkaistu SV")
-    assert(sheet.getRow(1).getCell(14).getStringCellValue == "-")
+    assert(sheet.getRow(1).getCell(13).getStringCellValue == "1.2.246.562.17.00000000000000008396")
+    assert(sheet.getRow(1).getCell(14).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(1).getCell(15).getStringCellValue == "-")
-    assert(sheet.getRow(1).getCell(16).getStringCellValue == "Animation, Master of Arts (Art and Design) (2 yrs) SV")
-    assert(sheet.getRow(1).getCell(17).getStringCellValue == "1.2.246.562.13.00000000000000002880")
-    assert(sheet.getRow(1).getCell(18).getStringCellValue == "Julkaistu SV")
-    assert(sheet.getRow(1).getCell(19).getStringCellValue == "722101")
-    assert(sheet.getRow(1).getCell(20).getStringCellValue == "-")
-    assert(sheet.getRow(1).getCell(21).getStringCellValue == "raportti.tutkinnontaso.ylempi")
-    assert(sheet.getRow(1).getCell(22).getStringCellValue == "120 studiepoäng")
-    assert(sheet.getRow(1).getCell(23) == null)
+    assert(sheet.getRow(1).getCell(16).getStringCellValue == "-")
+    assert(sheet.getRow(1).getCell(17).getStringCellValue == "Animation, Master of Arts (Art and Design) (2 yrs) SV")
+    assert(sheet.getRow(1).getCell(18).getStringCellValue == "1.2.246.562.13.00000000000000002880")
+    assert(sheet.getRow(1).getCell(19).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(1).getCell(20).getStringCellValue == "722101")
+    assert(sheet.getRow(1).getCell(21).getStringCellValue == "-")
+    assert(sheet.getRow(1).getCell(22).getStringCellValue == "raportti.tutkinnontaso.ylempi")
+    assert(sheet.getRow(1).getCell(23).getStringCellValue == "120 studiepoäng")
+    assert(sheet.getRow(1).getCell(24) == null)
 
     assert(
       sheet.getRow(2).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
@@ -2247,39 +2263,40 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(2).getCell(3).getStringCellValue == "raportti.arkistoitu")
     assert(sheet.getRow(2).getCell(4).getStringCellValue == "ARTS20100")
     assert(sheet.getRow(2).getCell(5).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
-    assert(sheet.getRow(2).getCell(6).getStringCellValue == "1.12.2022 - 2.1.2023")
-    assert(sheet.getRow(2).getCell(7).getStringCellValue == "Separata antagningar")
-    assert(sheet.getRow(2).getCell(8).getNumericCellValue == 12)
-    assert(sheet.getRow(2).getCell(9).getStringCellValue == "-")
+    assert(sheet.getRow(2).getCell(6).getStringCellValue == "1.2.246.562.29.00000000000000015722")
+    assert(sheet.getRow(2).getCell(7).getStringCellValue == "1.12.2022 - 2.1.2023")
+    assert(sheet.getRow(2).getCell(8).getStringCellValue == "Separata antagningar")
+    assert(sheet.getRow(2).getCell(9).getNumericCellValue == 12)
+    assert(sheet.getRow(2).getCell(10).getStringCellValue == "-")
     assert(
       sheet
         .getRow(2)
-        .getCell(10)
+        .getCell(11)
         .getStringCellValue == "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
     )
     assert(
       sheet
         .getRow(2)
-        .getCell(11)
+        .getCell(12)
         .getStringCellValue == "Arkitektur - Arkitektur, landskapsarkitektur och inredningsarkitektur, Arkitekt (2 år)"
     )
-    assert(sheet.getRow(2).getCell(12).getStringCellValue == "1.2.246.562.17.00000000000000007965")
-    assert(sheet.getRow(2).getCell(13).getStringCellValue == "Julkaistu SV")
-    assert(sheet.getRow(2).getCell(14).getStringCellValue == "-")
+    assert(sheet.getRow(2).getCell(13).getStringCellValue == "1.2.246.562.17.00000000000000007965")
+    assert(sheet.getRow(2).getCell(14).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(2).getCell(15).getStringCellValue == "-")
+    assert(sheet.getRow(2).getCell(16).getStringCellValue == "-")
     assert(
       sheet
         .getRow(2)
-        .getCell(16)
+        .getCell(17)
         .getStringCellValue == "Arkitektur - Arkitektur, landskapsarkitektur och inredningsarkitektur, Arkitekt (2 år)"
     )
-    assert(sheet.getRow(2).getCell(17).getStringCellValue == "1.2.246.562.13.00000000000000002675")
-    assert(sheet.getRow(2).getCell(18).getStringCellValue == "Julkaistu SV")
-    assert(sheet.getRow(2).getCell(19).getStringCellValue == "754101")
-    assert(sheet.getRow(2).getCell(20).getStringCellValue == "ARTS20100")
-    assert(sheet.getRow(2).getCell(21).getStringCellValue == "raportti.tutkinnontaso.alempijaylempi")
-    assert(sheet.getRow(2).getCell(22).getStringCellValue == "120 studiepoäng")
-    assert(sheet.getRow(2).getCell(23) == null)
+    assert(sheet.getRow(2).getCell(18).getStringCellValue == "1.2.246.562.13.00000000000000002675")
+    assert(sheet.getRow(2).getCell(19).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(2).getCell(20).getStringCellValue == "754101")
+    assert(sheet.getRow(2).getCell(21).getStringCellValue == "ARTS20100")
+    assert(sheet.getRow(2).getCell(22).getStringCellValue == "raportti.tutkinnontaso.alempijaylempi")
+    assert(sheet.getRow(2).getCell(23).getStringCellValue == "120 studiepoäng")
+    assert(sheet.getRow(2).getCell(24) == null)
 
     assert(
       sheet.getRow(3).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
@@ -2289,34 +2306,35 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(3).getCell(3).getStringCellValue == "Luonnos SV")
     assert(sheet.getRow(3).getCell(4).getStringCellValue == "ARTS20503")
     assert(sheet.getRow(3).getCell(5).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
-    assert(sheet.getRow(3).getCell(6).getStringCellValue == "1.12.2022 - 2.1.2023")
-    assert(sheet.getRow(3).getCell(7).getStringCellValue == "Separata antagningar")
-    assert(sheet.getRow(3).getCell(8).getNumericCellValue == 15)
-    assert(sheet.getRow(3).getCell(9).getNumericCellValue == 10)
+    assert(sheet.getRow(3).getCell(6).getStringCellValue == "1.2.246.562.29.00000000000000015722")
+    assert(sheet.getRow(3).getCell(7).getStringCellValue == "1.12.2022 - 2.1.2023")
+    assert(sheet.getRow(3).getCell(8).getStringCellValue == "Separata antagningar")
+    assert(sheet.getRow(3).getCell(9).getNumericCellValue == 15)
+    assert(sheet.getRow(3).getCell(10).getNumericCellValue == 10)
     assert(
       sheet
         .getRow(3)
-        .getCell(10)
+        .getCell(11)
         .getStringCellValue == "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
     )
     assert(
       sheet
         .getRow(3)
-        .getCell(11)
+        .getCell(12)
         .getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år) -toteutus"
     )
-    assert(sheet.getRow(3).getCell(12).getStringCellValue == "1.2.246.562.17.00000000000000007967")
-    assert(sheet.getRow(3).getCell(13).getStringCellValue == "raportti.arkistoitu")
-    assert(sheet.getRow(3).getCell(14).getStringCellValue == "-")
-    assert(sheet.getRow(3).getCell(15).getStringCellValue == "Höst 2023")
-    assert(sheet.getRow(3).getCell(16).getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år)")
-    assert(sheet.getRow(3).getCell(17).getStringCellValue == "1.2.246.562.13.00000000000000002677")
-    assert(sheet.getRow(3).getCell(18).getStringCellValue == "Julkaistu SV")
-    assert(sheet.getRow(3).getCell(19).getStringCellValue == "309902")
-    assert(sheet.getRow(3).getCell(20).getStringCellValue == "ARTS20502")
-    assert(sheet.getRow(3).getCell(21).getStringCellValue == "raportti.tutkinnontaso.alempi")
-    assert(sheet.getRow(3).getCell(22).getStringCellValue == "120 studiepoäng")
-    assert(sheet.getRow(3).getCell(23) == null)
+    assert(sheet.getRow(3).getCell(13).getStringCellValue == "1.2.246.562.17.00000000000000007967")
+    assert(sheet.getRow(3).getCell(14).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(3).getCell(15).getStringCellValue == "-")
+    assert(sheet.getRow(3).getCell(16).getStringCellValue == "Höst 2023")
+    assert(sheet.getRow(3).getCell(17).getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år)")
+    assert(sheet.getRow(3).getCell(18).getStringCellValue == "1.2.246.562.13.00000000000000002677")
+    assert(sheet.getRow(3).getCell(19).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(3).getCell(20).getStringCellValue == "309902")
+    assert(sheet.getRow(3).getCell(21).getStringCellValue == "ARTS20502")
+    assert(sheet.getRow(3).getCell(22).getStringCellValue == "raportti.tutkinnontaso.alempi")
+    assert(sheet.getRow(3).getCell(23).getStringCellValue == "120 studiepoäng")
+    assert(sheet.getRow(3).getCell(24) == null)
 
     assert(
       sheet.getRow(4).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
@@ -2328,39 +2346,40 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(4).getCell(3).getStringCellValue == "raportti.arkistoitu")
     assert(sheet.getRow(4).getCell(4).getStringCellValue == "ARTS20200")
     assert(sheet.getRow(4).getCell(5).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
-    assert(sheet.getRow(4).getCell(6).getStringCellValue == "1.12.2022 - 2.1.2023")
-    assert(sheet.getRow(4).getCell(7).getStringCellValue == "Separata antagningar")
-    assert(sheet.getRow(4).getCell(8).getNumericCellValue == 14)
-    assert(sheet.getRow(4).getCell(9).getNumericCellValue == 10)
+    assert(sheet.getRow(4).getCell(6).getStringCellValue == "1.2.246.562.29.00000000000000015722")
+    assert(sheet.getRow(4).getCell(7).getStringCellValue == "1.12.2022 - 2.1.2023")
+    assert(sheet.getRow(4).getCell(8).getStringCellValue == "Separata antagningar")
+    assert(sheet.getRow(4).getCell(9).getNumericCellValue == 14)
+    assert(sheet.getRow(4).getCell(10).getNumericCellValue == 10)
     assert(
       sheet
         .getRow(4)
-        .getCell(10)
+        .getCell(11)
         .getStringCellValue == "Magisterurvalet (Aalto-universitetet, konstnärligt utbildningsområde) 2023"
     )
     assert(
       sheet
         .getRow(4)
-        .getCell(11)
+        .getCell(12)
         .getStringCellValue == "Collaborative and Industrial Design - Design, Master of Arts (Art and Design) (2 yrs) -toteutus SV"
     )
-    assert(sheet.getRow(4).getCell(12).getStringCellValue == "1.2.246.562.17.00000000000000007977")
-    assert(sheet.getRow(4).getCell(13).getStringCellValue == "Julkaistu SV")
-    assert(sheet.getRow(4).getCell(14).getStringCellValue == "-")
-    assert(sheet.getRow(4).getCell(15).getStringCellValue == "30.9.2023")
+    assert(sheet.getRow(4).getCell(13).getStringCellValue == "1.2.246.562.17.00000000000000007977")
+    assert(sheet.getRow(4).getCell(14).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(4).getCell(15).getStringCellValue == "-")
+    assert(sheet.getRow(4).getCell(16).getStringCellValue == "30.9.2023")
     assert(
       sheet
         .getRow(4)
-        .getCell(16)
+        .getCell(17)
         .getStringCellValue == "Collaborative and Industrial Design - Design, Master of Arts (Art and Design) (2 yrs) SV"
     )
-    assert(sheet.getRow(4).getCell(17).getStringCellValue == "1.2.246.562.13.00000000000000002687")
-    assert(sheet.getRow(4).getCell(18).getStringCellValue == "Julkaistu SV")
-    assert(sheet.getRow(4).getCell(19).getStringCellValue == "722101")
-    assert(sheet.getRow(4).getCell(20).getStringCellValue == "ARTS20200")
-    assert(sheet.getRow(4).getCell(21).getStringCellValue == "raportti.tutkinnontaso.jatkotutkinto")
-    assert(sheet.getRow(4).getCell(22).getStringCellValue == "120 studiepoäng")
-    assert(sheet.getRow(4).getCell(23) == null)
+    assert(sheet.getRow(4).getCell(18).getStringCellValue == "1.2.246.562.13.00000000000000002687")
+    assert(sheet.getRow(4).getCell(19).getStringCellValue == "Julkaistu SV")
+    assert(sheet.getRow(4).getCell(20).getStringCellValue == "722101")
+    assert(sheet.getRow(4).getCell(21).getStringCellValue == "ARTS20200")
+    assert(sheet.getRow(4).getCell(22).getStringCellValue == "raportti.tutkinnontaso.jatkotutkinto")
+    assert(sheet.getRow(4).getCell(23).getStringCellValue == "120 studiepoäng")
+    assert(sheet.getRow(4).getCell(24) == null)
 
     assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 5)
     assert(wb.getSheetAt(0).getRow(6) == null)

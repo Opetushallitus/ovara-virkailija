@@ -61,6 +61,7 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
                  hk.tila,
                  hk.ulkoinen_tunniste,
                  haku_ja_hakuaika.haku_nimi,
+                 haku_ja_hakuaika.haku_oid,
                  haku_ja_hakuaika.hakuaika,
                  haku_ja_hakuaika.hakutapa_nimi,
                  hk.hakukohteen_aloituspaikat,
