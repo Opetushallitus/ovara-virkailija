@@ -140,7 +140,7 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     JOIN pub.pub_dim_haku ha
     ON h.haku_oid = ha.haku_oid
     WHERE #$filters
-    GROUP BY h.hakukohde_oid, h.organisaatio_nimi, h.haku_oid, ha.haku_nimi""".as[HakeneetHyvaksytytVastaanottaneetHakukohteittain]
+    GROUP BY h.hakukohde_oid, h.hakukohde_nimi, h.haku_oid, ha.haku_nimi, h.organisaatio_nimi""".as[HakeneetHyvaksytytVastaanottaneetHakukohteittain]
     LOG.debug(s"selectHakukohteittainWithParams: ${query.statements.head}")
     query
   }
