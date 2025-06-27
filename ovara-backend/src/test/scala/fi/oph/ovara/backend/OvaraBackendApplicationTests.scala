@@ -57,7 +57,7 @@ class OvaraBackendApplicationTests {
           .andExpect(content().json(
               """{
               "status": 400,
-              "message": "validation.error",
+              "message": "virhe.validointi",
               "details": ["alkamiskaudet.invalid", "haut.invalid.oid", "haun-tyyppi.invalid"]
             }"""))
     }

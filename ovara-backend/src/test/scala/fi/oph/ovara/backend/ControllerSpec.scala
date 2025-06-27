@@ -191,7 +191,7 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
     val jsonMap = objectMapper.readValue(jsonWritten, classOf[Map[String, Any]])
 
     jsonMap("status") shouldEqual 400
-    jsonMap("message") shouldEqual "validation.error"
+    jsonMap("message") shouldEqual "virhe.validointi"
 
     val details = jsonMap("details").asInstanceOf[List[String]]
     details.length shouldEqual 3
