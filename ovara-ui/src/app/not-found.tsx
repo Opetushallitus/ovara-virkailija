@@ -25,9 +25,9 @@ export default function Custom404() {
           </Typography>
         </Grid>
         <Grid>
-          <Typography variant="h2">{t('error.404.otsikko')}</Typography>
+          <Typography variant="h2">{t('virhe.404.otsikko')}</Typography>
           <Typography variant="body1" component="p">
-            {t('error.404.teksti')}
+            {t('virhe.404.teksti')}
           </Typography>
         </Grid>
         <Grid>

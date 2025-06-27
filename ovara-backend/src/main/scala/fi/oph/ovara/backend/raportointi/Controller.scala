@@ -64,7 +64,7 @@ class Controller(
       // validointivirheistä palautetaan yksityiskohtia
       val errorResponse = ErrorResponse(
         status = HttpServletResponse.SC_BAD_REQUEST,
-        message = "validation.error",
+        message = "virhe.validointi",
         details = Some(validationErrors)
       )
       ResponseEntity
@@ -317,7 +317,7 @@ class Controller(
       response.setContentType("application/json")
       val errorJson = mapper.writeValueAsString(Map(
         "status" -> HttpServletResponse.SC_BAD_REQUEST,
-        "message" -> "validation.error",
+        "message" -> "virhe.validointi",
         "details" -> validationErrors.asJava
       ))
       response.getWriter.write(errorJson)
@@ -392,7 +392,7 @@ class Controller(
     ) {
       validationResult match {
         case Left(_) =>
-          Left("validation.error")
+          Left("virhe.validointi")
 
         case Right(validParams) =>
           koulutuksetToteutuksetHakukohteetService.get(
@@ -448,7 +448,7 @@ class Controller(
     ) {
       validationResult match {
         case Left(_) =>
-          Left("validation.error")
+          Left("virhe.validointi")
 
         case Right(validParams) =>
           kkKoulutuksetToteutuksetHakukohteetService.get(
@@ -515,7 +515,7 @@ class Controller(
     ) {
       validationResult match {
         case Left(_) =>
-          Left("validation.error")
+          Left("virhe.validointi")
 
         case Right(validParams) =>
           hakijatService.get(
@@ -584,7 +584,7 @@ class Controller(
     ) {
       validationResult match {
         case Left(_) =>
-          Left("validation.error")
+          Left("virhe.validointi")
 
         case Right(validParams) =>
           kkHakijatService.get(
@@ -656,7 +656,7 @@ class Controller(
     ) {
       validationResult match {
         case Left(_) =>
-          Left("validation.error")
+          Left("virhe.validointi")
 
         case Right(validParams) =>
           hakeneetHyvaksytytVastaanottaneetService.get(
@@ -729,7 +729,7 @@ class Controller(
     ) {
       validationResult match {
         case Left(_) =>
-          Left("validation.error")
+          Left("virhe.validointi")
 
         case Right(validParams) =>
           kkHakeneetHyvaksytytVastaanottaneetService.get(

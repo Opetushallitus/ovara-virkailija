@@ -172,7 +172,7 @@ object ParameterValidator {
       validateBoolean(params.julkaisulupa, "julkaisulupa")
     ).flatten
 
-    val combinedErrors = errors ++ Option.when(params.oppilaitokset.isEmpty && params.toimipisteet.isEmpty)("error.required.missing").toList
+    val combinedErrors = errors ++ Option.when(params.oppilaitokset.isEmpty && params.toimipisteet.isEmpty)("virhe.pakollinen.puuttuu").toList
 
     if (combinedErrors.nonEmpty) {
       Left(combinedErrors.distinct)
@@ -218,7 +218,7 @@ object ParameterValidator {
 
     val combinedErrors = errors ++ Option.when(
       params.oppilaitokset.isEmpty && params.toimipisteet.isEmpty && params.hakukohderyhmat.isEmpty
-    )("error.required.missing").toList
+    )("virhe.pakollinen.puuttuu").toList
 
     if (combinedErrors.nonEmpty) {
       Left(combinedErrors.distinct)
