@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.ToisenAsteenHakijaWithCombinedNimi
+import fi.oph.ovara.backend.domain.ToisenAsteenHakija
 import fi.oph.ovara.backend.repository.{ReadOnlyDatabase, ToisenAsteenHakijatRepository}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -72,13 +72,11 @@ class ToisenAsteenHakijatService(
       )
 
       val queryResult = db.run(query, "toisenAsteenHakijatRepository.selectWithParams")
-      val sorted =
+      val sortedList =
         queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi, resultRow.hakijanEtunimi, resultRow.oppijanumero))
 
-      val sortedListwithCombinedNimi = sorted.map(sortedResult => ToisenAsteenHakijaWithCombinedNimi(sortedResult))
-
       ExcelWriter.writeToisenAsteenHakijatRaportti(
-        sortedListwithCombinedNimi,
+        sortedList,
         asiointikieli,
         translations
       )

@@ -50,6 +50,7 @@ case class KorkeakouluKoulutusToteutusHakukohdeResult(
     hakukohteenTila: Option[String],
     hakukohteenUlkoinenTunniste: Option[String],
     haunNimi: Kielistetty,
+    hakuOid: String,
     hakuaika: Option[Hakuaika],
     hakutapa: Kielistetty,
     hakukohteenAloituspaikat: Option[Int],
