@@ -6,7 +6,7 @@ import fi.oph.ovara.backend.domain.UserResponse
 import fi.oph.ovara.backend.raportointi.dto.{RawHakeneetHyvaksytytVastaanottaneetParams, RawHakijatParams, RawKkHakeneetHyvaksytytVastaanottaneetParams, RawKkHakijatParams, RawKkKoulutuksetToteutuksetHakukohteetParams, RawKoulutuksetToteutuksetHakukohteetParams, buildHakeneetHyvaksytytVastaanottaneetAuditParams, buildHakijatAuditParams, buildKkHakeneetHyvaksytytVastaanottaneetAuditParams, buildKkHakijatAuditParams, buildKkKoulutuksetToteutuksetHakukohteetAuditParams, buildKoulutuksetToteutuksetHakukohteetAuditParams}
 import fi.oph.ovara.backend.service.*
 import fi.oph.ovara.backend.utils.AuditOperation.{HakeneetHyvaksytytVastaanottaneet, KkHakeneetHyvaksytytVastaanottaneet, KkHakijat, KorkeakouluKoulutuksetToteutuksetHakukohteet, KoulutuksetToteutuksetHakukohteet, ToisenAsteenHakijat}
-import fi.oph.ovara.backend.utils.ParameterValidator.{validateAlphanumeric, validateAlphanumericList, validateHakeneetHyvaksytytVastaanottaneetParams, validateHakijatParams, validateKkHakeneetHyvaksytytVastaanottaneetParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams, validateNumericList, validateOid, validateOidList, validateOrganisaatioOid, validateOrganisaatioOidList}
+import fi.oph.ovara.backend.utils.ParameterValidator.{strToOptionBoolean, validateAlphanumeric, validateAlphanumericList, validateHakeneetHyvaksytytVastaanottaneetParams, validateHakijatParams, validateKkHakeneetHyvaksytytVastaanottaneetParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams, validateNumericList, validateOid, validateOidList, validateOrganisaatioOid, validateOrganisaatioOidList}
 import fi.oph.ovara.backend.utils.{AuditLog, AuditLogObj, AuditOperation}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.slf4j.{Logger, LoggerFactory}
@@ -622,6 +622,7 @@ class Controller(
                                            @RequestParam("ovara_harkinnanvaraisuudet", required = false) harkinnanvaraisuudet: java.util.Collection[String],
                                            @RequestParam("ovara_nayta-hakutoiveet", required = false) naytaHakutoiveet: String,
                                            @RequestParam("ovara_sukupuoli", required = false) sukupuoli: String,
+                                           @RequestParam("ovara_uusi_tilasto", required = false) uusiTilasto: String,
                                            request: HttpServletRequest,
                                            response: HttpServletResponse
                                          ): Unit = {
@@ -674,7 +675,8 @@ class Controller(
             validParams.kunnat,
             validParams.harkinnanvaraisuudet,
             validParams.sukupuoli,
-            validParams.naytaHakutoiveet
+            validParams.naytaHakutoiveet,
+            strToOptionBoolean(uusiTilasto).getOrElse(true),
           )
       }
     }
