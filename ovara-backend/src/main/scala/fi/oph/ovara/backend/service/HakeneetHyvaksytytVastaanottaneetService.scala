@@ -125,21 +125,39 @@ class HakeneetHyvaksytytVastaanottaneetService(
             db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectKoulutusaloittainWithParams")
           }
         case "toimipisteittain" =>
-          val query = hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams(
-            selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-            haut = haut,
-            hakukohteet = hakukohteet,
-            koulutusalat1 = koulutusalat1,
-            koulutusalat2 = koulutusalat2,
-            koulutusalat3 = koulutusalat3,
-            opetuskielet = opetuskielet,
-            maakunnat = maakunnat,
-            kunnat = kunnat,
-            harkinnanvaraisuudet = harkinnanvaraisuudet,
-            sukupuoli = sukupuoli
-          )
-          db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams")
-            .map(r => HakeneetHyvaksytytVastaanottaneetResult(r))
+          if(uusiTilasto) {
+            val query = hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams2(
+              selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
+              haut = haut,
+              hakukohteet = hakukohteet,
+              koulutusalat1 = koulutusalat1,
+              koulutusalat2 = koulutusalat2,
+              koulutusalat3 = koulutusalat3,
+              opetuskielet = opetuskielet,
+              maakunnat = maakunnat,
+              kunnat = kunnat,
+              harkinnanvaraisuudet = harkinnanvaraisuudet,
+              sukupuoli = sukupuoli
+            )
+            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams2")
+              .map(r => HakeneetHyvaksytytVastaanottaneetResult(r))
+          } else {
+            val query = hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams(
+              selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
+              haut = haut,
+              hakukohteet = hakukohteet,
+              koulutusalat1 = koulutusalat1,
+              koulutusalat2 = koulutusalat2,
+              koulutusalat3 = koulutusalat3,
+              opetuskielet = opetuskielet,
+              maakunnat = maakunnat,
+              kunnat = kunnat,
+              harkinnanvaraisuudet = harkinnanvaraisuudet,
+              sukupuoli = sukupuoli
+            )
+            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams")
+              .map(r => HakeneetHyvaksytytVastaanottaneetResult(r))
+          }
         case _ =>
           val query = hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams(
             selectedKayttooikeusOrganisaatiot = orgOidsForQuery,

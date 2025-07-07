@@ -482,6 +482,83 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     query
   }
 
+  def selectToimipisteittainWithParams2(
+                                        selectedKayttooikeusOrganisaatiot: List[String],
+                                        haut: List[String],
+                                        hakukohteet: List[String],
+                                        koulutusalat1: List[String],
+                                        koulutusalat2: List[String],
+                                        koulutusalat3: List[String],
+                                        opetuskielet: List[String],
+                                        maakunnat: List[String],
+                                        kunnat: List[String],
+                                        harkinnanvaraisuudet: List[String],
+                                        sukupuoli: Option[String]
+                                      ): SqlStreamingAction[Vector[
+    HakeneetHyvaksytytVastaanottaneetToimipisteittain
+  ], HakeneetHyvaksytytVastaanottaneetToimipisteittain, Effect] = {
+    val filters = buildFilters(
+      haut,
+      selectedKayttooikeusOrganisaatiot,
+      hakukohteet,
+      koulutusalat1,
+      koulutusalat2,
+      koulutusalat3,
+      opetuskielet,
+      maakunnat,
+      kunnat,
+      harkinnanvaraisuudet,
+      sukupuoli
+    )
+    val hakukohdeHakufilter = s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"
+    val hakukohdeOrganisaatioFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr(
+      "AND",
+      "h.jarjestyspaikka_oid",
+      selectedKayttooikeusOrganisaatiot
+    )
+    val hakukohdeFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.hakukohde_oid", hakukohteet)
+    val maakuntaFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintimaakunta", maakunnat)
+    val kuntaFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintikunta", kunnat)
+
+    val query = sql"""SELECT
+    h.toimipiste,
+    h.organisaatio_nimi,
+    count(distinct t.henkilo_oid) AS hakijat,
+    count(distinct t.henkilo_oid) filter (where ensisijainen) AS ensisijaisia,
+    count(distinct t.henkilo_oid) filter (where varasija) AS varasija,
+    count(distinct t.henkilo_oid) filter (where hyvaksytty) AS hyvaksytyt,
+    count(distinct t.henkilo_oid) filter (where vastaanottanut = true) AS vastaanottaneet,
+    count(distinct t.henkilo_oid) filter (where lasna) AS lasna,
+    count(distinct t.henkilo_oid) filter (where poissa) AS poissa,
+    count(distinct t.henkilo_oid) filter (where ilmoittautunut) AS ilm_yht,
+    a.aloituspaikat,
+    count(distinct t.henkilo_oid) filter (where toive_1) AS toive1,
+    count(distinct t.henkilo_oid) filter (where toive_2) AS toive2,
+    count(distinct t.henkilo_oid) filter (where toive_3) AS toive3,
+    count(distinct t.henkilo_oid) filter (where toive_4) AS toive4,
+    count(distinct t.henkilo_oid) filter (where toive_5) AS toive5,
+    count(distinct t.henkilo_oid) filter (where toive_6) AS toive6,
+    count(distinct t.henkilo_oid) filter (where toive_7) AS toive7
+    FROM pub.pub_fct_raportti_tilastoraportti_2aste_hakutoive t
+    JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
+    JOIN pub.pub_dim_haku ha ON h.haku_oid = ha.haku_oid
+    JOIN (
+	    SELECT
+		  h.toimipiste,
+		  SUM(h.hakukohteen_aloituspaikat ) as aloituspaikat
+	    FROM pub.pub_dim_hakukohde h
+	    WHERE #$hakukohdeHakufilter
+      #$hakukohdeOrganisaatioFilter
+      #$hakukohdeFilter
+      #$maakuntaFilter
+      #$kuntaFilter
+	    group by 1) a on h.toimipiste = a.toimipiste
+    WHERE #$filters
+    GROUP BY 1, 2, 11""".as[HakeneetHyvaksytytVastaanottaneetToimipisteittain]
+    LOG.debug(s"selectToimipisteittainWithParams: ${query.statements.head}")
+    query
+  }
+
   def selectToimipisteittainWithParams(
       selectedKayttooikeusOrganisaatiot: List[String],
       haut: List[String],
