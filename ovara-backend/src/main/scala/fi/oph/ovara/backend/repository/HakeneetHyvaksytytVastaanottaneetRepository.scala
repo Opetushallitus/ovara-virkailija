@@ -584,8 +584,8 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                         harkinnanvaraisuudet: List[String],
                                         sukupuoli: Option[String]
                                       ): SqlStreamingAction[Vector[
-    HakeneetHyvaksytytVastaanottaneetToimipisteittain
-  ], HakeneetHyvaksytytVastaanottaneetToimipisteittain, Effect] = {
+    HakeneetHyvaksytytVastaanottaneetTunnisteella
+  ], HakeneetHyvaksytytVastaanottaneetTunnisteella, Effect] = {
     val filters = buildFilters(
       haut,
       selectedKayttooikeusOrganisaatiot,
@@ -610,8 +610,8 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     val kuntaFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintikunta", kunnat)
 
     val query = sql"""SELECT
-    h.toimipiste,
-    h.organisaatio_nimi,
+    h.toimipiste as tunniste,
+    h.organisaatio_nimi as otsikko,
     count(distinct t.henkilo_oid) AS hakijat,
     count(distinct t.henkilo_oid) filter (where ensisijainen) AS ensisijaisia,
     count(distinct t.henkilo_oid) filter (where varasija) AS varasija,
@@ -643,8 +643,8 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       #$kuntaFilter
 	    group by 1) a on h.toimipiste = a.toimipiste
     WHERE #$filters
-    GROUP BY 1, 2, 11""".as[HakeneetHyvaksytytVastaanottaneetToimipisteittain]
-    LOG.debug(s"selectToimipisteittainWithParams: ${query.statements.head}")
+    GROUP BY 1, 2, 11""".as[HakeneetHyvaksytytVastaanottaneetTunnisteella]
+    LOG.debug(s"selectToimipisteittainWithParams2: ${query.statements.head}")
     query
   }
 
