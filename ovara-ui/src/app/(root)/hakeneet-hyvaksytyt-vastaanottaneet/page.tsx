@@ -96,7 +96,7 @@ export default function Hakutilasto() {
           <NaytaHakutoiveet />
           {hasOphPaaKayttajaRole(user?.authorities) && (
             <OvaraRadioGroup
-              label={'käytä uutta kyselyä'}
+              label={'Käytä uutta kyselyä'}
               options={RADIOGROUP_BOOLEAN_OPTIONS}
               value={getSelectedRadioGroupValue(uusiTilasto)}
               onChange={(e) => changeRadioGroupSelection(e, setUusiTilasto)}

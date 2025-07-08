@@ -44,7 +44,6 @@ class HakeneetHyvaksytytVastaanottaneetService(
            naytaHakutoiveet: Boolean,
            uusiTilasto: Boolean
          ): Either[String, XSSFWorkbook] = {
-    LOG.info(s"uusi tilasto: $uusiTilasto")
     val user = userService.getEnrichedUserDetails
     val asiointikieli = user.asiointikieli.getOrElse("fi")
     val authorities = user.authorities
@@ -57,11 +56,11 @@ class HakeneetHyvaksytytVastaanottaneetService(
       oppilaitosOids = oppilaitokset,
       koulutustoimijaOid = koulutustoimija
     )
-
+    val useFixedQuery = uusiTilasto && AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)
     Try {
       val queryResult = tulostustapa match {
         case "hakukohteittain" =>
-          if(uusiTilasto) {
+          if(useFixedQuery) {
             val query = hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams2(
               selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
               haut = haut,
@@ -92,7 +91,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
             )
             db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams")
         case "koulutusaloittain" =>
-          if(uusiTilasto) {
+          if(useFixedQuery) {
             val query = hakeneetHyvaksytytVastaanottaneetRepository.selectKoulutusaloittainWithParams2(
               selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
               haut = haut,
@@ -125,7 +124,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
             db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectKoulutusaloittainWithParams")
           }
         case "toimipisteittain" =>
-          if(uusiTilasto) {
+          if(useFixedQuery) {
             val query = hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams2(
               selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
               haut = haut,
@@ -159,7 +158,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
               .map(r => HakeneetHyvaksytytVastaanottaneetResult(r))
           }
         case _ =>
-          if (uusiTilasto) {
+          if (useFixedQuery) {
             val query = hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams2(
               selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
               haut = haut,

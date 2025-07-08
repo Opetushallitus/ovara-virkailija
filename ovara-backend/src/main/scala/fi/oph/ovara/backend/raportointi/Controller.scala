@@ -698,6 +698,7 @@ class Controller(
                                               @RequestParam("ovara_sukupuoli", required = false) sukupuoli: String,
                                               @RequestParam("ovara_ensikertalainen", required = false) ensikertalainen: String,
                                               @RequestParam("ovara_nayta-hakutoiveet", required = false) naytaHakutoiveet: String,
+                                              @RequestParam("ovara_uusi_tilasto", required = false) uusiTilasto: String,
                                               request: HttpServletRequest,
                                               response: HttpServletResponse
                                             ): Unit = {
@@ -748,7 +749,8 @@ class Controller(
             validParams.kansalaisuusluokat,
             validParams.sukupuoli,
             validParams.ensikertalainen,
-            validParams.naytaHakutoiveet
+            validParams.naytaHakutoiveet,
+            strToOptionBoolean(uusiTilasto).getOrElse(true),
           )
       }
     }
