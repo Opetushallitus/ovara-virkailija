@@ -687,6 +687,88 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     query
   }
 
+  def selectOkmOhjauksenAloittainWithParams2(
+                                             selectedKayttooikeusOrganisaatiot: List[String],
+                                             haut: List[String],
+                                             hakukohteet: List[String],
+                                             hakukohderyhmat: List[String],
+                                             okmOhjauksenAlat: List[String],
+                                             tutkinnonTasot: List[String],
+                                             aidinkielet: List[String],
+                                             kansalaisuudet: List[String],
+                                             sukupuoli: Option[String],
+                                             ensikertalainen: Option[Boolean]
+                                           ): SqlStreamingAction[Vector[
+    KkHakeneetHyvaksytytVastaanottaneetTunnisteella
+  ], KkHakeneetHyvaksytytVastaanottaneetTunnisteella, Effect] = {
+
+    val filters = buildFilters(
+      haut,
+      selectedKayttooikeusOrganisaatiot,
+      hakukohteet,
+      hakukohderyhmat,
+      okmOhjauksenAlat,
+      tutkinnonTasot,
+      aidinkielet,
+      kansalaisuudet,
+      sukupuoli,
+      ensikertalainen
+    )
+
+    val hakukohdeHakuFilter = s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"
+    val hakukohdeFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.hakukohde_oid", hakukohteet)
+    val hakukohdeOrganisaatioFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr(
+      "AND",
+      "h.jarjestyspaikka_oid",
+      selectedKayttooikeusOrganisaatiot
+    )
+    val hakukohdeOkmOhjauksenalaFilter =
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat)
+    val hakukohdeTutkinnontasoFilter = buildTutkinnonTasoFilters(tutkinnonTasot, "h").getOrElse("")
+
+    val query =
+      sql"""SELECT
+      h.okm_ohjauksen_ala AS tunniste,
+      o.koodinimi AS otsikko,
+      COUNT(DISTINCT t.henkilo_oid) AS hakijat,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE ensisijainen) AS ensisijaisia,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE ensikertalainen) AS ensikertalaisia,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE hyvaksytty) AS hyvaksytyt,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE vastaanottanut) AS vastaanottaneet,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE lasna) AS lasna,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE poissa) AS poissa,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE ilmoittautunut) AS ilm_yht,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE maksuvelvollinen) AS maksuvelvollisia,
+      a.valinnan_aloituspaikat,
+      a.aloituspaikat,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_1) AS toive_1,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_2) AS toive_2,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_3) AS toive_3,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_4) AS toive_4,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_5) AS toive_5,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_6) AS toive_6
+      FROM pub.pub_fct_raportti_tilastoraportti_kk_hakutoive t
+      JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
+      JOIN pub.pub_dim_koodisto_okmohjauksenala o ON h.okm_ohjauksen_ala = o.koodiarvo
+      JOIN (
+	    SELECT
+		  h.okm_ohjauksen_ala,
+          SUM(h.valintaperusteiden_aloituspaikat) as valinnan_aloituspaikat,
+		  SUM(h.hakukohteen_aloituspaikat) as aloituspaikat
+	    FROM pub.pub_dim_hakukohde h
+	    WHERE #$hakukohdeHakuFilter
+        #$hakukohdeFilter
+        #$hakukohdeOrganisaatioFilter
+        #$hakukohdeOkmOhjauksenalaFilter
+        #$hakukohdeTutkinnontasoFilter
+	    GROUP BY  1) a ON h.okm_ohjauksen_ala = a.okm_ohjauksen_ala
+      WHERE #$filters
+      GROUP BY 1, 2, 12, 13""".as[KkHakeneetHyvaksytytVastaanottaneetTunnisteella]
+
+    LOG.debug(s"selectOkmOhjauksenAloittainWithParams: ${query.statements.head}")
+    query
+  }
+
   def selectOkmOhjauksenAloittainWithParams(
       selectedKayttooikeusOrganisaatiot: List[String],
       haut: List[String],

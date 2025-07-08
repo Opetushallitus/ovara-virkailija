@@ -160,19 +160,36 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
             db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams").map(r => KkHakeneetHyvaksytytVastaanottaneetResult(r))
           }
         case "okm-ohjauksen-aloittain" =>
-          val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectOkmOhjauksenAloittainWithParams(
-            selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-            haut = haut,
-            hakukohteet = hakukohteet,
-            hakukohderyhmat = hakukohderyhmarajaus,
-            okmOhjauksenAlat = okmOhjauksenAlat,
-            tutkinnonTasot = tutkinnonTasot,
-            aidinkielet = aidinkielet,
-            kansalaisuudet = kansalaisuudet,
-            sukupuoli = sukupuoli,
-            ensikertalainen = ensikertalainen
-          )
-          db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectOkmOhjauksenAloittainWithParams")
+          if (useFixedQuery) {
+            val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectOkmOhjauksenAloittainWithParams2(
+              selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
+              haut = haut,
+              hakukohteet = hakukohteet,
+              hakukohderyhmat = hakukohderyhmarajaus,
+              okmOhjauksenAlat = okmOhjauksenAlat,
+              tutkinnonTasot = tutkinnonTasot,
+              aidinkielet = aidinkielet,
+              kansalaisuudet = kansalaisuudet,
+              sukupuoli = sukupuoli,
+              ensikertalainen = ensikertalainen
+            )
+            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectOkmOhjauksenAloittainWithParams2")
+              .map(r => KkHakeneetHyvaksytytVastaanottaneetResult(r))
+          } else {
+            val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectOkmOhjauksenAloittainWithParams(
+              selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
+              haut = haut,
+              hakukohteet = hakukohteet,
+              hakukohderyhmat = hakukohderyhmarajaus,
+              okmOhjauksenAlat = okmOhjauksenAlat,
+              tutkinnonTasot = tutkinnonTasot,
+              aidinkielet = aidinkielet,
+              kansalaisuudet = kansalaisuudet,
+              sukupuoli = sukupuoli,
+              ensikertalainen = ensikertalainen
+            )
+            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectOkmOhjauksenAloittainWithParams")
+          }
         case "kansalaisuuksittain" =>
           val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectKansalaisuuksittainWithParams(
             selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
