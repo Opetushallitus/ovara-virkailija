@@ -202,6 +202,23 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
           )
           db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohderyhmittainWithParams")
         case _ =>
+          if (useFixedQuery) {
+            val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams2(
+              selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
+              haut = haut,
+              hakukohteet = hakukohteet,
+              hakukohderyhmat = hakukohderyhmarajaus,
+              okmOhjauksenAlat = okmOhjauksenAlat,
+              tutkinnonTasot = tutkinnonTasot,
+              aidinkielet = aidinkielet,
+              kansalaisuudet = kansalaisuudet,
+              sukupuoli = sukupuoli,
+              ensikertalainen = ensikertalainen,
+              organisaatiotaso = tulostustapa
+            )
+            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams2")
+              .map(r => KkHakeneetHyvaksytytVastaanottaneetResult(r))
+          } else {
           val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams(
             selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
             haut = haut,
@@ -216,6 +233,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
             organisaatiotaso = tulostustapa
           )
           db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams")
+          }
 
       val vainEnsikertalaiset = ensikertalainen.getOrElse(false)
       val sumQuery = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams(
