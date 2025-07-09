@@ -36,7 +36,7 @@ class KkHakijatRepository extends Extractors {
     val optionalValintatietoQuery =
       makeOptionalListOfValuesQueryStr(
         "AND",
-        "ht.valintatapajonot->0->>'valinnan_tila'",
+        "ht.valintatieto",
         valintatiedotAsDbValues
       )
     val optionalVastaanottotietoQuery =
