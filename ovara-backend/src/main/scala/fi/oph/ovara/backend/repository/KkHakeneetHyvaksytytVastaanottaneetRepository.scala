@@ -1,6 +1,13 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.domain.{KkHakeneetHyvaksytytVastaanottaneetHakukohteittain, KkHakeneetHyvaksytytVastaanottaneetHauittain, KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella, KkHakeneetHyvaksytytVastaanottaneetResult, KkHakeneetHyvaksytytVastaanottaneetToimipisteittain, KkHakeneetHyvaksytytVastaanottaneetTunnisteella}
+import fi.oph.ovara.backend.domain.{
+  KkHakeneetHyvaksytytVastaanottaneetHakukohteittain,
+  KkHakeneetHyvaksytytVastaanottaneetHauittain,
+  KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella,
+  KkHakeneetHyvaksytytVastaanottaneetResult,
+  KkHakeneetHyvaksytytVastaanottaneetToimipisteittain,
+  KkHakeneetHyvaksytytVastaanottaneetTunnisteella
+}
 import fi.oph.ovara.backend.utils.RepositoryUtils
 import fi.oph.ovara.backend.utils.RepositoryUtils.buildTutkinnonTasoFilters
 import org.slf4j.{Logger, LoggerFactory}
@@ -512,18 +519,18 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   }
 
   def selectOrganisaatioittainWithParams2(
-                                          selectedKayttooikeusOrganisaatiot: List[String],
-                                          haut: List[String],
-                                          hakukohteet: List[String],
-                                          hakukohderyhmat: List[String],
-                                          okmOhjauksenAlat: List[String],
-                                          tutkinnonTasot: List[String],
-                                          aidinkielet: List[String],
-                                          kansalaisuudet: List[String],
-                                          sukupuoli: Option[String],
-                                          ensikertalainen: Option[Boolean],
-                                          organisaatiotaso: String
-                                        ): SqlStreamingAction[Vector[
+      selectedKayttooikeusOrganisaatiot: List[String],
+      haut: List[String],
+      hakukohteet: List[String],
+      hakukohderyhmat: List[String],
+      okmOhjauksenAlat: List[String],
+      tutkinnonTasot: List[String],
+      aidinkielet: List[String],
+      kansalaisuudet: List[String],
+      sukupuoli: Option[String],
+      ensikertalainen: Option[Boolean],
+      organisaatiotaso: String
+  ): SqlStreamingAction[Vector[
     KkHakeneetHyvaksytytVastaanottaneetTunnisteella
   ], KkHakeneetHyvaksytytVastaanottaneetTunnisteella, Effect] = {
 
@@ -541,7 +548,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     )
 
     val hakukohdeHakuFilter = s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"
-    val hakukohdeFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.hakukohde_oid", hakukohteet)
+    val hakukohdeFilter     = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.hakukohde_oid", hakukohteet)
     val hakukohdeOrganisaatioFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr(
       "AND",
       "h.jarjestyspaikka_oid",
@@ -553,15 +560,15 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
 
     val organisaatioSelect = organisaatiotaso match {
       case "oppilaitoksittain" => "h.oppilaitos as tunniste, h.oppilaitos_nimi as otsikko"
-      case _ => "h.koulutustoimija as tunniste, h.koulutustoimija_nimi as otsikko"
+      case _                   => "h.koulutustoimija as tunniste, h.koulutustoimija_nimi as otsikko"
     }
     val organisaatioJoin = organisaatiotaso match {
       case "oppilaitoksittain" => "h.oppilaitos = a.oppilaitos"
-      case _ => "h.koulutustoimija = a.koulutustoimija"
+      case _                   => "h.koulutustoimija = a.koulutustoimija"
     }
     val organisaatio = organisaatiotaso match {
       case "oppilaitoksittain" => "h.oppilaitos"
-      case _ => "h.koulutustoimija"
+      case _                   => "h.koulutustoimija"
     }
     val query =
       sql"""SELECT
@@ -688,17 +695,17 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   }
 
   def selectOkmOhjauksenAloittainWithParams2(
-                                             selectedKayttooikeusOrganisaatiot: List[String],
-                                             haut: List[String],
-                                             hakukohteet: List[String],
-                                             hakukohderyhmat: List[String],
-                                             okmOhjauksenAlat: List[String],
-                                             tutkinnonTasot: List[String],
-                                             aidinkielet: List[String],
-                                             kansalaisuudet: List[String],
-                                             sukupuoli: Option[String],
-                                             ensikertalainen: Option[Boolean]
-                                           ): SqlStreamingAction[Vector[
+      selectedKayttooikeusOrganisaatiot: List[String],
+      haut: List[String],
+      hakukohteet: List[String],
+      hakukohderyhmat: List[String],
+      okmOhjauksenAlat: List[String],
+      tutkinnonTasot: List[String],
+      aidinkielet: List[String],
+      kansalaisuudet: List[String],
+      sukupuoli: Option[String],
+      ensikertalainen: Option[Boolean]
+  ): SqlStreamingAction[Vector[
     KkHakeneetHyvaksytytVastaanottaneetTunnisteella
   ], KkHakeneetHyvaksytytVastaanottaneetTunnisteella, Effect] = {
 
@@ -716,7 +723,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     )
 
     val hakukohdeHakuFilter = s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"
-    val hakukohdeFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.hakukohde_oid", hakukohteet)
+    val hakukohdeFilter     = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.hakukohde_oid", hakukohteet)
     val hakukohdeOrganisaatioFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr(
       "AND",
       "h.jarjestyspaikka_oid",
@@ -846,6 +853,64 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       GROUP BY 1""".as[KkHakeneetHyvaksytytVastaanottaneetResult]
 
     LOG.debug(s"selectOkmOhjauksenAloittainWithParams: ${query.statements.head}")
+    query
+  }
+
+  def selectKansalaisuuksittainWithParams2(
+      selectedKayttooikeusOrganisaatiot: List[String],
+      haut: List[String],
+      hakukohteet: List[String],
+      hakukohderyhmat: List[String],
+      okmOhjauksenAlat: List[String],
+      tutkinnonTasot: List[String],
+      aidinkielet: List[String],
+      kansalaisuudet: List[String],
+      sukupuoli: Option[String],
+      ensikertalainen: Option[Boolean]
+  ): SqlStreamingAction[Vector[
+    KkHakeneetHyvaksytytVastaanottaneetResult
+  ], KkHakeneetHyvaksytytVastaanottaneetResult, Effect] = {
+
+    val filters = buildFilters(
+      haut,
+      selectedKayttooikeusOrganisaatiot,
+      hakukohteet,
+      hakukohderyhmat,
+      okmOhjauksenAlat,
+      tutkinnonTasot,
+      aidinkielet,
+      kansalaisuudet,
+      sukupuoli,
+      ensikertalainen
+    )
+    // kansalaisuuksittain tulostaessa Exceliin ei tule aloituspaikkasarakkeita
+    val query =
+      sql"""SELECT
+      m.koodinimi AS otsikko,
+      COUNT(DISTINCT t.henkilo_oid) AS hakijat,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE ensisijainen) AS ensisijaisia,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE ensikertalainen) AS ensikertalaisia,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE hyvaksytty) AS hyvaksytyt,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE vastaanottanut) AS vastaanottaneet,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE lasna) AS lasna,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE poissa) AS poissa,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE ilmoittautunut) AS ilm_yht,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE maksuvelvollinen) AS maksuvelvollisia,
+      NULL,
+      NULL,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_1) AS toive_1,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_2) AS toive_2,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_3) AS toive_3,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_4) AS toive_4,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_5) AS toive_5,
+      COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_6) AS toive_6
+      FROM pub.pub_fct_raportti_tilastoraportti_kk_hakutoive t
+      JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
+      JOIN pub.pub_dim_koodisto_maa_2 m ON t.kansalaisuus = m.koodiarvo
+      WHERE #$filters
+      GROUP BY 1, 11, 12""".as[KkHakeneetHyvaksytytVastaanottaneetResult]
+
+    LOG.debug(s"selectKansalaisuuksittainWithParams: ${query.statements.head}")
     query
   }
 
