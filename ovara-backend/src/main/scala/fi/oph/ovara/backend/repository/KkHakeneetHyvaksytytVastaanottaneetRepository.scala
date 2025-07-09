@@ -1059,12 +1059,11 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       JOIN pub.pub_dim_hakukohderyhma hr ON hh.hakukohderyhma_oid = hr.hakukohderyhma_oid
       JOIN (
 	    SELECT
-		  hr.hakukohderyhma_oid,
+		  hh.hakukohderyhma_oid,
           SUM(h.valintaperusteiden_aloituspaikat) as valinnan_aloituspaikat,
 		  SUM(h.hakukohteen_aloituspaikat) as aloituspaikat
 	    FROM pub.pub_dim_hakukohde h
         JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hh ON h.hakukohde_oid = hh.hakukohde_oid
-        JOIN pub.pub_dim_hakukohderyhma hr ON hh.hakukohderyhma_oid = hr.hakukohderyhma_oid
 	    WHERE #$hakukohdeHakuFilter
         #$hakukohdeFilter
         #$hakukohdeOrganisaatioFilter
