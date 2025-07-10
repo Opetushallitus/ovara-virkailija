@@ -5,6 +5,7 @@ node_modules
 .next
 
 .mise.toml
+.scalafmt.conf
 
 # local env files
 .env*.local
