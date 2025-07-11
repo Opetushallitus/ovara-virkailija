@@ -5,11 +5,7 @@ import { FormBox } from '@/app/components/form/form-box';
 import { FormButtons } from '@/app/components/form/form-buttons';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
-import {
-  hasOphPaaKayttajaRole,
-  hasOvaraToinenAsteRole,
-  isNullishOrEmpty,
-} from '@/app/lib/utils';
+import { hasOvaraToinenAsteRole, isNullishOrEmpty } from '@/app/lib/utils';
 import { useSearchParams } from 'next/navigation';
 
 import { KoulutuksenAlkaminen } from '@/app/components/form/koulutuksen-alkaminen';
@@ -24,19 +20,12 @@ import { Divider } from '@mui/material';
 import { NaytaHakutoiveet } from '@/app/components/form/nayta-hakutoiveet';
 import { Sukupuoli } from '@/app/components/form/sukupuoli';
 import { Harkinnanvaraisuus } from '@/app/components/form/harkinnanvaraisuus';
-import {
-  changeRadioGroupSelection,
-  downloadExcel,
-  getSelectedRadioGroupValue,
-} from '@/app/components/form/utils';
+import { downloadExcel } from '@/app/components/form/utils';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { KoulutusalaValikot } from '@/app/components/form/koulutusalavalikot';
 import { MaakuntaKuntaValikot } from '@/app/components/form/maakunta-kunta';
 import { useDownloadWithErrorBoundary } from '@/app/hooks/useDownloadWithErrorBoundary';
 import { isNullish } from 'remeda';
-import { OvaraRadioGroup } from '@/app/components/form/ovara-radio-group';
-import { RADIOGROUP_BOOLEAN_OPTIONS } from '@/app/lib/constants';
-import { useBooleanQueryStateWithOptions } from '@/app/hooks/searchParams/useQueryStateWithLocalStorage';
 
 export default function Hakutilasto() {
   const { t } = useTranslate();
@@ -47,10 +36,6 @@ export default function Hakutilasto() {
   const { selectedAlkamiskaudet, selectedHaut } = useCommonSearchParams();
   const { selectedTulostustapa } = useHakeneetSearchParams();
   const { run, isLoading } = useDownloadWithErrorBoundary();
-  const [uusiTilasto, setUusiTilasto] = useBooleanQueryStateWithOptions(
-    'ovara_uusi_tilasto',
-    true,
-  );
 
   const isDisabled =
     isNullishOrEmpty(selectedAlkamiskaudet) ||
@@ -94,14 +79,6 @@ export default function Hakutilasto() {
           <Divider />
           <Sukupuoli />
           <NaytaHakutoiveet />
-          {hasOphPaaKayttajaRole(user?.authorities) && (
-            <OvaraRadioGroup
-              label={'Käytä uutta kyselyä'}
-              options={RADIOGROUP_BOOLEAN_OPTIONS}
-              value={getSelectedRadioGroupValue(uusiTilasto)}
-              onChange={(e) => changeRadioGroupSelection(e, setUusiTilasto)}
-            />
-          )}
           <FormButtons disabled={isDisabled} downloadExcel={handleDownload} />
         </FormBox>
       ) : null}

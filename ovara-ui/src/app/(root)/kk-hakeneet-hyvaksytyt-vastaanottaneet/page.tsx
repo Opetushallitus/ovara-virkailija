@@ -5,11 +5,7 @@ import { FormBox } from '@/app/components/form/form-box';
 import { FormButtons } from '@/app/components/form/form-buttons';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
-import {
-  hasOphPaaKayttajaRole,
-  hasOvaraKkRole,
-  isNullishOrEmpty,
-} from '@/app/lib/utils';
+import { hasOvaraKkRole, isNullishOrEmpty } from '@/app/lib/utils';
 import { useSearchParams } from 'next/navigation';
 
 import { KoulutuksenAlkaminen } from '@/app/components/form/koulutuksen-alkaminen';
@@ -22,11 +18,7 @@ import { useHakeneetSearchParams } from '@/app/hooks/searchParams/useHakeneetSea
 import { Divider } from '@mui/material';
 import { NaytaHakutoiveet } from '@/app/components/form/nayta-hakutoiveet';
 import { Sukupuoli } from '@/app/components/form/sukupuoli';
-import {
-  changeRadioGroupSelection,
-  downloadExcel,
-  getSelectedRadioGroupValue,
-} from '@/app/components/form/utils';
+import { downloadExcel } from '@/app/components/form/utils';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { Kansalaisuus } from '@/app/components/form/kansalaisuus';
 import { KkTutkinnonTaso } from '@/app/components/form/kk-tutkinnon-taso';
@@ -36,9 +28,6 @@ import { Ensikertalainen } from '@/app/components/form/ensikertalainen';
 import { Hakukohderyhma } from '@/app/components/form/hakukohderyhma';
 import { useDownloadWithErrorBoundary } from '@/app/hooks/useDownloadWithErrorBoundary';
 import { isNullish } from 'remeda';
-import { OvaraRadioGroup } from '@/app/components/form/ovara-radio-group';
-import { RADIOGROUP_BOOLEAN_OPTIONS } from '@/app/lib/constants';
-import { useBooleanQueryStateWithOptions } from '@/app/hooks/searchParams/useQueryStateWithLocalStorage';
 
 export default function KkHakutilasto() {
   const { t } = useTranslate();
@@ -48,10 +37,6 @@ export default function KkHakutilasto() {
 
   const { selectedAlkamiskaudet, selectedHaut } = useCommonSearchParams();
   const { selectedTulostustapa } = useHakeneetSearchParams();
-  const [uusiTilasto, setUusiTilasto] = useBooleanQueryStateWithOptions(
-    'ovara_uusi_tilasto',
-    true,
-  );
   const isDisabled =
     isNullishOrEmpty(selectedAlkamiskaudet) ||
     isNullishOrEmpty(selectedHaut) ||
@@ -101,14 +86,6 @@ export default function KkHakutilasto() {
           <Sukupuoli />
           <Ensikertalainen />
           <NaytaHakutoiveet />
-          {hasOphPaaKayttajaRole(user?.authorities) && (
-            <OvaraRadioGroup
-              label={'Käytä uutta kyselyä'}
-              options={RADIOGROUP_BOOLEAN_OPTIONS}
-              value={getSelectedRadioGroupValue(uusiTilasto)}
-              onChange={(e) => changeRadioGroupSelection(e, setUusiTilasto)}
-            />
-          )}
           <FormButtons disabled={isDisabled} downloadExcel={handleDownload} />
         </FormBox>
       ) : null}

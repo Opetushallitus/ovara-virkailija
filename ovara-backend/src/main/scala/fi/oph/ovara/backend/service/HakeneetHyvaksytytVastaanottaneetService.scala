@@ -42,7 +42,6 @@ class HakeneetHyvaksytytVastaanottaneetService(
            harkinnanvaraisuudet: List[String],
            sukupuoli: Option[String],
            naytaHakutoiveet: Boolean,
-           uusiTilasto: Boolean
          ): Either[String, XSSFWorkbook] = {
     val user = userService.getEnrichedUserDetails
     val asiointikieli = user.asiointikieli.getOrElse("fi")
@@ -56,26 +55,9 @@ class HakeneetHyvaksytytVastaanottaneetService(
       oppilaitosOids = oppilaitokset,
       koulutustoimijaOid = koulutustoimija
     )
-    val useFixedQuery = uusiTilasto && AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)
     Try {
       val queryResult = tulostustapa match {
         case "hakukohteittain" =>
-          if(useFixedQuery) {
-            val query = hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams2(
-              selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-              haut = haut,
-              hakukohteet = hakukohteet,
-              koulutusalat1 = koulutusalat1,
-              koulutusalat2 = koulutusalat2,
-              koulutusalat3 = koulutusalat3,
-              opetuskielet = opetuskielet,
-              maakunnat = maakunnat,
-              kunnat = kunnat,
-              harkinnanvaraisuudet = harkinnanvaraisuudet,
-              sukupuoli = sukupuoli
-            )
-            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams2")
-          } else
             val query = hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams(
               selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
               haut = haut,
@@ -89,10 +71,9 @@ class HakeneetHyvaksytytVastaanottaneetService(
               harkinnanvaraisuudet = harkinnanvaraisuudet,
               sukupuoli = sukupuoli
             )
-            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams")
+            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams2")
         case "koulutusaloittain" =>
-          if(useFixedQuery) {
-            val query = hakeneetHyvaksytytVastaanottaneetRepository.selectKoulutusaloittainWithParams2(
+            val query = hakeneetHyvaksytytVastaanottaneetRepository.selectKoulutusaloittainWithParams(
               selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
               haut = haut,
               hakukohteet = hakukohteet,
@@ -107,25 +88,8 @@ class HakeneetHyvaksytytVastaanottaneetService(
             )
             db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectKoulutusaloittainWithParams2")
             .map(r => HakeneetHyvaksytytVastaanottaneetResult(r))
-          } else {
-            val query = hakeneetHyvaksytytVastaanottaneetRepository.selectKoulutusaloittainWithParams(
-              selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-              haut = haut,
-              hakukohteet = hakukohteet,
-              koulutusalat1 = koulutusalat1,
-              koulutusalat2 = koulutusalat2,
-              koulutusalat3 = koulutusalat3,
-              opetuskielet = opetuskielet,
-              maakunnat = maakunnat,
-              kunnat = kunnat,
-              harkinnanvaraisuudet = harkinnanvaraisuudet,
-              sukupuoli = sukupuoli
-            )
-            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectKoulutusaloittainWithParams")
-          }
         case "toimipisteittain" =>
-          if(useFixedQuery) {
-            val query = hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams2(
+            val query = hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams(
               selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
               haut = haut,
               hakukohteet = hakukohteet,
@@ -140,26 +104,8 @@ class HakeneetHyvaksytytVastaanottaneetService(
             )
             db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams2")
               .map(r => HakeneetHyvaksytytVastaanottaneetResult(r))
-          } else {
-            val query = hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams(
-              selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-              haut = haut,
-              hakukohteet = hakukohteet,
-              koulutusalat1 = koulutusalat1,
-              koulutusalat2 = koulutusalat2,
-              koulutusalat3 = koulutusalat3,
-              opetuskielet = opetuskielet,
-              maakunnat = maakunnat,
-              kunnat = kunnat,
-              harkinnanvaraisuudet = harkinnanvaraisuudet,
-              sukupuoli = sukupuoli
-            )
-            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams")
-              .map(r => HakeneetHyvaksytytVastaanottaneetResult(r))
-          }
         case _ =>
-          if (useFixedQuery) {
-            val query = hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams2(
+            val query = hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams(
               selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
               haut = haut,
               hakukohteet = hakukohteet,
@@ -175,23 +121,6 @@ class HakeneetHyvaksytytVastaanottaneetService(
             )
             db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams2")
               .map(r => HakeneetHyvaksytytVastaanottaneetResult(r))
-          } else {
-            val query = hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams(
-              selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
-              haut = haut,
-              hakukohteet = hakukohteet,
-              koulutusalat1 = koulutusalat1,
-              koulutusalat2 = koulutusalat2,
-              koulutusalat3 = koulutusalat3,
-              opetuskielet = opetuskielet,
-              maakunnat = maakunnat,
-              kunnat = kunnat,
-              harkinnanvaraisuudet = harkinnanvaraisuudet,
-              sukupuoli = sukupuoli,
-              organisaatiotaso = tulostustapa
-            )
-            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams")
-          }
       }
 
       val collator: Collator = Collator.getInstance(new Locale(asiointikieli))

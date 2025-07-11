@@ -45,28 +45,6 @@ case class KkHakeneetHyvaksytytVastaanottaneetHakukohteittain(
     toive6: Int
 ) extends KkHakeneetHyvaksytytVastaanottaneetBase
 
-case class KkHakeneetHyvaksytytVastaanottaneetHauittain(
-    otsikko: Kielistetty,
-    organisaatioNimi: Kielistetty,
-    hakijat: Int,
-    ensisijaisia: Int,
-    ensikertalaisia: Int,
-    hyvaksytyt: Int,
-    vastaanottaneet: Int,
-    lasna: Int,
-    poissa: Int,
-    ilmYht: Int,
-    maksuvelvollisia: Int,
-    valinnanAloituspaikat: Int,
-    aloituspaikat: Int,
-    toive1: Int,
-    toive2: Int,
-    toive3: Int,
-    toive4: Int,
-    toive5: Int,
-    toive6: Int
-) extends KkHakeneetHyvaksytytVastaanottaneetBase
-
 case class KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella(
     tunniste: String,
     otsikko: Kielistetty,
@@ -156,31 +134,6 @@ case class KkHakeneetHyvaksytytVastaanottaneetResult(
 ) extends KkHakeneetHyvaksytytVastaanottaneetBase
 
 object KkHakeneetHyvaksytytVastaanottaneetResult {
-  def apply(
-             hauittain: KkHakeneetHyvaksytytVastaanottaneetHauittain
-  ): KkHakeneetHyvaksytytVastaanottaneetResult = {
-    val combinedName: Kielistetty = mergeKielistetty(hauittain.otsikko, hauittain.organisaatioNimi)
-    new KkHakeneetHyvaksytytVastaanottaneetResult(
-      otsikko = combinedName,
-      hakijat = hauittain.hakijat,
-      ensisijaisia = hauittain.ensisijaisia,
-      ensikertalaisia = hauittain.ensikertalaisia,
-      hyvaksytyt = hauittain.hyvaksytyt,
-      vastaanottaneet = hauittain.vastaanottaneet,
-      lasna = hauittain.lasna,
-      poissa = hauittain.poissa,
-      ilmYht = hauittain.ilmYht,
-      maksuvelvollisia = hauittain.maksuvelvollisia,
-      valinnanAloituspaikat = hauittain.valinnanAloituspaikat,
-      aloituspaikat = hauittain.aloituspaikat,
-      toive1 = hauittain.toive1,
-      toive2 = hauittain.toive2,
-      toive3 = hauittain.toive3,
-      toive4 = hauittain.toive4,
-      toive5 = hauittain.toive5,
-      toive6 = hauittain.toive6
-    )
-  }
 
   def apply(
              tunnisteella: KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella
@@ -207,7 +160,7 @@ object KkHakeneetHyvaksytytVastaanottaneetResult {
       toive6 = tunnisteella.toive6
     )
   }
-  
+
   def apply(
       tunnisteella: KkHakeneetHyvaksytytVastaanottaneetTunnisteella
   ): KkHakeneetHyvaksytytVastaanottaneetResult = {
