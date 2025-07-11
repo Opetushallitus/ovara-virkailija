@@ -55,6 +55,10 @@ export const getSortedKoulutuksenAlkamisKaudet = (
   return [];
 };
 
+export const hasOphPaaKayttajaRole = (userRoles?: Array<string>) => {
+  return userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA');
+};
+
 export const hasOvaraRole = (userRoles?: Array<string>) => {
   return userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA');
 };

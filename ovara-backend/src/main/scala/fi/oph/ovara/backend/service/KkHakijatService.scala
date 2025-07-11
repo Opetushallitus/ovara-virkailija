@@ -76,7 +76,7 @@ class KkHakijatService(
         "kkHakijatRepository.selectWithParams"
       )
 
-      val sortedList = queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi, resultRow.hakijanEtunimi, resultRow.oppijanumero))
+      val sortedList = queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi.toLowerCase, resultRow.hakijanEtunimi.toLowerCase(), resultRow.oppijanumero))
 
       val yokokeet = {
         if(Some(naytaYoArvosanat).getOrElse(false))

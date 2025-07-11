@@ -73,7 +73,7 @@ class ToisenAsteenHakijatService(
 
       val queryResult = db.run(query, "toisenAsteenHakijatRepository.selectWithParams")
       val sortedList =
-        queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi, resultRow.hakijanEtunimi, resultRow.oppijanumero))
+        queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi.toLowerCase(), resultRow.hakijanEtunimi.toLowerCase, resultRow.oppijanumero))
 
       ExcelWriter.writeToisenAsteenHakijatRaportti(
         sortedList,

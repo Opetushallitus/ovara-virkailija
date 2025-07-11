@@ -37,7 +37,6 @@ export default function KkHakutilasto() {
 
   const { selectedAlkamiskaudet, selectedHaut } = useCommonSearchParams();
   const { selectedTulostustapa } = useHakeneetSearchParams();
-
   const isDisabled =
     isNullishOrEmpty(selectedAlkamiskaudet) ||
     isNullishOrEmpty(selectedHaut) ||
