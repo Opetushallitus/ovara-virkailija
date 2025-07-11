@@ -43,7 +43,7 @@ class ToisenAsteenHakijatRepository extends Extractors {
     val optionalValintatietoQuery =
       RepositoryUtils.makeOptionalListOfValuesQueryStr(
         "AND",
-        "ht.valintatieto'",
+        "ht.valintatieto",
         valintatiedotAsDbValues
       )
     val optionalVastaanottotietoQuery =
