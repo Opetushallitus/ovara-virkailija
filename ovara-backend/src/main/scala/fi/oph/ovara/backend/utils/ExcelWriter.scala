@@ -334,7 +334,7 @@ object ExcelWriter {
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
-      LOG.info("Creating new excel from db results")
+      LOG.info("Creating new KoulutuksetToteutuksetHakukohteetExcel from db results")
       val sheet: XSSFSheet                            = workbook.createSheet()
       val headingCellStyle: XSSFCellStyle             = workbook.createCellStyle()
       val bodyTextCellStyle: XSSFCellStyle            = workbook.createCellStyle()
@@ -544,7 +544,7 @@ object ExcelWriter {
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
-      LOG.info("Creating new excel from db results")
+      LOG.info("Creating new KkKoulutuksetToteutuksetHakukohteetExcel from db results")
       val sheet: XSSFSheet                 = workbook.createSheet()
       val headingCellStyle: XSSFCellStyle  = workbook.createCellStyle()
       val bodyTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
@@ -899,7 +899,7 @@ object ExcelWriter {
       translations: Map[String, String]
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
-    LOG.info("Creating new excel from db results")
+    LOG.info("Creating new ToisenAsteenHakijatExcel from db results")
     val sheet: XSSFSheet = workbook.createSheet()
     workbook.setSheetName(
       0,
@@ -1196,7 +1196,7 @@ object ExcelWriter {
       yokokeet: Vector[Koodi]
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
-    LOG.info("Creating new excel from db results")
+    LOG.info("Creating new KkHakijatExcel from db results")
     val sheet: XSSFSheet = workbook.createSheet()
     workbook.setSheetName(
       0,

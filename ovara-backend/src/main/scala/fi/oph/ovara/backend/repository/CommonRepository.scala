@@ -54,7 +54,6 @@ class CommonRepository extends Extractors {
           FROM pub.pub_dim_kontrolli_haku h
           WHERE h.haun_tyyppi = $haunTyyppi
           #$combinedQueryStr""".as[Haku]
-    LOG.info(query.statements.head)
     query
   }
 

@@ -71,7 +71,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
               harkinnanvaraisuudet = harkinnanvaraisuudet,
               sukupuoli = sukupuoli
             )
-            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams2")
+            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams")
         case "koulutusaloittain" =>
             val query = hakeneetHyvaksytytVastaanottaneetRepository.selectKoulutusaloittainWithParams(
               selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
@@ -86,7 +86,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
               harkinnanvaraisuudet = harkinnanvaraisuudet,
               sukupuoli = sukupuoli
             )
-            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectKoulutusaloittainWithParams2")
+            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectKoulutusaloittainWithParams")
             .map(r => HakeneetHyvaksytytVastaanottaneetResult(r))
         case "toimipisteittain" =>
             val query = hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams(
@@ -102,7 +102,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
               harkinnanvaraisuudet = harkinnanvaraisuudet,
               sukupuoli = sukupuoli
             )
-            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams2")
+            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams")
               .map(r => HakeneetHyvaksytytVastaanottaneetResult(r))
         case _ =>
             val query = hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams(
@@ -119,7 +119,7 @@ class HakeneetHyvaksytytVastaanottaneetService(
               sukupuoli = sukupuoli,
               organisaatiotaso = tulostustapa
             )
-            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams2")
+            db.run(query, "hakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams")
               .map(r => HakeneetHyvaksytytVastaanottaneetResult(r))
       }
 

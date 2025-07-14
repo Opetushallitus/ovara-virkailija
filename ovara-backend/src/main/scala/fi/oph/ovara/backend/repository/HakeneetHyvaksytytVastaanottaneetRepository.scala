@@ -137,10 +137,10 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     ON h.haku_oid = ha.haku_oid
     WHERE #$filters
     GROUP BY h.hakukohde_oid, h.hakukohde_nimi, h.haku_oid, ha.haku_nimi, h.organisaatio_nimi""".as[HakeneetHyvaksytytVastaanottaneetHakukohteittain]
-    LOG.debug(s"selectHakukohteittainWithParams2: ${query.statements.head}")
+    LOG.debug(s"selectHakukohteittainWithParams: ${query.statements.head}")
     query
   }
-  
+
   def selectHakijatYhteensaWithParams(
       selectedKayttooikeusOrganisaatiot: List[String],
       haut: List[String],
@@ -256,10 +256,10 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
 	    group by 1) a on h.koulutusala = a.koulutusala
     WHERE #$filters
     GROUP BY 1, 2, 11""".as[HakeneetHyvaksytytVastaanottaneetTunnisteella]
-    LOG.info(s"selectKoulutusaloittainWithParams2: ${query.statements.head}")
+    LOG.debug(s"selectKoulutusaloittainWithParams: ${query.statements.head}")
     query
   }
-  
+
 
   def selectOrganisaatioittainWithParams(
                                           selectedKayttooikeusOrganisaatiot: List[String],
@@ -349,7 +349,7 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     LOG.debug(s"selectOrganisaatioittainWithParams: ${query.statements.head}")
     query
   }
-  
+
 
   def selectToimipisteittainWithParams(
                                         selectedKayttooikeusOrganisaatiot: List[String],
@@ -424,7 +424,7 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
 	    group by 1) a on h.toimipiste = a.toimipiste
     WHERE #$filters
     GROUP BY 1, 2, 11""".as[HakeneetHyvaksytytVastaanottaneetTunnisteella]
-    LOG.debug(s"selectToimipisteittainWithParams2: ${query.statements.head}")
+    LOG.debug(s"selectToimipisteittainWithParams: ${query.statements.head}")
     query
   }
 

@@ -291,7 +291,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
 	    GROUP BY  1) a ON h.toimipiste = a.toimipiste
       WHERE #$filters
       GROUP BY 1, 2, 12, 13""".as[KkHakeneetHyvaksytytVastaanottaneetToimipisteittain]
-    LOG.debug(s"selectToimipisteittainWithParams2: ${query.statements.head}")
+    LOG.debug(s"selectToimipisteittainWithParams: ${query.statements.head}")
     query
   }
 
