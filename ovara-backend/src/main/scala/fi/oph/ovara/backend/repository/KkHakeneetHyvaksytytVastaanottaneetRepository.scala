@@ -34,38 +34,26 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
 
     val hakukohderyhmaFilter =
       if (hakukohderyhmat.nonEmpty) {
-        Some(
           s"AND (t.hakukohde_oid IN (SELECT DISTINCT hakukohde_oid FROM pub.pub_dim_hakukohderyhma_ja_hakukohteet WHERE hakukohderyhma_oid IN (${RepositoryUtils
             .makeListOfValuesQueryStr(hakukohderyhmat)})))"
-        )
       } else
-        None
+        ""
     val filters = Seq(
-      Some(s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"),
-      Option(
+      s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})",
         RepositoryUtils.makeOptionalListOfValuesQueryStr(
           "AND",
           "h.jarjestyspaikka_oid",
           selectedKayttooikeusOrganisaatiot
-        )
-      ).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.hakukohde_oid", hakukohteet)).filter(
-        _.nonEmpty
-      ),
+        ),
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.hakukohde_oid", hakukohteet),
       hakukohderyhmaFilter,
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat)).filter(
-        _.nonEmpty
-      ),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.aidinkieli", aidinkielet)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.kansalaisuusluokka", kansalaisuudet)).filter(
-        _.nonEmpty
-      ),
-      Option(RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "t.sukupuoli", sukupuoli)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "t.ensikertalainen", ensikertalainen)).filter(
-        _.nonEmpty
-      ),
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat),
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.aidinkieli", aidinkielet),
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.kansalaisuusluokka", kansalaisuudet),
+      RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "t.sukupuoli", sukupuoli),
+      RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "t.ensikertalainen", ensikertalainen),
       buildTutkinnonTasoFilters(tutkinnonTasot, "h")
-    ).collect { case Some(value) => value }.mkString("\n")
+    ).collect { case value if value.nonEmpty => value }.mkString("\n")
 
     filters
   }
@@ -169,7 +157,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     )
     val hakukohdeOkmOhjauksenalaFilter =
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat)
-    val hakukohdeTutkinnontasoFilter = buildTutkinnonTasoFilters(tutkinnonTasot, "h").getOrElse("")
+    val hakukohdeTutkinnontasoFilter = buildTutkinnonTasoFilters(tutkinnonTasot, "h")
 
     val query =
       sql"""SELECT
@@ -252,7 +240,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     )
     val hakukohdeOkmOhjauksenalaFilter =
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat)
-    val hakukohdeTutkinnontasoFilter = buildTutkinnonTasoFilters(tutkinnonTasot, "h").getOrElse("")
+    val hakukohdeTutkinnontasoFilter = buildTutkinnonTasoFilters(tutkinnonTasot, "h")
 
     val query =
       sql"""SELECT
@@ -333,7 +321,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     )
     val hakukohdeOkmOhjauksenalaFilter =
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat)
-    val hakukohdeTutkinnontasoFilter = buildTutkinnonTasoFilters(tutkinnonTasot, "h").getOrElse("")
+    val hakukohdeTutkinnontasoFilter = buildTutkinnonTasoFilters(tutkinnonTasot, "h")
 
     val organisaatioSelect = organisaatiotaso match {
       case "oppilaitoksittain" => "h.oppilaitos as tunniste, h.oppilaitos_nimi as otsikko"
@@ -426,7 +414,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     )
     val hakukohdeOkmOhjauksenalaFilter =
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat)
-    val hakukohdeTutkinnontasoFilter = buildTutkinnonTasoFilters(tutkinnonTasot, "h").getOrElse("")
+    val hakukohdeTutkinnontasoFilter = buildTutkinnonTasoFilters(tutkinnonTasot, "h")
 
     val query =
       sql"""SELECT
@@ -566,7 +554,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     )
     val hakukohdeOkmOhjauksenalaFilter =
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat)
-    val hakukohdeTutkinnontasoFilter = buildTutkinnonTasoFilters(tutkinnonTasot, "h").getOrElse("")
+    val hakukohdeTutkinnontasoFilter = buildTutkinnonTasoFilters(tutkinnonTasot, "h")
 
     val query =
       sql"""SELECT
@@ -629,41 +617,23 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   ): DBIO[Int] = {
     val hakukohderyhmaFilter =
       if (hakukohderyhmat.nonEmpty) {
-        Some(
           s"AND (ht.hakukohde_oid IN (SELECT DISTINCT hakukohde_oid FROM pub.pub_dim_hakukohderyhma_ja_hakukohteet WHERE hakukohderyhma_oid IN (${RepositoryUtils
             .makeListOfValuesQueryStr(hakukohderyhmat)})))"
-        )
       } else
-        None
+        ""
     val filters = Seq(
-      Some(s"ht.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"),
-      Option(
-        RepositoryUtils.makeOptionalListOfValuesQueryStr(
-          "AND",
-          "h.jarjestyspaikka_oid",
-          selectedKayttooikeusOrganisaatiot
-        )
-      ).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.hakukohde_oid", hakukohteet)).filter(
-        _.nonEmpty
-      ),
+      s"ht.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})",
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.jarjestyspaikka_oid", selectedKayttooikeusOrganisaatiot),
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.hakukohde_oid", hakukohteet),
       hakukohderyhmaFilter,
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat)).filter(
-        _.nonEmpty
-      ),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "he.aidinkieli", aidinkielet)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "he.kansalaisuusluokka", kansalaisuudet)).filter(
-        _.nonEmpty
-      ),
-      Option(RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "he.sukupuoli", sukupuoli)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "ht.ensikertalainen", ensikertalainen)).filter(
-        _.nonEmpty
-      ),
-      Option(RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "m.maksuvelvollisuus", maksuvelvollinen)).filter(
-        _.nonEmpty
-      ),
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat),
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "he.aidinkieli", aidinkielet),
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "he.kansalaisuusluokka", kansalaisuudet),
+      RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "he.sukupuoli", sukupuoli),
+      RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "ht.ensikertalainen", ensikertalainen),
+      RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "m.maksuvelvollisuus", maksuvelvollinen),
       buildTutkinnonTasoFilters(tutkinnonTasot, "h")
-    ).collect { case Some(value) => value }.mkString("\n")
+    ).collect { case value if value.nonEmpty => value }.mkString("\n")
 
     val maksuvelvollisuusJoin =
       if (maksuvelvollinen.isDefined) {

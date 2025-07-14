@@ -193,7 +193,7 @@ object RepositoryUtils {
   def buildTutkinnonTasoFilters(
       tutkinnonTasot: List[String],
       hakukohdeTable: String
-  ): Option[String] = {
+  ): String = {
     if (tutkinnonTasot.nonEmpty) {
       var conditions = List[String]()
       if (tutkinnonTasot.contains("alempi-ja-ylempi")) {
@@ -205,9 +205,9 @@ object RepositoryUtils {
       if (tutkinnonTasot.contains("ylempi")) {
         conditions = conditions :+ s"${hakukohdeTable}.alempi_kk_aste = false AND $hakukohdeTable.ylempi_kk_aste = true"
       }
-      Some(s"AND (" + conditions.mkString(" OR ") + ")")
+      s"AND (" + conditions.mkString(" OR ") + ")"
     } else
-      None
+      ""
   }
 
   def makeOptionalJarjestyspaikkaQuery(selectedKayttooikeusOrganisaatiot: List[String]): String = {

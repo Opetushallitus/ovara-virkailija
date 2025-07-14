@@ -28,54 +28,38 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     val harkinnanvaraisuudetWithSureValues = RepositoryUtils.enrichHarkinnanvaraisuudet(harkinnanvaraisuudet)
 
     val filters = Seq(
-      Some(s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"),
-      Option(
-        RepositoryUtils.makeOptionalListOfValuesQueryStr(
-          "AND",
-          "h.jarjestyspaikka_oid",
-          selectedKayttooikeusOrganisaatiot
-        )
-      ).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.hakukohde_oid", hakukohteet)).filter(
-        _.nonEmpty
+      s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})",
+      RepositoryUtils.makeOptionalListOfValuesQueryStr(
+        "AND",
+        "h.jarjestyspaikka_oid",
+        selectedKayttooikeusOrganisaatiot
       ),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_1", koulutusalat1)).filter(
-        _.nonEmpty
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.hakukohde_oid", hakukohteet),
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_1", koulutusalat1),
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_2", koulutusalat2),
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_3", koulutusalat3),
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintimaakunta", maakunnat),
+      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintikunta", kunnat),
+      RepositoryUtils.makeOptionalListOfValuesQueryStr(
+        "AND",
+        "t.harkinnanvaraisuuden_syy",
+        harkinnanvaraisuudetWithSureValues
       ),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_2", koulutusalat2)).filter(
-        _.nonEmpty
-      ),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_3", koulutusalat3)).filter(
-        _.nonEmpty
-      ),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintimaakunta", maakunnat)).filter(
-        _.nonEmpty
-      ),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintikunta", kunnat)).filter(_.nonEmpty),
-      Option(
-        RepositoryUtils.makeOptionalListOfValuesQueryStr(
-          "AND",
-          "t.harkinnanvaraisuuden_syy",
-          harkinnanvaraisuudetWithSureValues
-        )
-      ).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "t.sukupuoli", sukupuoli)).filter(_.nonEmpty),
+      RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "t.sukupuoli", sukupuoli),
       buildOpetuskieletFilter(opetuskielet)
-    ).collect { case Some(value) => value }.mkString("\n")
+    ).collect { case value if value.nonEmpty => value }.mkString("\n")
 
     filters
   }
 
-  private def buildOpetuskieletFilter(opetuskielet: List[String]): Option[String] = {
+  private def buildOpetuskieletFilter(opetuskielet: List[String]): String = {
     if (opetuskielet.nonEmpty) {
       val opetuskieletStr = opetuskielet.map(k => s"'$k'").mkString(", ")
-      Some(
         s"""AND EXISTS (
            |  SELECT 1 FROM jsonb_array_elements_text(h.oppilaitoksen_opetuskieli) AS elem
            |  WHERE elem IN ($opetuskieletStr)
            |)""".stripMargin
-      )
-    } else None
+    } else ""
   }
 
   def selectHakukohteittainWithParams(
