@@ -22,7 +22,7 @@ object ParameterValidator {
   val TILAT = Set("julkaistu", "tallennettu", "arkistoitu")
   val KK_TUTKINNON_TASOT = Set("alempi-ja-ylempi", "alempi", "ylempi")
 
-  private def strToOptionBoolean(value: String): Option[Boolean] = value match {
+  def strToOptionBoolean(value: String): Option[Boolean] = value match {
     case null | "" => None
     case v if v.equalsIgnoreCase("true") => Some(true)
     case v if v.equalsIgnoreCase("false") => Some(false)

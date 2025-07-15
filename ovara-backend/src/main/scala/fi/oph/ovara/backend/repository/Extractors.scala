@@ -260,15 +260,15 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   }
 
-  implicit val getHakeneetHyvaksytytVastaanottaneetToimipisteittainResult
-      : GetResult[HakeneetHyvaksytytVastaanottaneetToimipisteittain] = GetResult { r =>
-    val toimipiste       = r.nextString()
-    val organisaatioNimi = extractKielistetty(r.nextStringOption())
-    val commonFields     = extractHakeneetHyvaksytytVastaanottaneetCommonFields(r)
+  implicit val getHakeneetHyvaksytytVastaanottaneetTunnisteellaResult
+  : GetResult[HakeneetHyvaksytytVastaanottaneetTunnisteella] = GetResult { r =>
+    val tunniste = r.nextString()
+    val otsikko = extractKielistetty(r.nextStringOption())
+    val commonFields = extractHakeneetHyvaksytytVastaanottaneetCommonFields(r)
 
-    HakeneetHyvaksytytVastaanottaneetToimipisteittain(
-      toimipiste = toimipiste,
-      organisaatioNimi = organisaatioNimi,
+    HakeneetHyvaksytytVastaanottaneetTunnisteella(
+      tunniste = tunniste,
+      otsikko = otsikko,
       commonFields._1,
       commonFields._2,
       commonFields._3,
@@ -369,17 +369,48 @@ trait Extractors extends GenericOvaraJsonFormats {
       commonFields._16,
       commonFields._17
     )
-  }  
-  
-  implicit val getKkHakeneetHyvaksytytVastaanottaneetHauittainResult
-      : GetResult[KkHakeneetHyvaksytytVastaanottaneetHauittain] = GetResult { r =>
-    val hakukohdeNimi    = extractKielistetty(r.nextStringOption())
+  }
+
+  implicit val getKkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteellaResult
+  : GetResult[KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella] = GetResult { r =>
+    val hakuOid = r.nextString()
+    val haunNimi    = extractKielistetty(r.nextStringOption())
     val organisaatioNimi = extractKielistetty(r.nextStringOption())
     val commonFields     = extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(r)
 
-    KkHakeneetHyvaksytytVastaanottaneetHauittain(
-      otsikko = hakukohdeNimi,
+    KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella(
+      tunniste = hakuOid,
+      otsikko = haunNimi,
       organisaatioNimi = organisaatioNimi,
+      commonFields._1,
+      commonFields._2,
+      commonFields._3,
+      commonFields._4,
+      commonFields._5,
+      commonFields._6,
+      commonFields._7,
+      commonFields._8,
+      commonFields._9,
+      commonFields._10,
+      commonFields._11,
+      commonFields._12,
+      commonFields._13,
+      commonFields._14,
+      commonFields._15,
+      commonFields._16,
+      commonFields._17
+    )
+  }
+
+  implicit val getKkHakeneetHyvaksytytVastaanottaneetTunnisteella
+  : GetResult[KkHakeneetHyvaksytytVastaanottaneetTunnisteella] = GetResult { r =>
+    val tunniste = r.nextString()
+    val otsikko = extractKielistetty(r.nextStringOption())
+    val commonFields = extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(r)
+
+    KkHakeneetHyvaksytytVastaanottaneetTunnisteella(
+      tunniste = tunniste,
+      otsikko = otsikko,
       commonFields._1,
       commonFields._2,
       commonFields._3,

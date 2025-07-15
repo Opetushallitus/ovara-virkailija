@@ -34,10 +34,7 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
       makeOptionalJarjestyspaikkaQuery(selectedKayttooikeusOrganisaatiot)
 
     val optionalHakukohderyhmaSubSelect = makeOptionalHakukohderyhmatSubSelectQueryStr(hakukohderyhmat)
-    val tutkinnonTasoQueryStr = buildTutkinnonTasoFilters(tutkinnonTasot, "hk") match {
-      case Some(queryStr) => queryStr
-      case None           => ""
-    }
+    val tutkinnonTasoQueryStr = buildTutkinnonTasoFilters(tutkinnonTasot, "hk")
 
     val query = sql"""SELECT hk.organisaatio_nimi,
                  k.koulutus_nimi,

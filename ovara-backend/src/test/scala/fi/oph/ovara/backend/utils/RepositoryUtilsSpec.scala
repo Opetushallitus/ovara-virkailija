@@ -404,26 +404,26 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
 
   "buildTutkinnonTasoFilters" should "return None when the list is empty" in {
     val result = RepositoryUtils.buildTutkinnonTasoFilters(List.empty, "h")
-    result shouldBe None
+    result shouldBe ""
   }
 
   it should "return the correct filter for 'alempi-ja-ylempi'" in {
     val result = RepositoryUtils.buildTutkinnonTasoFilters(List("alempi-ja-ylempi"), "h")
-    result shouldBe Some("AND (h.alempi_kk_aste = true AND h.ylempi_kk_aste = true)")
+    result shouldBe "AND (h.alempi_kk_aste = true AND h.ylempi_kk_aste = true)"
   }
 
   it should "return the correct filter for 'alempi'" in {
     val result = RepositoryUtils.buildTutkinnonTasoFilters(List("alempi"), "h")
-    result shouldBe Some("AND (h.alempi_kk_aste = true AND h.ylempi_kk_aste = false)")
+    result shouldBe "AND (h.alempi_kk_aste = true AND h.ylempi_kk_aste = false)"
   }
 
   it should "return the correct filter for 'ylempi'" in {
     val result = RepositoryUtils.buildTutkinnonTasoFilters(List("ylempi"), "h")
-    result shouldBe Some("AND (h.alempi_kk_aste = false AND h.ylempi_kk_aste = true)")
+    result shouldBe "AND (h.alempi_kk_aste = false AND h.ylempi_kk_aste = true)"
   }
 
   it should "return the correct filter for multiple values" in {
     val result = RepositoryUtils.buildTutkinnonTasoFilters(List("alempi", "ylempi"), "h")
-    result shouldBe Some("AND (h.alempi_kk_aste = true AND h.ylempi_kk_aste = false OR h.alempi_kk_aste = false AND h.ylempi_kk_aste = true)")
+    result shouldBe "AND (h.alempi_kk_aste = true AND h.ylempi_kk_aste = false OR h.alempi_kk_aste = false AND h.ylempi_kk_aste = true)"
   }
 }
