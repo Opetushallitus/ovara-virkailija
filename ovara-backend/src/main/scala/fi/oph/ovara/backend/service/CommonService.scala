@@ -61,7 +61,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
                       oppilaitokset: List[String],
                       toimipisteet: List[String],
                       haut: List[String],
-                      hakukohderyhmat: List[String],
+                      selectedHakukohderyhmat: List[String],
                       hakukohteet: List[String]
                     ): Either[String, Vector[Hakukohde]] = {
     val user = userService.getEnrichedUserDetails
@@ -73,10 +73,17 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
 
     val isOphPaakayttaja = AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)
 
-    val allowedHakukohderyhmaOids = if (isOphPaakayttaja) {
-      hakukohderyhmat
+    val allowedHakukohderyhmaOidsFromSelection = if (isOphPaakayttaja) {
+      selectedHakukohderyhmat
     } else {
-      kayttooikeusOrganisaatiot intersect hakukohderyhmat
+      val allowedHakukohderyhmat = getHakukohderyhmat(haut) match {
+        case Right(hakukohderyhmaList) =>
+          hakukohderyhmaList.map(_.hakukohderyhma_oid).toList
+        case Left(error) =>
+          LOG.error("Error fetching hakukohderyhmat", error)
+          List.empty[String]
+      }
+      allowedHakukohderyhmat intersect selectedHakukohderyhmat
     }
 
     Try {
@@ -85,7 +92,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
           .selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(
             allowedOrgOidsFromSelection,
             haut,
-            allowedHakukohderyhmaOids,
+            allowedHakukohderyhmaOidsFromSelection,
             hakukohteet
           ),
         "selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja"
