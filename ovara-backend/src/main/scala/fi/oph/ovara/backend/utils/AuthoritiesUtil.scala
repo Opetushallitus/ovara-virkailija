@@ -22,5 +22,10 @@ object AuthoritiesUtil {
   def hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot: List[String]): Boolean = {
     kayttooikeusOrganisaatiot.contains(OPH_PAAKAYTTAJA_OID)
   }
+
+  def filterHakukohderyhmaOids(kayttooikeusOids: List[String]): List[String] = {
+    val regex = """^1\.2\.246\.562\.28.*""".r
+    kayttooikeusOids.filter(oid => regex.matches(oid))
+  }
   
 }

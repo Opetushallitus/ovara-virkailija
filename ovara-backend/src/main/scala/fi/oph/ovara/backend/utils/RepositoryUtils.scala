@@ -155,6 +155,22 @@ object RepositoryUtils {
     }
   }
 
+  def makeHakukohderyhmaQueryWithKayttooikeudet(kayttooikeusOrgOids: List[String],
+                                                kayttooikeusHakukohderyhmaOids: List[String]): String = {
+    val hakukohderyhmaStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusHakukohderyhmaOids)
+    val hakukohderyhmaQueryStr = s"hkr.hakukohderyhma_oid IN ($hakukohderyhmaStr)"
+
+    val hakukohdeOrgStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusOrgOids)
+    val hakukohdeQueryStr = s"hkr_hk.hakukohde_oid IN (SELECT hakukohde_oid FROM pub.pub_dim_hakukohde WHERE jarjestyspaikka_oid IN ($hakukohdeOrgStr))"
+
+    (kayttooikeusHakukohderyhmaOids.isEmpty, kayttooikeusOrgOids.isEmpty) match {
+      case (true, true) => ""
+      case (true, false) => s"AND ($hakukohdeQueryStr)"
+      case (false, true) => s"AND ($hakukohderyhmaQueryStr)"
+      case (false, false) => s"AND ($hakukohderyhmaQueryStr OR $hakukohdeQueryStr)"
+    }
+  }
+
   def enrichHarkinnanvaraisuudet(harkinnanvaraisuudet: List[String]): List[String] = {
     harkinnanvaraisuudet.flatMap(harkinnanvaraisuus => {
       if (List("ATARU_EI_PAATTOTODISTUSTA", "ATARU_YKS_MAT_AI").contains(harkinnanvaraisuus)) {

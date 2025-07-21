@@ -10,7 +10,8 @@ import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.{CacheEvict, Cacheable}
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.{Component, Service}
-import scala.util.{Try, Failure, Success}
+
+import scala.util.{Failure, Success, Try}
 
 @Component
 @Service
@@ -228,12 +229,13 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     Try {
       val user = userService.getEnrichedUserDetails
       val kayttooikeusOids = AuthoritiesUtil.getKayttooikeusOids(user.authorities)
+      val allUsersOrgOids = getAllAllowedOrgOidsFromAuthorities
       val hakukohderyhmaOids =
         if (AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOids))
           List() // ei rajata listaa pääkäyttäjälle
         else
-          kayttooikeusOids
-      db.run(commonRepository.selectHakukohderyhmat(hakukohderyhmaOids, haut), "selectHakukohderyhmat")
+          AuthoritiesUtil.filterHakukohderyhmaOids(kayttooikeusOids)
+      db.run(commonRepository.selectHakukohderyhmat(allUsersOrgOids, hakukohderyhmaOids, haut, AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOids)), "selectHakukohderyhmat")
     } match {
       case Success(result) => Right(result)
       case Failure(exception) =>
@@ -422,4 +424,17 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
 
     (childKayttooikeusOrgs intersect selectedOrgsDescendantOids).distinct
   }
+
+  def getAllAllowedOrgOidsFromAuthorities: List[String] = {
+    val user = userService.getEnrichedUserDetails
+    val authorities = user.authorities
+    val kayttooikeusOrganisaatioOids = AuthoritiesUtil.getKayttooikeusOids(authorities)
+
+    getAllowedOrgOidsFromOrgSelection(
+      kayttooikeusOrganisaatioOids,
+      List(),
+      List()
+    )
+  }
+
 }

@@ -286,6 +286,26 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     )
   }
 
+  "makeHakukohderyhmaQueryWithKayttooikeudet" should "return an empty string when both lists are empty" in {
+    val result = RepositoryUtils.makeHakukohderyhmaQueryWithKayttooikeudet(List.empty, List.empty)
+    result shouldBe ""
+  }
+
+  it should "return the hakukohde query string when only kayttooikeusOrgOids contains values" in {
+    val result = RepositoryUtils.makeHakukohderyhmaQueryWithKayttooikeudet(List("1.2.3"), List.empty)
+    result shouldBe "AND (hkr_hk.hakukohde_oid IN (SELECT hakukohde_oid FROM pub.pub_dim_hakukohde WHERE jarjestyspaikka_oid IN ('1.2.3')))"
+  }
+
+  it should "return the hakukohderyhma query string when only kayttooikeusHakukohderyhmaOids contains values" in {
+    val result = RepositoryUtils.makeHakukohderyhmaQueryWithKayttooikeudet(List.empty, List("4.5.6"))
+    result shouldBe "AND (hkr.hakukohderyhma_oid IN ('4.5.6'))"
+  }
+
+  it should "return both query strings combined with OR when both lists contain values" in {
+    val result = RepositoryUtils.makeHakukohderyhmaQueryWithKayttooikeudet(List("1.2.3"), List("4.5.6"))
+    result shouldBe "AND (hkr.hakukohderyhma_oid IN ('4.5.6') OR hkr_hk.hakukohde_oid IN (SELECT hakukohde_oid FROM pub.pub_dim_hakukohde WHERE jarjestyspaikka_oid IN ('1.2.3')))"
+  }
+
   "enrichHarkinnanvaraisuudet" should "add SURE_EI_PAATTOTODISTUSTA to harkinnanvaraisuudet when ATARU_EI_PAATTOTODISTUSTA is selected" in {
     assert(
       RepositoryUtils.enrichHarkinnanvaraisuudet(List("ATARU_OPPIMISVAIKEUDET", "ATARU_EI_PAATTOTODISTUSTA")) == List(
