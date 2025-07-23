@@ -306,6 +306,105 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     result shouldBe "AND (hkr.hakukohderyhma_oid IN ('4.5.6') OR hkr_hk.hakukohde_oid IN (SELECT hakukohde_oid FROM pub.pub_dim_hakukohde WHERE jarjestyspaikka_oid IN ('1.2.3')))"
   }
 
+  "buildOrgAndHakukohderyhmaFilter" should "return an empty string for OphPaakayttaja when all filters are empty" in {
+    val result = RepositoryUtils.buildOrgAndHakukohderyhmaFilter(
+      orgs = List.empty,
+      isOrganisaatioRajain = false,
+      selectedHakukohderyhmat = List.empty,
+      kayttooikeusHakukohderyhmat = List.empty,
+      isOphPaakayttaja = true
+    )
+    result.trim shouldBe ""
+  }
+
+  it should "return jarjestyspaikka filter for OphPaakayttaja when only orgs filter is provided" in {
+    val result = RepositoryUtils.buildOrgAndHakukohderyhmaFilter(
+      orgs = List("1.2.246.562.10.80593660139"),
+      isOrganisaatioRajain = false,
+      selectedHakukohderyhmat = List.empty,
+      kayttooikeusHakukohderyhmat = List.empty,
+      isOphPaakayttaja = true
+    )
+    result.trim shouldBe "AND hk.jarjestyspaikka_oid IN ('1.2.246.562.10.80593660139')"
+  }
+
+  it should "return jarjestyspaikka for normal user when only orgs filter is provided" in {
+    val result = RepositoryUtils.buildOrgAndHakukohderyhmaFilter(
+      orgs = List("1.2.246.562.10.80593660139"),
+      isOrganisaatioRajain = true,
+      selectedHakukohderyhmat = List.empty,
+      kayttooikeusHakukohderyhmat = List.empty,
+      isOphPaakayttaja = false
+    )
+    result shouldBe "AND hk.jarjestyspaikka_oid IN ('1.2.246.562.10.80593660139')"
+  }
+
+  it should "return jarjestyspaikka filter for normal user when no filter is provided" in {
+    val result = RepositoryUtils.buildOrgAndHakukohderyhmaFilter(
+      orgs = List("1.2.246.562.10.80593660139"),
+      isOrganisaatioRajain = false,
+      selectedHakukohderyhmat = List.empty,
+      kayttooikeusHakukohderyhmat = List.empty,
+      isOphPaakayttaja = false
+    )
+    result.trim shouldBe "AND hk.jarjestyspaikka_oid IN ('1.2.246.562.10.80593660139')"
+  }
+
+  it should "return a filter for selectedHakukohderyhmat for OphPaakayttaja when only selectedHakukohderyhmat filter is provided" in {
+    val result = RepositoryUtils.buildOrgAndHakukohderyhmaFilter(
+      orgs = List.empty,
+      isOrganisaatioRajain = false,
+      selectedHakukohderyhmat = List("1.2.246.562.28.95751395146"),
+      kayttooikeusHakukohderyhmat = List.empty,
+      isOphPaakayttaja = true
+    )
+    result.trim shouldBe "AND hkr_hk.hakukohderyhma_oid IN ('1.2.246.562.28.95751395146')"
+  }
+
+  it should "return a combined filter for orgs and selectedHakukohderyhmat for OphPaakayttaja when both filters are provided" in {
+    val result = RepositoryUtils.buildOrgAndHakukohderyhmaFilter(
+      orgs = List("1.2.246.562.10.80593660139"),
+      isOrganisaatioRajain = false,
+      selectedHakukohderyhmat = List("1.2.246.562.28.95751395146"),
+      kayttooikeusHakukohderyhmat = List.empty,
+      isOphPaakayttaja = true
+    )
+    result shouldBe "AND hk.jarjestyspaikka_oid IN ('1.2.246.562.10.80593660139') AND hkr_hk.hakukohderyhma_oid IN ('1.2.246.562.28.95751395146')"
+  }
+
+  it should "return a combined filter to both organisaatios and selected hakukohderyhmas when both filters are provided" in {
+    val result = RepositoryUtils.buildOrgAndHakukohderyhmaFilter(
+      orgs = List("1.2.246.562.10.80593660139"),
+      isOrganisaatioRajain = true,
+      selectedHakukohderyhmat = List("1.2.246.562.28.95751395146", "1.2.246.562.28.81326045473"),
+      kayttooikeusHakukohderyhmat = List("1.2.246.562.28.95751395146"),
+      isOphPaakayttaja = false
+    )
+    result shouldBe "AND hk.jarjestyspaikka_oid IN ('1.2.246.562.10.80593660139') AND hkr_hk.hakukohderyhma_oid IN ('1.2.246.562.28.95751395146', '1.2.246.562.28.81326045473')"
+  }
+
+  it should "return a filter including hakukohderyhmat outside of organisation if there is no org filter and hakukohderyhmafilter is provided" in {
+    val result = RepositoryUtils.buildOrgAndHakukohderyhmaFilter(
+      orgs = List("1.2.246.562.10.80593660139"),
+      isOrganisaatioRajain = false,
+      selectedHakukohderyhmat = List("1.2.246.562.28.95751395146", "1.2.246.562.28.81326045473"),
+      kayttooikeusHakukohderyhmat = List("1.2.246.562.28.95751395146"),
+      isOphPaakayttaja = false
+    )
+    result shouldBe "AND (hk.jarjestyspaikka_oid IN ('1.2.246.562.10.80593660139') AND hkr_hk.hakukohderyhma_oid IN ('1.2.246.562.28.95751395146', '1.2.246.562.28.81326045473') OR hkr_hk.hakukohderyhma_oid IN ('1.2.246.562.28.95751395146'))"
+  }
+
+  it should "return a filter for jarjestyspaikka and kayttooikeusHakukohderyhmat when no org or hakukohderyhma filters are provided" in {
+    val result = RepositoryUtils.buildOrgAndHakukohderyhmaFilter(
+      orgs = List("1.2.246.562.10.80593660139"),
+      isOrganisaatioRajain = false,
+      selectedHakukohderyhmat = List.empty,
+      kayttooikeusHakukohderyhmat = List("1.2.246.562.28.95751395146"),
+      isOphPaakayttaja = false
+    )
+    result shouldBe "AND hk.jarjestyspaikka_oid IN ('1.2.246.562.10.80593660139') OR hkr_hk.hakukohderyhma_oid IN ('1.2.246.562.28.95751395146')"
+  }
+
   "enrichHarkinnanvaraisuudet" should "add SURE_EI_PAATTOTODISTUSTA to harkinnanvaraisuudet when ATARU_EI_PAATTOTODISTUSTA is selected" in {
     assert(
       RepositoryUtils.enrichHarkinnanvaraisuudet(List("ATARU_OPPIMISVAIKEUDET", "ATARU_EI_PAATTOTODISTUSTA")) == List(
