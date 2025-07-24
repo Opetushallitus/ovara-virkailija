@@ -57,53 +57,6 @@ class CommonRepository extends Extractors {
     query
   }
 
-  def selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(
-      orgs: List[String],
-      haut: List[String],
-      hakukohderyhmat: List[String],
-      hakukohteet: List[String]
-  ): SqlStreamingAction[Vector[Hakukohde], Hakukohde, Effect] = {
-    val organisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(orgs)
-    val organisaatiotQueryStr = if (organisaatiotStr.isEmpty) {
-      ""
-    } else { s"AND hk.jarjestyspaikka_oid in ($organisaatiotStr)" }
-
-    val hautStr = RepositoryUtils.makeListOfValuesQueryStr(haut)
-    val hautQueryStr = if (hautStr.isEmpty) {
-      ""
-    } else {
-      s"AND hk.haku_oid in ($hautStr)"
-    }
-
-    val hakukohderyhmatStr = RepositoryUtils.makeListOfValuesQueryStr(hakukohderyhmat)
-    val hakukohderyhmatQueryStr = if (hakukohderyhmatStr.isEmpty) {
-      ""
-    } else {
-      s"AND hkr_hk.hakukohderyhma_oid in ($hakukohderyhmatStr)"
-    }
-
-    val hakukohteetStr = RepositoryUtils.makeListOfValuesQueryStr(hakukohteet)
-    val hakukohteetQueryStr = if (hakukohteetStr.isEmpty) {
-      ""
-    } else {
-      s"OR hk.hakukohde_oid in ($hakukohteetStr)"
-    }
-
-    val query = sql"""SELECT DISTINCT hk.hakukohde_oid, hk.hakukohde_nimi
-          FROM pub.pub_dim_hakukohde hk
-          LEFT JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
-          ON hkr_hk.hakukohde_oid = hk.hakukohde_oid
-          WHERE hk.tila != 'poistettu'
-          #$organisaatiotQueryStr
-          #$hautQueryStr
-          #$hakukohderyhmatQueryStr
-          #$hakukohteetQueryStr
-          """.as[Hakukohde]
-
-    LOG.debug(s"selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja: ${query.statements.head}")
-    query
-  }
-
   def selectDistinctExistingHakukohteetWithOrgAndAndHakukohderyhmaFilter(
       orgs: List[String],
       isOrganisaatioRajain: Boolean,
@@ -138,7 +91,7 @@ class CommonRepository extends Extractors {
       #$hakukohteetQueryStr
     """.as[Hakukohde]
 
-    LOG.debug(s"selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja: ${query.statements.head}")
+    LOG.debug(s"selectDistinctExistingHakukohteetWithOrgAndAndHakukohderyhmaFilter: ${query.statements.head}")
     query
   }
 

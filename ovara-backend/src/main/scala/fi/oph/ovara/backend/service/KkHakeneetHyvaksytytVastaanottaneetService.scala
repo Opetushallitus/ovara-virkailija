@@ -46,6 +46,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       val asiointikieli = user.asiointikieli.getOrElse("fi")
       val authorities = user.authorities
       val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
+      val kayttooikeusHakukohderyhmat = AuthoritiesUtil.filterHakukohderyhmaOids(kayttooikeusOrganisaatiot)
       val translations = lokalisointiService.getOvaraTranslations(asiointikieli)
       val isOphPaakayttaja = AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)
 
@@ -59,7 +60,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       val hakukohderyhmarajaus =
         if (orgOidsForQuery.isEmpty && hakukohderyhmat.isEmpty && !isOphPaakayttaja) {
           // pakotetaan käyttöoikeuksien mukainen hakukohderyhmärajaus jos ei ole mitään organisaatiorajausta eikä ole pääkäyttäjä
-          kayttooikeusOrganisaatiot
+          kayttooikeusHakukohderyhmat
         } else
           hakukohderyhmat
 

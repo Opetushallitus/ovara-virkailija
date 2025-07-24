@@ -194,31 +194,27 @@ object RepositoryUtils {
       // poikkeustapaus missä ei-pääkäyttäjällä on oikeudet vain hakukohderyhmiin, ei organisaatioita
       if (selectedHakukohderyhmat.nonEmpty) selectedHakukohderyhmatQuery
       else kayttooikeusHakukohderyhmatQuery
-    } else {
+    } else if (isOrganisaatioRajain && selectedHakukohderyhmat.nonEmpty) {
       // ei-pääkäyttäjä, organisaatioita rajattu valikosta
-      if (isOrganisaatioRajain && selectedHakukohderyhmat.nonEmpty) {
-        s"$orgsQuery $selectedHakukohderyhmatQuery".trim
-      } else if (isOrganisaatioRajain && selectedHakukohderyhmat.isEmpty) {
-        orgsQuery
-      } else {
-        // ei organisaatiorajainta, rajataan käyttöoikeuksien organisaatioilla
-        if (selectedHakukohderyhmat.nonEmpty) {
-          val selectedKayttooikeushakukohderyhmat = selectedHakukohderyhmat.intersect(kayttooikeusHakukohderyhmat)
-          val selectedOrganisaationHakukohderyhmat = selectedHakukohderyhmat.diff(kayttooikeusHakukohderyhmat)
+      s"$orgsQuery $selectedHakukohderyhmatQuery".trim
+    } else if (isOrganisaatioRajain && selectedHakukohderyhmat.isEmpty) {
+      orgsQuery
+    } else if (selectedHakukohderyhmat.nonEmpty) {
+      // ei organisaatiorajainta, rajataan käyttöoikeuksien organisaatioilla
+      val selectedKayttooikeushakukohderyhmat = selectedHakukohderyhmat.intersect(kayttooikeusHakukohderyhmat)
+      val selectedOrganisaationHakukohderyhmat = selectedHakukohderyhmat.diff(kayttooikeusHakukohderyhmat)
 
-          val selectedOrganisaationHakukohderyhmatQuery =
-            RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hkr_hk.hakukohderyhma_oid", selectedOrganisaationHakukohderyhmat)
-          val selectedKayttooikeushakukohderyhmatQuery =
-            RepositoryUtils.makeOptionalListOfValuesQueryStr("OR", "hkr_hk.hakukohderyhma_oid", selectedKayttooikeushakukohderyhmat)
+      val selectedOrganisaationHakukohderyhmatQuery =
+        RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hkr_hk.hakukohderyhma_oid", selectedOrganisaationHakukohderyhmat)
+      val selectedKayttooikeushakukohderyhmatQuery =
+        RepositoryUtils.makeOptionalListOfValuesQueryStr("OR", "hkr_hk.hakukohderyhma_oid", selectedKayttooikeushakukohderyhmat)
 
-          val orgQueryStr = orgsQuery.stripPrefix("AND").trim
-          val grouped = List(Some(orgQueryStr), Option(selectedOrganisaationHakukohderyhmatQuery).filter(_.nonEmpty), Option(selectedKayttooikeushakukohderyhmatQuery).filter(_.nonEmpty)).flatten.mkString(" ")
-          s"AND ($grouped)"
-        } else {
-          val kayttooikeusHakukohderymatQuery = RepositoryUtils.makeOptionalListOfValuesQueryStr("OR", "hkr_hk.hakukohderyhma_oid", kayttooikeusHakukohderyhmat)
-          s"${orgsQuery.trim} $kayttooikeusHakukohderymatQuery".trim
-        }
-      }
+      val orgQueryStr = orgsQuery.stripPrefix("AND").trim
+      val grouped = List(Some(orgQueryStr), Option(selectedOrganisaationHakukohderyhmatQuery).filter(_.nonEmpty), Option(selectedKayttooikeushakukohderyhmatQuery).filter(_.nonEmpty)).flatten.mkString(" ")
+      s"AND ($grouped)"
+    } else {
+      val kayttooikeusHakukohderymatQuery = RepositoryUtils.makeOptionalListOfValuesQueryStr("OR", "hkr_hk.hakukohderyhma_oid", kayttooikeusHakukohderyhmat)
+      s"${orgsQuery.trim} $kayttooikeusHakukohderymatQuery".trim
     }
     query
   }
