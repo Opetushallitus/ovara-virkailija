@@ -44,11 +44,7 @@ object OrganisaatioUtils {
   def getDescendantOids(hierarkia: OrganisaatioHierarkia): List[String] = {
     val organisaatioOid = hierarkia.organisaatio_oid
     val children        = hierarkia.children
-    if (children.isEmpty) {
-      List(organisaatioOid)
-    } else {
-      List(organisaatioOid) ::: children.flatMap(child => getDescendantOids(child))
-    }
+    organisaatioOid +: children.flatMap(child => getDescendantOids(child))
   }
 
   def getKayttooikeusDescendantAndSelfOids(
@@ -70,7 +66,7 @@ object OrganisaatioUtils {
   def filterActiveOrgsWithoutPeruskoulu(hierarkia: OrganisaatioHierarkia): Option[OrganisaatioHierarkia] = {
     val children = hierarkia.children
 
-    if (hierarkia.tila != "AKTIIVINEN" || 
+    if (hierarkia.tila != "AKTIIVINEN" ||
       hierarkia.oppilaitostyyppi.contains("oppilaitostyyppi_11#1") ||
       hierarkia.oppilaitostyyppi.contains("oppilaitostyyppi_12#1")) {
       None
