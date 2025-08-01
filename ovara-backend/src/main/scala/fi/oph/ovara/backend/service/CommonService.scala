@@ -80,7 +80,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
 
     val allowedOrgOidsFromSelection =
       getAllowedOrgOidsFromOrgSelection(kayttooikeusOrganisaatiot, oppilaitokset, toimipisteet, koulutustoimija)
-    val isOrganisaatioRajain        = koulutustoimija.isDefined || oppilaitokset.nonEmpty || toimipisteet.nonEmpty
+    val isOrganisaatioRajain        = (koulutustoimija.isDefined || oppilaitokset.nonEmpty || toimipisteet.nonEmpty) && allowedOrgOidsFromSelection.nonEmpty
     val kayttooikeusHakukohderyhmat = AuthoritiesUtil.filterHakukohderyhmaOids(kayttooikeusOrganisaatiot)
 
     Try {

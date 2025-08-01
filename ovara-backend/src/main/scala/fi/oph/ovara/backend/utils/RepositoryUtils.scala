@@ -157,66 +157,57 @@ object RepositoryUtils {
 
   def makeHakukohderyhmaQueryWithKayttooikeudet(
       kayttooikeusOrgOids: List[String],
-      kayttooikeusHakukohderyhmaOids: List[String]
+      kayttooikeusHakukohderyhmaOids: List[String],
+      hakukohderyhmaTablename: String = "hkr"
   ): String = {
     val hakukohderyhmaStr      = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusHakukohderyhmaOids)
-    val hakukohderyhmaQueryStr = s"hkr.hakukohderyhma_oid IN ($hakukohderyhmaStr)"
+    val hakukohderyhmaQueryStr = s"$hakukohderyhmaTablename.hakukohderyhma_oid IN ($hakukohderyhmaStr)"
 
     val hakukohdeOrgStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusOrgOids)
-    val hakukohdeQueryStr =
-      s"hkr_hk.hakukohde_oid IN (SELECT hakukohde_oid FROM pub.pub_dim_hakukohde WHERE jarjestyspaikka_oid IN ($hakukohdeOrgStr))"
+    val hakukohdeQueryStr = s"hk.jarjestyspaikka_oid IN ($hakukohdeOrgStr)"
 
     (kayttooikeusHakukohderyhmaOids.isEmpty, kayttooikeusOrgOids.isEmpty) match {
       case (true, true)   => ""
-      case (true, false)  => s"AND ($hakukohdeQueryStr)"
-      case (false, true)  => s"AND ($hakukohderyhmaQueryStr)"
+      case (true, false)  => s"AND $hakukohdeQueryStr"
+      case (false, true)  => s"AND $hakukohderyhmaQueryStr"
       case (false, false) => s"AND ($hakukohderyhmaQueryStr OR $hakukohdeQueryStr)"
     }
   }
 
-  def buildOrgAndHakukohderyhmaFilter(
-                                       orgs: List[String],
-                                       isOrganisaatioRajain: Boolean,
-                                       selectedHakukohderyhmat: List[String],
-                                       kayttooikeusHakukohderyhmat: List[String],
-                                       isOphPaakayttaja: Boolean
-                                     ): String = {
-    val orgsQuery =
-      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hk.jarjestyspaikka_oid", orgs)
-    val selectedHakukohderyhmatQuery =
-      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hkr_hk.hakukohderyhma_oid", selectedHakukohderyhmat)
-    val kayttooikeusHakukohderyhmatQuery =
-      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hkr_hk.hakukohderyhma_oid", kayttooikeusHakukohderyhmat)
-
-    val query = if (isOphPaakayttaja) {
-      s"$orgsQuery $selectedHakukohderyhmatQuery".trim
-    } else if (orgs.isEmpty) {
-      // poikkeustapaus missä ei-pääkäyttäjällä on oikeudet vain hakukohderyhmiin, ei organisaatioita
-      if (selectedHakukohderyhmat.nonEmpty) selectedHakukohderyhmatQuery
-      else kayttooikeusHakukohderyhmatQuery
-    } else if (isOrganisaatioRajain && selectedHakukohderyhmat.nonEmpty) {
-      // ei-pääkäyttäjä, organisaatioita rajattu valikosta
-      s"$orgsQuery $selectedHakukohderyhmatQuery".trim
-    } else if (isOrganisaatioRajain && selectedHakukohderyhmat.isEmpty) {
-      orgsQuery
-    } else if (selectedHakukohderyhmat.nonEmpty) {
-      // ei organisaatiorajainta, rajataan käyttöoikeuksien organisaatioilla
-      val selectedKayttooikeushakukohderyhmat = selectedHakukohderyhmat.intersect(kayttooikeusHakukohderyhmat)
-      val selectedOrganisaationHakukohderyhmat = selectedHakukohderyhmat.diff(kayttooikeusHakukohderyhmat)
-
-      val selectedOrganisaationHakukohderyhmatQuery =
-        RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hkr_hk.hakukohderyhma_oid", selectedOrganisaationHakukohderyhmat)
-      val selectedKayttooikeushakukohderyhmatQuery =
-        RepositoryUtils.makeOptionalListOfValuesQueryStr("OR", "hkr_hk.hakukohderyhma_oid", selectedKayttooikeushakukohderyhmat)
-
-      val orgQueryStr = orgsQuery.stripPrefix("AND").trim
-      val grouped = List(Some(orgQueryStr), Option(selectedOrganisaationHakukohderyhmatQuery).filter(_.nonEmpty), Option(selectedKayttooikeushakukohderyhmatQuery).filter(_.nonEmpty)).flatten.mkString(" ")
-      s"AND ($grouped)"
+  def buildHakukohdeFilterQuery(
+      selectedHakukohteet: List[String],
+      selectedHaut: List[String],
+      selectedHakukohderyhmat: List[String],
+      kayttooikeusHakukohderyhmat: List[String],
+      orgs: List[String],
+      isOrganisaatioRajain: Boolean,
+      isOphPaakayttaja: Boolean
+  ): String = {
+    if (selectedHaut.isEmpty)
+      throw new IllegalArgumentException("Haku must be selected before fetching hakukohteet")
+    if (orgs.isEmpty && kayttooikeusHakukohderyhmat.isEmpty && !isOphPaakayttaja)
+      throw new IllegalArgumentException("Non superuser must have either organization or hakukohderyhma limitation")
+    // käyttäjälle sallitut / organisaatiorajatut hakukohteet AND (selected hakukohde OR (selected hakukohderyhmä AND selected haku))
+    val hakukohteetOrganisaatioJaKäyttöoikeusrajauksilla = if (isOrganisaatioRajain) {
+      makeHakukohderyhmaQueryWithKayttooikeudet(orgs, List.empty, "hkr_hk")
+    } else if (isOphPaakayttaja) {
+        ""
     } else {
-      val kayttooikeusHakukohderymatQuery = RepositoryUtils.makeOptionalListOfValuesQueryStr("OR", "hkr_hk.hakukohderyhma_oid", kayttooikeusHakukohderyhmat)
-      s"${orgsQuery.trim} $kayttooikeusHakukohderymatQuery".trim
+        makeHakukohderyhmaQueryWithKayttooikeudet(orgs, kayttooikeusHakukohderyhmat, "hkr_hk")
     }
-    query
+    val selectedHakukohdeRajaus = if (selectedHakukohteet.nonEmpty) {
+      s"hk.hakukohde_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(selectedHakukohteet)}) OR"
+    } else {
+      ""
+    }
+    val selectedHakukohderyhmaRajaus = if (selectedHakukohderyhmat.nonEmpty) {
+      s"hkr_hk.hakukohderyhma_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(selectedHakukohderyhmat)}) AND"
+    } else {
+      ""
+    }
+    // haku on aina pakollinen rajain, validointi tehdään controllerissa
+    val selectedHakuRajaus = s"hk.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(selectedHaut)})"
+    s"$hakukohteetOrganisaatioJaKäyttöoikeusrajauksilla AND ($selectedHakukohdeRajaus ($selectedHakukohderyhmaRajaus $selectedHakuRajaus))"
   }
 
   def enrichHarkinnanvaraisuudet(harkinnanvaraisuudet: List[String]): List[String] = {

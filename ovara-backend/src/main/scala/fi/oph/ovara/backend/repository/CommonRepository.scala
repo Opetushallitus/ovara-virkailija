@@ -58,25 +58,22 @@ class CommonRepository extends Extractors {
   }
 
   def selectDistinctExistingHakukohteetWithOrgAndAndHakukohderyhmaFilter(
-      orgs: List[String],
+      selectedOrKayttooikeusOrgs: List[String],
       isOrganisaatioRajain: Boolean,
-      haut: List[String],
+      selectedHaut: List[String],
       selectedHakukohderyhmat: List[String],
       kayttooikeusHakukohderyhmat: List[String],
-      hakukohteet: List[String],
+      selectedHakukohteet: List[String],
       isOphPaakayttaja: Boolean
   ): SqlStreamingAction[Vector[Hakukohde], Hakukohde, Effect] = {
-    val hautStr      = RepositoryUtils.makeListOfValuesQueryStr(haut)
-    val hautQueryStr = if (hautStr.isEmpty) "" else s"AND hk.haku_oid IN ($hautStr)"
 
-    val hakukohteetStr      = RepositoryUtils.makeListOfValuesQueryStr(hakukohteet)
-    val hakukohteetQueryStr = if (hakukohteetStr.isEmpty) "" else s"OR hk.hakukohde_oid IN ($hakukohteetStr)"
-
-    val orgAndGroupQueryStr = RepositoryUtils.buildOrgAndHakukohderyhmaFilter(
-      orgs,
-      isOrganisaatioRajain,
+    val orgAndGroupQueryStr = RepositoryUtils.buildHakukohdeFilterQuery(
+      selectedHakukohteet,
+      selectedHaut,
       selectedHakukohderyhmat,
       kayttooikeusHakukohderyhmat,
+      selectedOrKayttooikeusOrgs,
+      isOrganisaatioRajain,
       isOphPaakayttaja
     )
 
@@ -86,9 +83,7 @@ class CommonRepository extends Extractors {
       LEFT JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
         ON hkr_hk.hakukohde_oid = hk.hakukohde_oid
       WHERE hk.tila != 'poistettu'
-      #$hautQueryStr
       #$orgAndGroupQueryStr
-      #$hakukohteetQueryStr
     """.as[Hakukohde]
 
     LOG.debug(s"selectDistinctExistingHakukohteetWithOrgAndAndHakukohderyhmaFilter: ${query.statements.head}")
@@ -154,7 +149,7 @@ class CommonRepository extends Extractors {
     val hautQueryStr = if (hautStr.isEmpty) {
       ""
     } else {
-      s"WHERE hkr_hk.haku_oid in ($hautStr)"
+      s"AND hkr_hk.haku_oid in ($hautStr)"
     }
 
     val hakukohderyhmaQueryStr: String = {
@@ -171,6 +166,8 @@ class CommonRepository extends Extractors {
           FROM pub.pub_dim_hakukohderyhma hkr
           JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
           ON hkr.hakukohderyhma_oid = hkr_hk.hakukohderyhma_oid
+          JOIN pub.pub_dim_hakukohde hk ON hkr_hk.hakukohde_oid = hk.hakukohde_oid
+          WHERE hk.tila != 'poistettu'
           #$hautQueryStr
           #$hakukohderyhmaQueryStr
           """.as[Hakukohderyhma]
