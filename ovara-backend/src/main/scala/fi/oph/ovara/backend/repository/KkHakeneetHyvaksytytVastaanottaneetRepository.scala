@@ -458,7 +458,14 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     KkHakeneetHyvaksytytVastaanottaneetTunnisteella
   ], KkHakeneetHyvaksytytVastaanottaneetTunnisteella, Effect] = {
 
-    val filters = buildFilters(
+    val filters = buildFiltersForMainQuery(
+      haut,
+      aidinkielet,
+      kansalaisuudet,
+      sukupuoli,
+      ensikertalainen
+    )
+    val hakukohdeFilters = buildHakukohdeFilters(
       haut,
       selectedKayttooikeusOrganisaatiot,
       isOrganisaatioRajain,
@@ -466,31 +473,21 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       hakukohteet,
       hakukohderyhmat,
       okmOhjauksenAlat,
-      tutkinnonTasot,
-      aidinkielet,
-      kansalaisuudet,
-      sukupuoli,
-      ensikertalainen
+      tutkinnonTasot
     )
 
-    val hakukohdeHakuFilter = s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"
-    val hakukohdeFilter     = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.hakukohde_oid", hakukohteet)
-    val hakukohdeOrganisaatioFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr(
-      "AND",
-      "h.jarjestyspaikka_oid",
-      selectedKayttooikeusOrganisaatiot
-    )
-    val hakukohdeHakukohderyhmafilter = RepositoryUtils.makeOptionalListOfValuesQueryStr(
-      "AND",
-      "hh.hakukohderyhma_oid",
-      hakukohderyhmat
-    )
-    val hakukohdeOkmOhjauksenalaFilter =
-      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat)
-    val hakukohdeTutkinnontasoFilter = buildTutkinnonTasoFilters(tutkinnonTasot, "h")
+    val filteredHakukohteet = s"""WITH filtered_hakukohteet AS (
+             SELECT h.*
+             FROM pub.pub_dim_hakukohde h
+             LEFT JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hh
+               ON h.hakukohde_oid = hh.hakukohde_oid
+             WHERE $hakukohdeFilters
+         )
+      """
 
     val query =
-      sql"""SELECT
+      sql"""#$filteredHakukohteet
+      SELECT
       h.okm_ohjauksen_ala AS tunniste,
       o.koodinimi AS otsikko,
       COUNT(DISTINCT t.henkilo_oid) AS hakijat,
@@ -502,8 +499,22 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE poissa) AS poissa,
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE ilmoittautunut) AS ilm_yht,
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE maksuvelvollinen) AS maksuvelvollisia,
-      aloituspaikatQuery.valinnan_aloituspaikat,
-      aloituspaikatQuery.aloituspaikat,
+      (
+        SELECT SUM(h2.valintaperusteiden_aloituspaikat)
+        FROM (
+          SELECT DISTINCT h3.hakukohde_oid, h3.okm_ohjauksen_ala, h3.valintaperusteiden_aloituspaikat
+          FROM filtered_hakukohteet h3
+        ) h2
+        WHERE h2.okm_ohjauksen_ala = h.okm_ohjauksen_ala
+      ) AS valinnan_aloituspaikat,
+      (
+        SELECT SUM(h2.hakukohteen_aloituspaikat)
+        FROM (
+          SELECT DISTINCT h3.hakukohde_oid, h3.okm_ohjauksen_ala, h3.hakukohteen_aloituspaikat
+          FROM filtered_hakukohteet h3
+        ) h2
+        WHERE h2.okm_ohjauksen_ala = h.okm_ohjauksen_ala
+      ) AS aloituspaikat,
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_1) AS toive_1,
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_2) AS toive_2,
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_3) AS toive_3,
@@ -511,24 +522,10 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_5) AS toive_5,
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_6) AS toive_6
       FROM pub.pub_fct_raportti_tilastoraportti_kk_hakutoive t
-      JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
+      JOIN filtered_hakukohteet h ON t.hakukohde_oid = h.hakukohde_oid
       JOIN pub.pub_dim_koodisto_okmohjauksenala o ON h.okm_ohjauksen_ala = o.koodiarvo
-      LEFT JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hh ON h.hakukohde_oid = hh.hakukohde_oid
-      JOIN (
-	    SELECT
-		  h.okm_ohjauksen_ala,
-          SUM(h.valintaperusteiden_aloituspaikat) as valinnan_aloituspaikat,
-		  SUM(h.hakukohteen_aloituspaikat) as aloituspaikat
-	    FROM pub.pub_dim_hakukohde h
-	    WHERE #$hakukohdeHakuFilter
-        #$hakukohdeFilter
-        #$hakukohdeOrganisaatioFilter
-        #$hakukohdeHakukohderyhmafilter
-        #$hakukohdeOkmOhjauksenalaFilter
-        #$hakukohdeTutkinnontasoFilter
-	    GROUP BY  1) aloituspaikatQuery ON h.okm_ohjauksen_ala = aloituspaikatQuery.okm_ohjauksen_ala
       WHERE #$filters
-      GROUP BY 1, 2, 12, 13""".as[KkHakeneetHyvaksytytVastaanottaneetTunnisteella]
+      GROUP BY h.okm_ohjauksen_ala, o.koodinimi""".as[KkHakeneetHyvaksytytVastaanottaneetTunnisteella]
 
     LOG.debug(s"selectOkmOhjauksenAloittainWithParams: ${query.statements.head}")
     query
