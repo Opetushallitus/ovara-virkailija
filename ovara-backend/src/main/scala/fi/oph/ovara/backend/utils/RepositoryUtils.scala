@@ -158,13 +158,14 @@ object RepositoryUtils {
   def makeHakukohderyhmaQueryWithKayttooikeudet(
       kayttooikeusOrgOids: List[String],
       kayttooikeusHakukohderyhmaOids: List[String],
-      hakukohderyhmaTablename: String = "hkr"
+      hakukohderyhmaTablename: String = "hkr",
+      hakukohdeTablename: String = "hk"
   ): String = {
     val hakukohderyhmaStr      = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusHakukohderyhmaOids)
     val hakukohderyhmaQueryStr = s"$hakukohderyhmaTablename.hakukohderyhma_oid IN ($hakukohderyhmaStr)"
 
     val hakukohdeOrgStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusOrgOids)
-    val hakukohdeQueryStr = s"hk.jarjestyspaikka_oid IN ($hakukohdeOrgStr)"
+    val hakukohdeQueryStr = s"$hakukohdeTablename.jarjestyspaikka_oid IN ($hakukohdeOrgStr)"
 
     (kayttooikeusHakukohderyhmaOids.isEmpty, kayttooikeusOrgOids.isEmpty) match {
       case (true, true)   => ""
@@ -265,21 +266,21 @@ object RepositoryUtils {
       ""
   }
 
-  def makeOptionalJarjestyspaikkaQuery(selectedKayttooikeusOrganisaatiot: List[String]): String = {
+  def makeOptionalJarjestyspaikkaQuery(selectedKayttooikeusOrganisaatiot: List[String], tablename: String = "hk"): String = {
     RepositoryUtils.makeOptionalListOfValuesQueryStr(
       "AND",
-      "hk.jarjestyspaikka_oid",
+      s"$tablename.jarjestyspaikka_oid",
       selectedKayttooikeusOrganisaatiot
     )
   }
 
-  def makeOptionalHakukohderyhmatSubSelectQueryStr(hakukohderyhmat: List[String]): String = {
+  def makeOptionalHakukohderyhmatSubSelectQueryStr(hakukohderyhmat: List[String], hakukohdeTablename: String = "hk", operator: String = "AND"): String = {
     val hakukohderyhmatStr = makeListOfValuesQueryStr(hakukohderyhmat)
     if (hakukohderyhmatStr.isEmpty) {
       ""
     } else {
-      "AND hk.hakukohde_oid IN (" +
-        "SELECT hkr_hk.hakukohde_oid FROM pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk " +
+      s"$operator $hakukohdeTablename.hakukohde_oid IN (" +
+        "SELECT DISTINCT hkr_hk.hakukohde_oid FROM pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk " +
         s"WHERE hkr_hk.hakukohderyhma_oid IN ($hakukohderyhmatStr))"
     }
   }
