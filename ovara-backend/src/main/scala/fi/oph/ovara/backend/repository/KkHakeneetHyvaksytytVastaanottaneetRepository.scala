@@ -360,7 +360,14 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     KkHakeneetHyvaksytytVastaanottaneetTunnisteella
   ], KkHakeneetHyvaksytytVastaanottaneetTunnisteella, Effect] = {
 
-    val filters = buildFilters(
+    val filters = buildFiltersForMainQuery(
+      haut,
+      aidinkielet,
+      kansalaisuudet,
+      sukupuoli,
+      ensikertalainen
+    )
+    val hakukohdeFilters = buildHakukohdeFilters(
       haut,
       selectedKayttooikeusOrganisaatiot,
       isOrganisaatioRajain,
@@ -368,43 +375,30 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       hakukohteet,
       hakukohderyhmat,
       okmOhjauksenAlat,
-      tutkinnonTasot,
-      aidinkielet,
-      kansalaisuudet,
-      sukupuoli,
-      ensikertalainen
+      tutkinnonTasot
     )
 
-    val hakukohdeHakuFilter = s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"
-    val hakukohdeFilter     = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.hakukohde_oid", hakukohteet)
-    val hakukohdeOrganisaatioFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr(
-      "AND",
-      "h.jarjestyspaikka_oid",
-      selectedKayttooikeusOrganisaatiot
-    )
-    val hakukohdeHakukohderyhmafilter = RepositoryUtils.makeOptionalListOfValuesQueryStr(
-      "AND",
-      "hh.hakukohderyhma_oid",
-      hakukohderyhmat
-    )
-    val hakukohdeOkmOhjauksenalaFilter =
-      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat)
-    val hakukohdeTutkinnontasoFilter = buildTutkinnonTasoFilters(tutkinnonTasot, "h")
+    val filteredHakukohteet = s"""WITH filtered_hakukohteet AS (
+             SELECT h.*
+             FROM pub.pub_dim_hakukohde h
+             LEFT JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hh
+               ON h.hakukohde_oid = hh.hakukohde_oid
+             WHERE $hakukohdeFilters
+         )
+      """
 
+    val organisaatio = organisaatiotaso match {
+      case "oppilaitoksittain" => "oppilaitos"
+      case _                   => "koulutustoimija"
+    }
     val organisaatioSelect = organisaatiotaso match {
       case "oppilaitoksittain" => "h.oppilaitos as tunniste, h.oppilaitos_nimi as otsikko"
       case _                   => "h.koulutustoimija as tunniste, h.koulutustoimija_nimi as otsikko"
     }
-    val organisaatioJoin = organisaatiotaso match {
-      case "oppilaitoksittain" => "h.oppilaitos = aloituspaikatQuery.oppilaitos"
-      case _                   => "h.koulutustoimija = aloituspaikatQuery.koulutustoimija"
-    }
-    val organisaatio = organisaatiotaso match {
-      case "oppilaitoksittain" => "h.oppilaitos"
-      case _                   => "h.koulutustoimija"
-    }
+
     val query =
-      sql"""SELECT
+      sql"""#$filteredHakukohteet
+      SELECT
       #$organisaatioSelect,
       COUNT(DISTINCT t.henkilo_oid) AS hakijat,
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE ensisijainen) AS ensisijaisia,
@@ -415,8 +409,22 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE poissa) AS poissa,
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE ilmoittautunut) AS ilm_yht,
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE maksuvelvollinen) AS maksuvelvollisia,
-      aloituspaikatQuery.valinnan_aloituspaikat,
-      aloituspaikatQuery.aloituspaikat,
+      (
+        SELECT SUM(h2.valintaperusteiden_aloituspaikat)
+        FROM (
+          SELECT DISTINCT h3.hakukohde_oid, h3.#$organisaatio, h3.#${organisaatio}_nimi, h3.valintaperusteiden_aloituspaikat
+          FROM filtered_hakukohteet h3
+        ) h2
+        WHERE h2.#$organisaatio = h.#$organisaatio AND h2.#${organisaatio}_nimi = h.#${organisaatio}_nimi
+      ) AS valinnan_aloituspaikat,
+      (
+        SELECT SUM(h2.hakukohteen_aloituspaikat)
+        FROM (
+          SELECT DISTINCT h3.hakukohde_oid, h3.#$organisaatio, h3.#${organisaatio}_nimi, h3.hakukohteen_aloituspaikat
+          FROM filtered_hakukohteet h3
+        ) h2
+        WHERE h2.#$organisaatio = h.#$organisaatio AND h2.#${organisaatio}_nimi = h.#${organisaatio}_nimi
+      ) AS aloituspaikat,
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_1) AS toive_1,
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_2) AS toive_2,
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_3) AS toive_3,
@@ -424,21 +432,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_5) AS toive_5,
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_6) AS toive_6
       FROM pub.pub_fct_raportti_tilastoraportti_kk_hakutoive t
-      JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
-      LEFT JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hh ON h.hakukohde_oid = hh.hakukohde_oid
-      JOIN (
-	    SELECT
-		  #$organisaatio,
-          SUM(h.valintaperusteiden_aloituspaikat) as valinnan_aloituspaikat,
-		  SUM(h.hakukohteen_aloituspaikat) as aloituspaikat
-	    FROM pub.pub_dim_hakukohde h
-	    WHERE #$hakukohdeHakuFilter
-        #$hakukohdeFilter
-        #$hakukohdeOrganisaatioFilter
-        #$hakukohdeHakukohderyhmafilter
-        #$hakukohdeOkmOhjauksenalaFilter
-        #$hakukohdeTutkinnontasoFilter
-	    GROUP BY  1) aloituspaikatQuery ON #$organisaatioJoin
+      JOIN filtered_hakukohteet h ON t.hakukohde_oid = h.hakukohde_oid
       WHERE #$filters
       GROUP BY 1, 2, 12, 13""".as[KkHakeneetHyvaksytytVastaanottaneetTunnisteella]
 
