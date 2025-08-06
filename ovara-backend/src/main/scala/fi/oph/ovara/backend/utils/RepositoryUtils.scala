@@ -189,7 +189,7 @@ object RepositoryUtils {
     if (orgs.isEmpty && kayttooikeusHakukohderyhmat.isEmpty && !isOphPaakayttaja)
       throw new IllegalArgumentException("Non superuser must have either organization or hakukohderyhma limitation")
     // käyttäjälle sallitut / organisaatiorajatut hakukohteet AND (selected hakukohde OR (selected hakukohderyhmä AND selected haku))
-    val hakukohteetOrganisaatioJaKäyttöoikeusrajauksilla = if (isOrganisaatioRajain) {
+    val hakukohteetOrganisaatioJaKayttooikeusrajauksilla = if (isOrganisaatioRajain) {
       makeHakukohderyhmaQueryWithKayttooikeudet(orgs, List.empty, "hkr_hk")
     } else if (isOphPaakayttaja) {
         ""
@@ -208,7 +208,7 @@ object RepositoryUtils {
     }
     // haku on aina pakollinen rajain, validointi tehdään controllerissa
     val selectedHakuRajaus = s"hk.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(selectedHaut)})"
-    s"$hakukohteetOrganisaatioJaKäyttöoikeusrajauksilla AND ($selectedHakukohdeRajaus ($selectedHakukohderyhmaRajaus $selectedHakuRajaus))"
+    s"$hakukohteetOrganisaatioJaKayttooikeusrajauksilla AND ($selectedHakukohdeRajaus ($selectedHakukohderyhmaRajaus $selectedHakuRajaus))"
   }
 
   def enrichHarkinnanvaraisuudet(harkinnanvaraisuudet: List[String]): List[String] = {
@@ -266,9 +266,9 @@ object RepositoryUtils {
       ""
   }
 
-  def makeOptionalJarjestyspaikkaQuery(selectedKayttooikeusOrganisaatiot: List[String], tablename: String = "hk"): String = {
+  def makeOptionalJarjestyspaikkaQuery(selectedKayttooikeusOrganisaatiot: List[String], tablename: String = "hk", operator: String = "AND"): String = {
     RepositoryUtils.makeOptionalListOfValuesQueryStr(
-      "AND",
+      operator,
       s"$tablename.jarjestyspaikka_oid",
       selectedKayttooikeusOrganisaatiot
     )

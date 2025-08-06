@@ -85,7 +85,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
 
   private def buildOrganisaatioKayttooikeusFilter(selectedKayttooikeusOrganisaatiot: List[String], isOrganisaatioRajain: Boolean, kayttooikeusHakukohderyhmat: List[String]) = {
     if (isOrganisaatioRajain) {
-      // jos organisaatio valittu, ei huomioida käyttäjän organisaatio ulkopuolisia hakukohderyhmiä
+      // jos organisaatio valittu, ei huomioida käyttäjän organisaation ulkopuolisia hakukohderyhmiä
       makeHakukohderyhmaQueryWithKayttooikeudet(selectedKayttooikeusOrganisaatiot, List.empty, "hh", "h")
     } else {
       makeHakukohderyhmaQueryWithKayttooikeudet(selectedKayttooikeusOrganisaatiot, kayttooikeusHakukohderyhmat, "hh", "h")

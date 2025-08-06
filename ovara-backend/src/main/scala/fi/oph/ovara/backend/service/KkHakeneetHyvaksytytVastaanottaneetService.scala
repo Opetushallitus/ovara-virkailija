@@ -48,7 +48,6 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
       val kayttooikeusHakukohderyhmat = AuthoritiesUtil.filterHakukohderyhmaOids(kayttooikeusOrganisaatiot)
       val translations = lokalisointiService.getOvaraTranslations(asiointikieli)
-      val isOphPaakayttaja = AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)
 
       val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
         kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
@@ -57,7 +56,6 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
         koulutustoimijaOid = koulutustoimija
       )
       val isOrganisaatioRajain =  (koulutustoimija.isDefined || oppilaitokset.nonEmpty || toimipisteet.nonEmpty) && orgOidsForQuery.nonEmpty
-      LOG.info(s"isOrganisaatioRajain: $isOrganisaatioRajain")
       val queryResult = tulostustapa match
         case "hauittain" =>
             val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHauittainWithParams(

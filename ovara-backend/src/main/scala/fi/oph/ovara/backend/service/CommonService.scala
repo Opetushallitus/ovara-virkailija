@@ -82,7 +82,6 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       getAllowedOrgOidsFromOrgSelection(kayttooikeusOrganisaatiot, oppilaitokset, toimipisteet, koulutustoimija)
     val isOrganisaatioRajain        = (koulutustoimija.isDefined || oppilaitokset.nonEmpty || toimipisteet.nonEmpty) && allowedOrgOidsFromSelection.nonEmpty
     val kayttooikeusHakukohderyhmat = AuthoritiesUtil.filterHakukohderyhmaOids(kayttooikeusOrganisaatiot)
-
     Try {
       db.run(
         commonRepository
@@ -428,6 +427,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       } else if (koulutustoimijaOid.isDefined) {
         getKoulutustoimijahierarkia(List(koulutustoimijaOid.get))
       } else {
+        LOG.info("Fetching organisaatio hierarkiat with user rights")
         getOrganisaatioHierarkiatWithUserRights match {
           case Right(hierarkiat) => hierarkiat
           case Left(error) =>
