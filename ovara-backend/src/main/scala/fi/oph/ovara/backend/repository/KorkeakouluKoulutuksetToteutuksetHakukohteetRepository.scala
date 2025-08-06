@@ -2,7 +2,7 @@ package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.KorkeakouluKoulutusToteutusHakukohdeResult
 import fi.oph.ovara.backend.utils.RepositoryUtils
-import fi.oph.ovara.backend.utils.RepositoryUtils.{buildTutkinnonTasoFilters, makeEqualsQueryStrOfOptional, makeHakukohderyhmaQueryWithKayttooikeudet, makeOptionalHakukohderyhmatSubSelectQueryStr, makeOptionalJarjestyspaikkaQuery}
+import fi.oph.ovara.backend.utils.RepositoryUtils.{buildTutkinnonTasoFilters, makeEqualsQueryStrOfOptional, makeOptionalHakukohderyhmatSubSelectQueryStr}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.{Component, Repository}
 import slick.dbio.Effect
@@ -31,9 +31,9 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
     val organisaatioKayttooikeusQueryStr =
       if (isOrganisaatioRajain) {
         // jos organisaatio on valittu, ei huomioida käyttäjän organisaatioiden ulkopuolisia hakukohderyhmiä
-        makeOrganisaatioHakukohderyhmaSubselect(selectedKayttooikeusOrganisaatiot, List.empty)
+        RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(selectedKayttooikeusOrganisaatiot, List.empty)
       } else {
-        makeOrganisaatioHakukohderyhmaSubselect(selectedKayttooikeusOrganisaatiot, kayttooikeusHakukohderyhmat)
+        RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(selectedKayttooikeusOrganisaatiot, kayttooikeusHakukohderyhmat)
       }
 
     val optionalHakukohderyhmaSubSelect = makeOptionalHakukohderyhmatSubSelectQueryStr(hakukohderyhmat)
@@ -96,30 +96,5 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
 
     query
   }
-
-  private def makeOrganisaatioHakukohderyhmaSubselect(
-                                                       kayttooikeusOrgOids: List[String],
-                                                       kayttooikeusHakukohderyhmaOids: List[String],
-                                                       hakukohdeTablename: String = "hk",
-                                                       operator: String = "AND"
-                                                     ): String = {
-    val kayttooikeusHakukohderyhmaEhto = makeOptionalHakukohderyhmatSubSelectQueryStr(
-      hakukohderyhmat = kayttooikeusHakukohderyhmaOids,
-      hakukohdeTablename = hakukohdeTablename,
-      operator = "" // lisätään operaattori vasta lopuksi
-    )
-
-    val organisaatioEhto = makeOptionalJarjestyspaikkaQuery(
-      selectedKayttooikeusOrganisaatiot = kayttooikeusOrgOids,
-      tablename = hakukohdeTablename,
-      operator = "" // lisätään operaattori vasta lopuksi
-    )
-
-    (kayttooikeusHakukohderyhmaEhto.trim, organisaatioEhto.trim) match {
-      case ("", "") => ""
-      case (hakukohderyhmaEhto, "") => s"$operator $hakukohderyhmaEhto"
-      case ("", organisaatioEhto) => s"$operator $organisaatioEhto"
-      case (hakukohderyhmaEhto, organisaatioEhto) => s"$operator ($hakukohderyhmaEhto OR $organisaatioEhto)"
-    }
-  }
+  
 }

@@ -2,7 +2,7 @@ package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.{KkHakeneetHyvaksytytVastaanottaneetHakukohteittain, KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella, KkHakeneetHyvaksytytVastaanottaneetResult, KkHakeneetHyvaksytytVastaanottaneetToimipisteittain, KkHakeneetHyvaksytytVastaanottaneetTunnisteella}
 import fi.oph.ovara.backend.utils.RepositoryUtils
-import fi.oph.ovara.backend.utils.RepositoryUtils.{buildTutkinnonTasoFilters, makeHakukohderyhmaQueryWithKayttooikeudet, makeOptionalJarjestyspaikkaQuery}
+import fi.oph.ovara.backend.utils.RepositoryUtils.{buildTutkinnonTasoFilters, makeHakukohderyhmaQueryWithKayttooikeudet}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.Component
 import slick.dbio.{DBIO, Effect}

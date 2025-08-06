@@ -174,7 +174,29 @@ object RepositoryUtils {
       case (false, false) => s"AND ($hakukohderyhmaQueryStr OR $hakukohdeQueryStr)"
     }
   }
+  
+  def makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(
+                                               kayttooikeusOrgOids: List[String],
+                                               kayttooikeusHakukohderyhmaOids: List[String],
+                                               hakukohdeTablename: String = "hk",
+                                               operator: String = "AND"
+                                             ): String = {
+    val kayttooikeusHakukohderyhmaEhto = makeOptionalHakukohderyhmatSubSelectQueryStr(
+      hakukohderyhmat = kayttooikeusHakukohderyhmaOids,
+      hakukohdeTablename = hakukohdeTablename,
+      operator = "" // lisätään operaattori vasta lopuksi
+    )
 
+    val organisaatioEhto = makeOptionalListOfValuesQueryStr("", "hk.jarjestyspaikka_oid", kayttooikeusOrgOids)
+
+    (kayttooikeusHakukohderyhmaEhto.trim, organisaatioEhto.trim) match {
+      case ("", "") => ""
+      case (hakukohderyhmaEhto, "") => s"$operator $hakukohderyhmaEhto"
+      case ("", organisaatioEhto) => s"$operator $organisaatioEhto"
+      case (hakukohderyhmaEhto, organisaatioEhto) => s"$operator ($hakukohderyhmaEhto OR $organisaatioEhto)"
+    }
+  }
+  
   def buildHakukohdeFilterQuery(
       selectedHakukohteet: List[String],
       selectedHaut: List[String],
@@ -264,14 +286,6 @@ object RepositoryUtils {
       s"AND (" + conditions.mkString(" OR ") + ")"
     } else
       ""
-  }
-
-  def makeOptionalJarjestyspaikkaQuery(selectedKayttooikeusOrganisaatiot: List[String], tablename: String = "hk", operator: String = "AND"): String = {
-    RepositoryUtils.makeOptionalListOfValuesQueryStr(
-      operator,
-      s"$tablename.jarjestyspaikka_oid",
-      selectedKayttooikeusOrganisaatiot
-    )
   }
 
   def makeOptionalHakukohderyhmatSubSelectQueryStr(hakukohderyhmat: List[String], hakukohdeTablename: String = "hk", operator: String = "AND"): String = {

@@ -306,6 +306,27 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     result shouldBe "AND (hkr.hakukohderyhma_oid IN ('4.5.6') OR hk.jarjestyspaikka_oid IN ('1.2.3'))"
   }
 
+  "makeHakukohderyhmaSubSelectQueryWithKayttooikeudet" should "return an empty string when both lists are empty" in {
+    val result = RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(List.empty, List.empty)
+    result shouldBe ""
+  }
+
+  it should "return the hakukohde query string when only kayttooikeusOrgOids contains values" in {
+    val result = RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(List("1.2.3"), List.empty)
+    result shouldBe "AND hk.jarjestyspaikka_oid in ('1.2.3')"
+  }
+
+  it should "return the hakukohderyhma subselect query string when only kayttooikeusHakukohderyhmaOids contains values" in {
+    val result = RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(List.empty, List("4.5.6"))
+    result shouldBe "AND hk.hakukohde_oid IN (SELECT DISTINCT hkr_hk.hakukohde_oid FROM pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk WHERE hkr_hk.hakukohderyhma_oid IN ('4.5.6'))"
+  }
+
+  it should "return both query strings combined with OR when both lists contain values" in {
+    val result = RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(List("1.2.3"), List("4.5.6"))
+    result shouldBe "AND (hk.hakukohde_oid IN (SELECT DISTINCT hkr_hk.hakukohde_oid FROM pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk WHERE hkr_hk.hakukohderyhma_oid IN ('4.5.6')) OR hk.jarjestyspaikka_oid in ('1.2.3'))"
+  }
+
+
   "buildHakukohdeFilterQuery" should "not limit organisation or hakukohderyhma for OphPaakayttaja when there are no selected filters except haku" in {
     val result = RepositoryUtils.buildHakukohdeFilterQuery(
       selectedHakukohteet = List.empty,

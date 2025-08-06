@@ -45,6 +45,7 @@ class KkHakijatService(
 
     val authorities               = user.authorities
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
+    val kayttooikeusHakukohderyhmat = AuthoritiesUtil.filterHakukohderyhmaOids(kayttooikeusOrganisaatiot)
     val isOphPaakayttaja          = AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)
 
     val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
@@ -52,18 +53,15 @@ class KkHakijatService(
       toimipisteOids = toimipisteet,
       oppilaitosOids = oppilaitokset
     )
-
-    val allowedHakukohderyhmat = if (isOphPaakayttaja) {
-      hakukohderyhmat
-    } else {
-      kayttooikeusOrganisaatiot intersect hakukohderyhmat
-    }
+    val isOrganisaatioRajain = (oppilaitokset.nonEmpty || toimipisteet.nonEmpty) && orgOidsForQuery.nonEmpty
 
     Try {
       val queryResult = db.run(
         kkHakijatRepository.selectWithParams(
           kayttooikeusOrganisaatiot = orgOidsForQuery,
-          hakukohderyhmat = allowedHakukohderyhmat,
+          isOrganisaatioRajain = isOrganisaatioRajain,
+          kayttooikeusHakukohderyhmat = kayttooikeusHakukohderyhmat,
+          hakukohderyhmat = hakukohderyhmat,
           haut = haut,
           oppilaitokset = oppilaitokset,
           toimipisteet = toimipisteet,
