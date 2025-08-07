@@ -37,7 +37,7 @@ case class ToisenAsteenHakija(
     valintatieto: Option[String],
     varasija: Option[String],
     kokonaispisteet: Option[String],
-    hylkaamisenTaiPeruuntumisenSyy: Kielistetty,
+    valintatapajonokohtainenTila: Kielistetty,
     vastaanottotieto: Option[String],
     viimVastaanottopaiva: Option[LocalDate],
     ilmoittautuminen: Option[String],

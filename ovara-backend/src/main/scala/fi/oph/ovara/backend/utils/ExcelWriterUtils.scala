@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.utils
 
-import fi.oph.ovara.backend.domain.{Hakuaika, Kieli, Kielistetty, Valintatapajono}
+import fi.oph.ovara.backend.domain.{En, Fi, Hakuaika, Kieli, Kielistetty, Sv, Valintatapajono}
 import fi.oph.ovara.backend.utils.Constants.DATE_FORMATTER_FOR_EXCEL
 import org.apache.poi.xssf.usermodel.{XSSFCell, XSSFCellStyle, XSSFRow}
 
@@ -288,13 +288,35 @@ object ExcelWriterUtils {
 
   def createHakutoiveenValintatapajonoWritableValues(
       hakukohteenValintatapajonot: Map[String, Seq[Valintatapajono]],
-      allSortedValintatapajonot: Seq[Valintatapajono]
+      allSortedValintatapajonot: Seq[Valintatapajono],
+      translations: Map[String, String]
   ): Seq[Kielistetty] = {
     allSortedValintatapajonot.map(valintatapajono => {
       hakukohteenValintatapajonot.get(valintatapajono.valintatapajonoOid) match {
-        case Some(foundValintatapajono) => foundValintatapajono.head.valinnanTilanKuvaus
+        case Some(foundValintatapajono) => createValintatapajonoCellValue(foundValintatapajono.head, translations)
         case None                       => Map()
       }
     })
+  }
+
+  def createValintatapajonoCellValue(
+      valintatapajono: Valintatapajono,
+      translations: Map[String, String]
+  ): Kielistetty = {
+    //HYVAKSYTTY","HYLATTY","PERUUNTUNUT","VARALLA
+    valintatapajono.valinnanTila match {
+      // Peruuntuneelle palautetaan pelkkä selite koska se sisältää jo tilan
+      case "PERUUNTUNUT" => valintatapajono.valinnanTilanKuvaus
+      case "HYLATTY" =>
+        // "Hylätty, hylkäämisen syy"
+        val valinnanTila = getTranslationForCellValue(valintatapajono.valinnanTila, translations)
+        valintatapajono.valinnanTilanKuvaus.map {
+          case (kieli, value) => kieli -> s"$valinnanTila, $value"
+        }
+      // pelkkä valintatapajonon tila tiloille joille ei ole kuvausta
+      case _ => Map({Fi -> getTranslationForCellValue(valintatapajono.valinnanTila, translations)},
+                    {Sv -> getTranslationForCellValue(valintatapajono.valinnanTila, translations)},
+                    {En -> getTranslationForCellValue(valintatapajono.valinnanTila, translations)})
+    }
   }
 }
