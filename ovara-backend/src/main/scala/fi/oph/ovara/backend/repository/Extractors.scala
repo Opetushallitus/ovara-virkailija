@@ -149,7 +149,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       valintatieto = r.nextStringOption(),
       varasija = r.nextStringOption(),
       kokonaispisteet = r.nextStringOption(),
-      hylkaamisenTaiPeruuntumisenSyy = extractKielistetty(r.nextStringOption()),
+      valintatapajonokohtainenTila = extractKielistetty(r.nextStringOption()),
       vastaanottotieto = r.nextStringOption(),
       viimVastaanottopaiva = extractDateOption(r.nextDateOption()),
       ilmoittautuminen = r.nextStringOption(),

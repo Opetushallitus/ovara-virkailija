@@ -68,11 +68,12 @@ class ExcelWriterUtilsSpec extends AnyFlatSpec {
   "createHakutoiveenValintapajonoWritableValues" should "return empty list when there are no valintatapajonot in the result" in {
     val hakutoiveenValintapajonot: Map[String, Seq[Valintatapajono]] = Map()
     val sortedValintatapajonot                                       = List()
-
+    val translations = Map[String, String]()
     assert(
       ExcelWriterUtils.createHakutoiveenValintatapajonoWritableValues(
         hakutoiveenValintapajonot,
-        sortedValintatapajonot
+        sortedValintatapajonot,
+        translations
       ) == List()
     )
   }
@@ -111,11 +112,13 @@ class ExcelWriterUtilsSpec extends AnyFlatSpec {
         )
       )
     )
+    val translations = Map[String, String]("raportti.hylatty" -> "Hylätty")
 
     assert(
       ExcelWriterUtils.createHakutoiveenValintatapajonoWritableValues(
         hakutoiveenValintapajonot,
-        sortedValintatapajonot
+        sortedValintatapajonot,
+        translations
       ) == List(Map(), Map(), Map())
     )
   }
@@ -180,22 +183,88 @@ class ExcelWriterUtilsSpec extends AnyFlatSpec {
         )
       )
     )
+    val translations = Map[String, String]("raportti.hylatty" -> "Hylätty")
 
     assert(
       ExcelWriterUtils.createHakutoiveenValintatapajonoWritableValues(
         hakutoiveenValintapajonot,
-        sortedValintatapajonot
+        sortedValintatapajonot,
+        translations
       ) == List(
         Map(
-          En -> "Et osallistunut valintakokeeseen",
-          Fi -> "Et osallistunut valintakokeeseen",
-          Sv -> "Et osallistunut valintakokeeseen SV"
+          En -> "Hylätty, Et osallistunut valintakokeeseen",
+          Fi -> "Hylätty, Et osallistunut valintakokeeseen",
+          Sv -> "Hylätty, Et osallistunut valintakokeeseen SV"
         ),
         Map(),
         Map(
-          En -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-          Fi -> "Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
-          Sv -> "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
+          En -> "Hylätty, Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+          Fi -> "Hylätty, Sinulla ei ole arvosanaa kemiasta tai arvosanasi ei ole kyllin hyvä.",
+          Sv -> "Hylätty, Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
+        )
+      )
+    )
+  }
+
+  it should "return only valinnanTilanKuvaus for peruuntunut and only tila for hyvaksytty" in {
+    val hakutoiveenValintapajonot: Map[String, Seq[Valintatapajono]] = Map(
+      "1704199256878262657431481297336" ->
+        List(
+          Valintatapajono(
+            valintatapajonoOid = "1704199256878262657431481297336",
+            valintatapajononNimi = "Todistusvalintajono ensikertalaisille hakijoille",
+            valinnanTila = "HYVAKSYTTY",
+            valinnanTilanKuvaus = Map()
+          )),
+      "1707384694164-3621431542682802084" ->
+        List(
+          Valintatapajono(
+            valintatapajonoOid = "1707384694164-3621431542682802084",
+            valintatapajononNimi = "Todistusvalintajono kaikille hakijoille",
+            valinnanTila = "PERUUNTUNUT",
+            valinnanTilanKuvaus = Map(
+              En -> "Peruuntunut, hyväksytty toisessa valintatapajonossa",
+              Fi -> "Peruuntunut, hyväksytty toisessa valintatapajonossa",
+              Sv -> "Peruuntunut, hyväksytty toisessa valintatapajonossa"
+            )
+          )
+        )
+    )
+    val sortedValintatapajonot = List(
+      Valintatapajono(
+        valintatapajonoOid = "1704199256878262657431481297336",
+        valintatapajononNimi = "Todistusvalintajono ensikertalaisille hakijoille",
+        valinnanTila = "HYVAKSYTTY",
+        valinnanTilanKuvaus = Map()
+      ),
+      Valintatapajono(
+        valintatapajonoOid = "1707384694164-3621431542682802084",
+        valintatapajononNimi = "Todistusvalintajono kaikille hakijoille",
+        valinnanTila = "PERUUNTUNUT",
+        valinnanTilanKuvaus = Map(
+          En -> "Peruuntunut, hyväksytty toisessa valintatapajonossa",
+          Fi -> "Peruuntunut, hyväksytty toisessa valintatapajonossa",
+          Sv -> "Peruuntunut, hyväksytty toisessa valintatapajonossa"
+        )
+      )
+    )
+    val translations = Map[String, String]("raportti.hylatty" -> "Hylätty", "raportti.hyvaksytty" -> "Hyväksytty")
+
+    assert(
+      ExcelWriterUtils.createHakutoiveenValintatapajonoWritableValues(
+        hakutoiveenValintapajonot,
+        sortedValintatapajonot,
+        translations
+      ) == List(
+        Map(
+          En -> "Hyväksytty",
+          Fi -> "Hyväksytty",
+          Sv -> "Hyväksytty"
+        ),
+        Map(
+          En -> "Peruuntunut, hyväksytty toisessa valintatapajonossa",
+          Fi -> "Peruuntunut, hyväksytty toisessa valintatapajonossa",
+          Sv -> "Peruuntunut, hyväksytty toisessa valintatapajonossa"
         )
       )
     )

@@ -28,7 +28,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     "raportti.peruuntunut"                      -> "Peruuntunut SV",
     "raportti.ei_vastaanotettu_maara_aikana"    -> "Ei vastaanotettu SV",
     "raportti.kokonaispisteet"                  -> "Kokonaispisteet SV",
-    "raportti.hylkaamisenTaiPeruuntumisenSyy"   -> "Hylkäämisen tai peruuntumisen syy SV",
+    "raportti.valintatapajonokohtainenTila"     -> "Valintatapajonokohtainen tila SV",
     "raportti.toimipiste"                       -> "Toimipiste SV",
     "raportti.hakukohde"                        -> "Hakukohde SV",
     "raportti.hakukelpoisuus"                   -> "Hakukelpoisuus SV",
@@ -2414,7 +2414,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(0).getCell(12).getStringCellValue == "raportti.valintatieto")
     assert(wb.getSheetAt(0).getRow(0).getCell(13).getStringCellValue == "Varasija SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "Kokonaispisteet SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "Hylkäämisen tai peruuntumisen syy SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "Valintatapajonokohtainen tila SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(16).getStringCellValue == "raportti.vastaanottotieto")
     assert(wb.getSheetAt(0).getRow(0).getCell(17).getStringCellValue == "raportti.viimVastaanottopaiva")
     assert(wb.getSheetAt(0).getRow(0).getCell(18).getStringCellValue == "raportti.ilmoittautuminen")
@@ -2530,7 +2530,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(0).getCell(12).getStringCellValue == "raportti.valintatieto")
     assert(wb.getSheetAt(0).getRow(0).getCell(13).getStringCellValue == "Varasija SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "Kokonaispisteet SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "Hylkäämisen tai peruuntumisen syy SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "Valintatapajonokohtainen tila SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(16).getStringCellValue == "raportti.vastaanottotieto")
     assert(wb.getSheetAt(0).getRow(0).getCell(17).getStringCellValue == "raportti.viimVastaanottopaiva")
     assert(wb.getSheetAt(0).getRow(0).getCell(18).getStringCellValue == "raportti.ilmoittautuminen")
@@ -2866,7 +2866,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(5) == null)
   }
 
-  "createHylkaamisenTaiPeruuntumisenSyyHeadingRow" should "create merged hylkäämisen tai peruuntumisen syy heading cell in the right index on the row" in {
+  "createValintatapajonokohtainenTilaHeadingRow" should "create merged valintatapajonokohtainen tila heading cell in the right index on the row" in {
     val wb: XSSFWorkbook                = new XSSFWorkbook()
     val sheet: XSSFSheet                = wb.createSheet()
     val headingCellStyle: XSSFCellStyle = wb.createCellStyle()
@@ -2903,7 +2903,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
     )
     val fieldNames = classOf[KkHakija].getDeclaredFields.map(_.getName).toList
-    ExcelWriter.createHylkaamisenTaiPeruuntumisenSyyHeadingRow(
+    ExcelWriter.createValintatapajonokohtainenTilaHeadingRow(
       wb,
       sheet,
       translations,
@@ -2917,7 +2917,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       assert(wb.getSheetAt(0).getRow(0).getCell(i) == null)
     }
 
-    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "Hylkäämisen tai peruuntumisen syy SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "Valintatapajonokohtainen tila SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(15).getColumnIndex == 15)
 
     for (i <- 16 until 29) {
@@ -2925,7 +2925,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     }
   }
 
-  it should "create merged hylkäämisen tai peruuntumisen syy heading cell in the right index on the row when hetu is not shown" in {
+  it should "create merged valintatapajonokohtainen tila heading cell in the right index on the row when hetu is not shown" in {
     val wb: XSSFWorkbook                = new XSSFWorkbook()
     val sheet: XSSFSheet                = wb.createSheet()
     val headingCellStyle: XSSFCellStyle = wb.createCellStyle()
@@ -2962,7 +2962,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
     )
     val fieldNames = classOf[KkHakija].getDeclaredFields.map(_.getName).toList
-    ExcelWriter.createHylkaamisenTaiPeruuntumisenSyyHeadingRow(
+    ExcelWriter.createValintatapajonokohtainenTilaHeadingRow(
       wb,
       sheet,
       translations,
@@ -2976,7 +2976,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       assert(wb.getSheetAt(0).getRow(0).getCell(i) == null)
     }
 
-    assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "Hylkäämisen tai peruuntumisen syy SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "Valintatapajonokohtainen tila SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(14).getColumnIndex == 14)
 
     for (i <- 15 until 28) {
@@ -3482,7 +3482,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
-    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "Hylkäämisen tai peruuntumisen syy SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "Valintatapajonokohtainen tila SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Sukunimi SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "Etunimi SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "Turvakielto SV")
@@ -3588,7 +3588,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
-    assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "Hylkäämisen tai peruuntumisen syy SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "Valintatapajonokohtainen tila SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Sukunimi SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "Etunimi SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "Turvakielto SV")
@@ -3658,13 +3658,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Koevalintajono kaikille hakijoille
     assert(wb.getSheetAt(0).getRow(2).getCell(14).getStringCellValue == "-")
     // Todistusvalinta (YO)
-    assert(wb.getSheetAt(0).getRow(2).getCell(15).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(15).getStringCellValue == "Hyvaksytty SV")
     //Todistusvalintajono ensikertalaisille hakijoille
     assert(
       wb.getSheetAt(0)
         .getRow(2)
         .getCell(16)
-        .getStringCellValue == "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 2."
+        .getStringCellValue == "Hylatty SV, Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 2."
     )
     // Todistusvalintajono ensikertalaisille hakijoille
     assert(
@@ -3675,7 +3675,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       wb.getSheetAt(0)
         .getRow(2)
         .getCell(18)
-        .getStringCellValue == "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 1."
+        .getStringCellValue == "Hylatty SV, Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 1."
     )
     // Valintatapajonosarakkeet loppuu
     assert(wb.getSheetAt(0).getRow(2).getCell(19).getStringCellValue == "raportti.perunut")
@@ -3722,19 +3722,19 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(3).getCell(13).getStringCellValue == "11.6.2024")
     // Valintatapajonosarakkeet alkaa
     // Koevalintajono kaikille hakijoille
-    assert(wb.getSheetAt(0).getRow(3).getCell(14).getStringCellValue == "Et osallistunut valintakokeeseen SV")
+    assert(wb.getSheetAt(0).getRow(3).getCell(14).getStringCellValue == "Hylatty SV, Et osallistunut valintakokeeseen SV")
     // Todistusvalinta (YO)
     assert(wb.getSheetAt(0).getRow(3).getCell(15).getStringCellValue == "-")
     //Todistusvalintajono ensikertalaisille hakijoille - 1707384681516-2842344525807969324
     assert(wb.getSheetAt(0).getRow(3).getCell(16).getStringCellValue == "-")
     // Todistusvalintajono ensikertalaisille hakijoille - 1704199256878262657431481297336
-    assert(wb.getSheetAt(0).getRow(3).getCell(17).getStringCellValue == "Du är inte en förstagångssökande.")
+    assert(wb.getSheetAt(0).getRow(3).getCell(17).getStringCellValue == "Hylatty SV, Du är inte en förstagångssökande.")
     // Todistusvalintajono kaikille hakijoille
     assert(
       wb.getSheetAt(0)
         .getRow(3)
         .getCell(18)
-        .getStringCellValue == "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
+        .getStringCellValue == "Hylatty SV, Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
     )
     // Valintatapajonosarakkeet loppuu
     assert(wb.getSheetAt(0).getRow(3).getCell(19).getStringCellValue == "-")
@@ -3787,7 +3787,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
-    assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "Hylkäämisen tai peruuntumisen syy SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "Valintatapajonokohtainen tila SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Sukunimi SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "Etunimi SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "Turvakielto SV")
@@ -3854,13 +3854,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Koevalintajono kaikille hakijoille
     assert(wb.getSheetAt(0).getRow(2).getCell(14).getStringCellValue == "-")
     // Todistusvalinta (YO)
-    assert(wb.getSheetAt(0).getRow(2).getCell(15).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(15).getStringCellValue == "Hyvaksytty SV")
     //Todistusvalintajono ensikertalaisille hakijoille
     assert(
       wb.getSheetAt(0)
         .getRow(2)
         .getCell(16)
-        .getStringCellValue == "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 2."
+        .getStringCellValue == "Hylatty SV, Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 2."
     )
     // Todistusvalintajono ensikertalaisille hakijoille
     assert(
@@ -3871,7 +3871,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       wb.getSheetAt(0)
         .getRow(2)
         .getCell(18)
-        .getStringCellValue == "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 1."
+        .getStringCellValue == "Hylatty SV, Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 1."
     )
     // Valintatapajonosarakkeet loppuu
     assert(wb.getSheetAt(0).getRow(2).getCell(19).getStringCellValue == "raportti.perunut")
@@ -3915,19 +3915,19 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(3).getCell(13).getStringCellValue == "11.6.2024")
     // Valintatapajonosarakkeet alkaa
     // Koevalintajono kaikille hakijoille
-    assert(wb.getSheetAt(0).getRow(3).getCell(14).getStringCellValue == "Et osallistunut valintakokeeseen SV")
+    assert(wb.getSheetAt(0).getRow(3).getCell(14).getStringCellValue == "Hylatty SV, Et osallistunut valintakokeeseen SV")
     // Todistusvalinta (YO)
     assert(wb.getSheetAt(0).getRow(3).getCell(15).getStringCellValue == "-")
     //Todistusvalintajono ensikertalaisille hakijoille - 1707384681516-2842344525807969324
     assert(wb.getSheetAt(0).getRow(3).getCell(16).getStringCellValue == "-")
     // Todistusvalintajono ensikertalaisille hakijoille - 1704199256878262657431481297336
-    assert(wb.getSheetAt(0).getRow(3).getCell(17).getStringCellValue == "Du är inte en förstagångssökande.")
+    assert(wb.getSheetAt(0).getRow(3).getCell(17).getStringCellValue == "Hylatty SV, Du är inte en förstagångssökande.")
     // Todistusvalintajono kaikille hakijoille
     assert(
       wb.getSheetAt(0)
         .getRow(3)
         .getCell(18)
-        .getStringCellValue == "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
+        .getStringCellValue == "Hylatty SV, Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
     )
     // Valintatapajonosarakkeet loppuu
     assert(wb.getSheetAt(0).getRow(3).getCell(19).getStringCellValue == "-")
@@ -4014,7 +4014,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
-    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "Hylkäämisen tai peruuntumisen syy SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "Valintatapajonokohtainen tila SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Sukunimi SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "Etunimi SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "Turvakielto SV")
@@ -4076,13 +4076,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Koevalintajono kaikille hakijoille
     assert(wb.getSheetAt(0).getRow(2).getCell(15).getStringCellValue == "-")
     // Todistusvalinta (YO)
-    assert(wb.getSheetAt(0).getRow(2).getCell(16).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(16).getStringCellValue == "Hyvaksytty SV")
     //Todistusvalintajono ensikertalaisille hakijoille
     assert(
       wb.getSheetAt(0)
         .getRow(2)
         .getCell(17)
-        .getStringCellValue == "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 2."
+        .getStringCellValue == "Hylatty SV, Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 2."
     )
     // Todistusvalintajono ensikertalaisille hakijoille
     assert(
@@ -4093,7 +4093,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       wb.getSheetAt(0)
         .getRow(2)
         .getCell(19)
-        .getStringCellValue == "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 1."
+        .getStringCellValue == "Hylatty SV, Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 1."
     )
     // Valintatapajonosarakkeet loppuu
     assert(wb.getSheetAt(0).getRow(2).getCell(20).getStringCellValue == "raportti.perunut")
@@ -4131,19 +4131,19 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(3).getCell(14).getStringCellValue == "11.6.2024")
     // Valintatapajonosarakkeet alkaa
     // Koevalintajono kaikille hakijoille
-    assert(wb.getSheetAt(0).getRow(3).getCell(15).getStringCellValue == "Et osallistunut valintakokeeseen SV")
+    assert(wb.getSheetAt(0).getRow(3).getCell(15).getStringCellValue == "Hylatty SV, Et osallistunut valintakokeeseen SV")
     // Todistusvalinta (YO)
     assert(wb.getSheetAt(0).getRow(3).getCell(16).getStringCellValue == "-")
     //Todistusvalintajono ensikertalaisille hakijoille - 1707384681516-2842344525807969324
     assert(wb.getSheetAt(0).getRow(3).getCell(17).getStringCellValue == "-")
     // Todistusvalintajono ensikertalaisille hakijoille - 1704199256878262657431481297336
-    assert(wb.getSheetAt(0).getRow(3).getCell(18).getStringCellValue == "Du är inte en förstagångssökande.")
+    assert(wb.getSheetAt(0).getRow(3).getCell(18).getStringCellValue == "Hylatty SV, Du är inte en förstagångssökande.")
     // Todistusvalintajono kaikille hakijoille
     assert(
       wb.getSheetAt(0)
         .getRow(3)
         .getCell(19)
-        .getStringCellValue == "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
+        .getStringCellValue == "Hylatty SV, Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt."
     )
     // Valintatapajonosarakkeet loppuu
     assert(wb.getSheetAt(0).getRow(3).getCell(20).getStringCellValue == "-")
@@ -4186,7 +4186,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
-    assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "Hylkäämisen tai peruuntumisen syy SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "Valintatapajonokohtainen tila SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Sukunimi SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "Etunimi SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "Turvakielto SV")
@@ -4237,20 +4237,20 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(2).getCell(13).getStringCellValue == "-")
     // Valintatapajonosarakkeet alkaa
     // Todistusvalinta (YO)
-    assert(wb.getSheetAt(0).getRow(2).getCell(14).getStringCellValue == "-")
+    assert(wb.getSheetAt(0).getRow(2).getCell(14).getStringCellValue == "Hyvaksytty SV")
     //Todistusvalintajono ensikertalaisille hakijoille
     assert(
       wb.getSheetAt(0)
         .getRow(2)
         .getCell(15)
-        .getStringCellValue == "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 2."
+        .getStringCellValue == "Hylatty SV, Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 2."
     )
     // Todistusvalintajono kaikille hakijoille
     assert(
       wb.getSheetAt(0)
         .getRow(2)
         .getCell(16)
-        .getStringCellValue == "Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 1."
+        .getStringCellValue == "Hylatty SV, Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 1."
     )
     // Valintatapajonosarakkeet loppuu
     assert(wb.getSheetAt(0).getRow(2).getCell(17).getStringCellValue == "raportti.perunut")
@@ -4307,7 +4307,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
-    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "Hylkäämisen tai peruuntumisen syy SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "Valintatapajonokohtainen tila SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Sukunimi SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "Etunimi SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "Turvakielto SV")
