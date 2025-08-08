@@ -2,7 +2,12 @@ package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.domain.*
 import fi.oph.ovara.backend.repository.{CommonRepository, ReadOnlyDatabase}
-import fi.oph.ovara.backend.utils.Constants.{KOULUTUSTOIMIJARAPORTTI, OPH_PAAKAYTTAJA_OID, OPPILAITOSRAPORTTI, TOIMIPISTERAPORTTI}
+import fi.oph.ovara.backend.utils.Constants.{
+  KOULUTUSTOIMIJARAPORTTI,
+  OPH_PAAKAYTTAJA_OID,
+  OPPILAITOSRAPORTTI,
+  TOIMIPISTERAPORTTI
+}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, OrganisaatioUtils}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
@@ -10,7 +15,8 @@ import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.{CacheEvict, Cacheable}
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.{Component, Service}
-import scala.util.{Try, Failure, Success}
+
+import scala.util.{Failure, Success, Try}
 
 @Component
 @Service
@@ -41,7 +47,11 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     LOG.info("Emptying alkamisvuodet cache")
   }
 
-  def getHaut(alkamiskaudet: List[String], selectedHaut: List[String], haunTyyppi: String): Either[String, Vector[Haku]] = {
+  def getHaut(
+      alkamiskaudet: List[String],
+      selectedHaut: List[String],
+      haunTyyppi: String
+  ): Either[String, Vector[Haku]] = {
     Try {
       db.run(
         commonRepository.selectDistinctExistingHaut(alkamiskaudet, selectedHaut, haunTyyppi),
@@ -56,38 +66,35 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
   }
 
   def getHakukohteet(
-                      koulutustoimija: Option[String],
-                      oppilaitokset: List[String],
-                      toimipisteet: List[String],
-                      haut: List[String],
-                      hakukohderyhmat: List[String],
-                      hakukohteet: List[String]
-                    ): Either[String, Vector[Hakukohde]] = {
-    val user = userService.getEnrichedUserDetails
-    val authorities = user.authorities
+      koulutustoimija: Option[String],
+      oppilaitokset: List[String],
+      toimipisteet: List[String],
+      haut: List[String],
+      selectedHakukohderyhmat: List[String],
+      hakukohteet: List[String]
+  ): Either[String, Vector[Hakukohde]] = {
+    val user                      = userService.getEnrichedUserDetails
+    val authorities               = user.authorities
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
+    val isOphPaakayttaja          = AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)
 
     val allowedOrgOidsFromSelection =
       getAllowedOrgOidsFromOrgSelection(kayttooikeusOrganisaatiot, oppilaitokset, toimipisteet, koulutustoimija)
-
-    val isOphPaakayttaja = AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)
-
-    val allowedHakukohderyhmaOids = if (isOphPaakayttaja) {
-      hakukohderyhmat
-    } else {
-      kayttooikeusOrganisaatiot intersect hakukohderyhmat
-    }
-
+    val isOrganisaatioRajain        = (koulutustoimija.isDefined || oppilaitokset.nonEmpty || toimipisteet.nonEmpty) && allowedOrgOidsFromSelection.nonEmpty
+    val kayttooikeusHakukohderyhmat = AuthoritiesUtil.filterHakukohderyhmaOids(kayttooikeusOrganisaatiot)
     Try {
       db.run(
         commonRepository
-          .selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(
+          .selectDistinctExistingHakukohteetWithOrgAndAndHakukohderyhmaFilter(
             allowedOrgOidsFromSelection,
+            isOrganisaatioRajain,
             haut,
-            allowedHakukohderyhmaOids,
-            hakukohteet
+            selectedHakukohderyhmat,
+            kayttooikeusHakukohderyhmat,
+            hakukohteet,
+            isOphPaakayttaja
           ),
-        "selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja"
+        "selectDistinctExistingHakukohteetWithSelectedOrgAndAndHakukohderyhmaFilter"
       )
     } match {
       case Success(result) => Right(result)
@@ -185,7 +192,10 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     }
   }
 
-  def getKoulutusalat2(koulutusalat1: List[String], selectedKoulutusalat2: List[String]): Either[String, Vector[Koodi]] = {
+  def getKoulutusalat2(
+      koulutusalat1: List[String],
+      selectedKoulutusalat2: List[String]
+  ): Either[String, Vector[Koodi]] = {
     Try {
       db.run(
         commonRepository.selectDistinctKoulutusalat2(koulutusalat1, selectedKoulutusalat2),
@@ -199,7 +209,10 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     }
   }
 
-  def getKoulutusalat3(koulutusalat2: List[String], selectedKoulutusalat3: List[String]): Either[String, Vector[Koodi]] = {
+  def getKoulutusalat3(
+      koulutusalat2: List[String],
+      selectedKoulutusalat3: List[String]
+  ): Either[String, Vector[Koodi]] = {
     Try {
       db.run(
         commonRepository.selectDistinctKoulutusalat3(koulutusalat2, selectedKoulutusalat3),
@@ -226,14 +239,23 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
 
   def getHakukohderyhmat(haut: List[String]): Either[String, Vector[Hakukohderyhma]] = {
     Try {
-      val user = userService.getEnrichedUserDetails
+      val user             = userService.getEnrichedUserDetails
       val kayttooikeusOids = AuthoritiesUtil.getKayttooikeusOids(user.authorities)
+      val allUsersOrgOids  = getAllAllowedOrgOidsFromAuthorities
       val hakukohderyhmaOids =
         if (AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOids))
           List() // ei rajata listaa pääkäyttäjälle
         else
-          kayttooikeusOids
-      db.run(commonRepository.selectHakukohderyhmat(hakukohderyhmaOids, haut), "selectHakukohderyhmat")
+          AuthoritiesUtil.filterHakukohderyhmaOids(kayttooikeusOids)
+      db.run(
+        commonRepository.selectHakukohderyhmat(
+          allUsersOrgOids,
+          hakukohderyhmaOids,
+          haut,
+          AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOids)
+        ),
+        "selectHakukohderyhmat"
+      )
     } match {
       case Success(result) => Right(result)
       case Failure(exception) =>
@@ -244,13 +266,14 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
 
   def getOrganisaatioHierarkiatWithUserRights: Either[String, List[OrganisaatioHierarkia]] = {
     Try {
-      val user = userService.getEnrichedUserDetails
+      val user          = userService.getEnrichedUserDetails
       val organisaatiot = AuthoritiesUtil.getKayttooikeusOids(user.authorities)
 
       val parentOids = if (organisaatiot.contains(OPH_PAAKAYTTAJA_OID)) {
         List(OPH_PAAKAYTTAJA_OID)
       } else {
-        val parentChildOrgs = db.run(commonRepository.selectChildOrganisaatiot(organisaatiot), "selectChildOrganisaatiot")
+        val parentChildOrgs =
+          db.run(commonRepository.selectChildOrganisaatiot(organisaatiot), "selectChildOrganisaatiot")
         parentChildOrgs.groupBy(_.parent_oid).keys.toList
       }
 
@@ -362,8 +385,8 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
             getKoulutustoimijahierarkia(kayttooikeusOrganisaatioOids)
           } else {
             // ei-pääkäyttäjälle haetaan hierarkiat oikeuksien perusteella
-            val toimipisteHierarkia = getToimipistehierarkiat(kayttooikeusOrganisaatioOids)
-            val oppilaitosHierarkia = getOppilaitoshierarkiat(kayttooikeusOrganisaatioOids)
+            val toimipisteHierarkia      = getToimipistehierarkiat(kayttooikeusOrganisaatioOids)
+            val oppilaitosHierarkia      = getOppilaitoshierarkiat(kayttooikeusOrganisaatioOids)
             val koulutustoimijaHierarkia = getKoulutustoimijahierarkia(kayttooikeusOrganisaatioOids)
             toimipisteHierarkia ++ oppilaitosHierarkia ++ koulutustoimijaHierarkia
           }
@@ -404,6 +427,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       } else if (koulutustoimijaOid.isDefined) {
         getKoulutustoimijahierarkia(List(koulutustoimijaOid.get))
       } else {
+        LOG.info("Fetching organisaatio hierarkiat with user rights")
         getOrganisaatioHierarkiatWithUserRights match {
           case Right(hierarkiat) => hierarkiat
           case Left(error) =>
@@ -422,4 +446,17 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
 
     (childKayttooikeusOrgs intersect selectedOrgsDescendantOids).distinct
   }
+
+  def getAllAllowedOrgOidsFromAuthorities: List[String] = {
+    val user                         = userService.getEnrichedUserDetails
+    val authorities                  = user.authorities
+    val kayttooikeusOrganisaatioOids = AuthoritiesUtil.getKayttooikeusOids(authorities)
+
+    getAllowedOrgOidsFromOrgSelection(
+      kayttooikeusOrganisaatioOids,
+      List(),
+      List()
+    )
+  }
+
 }

@@ -16,6 +16,8 @@ class KkHakijatRepository extends Extractors {
 
   def selectWithParams(
       kayttooikeusOrganisaatiot: List[String],
+      isOrganisaatioRajain: Boolean,
+      kayttooikeusHakukohderyhmat: List[String],
       hakukohderyhmat: List[String],
       haut: List[String],
       oppilaitokset: List[String],
@@ -27,7 +29,6 @@ class KkHakijatRepository extends Extractors {
       markkinointilupa: Option[Boolean]
   ): SqlStreamingAction[Vector[KkHakija], KkHakija, Effect] = {
     val hakuStr                     = makeListOfValuesQueryStr(haut)
-    val raportointiorganisaatiotStr = makeListOfValuesQueryStr(kayttooikeusOrganisaatiot)
 
     val vastaanottotiedotAsDbValues = mapVastaanottotiedotToDbValues(vastaanottotiedot)
     val valintatiedotAsDbValues     = mapValintatiedotToDbValues(valintatiedot)
@@ -47,8 +48,13 @@ class KkHakijatRepository extends Extractors {
     val optionalMarkkinointilupaQuery =
       makeEqualsQueryStrOfOptionalBoolean("AND", "hlo.koulutusmarkkinointilupa", markkinointilupa)
 
-    val optionalJarjestyspaikkaQuery =
-      makeOptionalJarjestyspaikkaQuery(kayttooikeusOrganisaatiot)
+    val organisaatioKayttooikeusQueryStr =
+      if (isOrganisaatioRajain) {
+        // jos organisaatio on valittu, ei huomioida käyttäjän organisaatioiden ulkopuolisia hakukohderyhmiä
+        RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(kayttooikeusOrganisaatiot, List.empty)
+      } else {
+        RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(kayttooikeusOrganisaatiot, kayttooikeusHakukohderyhmat)
+      }
 
     val optionalHakukohderyhmaSubSelect = makeOptionalHakukohderyhmatSubSelectQueryStr(hakukohderyhmat)
 
@@ -71,7 +77,7 @@ class KkHakijatRepository extends Extractors {
           LEFT JOIN pub.pub_dim_arvosana_yo yo
           ON yo.henkilo_oid = ht.henkilo_oid
           WHERE ht.haku_oid IN (#$hakuStr)
-          #$optionalJarjestyspaikkaQuery
+          #$organisaatioKayttooikeusQueryStr
           #$optionalHakukohderyhmaSubSelect
           #$optionalHakukohdeQuery
           #$optionalValintatietoQuery

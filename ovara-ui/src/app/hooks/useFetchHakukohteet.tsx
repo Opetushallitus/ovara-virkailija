@@ -95,5 +95,7 @@ export const useFetchHakukohteet = (
         selectedHakukohteet,
       ),
     enabled: fetchEnabled,
+    staleTime: 5 * 60 * 1000, // Data is fresh for 5 minutes
+    gcTime: 30 * 60 * 1000, // Data stays in memory for 30 minutes
   });
 };

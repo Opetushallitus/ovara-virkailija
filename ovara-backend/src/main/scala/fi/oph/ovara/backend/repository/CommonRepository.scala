@@ -45,9 +45,9 @@ class CommonRepository extends Extractors {
 
     val combinedQueryStr = (alkamiskaudetQueryStr, selectedHautQueryStr) match {
       case (a, b) if a.nonEmpty && b.nonEmpty => s"AND ($a OR $b)"
-      case (a, _) if a.nonEmpty => s"AND $a"
-      case (_, b) if b.nonEmpty => s"AND $b"
-      case _ => ""
+      case (a, _) if a.nonEmpty               => s"AND $a"
+      case (_, b) if b.nonEmpty               => s"AND $b"
+      case _                                  => ""
     }
 
     val query = sql"""SELECT h.haku_oid, h.haku_nimi
@@ -57,50 +57,36 @@ class CommonRepository extends Extractors {
     query
   }
 
-  def selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja(
-      orgs: List[String],
-      haut: List[String],
-      hakukohderyhmat: List[String],
-      hakukohteet: List[String]
+  def selectDistinctExistingHakukohteetWithOrgAndAndHakukohderyhmaFilter(
+      selectedOrKayttooikeusOrgs: List[String],
+      isOrganisaatioRajain: Boolean,
+      selectedHaut: List[String],
+      selectedHakukohderyhmat: List[String],
+      kayttooikeusHakukohderyhmat: List[String],
+      selectedHakukohteet: List[String],
+      isOphPaakayttaja: Boolean
   ): SqlStreamingAction[Vector[Hakukohde], Hakukohde, Effect] = {
-    val organisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(orgs)
-    val organisaatiotQueryStr = if (organisaatiotStr.isEmpty) {
-      ""
-    } else { s"AND hk.jarjestyspaikka_oid in ($organisaatiotStr)" }
 
-    val hautStr = RepositoryUtils.makeListOfValuesQueryStr(haut)
-    val hautQueryStr = if (hautStr.isEmpty) {
-      ""
-    } else {
-      s"AND hk.haku_oid in ($hautStr)"
-    }
+    val orgAndGroupQueryStr = RepositoryUtils.buildHakukohdeFilterQuery(
+      selectedHakukohteet,
+      selectedHaut,
+      selectedHakukohderyhmat,
+      kayttooikeusHakukohderyhmat,
+      selectedOrKayttooikeusOrgs,
+      isOrganisaatioRajain,
+      isOphPaakayttaja
+    )
 
-    val hakukohderyhmatStr = RepositoryUtils.makeListOfValuesQueryStr(hakukohderyhmat)
-    val hakukohderyhmatQueryStr = if (hakukohderyhmatStr.isEmpty) {
-      ""
-    } else {
-      s"AND hkr_hk.hakukohderyhma_oid in ($hakukohderyhmatStr)"
-    }
+    val query = sql"""
+      SELECT DISTINCT hk.hakukohde_oid, hk.hakukohde_nimi
+      FROM pub.pub_dim_hakukohde hk
+      LEFT JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
+        ON hkr_hk.hakukohde_oid = hk.hakukohde_oid
+      WHERE hk.tila != 'poistettu'
+      #$orgAndGroupQueryStr
+    """.as[Hakukohde]
 
-    val hakukohteetStr = RepositoryUtils.makeListOfValuesQueryStr(hakukohteet)
-    val hakukohteetQueryStr = if (hakukohteetStr.isEmpty) {
-      ""
-    } else {
-      s"OR hk.hakukohde_oid in ($hakukohteetStr)"
-    }
-
-    val query = sql"""SELECT DISTINCT hk.hakukohde_oid, hk.hakukohde_nimi
-          FROM pub.pub_dim_hakukohde hk
-          LEFT JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
-          ON hkr_hk.hakukohde_oid = hk.hakukohde_oid
-          WHERE hk.tila != 'poistettu'
-          #$organisaatiotQueryStr
-          #$hautQueryStr
-          #$hakukohderyhmatQueryStr
-          #$hakukohteetQueryStr
-          """.as[Hakukohde]
-
-    LOG.debug(s"selectDistinctExistingHakukohteetWithSelectedOrgsAsJarjestaja: ${query.statements.head}")
+    LOG.debug(s"selectDistinctExistingHakukohteetWithOrgAndAndHakukohderyhmaFilter: ${query.statements.head}")
     query
   }
 
@@ -136,10 +122,13 @@ class CommonRepository extends Extractors {
        """.as[Koodi]
   }
 
-  def selectDistinctKunnat(maakunnat: List[String], selectedKunnat: List[String]): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
+  def selectDistinctKunnat(
+      maakunnat: List[String],
+      selectedKunnat: List[String]
+  ): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
     val conditions = Map(
       "km.maakunta_koodiarvo" -> maakunnat,
-      "k.koodiarvo" -> selectedKunnat
+      "k.koodiarvo"           -> selectedKunnat
     )
     val whereClause = RepositoryUtils.makeOptionalWhereClause(conditions)
 
@@ -151,30 +140,39 @@ class CommonRepository extends Extractors {
   }
 
   def selectHakukohderyhmat(
+      kayttooikeusOrgOids: List[String],
       kayttooikeusHakukohderyhmaOids: List[String],
-      haut: List[String]
+      haut: List[String],
+      isOphPaakayttaja: Boolean
   ): SqlStreamingAction[Vector[Hakukohderyhma], Hakukohderyhma, Effect] = {
     val hautStr = RepositoryUtils.makeListOfValuesQueryStr(haut)
     val hautQueryStr = if (hautStr.isEmpty) {
       ""
     } else {
-      s"WHERE hkr_hk.haku_oid in ($hautStr)"
+      s"AND hkr_hk.haku_oid in ($hautStr)"
     }
 
-    val hakukohderyhmaStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusHakukohderyhmaOids)
-    val hakukohderyhmaQueryStr = if (kayttooikeusHakukohderyhmaOids.isEmpty) {
-      ""
-    } else {
-      s"AND hkr.hakukohderyhma_oid in ($hakukohderyhmaStr)"
+    val hakukohderyhmaQueryStr: String = {
+      if (isOphPaakayttaja)
+        ""
+      else
+        RepositoryUtils.makeHakukohderyhmaQueryWithKayttooikeudet(
+          kayttooikeusOrgOids,
+          kayttooikeusHakukohderyhmaOids
+        )
     }
 
-    sql"""SELECT DISTINCT hkr.hakukohderyhma_oid, hkr.hakukohderyhma_nimi
+    val query = sql"""SELECT DISTINCT hkr.hakukohderyhma_oid, hkr.hakukohderyhma_nimi
           FROM pub.pub_dim_hakukohderyhma hkr
           JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
           ON hkr.hakukohderyhma_oid = hkr_hk.hakukohderyhma_oid
+          JOIN pub.pub_dim_hakukohde hk ON hkr_hk.hakukohde_oid = hk.hakukohde_oid
+          WHERE hk.tila != 'poistettu'
           #$hautQueryStr
           #$hakukohderyhmaQueryStr
           """.as[Hakukohderyhma]
+    LOG.debug(s"selectHakukohderyhmat: ${query.statements.head}")
+    query
   }
 
   def selectDistinctKoulutusalat1(): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
@@ -182,7 +180,10 @@ class CommonRepository extends Extractors {
           FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k""".as[Koodi]
   }
 
-  def selectDistinctKoulutusalat2(koulutusalat1: List[String], selectedKoulutusalat2: List[String]): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
+  def selectDistinctKoulutusalat2(
+      koulutusalat1: List[String],
+      selectedKoulutusalat2: List[String]
+  ): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
     val conditions = Map(
       "k.kansallinenkoulutusluokitus2016koulutusalataso1" -> koulutusalat1,
       "k.kansallinenkoulutusluokitus2016koulutusalataso2" -> selectedKoulutusalat2
@@ -194,7 +195,10 @@ class CommonRepository extends Extractors {
             #$whereClause""".as[Koodi]
   }
 
-  def selectDistinctKoulutusalat3(koulutusalat2: List[String], selectedKoulutusalat3: List[String]): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
+  def selectDistinctKoulutusalat3(
+      koulutusalat2: List[String],
+      selectedKoulutusalat3: List[String]
+  ): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
     val conditions = Map(
       "k.kansallinenkoulutusluokitus2016koulutusalataso2" -> koulutusalat2,
       "k.kansallinenkoulutusluokitus2016koulutusalataso3" -> selectedKoulutusalat3

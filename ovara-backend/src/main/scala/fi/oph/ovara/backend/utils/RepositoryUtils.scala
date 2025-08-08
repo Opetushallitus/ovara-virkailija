@@ -155,6 +155,84 @@ object RepositoryUtils {
     }
   }
 
+  def makeHakukohderyhmaQueryWithKayttooikeudet(
+      kayttooikeusOrgOids: List[String],
+      kayttooikeusHakukohderyhmaOids: List[String],
+      hakukohderyhmaTablename: String = "hkr",
+      hakukohdeTablename: String = "hk"
+  ): String = {
+    val hakukohderyhmaStr      = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusHakukohderyhmaOids)
+    val hakukohderyhmaQueryStr = s"$hakukohderyhmaTablename.hakukohderyhma_oid IN ($hakukohderyhmaStr)"
+
+    val hakukohdeOrgStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusOrgOids)
+    val hakukohdeQueryStr = s"$hakukohdeTablename.jarjestyspaikka_oid IN ($hakukohdeOrgStr)"
+
+    (kayttooikeusHakukohderyhmaOids.isEmpty, kayttooikeusOrgOids.isEmpty) match {
+      case (true, true)   => ""
+      case (true, false)  => s"AND $hakukohdeQueryStr"
+      case (false, true)  => s"AND $hakukohderyhmaQueryStr"
+      case (false, false) => s"AND ($hakukohderyhmaQueryStr OR $hakukohdeQueryStr)"
+    }
+  }
+  
+  def makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(
+                                               kayttooikeusOrgOids: List[String],
+                                               kayttooikeusHakukohderyhmaOids: List[String],
+                                               hakukohdeTablename: String = "hk",
+                                               operator: String = "AND"
+                                             ): String = {
+    val kayttooikeusHakukohderyhmaEhto = makeOptionalHakukohderyhmatSubSelectQueryStr(
+      hakukohderyhmat = kayttooikeusHakukohderyhmaOids,
+      hakukohdeTablename = hakukohdeTablename,
+      operator = "" // lisätään operaattori vasta lopuksi
+    )
+
+    val organisaatioEhto = makeOptionalListOfValuesQueryStr("", "hk.jarjestyspaikka_oid", kayttooikeusOrgOids)
+
+    (kayttooikeusHakukohderyhmaEhto.trim, organisaatioEhto.trim) match {
+      case ("", "") => ""
+      case (hakukohderyhmaEhto, "") => s"$operator $hakukohderyhmaEhto"
+      case ("", organisaatioEhto) => s"$operator $organisaatioEhto"
+      case (hakukohderyhmaEhto, organisaatioEhto) => s"$operator ($hakukohderyhmaEhto OR $organisaatioEhto)"
+    }
+  }
+  
+  def buildHakukohdeFilterQuery(
+      selectedHakukohteet: List[String],
+      selectedHaut: List[String],
+      selectedHakukohderyhmat: List[String],
+      kayttooikeusHakukohderyhmat: List[String],
+      orgs: List[String],
+      isOrganisaatioRajain: Boolean,
+      isOphPaakayttaja: Boolean
+  ): String = {
+    if (selectedHaut.isEmpty)
+      throw new IllegalArgumentException("Haku must be selected before fetching hakukohteet")
+    if (orgs.isEmpty && kayttooikeusHakukohderyhmat.isEmpty && !isOphPaakayttaja)
+      throw new IllegalArgumentException("Non superuser must have either organization or hakukohderyhma limitation")
+    // käyttäjälle sallitut / organisaatiorajatut hakukohteet AND (selected hakukohde OR (selected hakukohderyhmä AND selected haku))
+    val hakukohteetOrganisaatioJaKayttooikeusrajauksilla = if (isOrganisaatioRajain) {
+      makeHakukohderyhmaQueryWithKayttooikeudet(orgs, List.empty, "hkr_hk")
+    } else if (isOphPaakayttaja) {
+        ""
+    } else {
+        makeHakukohderyhmaQueryWithKayttooikeudet(orgs, kayttooikeusHakukohderyhmat, "hkr_hk")
+    }
+    val selectedHakukohdeRajaus = if (selectedHakukohteet.nonEmpty) {
+      s"hk.hakukohde_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(selectedHakukohteet)}) OR"
+    } else {
+      ""
+    }
+    val selectedHakukohderyhmaRajaus = if (selectedHakukohderyhmat.nonEmpty) {
+      s"hkr_hk.hakukohderyhma_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(selectedHakukohderyhmat)}) AND"
+    } else {
+      ""
+    }
+    // haku on aina pakollinen rajain, validointi tehdään controllerissa
+    val selectedHakuRajaus = s"hk.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(selectedHaut)})"
+    s"$hakukohteetOrganisaatioJaKayttooikeusrajauksilla AND ($selectedHakukohdeRajaus ($selectedHakukohderyhmaRajaus $selectedHakuRajaus))"
+  }
+
   def enrichHarkinnanvaraisuudet(harkinnanvaraisuudet: List[String]): List[String] = {
     harkinnanvaraisuudet.flatMap(harkinnanvaraisuus => {
       if (List("ATARU_EI_PAATTOTODISTUSTA", "ATARU_YKS_MAT_AI").contains(harkinnanvaraisuus)) {
@@ -210,21 +288,13 @@ object RepositoryUtils {
       ""
   }
 
-  def makeOptionalJarjestyspaikkaQuery(selectedKayttooikeusOrganisaatiot: List[String]): String = {
-    RepositoryUtils.makeOptionalListOfValuesQueryStr(
-      "AND",
-      "hk.jarjestyspaikka_oid",
-      selectedKayttooikeusOrganisaatiot
-    )
-  }
-
-  def makeOptionalHakukohderyhmatSubSelectQueryStr(hakukohderyhmat: List[String]): String = {
+  def makeOptionalHakukohderyhmatSubSelectQueryStr(hakukohderyhmat: List[String], hakukohdeTablename: String = "hk", operator: String = "AND"): String = {
     val hakukohderyhmatStr = makeListOfValuesQueryStr(hakukohderyhmat)
     if (hakukohderyhmatStr.isEmpty) {
       ""
     } else {
-      "AND hk.hakukohde_oid IN (" +
-        "SELECT hkr_hk.hakukohde_oid FROM pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk " +
+      s"$operator $hakukohdeTablename.hakukohde_oid IN (" +
+        "SELECT DISTINCT hkr_hk.hakukohde_oid FROM pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk " +
         s"WHERE hkr_hk.hakukohderyhma_oid IN ($hakukohderyhmatStr))"
     }
   }
