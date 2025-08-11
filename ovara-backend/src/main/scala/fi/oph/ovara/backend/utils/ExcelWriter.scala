@@ -817,7 +817,7 @@ object ExcelWriter {
         hakijanHakutoiveRow,
         bodyTextCellStyle,
         cellIndex,
-        hakutoive.hylkaamisenTaiPeruuntumisenSyy,
+        hakutoive.valintatapajonokohtainenTila,
         asiointikieli
       )
       cellIndex = writeOptionTranslationToCell(
@@ -984,7 +984,7 @@ object ExcelWriter {
     }).flatten
   }
 
-  def createHylkaamisenTaiPeruuntumisenSyyHeadingRow(
+  def createValintatapajonokohtainenTilaHeadingRow(
       workbook: XSSFWorkbook,
       sheet: XSSFSheet,
       translations: Map[String, String],
@@ -1017,7 +1017,7 @@ object ExcelWriter {
 
     val headingCell = headingRow.createCell(headingColumnStartIndex)
     headingCell.setCellStyle(headingCellStyle)
-    val translationKey = s"raportti.hylkaamisenTaiPeruuntumisenSyy"
+    val translationKey = s"raportti.valintatapajonokohtainenTila"
     val value          = translations.getOrElse(translationKey, translationKey)
     headingCell.setCellValue(value)
 
@@ -1097,7 +1097,8 @@ object ExcelWriter {
       val hakutoiveValintatapajonot = hakutoive.valintatapajonot.groupBy(_.valintatapajonoOid)
       val hakukohteenValinnanTilanKuvaukset = createHakutoiveenValintatapajonoWritableValues(
         hakutoiveValintatapajonot,
-        distinctSortedValintatapajonotInQueryResult
+        distinctSortedValintatapajonotInQueryResult,
+        translations
       )
       hakukohteenValinnanTilanKuvaukset.foreach(kielistettyValinnanTilanKuvaus => {
         cellIndex = writeKielistettyToCell(
@@ -1233,7 +1234,7 @@ object ExcelWriter {
     val fieldNames: List[String] = classOf[KkHakija].getDeclaredFields.map(_.getName).toList
 
     if (distinctSortedValintatapajonotInQueryResult.nonEmpty) {
-      currentRowIndex = createHylkaamisenTaiPeruuntumisenSyyHeadingRow(
+      currentRowIndex = createValintatapajonokohtainenTilaHeadingRow(
         workbook,
         sheet,
         translations,
