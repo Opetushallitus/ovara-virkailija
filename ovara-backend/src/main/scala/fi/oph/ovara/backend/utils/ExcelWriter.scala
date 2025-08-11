@@ -1035,7 +1035,7 @@ object ExcelWriter {
       naytaHetu: Boolean,
       naytaPostiosoite: Boolean,
       distinctSortedValintatapajonotInQueryResult: Seq[Valintatapajono],
-      distinctSortedYoArvosanatInQueryResult: Seq[String]
+      allSortedYoKokeet: Seq[String]
   ): Unit = {
     var rowIndex = currentRowIndex
     hakijoidenHakutoiveet.foreach(hakutoive => {
@@ -1179,7 +1179,7 @@ object ExcelWriter {
       if (naytaArvosanat) {
         val hakutoiveArvosanat = hakutoive.arvosanat
         val hakutoiveenArvosanatCellValues =
-          createHakutoiveenArvosanatWritableValues(hakutoiveArvosanat, distinctSortedYoArvosanatInQueryResult)
+          createHakutoiveenArvosanatWritableValues(hakutoiveArvosanat, allSortedYoKokeet)
         hakutoiveenArvosanatCellValues.foreach(arvosanaValue => {
           cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, arvosanaValue)
         })
@@ -1219,8 +1219,7 @@ object ExcelWriter {
     val distinctSortedValintatapajonotInQueryResult =
       hakijoidenHakutoiveet.flatMap(_.valintatapajonot).distinctBy(_.valintatapajonoOid).sortBy(_.valintatapajononNimi)
 
-    val distinctSortedYoArvosanatInQueryResult =
-      hakijoidenHakutoiveet.flatMap(hakutoive => hakutoive.arvosanat.keys).distinct.sorted
+    val allYoKokeet = yokokeet.map(k => k.koodiarvo)
 
     val headingFieldNames =
       getHeadingFieldNames(
@@ -1228,7 +1227,7 @@ object ExcelWriter {
         naytaHetu,
         naytaPostiosoite,
         distinctSortedValintatapajonotInQueryResult,
-        distinctSortedYoArvosanatInQueryResult
+        allYoKokeet
       )
 
     val fieldNames: List[String] = classOf[KkHakija].getDeclaredFields.map(_.getName).toList
@@ -1265,7 +1264,7 @@ object ExcelWriter {
       naytaHetu = naytaHetu,
       naytaPostiosoite = naytaPostiosoite,
       distinctSortedValintatapajonotInQueryResult = distinctSortedValintatapajonotInQueryResult,
-      distinctSortedYoArvosanatInQueryResult = distinctSortedYoArvosanatInQueryResult
+      allSortedYoKokeet = allYoKokeet
     )
 
     // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
