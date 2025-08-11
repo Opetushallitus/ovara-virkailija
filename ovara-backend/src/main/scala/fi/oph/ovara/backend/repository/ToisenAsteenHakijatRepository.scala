@@ -75,7 +75,7 @@ class ToisenAsteenHakijatRepository extends Extractors {
     // Toisella asteella kirjoitushetkellä käytössä vain yksi valintatapajono, minkä takia varasija, kokonaispisteet ja hylk_tai_per_syy
     // haetaan jonon ensimmäisestä ja siis ainoasta valintatapajonosta.
     val query = sql"""SELECT hlo.sukunimi, hlo.etunimet, hlo.turvakielto,
-                 hlo.kansalaisuus_nimi, hlo.henkilo_oid, hlo.hakemus_oid, hk.oppilaitos_nimi, hk.toimipiste_nimi,
+                 hlo.kansalaisuudet_nimi, hlo.henkilo_oid, hlo.hakemus_oid, hk.oppilaitos_nimi, hk.toimipiste_nimi,
                  hk.hakukohde_nimi, ht.hakutoivenumero, ht2.kaksoistutkinto_kiinnostaa, ht2.urheilijatutkinto_kiinnostaa,
                  ht.valintatieto, ht.valintatapajonot->0->>'varasijan_numero' as varasija,
                  ht.valintatapajonot->0->>'pisteet' as kokonaispisteet, ht.valintatapajonot->0->>'valinnantilan_kuvauksen_teksti' as hylk_tai_per_syy,

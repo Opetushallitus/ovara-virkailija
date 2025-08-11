@@ -1,6 +1,7 @@
 package fi.oph.ovara.backend.utils
 
-import fi.oph.ovara.backend.domain.{En, Fi, Sv, Valintatapajono}
+import fi.oph.ovara.backend.domain.{En, Fi, Kieli, Kielistetty, Sv, Valintatapajono}
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.scalatest.flatspec.AnyFlatSpec
 
 class ExcelWriterUtilsSpec extends AnyFlatSpec {
@@ -26,6 +27,40 @@ class ExcelWriterUtilsSpec extends AnyFlatSpec {
     assert(
       ExcelWriterUtils.getTranslationForCellValue("eligible", translations) == "hakukelpoinen SV"
     )
+  }
+
+
+  "writeKielistettyListToCell" should "write a list of Kielistetty values to a cell" in {
+    val workbook = new XSSFWorkbook()
+    val sheet = workbook.createSheet("TestSheet")
+    val row = sheet.createRow(0)
+    val cellStyle = workbook.createCellStyle()
+    val kielistettyList: List[Kielistetty] = List(
+      Map(Fi -> "Suomi", Sv -> "Finland", En -> "Finland"),
+      Map(Fi -> "Turkki", Sv -> "Turkiet")
+    )
+    val asiointikieli = "fi"
+    
+    val nextCellIndex = ExcelWriterUtils.writeKielistettyListToCell(row, cellStyle, 0, kielistettyList, asiointikieli)
+    
+    val cell = row.getCell(0)
+    assert(cell.getStringCellValue == "Suomi, Turkki")
+    nextCellIndex == 1
+  }
+
+  it should "write a dash when the list is empty" in {
+    val workbook = new XSSFWorkbook()
+    val sheet = workbook.createSheet("TestSheet")
+    val row = sheet.createRow(0)
+    val cellStyle = workbook.createCellStyle()
+    val kielistettyList = List.empty[Kielistetty]
+    val asiointikieli = "fi"
+    
+    val nextCellIndex = ExcelWriterUtils.writeKielistettyListToCell(row, cellStyle, 0, kielistettyList, asiointikieli)
+    
+    val cell = row.getCell(0)
+    assert(cell.getStringCellValue == "-")
+    assert(nextCellIndex == 1)
   }
 
   "createHakutoiveenArvosanatWritableValues" should "return empty list when there are no arvosanat in the result" in {

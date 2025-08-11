@@ -88,6 +88,31 @@ object ExcelWriterUtils {
     cellIndex + 1
   }
 
+  def writeKielistettyListToCell(
+                              row: XSSFRow,
+                              cellStyle: XSSFCellStyle,
+                              cellIndex: Int,
+                              kielistettyList: List[Kielistetty],
+                              asiointikieli: String
+                            ): Int = {
+    val cell = createCell(row, cellStyle, cellIndex)
+    val kielistettyValue = if (kielistettyList.isEmpty) {
+      "-"
+    } else {
+      kielistettyList.map(k => k.get(Kieli.withName(asiointikieli)) match {
+        case Some(value) =>
+          if (value == null) {
+            "-"
+          } else {
+            value
+          }
+        case None => "-"
+      }).mkString(", ")
+    }
+    cell.setCellValue(kielistettyValue)
+    cellIndex + 1
+  }
+
   def writeKoulutuksenAlkamisaikaToCell(
       row: XSSFRow,
       cellStyle: XSSFCellStyle,

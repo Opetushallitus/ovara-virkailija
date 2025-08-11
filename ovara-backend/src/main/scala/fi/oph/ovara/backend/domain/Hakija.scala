@@ -3,7 +3,7 @@ package fi.oph.ovara.backend.domain
 import java.time.LocalDate
 
 abstract class Hakija {
-  val kansalaisuus: Kielistetty
+  val kansalaisuudet: List[Kielistetty]
   val oppijanumero: String
   val hakemusOid: String
   val toimipiste: Kielistetty
@@ -25,7 +25,7 @@ case class ToisenAsteenHakija(
     hakijanSukunimi: String,
     hakijanEtunimi: String,
     turvakielto: Option[Boolean],
-    kansalaisuus: Kielistetty,
+    kansalaisuudet: List[Kielistetty],
     oppijanumero: String,
     hakemusOid: String,
     oppilaitos: Kielistetty,
@@ -60,7 +60,7 @@ case class KkHakija(
     turvakielto: Option[Boolean],
     hetu: Option[String],
     syntymaAika: Option[LocalDate],
-    kansalaisuus: Kielistetty,
+    kansalaisuudet: List[Kielistetty],
     oppijanumero: String,
     hakemusOid: String,
     toimipiste: Kielistetty,
