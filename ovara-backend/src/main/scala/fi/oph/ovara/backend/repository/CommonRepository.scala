@@ -218,6 +218,7 @@ class CommonRepository extends Extractors {
   def selectDistinctYokokeet: SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
     sql"""SELECT yo.koodiarvo, yo.koodinimi
           FROM pub.pub_dim_koodisto_yokokeet yo
+          ORDER BY yo.koodiarvo ASC
        """.as[Koodi]
   }
 
