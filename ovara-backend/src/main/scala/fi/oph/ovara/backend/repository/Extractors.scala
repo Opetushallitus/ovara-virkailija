@@ -1,7 +1,7 @@
 package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.*
-import fi.oph.ovara.backend.utils.ExtractorUtils.{extractArray, extractCommaSeparatedString, extractDateOption, extractHakuaika, extractKielistetty, extractKoulutuksenAlkamisaika, extractMap, extractOpintojenlaajuus, extractValintatapajonot}
+import fi.oph.ovara.backend.utils.ExtractorUtils.{extractArray, extractCommaSeparatedString, extractDateOption, extractHakuaika, extractKielistetty, extractKielistettyList, extractKoulutuksenAlkamisaika, extractMap, extractOpintojenlaajuus, extractValintatapajonot}
 import fi.oph.ovara.backend.utils.GenericOvaraJsonFormats
 import org.json4s.jackson.Serialization.read
 import slick.jdbc.*
@@ -137,7 +137,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       hakijanSukunimi = r.nextString(),
       hakijanEtunimi = r.nextString(),
       turvakielto = r.nextBooleanOption(),
-      kansalaisuus = extractKielistetty(r.nextStringOption()),
+      kansalaisuudet = extractKielistettyList(r.nextStringOption()),
       oppijanumero = r.nextString(),
       hakemusOid = r.nextString(),
       oppilaitos = extractKielistetty(r.nextStringOption()),
@@ -174,7 +174,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       turvakielto = r.nextBooleanOption(),
       hetu = r.nextStringOption(),
       syntymaAika = extractDateOption(r.nextDateOption()),
-      kansalaisuus = extractKielistetty(r.nextStringOption()),
+      kansalaisuudet = extractKielistettyList(r.nextStringOption()),
       oppijanumero = r.nextString(),
       hakemusOid = r.nextString(),
       toimipiste = extractKielistetty(r.nextStringOption()),

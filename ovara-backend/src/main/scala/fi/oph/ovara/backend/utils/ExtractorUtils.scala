@@ -22,6 +22,10 @@ object ExtractorUtils extends GenericOvaraJsonFormats {
   def extractKielistetty(json: Option[String]): Kielistetty =
     json.map(read[Map[Kieli, String]]).getOrElse(Map())
 
+  def extractKielistettyList(json: Option[String]): List[Kielistetty] = {
+    json.map(read[List[Kielistetty]]).getOrElse(List())
+  }
+  
   def extractArray(json: Option[String]): List[String] = {
     json.map(read[List[String]]).getOrElse(List())
   }

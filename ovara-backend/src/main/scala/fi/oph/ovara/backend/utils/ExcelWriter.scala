@@ -765,7 +765,7 @@ object ExcelWriter {
         writeOptionBooleanToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.turvakielto, translations)
 
       cellIndex =
-        writeKielistettyToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.kansalaisuus, asiointikieli)
+        writeKielistettyListToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.kansalaisuudet, asiointikieli)
       cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.oppijanumero)
       cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.hakemusOid)
       cellIndex =
@@ -1053,7 +1053,7 @@ object ExcelWriter {
 
       cellIndex = writeOptionLocalDateToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.syntymaAika)
       cellIndex =
-        writeKielistettyToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.kansalaisuus, asiointikieli)
+        writeKielistettyListToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.kansalaisuudet, asiointikieli)
       cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.oppijanumero)
       cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.hakemusOid)
       cellIndex =

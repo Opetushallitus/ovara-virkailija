@@ -17,6 +17,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     "raportti.hakijanEtunimi"                   -> "Etunimi SV",
     "raportti.turvakielto"                      -> "Turvakielto SV",
     "raportti.kansalaisuus"                     -> "Kansalaisuus SV",
+    "raportti.kansalaisuudet"                   -> "Kansalaisuudet SV",
     "raportti.hakukohteenNimi"                  -> "Hakukohde SV",
     "raportti.haku"                             -> "Haku SV",
     "raportti.kaksoistutkintoKiinnostaa"        -> "Kaksoistutkinto kiinnostaa SV",
@@ -2402,7 +2403,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(0).getCell(0).getStringCellValue == "Sukunimi SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(1).getStringCellValue == "Etunimi SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(2).getStringCellValue == "Turvakielto SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(3).getStringCellValue == "Kansalaisuus SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(3).getStringCellValue == "Kansalaisuudet SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(4).getStringCellValue == "raportti.oppijanumero")
     assert(wb.getSheetAt(0).getRow(0).getCell(5).getStringCellValue == "raportti.hakemusOid")
     assert(wb.getSheetAt(0).getRow(0).getCell(6).getStringCellValue == "Oppilaitos SV")
@@ -2468,7 +2469,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(0).getCell(2).getStringCellValue == "Turvakielto SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(3).getStringCellValue == "raportti.hetu")
     assert(wb.getSheetAt(0).getRow(0).getCell(4).getStringCellValue == "raportti.syntymaAika")
-    assert(wb.getSheetAt(0).getRow(0).getCell(5).getStringCellValue == "Kansalaisuus SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(5).getStringCellValue == "Kansalaisuudet SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(6).getStringCellValue == "raportti.oppijanumero")
     assert(wb.getSheetAt(0).getRow(0).getCell(7).getStringCellValue == "raportti.hakemusOid")
     assert(wb.getSheetAt(0).getRow(0).getCell(8).getStringCellValue == "Toimipiste SV")
@@ -2518,7 +2519,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(0).getCell(0).getStringCellValue == "Sukunimi SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(1).getStringCellValue == "Etunimi SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(2).getStringCellValue == "Turvakielto SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(3).getStringCellValue == "Kansalaisuus SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(3).getStringCellValue == "Kansalaisuudet SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(4).getStringCellValue == "raportti.oppijanumero")
     assert(wb.getSheetAt(0).getRow(0).getCell(5).getStringCellValue == "raportti.hakemusOid")
     assert(wb.getSheetAt(0).getRow(0).getCell(6).getStringCellValue == "Oppilaitos SV")
@@ -2557,7 +2558,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         "Rautiainen-Testi",
         "Dina Testi",
         Some(false),
-        Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+        List(Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"), Map(En -> "Sweden", Fi -> "Ruotsi", Sv -> "Sverige")),
         "1.2.246.562.24.30646006111",
         "1.2.246.562.11.00000000000002179045",
         Map(En -> "Oppilaitos en", Fi  -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
@@ -2604,7 +2605,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Rautiainen-Testi")
     assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "Dina Testi")
     assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "Nej")
-    assert(wb.getSheetAt(0).getRow(1).getCell(3).getStringCellValue == "Finland")
+    assert(wb.getSheetAt(0).getRow(1).getCell(3).getStringCellValue == "Finland, Sverige")
     assert(wb.getSheetAt(0).getRow(1).getCell(4).getStringCellValue == "1.2.246.562.24.30646006111")
     assert(wb.getSheetAt(0).getRow(1).getCell(5).getStringCellValue == "1.2.246.562.11.00000000000002179045")
     assert(wb.getSheetAt(0).getRow(1).getCell(6).getStringCellValue == "Oppilaitos sv")
@@ -2644,7 +2645,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           "Rautiainen-Testi",
           "Dina Testi",
           Some(false),
-          Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+          List(Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland")),
           "1.2.246.562.24.30646006111",
           "1.2.246.562.11.00000000000002179045",
           Map(En -> "Oppilaitos 1 en", Fi -> "Oppilaitos 1 fi", Sv -> "Oppilaitos 1 sv"),
@@ -2680,7 +2681,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           "Rautiainen-Testi",
           "Dina Testi",
           Some(false),
-          Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+          List(Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland")),
           "1.2.246.562.24.30646006111",
           "1.2.246.562.11.00000000000002112891",
           Map(En -> "Oppilaitos 2 en", Fi -> "Oppilaitos 2 fi", Sv -> "Oppilaitos 2 sv"),
@@ -2716,7 +2717,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           "Lehto-Testi",
           "Vikke Testi",
           Some(false),
-          Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+          List(Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland")),
           "1.2.246.562.24.18441866015",
           "1.2.246.562.11.00000000000002126102",
           Map(En -> "Oppilaitos 3 en", Fi -> "Oppilaitos 3 fi", Sv -> "Oppilaitos 3 sv"),
@@ -2990,7 +2991,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     turvakielto = Some(false),
     hetu = Some("120393-129E"),
     syntymaAika = Some(LocalDate.parse("1993-03-12")),
-    kansalaisuus = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+    kansalaisuudet = List(Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland")),
     oppijanumero = "1.2.246.562.24.30646006111",
     hakemusOid = "1.2.246.562.11.00000000000002179045",
     toimipiste = Map(En -> "Toimipiste 1 en", Fi -> "Toimipiste 1 fi", Sv -> "Toimipiste 1 sv"),
@@ -3064,7 +3065,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     turvakielto = Some(true),
     hetu = Some("04041990-345K"),
     syntymaAika = Some(LocalDate.parse("1990-04-04")),
-    kansalaisuus = Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"),
+    kansalaisuudet = List(Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland")),
     oppijanumero = "1.2.246.562.24.18441866015",
     hakemusOid = "1.2.246.562.11.00000000000002126102",
     toimipiste = Map(En -> "Toimipiste 2 en", Fi -> "Toimipiste 2 fi", Sv -> "Toimipiste 2 sv"),
@@ -3183,7 +3184,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val expectedHeaders = List(
       "Sukunimi SV", "Etunimi SV", "Turvakielto SV", "raportti.hetu", "raportti.syntymaAika",
-      "Kansalaisuus SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
+      "Kansalaisuudet SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
       "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "raportti.valintatieto",
       "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV", "raportti.vastaanottotieto",
       "raportti.viimVastaanottopaiva", "raportti.ensikertalainen", "raportti.ilmoittautuminen",
@@ -3257,7 +3258,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val expectedHeaders = List(
       "Sukunimi SV", "Etunimi SV", "Turvakielto SV", "raportti.syntymaAika",
-      "Kansalaisuus SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
+      "Kansalaisuudet SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
       "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "raportti.valintatieto",
       "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV", "raportti.vastaanottotieto",
       "raportti.viimVastaanottopaiva", "raportti.ensikertalainen", "raportti.ilmoittautuminen",
@@ -3304,6 +3305,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           valintatiedonPvm = None,
           pohjakoulutus = None,
           maksuvelvollisuus = None,
+          kansalaisuudet = List(Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"), Map(En -> "Sweden", Fi -> "Ruotsi", Sv -> "Sverige")),
           valintatapajonot = List(
             Valintatapajono(
               valintatapajonoOid = "1709304116443-4815957697640331820",
@@ -3338,7 +3340,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val expectedHeaders = List(
       "Sukunimi SV", "Etunimi SV", "Turvakielto SV", "raportti.hetu", "raportti.syntymaAika",
-      "Kansalaisuus SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
+      "Kansalaisuudet SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
       "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "raportti.valintatieto",
       "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV", "Lukiokoulutus",
       "raportti.vastaanottotieto", "raportti.viimVastaanottopaiva", "raportti.ensikertalainen",
@@ -3349,7 +3351,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val expectedRows = List(
       List(
-        "Rautiainen-Testi", "Dina Testi", "Nej", "120393-129E", "12.3.1993", "Finland",
+        "Rautiainen-Testi", "Dina Testi", "Nej", "120393-129E", "12.3.1993", "Finland, Sverige",
         "1.2.246.562.24.30646006111", "1.2.246.562.11.00000000000002179045", "Toimipiste 1 sv",
         "Hakukohde 1 SV", "-", 2, "Hyvaksytty SV", "Ja", "-", "Annullerad, godkänt till ansökningsmål med högre prioritet",
         "raportti.perunut", "26.6.2024", "Ja", "raportti.lasna_koko_lukuvuosi", "-",
@@ -3390,7 +3392,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val expectedHeaders = List(
       "Sukunimi SV", "Etunimi SV", "Turvakielto SV", "raportti.syntymaAika",
-      "Kansalaisuus SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
+      "Kansalaisuudet SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
       "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "raportti.valintatieto",
       "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV",
       "Koevalintajono kaikille hakijoille", "Todistusvalinta (YO)",
@@ -3476,7 +3478,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val expectedHeaders = List(
       "Sukunimi SV", "Etunimi SV", "Turvakielto SV", "raportti.syntymaAika",
-      "Kansalaisuus SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
+      "Kansalaisuudet SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
       "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "raportti.valintatieto",
       "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV",
       "Koevalintajono kaikille hakijoille", "Todistusvalinta (YO)",
@@ -3603,7 +3605,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "Turvakielto SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(3).getStringCellValue == "raportti.hetu")
     assert(wb.getSheetAt(0).getRow(1).getCell(4).getStringCellValue == "raportti.syntymaAika")
-    assert(wb.getSheetAt(0).getRow(1).getCell(5).getStringCellValue == "Kansalaisuus SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(5).getStringCellValue == "Kansalaisuudet SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(6).getStringCellValue == "raportti.oppijanumero")
     assert(wb.getSheetAt(0).getRow(1).getCell(7).getStringCellValue == "raportti.hakemusOid")
     assert(wb.getSheetAt(0).getRow(1).getCell(8).getStringCellValue == "Toimipiste SV")
@@ -3774,7 +3776,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "Etunimi SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "Turvakielto SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(3).getStringCellValue == "raportti.syntymaAika")
-    assert(wb.getSheetAt(0).getRow(1).getCell(4).getStringCellValue == "Kansalaisuus SV")
+    assert(wb.getSheetAt(0).getRow(1).getCell(4).getStringCellValue == "Kansalaisuudet SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(5).getStringCellValue == "raportti.oppijanumero")
     assert(wb.getSheetAt(0).getRow(1).getCell(6).getStringCellValue == "raportti.hakemusOid")
     assert(wb.getSheetAt(0).getRow(1).getCell(7).getStringCellValue == "Toimipiste SV")
@@ -3888,7 +3890,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val expectedHeaders = List(
       "Sukunimi SV", "Etunimi SV", "Turvakielto SV", "raportti.hetu", "raportti.syntymaAika",
-      "Kansalaisuus SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
+      "Kansalaisuudet SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
       "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "raportti.valintatieto",
       "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV", "Lukiokoulutus",
       "raportti.vastaanottotieto", "raportti.viimVastaanottopaiva", "raportti.ensikertalainen",
@@ -4488,7 +4490,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           "turvakielto",
           "hetu",
           "syntymaAika",
-          "kansalaisuus",
+          "kansalaisuudet",
           "oppijanumero",
           "hakemusOid",
           "toimipiste",
@@ -4540,7 +4542,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           "turvakielto",
           "hetu",
           "syntymaAika",
-          "kansalaisuus",
+          "kansalaisuudet",
           "oppijanumero",
           "hakemusOid",
           "toimipiste",
@@ -4595,7 +4597,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           "hakijanEtunimi",
           "turvakielto",
           "syntymaAika",
-          "kansalaisuus",
+          "kansalaisuudet",
           "oppijanumero",
           "hakemusOid",
           "toimipiste",
@@ -4671,7 +4673,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           "turvakielto",
           "hetu",
           "syntymaAika",
-          "kansalaisuus",
+          "kansalaisuudet",
           "oppijanumero",
           "hakemusOid",
           "toimipiste",
@@ -4746,7 +4748,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           "turvakielto",
           "hetu",
           "syntymaAika",
-          "kansalaisuus",
+          "kansalaisuudet",
           "oppijanumero",
           "hakemusOid",
           "toimipiste",
