@@ -2558,7 +2558,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         "Rautiainen-Testi",
         "Dina Testi",
         Some(false),
-        List(Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland")),
+        List(Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"), Map(En -> "Sweden", Fi -> "Ruotsi", Sv -> "Sverige")),
         "1.2.246.562.24.30646006111",
         "1.2.246.562.11.00000000000002179045",
         Map(En -> "Oppilaitos en", Fi  -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
@@ -2605,7 +2605,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Rautiainen-Testi")
     assert(wb.getSheetAt(0).getRow(1).getCell(1).getStringCellValue == "Dina Testi")
     assert(wb.getSheetAt(0).getRow(1).getCell(2).getStringCellValue == "Nej")
-    assert(wb.getSheetAt(0).getRow(1).getCell(3).getStringCellValue == "Finland")
+    assert(wb.getSheetAt(0).getRow(1).getCell(3).getStringCellValue == "Finland, Sverige")
     assert(wb.getSheetAt(0).getRow(1).getCell(4).getStringCellValue == "1.2.246.562.24.30646006111")
     assert(wb.getSheetAt(0).getRow(1).getCell(5).getStringCellValue == "1.2.246.562.11.00000000000002179045")
     assert(wb.getSheetAt(0).getRow(1).getCell(6).getStringCellValue == "Oppilaitos sv")
@@ -3305,6 +3305,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
           valintatiedonPvm = None,
           pohjakoulutus = None,
           maksuvelvollisuus = None,
+          kansalaisuudet = List(Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"), Map(En -> "Sweden", Fi -> "Ruotsi", Sv -> "Sverige")),
           valintatapajonot = List(
             Valintatapajono(
               valintatapajonoOid = "1709304116443-4815957697640331820",
@@ -3350,7 +3351,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val expectedRows = List(
       List(
-        "Rautiainen-Testi", "Dina Testi", "Nej", "120393-129E", "12.3.1993", "Finland",
+        "Rautiainen-Testi", "Dina Testi", "Nej", "120393-129E", "12.3.1993", "Finland, Sverige",
         "1.2.246.562.24.30646006111", "1.2.246.562.11.00000000000002179045", "Toimipiste 1 sv",
         "Hakukohde 1 SV", "-", 2, "Hyvaksytty SV", "Ja", "-", "Annullerad, godkänt till ansökningsmål med högre prioritet",
         "raportti.perunut", "26.6.2024", "Ja", "raportti.lasna_koko_lukuvuosi", "-",
