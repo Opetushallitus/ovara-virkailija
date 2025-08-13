@@ -36,8 +36,8 @@ case class ValidatedKkHakeneetHyvaksytytVastaanottaneetParams(
 
 def buildKkHakeneetHyvaksytytVastaanottaneetAuditParams(
                                                          params: ValidatedKkHakeneetHyvaksytytVastaanottaneetParams
-                                                       ): Map[String, Any] = {
-  Map(
+                                                       ): List[(String, Any)] = {
+  List(
     "haut" -> Option(params.haut).filter(_.nonEmpty),
     "tulostustapa" -> Option(params.tulostustapa),
     "koulutustoimija" -> params.koulutustoimija,

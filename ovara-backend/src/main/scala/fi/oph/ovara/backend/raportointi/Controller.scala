@@ -3,7 +3,7 @@ package fi.oph.ovara.backend.raportointi
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.UserResponse
-import fi.oph.ovara.backend.raportointi.dto.{RawHakeneetHyvaksytytVastaanottaneetParams, RawHakijatParams, RawKkHakeneetHyvaksytytVastaanottaneetParams, RawKkHakijatParams, RawKkKoulutuksetToteutuksetHakukohteetParams, RawKoulutuksetToteutuksetHakukohteetParams, buildHakeneetHyvaksytytVastaanottaneetAuditParams, buildHakijatAuditParams, buildKkHakeneetHyvaksytytVastaanottaneetAuditParams, buildKkHakijatAuditParams, buildKkKoulutuksetToteutuksetHakukohteetAuditParams, buildKoulutuksetToteutuksetHakukohteetAuditParams}
+import fi.oph.ovara.backend.raportointi.dto.{KoulutuksetToteutuksetHakukohteetUtils, RawHakeneetHyvaksytytVastaanottaneetParams, RawHakijatParams, RawKkHakeneetHyvaksytytVastaanottaneetParams, RawKkHakijatParams, RawKkKoulutuksetToteutuksetHakukohteetParams, RawKoulutuksetToteutuksetHakukohteetParams, buildHakeneetHyvaksytytVastaanottaneetAuditParams, buildHakijatAuditParams, buildKkHakeneetHyvaksytytVastaanottaneetAuditParams, buildKkHakijatAuditParams, buildKkKoulutuksetToteutuksetHakukohteetAuditParams}
 import fi.oph.ovara.backend.service.*
 import fi.oph.ovara.backend.utils.AuditOperation.{HakeneetHyvaksytytVastaanottaneet, KkHakeneetHyvaksytytVastaanottaneet, KkHakijat, KorkeakouluKoulutuksetToteutuksetHakukohteet, KoulutuksetToteutuksetHakukohteet, ToisenAsteenHakijat}
 import fi.oph.ovara.backend.utils.ParameterValidator.{strToOptionBoolean, validateAlphanumeric, validateAlphanumericList, validateHakeneetHyvaksytytVastaanottaneetParams, validateHakijatParams, validateKkHakeneetHyvaksytytVastaanottaneetParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams, validateNumericList, validateOid, validateOidList, validateOrganisaatioOid, validateOrganisaatioOidList}
@@ -307,7 +307,7 @@ class Controller(
                                   response: HttpServletResponse,
                                   request: HttpServletRequest,
                                   id: String,
-                                  raporttiParams: Map[String, Any],
+                                  raporttiParams: List[(String, Any)],
                                   auditOperation: AuditOperation,
                                   mapper: ObjectMapper
                                 )(block: => Either[String, XSSFWorkbook]): Unit = {
@@ -380,13 +380,13 @@ class Controller(
     )
 
     val validationResult = validateKoulutuksetToteutuksetHakukohteetParams(params)
-
+    
     handleExcelRequest(
       validationErrors = validationResult.left.getOrElse(Nil),
       response = response,
       request = request,
       id = "koulutukset-toteutukset-hakukohteet",
-      raporttiParams = validationResult.toOption.map(buildKoulutuksetToteutuksetHakukohteetAuditParams).getOrElse(Map.empty),
+      raporttiParams = validationResult.toOption.map(KoulutuksetToteutuksetHakukohteetUtils.buildParams).getOrElse(List.empty),
       auditOperation = KoulutuksetToteutuksetHakukohteet,
       mapper = mapper
     ) {
@@ -403,7 +403,7 @@ class Controller(
             validParams.koulutuksenTila,
             validParams.toteutuksenTila,
             validParams.hakukohteenTila,
-            validParams.valintakoe
+            validParams.valintakoe,
           )
       }
     }
@@ -442,7 +442,7 @@ class Controller(
       response = response,
       request = request,
       id = "kk-koulutukset-toteutukset-hakukohteet",
-      raporttiParams = validationResult.toOption.map(buildKkKoulutuksetToteutuksetHakukohteetAuditParams).getOrElse(Map.empty),
+      raporttiParams = validationResult.toOption.map(buildKkKoulutuksetToteutuksetHakukohteetAuditParams).getOrElse(List.empty),
       auditOperation = KorkeakouluKoulutuksetToteutuksetHakukohteet,
       mapper = mapper
     ) {
@@ -509,7 +509,7 @@ class Controller(
       response = response,
       request = request,
       id = "hakijat",
-      raporttiParams = validationResult.toOption.map(buildHakijatAuditParams).getOrElse(Map.empty),
+      raporttiParams = validationResult.toOption.map(buildHakijatAuditParams).getOrElse(List.empty),
       auditOperation = ToisenAsteenHakijat,
       mapper = mapper
     ) {
@@ -578,7 +578,7 @@ class Controller(
       response = response,
       request = request,
       id = "kk-hakijat",
-      raporttiParams = validationResult.toOption.map(buildKkHakijatAuditParams).getOrElse(Map.empty),
+      raporttiParams = validationResult.toOption.map(buildKkHakijatAuditParams).getOrElse(List.empty),
       auditOperation = KkHakijat,
       mapper = mapper
     ) {
@@ -650,7 +650,7 @@ class Controller(
       response = response,
       request = request,
       id = "hakeneet-hyvaksytyt-vastaanottaneet",
-      raporttiParams = validationResult.toOption.map(buildHakeneetHyvaksytytVastaanottaneetAuditParams).getOrElse(Map.empty),
+      raporttiParams = validationResult.toOption.map(buildHakeneetHyvaksytytVastaanottaneetAuditParams).getOrElse(List.empty),
       auditOperation = HakeneetHyvaksytytVastaanottaneet,
       mapper = mapper
     ) {
@@ -723,7 +723,7 @@ class Controller(
       response = response,
       request = request,
       id = "kk-hakeneet-hyvaksytyt-vastaanottaneet",
-      raporttiParams = validationResult.toOption.map(buildKkHakeneetHyvaksytytVastaanottaneetAuditParams).getOrElse(Map.empty),
+      raporttiParams = validationResult.toOption.map(buildKkHakeneetHyvaksytytVastaanottaneetAuditParams).getOrElse(List.empty),
       auditOperation = KkHakeneetHyvaksytytVastaanottaneet,
       mapper = mapper
     ) {

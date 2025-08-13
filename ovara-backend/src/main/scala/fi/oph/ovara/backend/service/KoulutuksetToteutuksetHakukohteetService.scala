@@ -1,12 +1,14 @@
 package fi.oph.ovara.backend.service
 
+import fi.oph.ovara.backend.raportointi.dto.{KoulutuksetToteutuksetHakukohteetUtils, ValidatedKoulutuksetToteutuksetHakukohteetParams}
 import fi.oph.ovara.backend.repository.{KoulutuksetToteutuksetHakukohteetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter, OrganisaatioUtils}
 import org.slf4j.{Logger, LoggerFactory}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.{Component, Service}
-import scala.util.{Try, Failure, Success}
+
+import scala.util.{Failure, Success, Try}
 
 @Component
 @Service
@@ -66,11 +68,24 @@ class KoulutuksetToteutuksetHakukohteetService(
           groupedQueryResult
         )
 
+      val raporttiParams = KoulutuksetToteutuksetHakukohteetUtils.buildParams(
+        ValidatedKoulutuksetToteutuksetHakukohteetParams(
+          haut,
+          koulutustoimija,
+          oppilaitokset,
+          toimipisteet,
+          koulutuksenTila,
+          toteutuksenTila,
+          hakukohteenTila,
+          valintakoe)
+      )
+        
       ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         organisaationKoulutuksetHakukohteetToteutukset,
         asiointikieli,
         raporttityyppi,
-        translations
+        translations,
+        raporttiParams
       )
     } match {
       case Success(excelFile) => Right(excelFile)

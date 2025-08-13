@@ -34,8 +34,8 @@ case class ValidatedHakijatParams(
                           julkaisulupa: Option[Boolean]
                         )
 
-def buildHakijatAuditParams(valid: ValidatedHakijatParams): Map[String, Any] = {
-  Map(
+def buildHakijatAuditParams(valid: ValidatedHakijatParams): List[(String, Any)] = {
+  List(
     "haut"                 -> Option(valid.haut).filter(_.nonEmpty),
     "oppilaitokset"        -> Option(valid.oppilaitokset).filter(_.nonEmpty),
     "toimipisteet"         -> Option(valid.toimipisteet).filter(_.nonEmpty),

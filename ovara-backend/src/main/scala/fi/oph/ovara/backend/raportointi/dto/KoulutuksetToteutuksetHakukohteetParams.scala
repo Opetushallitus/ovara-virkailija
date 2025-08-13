@@ -22,16 +22,18 @@ case class ValidatedKoulutuksetToteutuksetHakukohteetParams(
                                                              valintakoe: Option[Boolean]
                                                            )
 
-def buildKoulutuksetToteutuksetHakukohteetAuditParams(valid: ValidatedKoulutuksetToteutuksetHakukohteetParams): Map[String, Any] = {
-  Map(
-    "haut" -> Option(valid.haut).filter(_.nonEmpty),
-    "koulutustoimija" -> valid.koulutustoimija,
-    "oppilaitokset" -> Option(valid.oppilaitokset).filter(_.nonEmpty),
-    "toimipisteet" -> Option(valid.toimipisteet).filter(_.nonEmpty),
-    "koulutuksenTila" -> valid.koulutuksenTila,
-    "toteutuksenTila" -> valid.toteutuksenTila,
-    "hakukohteenTila" -> valid.hakukohteenTila,
-    "valintakoe" -> valid.valintakoe
-  ).collect { case (key, Some(value)) => key -> value }
+object KoulutuksetToteutuksetHakukohteetUtils {
+  def buildParams(valid: ValidatedKoulutuksetToteutuksetHakukohteetParams): List[(String, Boolean | String | List[String])] = {
+    List(
+      "haku" -> Option(valid.haut).filter(_.nonEmpty),
+      "koulutustoimija" -> valid.koulutustoimija,
+      "oppilaitos" -> Option(valid.oppilaitokset).filter(_.nonEmpty),
+      "toimipiste" -> Option(valid.toimipisteet).filter(_.nonEmpty),
+      "koulutuksenTila" -> valid.koulutuksenTila,
+      "toteutuksenTila" -> valid.toteutuksenTila,
+      "hakukohteenTila" -> valid.hakukohteenTila,
+      "valintakoe" -> valid.valintakoe
+    ).collect { case (key, Some(value)) => key -> value }
+  }
 }
 

@@ -330,7 +330,8 @@ object ExcelWriter {
       hierarkiatWithResults: List[OrganisaatioHierarkiaWithHakukohteet],
       asiointikieli: String,
       raporttityyppi: String,
-      translations: Map[String, String]
+      translations: Map[String, String],
+      parametrit: List[(String, Boolean | String | List[String])]
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
@@ -384,6 +385,10 @@ object ExcelWriter {
         translations = translations
       )
 
+      // Create a new sheet for parametrit
+      val parametritSheet: XSSFSheet = workbook.createSheet()
+      createHakuparametritSheet(translations, parametrit, workbook, parametritSheet)
+
       // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
       raporttiColumnTitlesWithIndex.foreach { case (title, index) =>
         sheet.autoSizeColumn(index)
@@ -395,6 +400,49 @@ object ExcelWriter {
     }
 
     workbook
+  }
+
+  private def createHakuparametritSheet(translations: Map[String, String], parametrit: List[(String, Boolean | String | List[String])], workbook: XSSFWorkbook, parametritSheet: XSSFSheet): Unit = {
+    workbook.setSheetName(
+      1,
+      WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.hakuparametrit", "raportti.hakuparametrit"))
+    )
+    val paramHeadingCellStyle: XSSFCellStyle = workbook.createCellStyle()
+    createHeadingFont(workbook, paramHeadingCellStyle)
+
+    // otsikkorivi
+    val headingRow = parametritSheet.createRow(0)
+    val keyCell = headingRow.createCell(0)
+    val valueCell = headingRow.createCell(1)
+    keyCell.setCellStyle(paramHeadingCellStyle)
+    valueCell.setCellStyle(paramHeadingCellStyle)
+    keyCell.setCellValue(translations.getOrElse("raportti.hakuehto", "raportti.hakuehto"))
+    valueCell.setCellValue(translations.getOrElse("raportti.hakuarvo", "raportti.hakuarvo"))
+
+    // hakuparametrit
+    var paramRowIndex = 1
+    parametrit.foreach { case (key, value) =>
+      val row = parametritSheet.createRow(paramRowIndex)
+      val keyCell = row.createCell(0)
+      val valueCell = row.createCell(1)
+      keyCell.setCellValue(translations.getOrElse(s"raportti.$key", key))
+      value match {
+        case v: String => valueCell.setCellValue(translations.getOrElse(s"raportti.$v", v))
+        case v: Boolean =>
+          val translatedValue = if (v) {
+            translations.getOrElse("raportti.kylla", v.toString)
+          } else {
+            translations.getOrElse("raportti.ei", v.toString)
+          }
+          valueCell.setCellValue(translatedValue)
+        case v: List[String] => valueCell.setCellValue(v.mkString(", "))
+        case _ => valueCell.setCellValue(value.toString)
+      }
+      paramRowIndex += 1
+    }
+    // sarakeleveys
+    parametritSheet.autoSizeColumn(0)
+    parametritSheet.autoSizeColumn(1)
   }
 
   private def writeKorkeakouluKoulutuksetToteutuksetHakukohteetKoulutuksittainRows(
