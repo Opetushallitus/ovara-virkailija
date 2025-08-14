@@ -29,7 +29,7 @@ class AuditLog(val logger: Logger) {
 
   def logWithParams(request: HttpServletRequest, operation: Operation, raporttiParams: List[(String, Any)]): Unit = {
     try {
-      val paramsJson = toJson(raporttiParams)
+      val paramsJson = toJson(raporttiParams.toMap)
       val target = new Target.Builder().setField("parametrit", paramsJson).build()
       audit.log(getUser(request), operation, target, Changes.EMPTY)
     } catch {
