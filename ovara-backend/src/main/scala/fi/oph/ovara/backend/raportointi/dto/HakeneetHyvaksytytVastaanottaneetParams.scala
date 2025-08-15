@@ -38,8 +38,8 @@ case class ValidatedHakeneetHyvaksytytVastaanottaneetParams(
 
 def buildHakeneetHyvaksytytVastaanottaneetAuditParams(
                                                        params: ValidatedHakeneetHyvaksytytVastaanottaneetParams
-                                                     ): List[(String, Any)] = {
-  List(
+                                                     ): Map[String, Any] = {
+  Map(
     "haut" -> Option(params.haut).filter(_.nonEmpty),
     "tulostustapa" -> Option(params.tulostustapa),
     "koulutustoimija" -> params.koulutustoimija,

@@ -110,9 +110,9 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
       "valintakoe"      -> true,
       "toteutuksenTila" -> "julkaistu",
       "koulutustoimija" -> "1.2.246.562.10.1000000000000000000",
-      "haku"            -> List("1.2.246.562.29.00000000000000049925"),
+      "haut"            -> List("1.2.246.562.29.00000000000000049925"),
       "koulutuksenTila" -> "julkaistu",
-      "oppilaitos"      -> List("1.2.246.562.10.1000000000000000001"),
+      "oppilaitokset"      -> List("1.2.246.562.10.1000000000000000001"),
       "hakukohteenTila" -> "julkaistu"
     )
 

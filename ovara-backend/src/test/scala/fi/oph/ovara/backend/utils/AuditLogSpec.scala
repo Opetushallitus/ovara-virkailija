@@ -22,7 +22,7 @@ class AuditLogSpec extends AnyFlatSpec with Matchers {
       override def getUser(request: HttpServletRequest): User = mockUser
     }
 
-    val params = List("param1" -> "value1", "param2" -> "value2")
+    val params = Map("param1" -> "value1", "param2" -> "value2")
     
     auditLog.logWithParams(mockRequest, AuditOperation.KoulutuksetToteutuksetHakukohteet, params)
 

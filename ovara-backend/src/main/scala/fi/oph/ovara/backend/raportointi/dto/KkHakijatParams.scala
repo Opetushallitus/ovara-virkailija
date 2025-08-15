@@ -30,8 +30,8 @@ case class ValidatedKkHakijatParams(
                                      naytaPostiosoite: Boolean
                                    )
 
-def buildKkHakijatAuditParams(valid: ValidatedKkHakijatParams): List[(String, Any)] = {
-  List(
+def buildKkHakijatAuditParams(valid: ValidatedKkHakijatParams): Map[String, Any] = {
+  Map(
     "haut" -> Option(valid.haut).filter(_.nonEmpty),
     "oppilaitokset" -> Option(valid.oppilaitokset).filter(_.nonEmpty),
     "toimipisteet" -> Option(valid.toimipisteet).filter(_.nonEmpty),

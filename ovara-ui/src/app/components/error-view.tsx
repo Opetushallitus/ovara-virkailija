@@ -1,7 +1,12 @@
 'use client';
 
 import { FetchError, PermissionError } from '@/app/lib/common';
-import { useTranslate } from '@tolgee/react';
+import {
+  DefaultParamType,
+  TFnType,
+  TranslationKey,
+  useTranslate,
+} from '@tolgee/react';
 import { Stack } from '@mui/material';
 import { OphButton, OphTypography } from '@opetushallitus/oph-design-system';
 import { ReactNode } from 'react';
@@ -30,7 +35,10 @@ const ErrorComponent = ({ title, message, retry }: ErrorComponentProps) => {
 
 type ErrorBody = string | string[] | { details: string[] } | null;
 
-const renderErrorBody = (body: ErrorBody): ReactNode => {
+const renderErrorBody = (
+  body: ErrorBody,
+  t: TFnType<DefaultParamType, string, TranslationKey>,
+): ReactNode => {
   if (!body) return null;
 
   if (Array.isArray(body)) {
@@ -47,7 +55,7 @@ const renderErrorBody = (body: ErrorBody): ReactNode => {
 
   if (typeof body === 'string') {
     return (
-      <OphTypography sx={{ overflowWrap: 'anywhere' }}>{body}</OphTypography>
+      <OphTypography sx={{ overflowWrap: 'anywhere' }}>{t(body)}</OphTypography>
     );
   }
 
@@ -87,7 +95,7 @@ export function ErrorView({
             <OphTypography>
               {t('virhe.virhekoodi')} {error.response.status}
             </OphTypography>
-            {renderErrorBody(error.body as ErrorBody)}
+            {renderErrorBody(error.body as ErrorBody, t)}
           </Stack>
         }
         retry={reset}

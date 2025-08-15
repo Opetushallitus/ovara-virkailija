@@ -27,9 +27,9 @@ class AuditLog(val logger: Logger) {
   val audit = new Audit(logger, "ovara-virkailija", ApplicationType.VIRKAILIJA)
   private val errorLogger = LoggerFactory.getLogger(classOf[AuditLog])
 
-  def logWithParams(request: HttpServletRequest, operation: Operation, raporttiParams: List[(String, Any)]): Unit = {
+  def logWithParams(request: HttpServletRequest, operation: Operation, raporttiParams: Map[String, Any]): Unit = {
     try {
-      val paramsJson = toJson(raporttiParams.toMap)
+      val paramsJson = toJson(raporttiParams)
       val target = new Target.Builder().setField("parametrit", paramsJson).build()
       audit.log(getUser(request), operation, target, Changes.EMPTY)
     } catch {

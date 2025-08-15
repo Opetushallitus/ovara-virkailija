@@ -18,14 +18,14 @@ object ExtractorUtils extends GenericOvaraJsonFormats {
   def extractAlkamiskausi(jsonObject: Option[String]): Option[Alkamiskausi] = {
     jsonObject.map(read[Alkamiskausi])
   }
-  
+
   def extractKielistetty(json: Option[String]): Kielistetty =
     json.map(read[Map[Kieli, String]]).getOrElse(Map())
 
   def extractKielistettyList(json: Option[String]): List[Kielistetty] = {
     json.map(read[List[Kielistetty]]).getOrElse(List())
   }
-  
+
   def extractArray(json: Option[String]): List[String] = {
     json.map(read[List[String]]).getOrElse(List())
   }
@@ -37,7 +37,7 @@ object ExtractorUtils extends GenericOvaraJsonFormats {
     val list = extractArray(json)
     if (list.isEmpty) None else Some(list.mkString(","))
   }
-  
+
   def extractOpintojenlaajuus(laajuusnumero: Option[String], laajuusyksikko: Option[String]): Kielistetty = {
     val kielistettyLaajuusyksikko = extractKielistetty(laajuusyksikko)
     laajuusnumero match {

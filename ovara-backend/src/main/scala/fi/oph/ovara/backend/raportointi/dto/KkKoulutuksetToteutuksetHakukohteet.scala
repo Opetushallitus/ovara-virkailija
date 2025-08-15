@@ -26,8 +26,8 @@ case class ValidatedKkKoulutuksetToteutuksetHakukohteetParams(
 
 def buildKkKoulutuksetToteutuksetHakukohteetAuditParams(
                                                          params: ValidatedKkKoulutuksetToteutuksetHakukohteetParams
-                                                       ): List[(String, Any)] = {
-  List(
+                                                       ): Map[String, Any] = {
+  Map(
     "haut" -> Option(params.haut).filter(_.nonEmpty),
     "tulostustapa" -> Option(params.tulostustapa),
     "oppilaitokset" -> Option(params.oppilaitokset).filter(_.nonEmpty),
