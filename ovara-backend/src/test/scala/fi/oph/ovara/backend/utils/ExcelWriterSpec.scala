@@ -79,6 +79,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     "raportti.koulutustoimija"                  -> "Koulutustoimija SV",
     "raportti.oppilaitos"                       -> "Oppilaitos SV",
     "raportti.valintakoe"                       -> "Valintakoe SV",
+    "raportti.tulostustapa"                     -> "Tulostustapa SV",
+    "raportti.hakukohteittain"                  -> "Hakukohteittain SV",
+    "raportti.kk-tutkinnon-taso"                -> "Tutkinnon taso SV",
+    "raportti.ylempi"                           -> "ylempi SV"
   )
 
   def checkAloituspaikatRowValidity(sheet: XSSFSheet, rowNumber: Int, expected: Int): Unit = {
@@ -2458,6 +2462,50 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 5)
     assert(wb.getSheetAt(0).getRow(6) == null)
   }
+
+  it should "create hakuparametrit sheet in Korkeakoulujen koulutukset toteutukset ja hakukohteet" in {
+    val hakuParams: List[(String, String | Boolean | List[String])] =
+      List(
+        "haku" -> List("1.2.246.562.29.00000000000000015722"),
+        "tulostustapa" -> "hakukohteittain",
+        "oppilaitos" -> List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        "toimipiste" -> List("1.2.246.562.10.2781706420001"),
+        "hakukohderyhma" -> List("1.2.246.562.28.28396122930"),
+        "koulutuksenTila" -> "julkaistu",
+        "toteutuksenTila" -> "arkistoitu",
+        "hakukohteenTila" -> "julkaistu",
+        "kk-tutkinnon-taso" -> List("ylempi")
+      )
+    val wb = ExcelWriter.writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
+      korkeakouluKoulutuksetToteutuksetHakukohteetResults = korkeakouluKoulutuksetToteutuksetHakukohteet,
+      asiointikieli = userLng,
+      translations = translations,
+      tulostustapa = "hakukohteittain",
+      parametrit = hakuParams
+    )
+
+    val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
+    val expectedRows = List(
+      List("Haku SV", "1.2.246.562.29.00000000000000015722"),
+      List("Tulostustapa SV", "Hakukohteittain SV"),
+      List("Oppilaitos SV", "1.2.246.562.10.00000000001, 1.2.246.562.10.2781706420000"),
+      List("Toimipiste SV", "1.2.246.562.10.2781706420001"),
+      List("Hakukohderyhma SV", "1.2.246.562.28.28396122930"),
+      List("Kou.tila SV", "Julkaistu SV"),
+      List("Tot.tila SV", "Arkistoitu SV"),
+      List("Hak.tila SV", "Julkaistu SV"),
+      List("Tutkinnon taso SV", "ylempi SV")
+    )
+    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getSheetAt(1).getRow(1) != null)
+    val sheet = wb.getSheetAt(1)
+
+    validateHeaders(sheet = sheet, expectedHeaders = expectedHeaders)
+    expectedRows.zipWithIndex.foreach { case (expectedRow, rowIndex) =>
+      validateRow(sheet, rowIndex + 1, expectedRow)
+    }
+  }
+
 
   "createHeadingRow" should "create heading row with translated column names or translation keys for hakijat raportti" in {
     val wb: XSSFWorkbook                = new XSSFWorkbook()
