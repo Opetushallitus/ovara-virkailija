@@ -441,7 +441,7 @@ object ExcelWriter {
           valueCell.setCellValue(kielistettyValues)
         case v: List[String] =>
           // etsitään käännös ja jos ei löydy (esim oidit) laitetaan alkuperäinen arvo sellaisenaan
-          valueCell.setCellValue(v.map(valueString => translations.getOrElse(s"raportti.$valueString", valueString)).mkString(", "))
+          valueCell.setCellValue(v.map(valueString => translations.getOrElse(s"raportti.${valueString.toLowerCase}", valueString)).mkString(", "))
          case _ =>
            valueCell.setCellValue(value.toString)
       }
@@ -959,7 +959,8 @@ object ExcelWriter {
   def writeToisenAsteenHakijatRaportti(
       hakijat: Seq[ToisenAsteenHakija],
       asiointikieli: String,
-      translations: Map[String, String]
+      translations: Map[String, String],
+      parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new ToisenAsteenHakijatExcel from db results")
@@ -991,6 +992,10 @@ object ExcelWriter {
       translations = translations
     )
 
+    // Erillinen välilehti hakuparametreille
+    val parametritSheet: XSSFSheet = workbook.createSheet()
+    createHakuparametritSheet(translations, asiointikieli, parametrit, workbook, parametritSheet)
+    
     // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
     fieldNamesWithIndex.foreach { case (title, index) =>
       sheet.autoSizeColumn(index)

@@ -1,13 +1,15 @@
 package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.domain.ToisenAsteenHakija
+import fi.oph.ovara.backend.raportointi.dto.{ValidatedHakijatParams, buildHakijatParamsForExcel}
 import fi.oph.ovara.backend.repository.{ReadOnlyDatabase, ToisenAsteenHakijatRepository}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.{Component, Service}
-import scala.util.{Try, Failure, Success}
+
+import scala.util.{Failure, Success, Try}
 
 @Component
 @Service
@@ -75,10 +77,40 @@ class ToisenAsteenHakijatService(
       val sortedList =
         queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi.toLowerCase(), resultRow.hakijanEtunimi.toLowerCase, resultRow.oppijanumero))
 
+      val raporttiParamNames = db.run(
+        toisenAsteenHakijatRepository.hakuParamNamesQuery(
+          haut,
+          oppilaitokset,
+          toimipisteet,
+          hakukohteet,
+          pohjakoulutukset,
+        ),
+        "hakuParamNamesQuery"
+      ).map(param => param.parametri -> param.nimet).toMap
+      
+      val raporttiParams = buildHakijatParamsForExcel(
+        ValidatedHakijatParams(
+          haut,
+          oppilaitokset,
+          toimipisteet,
+          hakukohteet,
+          pohjakoulutukset,
+          valintatiedot,
+          vastaanottotiedot,
+          harkinnanvaraisuudet,
+          kaksoistutkintoKiinnostaa,
+          urheilijatutkintoKiinnostaa,
+          soraTerveys,
+          soraAiempi,
+          markkinointilupa,
+          julkaisulupa,
+        ), 
+        raporttiParamNames)
       ExcelWriter.writeToisenAsteenHakijatRaportti(
         sortedList,
         asiointikieli,
-        translations
+        translations,
+        raporttiParams
       )
     } match {
       case Success(excelFile) => Right(excelFile)

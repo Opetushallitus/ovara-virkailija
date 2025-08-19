@@ -10,7 +10,3 @@ package object domain {
   val TOIMIPISTEORGANISAATIOTYYPPI = "03"
 }
 
-case class ParametriNimet(
-                           parametri: String,
-                           nimet: List[Kielistetty]
-                         )

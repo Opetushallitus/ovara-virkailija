@@ -1,5 +1,8 @@
 package fi.oph.ovara.backend.raportointi.dto
 
+import fi.oph.ovara.backend.domain.Kielistetty
+import fi.oph.ovara.backend.utils.ParameterUtils
+
 case class RawHakijatParams(
                                haut: List[String],
                                oppilaitokset: List[String],
@@ -52,3 +55,33 @@ def buildHakijatAuditParams(valid: ValidatedHakijatParams): Map[String, Any] = {
     "julkaisulupa"         -> valid.julkaisulupa
   ).collect { case (key, Some(value)) => key -> value }
 }
+
+def buildHakijatParamsForExcel(params: ValidatedHakijatParams, paramNames: Map[String, List[Kielistetty]]):
+List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])] = {
+  val stringAndKielistettyParams = List(
+    "haku" -> paramNames.getOrElse("haku", List.empty),
+    "oppilaitos" -> paramNames.getOrElse("oppilaitos", List.empty),
+    "toimipiste" -> paramNames.getOrElse("toimipiste", List.empty),
+    "hakukohde" -> paramNames.getOrElse("hakukohde", List.empty),
+    "pohjakoulutus" -> paramNames.getOrElse("pohjakoulutus", List.empty),
+    "valintatieto" -> params.valintatiedot,
+    "vastaanottotieto" -> params.vastaanottotiedot,
+    "harkinnanvaraisuus" -> params.harkinnanvaraisuudet.map(_.stripPrefix("ATARU_").toLowerCase),
+  ).filterNot { case (_, value) =>
+    value match {
+      case list: List[_] => list.isEmpty
+    }
+  }
+
+  val booleanParams = ParameterUtils.collectBooleanParams(List(
+    "kaksoistutkintoKiinnostaa" -> params.kaksoistutkinto,
+    "urheilijatutkintoKiinnostaa" -> params.urheilijatutkinto,
+    "soraTerveys" -> params.soraTerveys,
+    "soraAiempi" -> params.soraAiempi,
+    "markkinointilupa" -> params.markkinointilupa,
+    "julkaisulupa" -> params.julkaisulupa)
+  )
+  stringAndKielistettyParams ++ booleanParams
+}
+
+

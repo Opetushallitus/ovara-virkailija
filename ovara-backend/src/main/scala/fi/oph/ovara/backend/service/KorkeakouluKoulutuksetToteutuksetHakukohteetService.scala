@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.raportointi.dto.{ValidatedKkKoulutuksetToteutuksetHakukohteetParams, buildParamsForExcel}
+import fi.oph.ovara.backend.raportointi.dto.{ValidatedKkKoulutuksetToteutuksetHakukohteetParams, buildHakijatParamsForExcel, buildKkKoulutuksetToteutuksetHakukohteetParamsForExcel}
 import fi.oph.ovara.backend.repository.{KorkeakouluKoulutuksetToteutuksetHakukohteetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -75,7 +75,7 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetService(
         ),
         "hakuParamNamesQuery"
       ).map(param => param.parametri -> param.nimet).toMap
-      val raporttiParams = buildParamsForExcel(
+      val raporttiParams = buildKkKoulutuksetToteutuksetHakukohteetParamsForExcel(
         ValidatedKkKoulutuksetToteutuksetHakukohteetParams(
           haut,
           tulostustapa,

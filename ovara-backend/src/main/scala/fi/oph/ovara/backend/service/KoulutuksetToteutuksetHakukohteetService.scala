@@ -1,7 +1,7 @@
 package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.domain.Kielistetty
-import fi.oph.ovara.backend.raportointi.dto.{KoulutuksetToteutuksetHakukohteetReadableParams, KoulutuksetToteutuksetHakukohteetUtils, ValidatedKoulutuksetToteutuksetHakukohteetParams}
+import fi.oph.ovara.backend.raportointi.dto.{KoulutuksetToteutuksetHakukohteetReadableParams, ValidatedKoulutuksetToteutuksetHakukohteetParams, buildKoulutuksetToteutuksetHakukohteetParamsForExcel}
 import fi.oph.ovara.backend.repository.{KoulutuksetToteutuksetHakukohteetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter, OrganisaatioUtils}
 import org.slf4j.{Logger, LoggerFactory}
@@ -78,7 +78,7 @@ class KoulutuksetToteutuksetHakukohteetService(
         ),
         "hakuParamNamesQuery"
       ).map(param => param.parametri -> param.nimet).toMap
-      val raporttiParams = KoulutuksetToteutuksetHakukohteetUtils.buildParamsForExcel(
+      val raporttiParams = buildKoulutuksetToteutuksetHakukohteetParamsForExcel(
         ValidatedKoulutuksetToteutuksetHakukohteetParams(
           haut,
           koulutustoimija,

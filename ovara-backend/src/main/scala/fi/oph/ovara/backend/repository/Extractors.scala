@@ -1,7 +1,7 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.ParametriNimet
 import fi.oph.ovara.backend.domain.*
+import fi.oph.ovara.backend.utils.{ParametriNimet}
 import fi.oph.ovara.backend.utils.ExtractorUtils.{extractArray, extractCommaSeparatedString, extractDateOption, extractHakuaika, extractKielistetty, extractKielistettyList, extractKoulutuksenAlkamisaika, extractMap, extractOpintojenlaajuus, extractValintatapajonot}
 import fi.oph.ovara.backend.utils.GenericOvaraJsonFormats
 import org.json4s.jackson.Serialization.read

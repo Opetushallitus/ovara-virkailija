@@ -42,7 +42,7 @@ def buildKkKoulutuksetToteutuksetHakukohteetAuditParams(
   ).collect { case (key, Some(value)) => key -> value }
 }
 
-def buildParamsForExcel(params: ValidatedKkKoulutuksetToteutuksetHakukohteetParams, paramNames: Map[String, List[Kielistetty]]):
+def buildKkKoulutuksetToteutuksetHakukohteetParamsForExcel(params: ValidatedKkKoulutuksetToteutuksetHakukohteetParams, paramNames: Map[String, List[Kielistetty]]):
 List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])] = {
   List(
     "haku" -> paramNames.getOrElse("haku", List.empty),

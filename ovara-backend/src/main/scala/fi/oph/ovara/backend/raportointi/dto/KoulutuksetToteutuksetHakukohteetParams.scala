@@ -1,6 +1,7 @@
 package fi.oph.ovara.backend.raportointi.dto
 
 import fi.oph.ovara.backend.domain.Kielistetty
+import fi.oph.ovara.backend.utils.ParameterUtils
 
 case class RawKoulutuksetToteutuksetHakukohteetParams(
                                                        haut: List[String],
@@ -48,25 +49,23 @@ def buildKoulutuksetToteutuksetHakukohteetAuditParams(valid: ValidatedKoulutukse
   ).collect { case (key, Some(value)) => key -> value }
 }
 
-object KoulutuksetToteutuksetHakukohteetUtils {
-  def buildParamsForExcel(params: ValidatedKoulutuksetToteutuksetHakukohteetParams, paramNames: Map[String, List[Kielistetty]]):
-  List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])] = {
-    List(
-      "haku" -> paramNames.getOrElse("haku", List.empty),
-      "koulutustoimija" -> paramNames.getOrElse("koulutustoimija", List.empty),
-      "oppilaitos" -> paramNames.getOrElse("oppilaitos", List.empty),
-      "toimipiste" -> paramNames.getOrElse("toimipiste", List.empty),
-      "koulutuksenTila" -> params.koulutuksenTila.getOrElse(""),
-      "toteutuksenTila" -> params.toteutuksenTila.getOrElse(""),
-      "hakukohteenTila" -> params.hakukohteenTila.getOrElse(""),
-      "valintakoe" -> params.valintakoe.getOrElse(false)
-    ).filterNot { case (_, value) =>
-      value match {
-        case list: List[_] => list.isEmpty
-        case str: String => str.isEmpty
-        case _ => false
-      }
-    }  
+def buildKoulutuksetToteutuksetHakukohteetParamsForExcel(params: ValidatedKoulutuksetToteutuksetHakukohteetParams, paramNames: Map[String, List[Kielistetty]]):
+List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])] = {
+  val stringAndKielistettyParams = List(
+    "haku" -> paramNames.getOrElse("haku", List.empty),
+    "koulutustoimija" -> paramNames.getOrElse("koulutustoimija", List.empty),
+    "oppilaitos" -> paramNames.getOrElse("oppilaitos", List.empty),
+    "toimipiste" -> paramNames.getOrElse("toimipiste", List.empty),
+    "koulutuksenTila" -> params.koulutuksenTila.getOrElse(""),
+    "toteutuksenTila" -> params.toteutuksenTila.getOrElse(""),
+    "hakukohteenTila" -> params.hakukohteenTila.getOrElse(""),
+  ).filterNot { case (_, value) =>
+    value match {
+      case list: List[_] => list.isEmpty
+      case str: String => str.isEmpty
+    }
   }
+  val valintakoeParam = ParameterUtils.collectBooleanParams(List(("valintakoe", params.valintakoe)))
+  stringAndKielistettyParams ++ valintakoeParam
 }
 

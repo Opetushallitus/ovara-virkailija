@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.ParametriNimet
+import fi.oph.ovara.backend.utils.{ParametriNimet}
 import fi.oph.ovara.backend.domain.KorkeakouluKoulutusToteutusHakukohdeResult
 import fi.oph.ovara.backend.utils.RepositoryUtils
 import fi.oph.ovara.backend.utils.RepositoryUtils.{buildTutkinnonTasoFilters, makeEqualsQueryStrOfOptional, makeOptionalHakukohderyhmatSubSelectQueryStr}
