@@ -1,12 +1,14 @@
 package fi.oph.ovara.backend.service
 
+import fi.oph.ovara.backend.raportointi.dto.{ValidatedKkKoulutuksetToteutuksetHakukohteetParams, buildParamsForExcel}
 import fi.oph.ovara.backend.repository.{KorkeakouluKoulutuksetToteutuksetHakukohteetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.{Component, Service}
 import org.slf4j.{Logger, LoggerFactory}
-import scala.util.{Try, Failure, Success}
+
+import scala.util.{Failure, Success, Try}
 
 @Component
 @Service
@@ -64,12 +66,34 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetService(
         ),
         "selectWithParams"
       )
-
+      val raporttiParamNames = db.run(
+        korkeakouluKoulutuksetToteutuksetHakukohteetRepository.hakuParamNamesQuery(
+          haut,
+          oppilaitokset,
+          toimipisteet,
+          hakukohderyhmat
+        ),
+        "hakuParamNamesQuery"
+      ).map(param => param.parametri -> param.nimet).toMap
+      val raporttiParams = buildParamsForExcel(
+        ValidatedKkKoulutuksetToteutuksetHakukohteetParams(
+          haut,
+          tulostustapa,
+          oppilaitokset,
+          toimipisteet,
+          hakukohderyhmat,
+          koulutuksenTila,
+          toteutuksenTila,
+          hakukohteenTila,
+          tutkinnonTasot),
+        raporttiParamNames
+      )
       ExcelWriter.writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
         queryResult,
         asiointikieli,
         translations,
-        tulostustapa
+        tulostustapa,
+        raporttiParams
       )
     } match {
       case Success(excelFile) => Right(excelFile)

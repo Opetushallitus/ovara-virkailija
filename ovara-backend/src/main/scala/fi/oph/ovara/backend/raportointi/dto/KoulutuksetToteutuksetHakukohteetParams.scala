@@ -35,11 +35,6 @@ case class KoulutuksetToteutuksetHakukohteetReadableParams(
                                                   valintakoe: Option[Boolean]
                                                 )
 
-case class ParametriNimet(
-                           parametri: String,
-                           nimet: List[Kielistetty]
-                         )
-
 def buildKoulutuksetToteutuksetHakukohteetAuditParams(valid: ValidatedKoulutuksetToteutuksetHakukohteetParams): Map[String, Any] = {
   Map(
     "haut" -> Option(valid.haut).filter(_.nonEmpty),
@@ -54,7 +49,7 @@ def buildKoulutuksetToteutuksetHakukohteetAuditParams(valid: ValidatedKoulutukse
 }
 
 object KoulutuksetToteutuksetHakukohteetUtils {
-  def buildParams(params: ValidatedKoulutuksetToteutuksetHakukohteetParams, paramNames: Map[String, List[Kielistetty]]):
+  def buildParamsForExcel(params: ValidatedKoulutuksetToteutuksetHakukohteetParams, paramNames: Map[String, List[Kielistetty]]):
   List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])] = {
     List(
       "haku" -> paramNames.getOrElse("haku", List.empty),

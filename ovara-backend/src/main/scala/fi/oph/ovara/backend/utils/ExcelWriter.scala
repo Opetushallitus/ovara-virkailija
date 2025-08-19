@@ -385,7 +385,7 @@ object ExcelWriter {
         translations = translations
       )
 
-      // Create a new sheet for parametrit
+      // Erillinen välilehti hakuparametreille
       val parametritSheet: XSSFSheet = workbook.createSheet()
       createHakuparametritSheet(translations, asiointikieli, parametrit, workbook, parametritSheet)
 
@@ -439,7 +439,9 @@ object ExcelWriter {
         case v: List[_] if v.forall(_.isInstanceOf[Kielistetty]) =>
           val kielistettyValues = v.asInstanceOf[List[Kielistetty]].map(k => getKielistettyCellValue(asiointikieli, k)).mkString(", ")
           valueCell.setCellValue(kielistettyValues)
-        case v: List[String] => valueCell.setCellValue(v.mkString(", "))
+        case v: List[String] =>
+          // etsitään käännös ja jos ei löydy (esim oidit) laitetaan alkuperäinen arvo sellaisenaan
+          valueCell.setCellValue(v.map(valueString => translations.getOrElse(s"raportti.$valueString", valueString)).mkString(", "))
          case _ =>
            valueCell.setCellValue(value.toString)
       }
@@ -595,7 +597,8 @@ object ExcelWriter {
       korkeakouluKoulutuksetToteutuksetHakukohteetResults: Seq[KorkeakouluKoulutusToteutusHakukohdeResult],
       asiointikieli: String,
       translations: Map[String, String],
-      tulostustapa: String
+      tulostustapa: String,
+      parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
@@ -743,6 +746,11 @@ object ExcelWriter {
 
         titles.zipWithIndex
       }
+
+      // Erillinen välilehti hakuparametreille
+      val parametritSheet: XSSFSheet = workbook.createSheet()
+      createHakuparametritSheet(translations, asiointikieli, parametrit, workbook, parametritSheet)
+
       // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
       raporttiColumnTitlesWithIndex.foreach { case (title, index) =>
         sheet.autoSizeColumn(index)

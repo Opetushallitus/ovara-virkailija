@@ -65,6 +65,12 @@ object RepositoryUtils {
     }
   }
 
+  def makeHakuParamOptionalQueryStr(paramName: String, idColumn: String, nameColumn: String, tableName: String, selectedParams: List[String]): String = {
+    if (selectedParams.nonEmpty)
+      s"""UNION ALL SELECT '$paramName' AS param, $nameColumn AS nimi FROM $tableName WHERE $idColumn IN (${RepositoryUtils.makeListOfValuesQueryStr(selectedParams)})"""
+    else
+      ""
+  }
   def makeAlkamiskaudetQueryStr(tableNames: List[String], alkamiskaudet: List[(Int, String)]): String = {
     def hasMoreThanOne(alkamiskaudet: List[(Int, String)]) = {
       alkamiskaudet.size > 1
@@ -174,7 +180,7 @@ object RepositoryUtils {
       case (false, false) => s"AND ($hakukohderyhmaQueryStr OR $hakukohdeQueryStr)"
     }
   }
-  
+
   def makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(
                                                kayttooikeusOrgOids: List[String],
                                                kayttooikeusHakukohderyhmaOids: List[String],
@@ -196,7 +202,7 @@ object RepositoryUtils {
       case (hakukohderyhmaEhto, organisaatioEhto) => s"$operator ($hakukohderyhmaEhto OR $organisaatioEhto)"
     }
   }
-  
+
   def buildHakukohdeFilterQuery(
       selectedHakukohteet: List[String],
       selectedHaut: List[String],

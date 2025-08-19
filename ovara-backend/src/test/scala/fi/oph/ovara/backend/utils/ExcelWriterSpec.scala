@@ -1,7 +1,6 @@
 package fi.oph.ovara.backend.utils
 
 import fi.oph.ovara.backend.domain.{Koodi, *}
-import fi.oph.ovara.backend.raportointi.dto.ValidatedKoulutuksetToteutuksetHakukohteetParams
 import fi.oph.ovara.backend.utils.Constants.*
 import org.apache.poi.ss.usermodel.HorizontalAlignment
 import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFSheet, XSSFWorkbook}
@@ -1886,12 +1885,20 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
   )
 
+  val kkKoulutuksetToteutuksetHakukohteetParams: List[(String, String | Boolean | List[String])] =
+    List(
+      "haku" -> List("1.2.246.562.29.00000000000000015722"),
+      "oppilaitos" -> List.empty,
+      "toimipiste" -> List("1.2.246.562.10.00000000001"),
+    )
+
   "writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti" should "create Korkeakoulujen koulutukset toteutukset ja hakukohteet -raportti koulutuksittain with four result rows" in {
     val wb = ExcelWriter.writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
       korkeakouluKoulutuksetToteutuksetHakukohteetResults = korkeakouluKoulutuksetToteutuksetHakukohteet,
       asiointikieli = userLng,
       translations = translations,
-      tulostustapa = "koulutuksittain"
+      tulostustapa = "koulutuksittain",
+      parametrit = kkKoulutuksetToteutuksetHakukohteetParams
     )
 
     val sheet = wb.getSheetAt(0)
@@ -2094,7 +2101,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
       korkeakouluKoulutuksetToteutuksetHakukohteetResults = korkeakouluKoulutuksetToteutuksetHakukohteet,
       asiointikieli = userLng,
       translations = translations,
-      tulostustapa = "toteutuksittain"
+      tulostustapa = "toteutuksittain",
+      parametrit = kkKoulutuksetToteutuksetHakukohteetParams
     )
 
     val sheet = wb.getSheetAt(0)
@@ -2252,7 +2260,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
       korkeakouluKoulutuksetToteutuksetHakukohteetResults = korkeakouluKoulutuksetToteutuksetHakukohteet,
       asiointikieli = userLng,
       translations = translations,
-      tulostustapa = "hakukohteittain"
+      tulostustapa = "hakukohteittain",
+      parametrit = kkKoulutuksetToteutuksetHakukohteetParams
     )
 
     val sheet = wb.getSheetAt(0)

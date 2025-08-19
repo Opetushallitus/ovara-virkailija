@@ -1,5 +1,7 @@
 package fi.oph.ovara.backend.raportointi.dto
 
+import fi.oph.ovara.backend.domain.Kielistetty
+
 case class RawKkKoulutuksetToteutuksetHakukohteetParams(
                                                          haut: List[String],
                                                          tulostustapa: String,
@@ -36,6 +38,27 @@ def buildKkKoulutuksetToteutuksetHakukohteetAuditParams(
     "koulutuksenTila" -> params.koulutuksenTila,
     "toteutuksenTila" -> params.toteutuksenTila,
     "hakukohteenTila" -> params.hakukohteenTila,
-    "tutkinnonTasot" -> Option(params.tutkinnonTasot).filter(_.nonEmpty)
+    "tutkinnonTaso" -> Option(params.tutkinnonTasot).filter(_.nonEmpty)
   ).collect { case (key, Some(value)) => key -> value }
+}
+
+def buildParamsForExcel(params: ValidatedKkKoulutuksetToteutuksetHakukohteetParams, paramNames: Map[String, List[Kielistetty]]):
+List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])] = {
+  List(
+    "haku" -> paramNames.getOrElse("haku", List.empty),
+    "tulostustapa" -> params.tulostustapa,
+    "oppilaitos" -> paramNames.getOrElse("oppilaitos", List.empty),
+    "toimipiste" -> paramNames.getOrElse("toimipiste", List.empty),
+    "hakukohderyhma" -> paramNames.getOrElse("hakukohderyhma", List.empty),
+    "koulutuksenTila" -> params.koulutuksenTila.getOrElse(""),
+    "toteutuksenTila" -> params.toteutuksenTila.getOrElse(""),
+    "hakukohteenTila" -> params.hakukohteenTila.getOrElse(""),
+    "kk-tutkinnon-taso" -> params.tutkinnonTasot
+  ).filterNot { case (_, value) =>
+    value match {
+      case list: List[_] => list.isEmpty
+      case str: String => str.isEmpty
+      case _ => false
+    }
+  }
 }

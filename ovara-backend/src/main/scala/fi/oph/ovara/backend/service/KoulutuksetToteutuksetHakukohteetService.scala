@@ -78,7 +78,7 @@ class KoulutuksetToteutuksetHakukohteetService(
         ),
         "hakuParamNamesQuery"
       ).map(param => param.parametri -> param.nimet).toMap
-      val raporttiParams = KoulutuksetToteutuksetHakukohteetUtils.buildParams(
+      val raporttiParams = KoulutuksetToteutuksetHakukohteetUtils.buildParamsForExcel(
         ValidatedKoulutuksetToteutuksetHakukohteetParams(
           haut,
           koulutustoimija,

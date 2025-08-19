@@ -1,7 +1,7 @@
 package fi.oph.ovara.backend.repository
 
+import fi.oph.ovara.backend.ParametriNimet
 import fi.oph.ovara.backend.domain.OrganisaationKoulutusToteutusHakukohde
-import fi.oph.ovara.backend.raportointi.dto.{ParametriNimet}
 import fi.oph.ovara.backend.utils.RepositoryUtils
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.{Component, Repository}
@@ -55,24 +55,17 @@ class KoulutuksetToteutuksetHakukohteetRepository extends Extractors {
 
     query
   }
-  
-  def hakuParamNamesQuery(haut: List[String], koulutustoimija: Option[String], oppilaitokset: List[String], toimipisteet: List[String]): 
+
+  def hakuParamNamesQuery(haut: List[String], koulutustoimija: Option[String], oppilaitokset: List[String], toimipisteet: List[String]):
   SqlStreamingAction[Vector[ParametriNimet], ParametriNimet, Effect] = {
-    val koulutustoimijaQuery = 
-      if(koulutustoimija.isDefined) 
+    val koulutustoimijaQuery =
+      if(koulutustoimija.isDefined)
        s"""UNION ALL SELECT 'koulutustoimija' AS param, organisaatio_nimi AS nimi FROM pub.pub_dim_organisaatio WHERE organisaatio_oid = '${koulutustoimija.get}'"""
       else
         ""
-    val oppilaitosQuery =
-      if (oppilaitokset.nonEmpty)
-        s"""UNION ALL SELECT 'oppilaitos' AS param, organisaatio_nimi AS nimi FROM pub.pub_dim_organisaatio WHERE organisaatio_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(oppilaitokset)})"""
-      else
-        ""
-    val toimipisteQuery =
-      if (toimipisteet.nonEmpty)
-        s"""UNION ALL SELECT 'toimipiste' AS param, organisaatio_nimi AS nimi FROM pub.pub_dim_organisaatio WHERE organisaatio_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(toimipisteet)})"""
-      else
-        ""
+    val oppilaitosQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("oppilaitos", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", oppilaitokset)
+    val toimipisteQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("toimipiste", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", toimipisteet)
+
     val query = sql"""
       SELECT param, jsonb_agg(nimi) AS nimet
       FROM (
