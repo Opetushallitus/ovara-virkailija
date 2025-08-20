@@ -402,9 +402,9 @@ object ExcelWriter {
     workbook
   }
 
-  private def createHakuparametritSheet(translations: Map[String, String], asiointikieli: String, parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])], workbook: XSSFWorkbook, parametritSheet: XSSFSheet): Unit = {
+  private def createHakuparametritSheet(translations: Map[String, String], asiointikieli: String, parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])], workbook: XSSFWorkbook, parametritSheet: XSSFSheet, sheetIndex: Int = 1): Unit = {
     workbook.setSheetName(
-      1,
+      sheetIndex,
       WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.hakuparametrit", "raportti.hakuparametrit"))
     )
     val paramHeadingCellStyle: XSSFCellStyle = workbook.createCellStyle()
@@ -426,24 +426,33 @@ object ExcelWriter {
       val keyCell = row.createCell(0)
       val valueCell = row.createCell(1)
       keyCell.setCellValue(translations.getOrElse(s"raportti.$key", key))
-      value match {
-        case v: String =>
-          valueCell.setCellValue(translations.getOrElse(s"raportti.$v", v))
-        case v: Boolean =>
-          val translatedValue = if (v) {
-            translations.getOrElse("raportti.kylla", v.toString)
-          } else {
-            translations.getOrElse("raportti.ei", v.toString)
-          }
-          valueCell.setCellValue(translatedValue)
-        case v: List[_] if v.forall(_.isInstanceOf[Kielistetty]) =>
-          val kielistettyValues = v.asInstanceOf[List[Kielistetty]].map(k => getKielistettyCellValue(asiointikieli, k)).mkString(", ")
-          valueCell.setCellValue(kielistettyValues)
-        case v: List[String] =>
-          // etsitään käännös ja jos ei löydy (esim oidit) laitetaan alkuperäinen arvo sellaisenaan
-          valueCell.setCellValue(v.map(valueString => translations.getOrElse(s"raportti.${valueString.toLowerCase}", valueString)).mkString(", "))
-         case _ =>
-           valueCell.setCellValue(value.toString)
+      if (key == "kansalaisuus") {
+        value match {
+          case v: List[String] =>
+            valueCell.setCellValue(v.map(valueString => ParameterUtils.getKansalaisuusluokkaTranslation(valueString, translations)).mkString(", "))
+          case _ =>
+            valueCell.setCellValue(value.toString)
+        }
+      } else {
+        value match {
+          case v: String =>
+            valueCell.setCellValue(translations.getOrElse(s"raportti.$v", v))
+          case v: Boolean =>
+            val translatedValue = if (v) {
+              translations.getOrElse("raportti.kylla", v.toString)
+            } else {
+              translations.getOrElse("raportti.ei", v.toString)
+            }
+            valueCell.setCellValue(translatedValue)
+          case v: List[_] if v.forall(_.isInstanceOf[Kielistetty]) =>
+            val kielistettyValues = v.asInstanceOf[List[Kielistetty]].map(k => getKielistettyCellValue(asiointikieli, k)).mkString(", ")
+            valueCell.setCellValue(kielistettyValues)
+          case v: List[String] =>
+            // etsitään käännös ja jos ei löydy (esim oidit) laitetaan alkuperäinen arvo sellaisenaan
+            valueCell.setCellValue(v.map(valueString => translations.getOrElse(s"raportti.${valueString.toLowerCase}", valueString)).mkString(", "))
+          case _ =>
+            valueCell.setCellValue(value.toString)
+        }
       }
       paramRowIndex += 1
     }
@@ -451,8 +460,6 @@ object ExcelWriter {
     parametritSheet.autoSizeColumn(0)
     parametritSheet.autoSizeColumn(1)
   }
-
-
 
   private def writeKorkeakouluKoulutuksetToteutuksetHakukohteetKoulutuksittainRows(
       sheet: XSSFSheet,
@@ -995,7 +1002,7 @@ object ExcelWriter {
     // Erillinen välilehti hakuparametreille
     val parametritSheet: XSSFSheet = workbook.createSheet()
     createHakuparametritSheet(translations, asiointikieli, parametrit, workbook, parametritSheet)
-    
+
     // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
     fieldNamesWithIndex.foreach { case (title, index) =>
       sheet.autoSizeColumn(index)
@@ -1262,7 +1269,8 @@ object ExcelWriter {
       maybeNaytaYoArvosanat: Option[Boolean] = None,
       maybeNaytaHetu: Option[Boolean] = None,
       maybeNaytaPostiosoite: Option[Boolean] = None,
-      yokokeet: Vector[Koodi]
+      yokokeet: Vector[Koodi],
+      parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new KkHakijatExcel from db results")
@@ -1366,6 +1374,11 @@ object ExcelWriter {
         yoKokeetSheet.autoSizeColumn(index)
       }
     }
+
+    // Erillinen välilehti hakuparametreille
+    val parametriSheetIndex = if (naytaArvosanat) 2 else 1
+    val parametritSheet: XSSFSheet = workbook.createSheet()
+    createHakuparametritSheet(translations, asiointikieli, parametrit, workbook, parametritSheet, parametriSheetIndex)
 
     try {
       workbook

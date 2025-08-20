@@ -106,6 +106,7 @@ class ToisenAsteenHakijatService(
           julkaisulupa,
         ), 
         raporttiParamNames)
+      
       ExcelWriter.writeToisenAsteenHakijatRaportti(
         sortedList,
         asiointikieli,

@@ -2638,7 +2638,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   val hakijatParams: List[(String, String | Boolean | List[String])] =
     List(
       "haku" -> List("1.2.246.562.29.00000000000000015722"),
-      "oppilaitos" -> List.empty,
+      "oppilaitos" -> List("1.2.246.562.10.00000000001"),
       "valintatieto" -> List("HYVAKSYTTY"),
     )
 
@@ -3373,7 +3373,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(true),
         maybeNaytaPostiosoite = Some(true),
-        yokokeet = yokokeet
+        yokokeet = yokokeet,
+        parametrit = hakijatParams
       )
 
     val expectedHeaders = List(
@@ -3408,7 +3409,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
     )
 
-    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getNumberOfSheets == 3)
     assert(wb.getSheetAt(0).getRow(1) != null)
     val sheet = wb.getSheetAt(0)
 
@@ -3444,10 +3445,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(false),
         maybeNaytaPostiosoite = Some(false),
-        yokokeet = yokokeet
+        yokokeet = yokokeet,
+        parametrit = hakijatParams
       )
 
-    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getNumberOfSheets == 3)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     val expectedHeaders = List(
@@ -3522,10 +3524,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(true),
         maybeNaytaPostiosoite = Some(false),
-        yokokeet = yokokeet
+        yokokeet = yokokeet,
+        parametrit = hakijatParams
       )
 
-    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getNumberOfSheets == 3)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
@@ -3580,7 +3583,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(false),
         maybeNaytaPostiosoite = Some(true),
-        yokokeet = yokokeet
+        yokokeet = yokokeet,
+        parametrit = hakijatParams
       )
 
     val expectedHeaders = List(
@@ -3639,7 +3643,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
     )
 
-    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getNumberOfSheets == 3)
     assert(wb.getSheetAt(0).getRow(1) != null)
     val sheet = wb.getSheetAt(0)
 
@@ -3666,7 +3670,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(false),
         maybeNaytaPostiosoite = Some(false),
-        yokokeet = yokokeet
+        yokokeet = yokokeet,
+        parametrit = hakijatParams
       )
 
     val expectedHeaders = List(
@@ -3724,7 +3729,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
     )
 
-    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getNumberOfSheets == 3)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     val sheet = wb.getSheetAt(0)
@@ -3746,10 +3751,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(false),
         maybeNaytaPostiosoite = Some(false),
-        yokokeet = yokokeet
+        yokokeet = yokokeet,
+        parametrit = hakijatParams
       )
 
-    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getNumberOfSheets == 3)
     assert(wb.getSheetAt(1).getRow(1) != null)
 
     assert(wb.getSheetAt(1).getRow(0).getCell(0).getStringCellValue == "raportti.yokoelyhenne")
@@ -3770,8 +3776,57 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(1).getRow(6) == null)
   }
 
+  it should "create hakuparametrit sheet after yokokeet sheet" in {
+    val hakuParams: List[(String, String | Boolean | List[String])] =
+      List(
+        "haku" -> List("1.2.246.562.29.00000000000000015722"),
+        "oppilaitos" -> List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        "toimipiste" -> List("1.2.246.562.10.2781706420001"),
+        "hakukohde" -> List("1.2.246.562.20.00000000000000059957"),
+        "hakukohderyhma" -> List("1.2.246.562.28.28396122930"),
+        "valintatieto" -> List("HYVAKSYTTY"),
+        "vastaanottotieto" -> List("PERUUTETTU"),
+        "kansalaisuus" -> List("1"),
+        "markkinointilupa" -> true,
+        "nayta-yo-arvosanat" -> true,
+        "nayta-hetu" -> false,
+        "nayta-postiosoite" -> false,
+      )
+    val hakijatQueryResult = Vector()
+    val wb =
+      ExcelWriter.writeToisenAsteenHakijatRaportti(
+        hakijatQueryResult,
+        userLng,
+        translations,
+        hakuParams,
+      )
 
-  it should "return excel without arvosanat and yokokeet sheet when nayta arvosanat is false" in {
+    val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
+    val expectedRows = List(
+      List("Haku SV", "1.2.246.562.29.00000000000000015722"),
+      List("Oppilaitos SV", "1.2.246.562.10.00000000001, 1.2.246.562.10.2781706420000"),
+      List("Toimipiste SV", "1.2.246.562.10.2781706420001"),
+      List("Hakukohde SV", "1.2.246.562.20.00000000000000059957"),
+      List("Hakukohderyhma SV", "1.2.246.562.28.28396122930"),
+      List("Valintatieto SV", "Hyvaksytty SV"),
+      List("Vastaanottotieto SV", "Peruutettu SV"),
+      List("Kansalaisuus SV", "raportti.kansalaisuus.suomi"),
+      List("LupaMark SV", "Ja"),
+      List("nayta-yo-arvosanat", "Ja"),
+      List("nayta-hetu", "Nej"),
+      List("nayta-postiosoite", "Nej")
+    )
+    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getSheetAt(1).getRow(1) != null)
+    val sheet = wb.getSheetAt(1)
+
+    validateHeaders(sheet = sheet, expectedHeaders = expectedHeaders)
+    expectedRows.zipWithIndex.foreach { case (expectedRow, rowIndex) =>
+      validateRow(sheet, rowIndex + 1, expectedRow)
+    }
+  }
+
+  it should "return excel without arvosanat and yokokeet sheet and with parametrit sheet when nayta arvosanat is false" in {
     val kkHakijatResult = Vector(
       kkHakijatRautiainenWithValintatapajonot,
       kkHakijaLehtoWithValintatapajonot
@@ -3785,10 +3840,25 @@ class ExcelWriterSpec extends AnyFlatSpec {
         maybeNaytaYoArvosanat = Some(false),
         maybeNaytaHetu = Some(true),
         maybeNaytaPostiosoite = Some(true),
-        yokokeet = Vector()
+        yokokeet = Vector(),
+        parametrit = hakijatParams
       )
 
-    assert(wb.getNumberOfSheets == 1)
+    val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
+    val expectedRows = List(
+      List("Haku SV", "1.2.246.562.29.00000000000000015722"),
+      List("Oppilaitos SV", "1.2.246.562.10.00000000001"),
+      List("Valintatieto SV", "Hyvaksytty SV"),
+    )
+    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getSheetAt(1).getRow(1) != null)
+    val sheet = wb.getSheetAt(1)
+
+    validateHeaders(sheet = sheet, expectedHeaders = expectedHeaders)
+    expectedRows.zipWithIndex.foreach { case (expectedRow, rowIndex) =>
+      validateRow(sheet, rowIndex + 1, expectedRow)
+    }
+
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
@@ -3957,10 +4027,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
         maybeNaytaYoArvosanat = None,
         maybeNaytaHetu = Some(false),
         maybeNaytaPostiosoite = Some(false),
-        yokokeet = Vector()
+        yokokeet = Vector(),
+        parametrit = hakijatParams
       )
 
-    assert(wb.getNumberOfSheets == 1)
+    assert(wb.getNumberOfSheets == 2)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
@@ -4078,7 +4149,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(true),
         maybeNaytaPostiosoite = Some(false),
-        yokokeet = yokokeet
+        yokokeet = yokokeet,
+        parametrit = hakijatParams
       )
 
     val expectedHeaders = List(
@@ -4106,7 +4178,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       ),
     )
 
-    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getNumberOfSheets == 3)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     val sheet = wb.getSheetAt(0)

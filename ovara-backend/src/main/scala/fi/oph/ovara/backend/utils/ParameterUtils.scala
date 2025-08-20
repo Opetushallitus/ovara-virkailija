@@ -14,4 +14,15 @@ object ParameterUtils {
       case (key, Some(value)) => key -> value
     }
   }
+  
+  def getKansalaisuusluokkaTranslation(value: String, translations: Map[String, String]): String = {
+    value match {
+      case "1" =>
+        translations.getOrElse("raportti.kansalaisuus.suomi", "raportti.kansalaisuus.suomi")
+      case "2" =>
+        translations.getOrElse("raportti.kansalaisuus.eu-eta", "raportti.kansalaisuus.eu-eta")
+      case _ =>
+        translations.getOrElse("raportti.kansalaisuus.muu", "raportti.kansalaisuus.muu")
+    }
+  }
 }

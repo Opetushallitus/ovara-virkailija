@@ -113,8 +113,9 @@ class ToisenAsteenHakijatRepository extends Extractors {
   SqlStreamingAction[Vector[ParametriNimet], ParametriNimet, Effect] = {
     val oppilaitosQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("oppilaitos", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", oppilaitokset)
     val toimipisteQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("toimipiste", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", toimipisteet)
+    val hakukohdeQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("hakukohde", "hakukohde_oid", "hakukohde_nimi", "pub.pub_dim_hakukohde", hakukohteet)
     val pohjakoulutusQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("pohjakoulutus", "koodiarvo", "koodinimi", "pub.pub_dim_koodisto_pohjakoulutustoinenaste", pohjakoulutukset)
-    LOG.info(s"pohjakoulutusQuery: $pohjakoulutusQuery")
+
     val query = sql"""
         SELECT param, jsonb_agg(nimi) AS nimet
         FROM (
@@ -122,6 +123,7 @@ class ToisenAsteenHakijatRepository extends Extractors {
           WHERE haku_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(haut)})
           #$oppilaitosQuery
           #$toimipisteQuery
+          #$hakukohdeQuery
           #$pohjakoulutusQuery
         ) subquery
         GROUP BY param
