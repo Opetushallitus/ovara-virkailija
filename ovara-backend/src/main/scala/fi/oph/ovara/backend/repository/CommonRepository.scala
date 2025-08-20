@@ -92,7 +92,7 @@ class CommonRepository extends Extractors {
 
   def selectToisenAsteenPohjakoulutukset = {
     sql"""SELECT pk.koodiarvo, pk.koodinimi
-          FROM pub.pub_dim_koodisto_2asteenpohjakoulutus2021 pk
+          FROM pub.pub_dim_koodisto_pohjakoulutustoinenaste pk
           """.as[Koodi]
   }
 

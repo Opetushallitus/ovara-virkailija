@@ -113,7 +113,7 @@ class ToisenAsteenHakijatRepository extends Extractors {
   SqlStreamingAction[Vector[ParametriNimet], ParametriNimet, Effect] = {
     val oppilaitosQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("oppilaitos", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", oppilaitokset)
     val toimipisteQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("toimipiste", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", toimipisteet)
-    val pohjakoulutusQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("pohjakoulutus", "koodiarvo", "koodinimi", "pub.pub_dim_koodisto_2asteenpohjakoulutus2021", pohjakoulutukset)
+    val pohjakoulutusQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("pohjakoulutus", "koodiarvo", "koodinimi", "pub.pub_dim_koodisto_pohjakoulutustoinenaste", pohjakoulutukset)
     LOG.info(s"pohjakoulutusQuery: $pohjakoulutusQuery")
     val query = sql"""
         SELECT param, jsonb_agg(nimi) AS nimet
