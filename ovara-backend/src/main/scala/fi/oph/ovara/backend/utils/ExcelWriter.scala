@@ -433,6 +433,11 @@ object ExcelWriter {
           case _ =>
             valueCell.setCellValue(value.toString)
         }
+      } else if (key == "tulostustapa") {
+        value match {
+          case v: String =>
+            valueCell.setCellValue(translations.getOrElse(s"raportti.tulostustapa.$v", v))
+        }
       } else {
         value match {
           case v: String =>
@@ -1573,7 +1578,8 @@ object ExcelWriter {
       ensikertalaisetYksittaisetHakijat: Int,
       maksuvelvollisetYksittaisetHakijat: Int,
       naytaHakutoiveet: Boolean,
-      tulostustapa: String
+      tulostustapa: String,
+      parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new KkHakeneetHyvaksytytVastaanottaneet excel from db results")
@@ -1777,6 +1783,11 @@ object ExcelWriter {
         )
 
       createRowCells(hakijatSummaryData, hakijatSummaryRow, workbook, createSummaryCellStyle(workbook))
+
+      // Erillinen välilehti hakuparametreille
+      val parametritSheet: XSSFSheet = workbook.createSheet()
+      createHakuparametritSheet(translations, asiointikieli, parametrit, workbook, parametritSheet)
+      
       // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
       fieldNamesWithIndex.foreach { case (title, index) =>
         sheet.autoSizeColumn(index)

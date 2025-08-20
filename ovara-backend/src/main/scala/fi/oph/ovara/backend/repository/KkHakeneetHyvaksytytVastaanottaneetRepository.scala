@@ -1,7 +1,7 @@
 package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.{KkHakeneetHyvaksytytVastaanottaneetHakukohteittain, KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella, KkHakeneetHyvaksytytVastaanottaneetResult, KkHakeneetHyvaksytytVastaanottaneetToimipisteittain, KkHakeneetHyvaksytytVastaanottaneetTunnisteella}
-import fi.oph.ovara.backend.utils.RepositoryUtils
+import fi.oph.ovara.backend.utils.{ParametriNimet, RepositoryUtils}
 import fi.oph.ovara.backend.utils.RepositoryUtils.{buildTutkinnonTasoFilters, makeHakukohderyhmaQueryWithKayttooikeudet}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.Component
@@ -744,4 +744,42 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     query
   }
 
+  def hakuParamNamesQuery(haut: List[String], koulutustoimija: Option[String], oppilaitokset: List[String], toimipisteet: List[String],
+                          hakukohderyhmat: List[String], hakukohteet: List[String], okmOhjauksenAlat: List[String],
+                          sukupuoli: Option[String]):
+  SqlStreamingAction[Vector[ParametriNimet], ParametriNimet, Effect] = {
+    val koulutustoimijaQuery =
+      if (koulutustoimija.isDefined)
+        s"""UNION ALL SELECT 'koulutustoimija' AS param, organisaatio_nimi AS nimi FROM pub.pub_dim_organisaatio WHERE organisaatio_oid = '${koulutustoimija.get}'"""
+      else
+        ""
+    val oppilaitosQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("oppilaitos", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", oppilaitokset)
+    val toimipisteQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("toimipiste", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", toimipisteet)
+    val hakukohderyhmaQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("hakukohderyhma", "hakukohderyhma_oid", "hakukohderyhma_nimi", "pub.pub_dim_hakukohderyhma", hakukohderyhmat)
+    val hakukohdeQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("hakukohde", "hakukohde_oid", "hakukohde_nimi", "pub.pub_dim_hakukohde", hakukohteet)
+    val okmOhjauksenAlaQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("okm-ohjauksen-ala", "koodiarvo", "koodinimi", "pub.pub_dim_koodisto_okmohjauksenala", okmOhjauksenAlat)
+    val sukupuoliQuery =
+      if (sukupuoli.isDefined)
+        s"""UNION ALL SELECT 'sukupuoli' AS param, koodinimi AS nimi FROM pub.pub_dim_koodisto_sukupuoli WHERE koodiarvo = '${sukupuoli.get}'"""
+      else
+        ""
+
+    val query = sql"""
+      SELECT param, jsonb_agg(nimi) AS nimet
+      FROM (
+        SELECT 'haku' AS param, haku_nimi AS nimi from pub.pub_dim_haku
+        WHERE haku_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(haut)})
+        #$koulutustoimijaQuery
+        #$oppilaitosQuery
+        #$toimipisteQuery
+        #$hakukohderyhmaQuery
+        #$hakukohdeQuery
+        #$okmOhjauksenAlaQuery
+        #$sukupuoliQuery
+      ) subquery
+      GROUP BY param
+    """.as[ParametriNimet]
+    LOG.debug(s"hakuParamNamesQuery: ${query.statements.head}")
+    query
+  }
 }
