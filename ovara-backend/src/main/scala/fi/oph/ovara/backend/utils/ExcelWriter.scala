@@ -1395,7 +1395,8 @@ object ExcelWriter {
       data: List[T],
       yksittaisetHakijat: Int,
       naytaHakutoiveet: Boolean,
-      tulostustapa: String
+      tulostustapa: String,
+      parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new HakeneetHyvaksytytVastaanottaneet excel from db results")
@@ -1513,6 +1514,10 @@ object ExcelWriter {
         yksittaisetHakijat)
       createRowCells(hakijatSummaryData, hakijatSummaryRow, workbook, createSummaryCellStyle(workbook))
     }
+
+    // Erillinen välilehti hakuparametreille
+    val parametritSheet: XSSFSheet = workbook.createSheet()
+    createHakuparametritSheet(translations, asiointikieli, parametrit, workbook, parametritSheet)
 
     // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
     fieldNamesWithIndex.foreach { case (title, index) =>

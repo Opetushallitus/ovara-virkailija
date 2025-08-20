@@ -92,6 +92,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     "raportti.soraTerveys"                      -> "Sora terveydentila SV",
     "raportti.soraAiempi"                       -> "Sora aiempi SV",
     "raportti.julkaisulupa"                     -> "Julkaisulupa SV",
+    "raportti.opetuskieli"                      -> "Opetuskieli SV",
+    "raportti.koulutusala1"                     -> "Koulutusala 1 SV",
+    "raportti.koulutusala2"                     -> "Koulutusala 2 SV",
+    "raportti.koulutusala3"                     -> "Koulutusala 3 SV",
   )
 
   def checkAloituspaikatRowValidity(sheet: XSSFSheet, rowNumber: Int, expected: Int): Unit = {
@@ -4191,6 +4195,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(4) == null)
   }
 
+  val hakeneetHyvaksytytVastaanottaneetParams: List[(String, String | Boolean | List[String])] =
+    List(
+      "haku" -> List("1.2.246.562.29.00000000000000015722"),
+      "oppilaitos" -> List("1.2.246.562.10.52251087186"),
+      "toimipiste" -> List("1.2.246.562.10.23017513880"),
+      "tulostustapa" -> "toimipisteittain"
+    )
   "writeHakeneetHyvaksytytVastaanottaneetRaportti" should "return excel with three heading columns, three result rows and two summary rows for hakukohteittain" in {
     val data = List(
       HakeneetHyvaksytytVastaanottaneetHakukohteittain(
@@ -4300,10 +4311,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
       data = data,
       yksittaisetHakijat = 450,
       naytaHakutoiveet = true,
-      tulostustapa = "hakukohteittain"
+      tulostustapa = "hakukohteittain",
+      parametrit = hakeneetHyvaksytytVastaanottaneetParams
     )
 
-    assert(workbook.getNumberOfSheets == 1)
+    assert(workbook.getNumberOfSheets == 2)
     val sheet = workbook.getSheetAt(0)
     // Otsikkorivi
     val headingRow = sheet.getRow(0)
@@ -4415,6 +4427,62 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
   }
 
+  it should "create hakuparametrit sheet" in {
+    val hakuParams: List[(String, String | Boolean | List[String])] =
+      List(
+        "haku" -> List("1.2.246.562.29.00000000000000015722"),
+        "tulostustapa" -> "toimipisteittain",
+        "oppilaitos" -> List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        "toimipiste" -> List("1.2.246.562.10.2781706420001"),
+        "hakukohde" -> List("1.2.246.562.20.00000000000000059957"),
+        "opetuskieli" -> List("1", "4"),
+        "koulutusala1" -> List("10"),
+        "koulutusala2" -> List("092"),
+        "koulutusala3" -> List("1018"),
+        "maakunta" -> List("01"),
+        "kunta" -> List("091"),
+        "harkinnanvaraisuus" -> List("OPPIMISVAIKEUDET"),
+        "sukupuoli" -> List("2"),
+        "nayta-hakutoiveet" -> true,
+      )
+    val data = List.empty
+    val wb = ExcelWriter.writeHakeneetHyvaksytytVastaanottaneetRaportti(
+      asiointikieli = "sv",
+      translations = translations,
+      data = data,
+      yksittaisetHakijat = 0,
+      naytaHakutoiveet = true,
+      tulostustapa = "toimipisteittain",
+      parametrit = hakuParams
+    )
+
+    val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
+    val expectedRows = List(
+      List("Haku SV", "1.2.246.562.29.00000000000000015722"),
+      List("Tulostustapa SV", "toimipisteittain"),
+      List("Oppilaitos SV", "1.2.246.562.10.00000000001, 1.2.246.562.10.2781706420000"),
+      List("Toimipiste SV", "1.2.246.562.10.2781706420001"),
+      List("Hakukohde SV", "1.2.246.562.20.00000000000000059957"),
+      List("Opetuskieli SV", "1, 4"),
+      List("Koulutusala 1 SV", "10"),
+      List("Koulutusala 2 SV", "092"),
+      List("Koulutusala 3 SV", "1018"),
+      List("maakunta", "01"),
+      List("kunta", "091"),
+      List("Harkinnanvaraisuus SV", "Oppimisvaikeudet SV"),
+      List("sukupuoli", "2"),
+      List("nayta-hakutoiveet", "Ja")
+    )
+    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getSheetAt(1).getRow(1) != null)
+    val sheet = wb.getSheetAt(1)
+
+    validateHeaders(sheet = sheet, expectedHeaders = expectedHeaders)
+    expectedRows.zipWithIndex.foreach { case (expectedRow, rowIndex) =>
+      validateRow(sheet, rowIndex + 1, expectedRow)
+    }
+  }
+
   it should "return excel with one heading column, three result rows and two summary rows for toimipisteittäin" in {
     val data = List(
       HakeneetHyvaksytytVastaanottaneetResult(
@@ -4494,10 +4562,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
       data = data,
       yksittaisetHakijat = 450,
       naytaHakutoiveet = true,
-      tulostustapa = "toimipisteittain"
+      tulostustapa = "toimipisteittain",
+      parametrit = hakeneetHyvaksytytVastaanottaneetParams
     )
 
-    assert(workbook.getNumberOfSheets == 1)
+    assert(workbook.getNumberOfSheets == 2)
     val sheet = workbook.getSheetAt(0)
     // Otsikkorivi
     val headingRow = sheet.getRow(0)
@@ -4628,10 +4697,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
       data = data,
       yksittaisetHakijat = 300,
       naytaHakutoiveet = false,
-      tulostustapa = "oppilaitoksittain"
+      tulostustapa = "oppilaitoksittain",
+      parametrit = hakeneetHyvaksytytVastaanottaneetParams
     )
 
-    assert(workbook.getNumberOfSheets == 1)
+    assert(workbook.getNumberOfSheets == 2)
     val sheet = workbook.getSheetAt(0)
     // Otsikkorivi
     val headingRow = sheet.getRow(0)
@@ -4703,10 +4773,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
       data = data,
       yksittaisetHakijat = 300,
       naytaHakutoiveet = false,
-      tulostustapa = "toimipisteittain"
+      tulostustapa = "toimipisteittain",
+      parametrit = hakeneetHyvaksytytVastaanottaneetParams
     )
 
-    assert(workbook.getNumberOfSheets == 1)
+    assert(workbook.getNumberOfSheets == 2)
     val sheet = workbook.getSheetAt(0)
     // Otsikkorivi
     val headingRow = sheet.getRow(0)

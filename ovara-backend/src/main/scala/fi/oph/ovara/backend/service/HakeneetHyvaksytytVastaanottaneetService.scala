@@ -1,6 +1,7 @@
 package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.domain.{HakeneetHyvaksytytVastaanottaneetHakukohteittain, HakeneetHyvaksytytVastaanottaneetResult, Kieli}
+import fi.oph.ovara.backend.raportointi.dto.{ValidatedHakeneetHyvaksytytVastaanottaneetParams, buildHakeneetHyvaksytytVastaanottaneetParamsForExcel}
 import fi.oph.ovara.backend.repository.{HakeneetHyvaksytytVastaanottaneetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -158,13 +159,52 @@ class HakeneetHyvaksytytVastaanottaneetService(
 
       val sumQueryResult = db.run(sumQuery, "hakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams")
 
+      val raporttiParamNames = db.run(
+        hakeneetHyvaksytytVastaanottaneetRepository.hakuParamNamesQuery(
+          haut = haut,
+          koulutustoimija = koulutustoimija,
+          oppilaitokset = oppilaitokset,
+          toimipisteet = toimipisteet,
+          hakukohteet = hakukohteet,
+          opetuskielet = opetuskielet,
+          koulutusalat1 = koulutusalat1,
+          koulutusalat2 = koulutusalat2,
+          koulutusalat3 = koulutusalat3,
+          maakunnat = maakunnat,
+          kunnat = kunnat,
+          sukupuoli = sukupuoli,
+        ),
+        "hakuParamNamesQuery"
+      ).map(param => param.parametri -> param.nimet).toMap
+
+      val raporttiParams = buildHakeneetHyvaksytytVastaanottaneetParamsForExcel(
+        ValidatedHakeneetHyvaksytytVastaanottaneetParams(
+          haut = haut,
+          tulostustapa = tulostustapa,
+          koulutustoimija = koulutustoimija,
+          oppilaitokset = oppilaitokset,
+          toimipisteet = toimipisteet,
+          hakukohteet = hakukohteet,
+          koulutusalat1 = koulutusalat1,
+          koulutusalat2 = koulutusalat2,
+          koulutusalat3 = koulutusalat3,
+          opetuskielet = opetuskielet,
+          maakunnat = maakunnat,
+          kunnat = kunnat,
+          harkinnanvaraisuudet = harkinnanvaraisuudet,
+          naytaHakutoiveet = naytaHakutoiveet,
+          sukupuoli = sukupuoli
+        ), raporttiParamNames
+      )
+      
       ExcelWriter.writeHakeneetHyvaksytytVastaanottaneetRaportti(
         asiointikieli,
         translations,
         sortedResult.toList,
         sumQueryResult,
         naytaHakutoiveet,
-        tulostustapa
+        tulostustapa,
+        raporttiParams
       )
     } match {
       case Success(excelFile) => Right(excelFile)
