@@ -19,6 +19,18 @@ object ExcelWriterUtils {
     translations.getOrElse(s"raportti.$lowerCaseStr", s"raportti.$lowerCaseStr")
   }
 
+  def getKielistettyCellValue(asiointikieli: String, v: Kielistetty) = {
+    v.get(Kieli.withName(asiointikieli)) match {
+      case Some(value) =>
+        if (value == null) {
+          "-"
+        } else {
+          value
+        }
+      case None => "-"
+    }
+  }
+  
   def writeStrToCell(row: XSSFRow, cellStyle: XSSFCellStyle, cellIndex: Int, str: String): Int = {
     val cell = createCell(row, cellStyle, cellIndex)
     cell.setCellValue(str)
@@ -75,15 +87,7 @@ object ExcelWriterUtils {
       asiointikieli: String
   ): Int = {
     val cell = createCell(row, cellStyle, cellIndex)
-    val kielistettyValue = kielistetty.get(Kieli.withName(asiointikieli)) match {
-      case Some(value) =>
-        if (value == null) {
-          "-"
-        } else {
-          value
-        }
-      case None => "-"
-    }
+    val kielistettyValue = getKielistettyCellValue(asiointikieli, kielistetty) 
     cell.setCellValue(kielistettyValue)
     cellIndex + 1
   }
@@ -99,15 +103,7 @@ object ExcelWriterUtils {
     val kielistettyValue = if (kielistettyList.isEmpty) {
       "-"
     } else {
-      kielistettyList.map(k => k.get(Kieli.withName(asiointikieli)) match {
-        case Some(value) =>
-          if (value == null) {
-            "-"
-          } else {
-            value
-          }
-        case None => "-"
-      }).mkString(", ")
+      kielistettyList.map(k => getKielistettyCellValue(asiointikieli, k)).mkString(", ")
     }
     cell.setCellValue(kielistettyValue)
     cellIndex + 1

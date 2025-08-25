@@ -1,6 +1,7 @@
 package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.domain.{Kieli, KkHakeneetHyvaksytytVastaanottaneetHakukohteittain, KkHakeneetHyvaksytytVastaanottaneetResult}
+import fi.oph.ovara.backend.raportointi.dto.{ValidatedKkHakeneetHyvaksytytVastaanottaneetParams, buildKkHakeneetHyvaksytytVastaanottaneetParamsForExcel}
 import fi.oph.ovara.backend.repository.{KkHakeneetHyvaksytytVastaanottaneetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -251,6 +252,40 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
         else
           db.run(ensikertalaisetSumQuery, "kkHakeneetHyvaksytytVastaanottaneetRepository.selectEnsikertalaisetHakijatYhteensaWithParams")
       val maksuvelvollisetSumQueryResult = db.run(maksuvelvollisetSumQuery, "kkHakeneetHyvaksytytVastaanottaneetRepository.selectMaksuvelvollisetHakijatYhteensaWithParams")
+
+      val raporttiParamNames = db.run(
+        kkHakeneetHyvaksytytVastaanottaneetRepository.hakuParamNamesQuery(
+          haut = haut,
+          koulutustoimija = koulutustoimija,
+          oppilaitokset = oppilaitokset,
+          toimipisteet = toimipisteet,
+          hakukohteet = hakukohteet,
+          hakukohderyhmat = hakukohderyhmat,
+          okmOhjauksenAlat = okmOhjauksenAlat,
+          sukupuoli = sukupuoli,
+        ),
+        "hakuParamNamesQuery"
+      ).map(param => param.parametri -> param.nimet).toMap
+
+      val raporttiParams = buildKkHakeneetHyvaksytytVastaanottaneetParamsForExcel(
+        ValidatedKkHakeneetHyvaksytytVastaanottaneetParams(
+          haut = haut,
+          tulostustapa = tulostustapa,
+          koulutustoimija = koulutustoimija,
+          oppilaitokset = oppilaitokset,
+          toimipisteet = toimipisteet,
+          hakukohteet = hakukohteet,
+          hakukohderyhmat = hakukohderyhmat,
+          okmOhjauksenAlat = okmOhjauksenAlat,
+          tutkinnonTasot = tutkinnonTasot,
+          aidinkielet = aidinkielet,
+          kansalaisuusluokat = kansalaisuudet,
+          sukupuoli = sukupuoli,
+          ensikertalainen = ensikertalainen,
+          naytaHakutoiveet = naytaHakutoiveet
+        ), raporttiParamNames
+      )
+      
       ExcelWriter.writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
         asiointikieli,
         translations,
@@ -259,7 +294,8 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
         ensikertalaisetSumQueryResult,
         maksuvelvollisetSumQueryResult,
         naytaHakutoiveet,
-        tulostustapa
+        tulostustapa,
+        raporttiParams
       )
     } match {
       case Success(excelFile) => Right(excelFile)

@@ -1,5 +1,8 @@
 package fi.oph.ovara.backend.raportointi.dto
 
+import fi.oph.ovara.backend.domain.Kielistetty
+import fi.oph.ovara.backend.utils.ParameterUtils
+
 case class RawHakeneetHyvaksytytVastaanottaneetParams(
                                                        haut: List[String],
                                                        tulostustapa: String,
@@ -56,4 +59,30 @@ def buildHakeneetHyvaksytytVastaanottaneetAuditParams(
     "naytaHakutoiveet" -> Option(params.naytaHakutoiveet),
     "sukupuoli" -> params.sukupuoli
   ).collect { case (key, Some(value)) => key -> value }
+}
+
+def buildHakeneetHyvaksytytVastaanottaneetParamsForExcel(params: ValidatedHakeneetHyvaksytytVastaanottaneetParams, paramNames: Map[String, List[Kielistetty]]):
+List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])] = {
+  val stringAndKielistettyParams = List(
+    "haku" -> paramNames.getOrElse("haku", List.empty),
+    "tulostustapa" -> params.tulostustapa,
+    "koulutustoimija" -> paramNames.getOrElse("koulutustoimija", List.empty),
+    "oppilaitos" -> paramNames.getOrElse("oppilaitos", List.empty),
+    "toimipiste" -> paramNames.getOrElse("toimipiste", List.empty),
+    "hakukohde" -> paramNames.getOrElse("hakukohde", List.empty),
+    "opetuskieli" -> paramNames.getOrElse("opetuskieli", List.empty),
+    "koulutusalat1" -> paramNames.getOrElse("koulutusala1", List.empty),
+    "koulutusalat2" -> paramNames.getOrElse("koulutusala2", List.empty),
+    "koulutusalat3" -> paramNames.getOrElse("koulutusala3", List.empty),
+    "maakunnat" -> paramNames.getOrElse("maakunta", List.empty),
+    "kunnat" -> paramNames.getOrElse("kunta", List.empty),
+    "harkinnanvaraisuus" -> params.harkinnanvaraisuudet.map(_.stripPrefix("ATARU_").toLowerCase),
+    "sukupuoli" -> paramNames.getOrElse("sukupuoli", List.empty),
+  ).filterNot { case (_, value) =>
+    value match {
+      case list: List[_] => list.isEmpty
+      case str: String => str.isEmpty
+    }
+  }
+  stringAndKielistettyParams ++ List(("nayta-hakutoiveet", params.naytaHakutoiveet))
 }

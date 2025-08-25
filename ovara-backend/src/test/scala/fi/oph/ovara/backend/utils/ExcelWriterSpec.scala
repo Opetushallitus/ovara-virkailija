@@ -21,12 +21,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
     "raportti.hakukohteenNimi"                  -> "Hakukohde SV",
     "raportti.haku"                             -> "Haku SV",
     "raportti.kaksoistutkintoKiinnostaa"        -> "Kaksoistutkinto kiinnostaa SV",
+    "raportti.urheilijatutkintoKiinnostaa"      -> "Urheilijatutkinto kiinnostaa SV",
     "raportti.markkinointilupa"                 -> "LupaMark SV",
     "raportti.kylla"                            -> "Ja",
     "raportti.ei"                               -> "Nej",
     "raportti.hylatty"                          -> "Hylatty SV",
     "raportti.hyvaksytty"                       -> "Hyvaksytty SV",
     "raportti.peruuntunut"                      -> "Peruuntunut SV",
+    "raportti.peruutettu"                       -> "Peruutettu SV",
     "raportti.ei_vastaanotettu_maara_aikana"    -> "Ei vastaanotettu SV",
     "raportti.kokonaispisteet"                  -> "Kokonaispisteet SV",
     "raportti.valintatapajonokohtainenTila"     -> "Valintatapajonokohtainen tila SV",
@@ -66,6 +68,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     "raportti.yksittaiset-hakijat"              -> "Yksittäiset hakijat SV",
     "raportti.oppilaitosJaToimipiste"           -> "Oppilaitos ja toimipiste SV",
     "raportti.julkaistu"                        -> "Julkaistu SV",
+    "raportti.arkistoitu"                       -> "Arkistoitu SV",
     "raportti.luonnos"                          -> "Luonnos SV",
     "raportti.hakukohdeOid"                     -> "Hakukohteen oid SV",
     "raportti.koulutuksenTila"                  -> "Kou.tila SV",
@@ -73,7 +76,26 @@ class ExcelWriterSpec extends AnyFlatSpec {
     "raportti.hakukohteenTila"                  -> "Hak.tila SV",
     "raportti.onValintakoe"                     -> "Koe SV",
     "raportti.voiSuorittaaKaksoistutkinnon"     -> "Voi suorittaa kaksoistutkinnon? SV",
-    "raportti.jarjestaaUrheilijanAmmKoulutusta" -> "Voi suorittaa tutkinnon urheilijana? SV"
+    "raportti.jarjestaaUrheilijanAmmKoulutusta" -> "Voi suorittaa tutkinnon urheilijana? SV",
+    "raportti.hakuparametrit"                   -> "Hakuparametrit SV",
+    "raportti.koulutustoimija"                  -> "Koulutustoimija SV",
+    "raportti.oppilaitos"                       -> "Oppilaitos SV",
+    "raportti.valintakoe"                       -> "Valintakoe SV",
+    "raportti.tulostustapa"                     -> "Tulostustapa SV",
+    "raportti.tulostustapa.hakukohteittain"     -> "Hakukohteittain SV",
+    "raportti.kk-tutkinnon-taso"                -> "Tutkinnon taso SV",
+    "raportti.ylempi"                           -> "ylempi SV",
+    "raportti.valintatieto"                     -> "Valintatieto SV",
+    "raportti.vastaanottotieto"                 -> "Vastaanottotieto SV",
+    "raportti.harkinnanvaraisuus"               -> "Harkinnanvaraisuus SV",
+    "raportti.oppimisvaikeudet"                 -> "Oppimisvaikeudet SV",
+    "raportti.soraTerveys"                      -> "Sora terveydentila SV",
+    "raportti.soraAiempi"                       -> "Sora aiempi SV",
+    "raportti.julkaisulupa"                     -> "Julkaisulupa SV",
+    "raportti.opetuskieli"                      -> "Opetuskieli SV",
+    "raportti.koulutusala1"                     -> "Koulutusala 1 SV",
+    "raportti.koulutusala2"                     -> "Koulutusala 2 SV",
+    "raportti.koulutusala3"                     -> "Koulutusala 3 SV",
   )
 
   def checkAloituspaikatRowValidity(sheet: XSSFSheet, rowNumber: Int, expected: Int): Unit = {
@@ -475,7 +497,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(currentRowIndex == 0)
   }
 
-  "writeKoulutuksetToteutuksetHakukohteetRaportti" should "create one sheet and set 'Yhteenveto' as the name of the sheet" in {
+  val koulutuksetToteutuksetHakukohteetParams: List[(String, String | Boolean | List[String])] =
+    List(
+      "haku" -> List("1.2.246.562.29.00000000000000015722"),
+      "oppilaitos" -> List.empty,
+      "toimipiste" -> List("1.2.246.562.10.00000000001"),
+    )
+
+  "writeKoulutuksetToteutuksetHakukohteetRaportti" should "create two sheets and set 'Yhteenveto' as the name of the first sheet" in {
     val hierarkiatWithHakukohteet = List(
       OrganisaatioHierarkiaWithHakukohteet(
         "1.2.246.562.10.41253773158",
@@ -497,20 +526,23 @@ class ExcelWriterSpec extends AnyFlatSpec {
         hierarkiatWithHakukohteet,
         userLng,
         KOULUTUSTOIMIJARAPORTTI,
-        translations
+        translations,
+        koulutuksetToteutuksetHakukohteetParams
       )
-    assert(wb.getNumberOfSheets == 1)
+    assert(wb.getNumberOfSheets == 2)
     assert(wb.getSheetName(0) == "Yhteenveto SV")
+    assert(wb.getSheetName(1) == "Hakuparametrit SV")
   }
 
-  it should "create one sheet with the column title row and no results" in {
+  it should "create a sheet with the column title row and no results" in {
     val hierarkiatWithHakukohteet = List()
     val wb =
       ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         hierarkiatWithHakukohteet,
         userLng,
         KOULUTUSTOIMIJARAPORTTI,
-        translations
+        translations,
+        koulutuksetToteutuksetHakukohteetParams
       )
     assert(wb.getSheetAt(0).getRow(0).getCell(0).getStringCellValue == "Hakukohde SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(1).getStringCellValue == "Hakukohteen oid SV")
@@ -523,6 +555,49 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(0).getCell(8).getStringCellValue == "Voi suorittaa tutkinnon urheilijana? SV")
     assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 1)
     assert(wb.getSheetAt(0).getRow(1) == null)
+  }
+
+  it should "create a second sheet with all search terms listed" in {
+    val hakuParams: List[(String, String | Boolean | List[String])] =
+      List(
+        "haku" -> List("1.2.246.562.29.00000000000000015722"),
+        "koulutustoimija" -> "1.2.246.562.10.2781706420000",
+        "oppilaitos" -> List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        "toimipiste" -> List("1.2.246.562.10.2781706420001"),
+        "koulutuksenTila" -> "julkaistu",
+        "toteutuksenTila" -> "arkistoitu",
+        "hakukohteenTila" -> "julkaistu",
+        "valintakoe" -> false
+      )
+    val hierarkiatWithHakukohteet = List()
+    val wb =
+      ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
+        hierarkiatWithHakukohteet,
+        userLng,
+        KOULUTUSTOIMIJARAPORTTI,
+        translations,
+        hakuParams
+      )
+
+    val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
+    val expectedRows = List(
+      List("Haku SV","1.2.246.562.29.00000000000000015722"),
+      List("Koulutustoimija SV", "1.2.246.562.10.2781706420000"),
+      List("Oppilaitos SV", "1.2.246.562.10.00000000001, 1.2.246.562.10.2781706420000"),
+      List("Toimipiste SV", "1.2.246.562.10.2781706420001"),
+      List("Kou.tila SV", "Julkaistu SV"),
+      List("Tot.tila SV", "Arkistoitu SV"),
+      List("Hak.tila SV", "Julkaistu SV"),
+      List("Valintakoe SV", "Nej")
+    )
+    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getSheetAt(1).getRow(1) != null)
+    val sheet = wb.getSheetAt(1)
+
+    validateHeaders(sheet = sheet, expectedHeaders = expectedHeaders)
+    expectedRows.zipWithIndex.foreach { case (expectedRow, rowIndex) =>
+      validateRow(sheet, rowIndex + 1, expectedRow)
+    }
   }
 
   it should "create a sheet with the column title row and one result row for koulutustoimija" in {
@@ -547,7 +622,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         hierarkiatWithHakukohteet,
         userLng,
         KOULUTUSTOIMIJARAPORTTI,
-        translations
+        translations,
+        koulutuksetToteutuksetHakukohteetParams
       )
     val sheet = wb.getSheetAt(0)
     // Heading row
@@ -626,7 +702,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
         hierarkiatWithHakukohteet,
         userLng,
         KOULUTUSTOIMIJARAPORTTI,
-        translations
+        translations,
+        koulutuksetToteutuksetHakukohteetParams
       )
     val sheet = wb.getSheetAt(0)
     // Heading row
@@ -722,7 +799,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
       koulutustoimijaWithHakukohteet,
       userLng,
       KOULUTUSTOIMIJARAPORTTI,
-      translations
+      translations,
+      koulutuksetToteutuksetHakukohteetParams
     )
     val sheet = wb.getSheetAt(0)
     // Parent organisaatio row with aloituspaikat sum
@@ -1013,7 +1091,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
       hierarkiatWithHakukohteet,
       userLng,
       OPPILAITOSRAPORTTI,
-      translations
+      translations,
+      koulutuksetToteutuksetHakukohteetParams
     )
     val sheet = wb.getSheetAt(0)
     // Parent organisaatio row with aloituspaikat sum
@@ -1053,7 +1132,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Toimipisteen hakukohde
     assert(sheet.getRow(6).getCell(0).getStringCellValue == "Toimipisteen hakukohteen nimi sv")
     assert(sheet.getRow(6).getCell(1).getStringCellValue == "1.2.246.562.20.0000000000000004567")
-    assert(sheet.getRow(6).getCell(2).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(6).getCell(2).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(6).getCell(3).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(6).getCell(4).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(6).getCell(5).getNumericCellValue == 3)
@@ -1069,7 +1148,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Toimipisteen 2 hakukohde
     assert(sheet.getRow(8).getCell(0).getStringCellValue == "Toimipisteen 2 hakukohteen nimi sv")
     assert(sheet.getRow(8).getCell(1).getStringCellValue == "1.2.246.562.20.0000000000000004568")
-    assert(sheet.getRow(8).getCell(2).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(8).getCell(2).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(8).getCell(3).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(8).getCell(4).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(8).getCell(5).getNumericCellValue == 4)
@@ -1085,7 +1164,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Toimipisteen 2 alitoimipiste hakukohde
     assert(sheet.getRow(10).getCell(0).getStringCellValue == "Toimipisteen 2 alitoimipisteen hakukohteen nimi sv")
     assert(sheet.getRow(10).getCell(1).getStringCellValue == "1.2.246.562.20.000000000000000456811")
-    assert(sheet.getRow(10).getCell(2).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(10).getCell(2).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(10).getCell(3).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(10).getCell(4).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(10).getCell(5).getNumericCellValue == 2)
@@ -1119,7 +1198,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Oppilaitos 2 hakukohde
     assert(sheet.getRow(15).getCell(0).getStringCellValue == "Toimipisteen 3 hakukohteen nimi sv")
     assert(sheet.getRow(15).getCell(1).getStringCellValue == "1.2.246.562.20.00000000000000045673")
-    assert(sheet.getRow(15).getCell(2).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(15).getCell(2).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(15).getCell(3).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(15).getCell(4).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(15).getCell(5).getNumericCellValue == 3)
@@ -1268,7 +1347,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
       hierarkiatWithHakukohteet,
       userLng,
       TOIMIPISTERAPORTTI,
-      translations
+      translations,
+      koulutuksetToteutuksetHakukohteetParams
     )
     val sheet = wb.getSheetAt(0)
     // Parent organisaatio row with aloituspaikat sum
@@ -1547,7 +1627,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(6).getCell(1).getStringCellValue == "1.2.246.562.20.0000000000000004567")
     assert(sheet.getRow(6).getCell(2).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(6).getCell(3).getStringCellValue == "Julkaistu SV")
-    assert(sheet.getRow(6).getCell(4).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(6).getCell(4).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(6).getCell(5).getNumericCellValue == 3)
     assert(sheet.getRow(6).getCell(6).getStringCellValue == "Nej")
     assert(sheet.getRow(6).getCell(7).getStringCellValue == "-")
@@ -1565,7 +1645,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(8).getCell(1).getStringCellValue == "1.2.246.562.20.0000000000000004568")
     assert(sheet.getRow(8).getCell(2).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(8).getCell(3).getStringCellValue == "Julkaistu SV")
-    assert(sheet.getRow(8).getCell(4).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(8).getCell(4).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(8).getCell(5).getNumericCellValue == 4)
     assert(sheet.getRow(8).getCell(6).getStringCellValue == "Ja")
     assert(sheet.getRow(8).getCell(7).getStringCellValue == "-")
@@ -1583,7 +1663,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(10).getCell(1).getStringCellValue == "1.2.246.562.20.000000000000000456811")
     assert(sheet.getRow(10).getCell(2).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(10).getCell(3).getStringCellValue == "Julkaistu SV")
-    assert(sheet.getRow(10).getCell(4).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(10).getCell(4).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(10).getCell(5).getNumericCellValue == 2)
     assert(sheet.getRow(10).getCell(6).getStringCellValue == "Nej")
     assert(sheet.getRow(10).getCell(7).getStringCellValue == "-")
@@ -1822,12 +1902,20 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
   )
 
+  val kkKoulutuksetToteutuksetHakukohteetParams: List[(String, String | Boolean | List[String])] =
+    List(
+      "haku" -> List("1.2.246.562.29.00000000000000015722"),
+      "oppilaitos" -> List.empty,
+      "toimipiste" -> List("1.2.246.562.10.00000000001"),
+    )
+
   "writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti" should "create Korkeakoulujen koulutukset toteutukset ja hakukohteet -raportti koulutuksittain with four result rows" in {
     val wb = ExcelWriter.writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
       korkeakouluKoulutuksetToteutuksetHakukohteetResults = korkeakouluKoulutuksetToteutuksetHakukohteet,
       asiointikieli = userLng,
       translations = translations,
-      tulostustapa = "koulutuksittain"
+      tulostustapa = "koulutuksittain",
+      parametrit = kkKoulutuksetToteutuksetHakukohteetParams
     )
 
     val sheet = wb.getSheetAt(0)
@@ -1879,7 +1967,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(1).getCell(12).getStringCellValue == "-")
     assert(sheet.getRow(1).getCell(13).getStringCellValue == "Animation, Master of Arts (2 yrs) SV")
     assert(sheet.getRow(1).getCell(14).getStringCellValue == "1.2.246.562.20.00000000000000017880")
-    assert(sheet.getRow(1).getCell(15).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(1).getCell(15).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(1).getCell(16).getStringCellValue == "-")
     assert(sheet.getRow(1).getCell(17).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
     assert(sheet.getRow(1).getCell(18).getStringCellValue == "1.2.246.562.29.00000000000000015722")
@@ -1922,7 +2010,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(2).getCell(12).getStringCellValue == "-")
     assert(sheet.getRow(2).getCell(13).getStringCellValue == "Arkitektur, Arkitekt (2 år)")
     assert(sheet.getRow(2).getCell(14).getStringCellValue == "1.2.246.562.20.00000000000000017819")
-    assert(sheet.getRow(2).getCell(15).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(2).getCell(15).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(2).getCell(16).getStringCellValue == "ARTS20100")
     assert(sheet.getRow(2).getCell(17).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
     assert(sheet.getRow(2).getCell(18).getStringCellValue == "1.2.246.562.29.00000000000000015722")
@@ -1967,7 +2055,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       sheet.getRow(3).getCell(13).getStringCellValue == "Hakukohde Collaborative and Industrial Design, Master of Arts (2 yrs) SV"
     )
     assert(sheet.getRow(3).getCell(14).getStringCellValue == "1.2.246.562.20.00000000000000017881")
-    assert(sheet.getRow(3).getCell(15).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(3).getCell(15).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(3).getCell(16).getStringCellValue == "ARTS20200")
     assert(sheet.getRow(3).getCell(17).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
     assert(sheet.getRow(3).getCell(18).getStringCellValue == "1.2.246.562.29.00000000000000015722")
@@ -2000,7 +2088,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         .getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år) -toteutus"
     )
     assert(sheet.getRow(4).getCell(9).getStringCellValue == "1.2.246.562.17.00000000000000007967")
-    assert(sheet.getRow(4).getCell(10).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(4).getCell(10).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(4).getCell(11).getStringCellValue == "-")
     assert(sheet.getRow(4).getCell(12).getStringCellValue == "Höst 2023")
     assert(sheet.getRow(4).getCell(13).getStringCellValue == "Film- och tv-manuskript, konstmagister (2 år)")
@@ -2030,7 +2118,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
       korkeakouluKoulutuksetToteutuksetHakukohteetResults = korkeakouluKoulutuksetToteutuksetHakukohteet,
       asiointikieli = userLng,
       translations = translations,
-      tulostustapa = "toteutuksittain"
+      tulostustapa = "toteutuksittain",
+      parametrit = kkKoulutuksetToteutuksetHakukohteetParams
     )
 
     val sheet = wb.getSheetAt(0)
@@ -2068,7 +2157,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(1).getCell(5).getStringCellValue == "-")
     assert(sheet.getRow(1).getCell(6).getStringCellValue == "Animation, Master of Arts (2 yrs) SV")
     assert(sheet.getRow(1).getCell(7).getStringCellValue == "1.2.246.562.20.00000000000000017880")
-    assert(sheet.getRow(1).getCell(8).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(1).getCell(8).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(1).getCell(9).getStringCellValue == "-")
     assert(sheet.getRow(1).getCell(10).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
     assert(sheet.getRow(1).getCell(11).getStringCellValue == "1.2.246.562.29.00000000000000015722")
@@ -2099,7 +2188,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(2).getCell(5).getStringCellValue == "-")
     assert(sheet.getRow(2).getCell(6).getStringCellValue == "Arkitektur, Arkitekt (2 år)")
     assert(sheet.getRow(2).getCell(7).getStringCellValue == "1.2.246.562.20.00000000000000017819")
-    assert(sheet.getRow(2).getCell(8).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(2).getCell(8).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(2).getCell(9).getStringCellValue == "ARTS20100")
     assert(sheet.getRow(2).getCell(10).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
     assert(sheet.getRow(1).getCell(11).getStringCellValue == "1.2.246.562.29.00000000000000015722")
@@ -2132,7 +2221,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       sheet.getRow(3).getCell(6).getStringCellValue == "Hakukohde Collaborative and Industrial Design, Master of Arts (2 yrs) SV"
     )
     assert(sheet.getRow(3).getCell(7).getStringCellValue == "1.2.246.562.20.00000000000000017881")
-    assert(sheet.getRow(3).getCell(8).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(3).getCell(8).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(3).getCell(9).getStringCellValue == "ARTS20200")
     assert(sheet.getRow(3).getCell(10).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
     assert(sheet.getRow(1).getCell(11).getStringCellValue == "1.2.246.562.29.00000000000000015722")
@@ -2158,7 +2247,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         .getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år) -toteutus"
     )
     assert(sheet.getRow(4).getCell(2).getStringCellValue == "1.2.246.562.17.00000000000000007967")
-    assert(sheet.getRow(4).getCell(3).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(4).getCell(3).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(4).getCell(4).getStringCellValue == "-")
     assert(sheet.getRow(4).getCell(5).getStringCellValue == "Höst 2023")
     assert(sheet.getRow(4).getCell(6).getStringCellValue == "Film- och tv-manuskript, konstmagister (2 år)")
@@ -2188,7 +2277,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
       korkeakouluKoulutuksetToteutuksetHakukohteetResults = korkeakouluKoulutuksetToteutuksetHakukohteet,
       asiointikieli = userLng,
       translations = translations,
-      tulostustapa = "hakukohteittain"
+      tulostustapa = "hakukohteittain",
+      parametrit = kkKoulutuksetToteutuksetHakukohteetParams
     )
 
     val sheet = wb.getSheetAt(0)
@@ -2223,7 +2313,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
     assert(sheet.getRow(1).getCell(1).getStringCellValue == "Animation, Master of Arts (2 yrs) SV")
     assert(sheet.getRow(1).getCell(2).getStringCellValue == "1.2.246.562.20.00000000000000017880")
-    assert(sheet.getRow(1).getCell(3).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(1).getCell(3).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(1).getCell(4).getStringCellValue == "-")
     assert(sheet.getRow(1).getCell(5).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
     assert(sheet.getRow(1).getCell(6).getStringCellValue == "1.2.246.562.29.00000000000000015722")
@@ -2261,7 +2351,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
     assert(sheet.getRow(2).getCell(1).getStringCellValue == "Arkitektur, Arkitekt (2 år)")
     assert(sheet.getRow(2).getCell(2).getStringCellValue == "1.2.246.562.20.00000000000000017819")
-    assert(sheet.getRow(2).getCell(3).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(2).getCell(3).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(2).getCell(4).getStringCellValue == "ARTS20100")
     assert(sheet.getRow(2).getCell(5).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
     assert(sheet.getRow(2).getCell(6).getStringCellValue == "1.2.246.562.29.00000000000000015722")
@@ -2325,7 +2415,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         .getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år) -toteutus"
     )
     assert(sheet.getRow(3).getCell(13).getStringCellValue == "1.2.246.562.17.00000000000000007967")
-    assert(sheet.getRow(3).getCell(14).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(3).getCell(14).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(3).getCell(15).getStringCellValue == "-")
     assert(sheet.getRow(3).getCell(16).getStringCellValue == "Höst 2023")
     assert(sheet.getRow(3).getCell(17).getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år)")
@@ -2344,7 +2434,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       sheet.getRow(4).getCell(1).getStringCellValue == "Hakukohde Collaborative and Industrial Design, Master of Arts (2 yrs) SV"
     )
     assert(sheet.getRow(4).getCell(2).getStringCellValue == "1.2.246.562.20.00000000000000017881")
-    assert(sheet.getRow(4).getCell(3).getStringCellValue == "raportti.arkistoitu")
+    assert(sheet.getRow(4).getCell(3).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(4).getCell(4).getStringCellValue == "ARTS20200")
     assert(sheet.getRow(4).getCell(5).getStringCellValue == "Aalto-universitetets magisteransökan 2023")
     assert(sheet.getRow(4).getCell(6).getStringCellValue == "1.2.246.562.29.00000000000000015722")
@@ -2386,6 +2476,50 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(6) == null)
   }
 
+  it should "create hakuparametrit sheet in Korkeakoulujen koulutukset toteutukset ja hakukohteet" in {
+    val hakuParams: List[(String, String | Boolean | List[String])] =
+      List(
+        "haku" -> List("1.2.246.562.29.00000000000000015722"),
+        "tulostustapa" -> "hakukohteittain",
+        "oppilaitos" -> List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        "toimipiste" -> List("1.2.246.562.10.2781706420001"),
+        "hakukohderyhma" -> List("1.2.246.562.28.28396122930"),
+        "koulutuksenTila" -> "julkaistu",
+        "toteutuksenTila" -> "arkistoitu",
+        "hakukohteenTila" -> "julkaistu",
+        "kk-tutkinnon-taso" -> List("ylempi")
+      )
+    val wb = ExcelWriter.writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
+      korkeakouluKoulutuksetToteutuksetHakukohteetResults = korkeakouluKoulutuksetToteutuksetHakukohteet,
+      asiointikieli = userLng,
+      translations = translations,
+      tulostustapa = "hakukohteittain",
+      parametrit = hakuParams
+    )
+
+    val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
+    val expectedRows = List(
+      List("Haku SV", "1.2.246.562.29.00000000000000015722"),
+      List("Tulostustapa SV", "Hakukohteittain SV"),
+      List("Oppilaitos SV", "1.2.246.562.10.00000000001, 1.2.246.562.10.2781706420000"),
+      List("Toimipiste SV", "1.2.246.562.10.2781706420001"),
+      List("Hakukohderyhma SV", "1.2.246.562.28.28396122930"),
+      List("Kou.tila SV", "Julkaistu SV"),
+      List("Tot.tila SV", "Arkistoitu SV"),
+      List("Hak.tila SV", "Julkaistu SV"),
+      List("Tutkinnon taso SV", "ylempi SV")
+    )
+    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getSheetAt(1).getRow(1) != null)
+    val sheet = wb.getSheetAt(1)
+
+    validateHeaders(sheet = sheet, expectedHeaders = expectedHeaders)
+    expectedRows.zipWithIndex.foreach { case (expectedRow, rowIndex) =>
+      validateRow(sheet, rowIndex + 1, expectedRow)
+    }
+  }
+
+
   "createHeadingRow" should "create heading row with translated column names or translation keys for hakijat raportti" in {
     val wb: XSSFWorkbook                = new XSSFWorkbook()
     val sheet: XSSFSheet                = wb.createSheet()
@@ -2411,20 +2545,20 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(0).getCell(8).getStringCellValue == "Hakukohde SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(9).getStringCellValue == "raportti.prioriteetti")
     assert(wb.getSheetAt(0).getRow(0).getCell(10).getStringCellValue == "Kaksoistutkinto kiinnostaa SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(11).getStringCellValue == "raportti.urheilijatutkintoKiinnostaa")
-    assert(wb.getSheetAt(0).getRow(0).getCell(12).getStringCellValue == "raportti.valintatieto")
+    assert(wb.getSheetAt(0).getRow(0).getCell(11).getStringCellValue == "Urheilijatutkinto kiinnostaa SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(12).getStringCellValue == "Valintatieto SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(13).getStringCellValue == "Varasija SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "Kokonaispisteet SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "Valintatapajonokohtainen tila SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(16).getStringCellValue == "raportti.vastaanottotieto")
+    assert(wb.getSheetAt(0).getRow(0).getCell(16).getStringCellValue == "Vastaanottotieto SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(17).getStringCellValue == "raportti.viimVastaanottopaiva")
     assert(wb.getSheetAt(0).getRow(0).getCell(18).getStringCellValue == "raportti.ilmoittautuminen")
-    assert(wb.getSheetAt(0).getRow(0).getCell(19).getStringCellValue == "raportti.harkinnanvaraisuus")
-    assert(wb.getSheetAt(0).getRow(0).getCell(20).getStringCellValue == "raportti.soraAiempi")
-    assert(wb.getSheetAt(0).getRow(0).getCell(21).getStringCellValue == "raportti.soraTerveys")
+    assert(wb.getSheetAt(0).getRow(0).getCell(19).getStringCellValue == "Harkinnanvaraisuus SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(20).getStringCellValue == "Sora aiempi SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(21).getStringCellValue == "Sora terveydentila SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(22).getStringCellValue == "Pohjakoulutus SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(23).getStringCellValue == "LupaMark SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(24).getStringCellValue == "raportti.julkaisulupa")
+    assert(wb.getSheetAt(0).getRow(0).getCell(24).getStringCellValue == "Julkaisulupa SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(25).getStringCellValue == "raportti.sahkoinenViestintalupa")
     assert(wb.getSheetAt(0).getRow(0).getCell(26).getStringCellValue == "raportti.lahiosoite")
     assert(wb.getSheetAt(0).getRow(0).getCell(27).getStringCellValue == "raportti.postinumero")
@@ -2476,11 +2610,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(0).getCell(9).getStringCellValue == "Hakukohde SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(10).getStringCellValue == "Hakukelpoisuus SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(11).getStringCellValue == "raportti.prioriteetti")
-    assert(wb.getSheetAt(0).getRow(0).getCell(12).getStringCellValue == "raportti.valintatieto")
+    assert(wb.getSheetAt(0).getRow(0).getCell(12).getStringCellValue == "Valintatieto SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(13).getStringCellValue == "raportti.ehdollisestiHyvaksytty")
     assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "Valintatiedon päivämäärä SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "Lukiokoulutus")
-    assert(wb.getSheetAt(0).getRow(0).getCell(16).getStringCellValue == "raportti.vastaanottotieto")
+    assert(wb.getSheetAt(0).getRow(0).getCell(16).getStringCellValue == "Vastaanottotieto SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(17).getStringCellValue == "raportti.viimVastaanottopaiva")
     assert(wb.getSheetAt(0).getRow(0).getCell(18).getStringCellValue == "raportti.ensikertalainen")
     assert(wb.getSheetAt(0).getRow(0).getCell(19).getStringCellValue == "raportti.ilmoittautuminen")
@@ -2505,16 +2639,24 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1) == null)
   }
 
-  "writeToisenAsteenHakijatRaportti" should "create one sheet with a sheet name, heading row and no results" in {
+  val hakijatParams: List[(String, String | Boolean | List[String])] =
+    List(
+      "haku" -> List("1.2.246.562.29.00000000000000015722"),
+      "oppilaitos" -> List("1.2.246.562.10.00000000001"),
+      "valintatieto" -> List("HYVAKSYTTY"),
+    )
+
+  "writeToisenAsteenHakijatRaportti" should "create one sheet with a sheet name, heading row and no results and parameter sheet" in {
     val hakijatQueryResult = Vector()
     val wb =
       ExcelWriter.writeToisenAsteenHakijatRaportti(
         hakijatQueryResult,
         userLng,
-        translations
+        translations,
+        hakijatParams,
       )
 
-    assert(wb.getNumberOfSheets == 1)
+    assert(wb.getNumberOfSheets == 2)
     assert(wb.getSheetName(0) == "Yhteenveto SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(0).getStringCellValue == "Sukunimi SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(1).getStringCellValue == "Etunimi SV")
@@ -2527,20 +2669,20 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(0).getCell(8).getStringCellValue == "Hakukohde SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(9).getStringCellValue == "raportti.prioriteetti")
     assert(wb.getSheetAt(0).getRow(0).getCell(10).getStringCellValue == "Kaksoistutkinto kiinnostaa SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(11).getStringCellValue == "raportti.urheilijatutkintoKiinnostaa")
-    assert(wb.getSheetAt(0).getRow(0).getCell(12).getStringCellValue == "raportti.valintatieto")
+    assert(wb.getSheetAt(0).getRow(0).getCell(11).getStringCellValue == "Urheilijatutkinto kiinnostaa SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(12).getStringCellValue == "Valintatieto SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(13).getStringCellValue == "Varasija SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(14).getStringCellValue == "Kokonaispisteet SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "Valintatapajonokohtainen tila SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(16).getStringCellValue == "raportti.vastaanottotieto")
+    assert(wb.getSheetAt(0).getRow(0).getCell(16).getStringCellValue == "Vastaanottotieto SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(17).getStringCellValue == "raportti.viimVastaanottopaiva")
     assert(wb.getSheetAt(0).getRow(0).getCell(18).getStringCellValue == "raportti.ilmoittautuminen")
-    assert(wb.getSheetAt(0).getRow(0).getCell(19).getStringCellValue == "raportti.harkinnanvaraisuus")
-    assert(wb.getSheetAt(0).getRow(0).getCell(20).getStringCellValue == "raportti.soraAiempi")
-    assert(wb.getSheetAt(0).getRow(0).getCell(21).getStringCellValue == "raportti.soraTerveys")
+    assert(wb.getSheetAt(0).getRow(0).getCell(19).getStringCellValue == "Harkinnanvaraisuus SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(20).getStringCellValue == "Sora aiempi SV")
+    assert(wb.getSheetAt(0).getRow(0).getCell(21).getStringCellValue == "Sora terveydentila SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(22).getStringCellValue == "Pohjakoulutus SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(23).getStringCellValue == "LupaMark SV")
-    assert(wb.getSheetAt(0).getRow(0).getCell(24).getStringCellValue == "raportti.julkaisulupa")
+    assert(wb.getSheetAt(0).getRow(0).getCell(24).getStringCellValue == "Julkaisulupa SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(25).getStringCellValue == "raportti.sahkoinenViestintalupa")
     assert(wb.getSheetAt(0).getRow(0).getCell(26).getStringCellValue == "raportti.lahiosoite")
     assert(wb.getSheetAt(0).getRow(0).getCell(27).getStringCellValue == "raportti.postinumero")
@@ -2550,6 +2692,60 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     assert(wb.getSheetAt(0).getPhysicalNumberOfRows == 1)
     assert(wb.getSheetAt(0).getRow(1) == null)
+  }
+
+  it should "create hakuparametrit sheet" in {
+    val hakuParams: List[(String, String | Boolean | List[String])] =
+      List(
+        "haku" -> List("1.2.246.562.29.00000000000000015722"),
+        "oppilaitos" -> List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        "toimipiste" -> List("1.2.246.562.10.2781706420001"),
+        "hakukohde" -> List("1.2.246.562.20.00000000000000059957"),
+        "pohjakoulutus" -> List("Perusopetuksen oppimäärä"),
+        "valintatieto" -> List("HYVAKSYTTY"),
+        "vastaanottotieto" -> List("PERUUTETTU"),
+        "harkinnanvaraisuus" -> List("OPPIMISVAIKEUDET"),
+        "kaksoistutkintoKiinnostaa" -> false,
+        "urheilijatutkintoKiinnostaa" -> false,
+        "soraTerveys" -> true,
+        "soraAiempi" -> true,
+        "markkinointilupa" -> true,
+        "julkaisulupa" -> true
+      )
+    val hakijatQueryResult = Vector()
+    val wb =
+      ExcelWriter.writeToisenAsteenHakijatRaportti(
+        hakijatQueryResult,
+        userLng,
+        translations,
+        hakuParams,
+      )
+
+    val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
+    val expectedRows = List(
+      List("Haku SV", "1.2.246.562.29.00000000000000015722"),
+      List("Oppilaitos SV", "1.2.246.562.10.00000000001, 1.2.246.562.10.2781706420000"),
+      List("Toimipiste SV", "1.2.246.562.10.2781706420001"),
+      List("Hakukohde SV", "1.2.246.562.20.00000000000000059957"),
+      List("Pohjakoulutus SV", "Perusopetuksen oppimäärä"),
+      List("Valintatieto SV", "Hyvaksytty SV"),
+      List("Vastaanottotieto SV", "Peruutettu SV"),
+      List("Harkinnanvaraisuus SV", "Oppimisvaikeudet SV"),
+      List("Kaksoistutkinto kiinnostaa SV", "Nej"),
+      List("Urheilijatutkinto kiinnostaa SV", "Nej"),
+      List("Sora terveydentila SV", "Ja"),
+      List("Sora aiempi SV", "Ja"),
+      List("LupaMark SV", "Ja"),
+      List("Julkaisulupa SV", "Ja")
+    )
+    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getSheetAt(1).getRow(1) != null)
+    val sheet = wb.getSheetAt(1)
+
+    validateHeaders(sheet = sheet, expectedHeaders = expectedHeaders)
+    expectedRows.zipWithIndex.foreach { case (expectedRow, rowIndex) =>
+      validateRow(sheet, rowIndex + 1, expectedRow)
+    }
   }
 
   it should "return excel with one result row in addition to heading row" in {
@@ -2596,10 +2792,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
       ExcelWriter.writeToisenAsteenHakijatRaportti(
         hakijatResult,
         userLng,
-        translations
+        translations,
+        hakijatParams,
       )
 
-    assert(wb.getNumberOfSheets == 1)
+    assert(wb.getNumberOfSheets == 2)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Rautiainen-Testi")
@@ -2621,7 +2818,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1).getCell(16).getStringCellValue == "Ei vastaanotettu SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(17).getStringCellValue == "-")
     assert(wb.getSheetAt(0).getRow(1).getCell(18).getStringCellValue == "-")
-    assert(wb.getSheetAt(0).getRow(1).getCell(19).getStringCellValue == "raportti.oppimisvaikeudet")
+    assert(wb.getSheetAt(0).getRow(1).getCell(19).getStringCellValue == "Oppimisvaikeudet SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(20).getStringCellValue == "Nej")
     assert(wb.getSheetAt(0).getRow(1).getCell(21).getStringCellValue == "Nej")
     assert(wb.getSheetAt(0).getRow(1).getCell(22).getStringCellValue == "Den grundläggande utbildningens lärokurs")
@@ -2759,10 +2956,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
       ExcelWriter.writeToisenAsteenHakijatRaportti(
         hakijatResult,
         userLng,
-        translations
+        translations,
+        hakijatParams,
       )
 
-    assert(wb.getNumberOfSheets == 1)
+    assert(wb.getNumberOfSheets == 2)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(1).getCell(0).getStringCellValue == "Rautiainen-Testi")
@@ -3179,14 +3377,15 @@ class ExcelWriterSpec extends AnyFlatSpec {
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(true),
         maybeNaytaPostiosoite = Some(true),
-        yokokeet = yokokeet
+        yokokeet = yokokeet,
+        parametrit = hakijatParams
       )
 
     val expectedHeaders = List(
       "Sukunimi SV", "Etunimi SV", "Turvakielto SV", "raportti.hetu", "raportti.syntymaAika",
       "Kansalaisuudet SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
-      "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "raportti.valintatieto",
-      "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV", "raportti.vastaanottotieto",
+      "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "Valintatieto SV",
+      "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV", "Vastaanottotieto SV",
       "raportti.viimVastaanottopaiva", "raportti.ensikertalainen", "raportti.ilmoittautuminen",
       "Pohjakoulutus SV", "raportti.maksuvelvollisuus", "raportti.hakemusmaksunTila",
       "LupaMark SV", "raportti.sahkoinenViestintalupa", "raportti.lahiosoite",
@@ -3214,7 +3413,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
     )
 
-    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getNumberOfSheets == 3)
     assert(wb.getSheetAt(0).getRow(1) != null)
     val sheet = wb.getSheetAt(0)
 
@@ -3250,17 +3449,18 @@ class ExcelWriterSpec extends AnyFlatSpec {
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(false),
         maybeNaytaPostiosoite = Some(false),
-        yokokeet = yokokeet
+        yokokeet = yokokeet,
+        parametrit = hakijatParams
       )
 
-    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getNumberOfSheets == 3)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     val expectedHeaders = List(
       "Sukunimi SV", "Etunimi SV", "Turvakielto SV", "raportti.syntymaAika",
       "Kansalaisuudet SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
-      "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "raportti.valintatieto",
-      "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV", "raportti.vastaanottotieto",
+      "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "Valintatieto SV",
+      "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV", "Vastaanottotieto SV",
       "raportti.viimVastaanottopaiva", "raportti.ensikertalainen", "raportti.ilmoittautuminen",
       "Pohjakoulutus SV", "raportti.maksuvelvollisuus", "raportti.hakemusmaksunTila",
       "LupaMark SV", "raportti.sahkoinenViestintalupa", "raportti.kotikunta", "raportti.asuinmaa",
@@ -3329,10 +3529,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(true),
         maybeNaytaPostiosoite = Some(false),
-        yokokeet = yokokeet
+        yokokeet = yokokeet,
+        parametrit = hakijatParams
       )
 
-    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getNumberOfSheets == 3)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
@@ -3341,9 +3542,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val expectedHeaders = List(
       "Sukunimi SV", "Etunimi SV", "Turvakielto SV", "raportti.hetu", "raportti.syntymaAika",
       "Kansalaisuudet SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
-      "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "raportti.valintatieto",
+      "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "Valintatieto SV",
       "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV", "Lukiokoulutus",
-      "raportti.vastaanottotieto", "raportti.viimVastaanottopaiva", "raportti.ensikertalainen",
+      "Vastaanottotieto SV", "raportti.viimVastaanottopaiva", "raportti.ensikertalainen",
       "raportti.ilmoittautuminen", "Pohjakoulutus SV", "raportti.maksuvelvollisuus", "raportti.hakemusmaksunTila",
       "LupaMark SV", "raportti.sahkoinenViestintalupa", "raportti.kotikunta", "raportti.asuinmaa",
       "Puhelinnumero SV", "raportti.sahkoposti", "A", "BB", "EA", "I", "M"
@@ -3387,17 +3588,18 @@ class ExcelWriterSpec extends AnyFlatSpec {
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(false),
         maybeNaytaPostiosoite = Some(true),
-        yokokeet = yokokeet
+        yokokeet = yokokeet,
+        parametrit = hakijatParams
       )
 
     val expectedHeaders = List(
       "Sukunimi SV", "Etunimi SV", "Turvakielto SV", "raportti.syntymaAika",
       "Kansalaisuudet SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
-      "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "raportti.valintatieto",
+      "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "Valintatieto SV",
       "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV",
       "Koevalintajono kaikille hakijoille", "Todistusvalinta (YO)",
       "Todistusvalintajono ensikertalaisille hakijoille", "Todistusvalintajono ensikertalaisille hakijoille",
-      "Todistusvalintajono kaikille hakijoille", "raportti.vastaanottotieto",
+      "Todistusvalintajono kaikille hakijoille", "Vastaanottotieto SV",
       "raportti.viimVastaanottopaiva", "raportti.ensikertalainen", "raportti.ilmoittautuminen",
       "Pohjakoulutus SV", "raportti.maksuvelvollisuus", "raportti.hakemusmaksunTila",
       "LupaMark SV", "raportti.sahkoinenViestintalupa", "raportti.lahiosoite",
@@ -3446,7 +3648,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
     )
 
-    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getNumberOfSheets == 3)
     assert(wb.getSheetAt(0).getRow(1) != null)
     val sheet = wb.getSheetAt(0)
 
@@ -3473,17 +3675,18 @@ class ExcelWriterSpec extends AnyFlatSpec {
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(false),
         maybeNaytaPostiosoite = Some(false),
-        yokokeet = yokokeet
+        yokokeet = yokokeet,
+        parametrit = hakijatParams
       )
 
     val expectedHeaders = List(
       "Sukunimi SV", "Etunimi SV", "Turvakielto SV", "raportti.syntymaAika",
       "Kansalaisuudet SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
-      "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "raportti.valintatieto",
+      "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "Valintatieto SV",
       "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV",
       "Koevalintajono kaikille hakijoille", "Todistusvalinta (YO)",
       "Todistusvalintajono ensikertalaisille hakijoille", "Todistusvalintajono ensikertalaisille hakijoille",
-      "Todistusvalintajono kaikille hakijoille", "raportti.vastaanottotieto",
+      "Todistusvalintajono kaikille hakijoille", "Vastaanottotieto SV",
       "raportti.viimVastaanottopaiva", "raportti.ensikertalainen", "raportti.ilmoittautuminen",
       "Pohjakoulutus SV", "raportti.maksuvelvollisuus", "raportti.hakemusmaksunTila",
       "LupaMark SV", "raportti.sahkoinenViestintalupa", "raportti.kotikunta", "raportti.asuinmaa",
@@ -3531,7 +3734,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
     )
 
-    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getNumberOfSheets == 3)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     val sheet = wb.getSheetAt(0)
@@ -3553,10 +3756,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(false),
         maybeNaytaPostiosoite = Some(false),
-        yokokeet = yokokeet
+        yokokeet = yokokeet,
+        parametrit = hakijatParams
       )
 
-    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getNumberOfSheets == 3)
     assert(wb.getSheetAt(1).getRow(1) != null)
 
     assert(wb.getSheetAt(1).getRow(0).getCell(0).getStringCellValue == "raportti.yokoelyhenne")
@@ -3577,8 +3781,57 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(1).getRow(6) == null)
   }
 
+  it should "create hakuparametrit sheet after yokokeet sheet" in {
+    val hakuParams: List[(String, String | Boolean | List[String])] =
+      List(
+        "haku" -> List("1.2.246.562.29.00000000000000015722"),
+        "oppilaitos" -> List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        "toimipiste" -> List("1.2.246.562.10.2781706420001"),
+        "hakukohde" -> List("1.2.246.562.20.00000000000000059957"),
+        "hakukohderyhma" -> List("1.2.246.562.28.28396122930"),
+        "valintatieto" -> List("HYVAKSYTTY"),
+        "vastaanottotieto" -> List("PERUUTETTU"),
+        "kansalaisuus" -> List("1"),
+        "markkinointilupa" -> true,
+        "nayta-yo-arvosanat" -> true,
+        "nayta-hetu" -> false,
+        "nayta-postiosoite" -> false,
+      )
+    val hakijatQueryResult = Vector()
+    val wb =
+      ExcelWriter.writeToisenAsteenHakijatRaportti(
+        hakijatQueryResult,
+        userLng,
+        translations,
+        hakuParams,
+      )
 
-  it should "return excel without arvosanat and yokokeet sheet when nayta arvosanat is false" in {
+    val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
+    val expectedRows = List(
+      List("Haku SV", "1.2.246.562.29.00000000000000015722"),
+      List("Oppilaitos SV", "1.2.246.562.10.00000000001, 1.2.246.562.10.2781706420000"),
+      List("Toimipiste SV", "1.2.246.562.10.2781706420001"),
+      List("Hakukohde SV", "1.2.246.562.20.00000000000000059957"),
+      List("Hakukohderyhma SV", "1.2.246.562.28.28396122930"),
+      List("Valintatieto SV", "Hyvaksytty SV"),
+      List("Vastaanottotieto SV", "Peruutettu SV"),
+      List("Kansalaisuus SV", "raportti.kansalaisuus.suomi"),
+      List("LupaMark SV", "Ja"),
+      List("nayta-yo-arvosanat", "Ja"),
+      List("nayta-hetu", "Nej"),
+      List("nayta-postiosoite", "Nej")
+    )
+    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getSheetAt(1).getRow(1) != null)
+    val sheet = wb.getSheetAt(1)
+
+    validateHeaders(sheet = sheet, expectedHeaders = expectedHeaders)
+    expectedRows.zipWithIndex.foreach { case (expectedRow, rowIndex) =>
+      validateRow(sheet, rowIndex + 1, expectedRow)
+    }
+  }
+
+  it should "return excel without arvosanat and yokokeet sheet and with parametrit sheet when nayta arvosanat is false" in {
     val kkHakijatResult = Vector(
       kkHakijatRautiainenWithValintatapajonot,
       kkHakijaLehtoWithValintatapajonot
@@ -3592,10 +3845,25 @@ class ExcelWriterSpec extends AnyFlatSpec {
         maybeNaytaYoArvosanat = Some(false),
         maybeNaytaHetu = Some(true),
         maybeNaytaPostiosoite = Some(true),
-        yokokeet = Vector()
+        yokokeet = Vector(),
+        parametrit = hakijatParams
       )
 
-    assert(wb.getNumberOfSheets == 1)
+    val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
+    val expectedRows = List(
+      List("Haku SV", "1.2.246.562.29.00000000000000015722"),
+      List("Oppilaitos SV", "1.2.246.562.10.00000000001"),
+      List("Valintatieto SV", "Hyvaksytty SV"),
+    )
+    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getSheetAt(1).getRow(1) != null)
+    val sheet = wb.getSheetAt(1)
+
+    validateHeaders(sheet = sheet, expectedHeaders = expectedHeaders)
+    expectedRows.zipWithIndex.foreach { case (expectedRow, rowIndex) =>
+      validateRow(sheet, rowIndex + 1, expectedRow)
+    }
+
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
@@ -3612,7 +3880,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1).getCell(9).getStringCellValue == "Hakukohde SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(10).getStringCellValue == "Hakukelpoisuus SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(11).getStringCellValue == "raportti.prioriteetti")
-    assert(wb.getSheetAt(0).getRow(1).getCell(12).getStringCellValue == "raportti.valintatieto")
+    assert(wb.getSheetAt(0).getRow(1).getCell(12).getStringCellValue == "Valintatieto SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(13).getStringCellValue == "raportti.ehdollisestiHyvaksytty")
     assert(wb.getSheetAt(0).getRow(1).getCell(14).getStringCellValue == "Valintatiedon päivämäärä SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(15).getStringCellValue == "Koevalintajono kaikille hakijoille")
@@ -3624,7 +3892,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       wb.getSheetAt(0).getRow(1).getCell(18).getStringCellValue == "Todistusvalintajono ensikertalaisille hakijoille"
     )
     assert(wb.getSheetAt(0).getRow(1).getCell(19).getStringCellValue == "Todistusvalintajono kaikille hakijoille")
-    assert(wb.getSheetAt(0).getRow(1).getCell(20).getStringCellValue == "raportti.vastaanottotieto")
+    assert(wb.getSheetAt(0).getRow(1).getCell(20).getStringCellValue == "Vastaanottotieto SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(21).getStringCellValue == "raportti.viimVastaanottopaiva")
     assert(wb.getSheetAt(0).getRow(1).getCell(22).getStringCellValue == "raportti.ensikertalainen")
     assert(wb.getSheetAt(0).getRow(1).getCell(23).getStringCellValue == "raportti.ilmoittautuminen")
@@ -3764,10 +4032,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
         maybeNaytaYoArvosanat = None,
         maybeNaytaHetu = Some(false),
         maybeNaytaPostiosoite = Some(false),
-        yokokeet = Vector()
+        yokokeet = Vector(),
+        parametrit = hakijatParams
       )
 
-    assert(wb.getNumberOfSheets == 1)
+    assert(wb.getNumberOfSheets == 2)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     assert(wb.getSheetAt(0).getRow(0).getCell(0) == null)
@@ -3783,7 +4052,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1).getCell(8).getStringCellValue == "Hakukohde SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(9).getStringCellValue == "Hakukelpoisuus SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(10).getStringCellValue == "raportti.prioriteetti")
-    assert(wb.getSheetAt(0).getRow(1).getCell(11).getStringCellValue == "raportti.valintatieto")
+    assert(wb.getSheetAt(0).getRow(1).getCell(11).getStringCellValue == "Valintatieto SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(12).getStringCellValue == "raportti.ehdollisestiHyvaksytty")
     assert(wb.getSheetAt(0).getRow(1).getCell(13).getStringCellValue == "Valintatiedon päivämäärä SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(14).getStringCellValue == "Todistusvalinta (YO)")
@@ -3791,7 +4060,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       wb.getSheetAt(0).getRow(1).getCell(15).getStringCellValue == "Todistusvalintajono ensikertalaisille hakijoille"
     )
     assert(wb.getSheetAt(0).getRow(1).getCell(16).getStringCellValue == "Todistusvalintajono kaikille hakijoille")
-    assert(wb.getSheetAt(0).getRow(1).getCell(17).getStringCellValue == "raportti.vastaanottotieto")
+    assert(wb.getSheetAt(0).getRow(1).getCell(17).getStringCellValue == "Vastaanottotieto SV")
     assert(wb.getSheetAt(0).getRow(1).getCell(18).getStringCellValue == "raportti.viimVastaanottopaiva")
     assert(wb.getSheetAt(0).getRow(1).getCell(19).getStringCellValue == "raportti.ensikertalainen")
     assert(wb.getSheetAt(0).getRow(1).getCell(20).getStringCellValue == "raportti.ilmoittautuminen")
@@ -3885,15 +4154,16 @@ class ExcelWriterSpec extends AnyFlatSpec {
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(true),
         maybeNaytaPostiosoite = Some(false),
-        yokokeet = yokokeet
+        yokokeet = yokokeet,
+        parametrit = hakijatParams
       )
 
     val expectedHeaders = List(
       "Sukunimi SV", "Etunimi SV", "Turvakielto SV", "raportti.hetu", "raportti.syntymaAika",
       "Kansalaisuudet SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
-      "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "raportti.valintatieto",
+      "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "Valintatieto SV",
       "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV", "Lukiokoulutus",
-      "raportti.vastaanottotieto", "raportti.viimVastaanottopaiva", "raportti.ensikertalainen",
+      "Vastaanottotieto SV", "raportti.viimVastaanottopaiva", "raportti.ensikertalainen",
       "raportti.ilmoittautuminen", "Pohjakoulutus SV", "raportti.maksuvelvollisuus",
       "raportti.hakemusmaksunTila", "LupaMark SV", "raportti.sahkoinenViestintalupa",
       "raportti.kotikunta", "raportti.asuinmaa", "Puhelinnumero SV", "raportti.sahkoposti",
@@ -3913,7 +4183,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       ),
     )
 
-    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getNumberOfSheets == 3)
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     val sheet = wb.getSheetAt(0)
@@ -3926,6 +4196,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(4) == null)
   }
 
+  val hakeneetHyvaksytytVastaanottaneetParams: List[(String, String | Boolean | List[String])] =
+    List(
+      "haku" -> List("1.2.246.562.29.00000000000000015722"),
+      "oppilaitos" -> List("1.2.246.562.10.52251087186"),
+      "toimipiste" -> List("1.2.246.562.10.23017513880"),
+      "tulostustapa" -> "toimipisteittain"
+    )
   "writeHakeneetHyvaksytytVastaanottaneetRaportti" should "return excel with three heading columns, three result rows and two summary rows for hakukohteittain" in {
     val data = List(
       HakeneetHyvaksytytVastaanottaneetHakukohteittain(
@@ -4035,10 +4312,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
       data = data,
       yksittaisetHakijat = 450,
       naytaHakutoiveet = true,
-      tulostustapa = "hakukohteittain"
+      tulostustapa = "hakukohteittain",
+      parametrit = hakeneetHyvaksytytVastaanottaneetParams
     )
 
-    assert(workbook.getNumberOfSheets == 1)
+    assert(workbook.getNumberOfSheets == 2)
     val sheet = workbook.getSheetAt(0)
     // Otsikkorivi
     val headingRow = sheet.getRow(0)
@@ -4150,6 +4428,62 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
   }
 
+  it should "create hakuparametrit sheet" in {
+    val hakuParams: List[(String, String | Boolean | List[String])] =
+      List(
+        "haku" -> List("1.2.246.562.29.00000000000000015722"),
+        "tulostustapa" -> "toimipisteittain",
+        "oppilaitos" -> List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        "toimipiste" -> List("1.2.246.562.10.2781706420001"),
+        "hakukohde" -> List("1.2.246.562.20.00000000000000059957"),
+        "opetuskieli" -> List("1", "4"),
+        "koulutusala1" -> List("10"),
+        "koulutusala2" -> List("092"),
+        "koulutusala3" -> List("1018"),
+        "maakunta" -> List("01"),
+        "kunta" -> List("091"),
+        "harkinnanvaraisuus" -> List("OPPIMISVAIKEUDET"),
+        "sukupuoli" -> List("2"),
+        "nayta-hakutoiveet" -> true,
+      )
+    val data = List.empty
+    val wb = ExcelWriter.writeHakeneetHyvaksytytVastaanottaneetRaportti(
+      asiointikieli = "sv",
+      translations = translations,
+      data = data,
+      yksittaisetHakijat = 0,
+      naytaHakutoiveet = true,
+      tulostustapa = "toimipisteittain",
+      parametrit = hakuParams
+    )
+
+    val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
+    val expectedRows = List(
+      List("Haku SV", "1.2.246.562.29.00000000000000015722"),
+      List("Tulostustapa SV", "toimipisteittain"),
+      List("Oppilaitos SV", "1.2.246.562.10.00000000001, 1.2.246.562.10.2781706420000"),
+      List("Toimipiste SV", "1.2.246.562.10.2781706420001"),
+      List("Hakukohde SV", "1.2.246.562.20.00000000000000059957"),
+      List("Opetuskieli SV", "1, 4"),
+      List("Koulutusala 1 SV", "10"),
+      List("Koulutusala 2 SV", "092"),
+      List("Koulutusala 3 SV", "1018"),
+      List("maakunta", "01"),
+      List("kunta", "091"),
+      List("Harkinnanvaraisuus SV", "Oppimisvaikeudet SV"),
+      List("sukupuoli", "2"),
+      List("nayta-hakutoiveet", "Ja")
+    )
+    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getSheetAt(1).getRow(1) != null)
+    val sheet = wb.getSheetAt(1)
+
+    validateHeaders(sheet = sheet, expectedHeaders = expectedHeaders)
+    expectedRows.zipWithIndex.foreach { case (expectedRow, rowIndex) =>
+      validateRow(sheet, rowIndex + 1, expectedRow)
+    }
+  }
+
   it should "return excel with one heading column, three result rows and two summary rows for toimipisteittäin" in {
     val data = List(
       HakeneetHyvaksytytVastaanottaneetResult(
@@ -4229,10 +4563,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
       data = data,
       yksittaisetHakijat = 450,
       naytaHakutoiveet = true,
-      tulostustapa = "toimipisteittain"
+      tulostustapa = "toimipisteittain",
+      parametrit = hakeneetHyvaksytytVastaanottaneetParams
     )
 
-    assert(workbook.getNumberOfSheets == 1)
+    assert(workbook.getNumberOfSheets == 2)
     val sheet = workbook.getSheetAt(0)
     // Otsikkorivi
     val headingRow = sheet.getRow(0)
@@ -4363,10 +4698,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
       data = data,
       yksittaisetHakijat = 300,
       naytaHakutoiveet = false,
-      tulostustapa = "oppilaitoksittain"
+      tulostustapa = "oppilaitoksittain",
+      parametrit = hakeneetHyvaksytytVastaanottaneetParams
     )
 
-    assert(workbook.getNumberOfSheets == 1)
+    assert(workbook.getNumberOfSheets == 2)
     val sheet = workbook.getSheetAt(0)
     // Otsikkorivi
     val headingRow = sheet.getRow(0)
@@ -4438,10 +4774,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
       data = data,
       yksittaisetHakijat = 300,
       naytaHakutoiveet = false,
-      tulostustapa = "toimipisteittain"
+      tulostustapa = "toimipisteittain",
+      parametrit = hakeneetHyvaksytytVastaanottaneetParams
     )
 
-    assert(workbook.getNumberOfSheets == 1)
+    assert(workbook.getNumberOfSheets == 2)
     val sheet = workbook.getSheetAt(0)
     // Otsikkorivi
     val headingRow = sheet.getRow(0)
@@ -4838,10 +5175,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
       ensikertalaisetYksittaisetHakijat = 126,
       maksuvelvollisetYksittaisetHakijat = 2,
       naytaHakutoiveet = true,
-      tulostustapa = "toimipisteittain"
+      tulostustapa = "toimipisteittain",
+      hakeneetHyvaksytytVastaanottaneetParams
     )
 
-    assert(workbook.getNumberOfSheets == 1)
+    assert(workbook.getNumberOfSheets == 2)
     val sheet = workbook.getSheetAt(0)
 
     // otsikkorivi
@@ -4952,6 +5290,64 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(hakijatSummaryRow.getCell(9).getNumericCellValue == 2)
   }
 
+  it should "create hakuparametrit sheet" in {
+    val hakuParams: List[(String, String | Boolean | List[String])] =
+      List(
+        "haku" -> List("1.2.246.562.29.00000000000000015722"),
+        "tulostustapa" -> "toimipisteittain",
+        "koulutustoimija" -> List("1.2.246.562.10.53814745062"),
+        "oppilaitos" -> List("1.2.246.562.10.39218317368"),
+        "toimipiste" -> List("1.2.246.562.10.94997228401"),
+        "hakukohderyhma" -> List("1.2.246.562.28.87571420741"),
+        "hakukohde" -> List("1.2.246.562.20.00000000000000038238","1.2.246.562.20.00000000000000038237"),
+        "okm-ohjauksen-ala" -> List("10"),
+        "tutkinnon-taso" -> List("1"),
+        "aidinkieli" -> List("sv"),
+        "kansalaisuus" -> List("muu"),
+        "sukupuoli" -> List("2"),
+        "ensikertalainen" -> false,
+        "nayta-hakutoiveet" -> true,
+      )
+    val data = List.empty
+    val wb = ExcelWriter.writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
+      asiointikieli = "sv",
+      translations = translations,
+      data = data,
+      yksittaisetHakijat = 0,
+      ensikertalaisetYksittaisetHakijat = 0,
+      maksuvelvollisetYksittaisetHakijat = 0,
+      naytaHakutoiveet = true,
+      tulostustapa = "toimipisteittain",
+      parametrit = hakuParams
+    )
+
+    val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
+    val expectedRows = List(
+      List("Haku SV", "1.2.246.562.29.00000000000000015722"),
+      List("Tulostustapa SV", "toimipisteittain"),
+      List("Koulutustoimija SV", "1.2.246.562.10.53814745062"),
+      List("Oppilaitos SV", "1.2.246.562.10.39218317368"),
+      List("Toimipiste SV", "1.2.246.562.10.94997228401"),
+      List("Hakukohderyhma SV", "1.2.246.562.28.87571420741"),
+      List("Hakukohde SV", "1.2.246.562.20.00000000000000038238, 1.2.246.562.20.00000000000000038237"),
+      List("okm-ohjauksen-ala", "10"),
+      List("tutkinnon-taso", "1"),
+      List("aidinkieli", "sv"),
+      List("Kansalaisuus SV", "raportti.kansalaisuus.muu"),
+      List("sukupuoli", "2"),
+      List("ensikertalainen", "Nej"),
+      List("nayta-hakutoiveet", "Ja")
+    )
+    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getSheetAt(1).getRow(1) != null)
+    val sheet = wb.getSheetAt(1)
+
+    validateHeaders(sheet = sheet, expectedHeaders = expectedHeaders)
+    expectedRows.zipWithIndex.foreach { case (expectedRow, rowIndex) =>
+      validateRow(sheet, rowIndex + 1, expectedRow)
+    }
+  }
+
   it should "return excel with three title columns and summaries shifted accordingly if tulostustapa is hakukohteittain" in {
     val data = List(
       KkHakeneetHyvaksytytVastaanottaneetHakukohteittain(
@@ -5032,7 +5428,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
       ensikertalaisetYksittaisetHakijat = 126,
       maksuvelvollisetYksittaisetHakijat = 2,
       naytaHakutoiveet = true,
-      tulostustapa = "hakukohteittain"
+      tulostustapa = "hakukohteittain",
+      hakeneetHyvaksytytVastaanottaneetParams
     )
 
     assert(workbook.getNumberOfSheets == 1)
@@ -5216,10 +5613,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
       ensikertalaisetYksittaisetHakijat = 126,
       maksuvelvollisetYksittaisetHakijat = 2,
       naytaHakutoiveet = false,
-      tulostustapa = "toimipisteittain"
+      tulostustapa = "toimipisteittain",
+      hakeneetHyvaksytytVastaanottaneetParams
     )
 
-    assert(workbook.getNumberOfSheets == 1)
+    assert(workbook.getNumberOfSheets == 2)
     val sheet = workbook.getSheetAt(0)
 
     // otsikkorivi
@@ -5398,10 +5796,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
       ensikertalaisetYksittaisetHakijat = 1289,
       maksuvelvollisetYksittaisetHakijat = 0,
       naytaHakutoiveet = true,
-      tulostustapa = "kansalaisuuksittain"
+      tulostustapa = "kansalaisuuksittain",
+      hakeneetHyvaksytytVastaanottaneetParams
     )
 
-    assert(workbook.getNumberOfSheets == 1)
+    assert(workbook.getNumberOfSheets == 2)
     val sheet = workbook.getSheetAt(0)
 
     // otsikkorivi
@@ -5619,10 +6018,11 @@ class ExcelWriterSpec extends AnyFlatSpec {
       ensikertalaisetYksittaisetHakijat = 1578,
       maksuvelvollisetYksittaisetHakijat = 0,
       naytaHakutoiveet = true,
-      tulostustapa = "hakukohderyhmittain"
+      tulostustapa = "hakukohderyhmittain",
+      hakeneetHyvaksytytVastaanottaneetParams
     )
 
-    assert(workbook.getNumberOfSheets == 1)
+    assert(workbook.getNumberOfSheets == 2)
     val sheet = workbook.getSheetAt(0)
 
     // otsikkorivi

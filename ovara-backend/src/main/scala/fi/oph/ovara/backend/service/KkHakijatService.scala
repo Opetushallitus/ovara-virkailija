@@ -1,6 +1,7 @@
 package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.domain.{KkHakija, Koodi}
+import fi.oph.ovara.backend.raportointi.dto.{ValidatedKkHakijatParams, buildKkHakijatParamsForExcel}
 import fi.oph.ovara.backend.repository.{CommonRepository, KkHakijatRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -83,6 +84,34 @@ class KkHakijatService(
           Vector()
       }
 
+      val raporttiParamNames = db.run(
+        kkHakijatRepository.hakuParamNamesQuery(
+          haut,
+          oppilaitokset,
+          toimipisteet,
+          hakukohderyhmat,
+          hakukohteet,
+        ),
+        "hakuParamNamesQuery"
+      ).map(param => param.parametri -> param.nimet).toMap
+
+      val raporttiParams = buildKkHakijatParamsForExcel(
+        ValidatedKkHakijatParams(
+          haut,
+          oppilaitokset,
+          toimipisteet,
+          hakukohteet,
+          valintatiedot,
+          vastaanottotiedot,
+          hakukohderyhmat,
+          kansalaisuusluokat,
+          markkinointilupa,
+          naytaYoArvosanat,
+          naytaHetu,
+          naytaPostiosoite
+        ),
+        raporttiParamNames)
+
       ExcelWriter.writeKkHakijatRaportti(
         sortedList,
         asiointikieli,
@@ -90,7 +119,8 @@ class KkHakijatService(
         Some(naytaYoArvosanat),
         Some(naytaHetu),
         Some(naytaPostiosoite),
-        yokokeet
+        yokokeet,
+        raporttiParams
       )
     } match {
       case Success(excelFile) => Right(excelFile)

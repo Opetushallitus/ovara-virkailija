@@ -1,5 +1,8 @@
 package fi.oph.ovara.backend.raportointi.dto
 
+import fi.oph.ovara.backend.domain.Kielistetty
+import fi.oph.ovara.backend.utils.ParameterUtils
+
 case class RawKkHakijatParams(
                                haut: List[String],
                                oppilaitokset: List[String],
@@ -46,3 +49,31 @@ def buildKkHakijatAuditParams(valid: ValidatedKkHakijatParams): Map[String, Any]
     "naytaPostiosoite" -> Option(valid.naytaPostiosoite)
   ).collect { case (key, Some(value)) => key -> value }
 }
+
+def buildKkHakijatParamsForExcel(params: ValidatedKkHakijatParams, paramNames: Map[String, List[Kielistetty]]):
+List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])] = {
+  val stringAndKielistettyParams = List(
+    "haku" -> paramNames.getOrElse("haku", List.empty),
+    "oppilaitos" -> paramNames.getOrElse("oppilaitos", List.empty),
+    "toimipiste" -> paramNames.getOrElse("toimipiste", List.empty),
+    "hakukohderyhma" -> paramNames.getOrElse("hakukohderyhma", List.empty),
+    "hakukohde" -> paramNames.getOrElse("hakukohde", List.empty),
+    "valintatieto" -> params.valintatiedot,
+    "vastaanottotieto" -> params.vastaanottotiedot,
+    "kansalaisuus" -> params.kansalaisuusluokat,
+    
+  ).filterNot { case (_, value) =>
+    value match {
+      case list: List[_] => list.isEmpty
+    }
+  }
+
+  val booleanParams = ParameterUtils.collectBooleanParams(List(
+    "markkinointilupa" -> params.markkinointilupa,
+    "nayta-yo-arvosanat" -> Some(params.naytaYoArvosanat),
+    "nayta-hetu" -> Some(params.naytaHetu),
+    "nayta-postiosoite" -> Some(params.naytaPostiosoite))
+  )
+  stringAndKielistettyParams ++ booleanParams
+}
+

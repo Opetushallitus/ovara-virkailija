@@ -1,7 +1,7 @@
 package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.KkHakija
-import fi.oph.ovara.backend.utils.RepositoryUtils
+import fi.oph.ovara.backend.utils.{ParametriNimet, RepositoryUtils}
 import fi.oph.ovara.backend.utils.RepositoryUtils.*
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.{Component, Repository}
@@ -88,6 +88,29 @@ class KkHakijatRepository extends Extractors {
 
     LOG.debug(s"selectWithParams: ${query.statements.head}")
 
+    query
+  }
+
+  def hakuParamNamesQuery(haut: List[String], oppilaitokset: List[String], toimipisteet: List[String], hakukohderyhmat: List[String], hakukohteet: List[String]):
+  SqlStreamingAction[Vector[ParametriNimet], ParametriNimet, Effect] = {
+    val oppilaitosQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("oppilaitos", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", oppilaitokset)
+    val toimipisteQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("toimipiste", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", toimipisteet)
+    val hakukohderyhmaQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("hakukohderyhma", "hakukohderyhma_oid", "hakukohderyhma_nimi", "pub.pub_dim_hakukohderyhma", hakukohderyhmat)
+    val hakukohdeQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("hakukohde", "hakukohde_oid", "hakukohde_nimi", "pub.pub_dim_hakukohde", hakukohteet)
+
+    val query = sql"""
+        SELECT param, jsonb_agg(nimi) AS nimet
+        FROM (
+          SELECT 'haku' AS param, haku_nimi AS nimi from pub.pub_dim_haku
+          WHERE haku_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(haut)})
+          #$oppilaitosQuery
+          #$toimipisteQuery
+          #$hakukohderyhmaQuery
+          #$hakukohdeQuery
+        ) subquery
+        GROUP BY param
+      """.as[ParametriNimet]
+    LOG.debug(s"hakuParamNamesQuery: ${query.statements.head}")
     query
   }
 }

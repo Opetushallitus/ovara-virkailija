@@ -1,5 +1,6 @@
 package fi.oph.ovara.backend.repository
 
+import fi.oph.ovara.backend.utils.{ParametriNimet}
 import fi.oph.ovara.backend.domain.OrganisaationKoulutusToteutusHakukohde
 import fi.oph.ovara.backend.utils.RepositoryUtils
 import org.slf4j.{Logger, LoggerFactory}
@@ -52,6 +53,31 @@ class KoulutuksetToteutuksetHakukohteetRepository extends Extractors {
 
     LOG.debug(s"selectWithParams: ${query.statements.head}")
 
+    query
+  }
+
+  def hakuParamNamesQuery(haut: List[String], koulutustoimija: Option[String], oppilaitokset: List[String], toimipisteet: List[String]):
+  SqlStreamingAction[Vector[ParametriNimet], ParametriNimet, Effect] = {
+    val koulutustoimijaQuery =
+      if(koulutustoimija.isDefined)
+       s"""UNION ALL SELECT 'koulutustoimija' AS param, organisaatio_nimi AS nimi FROM pub.pub_dim_organisaatio WHERE organisaatio_oid = '${koulutustoimija.get}'"""
+      else
+        ""
+    val oppilaitosQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("oppilaitos", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", oppilaitokset)
+    val toimipisteQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("toimipiste", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", toimipisteet)
+
+    val query = sql"""
+      SELECT param, jsonb_agg(nimi) AS nimet
+      FROM (
+        SELECT 'haku' AS param, haku_nimi AS nimi from pub.pub_dim_haku
+        WHERE haku_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(haut)})
+        #$koulutustoimijaQuery
+        #$oppilaitosQuery
+        #$toimipisteQuery
+      ) subquery
+      GROUP BY param
+    """.as[ParametriNimet]
+    LOG.debug(s"hakuParamNamesQuery: ${query.statements.head}")
     query
   }
 }

@@ -380,7 +380,7 @@ class Controller(
     )
 
     val validationResult = validateKoulutuksetToteutuksetHakukohteetParams(params)
-
+    
     handleExcelRequest(
       validationErrors = validationResult.left.getOrElse(Nil),
       response = response,
@@ -403,7 +403,7 @@ class Controller(
             validParams.koulutuksenTila,
             validParams.toteutuksenTila,
             validParams.hakukohteenTila,
-            validParams.valintakoe
+            validParams.valintakoe,
           )
       }
     }

@@ -1,5 +1,8 @@
 package fi.oph.ovara.backend.raportointi.dto
 
+import fi.oph.ovara.backend.domain.Kielistetty
+import fi.oph.ovara.backend.utils.ParameterUtils
+
 case class RawKkHakeneetHyvaksytytVastaanottaneetParams(
                                                          haut: List[String],
                                                          tulostustapa: String,
@@ -53,4 +56,33 @@ def buildKkHakeneetHyvaksytytVastaanottaneetAuditParams(
     "ensikertalainen" -> params.ensikertalainen,
     "naytaHakutoiveet" -> Option(params.naytaHakutoiveet)
   ).collect { case (key, Some(value)) => key -> value }
+}
+
+def buildKkHakeneetHyvaksytytVastaanottaneetParamsForExcel(params: ValidatedKkHakeneetHyvaksytytVastaanottaneetParams, paramNames: Map[String, List[Kielistetty]]):
+List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])] = {
+  val stringAndKielistettyParams = List(
+    "haku" -> paramNames.getOrElse("haku", List.empty),
+    "tulostustapa" -> params.tulostustapa,
+    "koulutustoimija" -> paramNames.getOrElse("koulutustoimija", List.empty),
+    "oppilaitos" -> paramNames.getOrElse("oppilaitos", List.empty),
+    "toimipiste" -> paramNames.getOrElse("toimipiste", List.empty),
+    "hakukohderyhma" -> paramNames.getOrElse("hakukohderyhma", List.empty),
+    "hakukohde" -> paramNames.getOrElse("hakukohde", List.empty),
+    "okm-ohjauksen-alat" -> paramNames.getOrElse("okm-ohjauksen-ala", List.empty),
+    "kk-tutkinnon-taso" -> params.tutkinnonTasot,
+    "aidinkieli" -> params.aidinkielet,
+    "kansalaisuus" -> params.kansalaisuusluokat,
+    "sukupuoli" -> paramNames.getOrElse("sukupuoli", List.empty),
+  ).filterNot { case (_, value) =>
+    value match {
+      case list: List[_] => list.isEmpty
+      case str: String => str.isEmpty
+    }
+  }
+
+  val booleanParams = ParameterUtils.collectBooleanParams(List(
+    "ensikertalainen" -> params.ensikertalainen,
+    "nayta-hakutoiveet" -> Some(params.naytaHakutoiveet))
+  )
+  stringAndKielistettyParams ++ booleanParams
 }
