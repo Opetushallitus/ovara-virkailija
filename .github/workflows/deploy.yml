@@ -55,7 +55,7 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OPINTOPOLKU_DEV_ROLE_ARN }}
           role-session-name: ovara-deploy
           aws-region: eu-west-1
-      - name: Configure AWS dev-role credentials
+      - name: Configure AWS prod-role credentials
         if: ${{ inputs.environment == 'sade' }}
         uses: aws-actions/configure-aws-credentials@v4.1.0
         with:
