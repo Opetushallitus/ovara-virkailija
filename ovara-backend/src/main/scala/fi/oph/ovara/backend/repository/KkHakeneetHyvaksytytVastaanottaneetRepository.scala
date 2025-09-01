@@ -124,6 +124,14 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       ensikertalainen
     )
 
+    val needsHakukohderyhmaJoin = filters.contains("hh.hakukohderyhma_oid")
+
+    val joinHakukohderyhma =
+      if (needsHakukohderyhmaJoin)
+        "JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hh ON h.hakukohde_oid = hh.hakukohde_oid"
+      else
+        ""
+
     val query =
       sql"""SELECT
             h.hakukohde_oid,
@@ -151,7 +159,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       FROM pub.pub_fct_raportti_tilastoraportti_kk_hakutoive t
       JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
       JOIN pub.pub_dim_haku ha ON h.haku_oid = ha.haku_oid
-      LEFT JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hh ON h.hakukohde_oid = hh.hakukohde_oid
+      #$joinHakukohderyhma
       WHERE #$filters
       GROUP BY h.hakukohde_oid, h.hakukohde_nimi, h.haku_oid, ha.haku_nimi, h.organisaatio_nimi"""
         .as[KkHakeneetHyvaksytytVastaanottaneetHakukohteittain]
