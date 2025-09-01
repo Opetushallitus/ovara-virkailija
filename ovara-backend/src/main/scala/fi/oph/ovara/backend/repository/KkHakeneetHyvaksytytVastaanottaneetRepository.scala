@@ -124,14 +124,6 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       ensikertalainen
     )
 
-    val needsHakukohderyhmaJoin = filters.contains("hh.hakukohderyhma_oid")
-
-    val joinHakukohderyhma =
-      if (needsHakukohderyhmaJoin)
-        "JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hh ON h.hakukohde_oid = hh.hakukohde_oid"
-      else
-        ""
-
     val query =
       sql"""SELECT
             h.hakukohde_oid,
@@ -139,27 +131,27 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
             h.haku_oid,
             ha.haku_nimi,
             h.organisaatio_nimi,
-            COUNT(t.hakutoive_id) AS hakijat,
-            COUNT(t.hakutoive_id) filter (WHERE ensisijainen) AS ensisijaisia,
-            COUNT(t.hakutoive_id) filter (WHERE ensikertalainen) AS ensikertalaisia,
-            COUNT(t.hakutoive_id) filter (WHERE hyvaksytty) AS hyvaksytyt,
-            COUNT(t.hakutoive_id) filter (WHERE vastaanottanut) AS vastaanottaneet,
-            COUNT(t.hakutoive_id) filter (WHERE lasna) AS lasna,
-            COUNT(t.hakutoive_id) filter (WHERE poissa) AS poissa,
-            COUNT(t.hakutoive_id) filter (WHERE ilmoittautunut) AS ilm_yht,
-            COUNT(t.hakutoive_id) filter (WHERE maksuvelvollinen) AS maksuvelvollisia,
+            COUNT(DISTINCT t.hakutoive_id) AS hakijat,
+            COUNT(DISTINCT t.hakutoive_id) filter (WHERE ensisijainen) AS ensisijaisia,
+            COUNT(DISTINCT t.hakutoive_id) filter (WHERE ensikertalainen) AS ensikertalaisia,
+            COUNT(DISTINCT t.hakutoive_id) filter (WHERE hyvaksytty) AS hyvaksytyt,
+            COUNT(DISTINCT t.hakutoive_id) filter (WHERE vastaanottanut) AS vastaanottaneet,
+            COUNT(DISTINCT t.hakutoive_id) filter (WHERE lasna) AS lasna,
+            COUNT(DISTINCT t.hakutoive_id) filter (WHERE poissa) AS poissa,
+            COUNT(DISTINCT t.hakutoive_id) filter (WHERE ilmoittautunut) AS ilm_yht,
+            COUNT(DISTINCT t.hakutoive_id) filter (WHERE maksuvelvollinen) AS maksuvelvollisia,
             MIN(h.valintaperusteiden_aloituspaikat) AS valinnan_aloituspaikat,
             MIN(h.hakukohteen_aloituspaikat) AS aloituspaikat,
-            COUNT(t.hakutoive_id) filter (WHERE toive_1) AS toive_1,
-            COUNT(t.hakutoive_id) filter (WHERE toive_2) AS toive_2,
-            COUNT(t.hakutoive_id) filter (WHERE toive_3) AS toive_3,
-            COUNT(t.hakutoive_id) filter (WHERE toive_4) AS toive_4,
-            COUNT(t.hakutoive_id) filter (WHERE toive_5) AS toive_5,
-            COUNT(t.hakutoive_id) filter (WHERE toive_6) AS toive_6
+            COUNT(DISTINCT t.hakutoive_id) filter (WHERE toive_1) AS toive_1,
+            COUNT(DISTINCT t.hakutoive_id) filter (WHERE toive_2) AS toive_2,
+            COUNT(DISTINCT t.hakutoive_id) filter (WHERE toive_3) AS toive_3,
+            COUNT(DISTINCT t.hakutoive_id) filter (WHERE toive_4) AS toive_4,
+            COUNT(DISTINCT t.hakutoive_id) filter (WHERE toive_5) AS toive_5,
+            COUNT(DISTINCT t.hakutoive_id) filter (WHERE toive_6) AS toive_6
       FROM pub.pub_fct_raportti_tilastoraportti_kk_hakutoive t
       JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
       JOIN pub.pub_dim_haku ha ON h.haku_oid = ha.haku_oid
-      #$joinHakukohderyhma
+      LEFT JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hh ON h.hakukohde_oid = hh.hakukohde_oid
       WHERE #$filters
       GROUP BY h.hakukohde_oid, h.hakukohde_nimi, h.haku_oid, ha.haku_nimi, h.organisaatio_nimi"""
         .as[KkHakeneetHyvaksytytVastaanottaneetHakukohteittain]
