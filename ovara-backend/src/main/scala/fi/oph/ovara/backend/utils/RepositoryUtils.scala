@@ -193,7 +193,7 @@ object RepositoryUtils {
       operator = "" // lisätään operaattori vasta lopuksi
     )
 
-    val organisaatioEhto = makeOptionalListOfValuesQueryStr("", "hk.jarjestyspaikka_oid", kayttooikeusOrgOids)
+    val organisaatioEhto = makeOptionalListOfValuesQueryStr("", s"$hakukohdeTablename.jarjestyspaikka_oid", kayttooikeusOrgOids)
 
     (kayttooikeusHakukohderyhmaEhto.trim, organisaatioEhto.trim) match {
       case ("", "") => ""

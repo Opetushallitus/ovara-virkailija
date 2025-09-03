@@ -2,7 +2,7 @@ package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.{KkHakeneetHyvaksytytVastaanottaneetHakukohteittain, KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella, KkHakeneetHyvaksytytVastaanottaneetResult, KkHakeneetHyvaksytytVastaanottaneetToimipisteittain, KkHakeneetHyvaksytytVastaanottaneetTunnisteella}
 import fi.oph.ovara.backend.utils.{ParametriNimet, RepositoryUtils}
-import fi.oph.ovara.backend.utils.RepositoryUtils.{buildTutkinnonTasoFilters, makeHakukohderyhmaQueryWithKayttooikeudet}
+import fi.oph.ovara.backend.utils.RepositoryUtils.{buildTutkinnonTasoFilters, makeHakukohderyhmaQueryWithKayttooikeudet, makeOptionalHakukohderyhmatSubSelectQueryStr}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.Component
 import slick.dbio.{DBIO, Effect}
@@ -28,18 +28,27 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       ensikertalainen: Option[Boolean]
   ): String = {
 
-    val hakukohteetOrganisaatioJaKayttooikeusrajauksillaFilter: String = buildOrganisaatioKayttooikeusFilter(selectedKayttooikeusOrganisaatiot, isOrganisaatioRajain, kayttooikeusHakukohderyhmat)
+    val organisaatioKayttooikeusQueryStr =
+      if (isOrganisaatioRajain) {
+        // jos organisaatio on valittu, ei huomioida käyttäjän organisaatioiden ulkopuolisia hakukohderyhmiä
+        RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(selectedKayttooikeusOrganisaatiot, List.empty, "h")
+      } else {
+        RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(selectedKayttooikeusOrganisaatiot, kayttooikeusHakukohderyhmat, "h")
+      }
+
+    val optionalHakukohderyhmaSubSelect = makeOptionalHakukohderyhmatSubSelectQueryStr(hakukohderyhmat, "h")
+
     val filters = Seq(
       s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})",
-      hakukohteetOrganisaatioJaKayttooikeusrajauksillaFilter,
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.hakukohde_oid", hakukohteet),
-      RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hh.hakukohderyhma_oid", hakukohderyhmat),
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.okm_ohjauksen_ala", okmOhjauksenAlat),
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.aidinkieli", aidinkielet),
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.kansalaisuusluokka", kansalaisuudet),
       RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "t.sukupuoli", sukupuoli),
       RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "t.ensikertalainen", ensikertalainen),
-      buildTutkinnonTasoFilters(tutkinnonTasot, "h")
+      buildTutkinnonTasoFilters(tutkinnonTasot, "h"),
+      optionalHakukohderyhmaSubSelect,
+      organisaatioKayttooikeusQueryStr
     ).collect { case value if value.nonEmpty => value }.mkString("\n")
 
     filters
@@ -151,7 +160,6 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       FROM pub.pub_fct_raportti_tilastoraportti_kk_hakutoive t
       JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
       JOIN pub.pub_dim_haku ha ON h.haku_oid = ha.haku_oid
-      LEFT JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hh ON h.hakukohde_oid = hh.hakukohde_oid
       WHERE #$filters
       GROUP BY h.hakukohde_oid, h.hakukohde_nimi, h.haku_oid, ha.haku_nimi, h.organisaatio_nimi"""
         .as[KkHakeneetHyvaksytytVastaanottaneetHakukohteittain]
@@ -586,7 +594,6 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       FROM pub.pub_fct_raportti_tilastoraportti_kk_hakutoive t
       JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
       JOIN pub.pub_dim_koodisto_maa_2 m ON t.kansalaisuus = m.koodiarvo
-      LEFT JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hh ON h.hakukohde_oid = hh.hakukohde_oid
       WHERE #$filters
       GROUP BY 1, 11, 12""".as[KkHakeneetHyvaksytytVastaanottaneetResult]
 
