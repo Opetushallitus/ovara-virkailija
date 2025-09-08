@@ -1691,6 +1691,11 @@ object ExcelWriter {
         )
 
       createHakukohteittainSummaryRowCells(hakijatSummaryData, hakijatSummaryRow, workbook, createSummaryCellStyle(workbook))
+
+      // Erillinen välilehti hakuparametreille
+      val parametritSheet: XSSFSheet = workbook.createSheet()
+      createHakuparametritSheet(translations, asiointikieli, parametrit, workbook, parametritSheet)
+      
       // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
       otsikotWithIndex.foreach { case (title, index) =>
         sheet.autoSizeColumn(index)
@@ -1787,7 +1792,7 @@ object ExcelWriter {
       // Erillinen välilehti hakuparametreille
       val parametritSheet: XSSFSheet = workbook.createSheet()
       createHakuparametritSheet(translations, asiointikieli, parametrit, workbook, parametritSheet)
-      
+
       // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
       fieldNamesWithIndex.foreach { case (title, index) =>
         sheet.autoSizeColumn(index)
