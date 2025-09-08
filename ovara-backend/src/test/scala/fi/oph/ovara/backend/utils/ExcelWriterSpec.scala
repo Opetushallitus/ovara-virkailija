@@ -5432,7 +5432,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       hakeneetHyvaksytytVastaanottaneetParams
     )
 
-    assert(workbook.getNumberOfSheets == 1)
+    assert(workbook.getNumberOfSheets == 2)
     val sheet = workbook.getSheetAt(0)
 
     // otsikkorivi
