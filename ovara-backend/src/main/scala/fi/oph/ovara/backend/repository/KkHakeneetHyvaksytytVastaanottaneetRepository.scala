@@ -215,7 +215,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     )
 
     val filteredHakukohteet = s"""WITH filtered_hakukohteet AS (
-             SELECT h.*
+             SELECT distinct on (h.hakukohde_oid) h.*
              FROM pub.pub_dim_hakukohde h
              LEFT JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hh
                ON h.hakukohde_oid = hh.hakukohde_oid
@@ -241,19 +241,19 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
           (
             SELECT SUM(h2.valintaperusteiden_aloituspaikat)
             FROM (
-              SELECT DISTINCT h3.hakukohde_oid, h3.haku_oid, h3.organisaatio_nimi, h3.valintaperusteiden_aloituspaikat
+              SELECT h3.hakukohde_oid, h3.haku_oid, h3.valintaperusteiden_aloituspaikat
               FROM filtered_hakukohteet h3
             ) h2
-            WHERE h2.haku_oid = ha.haku_oid AND h2.organisaatio_nimi = h.organisaatio_nimi
+            WHERE h2.haku_oid = ha.haku_oid
           ) AS valinnan_aloituspaikat,
 
           (
             SELECT SUM(h2.hakukohteen_aloituspaikat)
             FROM (
-              SELECT DISTINCT h3.hakukohde_oid, h3.haku_oid, h3.organisaatio_nimi, h3.hakukohteen_aloituspaikat
+              SELECT h3.hakukohde_oid, h3.haku_oid, h3.hakukohteen_aloituspaikat
               FROM filtered_hakukohteet h3
             ) h2
-            WHERE h2.haku_oid = ha.haku_oid AND h2.organisaatio_nimi = h.organisaatio_nimi
+            WHERE h2.haku_oid = ha.haku_oid
           ) AS aloituspaikat,
 
           COUNT(DISTINCT t.henkilo_oid) FILTER (WHERE toive_1) AS toive_1,
