@@ -614,7 +614,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
       JOIN pub.pub_dim_koodisto_maa_2 m ON t.kansalaisuus = m.koodiarvo
       WHERE #$filters
-      GROUP BY 1, 11, 12""".as[KkHakeneetHyvaksytytVastaanottaneetResult]
+      GROUP BY m.koodinimi""".as[KkHakeneetHyvaksytytVastaanottaneetResult]
 
     LOG.debug(s"selectKansalaisuuksittainWithParams: ${query.statements.head}")
     query
