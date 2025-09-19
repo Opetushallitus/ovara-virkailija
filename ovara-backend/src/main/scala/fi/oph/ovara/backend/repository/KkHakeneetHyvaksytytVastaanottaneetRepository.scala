@@ -17,6 +17,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       haut: List[String],
       selectedKayttooikeusOrganisaatiot: List[String],
       isOrganisaatioRajain: Boolean,
+      isOphPaakayttaja: Boolean,
       kayttooikeusHakukohderyhmat: List[String],
       hakukohteet: List[String],
       hakukohderyhmat: List[String],
@@ -32,6 +33,8 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       if (isOrganisaatioRajain) {
         // jos organisaatio on valittu, ei huomioida käyttäjän organisaatioiden ulkopuolisia hakukohderyhmiä
         RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(selectedKayttooikeusOrganisaatiot, List.empty, "h")
+      } else if (isOphPaakayttaja) {
+        ""
       } else {
         RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(selectedKayttooikeusOrganisaatiot, kayttooikeusHakukohderyhmat, "h")
       }
@@ -73,6 +76,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                      haut: List[String],
                                      selectedKayttooikeusOrganisaatiot: List[String],
                                      isOrganisaatioRajain: Boolean,
+                                     isOphPaakayttaja: Boolean,
                                      kayttooikeusHakukohderyhmat: List[String],
                                      hakukohteet: List[String],
                                      hakukohderyhmat: List[String],
@@ -80,7 +84,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
                                      tutkinnonTasot: List[String]
                                    ): String = {
     val hakukohteetOrganisaatioJaKayttooikeusrajauksillaFilter =
-      buildOrganisaatioKayttooikeusFilter(selectedKayttooikeusOrganisaatiot, isOrganisaatioRajain, kayttooikeusHakukohderyhmat)
+      buildOrganisaatioKayttooikeusFilter(selectedKayttooikeusOrganisaatiot, isOrganisaatioRajain, isOphPaakayttaja, kayttooikeusHakukohderyhmat)
 
     Seq(
       s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})",
@@ -92,11 +96,14 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     ).filter(_.nonEmpty).mkString("\n")
   }
 
-  private def buildOrganisaatioKayttooikeusFilter(selectedKayttooikeusOrganisaatiot: List[String], isOrganisaatioRajain: Boolean, kayttooikeusHakukohderyhmat: List[String]) = {
+  private def buildOrganisaatioKayttooikeusFilter(selectedKayttooikeusOrganisaatiot: List[String], isOrganisaatioRajain: Boolean, isOphPaakayttaja: Boolean, kayttooikeusHakukohderyhmat: List[String]) = {
     if (isOrganisaatioRajain) {
       // jos organisaatio valittu, ei huomioida käyttäjän organisaation ulkopuolisia hakukohderyhmiä
       makeHakukohderyhmaQueryWithKayttooikeudet(selectedKayttooikeusOrganisaatiot, List.empty, "hh", "h")
-    } else {
+    } else if (isOphPaakayttaja) {
+      ""
+    }
+    else {
       makeHakukohderyhmaQueryWithKayttooikeudet(selectedKayttooikeusOrganisaatiot, kayttooikeusHakukohderyhmat, "hh", "h")
     }
   }
@@ -104,6 +111,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   def selectHakukohteittainWithParams(
       selectedKayttooikeusOrganisaatiot: List[String],
       isOrganisaatioRajain: Boolean,
+      isOphPaakayttaja: Boolean,
       kayttooikeusHakukohderyhmat: List[String],
       haut: List[String],
       hakukohteet: List[String],
@@ -113,7 +121,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       aidinkielet: List[String],
       kansalaisuudet: List[String],
       sukupuoli: Option[String],
-      ensikertalainen: Option[Boolean]
+      ensikertalainen: Option[Boolean],
   ): SqlStreamingAction[Vector[
     KkHakeneetHyvaksytytVastaanottaneetHakukohteittain
   ], KkHakeneetHyvaksytytVastaanottaneetHakukohteittain, Effect] = {
@@ -122,6 +130,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       haut,
       selectedKayttooikeusOrganisaatiot,
       isOrganisaatioRajain,
+      isOphPaakayttaja,
       kayttooikeusHakukohderyhmat,
       hakukohteet,
       hakukohderyhmat,
@@ -171,6 +180,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   def selectHauittainWithParams(
       selectedKayttooikeusOrganisaatiot: List[String],
       isOrganisaatioRajain: Boolean,
+      isOphPaakayttaja: Boolean,
       kayttooikeusHakukohderyhmat: List[String],
       haut: List[String],
       hakukohteet: List[String],
@@ -196,6 +206,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       haut,
       selectedKayttooikeusOrganisaatiot,
       isOrganisaatioRajain,
+      isOphPaakayttaja,
       kayttooikeusHakukohderyhmat,
       hakukohteet,
       hakukohderyhmat,
@@ -204,7 +215,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     )
 
     val filteredHakukohteet = s"""WITH filtered_hakukohteet AS (
-             SELECT h.*
+             SELECT distinct on (h.hakukohde_oid) h.*
              FROM pub.pub_dim_hakukohde h
              LEFT JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hh
                ON h.hakukohde_oid = hh.hakukohde_oid
@@ -230,19 +241,19 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
           (
             SELECT SUM(h2.valintaperusteiden_aloituspaikat)
             FROM (
-              SELECT DISTINCT h3.hakukohde_oid, h3.haku_oid, h3.organisaatio_nimi, h3.valintaperusteiden_aloituspaikat
+              SELECT h3.hakukohde_oid, h3.haku_oid, h3.valintaperusteiden_aloituspaikat
               FROM filtered_hakukohteet h3
             ) h2
-            WHERE h2.haku_oid = ha.haku_oid AND h2.organisaatio_nimi = h.organisaatio_nimi
+            WHERE h2.haku_oid = ha.haku_oid
           ) AS valinnan_aloituspaikat,
 
           (
             SELECT SUM(h2.hakukohteen_aloituspaikat)
             FROM (
-              SELECT DISTINCT h3.hakukohde_oid, h3.haku_oid, h3.organisaatio_nimi, h3.hakukohteen_aloituspaikat
+              SELECT h3.hakukohde_oid, h3.haku_oid, h3.hakukohteen_aloituspaikat
               FROM filtered_hakukohteet h3
             ) h2
-            WHERE h2.haku_oid = ha.haku_oid AND h2.organisaatio_nimi = h.organisaatio_nimi
+            WHERE h2.haku_oid = ha.haku_oid
           ) AS aloituspaikat,
 
           COUNT(DISTINCT t.henkilo_oid) FILTER (WHERE toive_1) AS toive_1,
@@ -265,6 +276,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   def selectToimipisteittainWithParams(
       selectedKayttooikeusOrganisaatiot: List[String],
       isOrganisaatioRajain: Boolean,
+      isOphPaakayttaja: Boolean,
       kayttooikeusHakukohderyhmat: List[String],
       haut: List[String],
       hakukohteet: List[String],
@@ -290,6 +302,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       haut,
       selectedKayttooikeusOrganisaatiot,
       isOrganisaatioRajain,
+      isOphPaakayttaja,
       kayttooikeusHakukohderyhmat,
       hakukohteet,
       hakukohderyhmat,
@@ -298,7 +311,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     )
 
     val filteredHakukohteet = s"""WITH filtered_hakukohteet AS (
-             SELECT h.*
+             SELECT distinct on (h.hakukohde_oid) h.*
              FROM pub.pub_dim_hakukohde h
              LEFT JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hh
                ON h.hakukohde_oid = hh.hakukohde_oid
@@ -323,18 +336,18 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       (
         SELECT SUM(h2.valintaperusteiden_aloituspaikat)
         FROM (
-          SELECT DISTINCT h3.hakukohde_oid, h3.toimipiste, h3.organisaatio_nimi, h3.valintaperusteiden_aloituspaikat
+          SELECT h3.hakukohde_oid, h3.toimipiste, h3.valintaperusteiden_aloituspaikat
           FROM filtered_hakukohteet h3
         ) h2
-        WHERE h2.toimipiste = h.toimipiste AND h2.organisaatio_nimi = h.organisaatio_nimi
+        WHERE h2.toimipiste = h.toimipiste
       ) AS valinnan_aloituspaikat,
       (
         SELECT SUM(h2.hakukohteen_aloituspaikat)
         FROM (
-          SELECT DISTINCT h3.hakukohde_oid, h3.toimipiste, h3.organisaatio_nimi, h3.hakukohteen_aloituspaikat
+          SELECT DISTINCT h3.hakukohde_oid, h3.toimipiste, h3.hakukohteen_aloituspaikat
           FROM filtered_hakukohteet h3
         ) h2
-        WHERE h2.toimipiste = h.toimipiste AND h2.organisaatio_nimi = h.organisaatio_nimi
+        WHERE h2.toimipiste = h.toimipiste
       ) AS aloituspaikat,
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_1) AS toive_1,
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_2) AS toive_2,
@@ -353,6 +366,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   def selectOrganisaatioittainWithParams(
       selectedKayttooikeusOrganisaatiot: List[String],
       isOrganisaatioRajain: Boolean,
+      isOphPaakayttaja: Boolean,
       kayttooikeusHakukohderyhmat: List[String],
       haut: List[String],
       hakukohteet: List[String],
@@ -379,6 +393,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       haut,
       selectedKayttooikeusOrganisaatiot,
       isOrganisaatioRajain,
+      isOphPaakayttaja,
       kayttooikeusHakukohderyhmat,
       hakukohteet,
       hakukohderyhmat,
@@ -387,7 +402,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     )
 
     val filteredHakukohteet = s"""WITH filtered_hakukohteet AS (
-             SELECT h.*
+             SELECT distinct on (h.hakukohde_oid) h.*
              FROM pub.pub_dim_hakukohde h
              LEFT JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hh
                ON h.hakukohde_oid = hh.hakukohde_oid
@@ -420,18 +435,18 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       (
         SELECT SUM(h2.valintaperusteiden_aloituspaikat)
         FROM (
-          SELECT DISTINCT h3.hakukohde_oid, h3.#$organisaatio, h3.#${organisaatio}_nimi, h3.valintaperusteiden_aloituspaikat
+          SELECT h3.hakukohde_oid, h3.#$organisaatio, h3.valintaperusteiden_aloituspaikat
           FROM filtered_hakukohteet h3
         ) h2
-        WHERE h2.#$organisaatio = h.#$organisaatio AND h2.#${organisaatio}_nimi = h.#${organisaatio}_nimi
+        WHERE h2.#$organisaatio = h.#$organisaatio
       ) AS valinnan_aloituspaikat,
       (
         SELECT SUM(h2.hakukohteen_aloituspaikat)
         FROM (
-          SELECT DISTINCT h3.hakukohde_oid, h3.#$organisaatio, h3.#${organisaatio}_nimi, h3.hakukohteen_aloituspaikat
+          SELECT h3.hakukohde_oid, h3.#$organisaatio, h3.hakukohteen_aloituspaikat
           FROM filtered_hakukohteet h3
         ) h2
-        WHERE h2.#$organisaatio = h.#$organisaatio AND h2.#${organisaatio}_nimi = h.#${organisaatio}_nimi
+        WHERE h2.#$organisaatio = h.#$organisaatio
       ) AS aloituspaikat,
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_1) AS toive_1,
       COUNT(DISTINCT t.henkilo_oid) filter (WHERE toive_2) AS toive_2,
@@ -442,7 +457,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       FROM pub.pub_fct_raportti_tilastoraportti_kk_hakutoive t
       JOIN filtered_hakukohteet h ON t.hakukohde_oid = h.hakukohde_oid
       WHERE #$filters
-      GROUP BY 1, 2, 12, 13""".as[KkHakeneetHyvaksytytVastaanottaneetTunnisteella]
+      GROUP BY 1, 2""".as[KkHakeneetHyvaksytytVastaanottaneetTunnisteella]
 
     LOG.debug(s"selectOrganisaatioittainWithParams: ${query.statements.head}")
     query
@@ -452,6 +467,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   def selectOkmOhjauksenAloittainWithParams(
       selectedKayttooikeusOrganisaatiot: List[String],
       isOrganisaatioRajain: Boolean,
+      isOphPaakayttaja: Boolean,
       kayttooikeusHakukohderyhmat: List[String],
       haut: List[String],
       hakukohteet: List[String],
@@ -477,6 +493,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       haut,
       selectedKayttooikeusOrganisaatiot,
       isOrganisaatioRajain,
+      isOphPaakayttaja,
       kayttooikeusHakukohderyhmat,
       hakukohteet,
       hakukohderyhmat,
@@ -485,7 +502,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     )
 
     val filteredHakukohteet = s"""WITH filtered_hakukohteet AS (
-             SELECT h.*
+             SELECT distinct on (h.hakukohde_oid) h.*
              FROM pub.pub_dim_hakukohde h
              LEFT JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hh
                ON h.hakukohde_oid = hh.hakukohde_oid
@@ -510,7 +527,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       (
         SELECT SUM(h2.valintaperusteiden_aloituspaikat)
         FROM (
-          SELECT DISTINCT h3.hakukohde_oid, h3.okm_ohjauksen_ala, h3.valintaperusteiden_aloituspaikat
+          SELECT h3.hakukohde_oid, h3.okm_ohjauksen_ala, h3.valintaperusteiden_aloituspaikat
           FROM filtered_hakukohteet h3
         ) h2
         WHERE h2.okm_ohjauksen_ala = h.okm_ohjauksen_ala
@@ -518,7 +535,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       (
         SELECT SUM(h2.hakukohteen_aloituspaikat)
         FROM (
-          SELECT DISTINCT h3.hakukohde_oid, h3.okm_ohjauksen_ala, h3.hakukohteen_aloituspaikat
+          SELECT h3.hakukohde_oid, h3.okm_ohjauksen_ala, h3.hakukohteen_aloituspaikat
           FROM filtered_hakukohteet h3
         ) h2
         WHERE h2.okm_ohjauksen_ala = h.okm_ohjauksen_ala
@@ -542,6 +559,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   def selectKansalaisuuksittainWithParams(
       selectedKayttooikeusOrganisaatiot: List[String],
       isOrganisaatioRajain: Boolean,
+      isOphPaakayttaja: Boolean,
       kayttooikeusHakukohderyhmat: List[String],
       haut: List[String],
       hakukohteet: List[String],
@@ -560,6 +578,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       haut,
       selectedKayttooikeusOrganisaatiot,
       isOrganisaatioRajain,
+      isOphPaakayttaja,
       kayttooikeusHakukohderyhmat,
       hakukohteet,
       hakukohderyhmat,
@@ -595,7 +614,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       JOIN pub.pub_dim_hakukohde h ON t.hakukohde_oid = h.hakukohde_oid
       JOIN pub.pub_dim_koodisto_maa_2 m ON t.kansalaisuus = m.koodiarvo
       WHERE #$filters
-      GROUP BY 1, 11, 12""".as[KkHakeneetHyvaksytytVastaanottaneetResult]
+      GROUP BY m.koodinimi""".as[KkHakeneetHyvaksytytVastaanottaneetResult]
 
     LOG.debug(s"selectKansalaisuuksittainWithParams: ${query.statements.head}")
     query
@@ -605,6 +624,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   def selectHakukohderyhmittainWithParams(
       selectedKayttooikeusOrganisaatiot: List[String],
       isOrganisaatioRajain: Boolean,
+      isOphPaakayttaja: Boolean,
       kayttooikeusHakukohderyhmat: List[String],
       haut: List[String],
       hakukohteet: List[String],
@@ -630,6 +650,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       haut,
       selectedKayttooikeusOrganisaatiot,
       isOrganisaatioRajain,
+      isOphPaakayttaja,
       kayttooikeusHakukohderyhmat,
       hakukohteet,
       hakukohderyhmat,
@@ -687,7 +708,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       JOIN filtered_hakukohteet h ON t.hakukohde_oid = h.hakukohde_oid
       JOIN pub.pub_dim_hakukohderyhma hr ON h.hakukohderyhma_oid = hr.hakukohderyhma_oid
       WHERE #$filters
-      GROUP BY 1, 2, 12, 13""".as[KkHakeneetHyvaksytytVastaanottaneetTunnisteella]
+      GROUP BY 1, 2""".as[KkHakeneetHyvaksytytVastaanottaneetTunnisteella]
 
     LOG.debug(s"selectHakukohderyhmittainWithParams: ${query.statements.head}")
     query
@@ -697,6 +718,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   def selectHakijatYhteensaWithParams(
       selectedKayttooikeusOrganisaatiot: List[String],
       isOrganisaatioRajain: Boolean,
+      isOphPaakayttaja: Boolean,
       kayttooikeusHakukohderyhmat: List[String],
       haut: List[String],
       hakukohteet: List[String],
@@ -716,7 +738,7 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       } else
         ""
 
-    val hakukohteetOrganisaatioJaKayttooikeusrajauksillaFilter: String = buildOrganisaatioKayttooikeusFilter(selectedKayttooikeusOrganisaatiot, isOrganisaatioRajain, kayttooikeusHakukohderyhmat)
+    val hakukohteetOrganisaatioJaKayttooikeusrajauksillaFilter: String = buildOrganisaatioKayttooikeusFilter(selectedKayttooikeusOrganisaatiot, isOrganisaatioRajain, isOphPaakayttaja, kayttooikeusHakukohderyhmat)
 
     val filters = Seq(
       s"ht.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})",

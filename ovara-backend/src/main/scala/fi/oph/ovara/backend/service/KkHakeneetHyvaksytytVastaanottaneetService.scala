@@ -48,6 +48,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       val authorities = user.authorities
       val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
       val kayttooikeusHakukohderyhmat = AuthoritiesUtil.filterHakukohderyhmaOids(kayttooikeusOrganisaatiot)
+      val isOphPaakayttaja = AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)
       val translations = lokalisointiService.getOvaraTranslations(asiointikieli)
 
       val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
@@ -62,6 +63,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
             val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHauittainWithParams(
               selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
               isOrganisaatioRajain = isOrganisaatioRajain,
+              isOphPaakayttaja = isOphPaakayttaja,
               kayttooikeusHakukohderyhmat = kayttooikeusHakukohderyhmat,
               haut = haut,
               hakukohteet = hakukohteet,
@@ -80,6 +82,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
             val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams(
               selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
               isOrganisaatioRajain = isOrganisaatioRajain,
+              isOphPaakayttaja = isOphPaakayttaja,
               kayttooikeusHakukohderyhmat = kayttooikeusHakukohderyhmat,
               haut = haut,
               hakukohteet = hakukohteet,
@@ -96,6 +99,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
             val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectToimipisteittainWithParams(
               selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
               isOrganisaatioRajain = isOrganisaatioRajain,
+              isOphPaakayttaja = isOphPaakayttaja,
               kayttooikeusHakukohderyhmat = kayttooikeusHakukohderyhmat,
               haut = haut,
               hakukohteet = hakukohteet,
@@ -113,6 +117,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
             val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectOkmOhjauksenAloittainWithParams(
               selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
               isOrganisaatioRajain = isOrganisaatioRajain,
+              isOphPaakayttaja = isOphPaakayttaja,
               kayttooikeusHakukohderyhmat = kayttooikeusHakukohderyhmat,
               haut = haut,
               hakukohteet = hakukohteet,
@@ -130,6 +135,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
             val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectKansalaisuuksittainWithParams(
               selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
               isOrganisaatioRajain = isOrganisaatioRajain,
+              isOphPaakayttaja = isOphPaakayttaja,
               kayttooikeusHakukohderyhmat = kayttooikeusHakukohderyhmat,
               haut = haut,
               hakukohteet = hakukohteet,
@@ -146,6 +152,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
             val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakukohderyhmittainWithParams(
               selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
               isOrganisaatioRajain = isOrganisaatioRajain,
+              isOphPaakayttaja = isOphPaakayttaja,
               kayttooikeusHakukohderyhmat = kayttooikeusHakukohderyhmat,
               haut = haut,
               hakukohteet = hakukohteet,
@@ -163,6 +170,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
             val query = kkHakeneetHyvaksytytVastaanottaneetRepository.selectOrganisaatioittainWithParams(
               selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
               isOrganisaatioRajain = isOrganisaatioRajain,
+              isOphPaakayttaja = isOphPaakayttaja,
               kayttooikeusHakukohderyhmat = kayttooikeusHakukohderyhmat,
               haut = haut,
               hakukohteet = hakukohteet,
@@ -183,6 +191,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       val sumQuery = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams(
         selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
         isOrganisaatioRajain = isOrganisaatioRajain,
+        isOphPaakayttaja = isOphPaakayttaja,
         kayttooikeusHakukohderyhmat = kayttooikeusHakukohderyhmat,
         haut = haut,
         hakukohteet = hakukohteet,
@@ -198,6 +207,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       val ensikertalaisetSumQuery = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams(
         selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
         isOrganisaatioRajain = isOrganisaatioRajain,
+        isOphPaakayttaja = isOphPaakayttaja,
         kayttooikeusHakukohderyhmat = kayttooikeusHakukohderyhmat,
         haut = haut,
         hakukohteet = hakukohteet,
@@ -213,6 +223,7 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       val maksuvelvollisetSumQuery = kkHakeneetHyvaksytytVastaanottaneetRepository.selectHakijatYhteensaWithParams(
         selectedKayttooikeusOrganisaatiot = orgOidsForQuery,
         isOrganisaatioRajain = isOrganisaatioRajain,
+        isOphPaakayttaja = isOphPaakayttaja,
         kayttooikeusHakukohderyhmat = kayttooikeusHakukohderyhmat,
         haut = haut,
         hakukohteet = hakukohteet,
