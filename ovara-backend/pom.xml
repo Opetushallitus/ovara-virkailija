@@ -33,8 +33,8 @@
         <postgresql.version>42.7.7</postgresql.version>
         <flyway.version>11.11.1</flyway.version>
         <slick.version>3.6.1</slick.version>
-        <spring-context.version>6.2.10</spring-context.version>
-        <spring-security-cas.version>6.5.3</spring-security-cas.version>
+        <spring-context.version>6.2.11</spring-context.version>
+        <spring-security-cas.version>6.5.5</spring-security-cas.version>
         <jackson.version>2.19.2</jackson.version>
         <json4s.version>4.1.0-M8</json4s.version>
         <apache.poi.version>5.4.0</apache.poi.version>
