@@ -61,10 +61,10 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
                  hk.hakukohde_oid,
                  hk.tila,
                  hk.ulkoinen_tunniste,
-                 haku_ja_hakuaika.haku_nimi,
-                 haku_ja_hakuaika.haku_oid,
+                 h.haku_nimi,
+                 h.haku_oid,
                  haku_ja_hakuaika.hakuaika,
-                 haku_ja_hakuaika.hakutapa_nimi,
+                 h.hakutapa_nimi,
                  hk.hakukohteen_aloituspaikat,
                  hk.aloituspaikat_ensikertalaisille,
                  hk.valintaperuste_nimi
@@ -81,9 +81,9 @@ class KorkeakouluKoulutuksetToteutuksetHakukohteetRepository extends Extractors 
           ON hk.koulutuksen_alkamiskausi_koodiuri = kausi.versioitu_koodiuri
           JOIN (
             SELECT *, jsonb_array_elements(pdh.hakuajat) AS hakuaika
-            FROM pub.pub_dim_haku pdh
+            FROM pub.pub_dim_hakukohde pdh
             ) AS haku_ja_hakuaika
-          ON haku_ja_hakuaika.haku_oid = hk.haku_oid
+          ON haku_ja_hakuaika.haku_oid = h.haku_oid
           WHERE h.haku_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(haut)})
           #$organisaatioKayttooikeusQueryStr
           #$optionalHakukohderyhmaSubSelect
