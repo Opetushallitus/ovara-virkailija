@@ -7,6 +7,7 @@ runs:
       with:
         standalone: true
         run_install: false
+        package_json_file: 'ovara-ui/package.json'
     - uses: actions/setup-node@v4
       with:
         node-version-file: 'ovara-ui/.nvmrc'
