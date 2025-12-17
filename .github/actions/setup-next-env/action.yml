@@ -3,6 +3,10 @@ description: 'Setup Next.js environment'
 runs:
   using: 'composite'
   steps:
+    - uses: pnpm/action-setup@v4
+      with:
+        standalone: true
+        run_install: false
     - uses: actions/setup-node@v4
       with:
         node-version-file: 'ovara-ui/.nvmrc'
@@ -10,10 +14,6 @@ runs:
         cache-dependency-path: ovara-ui/pnpm-lock.yaml
         registry-url: 'https://npm.pkg.github.com'
         scope: '@opetushallitus'
-    - uses: pnpm/action-setup@v4
-      with:
-        standalone: true
-        run_install: false
     - uses: actions/cache@v4
       id: node_modules-cache
       with:
