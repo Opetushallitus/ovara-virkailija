@@ -166,5 +166,8 @@ jobs:
         run: |
           cd ovara-ui
           SKIP_TYPECHECK=true pnpm run build
+          cd .next/standalone
+          npm install semver@^7.7.2
+          cd ../..
           zip -r ga-${{github.run_number}}.zip .next/*.* .next/BUILD_ID .next/server .next/static .next/standalone public # OpenNext v3 needs server-files also in .next/server
           aws s3 cp --no-progress ga-${{github.run_number}}.zip s3://"$bucket"/ovara-ui/ga-${{github.run_number}}.zip

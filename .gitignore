@@ -16,3 +16,4 @@ pnpm-debug.log
 cdk.out
 .open-next
 cdk/**/*.d.ts
+OY-*
