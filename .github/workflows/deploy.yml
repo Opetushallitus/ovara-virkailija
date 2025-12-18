@@ -39,21 +39,21 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OPH_UTILITY_ROLE_ARN }}
           role-session-name: ovara-build-zip
           aws-region: eu-west-1
-      - name: Download build from s3
+      - name: Download and prepare build
         env:
           bucket: ${{ secrets.BUCKET_NAME }}
           SKIP_OPENNEXT_BUILD: true
         run: |
+          set -euo pipefail
           cd ovara-ui
-          aws s3 cp --no-progress s3://"$bucket"/ovara-ui/ga-${{inputs.build-number}}.zip build.zip
+          aws s3 cp --no-progress "s3://$bucket/ovara-ui/ga-${{ inputs.build-number }}.zip" build.zip
           unzip build.zip
-          cp -R .next/standalone/.next/server .next/server # OpenNext v3 needs server-files also in .next/server
-          find cdk -path '*cdk.out/asset.*' -type d -print0 | while IFS= read -r -d '' asset; do
-            if [ -d "$asset/node_modules" ]; then
-              mkdir -p "$asset/node_modules/.bin"
-              ln -sf ../../semver/bin/semver.js "$asset/node_modules/.bin/semver"
-            fi
-          done
+          # OpenNext v3 needs server-files also in .next/server
+          cp -R .next/standalone/.next/server .next/server
+          # Ensure semver binary exists before CDK packages lambda assets
+          pushd .next/standalone >/dev/null
+          npm install semver@^7.7.2
+          popd >/dev/null
       - name: Configure AWS dev-role credentials
         if: ${{ inputs.environment == 'hahtuva' || inputs.environment == 'untuva' || inputs.environment == 'pallero' }}
         uses: aws-actions/configure-aws-credentials@v4.1.0
