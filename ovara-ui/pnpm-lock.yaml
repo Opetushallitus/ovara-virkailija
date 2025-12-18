@@ -62,6 +62,9 @@ importers:
       remeda:
         specifier: ^2.30.0
         version: 2.30.0
+      semver:
+        specifier: ^7.7.2
+        version: 7.7.3
       ts-pattern:
         specifier: ^5.8.0
         version: 5.8.0
