@@ -3,6 +3,7 @@ run-name: Deploy Ovara-virkailija UI build number ${{ inputs.build-number }} to 
 env:
   HUSKY: 0
   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  PNPM_NODE_LINKER: hoisted
 
 permissions:
   id-token: write
