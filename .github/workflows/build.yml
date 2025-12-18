@@ -7,6 +7,7 @@ on:
       - '**.md'
 env:
   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  PNPM_NODE_LINKER: hoisted
 
 jobs:
   # BACKEND
