@@ -28,7 +28,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            Show this help message and exit
-  -d, --dependencies    Clean and install dependencies before deployment (i.e. run npm ci)
+  -d, --dependencies    Clean and install dependencies before deployment (i.e. run pnpm install)
   '''
     exit 0
     ;;
@@ -75,31 +75,31 @@ if [[ "${loadup}" == "true" ]]; then
     fi
     echo "Deploying load testing instance"
     cd "${git_root}/ovara-ui/cdk/"
-    aws-vault exec oph-dev -- cdk deploy LoadtestStack --require-approval never -c "environment=$environment"
+    aws-vault exec oph-dev -- pnpm exec cdk deploy LoadtestStack --require-approval never -c "environment=$environment"
 fi
 
 if [[ "${loaddown}" == "true" ]]; then
     environment=${POSITIONAL[~-1]}
     echo "Destroying load testing instance"
     cd "${git_root}/ovara-ui/cdk/"
-    aws-vault exec oph-dev -- cdk destroy LoadtestStack -f -c "environment=$environment"
+    aws-vault exec oph-dev -- pnpm exec cdk destroy LoadtestStack -f -c "environment=$environment"
 fi
 
 if [[ "${build}" == "true" ]]; then
     echo "Building Lambda code and synthesizing CDK template"
-    npx cdk synth
+    cd "${git_root}/ovara-ui/cdk/" && pnpm exec cdk synth
 fi
 
 if [[ -n "${dependencies}" ]]; then
     echo "Installing CDK dependencies.."
-    cd "${git_root}/ovara-ui/cdk/" && npm ci
+    cd "${git_root}/ovara-ui/cdk/" && pnpm install --frozen-lockfile
     echo "Installing app dependencies.."
-    cd "${git_root}/ovara-ui/" && npm ci
+    cd "${git_root}/ovara-ui/" && pnpm install --frozen-lockfile
 fi
 
 if [[ "${build}" == "true" ]]; then
     echo "Building Lambda code and synthesizing CDK template"
-    npx cdk synth
+    cd "${git_root}/ovara-ui/cdk/" && pnpm exec cdk synth
 fi
 
 if [[ "${deploy}" == "true" ]]; then
@@ -120,7 +120,7 @@ if [[ "${deploy}" == "true" ]]; then
 
    echo "Building Lambda code, synhesizing CDK code and deploying to environment: $environment"
    cd "${git_root}/ovara-ui/cdk/"
-   aws-vault exec $aws_profile -- cdk deploy HostedZoneStack -c "environment=${environment}"
-   aws-vault exec $aws_profile -- cdk deploy OvaraCertificateStack -c "environment=${environment}"
-   aws-vault exec $aws_profile -- cdk deploy OvaraUISovellusStack -c "environment=${environment}"
+   aws-vault exec $aws_profile -- pnpm exec cdk deploy HostedZoneStack -c "environment=${environment}"
+   aws-vault exec $aws_profile -- pnpm exec cdk deploy OvaraCertificateStack -c "environment=${environment}"
+   aws-vault exec $aws_profile -- pnpm exec cdk deploy OvaraUISovellusStack -c "environment=${environment}"
 fi
