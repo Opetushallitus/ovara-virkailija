@@ -1,6 +1,7 @@
 {
   "name": "cdk",
   "version": "0.1.0",
+  "packageManager": "pnpm@10.25.0",
   "bin": {
     "cdk": "bin/cdk.js"
   },
@@ -22,6 +23,7 @@
   "dependencies": {
     "aws-cdk-lib": "2.212.0",
     "cdk-nextjs-standalone": "^4.3.0",
-    "constructs": "^10.4.2"
+    "constructs": "^10.4.2",
+    "semver": "^7.7.2"
   }
 }
