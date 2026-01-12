@@ -3,6 +3,7 @@
 
 node_modules
 .next
+pnpm-debug.log
 
 .mise.toml
 .scalafmt.conf
@@ -15,3 +16,4 @@ node_modules
 cdk.out
 .open-next
 cdk/**/*.d.ts
+OY-*

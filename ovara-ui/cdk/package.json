@@ -1,10 +1,12 @@
 {
   "name": "cdk",
   "version": "0.1.0",
+  "packageManager": "pnpm@10.25.0",
   "bin": {
     "cdk": "bin/cdk.js"
   },
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
@@ -15,6 +17,7 @@
     "@types/node": "24.3.0",
     "aws-cdk": "2.1025.0",
     "jest": "^30.0.5",
+    "only-allow": "^1.2.2",
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.2"
@@ -22,6 +25,7 @@
   "dependencies": {
     "aws-cdk-lib": "2.212.0",
     "cdk-nextjs-standalone": "^4.3.0",
-    "constructs": "^10.4.2"
+    "constructs": "^10.4.2",
+    "semver": "^7.7.2"
   }
 }

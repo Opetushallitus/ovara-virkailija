@@ -63,7 +63,7 @@ OVARA_BACKEND=https://localhost:8443
 APP_URL=https://localhost:3405
 ````
 
-Käyttöliittymän saa käynnistettyä komennolla `npm run dev`. Käyttöliittymä avautuu osoitteeseen: `https://localhost:3405`.
+Käyttöliittymän saa käynnistettyä komennolla `pnpm dev`. Käyttöliittymä avautuu osoitteeseen: `https://localhost:3405`.
 
 Lokaaliympäristössä backendin ja käyttöliittymän käyttö https yli cas-autentikoinnilla ja sessiohallinnalla edellyttää sertifikaattien ja keystoren generointia.
 Nämä saa luotua ajamalla projektin juuressa skriptin `generate-certs.sh`.
@@ -72,8 +72,8 @@ Nämä saa luotua ajamalla projektin juuressa skriptin `generate-certs.sh`.
 
 Asenna ensin sovelluksen riippuvuudet ja buildaa next.js sovellus:
 ````
-    npm ci
-    SKIP_TYPECHECK=true npm run build
+    pnpm install --frozen-lockfile
+    SKIP_TYPECHECK=true pnpm run build
 ````
 Deploy onnistuu komennolla:
 ````
