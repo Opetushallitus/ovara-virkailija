@@ -9,7 +9,19 @@ muodostaa excel-tiedoston, joka ladataan käyttäjän selaimeen.
 
 Backend käyttää Java Corretton versiota 21.
 
-Backendiä ajetaan IDEA:ssa. Kehitysympäristön konfiguraatio määritellään `application-dev.properties`-nimisessä tiedostossa
+## Varmenteen generointi
+
+Asenna `mkcert`-ohjelma jos sitä ei löydy:
+```
+brew install mkcert
+```
+
+Generoi varmenne ajamalla projektin juuressa:
+```
+./generate-certs.sh
+```
+
+Backendiä ajetaan IDEA:ssa (`/src/main/scala/fi/oph/ovara/backend/OvaraBackendApplication.scala`). Kehitysympäristön konfiguraatio määritellään `/src/main/resources/application-dev.properties`-nimisessä tiedostossa
 ````
 spring.datasource.url=jdbc:postgresql://localhost:5432/ovara
 #readonly datasource url, voit käyttää samaa kantayhteyttä molempiin datasourceihin lokaalisti
@@ -28,7 +40,7 @@ ovara-backend.cas.password=<CAS-SALASANA>
 
 server.port=8443
 #self-signed SSL-sertifikaatti lokaalia käyttöä varten
-server.ssl.key-store=classpath:keystore.p12
+server.ssl.key-store=classpath:localhost-keystore.p12
 server.ssl.key-store-password=ovarabackendkey
 server.ssl.key-store-type=PKCS12
 server.ssl.key-alias=ovara-backend
@@ -44,13 +56,15 @@ vaan voit katsoa tarvittavat komennot `justfile`:stä ja ajaa ne sellaisinaan ko
 
 `justfile`:stä löytyvät komennot QA-tietokantayhteydelle olettavat että QA-ympäristön bastion-putkitus löytyy ssh configista aliaksella `pallero-bastion`
 
-Ovara-backendin rajapinta on dokumentoitu Swaggeriä käyttäen ja se löytyy osoitteesta: `http://localhost:8080/ovara-backend/swagger-ui/index.html`.
+Ovara-backendin rajapinta on dokumentoitu Swaggeriä käyttäen ja se löytyy osoitteesta: https://localhost:8443/ovara-backend/swagger.
+
 Rajapintojen kutsuminen edellyttää kirjautumista. Kehitysympäristössä tämä tapahtuu helpoiten siten, että myös ovara-ui on
 lokaalisti käynnissä ja kirjaudut sen kautta sisään ennen swaggerin rajapintojen käyttämistä.
 
+Kirjautuminen onnistuu myös ilman käyttöliittymää: https://virkailija.testiopintopolku.fi/cas/login?service=https%3A%2F%2Flocalhost:8443%2Fovara-backend%2Fj_spring_cas_security_check
+
 Lokaalisti backendia ajaessa lisää `spring.profiles.active=dev`-rivi `application.properties`-tiedostoon
-tai anna käynnistysparametri `--spring.profiles.active=dev`.
-Jotta properties-tiedostot luetaan hakemiston oph-configuration alta, tulee antaa käynnistysparametri `spring.config.additional-location=classpath:/oph-configuration/application.properties`
+tai anna käynnistysparametri `-Dspring.profiles.active=dev`.
 
 # Ovara-ui
 
@@ -63,7 +77,7 @@ OVARA_BACKEND=https://localhost:8443
 APP_URL=https://localhost:3405
 ````
 
-Käyttöliittymän saa käynnistettyä komennolla `npm run dev`. Käyttöliittymä avautuu osoitteeseen: `https://localhost:3405`.
+Käyttöliittymän saa käynnistettyä komennolla `npm run dev`. Käyttöliittymä avautuu osoitteeseen: https://localhost:3405.
 
 Lokaaliympäristössä backendin ja käyttöliittymän käyttö https yli cas-autentikoinnilla ja sessiohallinnalla edellyttää sertifikaattien ja keystoren generointia.
 Nämä saa luotua ajamalla projektin juuressa skriptin `generate-certs.sh`.
