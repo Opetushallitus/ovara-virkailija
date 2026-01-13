@@ -9,7 +9,19 @@ muodostaa excel-tiedoston, joka ladataan käyttäjän selaimeen.
 
 Backend käyttää Java Corretton versiota 21.
 
-Backendiä ajetaan IDEA:ssa. Kehitysympäristön konfiguraatio määritellään `application-dev.properties`-nimisessä tiedostossa
+## Varmenteen generointi
+
+Asenna `mkcert`-ohjelma jos sitä ei löydy:
+```
+brew install mkcert
+```
+
+Generoi varmenne ajamalla projektin juuressa:
+```
+./generate-certs.sh
+```
+
+Backendiä ajetaan IDEA:ssa (`/src/main/scala/fi/oph/ovara/backend/OvaraBackendApplication.scala`). Kehitysympäristön konfiguraatio määritellään `/src/main/resources/application-dev.properties`-nimisessä tiedostossa
 ````
 spring.datasource.url=jdbc:postgresql://localhost:5432/ovara
 #readonly datasource url, voit käyttää samaa kantayhteyttä molempiin datasourceihin lokaalisti
@@ -28,7 +40,7 @@ ovara-backend.cas.password=<CAS-SALASANA>
 
 server.port=8443
 #self-signed SSL-sertifikaatti lokaalia käyttöä varten
-server.ssl.key-store=classpath:keystore.p12
+server.ssl.key-store=classpath:localhost-keystore.p12
 server.ssl.key-store-password=ovarabackendkey
 server.ssl.key-store-type=PKCS12
 server.ssl.key-alias=ovara-backend
@@ -49,8 +61,7 @@ Rajapintojen kutsuminen edellyttää kirjautumista. Kehitysympäristössä täm�
 lokaalisti käynnissä ja kirjaudut sen kautta sisään ennen swaggerin rajapintojen käyttämistä.
 
 Lokaalisti backendia ajaessa lisää `spring.profiles.active=dev`-rivi `application.properties`-tiedostoon
-tai anna käynnistysparametri `--spring.profiles.active=dev`.
-Jotta properties-tiedostot luetaan hakemiston oph-configuration alta, tulee antaa käynnistysparametri `spring.config.additional-location=classpath:/oph-configuration/application.properties`
+tai anna käynnistysparametri `-Dspring.profiles.active=dev`.
 
 # Ovara-ui
 
