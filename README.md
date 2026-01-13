@@ -56,7 +56,7 @@ vaan voit katsoa tarvittavat komennot `justfile`:stä ja ajaa ne sellaisinaan ko
 
 `justfile`:stä löytyvät komennot QA-tietokantayhteydelle olettavat että QA-ympäristön bastion-putkitus löytyy ssh configista aliaksella `pallero-bastion`
 
-Ovara-backendin rajapinta on dokumentoitu Swaggeriä käyttäen ja se löytyy osoitteesta: `http://localhost:8080/ovara-backend/swagger-ui/index.html`.
+Ovara-backendin rajapinta on dokumentoitu Swaggeriä käyttäen ja se löytyy osoitteesta: `http://localhost:8080/ovara-backend/swagger`.
 Rajapintojen kutsuminen edellyttää kirjautumista. Kehitysympäristössä tämä tapahtuu helpoiten siten, että myös ovara-ui on
 lokaalisti käynnissä ja kirjaudut sen kautta sisään ennen swaggerin rajapintojen käyttämistä.
 
