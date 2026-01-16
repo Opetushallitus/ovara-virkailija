@@ -763,7 +763,6 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       sql"""SELECT count(distinct ht.henkilo_oid)
       FROM pub.pub_dim_hakutoive ht
       JOIN pub.pub_dim_hakukohde h ON ht.hakukohde_oid = h.hakukohde_oid
-      JOIN pub.pub_dim_hakukohderyhma_ja_hakukohteet hh ON h.hakukohde_oid = hh.hakukohde_oid
       JOIN pub.pub_dim_henkilo he on ht.henkilo_hakemus_id = he.henkilo_hakemus_id
       #$maksuvelvollisuusJoin
       WHERE #$filters
