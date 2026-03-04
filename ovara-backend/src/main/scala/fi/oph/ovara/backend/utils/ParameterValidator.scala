@@ -257,9 +257,9 @@ object ParameterValidator {
       validateNumericList(params.koulutusalat1, "koulutusalat1"),
       validateNumericList(params.koulutusalat2, "koulutusalat2"),
       validateNumericList(params.koulutusalat3, "koulutusalat3"),
-      validateAlphanumericList(params.opetuskielet, "opetuskielet"),
-      validateAlphanumericList(params.maakunnat, "maakunnat"),
-      validateAlphanumericList(params.kunnat, "kunnat"),
+      validateNumericList(params.opetuskielet, "opetuskielet"),
+      validateNumericList(params.maakunnat, "maakunnat"),
+      validateNumericList(params.kunnat, "kunnat"),
       validateAlphanumericList(params.harkinnanvaraisuudet, "harkinnanvaraisuudet"),
       validateNumeric(params.sukupuoli, "sukupuoli"),
       validateBoolean(params.naytaHakutoiveet, "nayta-hakutoiveet")

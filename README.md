@@ -18,7 +18,7 @@ brew install mkcert
 
 Generoi varmenne ajamalla projektin juuressa:
 ```
-./generate-certs.sh
+./generate_certs.sh
 ```
 
 Backendiä ajetaan IDEA:ssa (`/src/main/scala/fi/oph/ovara/backend/OvaraBackendApplication.scala`). Kehitysympäristön konfiguraatio määritellään `/src/main/resources/application-dev.properties`-nimisessä tiedostossa

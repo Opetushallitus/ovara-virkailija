@@ -56,7 +56,12 @@ class HakeneetHyvaksytytVastaanottaneetService(
       oppilaitosOids = oppilaitokset,
       koulutustoimijaOid = koulutustoimija
     )
+
     Try {
+      val maakuntaKoodiurit = commonService.getMaakuntaKoodiUrit(maakunnat).get.toList
+      val kuntaKoodiurit = commonService.getKuntaKoodiurit(kunnat).get.toList
+      val opetuskieliKoodiurit = commonService.getOpetuskieliKoodiurit(opetuskielet).get.toList
+
       val queryResult = tulostustapa match {
         case "hakukohteittain" =>
             val query = hakeneetHyvaksytytVastaanottaneetRepository.selectHakukohteittainWithParams(
@@ -66,9 +71,9 @@ class HakeneetHyvaksytytVastaanottaneetService(
               koulutusalat1 = koulutusalat1,
               koulutusalat2 = koulutusalat2,
               koulutusalat3 = koulutusalat3,
-              opetuskielet = opetuskielet,
-              maakunnat = maakunnat,
-              kunnat = kunnat,
+              opetuskielet = opetuskieliKoodiurit,
+              maakunnat = maakuntaKoodiurit,
+              kunnat = kuntaKoodiurit,
               harkinnanvaraisuudet = harkinnanvaraisuudet,
               sukupuoli = sukupuoli
             )
@@ -81,9 +86,9 @@ class HakeneetHyvaksytytVastaanottaneetService(
               koulutusalat1 = koulutusalat1,
               koulutusalat2 = koulutusalat2,
               koulutusalat3 = koulutusalat3,
-              opetuskielet = opetuskielet,
-              maakunnat = maakunnat,
-              kunnat = kunnat,
+              opetuskielet = opetuskieliKoodiurit,
+              maakunnat = maakuntaKoodiurit,
+              kunnat = kuntaKoodiurit,
               harkinnanvaraisuudet = harkinnanvaraisuudet,
               sukupuoli = sukupuoli
             )
@@ -97,9 +102,9 @@ class HakeneetHyvaksytytVastaanottaneetService(
               koulutusalat1 = koulutusalat1,
               koulutusalat2 = koulutusalat2,
               koulutusalat3 = koulutusalat3,
-              opetuskielet = opetuskielet,
-              maakunnat = maakunnat,
-              kunnat = kunnat,
+              opetuskielet = opetuskieliKoodiurit,
+              maakunnat = maakuntaKoodiurit,
+              kunnat = kuntaKoodiurit,
               harkinnanvaraisuudet = harkinnanvaraisuudet,
               sukupuoli = sukupuoli
             )
@@ -113,9 +118,9 @@ class HakeneetHyvaksytytVastaanottaneetService(
               koulutusalat1 = koulutusalat1,
               koulutusalat2 = koulutusalat2,
               koulutusalat3 = koulutusalat3,
-              opetuskielet = opetuskielet,
-              maakunnat = maakunnat,
-              kunnat = kunnat,
+              opetuskielet = opetuskieliKoodiurit,
+              maakunnat = maakuntaKoodiurit,
+              kunnat = kuntaKoodiurit,
               harkinnanvaraisuudet = harkinnanvaraisuudet,
               sukupuoli = sukupuoli,
               organisaatiotaso = tulostustapa
