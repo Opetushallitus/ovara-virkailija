@@ -39,7 +39,7 @@ export const KoulutusalaValikot = () => {
     queryFn: () =>
       doApiFetch('koulutusalat2', {
         queryParams: selectedKoulutusalat1
-          ? `?koulutusalat1=${selectedKoulutusalat1}&selectedKoulutusalat2=${selectedKoulutusalat2 ? selectedKoulutusalat2 : []}`
+          ? `?ovara_koulutusalat1=${selectedKoulutusalat1}&ovara_selectedKoulutusalat2=${selectedKoulutusalat2 ? selectedKoulutusalat2 : []}`
           : null,
       }),
   });
@@ -53,7 +53,7 @@ export const KoulutusalaValikot = () => {
     queryFn: () =>
       doApiFetch('koulutusalat3', {
         queryParams: selectedKoulutusalat2
-          ? `?koulutusalat2=${selectedKoulutusalat2}&selectedKoulutusalat3=${selectedKoulutusalat3 ? selectedKoulutusalat3 : []}`
+          ? `?ovara_koulutusalat2=${selectedKoulutusalat2}&ovara_selectedKoulutusalat3=${selectedKoulutusalat3 ? selectedKoulutusalat3 : []}`
           : null,
       }),
   });

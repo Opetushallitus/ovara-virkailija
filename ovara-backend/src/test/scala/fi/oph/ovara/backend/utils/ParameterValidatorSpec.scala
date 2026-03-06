@@ -141,9 +141,9 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
       koulutusalat1 = List("foo"),
       koulutusalat2 = List("bar"),
       koulutusalat3 = List("baz"),
-      opetuskielet = List("invalid*-kieli"),
-      maakunnat = List("invalid*-maakunta"),
-      kunnat = List("invalid*-kunta"),
+      opetuskielet = List("oppilaitoksenopetuskieli_1"),
+      maakunnat = List("maakunta_01"),
+      kunnat = List("kunta_001"),
       harkinnanvaraisuudet = List("FOOBAR''"),
       sukupuoli = Some("invalid-sukupuoli"),
       naytaHakutoiveet = "invalid-boolean"
@@ -168,6 +168,48 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
       "sukupuoli.invalid",
       "nayta-hakutoiveet.invalid"
     ))
+  }
+
+  it should "return no errors for valid parameters" in {
+
+    val params = RawHakeneetHyvaksytytVastaanottaneetParams(
+      haut = List("1.2.246.562.29.00000000000000056840"),
+      tulostustapa = "hakukohteittain",
+      koulutustoimija = Some("1.2.246.562.10.346830761110"),
+      oppilaitokset = List("1.2.246.562.10.52251087186"),
+      toimipisteet = List("1.2.246.562.10.55711304158"),
+      hakukohteet = List("1.2.246.562.20.00000000000000059958"),
+      koulutusalat1 = List("09"),
+      koulutusalat2 = List("092"),
+      koulutusalat3 = List("0922"),
+      opetuskielet = List("1"),
+      maakunnat = List("21"),
+      kunnat = List("004"),
+      harkinnanvaraisuudet = List("ATARU_EI_PAATTOTODISTUSTA"),
+      sukupuoli = Some("2"),
+      naytaHakutoiveet = "true"
+    )
+
+    val expected = ValidatedHakeneetHyvaksytytVastaanottaneetParams(
+      haut = List("1.2.246.562.29.00000000000000056840"),
+      tulostustapa = "hakukohteittain",
+      koulutustoimija = Some("1.2.246.562.10.346830761110"),
+      oppilaitokset = List("1.2.246.562.10.52251087186"),
+      toimipisteet = List("1.2.246.562.10.55711304158"),
+      hakukohteet = List("1.2.246.562.20.00000000000000059958"),
+      koulutusalat1 = List("09"),
+      koulutusalat2 = List("092"),
+      koulutusalat3 = List("0922"),
+      opetuskielet = List("1"),
+      maakunnat = List("21"),
+      kunnat = List("004"),
+      harkinnanvaraisuudet = List("ATARU_EI_PAATTOTODISTUSTA"),
+      sukupuoli = Some("2"),
+      naytaHakutoiveet = true,
+    )
+    val result = ParameterValidator.validateHakeneetHyvaksytytVastaanottaneetParams(params)
+
+    result shouldBe Right(expected)
   }
 
   "validateKkHakeneetHyvaksytytVastaanottaneetParams" should "return errors for invalid parameters" in {
@@ -210,42 +252,40 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
 
   it should "return no errors for valid parameters" in {
 
-    val params = RawHakeneetHyvaksytytVastaanottaneetParams(
+    val params = RawKkHakeneetHyvaksytytVastaanottaneetParams(
       haut = List("1.2.246.562.29.00000000000000056840"),
       tulostustapa = "hakukohteittain",
       koulutustoimija = Some("1.2.246.562.10.346830761110"),
       oppilaitokset = List("1.2.246.562.10.52251087186"),
       toimipisteet = List("1.2.246.562.10.55711304158"),
       hakukohteet = List("1.2.246.562.20.00000000000000059958"),
-      koulutusalat1 = List("09"),
-      koulutusalat2 = List("092"),
-      koulutusalat3 = List("0922"),
-      opetuskielet = List("oppilaitoksenopetuskieli_1"),
-      maakunnat = List("maakunta_21"),
-      kunnat = List("kunta_004"),
-      harkinnanvaraisuudet = List("ATARU_EI_PAATTOTODISTUSTA"),
+      hakukohderyhmat = List("1.2.246.562.20.00000000000000059958"),
+      okmOhjauksenAlat = List("11"),
+      tutkinnonTasot = List("alempi"),
+      aidinkielet = List("baz"),
+      kansalaisuusluokat = List("013"),
       sukupuoli = Some("2"),
+      ensikertalainen = "true",
       naytaHakutoiveet = "true"
     )
 
-    val expected = ValidatedHakeneetHyvaksytytVastaanottaneetParams(
+    val expected = ValidatedKkHakeneetHyvaksytytVastaanottaneetParams(
       haut = List("1.2.246.562.29.00000000000000056840"),
       tulostustapa = "hakukohteittain",
       koulutustoimija = Some("1.2.246.562.10.346830761110"),
       oppilaitokset = List("1.2.246.562.10.52251087186"),
       toimipisteet = List("1.2.246.562.10.55711304158"),
       hakukohteet = List("1.2.246.562.20.00000000000000059958"),
-      koulutusalat1 = List("09"),
-      koulutusalat2 = List("092"),
-      koulutusalat3 = List("0922"),
-      opetuskielet = List("oppilaitoksenopetuskieli_1"),
-      maakunnat = List("maakunta_21"),
-      kunnat = List("kunta_004"),
-      harkinnanvaraisuudet = List("ATARU_EI_PAATTOTODISTUSTA"),
+      hakukohderyhmat = List("1.2.246.562.20.00000000000000059958"),
+      okmOhjauksenAlat = List("11"),
+      tutkinnonTasot = List("alempi"),
+      aidinkielet = List("baz"),
+      kansalaisuusluokat = List("013"),
       sukupuoli = Some("2"),
+      ensikertalainen = Some(true),
       naytaHakutoiveet = true,
     )
-    val result = ParameterValidator.validateHakeneetHyvaksytytVastaanottaneetParams(params)
+    val result = ParameterValidator.validateKkHakeneetHyvaksytytVastaanottaneetParams(params)
 
     result shouldBe Right(expected)
   }

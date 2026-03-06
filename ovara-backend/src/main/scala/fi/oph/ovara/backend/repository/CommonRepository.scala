@@ -116,10 +116,24 @@ class CommonRepository extends Extractors {
        """.as[Koodi]
   }
 
+  def selectOpetuskieliKoodiurit(koodiarvot: List[String]): SqlStreamingAction[Vector[String], String, Effect] = {
+    sql"""SELECT ook.koodiuri
+          FROM pub.pub_dim_koodisto_oppilaitoksenopetuskieli ook
+          WHERE ook.koodiarvo in (#${RepositoryUtils.makeListOfValuesQueryStr(koodiarvot)})
+       """.as[String]
+  }
+
   def selectDistinctMaakunnat: SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
     sql"""SELECT mk.koodiarvo, mk.koodinimi
           FROM pub.pub_dim_koodisto_maakunta mk
        """.as[Koodi]
+  }
+
+  def selectMaakuntaKoodiurit(koodiarvot: List[String]): SqlStreamingAction[Vector[String], String, Effect] = {
+    sql"""SELECT mk.koodiuri
+          FROM pub.pub_dim_koodisto_maakunta mk
+          WHERE mk.koodiarvo in (#${RepositoryUtils.makeListOfValuesQueryStr(koodiarvot)})
+       """.as[String]
   }
 
   def selectDistinctKunnat(
@@ -137,6 +151,13 @@ class CommonRepository extends Extractors {
           JOIN pub.pub_dim_koodisto_kunta_maakunta km
           ON k.koodiarvo = km.kunta_koodiarvo
           #$whereClause""".as[Koodi]
+  }
+
+  def selectKuntaKoodiurit(koodiarvot: List[String]): SqlStreamingAction[Vector[String], String, Effect] = {
+    sql"""SELECT k.koodiuri
+          FROM pub.pub_dim_koodisto_kunta k
+          WHERE k.koodiarvo in (#${RepositoryUtils.makeListOfValuesQueryStr(koodiarvot)})
+       """.as[String]
   }
 
   def selectHakukohderyhmat(

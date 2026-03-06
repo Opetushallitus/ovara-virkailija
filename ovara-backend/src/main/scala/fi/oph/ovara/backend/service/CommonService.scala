@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.*
+import fi.oph.ovara.backend.domain.{Haku, Hakukohde, Hakukohderyhma, Koodi, Organisaatio, OrganisaatioHierarkia}
 import fi.oph.ovara.backend.repository.{CommonRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.Constants.{
   KOULUTUSTOIMIJARAPORTTI,
@@ -16,6 +16,7 @@ import org.springframework.cache.annotation.{CacheEvict, Cacheable}
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.{Component, Service}
 
+import scala.util.control.NonFatal
 import scala.util.{Failure, Success, Try}
 
 @Component
@@ -159,6 +160,17 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     }
   }
 
+  def getOpetuskieliKoodiurit(koodiarvot: List[String]): Try[Vector[String]] =
+    Try {
+      if (koodiarvot.nonEmpty) {
+        db.run(commonRepository.selectOpetuskieliKoodiurit(koodiarvot), "selectOpetuskieliKoodiurit")
+      } else Vector.empty
+    }.recoverWith {
+      case NonFatal(exception) =>
+        LOG.error("Error fetching opetuskielet", exception)
+        Failure(exception)
+    }
+
   def getMaakunnat: Either[String, Vector[Koodi]] = {
     Try {
       db.run(commonRepository.selectDistinctMaakunnat, "selectDistinctMaakunnat")
@@ -170,6 +182,17 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     }
   }
 
+  def getMaakuntaKoodiUrit(koodiarvot: List[String]): Try[Vector[String]] =
+    Try {
+      if (koodiarvot.nonEmpty) {
+        db.run(commonRepository.selectMaakuntaKoodiurit(koodiarvot), "selectMaakuntaKoodiurit")
+      } else Vector.empty
+    }.recoverWith {
+      case NonFatal(exception) =>
+        LOG.error("Error fetching maakunnat", exception)
+        Failure(exception)
+    }
+
   def getKunnat(maakunnat: List[String], selectedKunnat: List[String]): Either[String, Vector[Koodi]] = {
     Try {
       db.run(commonRepository.selectDistinctKunnat(maakunnat, selectedKunnat), "selectDistinctKunnat")
@@ -178,6 +201,18 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       case Failure(exception) =>
         LOG.error("Error fetching kunnat", exception)
         Left("virhe.tietokanta")
+    }
+  }
+
+  def getKuntaKoodiurit(koodiarvot: List[String]): Try[Vector[String]] = {
+    Try {
+      if (koodiarvot.nonEmpty) {
+        db.run(commonRepository.selectKuntaKoodiurit(koodiarvot), "selectKuntaKoodiurit")
+      } else Vector.empty
+    }.recoverWith {
+      case NonFatal(exception) =>
+        LOG.error("Error fetching kunnat", exception)
+        Failure(exception)
     }
   }
 
