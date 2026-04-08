@@ -4,6 +4,7 @@ spring.datasource.url={{host_postgresql_ovara}}
 spring.datasource.username={{ovara_backend_postgresql_username}}
 spring.datasource.password={{ovara_backend_postgresql_password}}
 app.readonly.datasource.url={{host_postgresql_ovara_readonly}}
+use.aws.jdbc.wrapper={{ovara_backend_db_use_aws_jdbc_wrapper | default('false')}}
 
 session.schema.name={{ovara_backend_session_schema}}
 flyway.locations=classpath:db/migration
