@@ -4,22 +4,22 @@ import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, Ser
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.UserResponse
 import fi.oph.ovara.backend.raportointi.dto.{RawHakeneetHyvaksytytVastaanottaneetParams, RawHakijatParams, RawKkHakeneetHyvaksytytVastaanottaneetParams, RawKkHakijatParams, RawKkKoulutuksetToteutuksetHakukohteetParams, RawKoulutuksetToteutuksetHakukohteetParams, buildHakeneetHyvaksytytVastaanottaneetAuditParams, buildHakijatAuditParams, buildKkHakeneetHyvaksytytVastaanottaneetAuditParams, buildKkHakijatAuditParams, buildKkKoulutuksetToteutuksetHakukohteetAuditParams, buildKoulutuksetToteutuksetHakukohteetAuditParams}
-import fi.oph.ovara.backend.service.*
+import fi.oph.ovara.backend.service.{CommonService, HakeneetHyvaksytytVastaanottaneetService, KkHakeneetHyvaksytytVastaanottaneetService, KkHakijatService, KorkeakouluKoulutuksetToteutuksetHakukohteetService, KoulutuksetToteutuksetHakukohteetService, ToisenAsteenHakijatService, UserService}
 import fi.oph.ovara.backend.utils.AuditOperation.{HakeneetHyvaksytytVastaanottaneet, KkHakeneetHyvaksytytVastaanottaneet, KkHakijat, KorkeakouluKoulutuksetToteutuksetHakukohteet, KoulutuksetToteutuksetHakukohteet, ToisenAsteenHakijat}
-import fi.oph.ovara.backend.utils.ParameterValidator.{strToOptionBoolean, validateAlphanumeric, validateAlphanumericList, validateHakeneetHyvaksytytVastaanottaneetParams, validateHakijatParams, validateKkHakeneetHyvaksytytVastaanottaneetParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams, validateNumericList, validateOid, validateOidList, validateOrganisaatioOid, validateOrganisaatioOidList}
+import fi.oph.ovara.backend.utils.ControllerUtils.{handleRequest, getListParamAsScalaList}
+import fi.oph.ovara.backend.utils.ParameterValidator.{validateAlphanumeric, validateAlphanumericList, validateHakeneetHyvaksytytVastaanottaneetParams, validateHakijatParams, validateKkHakeneetHyvaksytytVastaanottaneetParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams, validateNumericList, validateOidList, validateOrganisaatioOid, validateOrganisaatioOidList}
 import fi.oph.ovara.backend.utils.{AuditLog, AuditLogObj, AuditOperation}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.{HttpHeaders, MediaType, ResponseEntity}
 import org.springframework.security.web.csrf.CsrfToken
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
 import org.springframework.web.servlet.view.RedirectView
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util
 import scala.jdk.CollectionConverters.*
 
 case class ErrorResponse(
@@ -50,38 +50,6 @@ class Controller(
   mapper.registerModule(DefaultScalaModule)
   mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
   mapper.configure(SerializationFeature.INDENT_OUTPUT, true)
-
-
-  private def getListParamAsScalaList(listParam: util.Collection[String]) = {
-    if (listParam == null) List() else listParam.asScala.toList
-  }
-
-  private def handleRequest[T](
-                        validationErrors: List[String],
-                        mapper: ObjectMapper
-                      )(block: => Either[String, T]): ResponseEntity[String] = {
-    if (validationErrors.nonEmpty) {
-      // validointivirheistä palautetaan yksityiskohtia
-      val errorResponse = ErrorResponse(
-        status = HttpServletResponse.SC_BAD_REQUEST,
-        message = "virhe.validointi",
-        details = Some(validationErrors)
-      )
-      ResponseEntity
-        .status(HttpServletResponse.SC_BAD_REQUEST)
-        .body(mapper.writeValueAsString(errorResponse))
-    } else {
-      block match {
-        case Right(result) =>
-          ResponseEntity.ok(mapper.writeValueAsString(result))
-        case Left(errorMessage) =>
-          // odottamattomista virheistä vain virheviesti
-          ResponseEntity
-            .status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
-            .body(mapper.writeValueAsString(errorMessage))
-      }
-    }
-  }
 
   @GetMapping(path = Array("healthcheck"))
   def healthcheck = "Ovara application is running!"
