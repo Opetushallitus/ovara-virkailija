@@ -32,7 +32,7 @@ class OpiskelijavalintatietoService(db: ReadOnlyDatabase, repository: Opiskelija
             _.groupBy(_.hakemusOid).values.map { rowsForHakemus =>
               val hakutoiveet = rowsForHakemus.map(_.asHakutoive)
               rowsForHakemus.head.asHakemus(hakutoiveet)
-            }
+            }.toSeq
           }
 
           oppija.asOpiskelijavalintatieto(hakemukset.getOrElse(Seq.empty))
