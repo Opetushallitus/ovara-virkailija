@@ -8,7 +8,7 @@ case class Opiskelijavalintatieto(
     syntymaaika: String,
     sukunimi: String,
     etunimet: String,
-    hakemukset: Iterable[Hakemus]
+    hakemukset: Seq[Hakemus]
 )
 
 case class Hakemus(
@@ -16,14 +16,14 @@ case class Hakemus(
     haku: Nimetty,
     haunKohdejoukko: Option[String],
     hakutapa: Option[String],
-    hakutoiveet: Iterable[Hakutoive]
+    hakutoiveet: Seq[Hakutoive]
 )
 
 case class Hakutoive(
     hakukohde: Nimetty,
     tarjoaja: Option[Nimetty],
     koulutuksenAlkamiskausiUri: Option[String],
-    koulutuksenAlkamisvuosi: Option[String],
+    koulutuksenAlkamisvuosi: Option[Int],
     valinnanTila: Option[String],
     vastaanotonTila: Option[String],
     ilmoittautumisenTila: Option[String]
@@ -38,7 +38,7 @@ case class OppijaRow(
     sukunimi: String,
     etunimet: String
 ) {
-  def asOpiskelijavalintatieto(hakemukset: Iterable[Hakemus]): Opiskelijavalintatieto = Opiskelijavalintatieto(
+  def asOpiskelijavalintatieto(hakemukset: Seq[Hakemus]): Opiskelijavalintatieto = Opiskelijavalintatieto(
     oppijanumero,
     hetu,
     syntymaaika,
@@ -60,7 +60,7 @@ case class HakemusRow(
     tarjoajanOid: Option[String],
     tarjoajanNimi: Kielistetty,
     koulutuksenAlkamiskausiuri: Option[String],
-    koulutuksenAlkamisvuosi: Option[String],
+    koulutuksenAlkamisvuosi: Option[Int],
     valinnanTila: Option[String],
     vastaanottoTila: Option[String],
     ilmoituksenTila: Option[String]

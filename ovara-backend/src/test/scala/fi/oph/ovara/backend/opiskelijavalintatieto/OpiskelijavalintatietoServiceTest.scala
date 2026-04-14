@@ -44,12 +44,11 @@ class OpiskelijavalintatietoServiceTest extends AnyFlatSpec with Matchers with O
 
     val response = service.get(List(OPPIJANUMERO))
 
-    val head = getOnlyOppija(response)
-    assert(head.hakemukset.size == 1)
-    assert(head.hakemukset.head.haku.oid == HAKU_OID)
-    assert(head.hakemukset.head.haku.nimi.isEmpty)
-    assert(head.hakemukset.head.haunKohdejoukko.isEmpty)
-    assert(head.hakemukset.head.hakutapa.isEmpty)
+    val hakemus = getOnlyHakemus(response)
+    assert(hakemus.haku.oid == HAKU_OID)
+    assert(hakemus.haku.nimi.isEmpty)
+    assert(hakemus.haunKohdejoukko.isEmpty)
+    assert(hakemus.hakutapa.isEmpty)
   }
 
   it should "return hakemus without hakukohde names when hakukohde not found" in {
@@ -95,10 +94,10 @@ class OpiskelijavalintatietoServiceTest extends AnyFlatSpec with Matchers with O
     assert(oppija.hakemukset.head.hakutoiveet.size == 2)
     val hakutoiveWithHakukohdeValues = oppija.hakemukset.head.hakutoiveet.find(_.hakukohde.oid == HAKUKOHDE_OID).get
     assert(hakutoiveWithHakukohdeValues.koulutuksenAlkamiskausiUri.contains("kausi_s#1"))
-    assert(hakutoiveWithHakukohdeValues.koulutuksenAlkamisvuosi.contains("2022"))
+    assert(hakutoiveWithHakukohdeValues.koulutuksenAlkamisvuosi.contains(2022))
     val hakutoiveWithHakuValues = oppija.hakemukset.head.hakutoiveet.find(_.hakukohde.oid == otherHakukohdeOid).get
     assert(hakutoiveWithHakuValues.koulutuksenAlkamiskausiUri.contains("kausi_k#1"))
-    assert(hakutoiveWithHakuValues.koulutuksenAlkamisvuosi.contains("2023"))
+    assert(hakutoiveWithHakuValues.koulutuksenAlkamisvuosi.contains(2023))
   }
 
   it should "returns alkamiskausi and alkamisvuosi as nulls when both hakukohde and haku don't have them" in {
@@ -143,10 +142,16 @@ class OpiskelijavalintatietoServiceTest extends AnyFlatSpec with Matchers with O
     response.toOption.get.head
   }
 
+  private def getOnlyHakemus(response: Either[String, Seq[Opiskelijavalintatieto]]): Hakemus = {
+    val oppija = getOnlyOppija(response)
+    assert(oppija.hakemukset.size == 1)
+    oppija.hakemukset.head
+  }
+
   private def getOnlyHakutoive(response: Either[String, Seq[Opiskelijavalintatieto]]): Hakutoive = {
-    val head = getOnlyOppija(response)
-    assert(head.hakemukset.flatMap(_.hakutoiveet).size == 1)
-    head.hakemukset.head.hakutoiveet.head
+    val hakemus = getOnlyHakemus(response)
+    assert(hakemus.hakutoiveet.size == 1)
+    hakemus.hakutoiveet.head
   }
 
 }

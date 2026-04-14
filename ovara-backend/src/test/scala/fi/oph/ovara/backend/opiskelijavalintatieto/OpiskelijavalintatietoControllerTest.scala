@@ -65,6 +65,13 @@ class OpiskelijavalintatietoControllerTest extends OpiskelijavalintatietoTestUti
     }
 
     @Test
+    def returns500WhenDatabaseError(): Unit = {
+      get()
+        .andExpect(status().isInternalServerError)
+        .andExpect(content().json("\"virhe.tietokanta\""))
+    }
+
+    @Test
     def returnsNotFoundWhenUserNotFound(): Unit = {
       initSchema()
 
@@ -209,7 +216,7 @@ class OpiskelijavalintatietoControllerTest extends OpiskelijavalintatietoTestUti
       |        }
       |      },
       |      "koulutuksenAlkamiskausiUri" : "kausi_s#1",
-      |      "koulutuksenAlkamisvuosi" : "2022",
+      |      "koulutuksenAlkamisvuosi" : 2022,
       |      "valinnanTila" : null,
       |      "vastaanotonTila" : null,
       |      "ilmoittautumisenTila" : null
