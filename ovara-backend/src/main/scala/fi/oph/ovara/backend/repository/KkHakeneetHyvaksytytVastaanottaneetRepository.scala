@@ -2,7 +2,7 @@ package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.{KkHakeneetHyvaksytytVastaanottaneetHakukohteittain, KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella, KkHakeneetHyvaksytytVastaanottaneetResult, KkHakeneetHyvaksytytVastaanottaneetToimipisteittain, KkHakeneetHyvaksytytVastaanottaneetTunnisteella}
 import fi.oph.ovara.backend.utils.{ParametriNimet, RepositoryUtils}
-import fi.oph.ovara.backend.utils.RepositoryUtils.{buildTutkinnonTasoFilters, makeHakukohderyhmaQueryWithKayttooikeudet, makeOptionalHakukohderyhmatSubSelectQueryStr}
+import fi.oph.ovara.backend.utils.RepositoryUtils.{buildTutkinnonTasoFilters, makeHakukohderyhmaQueryWithKayttooikeudet, makeOptionalHakukohderyhmatSubSelectQueryStr, makeHakukohderyhmaSubSelectQueryWithKayttooikeudet}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.Component
 import slick.dbio.{DBIO, Effect}
@@ -738,7 +738,14 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       } else
         ""
 
-    val hakukohteetOrganisaatioJaKayttooikeusrajauksillaFilter: String = buildOrganisaatioKayttooikeusFilter(selectedKayttooikeusOrganisaatiot, isOrganisaatioRajain, isOphPaakayttaja, kayttooikeusHakukohderyhmat)
+    val hakukohteetOrganisaatioJaKayttooikeusrajauksillaFilter: String =
+      if (isOrganisaatioRajain) {
+        makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(selectedKayttooikeusOrganisaatiot, List.empty, "h")
+      } else if (isOphPaakayttaja) {
+        ""
+      } else {
+        makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(selectedKayttooikeusOrganisaatiot, kayttooikeusHakukohderyhmat, "h")
+      }
 
     val filters = Seq(
       s"ht.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})",
