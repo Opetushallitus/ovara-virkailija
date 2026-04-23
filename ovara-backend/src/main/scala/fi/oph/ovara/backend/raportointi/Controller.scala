@@ -6,9 +6,8 @@ import fi.oph.ovara.backend.domain.UserResponse
 import fi.oph.ovara.backend.raportointi.dto.{RawHakeneetHyvaksytytVastaanottaneetParams, RawHakijatParams, RawKkHakeneetHyvaksytytVastaanottaneetParams, RawKkHakijatParams, RawKkKoulutuksetToteutuksetHakukohteetParams, RawKoulutuksetToteutuksetHakukohteetParams, buildHakeneetHyvaksytytVastaanottaneetAuditParams, buildHakijatAuditParams, buildKkHakeneetHyvaksytytVastaanottaneetAuditParams, buildKkHakijatAuditParams, buildKkKoulutuksetToteutuksetHakukohteetAuditParams, buildKoulutuksetToteutuksetHakukohteetAuditParams}
 import fi.oph.ovara.backend.service.{CommonService, HakeneetHyvaksytytVastaanottaneetService, KkHakeneetHyvaksytytVastaanottaneetService, KkHakijatService, KorkeakouluKoulutuksetToteutuksetHakukohteetService, KoulutuksetToteutuksetHakukohteetService, ToisenAsteenHakijatService, UserService}
 import fi.oph.ovara.backend.utils.AuditOperation.{HakeneetHyvaksytytVastaanottaneet, KkHakeneetHyvaksytytVastaanottaneet, KkHakijat, KorkeakouluKoulutuksetToteutuksetHakukohteet, KoulutuksetToteutuksetHakukohteet, ToisenAsteenHakijat}
-import fi.oph.ovara.backend.utils.ControllerUtils.getListParamAsScalaList
 import fi.oph.ovara.backend.utils.ParameterValidator.{validateAlphanumeric, validateAlphanumericList, validateHakeneetHyvaksytytVastaanottaneetParams, validateHakijatParams, validateKkHakeneetHyvaksytytVastaanottaneetParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams, validateNumericList, validateOidList, validateOrganisaatioOid, validateOrganisaatioOidList}
-import fi.oph.ovara.backend.utils.{AuditLog, AuditLogObj, AuditOperation}
+import fi.oph.ovara.backend.utils.{AuditLog, AuditLogObj, AuditOperation, ControllerUtils}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
@@ -38,9 +37,9 @@ class Controller(
     kkHakijatService: KkHakijatService,
     hakeneetHyvaksytytVastaanottaneetService: HakeneetHyvaksytytVastaanottaneetService,
     kkHakeneetHyvaksytytVastaanottaneetService: KkHakeneetHyvaksytytVastaanottaneetService,
-    userService: UserService,
+    val userService: UserService,
     val auditLog: AuditLog = AuditLogObj
-) {
+) extends ControllerUtils {
   val LOG: Logger = LoggerFactory.getLogger(classOf[Controller])
 
   @Value("${ovara.ui.url}")
