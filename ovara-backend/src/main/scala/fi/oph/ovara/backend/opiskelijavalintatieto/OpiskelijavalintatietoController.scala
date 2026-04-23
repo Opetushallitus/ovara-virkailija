@@ -1,25 +1,20 @@
 package fi.oph.ovara.backend.opiskelijavalintatieto
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import fi.oph.ovara.backend.service.UserService
-import fi.oph.ovara.backend.utils.Constants.OPH_PAAKAYTTAJA_AUTHORITY
-import fi.oph.ovara.backend.utils.ControllerUtils.getListParamAsScalaList
 import fi.oph.ovara.backend.utils.ParameterValidator.{validateOid, validateOidList}
+import fi.oph.ovara.backend.utils.{ApiException, ControllerUtils}
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.{Content, Schema}
 import io.swagger.v3.oas.annotations.responses.ApiResponse
-import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.{HttpStatus, MediaType}
 import org.springframework.web.bind.annotation.{
-  ExceptionHandler,
   GetMapping,
   PostMapping,
   RequestBody,
   RequestMapping,
   RequestParam,
-  ResponseStatus,
   RestController
 }
 import org.springframework.web.server.ResponseStatusException
@@ -30,9 +25,9 @@ import scala.jdk.OptionConverters.RichOption
 @RestController
 @RequestMapping(path = Array("api"))
 class OpiskelijavalintatietoController @Autowired() (
-    userService: UserService,
+    val userService: UserService,
     opiskelijavalintatietoService: OpiskelijavalintatietoService
-) {
+) extends ControllerUtils {
   val LOG: Logger = LoggerFactory.getLogger(classOf[OpiskelijavalintatietoController])
 
   @GetMapping(path = Array("opiskelijavalintatiedot"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
@@ -106,29 +101,6 @@ class OpiskelijavalintatietoController @Autowired() (
       }
     }
 
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  @ExceptionHandler(Array(classOf[ValidationException]))
-  def validationException(ex: ValidationException): ValidationError = {
-    ValidationError(
-      status = HttpServletResponse.SC_BAD_REQUEST,
-      message = "virhe.validointi",
-      details = ex.validationErrors.asJava
-    )
-  }
-
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  @ExceptionHandler(Array(classOf[ApiException]))
-  def validationException(ex: ApiException): String = {
-    ObjectMapper().writeValueAsString(ex.errorMessage)
-  }
-
-  private def validate(f: => Iterable[String]): Unit = {
-    val errors = f
-    if (errors.nonEmpty) {
-      throw ValidationException(errors.toList)
-    }
-  }
-
   private def handleRequest[T](block: => Either[String, T]): T = {
     block match {
       case Right(null) =>
@@ -141,16 +113,4 @@ class OpiskelijavalintatietoController @Autowired() (
     }
   }
 
-  private def withPaakayttajaRole[T](f: => T): T = {
-    val user = userService.getEnrichedUserDetails
-
-    if (user.authorities.contains(OPH_PAAKAYTTAJA_AUTHORITY)) {
-      f
-    } else {
-      throw ResponseStatusException(HttpStatus.FORBIDDEN)
-    }
-  }
-
-  case class ValidationException(validationErrors: List[String]) extends RuntimeException
-  case class ApiException(errorMessage: String)                  extends RuntimeException
 }
