@@ -1,13 +1,29 @@
 package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.*
-import fi.oph.ovara.backend.opiskelijavalintatieto.{HakemusRow, OppijaRow}
-import fi.oph.ovara.backend.utils.ExtractorUtils.{extractArray, extractCommaSeparatedString, extractDateOption, extractHakuaika, extractKielistetty, extractKielistettyList, extractKoulutuksenAlkamisaika, extractMap, extractOpintojenlaajuus, extractValintatapajonot}
-import fi.oph.ovara.backend.utils.{GenericOvaraJsonFormats, ParametriNimet}
+import fi.oph.ovara.backend.utils.ExtractorUtils.{
+  extractArray,
+  extractCommaSeparatedString,
+  extractDateOption,
+  extractHakuaika,
+  extractKielistetty,
+  extractKielistettyList,
+  extractKoulutuksenAlkamisaika,
+  extractMap,
+  extractOpintojenlaajuus,
+  extractValintatapajonot
+}
+import fi.oph.ovara.backend.utils.{Constants, GenericOvaraJsonFormats, ParametriNimet}
 import org.json4s.jackson.Serialization.read
+import org.slf4j.{Logger, LoggerFactory}
 import slick.jdbc.*
 
+import java.time.OffsetDateTime
+import scala.util.control.NonFatal
+import scala.util.{Failure, Try}
+
 trait Extractors extends GenericOvaraJsonFormats {
+  private val LOG: Logger = LoggerFactory.getLogger(classOf[Extractors])
   implicit val getHakuResult: GetResult[Haku] = GetResult(r =>
     Haku(
       haku_oid = r.nextString(),
@@ -83,7 +99,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       )
     })
   }
-  
+
   implicit val getParametriNimiResult: GetResult[ParametriNimet] = {
     GetResult(r =>
       ParametriNimet(
@@ -215,38 +231,20 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   )
 
-  implicit val getOppijaRow: GetResult[OppijaRow] = GetResult(r =>
-    OppijaRow(
-      oppijanumero = r.nextString(),
-      hetu = r.nextString(),
-      syntymaaika = r.nextString(),
-      sukunimi = r.nextString(),
-      etunimet = r.nextString(),
-    )
-  )
+  implicit val getKielistetty: GetResult[Kielistetty] =
+    GetResult(r => Seq(Fi, Sv, En).flatMap(kieli => r.nextStringOption().map(kieli -> _)).toMap)
 
-  implicit val getKielistetty: GetResult[Kielistetty] = GetResult(r =>
-    Seq(Fi, Sv, En).flatMap(kieli => r.nextStringOption().map(kieli -> _)).toMap
-  )
-
-  implicit val getHakemus: GetResult[HakemusRow] = GetResult(r =>
-    HakemusRow(
-      oppijanumero = r.nextString(),
-      hakemusOid = r.nextString(),
-      hakuOid = r.nextString(),
-      hakuNimi = getKielistetty(r),
-      kohdejoukkoKoodiuri = r.nextStringOption(),
-      hakutapakoodiuri = r.nextStringOption(),
-      hakukohdeOid = r.nextString(),
-      hakukohdeNimi = getKielistetty(r),
-      tarjoajanOid = r.nextStringOption(),
-      tarjoajanNimi = getKielistetty(r),
-      koulutuksenAlkamiskausiuri = r.nextStringOption(),
-      koulutuksenAlkamisvuosi = r.nextIntOption(),
-      valinnanTila = r.nextStringOption(),
-      vastaanottoTila = r.nextStringOption(),
-      ilmoituksenTila = r.nextStringOption()
-    )
+  implicit val getOffsetDateTime: GetResult[Option[OffsetDateTime]] = GetResult(r =>
+    r.nextStringOption().flatMap { str =>
+      LOG.info(s"ASDF date string: $str")
+      Try(OffsetDateTime.parse(str, Constants.PSQL_TIMESTAMPTZ_FORMATTER))
+        .recoverWith {
+          case NonFatal(e) =>
+            LOG.error(s"Error while parsing OffsetDateTime from string: $str", e)
+            Failure(e)
+        }
+        .toOption
+    }
   )
 
   private def extractHakeneetHyvaksytytVastaanottaneetCommonFields(

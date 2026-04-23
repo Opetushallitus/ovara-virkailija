@@ -24,7 +24,7 @@ object RepositoryUtils {
     (alkamiskaudetAndVuodet, henkilokohtainenSuunnitelma, eiAlkamiskautta)
   }
 
-  def makeListOfValuesQueryStr(values: Seq[String]): String = {
+  def makeListOfValuesQueryStr(values: Iterable[String]): String = {
     s"${values.map(s => s"'$s'").mkString(", ")}"
   }
 
