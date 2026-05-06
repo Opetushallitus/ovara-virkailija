@@ -2,19 +2,19 @@ package fi.oph.ovara.backend.valpas
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include
-import com.fasterxml.jackson.databind.ObjectMapper
 import fi.oph.ovara.backend.opiskelijavalintatieto.KielistettyResponse
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode
 import org.slf4j.{Logger, LoggerFactory}
 
-import java.time.{LocalDate, OffsetDateTime}
+import java.time.{LocalDateTime, OffsetDateTime}
 import scala.annotation.meta.field
 import scala.beans.BeanProperty
 import scala.jdk.CollectionConverters.*
 
 val LOG: Logger = LoggerFactory.getLogger("Valpas DTO")
 
+@JsonInclude(Include.NON_ABSENT)
 case class HakemusResponse(
     @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
     @BeanProperty hakemusOid: String,
@@ -41,19 +41,11 @@ case class HakemusResponse(
     @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
     @BeanProperty hakutapa: KoodistoArvoResponse,
     @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty hakutyyppi: KoodistoArvoResponse,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
     @BeanProperty aktiivinenHaku: Option[Boolean],
     @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty haunAlkamispaivamaara: Option[LocalDate],
+    @BeanProperty haunAlkamispaivamaara: Option[LocalDateTime],
     @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
     @BeanProperty oppijaOid: String,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty huoltajanNimi: Option[String],
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty huoltajanPuhelinnumero: Option[String],
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty huoltajanSahkoposti: Option[String],
     @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
     @BeanProperty hakutoiveet: java.util.List[HakutoiveResponse]
 )
@@ -68,22 +60,19 @@ object HakemusResponse {
       matkapuhelin = hakemus.matkapuhelin,
       lahiosoite = hakemus.lahiosoite,
       postinumero = hakemus.postinumero,
-      postitoimipaikka = hakemus.postinumero,
+      postitoimipaikka = hakemus.postitoimipaikka,
       maa = KoodistoArvoResponse(hakemus.maa),
       hakuOid = hakemus.hakuOid,
       hakuNimi = KielistettyResponse(hakemus.hakuNimi),
       hakutapa = KoodistoArvoResponse(hakemus.hakutapa),
-      hakutyyppi = KoodistoArvoResponse(hakemus.hakutyyppi),
       aktiivinenHaku = hakemus.aktiivinenHaku,
       haunAlkamispaivamaara = hakemus.haunAlkamispaivamaara,
       oppijaOid = hakemus.oppijaOid,
-      huoltajanNimi = hakemus.huoltajanNimi,
-      huoltajanPuhelinnumero = hakemus.huoltajanPuhelinnumero,
-      huoltajanSahkoposti = hakemus.huoltajanSahkoposti,
       hakutoiveet = hakemus.hakutoiveet.map(HakutoiveResponse.apply).asJava
     )
 }
 
+@JsonInclude(Include.NON_ABSENT)
 case class HakutoiveResponse(
     @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
     @BeanProperty hakukohdeOid: String,
@@ -148,21 +137,15 @@ case class HakutoiveResponse(
     @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
     @BeanProperty paasykoe: Option[PaasykoeResponse],
     @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
-    @BeanProperty kielikoe: Option[PaasykoeResponse],
-    @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
     @BeanProperty lisanaytto: Option[PaasykoeResponse],
     @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty liitteetTarkastettu: Boolean,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty valintakoe: java.util.List[ValintakoeResponse],
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty alinHyvaksyttyPistemaara: String,
+    @BeanProperty alinHyvaksyttyPistemaara: BigDecimal,
     @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
     @BeanProperty alinValintaPistemaara: Int,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty pisteet: Int,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty varasijanumero: Int
+    @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
+    @BeanProperty pisteet: Option[BigDecimal],
+    @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
+    @BeanProperty varasijanumero: Option[Int]
 )
 
 object HakutoiveResponse {
@@ -181,10 +164,7 @@ object HakutoiveResponse {
       hakutoive.ilmoittautumistila,
       hakutoive.harkinnanvaraisuus,
       hakutoive.paasykoe.map(PaasykoeResponse.apply),
-      hakutoive.kielikoe.map(PaasykoeResponse.apply),
       hakutoive.lisanaytto.map(PaasykoeResponse.apply),
-      hakutoive.liitteetTarkastettu,
-      hakutoive.valintakoe.map(ValintakoeResponse.apply).asJava,
       hakutoive.alinHyvaksyttyPistemaara,
       hakutoive.alinValintaPistemaara,
       hakutoive.pisteet,
@@ -210,39 +190,6 @@ object PaasykoeResponse {
     )
 }
 
-case class ValintakoeResponse(
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty osallistuminen: String,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty laskentatila: String,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty valintakoeOid: String,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty valintakoeTunniste: String,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty nimi: String,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty valinnanVaiheOid: String,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty valinnanVaiheJarjestysluku: Int,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty arvo: String
-)
-
-object ValintakoeResponse {
-  def apply(valintakoe: Valintakoe) =
-    new ValintakoeResponse(
-      osallistuminen = valintakoe.osallistuminen,
-      laskentatila = valintakoe.laskentatila,
-      valintakoeOid = valintakoe.valintakoeOid,
-      valintakoeTunniste = valintakoe.valintakoeTunniste,
-      nimi = valintakoe.nimi,
-      valinnanVaiheOid = valintakoe.valinnanVaiheOid,
-      valinnanVaiheJarjestysluku = valintakoe.valinnanVaiheJarjestysluku,
-      arvo = valintakoe.arvo
-    )
-}
-
 case class KoodistoArvoResponse(
     @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
     @BeanProperty versioituUri: String,
@@ -253,24 +200,18 @@ case class KoodistoArvoResponse(
     @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
     @BeanProperty koodistoVersio: Int,
     @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty nimi: KielistettyResponse,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty
-    @JsonInclude(Include.NON_EMPTY)
-    lyhytNimi: KielistettyResponse
+    @BeanProperty nimi: KielistettyResponse
 )
 
 object KoodistoArvoResponse {
   def apply(koodistoArvo: KoodistoArvo): KoodistoArvoResponse = {
-    LOG.info(s"ASDF lyhyt nimi: ${koodistoArvo.lyhytNimi} (${new ObjectMapper().writeValueAsString(koodistoArvo.lyhytNimi)})")
 
     new KoodistoArvoResponse(
       versioituUri = koodistoArvo.versioituUri,
       koodiarvo = koodistoArvo.koodiarvo,
       koodistoUri = koodistoArvo.koodistoUri,
       koodistoVersio = koodistoArvo.koodistoVersio,
-      nimi = KielistettyResponse(koodistoArvo.nimi),
-      lyhytNimi = if (koodistoArvo.lyhytNimi.isEmpty) null else KielistettyResponse(koodistoArvo.lyhytNimi)
+      nimi = KielistettyResponse(koodistoArvo.nimi)
     )
   }
 }

@@ -1,5 +1,6 @@
 package fi.oph.ovara.backend.utils
 
+import java.time.ZoneId
 import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder}
 import java.time.temporal.ChronoField
 
@@ -78,4 +79,6 @@ object Constants {
     .optionalEnd()
     .appendOffset("+HH:mm", "+00")
     .toFormatter()
+
+  val HELSINKI_TIMEZONE: ZoneId = ZoneId.of("Europe/Helsinki")
 }
