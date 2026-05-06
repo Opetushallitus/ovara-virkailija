@@ -3,18 +3,23 @@ package fi.oph.ovara.backend.valpas
 import fi.oph.ovara.backend.repository.ReadOnlyDatabase
 import slick.jdbc.H2Profile.api.*
 
+import java.time.OffsetDateTime
+
 trait ValpasTestUtils {
   val db: ReadOnlyDatabase
 
-  val OPPIJANUMERO     = "1.2.246.562.24.9"
-  val HAKEMUS_OID      = "1.2.246.562.11.580"
-  val HAKU_OID         = "1.2.246.562.29.001"
-  val HAKUKOHDE_OID    = "1.2.246.562.20.012"
-  val TOTEUTUS_OID     = "1.2.246.562.17.122"
-  val KOULUTUS_OID     = "1.2.246.562.13.022"
-  val ORGANISAATIO_OID = "1.2.246.562.10.486"
+  val OPPIJANUMERO       = "1.2.246.562.24.9"
+  val HAKEMUS_OID        = "1.2.246.562.11.580"
+  val HAKU_OID           = "1.2.246.562.29.001"
+  val HAKUKOHDE_OID      = "1.2.246.562.20.012"
+  val TOTEUTUS_OID       = "1.2.246.562.17.122"
+  val KOULUTUS_OID       = "1.2.246.562.13.022"
+  val ORGANISAATIO_OID   = "1.2.246.562.10.486"
+  val VALINTATAPAJONO_ID = "16799"
 
   def insertHakemus(): Unit = {
+    val tomorrow = OffsetDateTime.now().plusDays(2)
+
     db.run(sqlu"""INSERT INTO gen.gen_henkilo values($OPPIJANUMERO, $OPPIJANUMERO)""", "Insert test haku")
     db.run(
       sqlu"""INSERT INTO gen.gen_hakemus values(
@@ -45,10 +50,14 @@ trait ValpasTestUtils {
       sqlu"""INSERT INTO gen.gen_koodi values
          ('maatjavaltiot2_246#2', 'maatjavaltiot2', '246', 2, 'Suomi', 'Finland', 'Finland'),
          ('hakutapa_03#1', 'hakutapa', '03', 1, 'Jatkuva haku', 'Kontinuerlig ansökan', 'Rolling admission (upper secondary level)'),
-         ('hakutyyppi_01#1', 'hakutyyppi', '01', 1, 'Varsinainen haku', 'Egentlig ansökan', null),
          ('haunkohdejoukko_11#1', 'haunkohdejoukko', '11', 1, 'Perusopetuksen jälkeisen koulutuksen yhteishaku', 'Gemensam ansökan till utbildning efter grundläggande utbildning', null)
          """,
       "Insert test koodit"
+    )
+
+    db.run(
+      sqlu"""INSERT INTO gen.gen_ohjausparametri values($HAKU_OID, $HAKUKIERROS_PAATTYY, ${tomorrow.toString})""",
+      "Insert test ohjausparametri"
     )
   }
 
@@ -98,12 +107,22 @@ trait ValpasTestUtils {
     db.run(
       sqlu"""INSERT INTO gen.gen_koodi values
              ('koulutus_621702#12' , 'koulutus','621702',  12, 'Kulttuurituottaja' , 'Kulturproducent', 'Bachelor of Culture and Arts, Cultural Manager')""",
-    "Insert test koodi")
+      "Insert test koodi"
+    )
+
+    db.run(
+      sqlu"""INSERT INTO gen.gen_valintarekisteri values($VALINTATAPAJONO_ID, $HAKEMUS_OID, $HAKUKOHDE_OID, 23.7, 4)""",
+      "Insert test valintarekisteri"
+    )
+
+    db.run(
+      sqlu"""INSERT INTO gen.gen_valintarekisteri_valintatapajono values($VALINTATAPAJONO_ID, 21.1)""",
+      "Insert test valintarekisteri valintatapajono"
+    )
   }
 
   def initSchema(): Unit = {
     val query = sqlu"""
-          DROP ALL OBJECTS;
           CREATE DOMAIN IF NOT EXISTS JSONB AS JSON;
           CREATE SCHEMA gen;
 
@@ -172,14 +191,34 @@ trait ValpasTestUtils {
           );
 
           CREATE TABLE gen.gen_koodi(
-             versioitu_koodiuri text,
-             koodistouri text,
-             koodiarvo text,
-             koodiversio integer,
-             nimi_fi text,
-             nimi_sv text,
-             nimi_en text
-          )
+              versioitu_koodiuri text,
+              koodistouri text,
+              koodiarvo text,
+              koodiversio integer,
+              nimi_fi text,
+              nimi_sv text,
+              nimi_en text
+          );
+
+          CREATE TABLE gen.gen_ohjausparametri(
+              haku_oid text,
+              avain text,
+              aikaleima timestamp with time zone
+          );
+
+          CREATE TABLE gen.gen_valintarekisteri(
+            valintatapajono_id text,
+            hakemus_oid text,
+            hakukohde_oid text,
+            pisteet double precision,
+            varasijan_numero integer
+          );
+
+          CREATE TABLE gen.gen_valintarekisteri_valintatapajono(
+            valintatapajono_id text,
+            alin_hyvaksytty_pistemaara double precision
+          );
+
           """
     db.run(query, "Init Valpas test schema")
   }

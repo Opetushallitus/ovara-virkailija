@@ -3,15 +3,15 @@ package fi.oph.ovara.backend.valpas
 import fi.oph.ovara.backend.repository.Extractors
 import fi.oph.ovara.backend.utils.ExtractorUtils.extractArray
 import slick.jdbc.GetResult
+import org.json4s.jackson.Serialization.read
 
-class ValpasExtractors extends Extractors {
+class ValpasExtractors extends Extractors with ValpasFormats {
   implicit val getHakemus: GetResult[HakemusRow] = GetResult { r =>
     HakemusRow(
       hakuOid = r.nextString(),
-      haunAlku = getOffsetDateTime(r),
-      haunLoppu = getOffsetDateTime(r),
+      hakuajat = getHakuajat(r),
+      hakukierrosPaattyy = getOffsetDateTime(r),
       hakutapaKoodiuri = r.nextString(),
-      hakutyyppiKoodiuri = r.nextString(),
       haunNimi = getKielistetty(r),
       oppijanumero = r.nextString(),
       hakemusOid = r.nextString(),
@@ -21,10 +21,7 @@ class ValpasExtractors extends Extractors {
       asuinmaa = r.nextString(),
       lahiosoite = r.nextString(),
       postinumero = r.nextString(),
-      postitoimipaikka = r.nextString(),
-      huoltajanNimi = r.nextStringOption(),
-      huoltajanPuhelinnumero = r.nextStringOption(),
-      huoltajanSahkoposti = r.nextStringOption()
+      postitoimipaikka = r.nextString()
     )
   }
 
@@ -42,7 +39,11 @@ class ValpasExtractors extends Extractors {
       vastaanottotieto = r.nextString(),
       ilmoittautumistila = r.nextString(),
       valintatila = r.nextString(),
-      harkinnanvaraisuus = r.nextString()
+      harkinnanvaraisuus = r.nextString(),
+      valintatapajonoId = r.nextString(),
+      alin_hyvaksytty_pistemaara = r.nextBigDecimal(),
+      pisteet = r.nextBigDecimalOption(),
+      varasijanNumero = r.nextIntOption()
     )
   }
 
@@ -52,8 +53,11 @@ class ValpasExtractors extends Extractors {
       koodiarvo = r.nextString(),
       koodistoUri = r.nextString(),
       koodistoVersio = r.nextInt(),
-      nimi = getKielistetty(r),
-      lyhytNimi = getKielistetty(r)
+      nimi = getKielistetty(r)
     )
+  }
+
+  implicit val getHakuajat: GetResult[List[ValpasHakuaika]] = GetResult { r =>
+    r.nextStringOption().map(read[List[ValpasHakuaika]]).getOrElse(List.empty)
   }
 }
