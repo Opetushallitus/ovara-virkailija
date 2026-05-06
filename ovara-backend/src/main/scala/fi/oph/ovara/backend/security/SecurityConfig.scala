@@ -182,7 +182,7 @@ class SecurityConfig  {
         .anyRequest().fullyAuthenticated()
       )
       .csrf(csrf => csrf
-        .ignoringRequestMatchers("/api/healthcheck", "/api/csrf", "/api/opiskelijavalintatiedot")
+        .ignoringRequestMatchers("/api/healthcheck", "/api/csrf", "/api/opiskelijavalintatiedot", "/api/valpas")
       )
       .exceptionHandling(exceptionHandling =>
         // corsin takia suoran cas uudelleenohjauksen sijaan palautetaan http 401 ja käli hoitaa forwardoinnin login apiin

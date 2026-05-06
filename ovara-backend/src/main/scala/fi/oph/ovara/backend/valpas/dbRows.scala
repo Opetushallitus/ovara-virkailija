@@ -1,8 +1,9 @@
 package fi.oph.ovara.backend.valpas
 
 import fi.oph.ovara.backend.domain.Kielistetty
+import fi.oph.ovara.backend.utils.Constants.HELSINKI_TIMEZONE
 
-import java.time.OffsetDateTime
+import java.time.{LocalDateTime, OffsetDateTime}
 
 case class HakemusRow(
     hakemusOid: String,
@@ -15,14 +16,10 @@ case class HakemusRow(
     asuinmaa: String,
     hakuOid: String,
     haunNimi: Kielistetty,
-    haunAlku: Option[OffsetDateTime],
-    haunLoppu: Option[OffsetDateTime],
+    hakuajat: List[ValpasHakuaika],
+    hakukierrosPaattyy: Option[OffsetDateTime],
     hakutapaKoodiuri: String,
-    hakutyyppiKoodiuri: String,
-    oppijanumero: String,
-    huoltajanNimi: Option[String],
-    huoltajanPuhelinnumero: Option[String],
-    huoltajanSahkoposti: Option[String]
+    oppijanumero: String
 ) {
   def asHakemus(koodistot: Map[String, KoodistoArvo], hakutoiveet: Seq[Hakutoive]): Hakemus = {
     Hakemus(
@@ -37,23 +34,20 @@ case class HakemusRow(
       hakuOid = hakuOid,
       hakuNimi = haunNimi,
       hakutapa = koodistot(hakutapaKoodiuri),
-      hakutyyppi = koodistot(hakutyyppiKoodiuri),
       aktiivinenHaku = isAktiivinen,
-      haunAlkamispaivamaara = haunAlku.map(_.toLocalDate),
+      haunAlkamispaivamaara = firstHakuajanAlku,
       oppijaOid = oppijanumero,
-      huoltajanNimi = huoltajanNimi,
-      huoltajanPuhelinnumero = huoltajanPuhelinnumero,
-      huoltajanSahkoposti = huoltajanSahkoposti,
       hakutoiveet = hakutoiveet
     )
   }
 
-  private def isAktiivinen: Option[Boolean] = {
-    val hakuaika = for (a <- haunAlku; l <- haunLoppu) yield (a, l)
-    hakuaika.map { case (alku, loppu) =>
-      val now = OffsetDateTime.now()
-      !alku.isAfter(now) && loppu.isAfter(now)
-    }
+  lazy val firstHakuajanAlku: Option[LocalDateTime] =
+    hakuajat.flatMap(_.alkaa).minOption
+
+  lazy val isAktiivinen: Option[Boolean] = {
+    val alkuaika = firstHakuajanAlku.map(_.atZone(HELSINKI_TIMEZONE).toOffsetDateTime)
+    val now      = OffsetDateTime.now()
+    for (a <- alkuaika; l <- hakukierrosPaattyy) yield !a.isAfter(now) && l.isAfter(now)
   }
 }
 
@@ -70,7 +64,11 @@ case class HakutoiveRow(
     vastaanottotieto: String,
     valintatila: String,
     ilmoittautumistila: String,
-    harkinnanvaraisuus: String
+    harkinnanvaraisuus: String,
+    valintatapajonoId: String,
+    alin_hyvaksytty_pistemaara: BigDecimal,
+    pisteet: Option[BigDecimal],
+    varasijanNumero: Option[Int]
 ) {
   def asHakutoive(koodistot: Map[String, KoodistoArvo]): Hakutoive = {
     Hakutoive(
@@ -87,14 +85,11 @@ case class HakutoiveRow(
       ilmoittautumistila = ilmoittautumistila,
       harkinnanvaraisuus = harkinnanvaraisuus,
       paasykoe = None,
-      kielikoe = None,
       lisanaytto = None,
-      liitteetTarkastettu = false,
-      valintakoe = Seq.empty,
-      alinHyvaksyttyPistemaara = null,
+      alinHyvaksyttyPistemaara = alin_hyvaksytty_pistemaara,
       alinValintaPistemaara = 0,
-      pisteet = 0,
-      varasijanumero = 0
+      pisteet = pisteet,
+      varasijanumero = varasijanNumero
     )
   }
 }

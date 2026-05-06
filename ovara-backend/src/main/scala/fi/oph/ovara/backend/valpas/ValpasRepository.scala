@@ -13,28 +13,25 @@ class ValpasRepository(db: ReadOnlyDatabase) extends ValpasExtractors {
   def selectHakemukset(oppijanumerot: List[String]): Seq[HakemusRow] = {
     val query = sql"""
     SELECT haku.haku_oid,
-      '2024-08-31 23:59:00.365924+03'::timestamp with time zone as haunAlku, -- koutan hakuajat? hakukohteen hakuajat?
-      '2027-08-31 23:59:00.365924+03'::timestamp with time zone as haunLoppu, -- koutan hakuajat? hakukohteen hakuajat? ohjausparametrien PH_HKP?
+      '[{"alkaa": "2024-08-31T23:59", "paattyy": "2027-08-31T23:59"},{"alkaa": "2026-08-31T23:59", "paattyy": "2027-09-31T23:59"},{"alkaa": "2022-08-31T23:59", "paattyy": "2023-08-31T23:59"}]' AS hakuajat,-- Haun hakuajat puuttuvat Ovarasta, ainakin gen-skeemasta
+      op.aikaleima as hakukierros_paattyy,
       haku.hakutapakoodiuri,
-      'hakutyyppi_01#1' as hakutyyppi, -- mistä?
       haku.haku_nimi_fi,
       haku.haku_nimi_sv,
       haku.haku_nimi_en,
       hlo.oppijanumero,
       hakemus.hakemus_oid,
-      hakemus.muokattu,   -- hakemuksenMuokkauksenAikaleima ?
-      hakemus.sahkoposti, -- yhteystiedot hakemukselta?
+      hakemus.muokattu,
+      hakemus.sahkoposti,
       hakemus.puhelin,
-      hakemus.asuinmaa,   -- myös maa hakemukselta? lyhytnimi?
+      hakemus.asuinmaa,
       hakemus.lahiosoite,
       hakemus.postinumero,
-      hakemus.postitoimipaikka,
-      null as huoltajanNimi, -- mistä? onko aina null atarun kanssa?
-      null as huoltajanPuhelinnumero, -- mistä? onko aina null atarun kanssa?
-      null as huoltajanSahkoposti -- mistä? onko aina null atarun kanssa?
+      hakemus.postitoimipaikka
     FROM gen.gen_henkilo hlo
     INNER JOIN gen.gen_hakemus hakemus on hakemus.henkilo_oid = hlo.henkilo_oid
     INNER JOIN gen.gen_haku haku on hakemus.haku_oid = haku.haku_oid
+    LEFT JOIN gen.gen_ohjausparametri op on hakemus.haku_oid = op.haku_oid and op.avain = 'PH_HKP'
     WHERE hlo.oppijanumero in (#${RepositoryUtils.makeListOfValuesQueryStr(oppijanumerot)})
     AND haku.kohdejoukko_koodiuri LIKE 'haunkohdejoukko_11%'
     """.as[HakemusRow]
@@ -64,12 +61,18 @@ class ValpasRepository(db: ReadOnlyDatabase) extends ValpasExtractors {
       ht.vastaanottotieto,
       ht.ilmoittautumisen_tila,
       ht.valintatieto,
-      ht.harkinnanvaraisuuden_syy
+      ht.harkinnanvaraisuuden_syy,
+      vr.valintatapajono_id,
+      vj.alin_hyvaksytty_pistemaara,
+      vr.pisteet,
+      vr.varasijan_numero
     FROM gen.gen_hakutoive ht
     LEFT JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
     LEFT JOIN gen.gen_organisaatio o ON hk.jarjestyspaikka_oid = o.organisaatio_oid
     LEFT JOIN gen.gen_toteutus t ON hk.toteutus_oid = t.toteutus_oid
     LEFT JOIN gen.gen_koulutus k ON t.koulutus_oid = k.koulutus_oid
+    LEFT JOIN gen.gen_valintarekisteri vr ON ht.hakemus_oid = vr.hakemus_oid AND ht.hakukohde_oid = vr.hakukohde_oid
+    LEFT JOIN gen.gen_valintarekisteri_valintatapajono vj ON vr.valintatapajono_id = vj.valintatapajono_id
     WHERE ht.hakemus_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(hakemusOids)})
     """.as[HakutoiveRow]
 
@@ -85,10 +88,7 @@ class ValpasRepository(db: ReadOnlyDatabase) extends ValpasExtractors {
       koodiversio,
       nimi_fi,
       nimi_sv,
-      nimi_en,
-      null as lyhytnimi_fi, -- Puuttuu Ovarasta?
-      null as lyhytnimi_sv, -- Puuttuu Ovarasta?
-      null as lyhytnimi_en -- Puuttuu Ovarasta?
+      nimi_en
     FROM gen.gen_koodi
     WHERE versioitu_koodiuri in (#${RepositoryUtils.makeListOfValuesQueryStr(koodiUrit)})
     """.as[KoodistoArvo]

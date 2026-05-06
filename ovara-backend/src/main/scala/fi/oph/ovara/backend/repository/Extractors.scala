@@ -236,7 +236,6 @@ trait Extractors extends GenericOvaraJsonFormats {
 
   implicit val getOffsetDateTime: GetResult[Option[OffsetDateTime]] = GetResult(r =>
     r.nextStringOption().flatMap { str =>
-      LOG.info(s"ASDF date string: $str")
       Try(OffsetDateTime.parse(str, Constants.PSQL_TIMESTAMPTZ_FORMATTER))
         .recoverWith {
           case NonFatal(e) =>

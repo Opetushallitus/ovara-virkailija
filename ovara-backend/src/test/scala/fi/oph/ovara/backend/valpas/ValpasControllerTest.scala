@@ -102,7 +102,7 @@ class ValpasControllerTest extends ValpasTestUtils {
         .andExpect(content.json(expectedHakemus(expectedHakutoive)))
     }
 
-    def expectedHakemus(hakutoive: String = "") =
+    private def expectedHakemus(hakutoive: String = "") =
       s"""
         |[ {
         |  "hakemusOid" : "1.2.246.562.11.580",
@@ -112,7 +112,7 @@ class ValpasControllerTest extends ValpasTestUtils {
         |  "matkapuhelin" : "+358401234567",
         |  "lahiosoite" : "Katu 1",
         |  "postinumero" : "00100",
-        |  "postitoimipaikka" : "00100",
+        |  "postitoimipaikka" : "Helsinki",
         |  "maa" : {
         |    "versioituUri" : "maatjavaltiot2_246#2",
         |    "koodiarvo" : "246",
@@ -141,26 +141,12 @@ class ValpasControllerTest extends ValpasTestUtils {
         |      "en" : "Rolling admission (upper secondary level)"
         |    }
         |  },
-        |  "hakutyyppi" : {
-        |    "versioituUri" : "hakutyyppi_01#1",
-        |    "koodiarvo" : "01",
-        |    "koodistoUri" : "hakutyyppi",
-        |    "koodistoVersio" : 1,
-        |    "nimi" : {
-        |      "fi" : "Varsinainen haku",
-        |      "sv" : "Egentlig ansökan"
-        |    }
-        |  },
-        |  "aktiivinenHaku" : true,
-        |  "haunAlkamispaivamaara" : "2024-08-31",
+        |  "haunAlkamispaivamaara" : "2022-08-31T23:59:00",
         |  "oppijaOid" : "1.2.246.562.24.9",
-        |  "huoltajanNimi" : null,
-        |  "huoltajanPuhelinnumero" : null,
-        |  "huoltajanSahkoposti" : null,
         |  "hakutoiveet" : [ $hakutoive ]
         |} ]""".stripMargin
 
-    val expectedHakutoive =
+    private val expectedHakutoive =
       """
         |{
         |    "hakukohdeOid" : "1.2.246.562.20.012",
@@ -192,19 +178,11 @@ class ValpasControllerTest extends ValpasTestUtils {
         |        "en" : "Bachelor of Culture and Arts, Cultural Manager"
         |      }
         |    } ],
-        |    "vastaanottotieto" : null,
-        |    "valintatila" : null,
-        |    "ilmoittautumistila" : null,
         |    "harkinnanvaraisuus" : "EI_HARKINNANVARAINEN",
-        |    "paasykoe" : null,
-        |    "kielikoe" : null,
-        |    "lisanaytto" : null,
-        |    "liitteetTarkastettu" : false,
-        |    "valintakoe" : [ ],
-        |    "alinHyvaksyttyPistemaara" : null,
+        |    "alinHyvaksyttyPistemaara" : 21.1,
         |    "alinValintaPistemaara" : 0,
-        |    "pisteet" : 0,
-        |    "varasijanumero" : 0
+        |    "pisteet" : 23.7,
+        |    "varasijanumero" : 4
         |}""".stripMargin
   }
 }
