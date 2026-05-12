@@ -54,8 +54,9 @@ object Constants {
       "valinnan-aloituspaikat",
       "aloituspaikat",
     )
-    
-  val OPH_PAAKAYTTAJA_OID = "1.2.246.562.10.00000000001"
+
+  val OPH_PAAKAYTTAJA_OID       = "1.2.246.562.10.00000000001"
+  val OPH_PAAKAYTTAJA_AUTHORITY = s"ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA_$OPH_PAAKAYTTAJA_OID"
 
   val KOULUTUSTOIMIJARAPORTTI = "koulutustoimijaraportti"
   val OPPILAITOSRAPORTTI      = "oppilaitosraportti"

@@ -2,15 +2,14 @@ package fi.oph.ovara.backend
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import fi.oph.ovara.backend.raportointi.{Controller, ErrorResponse}
+import fi.oph.ovara.backend.raportointi.Controller
 import fi.oph.ovara.backend.service.*
 import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation}
 import fi.vm.sade.auditlog.*
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import org.json4s.jackson.JsonMethods.mapper
 import org.mockito.{ArgumentCaptor, ArgumentMatchers}
-import org.mockito.ArgumentMatchers.{any, argThat}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

@@ -2,6 +2,7 @@ package fi.oph.ovara.backend.utils
 
 import fi.oph.ovara.backend.domain.*
 import org.json4s.jackson.Serialization.read
+import slick.jdbc.PositionedResult
 
 import java.sql.Date
 import java.time.LocalDate
