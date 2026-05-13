@@ -3,6 +3,7 @@ import { Construct } from 'constructs';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import { Nextjs } from 'cdk-nextjs-standalone';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import { PriceClass } from 'aws-cdk-lib/aws-cloudfront';
 
@@ -31,6 +32,11 @@ export class OvaraUISovellusStack extends cdk.Stack {
         hostedZone: props.hostedZone,
       },
       overrides: {
+        nextjs: {
+          nextjsDistributionProps: {
+            functionUrlAuthType: lambda.FunctionUrlAuthType.AWS_IAM,
+          },
+        },
         nextjsDistribution: {
           distributionProps: {
             priceClass: PriceClass.PRICE_CLASS_100,
