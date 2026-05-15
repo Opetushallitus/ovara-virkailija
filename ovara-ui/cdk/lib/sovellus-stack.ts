@@ -41,6 +41,9 @@ export class OvaraUISovellusStack extends cdk.Stack {
           distributionProps: {
             priceClass: PriceClass.PRICE_CLASS_100,
           },
+          edgeFunctionProps: {
+            stackId: `${props.env?.region}-${props.environmentName}-ovara-ui-edge-lambda`,
+          },
         },
         nextjsServer: {
           functionProps: {
