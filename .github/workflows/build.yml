@@ -7,6 +7,7 @@ on:
       - '**.md'
 env:
   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  PNPM_NODE_LINKER: hoisted
 
 jobs:
   # BACKEND
@@ -88,39 +89,47 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.25.0
+          run_install: false
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@opetushallitus'
       - name: Install dependencies
         run: |
           cd ovara-ui
-          npm ci
+          pnpm install
       - name: Run lint
         run: |
           cd ovara-ui
-          # npm run typecheck
-          npm run lint
+          # pnpm run typecheck
+          pnpm run lint
 
   test:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.25.0
+          run_install: false
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@opetushallitus'
       - name: Install dependencies
         run: |
           cd ovara-ui
-          npm ci
+          pnpm install
       - name: Run unit tests
         run: |
           cd ovara-ui
-          npm test
+          pnpm test
 
   deploy-ui-zip:
     needs: [lint, test]
@@ -132,15 +141,19 @@ jobs:
       packages: read
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.25.0
+          run_install: false
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@opetushallitus'
       - name: Install dependencies
         run: |
           cd ovara-ui
-          npm ci --no-audit --prefer-offline
+          pnpm install --prefer-offline
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4
         with:
@@ -152,6 +165,9 @@ jobs:
           bucket: ${{ secrets.BUCKET_NAME }}
         run: |
           cd ovara-ui
-          SKIP_TYPECHECK=true npm run build
+          SKIP_TYPECHECK=true pnpm run build
+          cd .next/standalone
+          npm install semver@^7.7.2
+          cd ../..
           zip -r ga-${{github.run_number}}.zip .next/*.* .next/BUILD_ID .next/server .next/static .next/standalone public # OpenNext v3 needs server-files also in .next/server
           aws s3 cp --no-progress ga-${{github.run_number}}.zip s3://"$bucket"/ovara-ui/ga-${{github.run_number}}.zip

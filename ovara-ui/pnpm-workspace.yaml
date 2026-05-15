@@ -1,0 +1,8 @@
+packages:
+  - .
+  - ./cdk
+
+onlyBuiltDependencies:
+  - fsevents
+
+minimumReleaseAge: 4320
