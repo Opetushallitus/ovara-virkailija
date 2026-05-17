@@ -9,12 +9,18 @@ import org.springframework.stereotype.{Component, Repository}
 class WriteDatabase(
                      @Value("${spring.datasource.url}") url: String,
                      @Value("${spring.datasource.username}") username: String,
-                     @Value("${spring.datasource.password}") password: String
+                     @Value("${spring.datasource.password}") password: String,
+                     @Value("${use.aws.jdbc.wrapper:false}") useAwsJdbcWrapper: String
                    ) extends OvaraDatabase {
 
   override protected def hikariConfig: HikariConfig = {
     val config = new HikariConfig()
-    config.setJdbcUrl(url)
+    if (useAwsJdbcWrapper.toBoolean) {
+      config.setDriverClassName("software.amazon.jdbc.Driver")
+      config.setJdbcUrl(url.replace("jdbc:postgresql:", "jdbc:aws-wrapper:postgresql:"))
+    } else {
+      config.setJdbcUrl(url)
+    }
     config.setUsername(username)
     config.setPassword(password)
     config.setMaximumPoolSize(10)
