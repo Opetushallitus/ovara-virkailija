@@ -1,9 +1,9 @@
 package fi.oph.ovara.backend.repository
 
 import fi.oph.ovara.backend.domain.*
-import fi.oph.ovara.backend.utils.ParametriNimet
+import fi.oph.ovara.backend.opiskelijavalintatieto.{HakemusRow, OppijaRow}
 import fi.oph.ovara.backend.utils.ExtractorUtils.{extractArray, extractCommaSeparatedString, extractDateOption, extractHakuaika, extractKielistetty, extractKielistettyList, extractKoulutuksenAlkamisaika, extractMap, extractOpintojenlaajuus, extractValintatapajonot}
-import fi.oph.ovara.backend.utils.GenericOvaraJsonFormats
+import fi.oph.ovara.backend.utils.{GenericOvaraJsonFormats, ParametriNimet}
 import org.json4s.jackson.Serialization.read
 import slick.jdbc.*
 
@@ -212,6 +212,40 @@ trait Extractors extends GenericOvaraJsonFormats {
       puhelinnumero = r.nextStringOption(),
       sahkoposti = r.nextStringOption(),
       arvosanat = extractMap(r.nextStringOption())
+    )
+  )
+
+  implicit val getOppijaRow: GetResult[OppijaRow] = GetResult(r =>
+    OppijaRow(
+      oppijanumero = r.nextString(),
+      hetu = r.nextString(),
+      syntymaaika = r.nextString(),
+      sukunimi = r.nextString(),
+      etunimet = r.nextString(),
+    )
+  )
+
+  implicit val getKielistetty: GetResult[Kielistetty] = GetResult(r =>
+    Seq(Fi, Sv, En).flatMap(kieli => r.nextStringOption().map(kieli -> _)).toMap
+  )
+
+  implicit val getHakemus: GetResult[HakemusRow] = GetResult(r =>
+    HakemusRow(
+      oppijanumero = r.nextString(),
+      hakemusOid = r.nextString(),
+      hakuOid = r.nextString(),
+      hakuNimi = getKielistetty(r),
+      kohdejoukkoKoodiuri = r.nextStringOption(),
+      hakutapakoodiuri = r.nextStringOption(),
+      hakukohdeOid = r.nextString(),
+      hakukohdeNimi = getKielistetty(r),
+      tarjoajanOid = r.nextStringOption(),
+      tarjoajanNimi = getKielistetty(r),
+      koulutuksenAlkamiskausiuri = r.nextStringOption(),
+      koulutuksenAlkamisvuosi = r.nextIntOption(),
+      valinnanTila = r.nextStringOption(),
+      vastaanottoTila = r.nextStringOption(),
+      ilmoituksenTila = r.nextStringOption()
     )
   )
 

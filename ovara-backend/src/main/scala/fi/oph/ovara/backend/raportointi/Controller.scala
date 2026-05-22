@@ -4,22 +4,22 @@ import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, Ser
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.UserResponse
 import fi.oph.ovara.backend.raportointi.dto.{RawHakeneetHyvaksytytVastaanottaneetParams, RawHakijatParams, RawKkHakeneetHyvaksytytVastaanottaneetParams, RawKkHakijatParams, RawKkKoulutuksetToteutuksetHakukohteetParams, RawKoulutuksetToteutuksetHakukohteetParams, buildHakeneetHyvaksytytVastaanottaneetAuditParams, buildHakijatAuditParams, buildKkHakeneetHyvaksytytVastaanottaneetAuditParams, buildKkHakijatAuditParams, buildKkKoulutuksetToteutuksetHakukohteetAuditParams, buildKoulutuksetToteutuksetHakukohteetAuditParams}
-import fi.oph.ovara.backend.service.*
+import fi.oph.ovara.backend.service.{CommonService, HakeneetHyvaksytytVastaanottaneetService, KkHakeneetHyvaksytytVastaanottaneetService, KkHakijatService, KorkeakouluKoulutuksetToteutuksetHakukohteetService, KoulutuksetToteutuksetHakukohteetService, ToisenAsteenHakijatService, UserService}
 import fi.oph.ovara.backend.utils.AuditOperation.{HakeneetHyvaksytytVastaanottaneet, KkHakeneetHyvaksytytVastaanottaneet, KkHakijat, KorkeakouluKoulutuksetToteutuksetHakukohteet, KoulutuksetToteutuksetHakukohteet, ToisenAsteenHakijat}
-import fi.oph.ovara.backend.utils.ParameterValidator.{strToOptionBoolean, validateAlphanumeric, validateAlphanumericList, validateHakeneetHyvaksytytVastaanottaneetParams, validateHakijatParams, validateKkHakeneetHyvaksytytVastaanottaneetParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams, validateNumericList, validateOid, validateOidList, validateOrganisaatioOid, validateOrganisaatioOidList}
+import fi.oph.ovara.backend.utils.ControllerUtils.getListParamAsScalaList
+import fi.oph.ovara.backend.utils.ParameterValidator.{validateAlphanumeric, validateAlphanumericList, validateHakeneetHyvaksytytVastaanottaneetParams, validateHakijatParams, validateKkHakeneetHyvaksytytVastaanottaneetParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams, validateNumericList, validateOidList, validateOrganisaatioOid, validateOrganisaatioOidList}
 import fi.oph.ovara.backend.utils.{AuditLog, AuditLogObj, AuditOperation}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.{HttpHeaders, MediaType, ResponseEntity}
 import org.springframework.security.web.csrf.CsrfToken
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
 import org.springframework.web.servlet.view.RedirectView
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util
 import scala.jdk.CollectionConverters.*
 
 case class ErrorResponse(
@@ -51,11 +51,6 @@ class Controller(
   mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
   mapper.configure(SerializationFeature.INDENT_OUTPUT, true)
 
-
-  private def getListParamAsScalaList(listParam: util.Collection[String]) = {
-    if (listParam == null) List() else listParam.asScala.toList
-  }
-
   private def handleRequest[T](
                         validationErrors: List[String],
                         mapper: ObjectMapper
@@ -82,7 +77,7 @@ class Controller(
       }
     }
   }
-
+  
   @GetMapping(path = Array("healthcheck"))
   def healthcheck = "Ovara application is running!"
 
@@ -380,7 +375,7 @@ class Controller(
     )
 
     val validationResult = validateKoulutuksetToteutuksetHakukohteetParams(params)
-    
+
     handleExcelRequest(
       validationErrors = validationResult.left.getOrElse(Nil),
       response = response,

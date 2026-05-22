@@ -20,7 +20,6 @@ class OvaraBackendApplicationTests {
     private val mvc: MockMvc = null
 
     @Test
-    @throws[Exception]
     def get200ResponseFromHealthcheckUnautheticated(): Unit = {
         mvc.perform(MockMvcRequestBuilders.get("/api/healthcheck").accept(MediaType.APPLICATION_JSON))
           .andExpect(status.isOk)
@@ -28,7 +27,6 @@ class OvaraBackendApplicationTests {
     }
 
     @Test
-    @throws[Exception]
     def get401ResponseFromAuthenticatedApi(): Unit = {
         mvc.perform(MockMvcRequestBuilders.get("/api/alkamisvuodet").accept(MediaType.APPLICATION_JSON))
           .andExpect(status.isUnauthorized)
