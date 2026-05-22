@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.13</version>
+        <version>3.5.14</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>fi.oph.ovara</groupId>
@@ -34,8 +34,8 @@
         <aws-advanced-jdbc-wrapper.version>3.3.0</aws-advanced-jdbc-wrapper.version>
         <flyway.version>11.11.1</flyway.version>
         <slick.version>3.6.1</slick.version>
-        <spring-context.version>6.2.17</spring-context.version>
-        <spring-security-cas.version>6.5.9</spring-security-cas.version>
+        <spring-context.version>6.2.18</spring-context.version>
+        <spring-security-cas.version>6.5.10</spring-security-cas.version>
         <jackson.version>2.19.2</jackson.version>
         <json4s.version>4.1.0-M8</json4s.version>
         <apache.poi.version>5.4.0</apache.poi.version>
@@ -65,11 +65,15 @@
                 <artifactId>slick-pg_3</artifactId>
                 <version>0.23.1</version>
             </dependency>
-            <!-- Riippuvuuskonfliktit -->
             <dependency>
-                <groupId>org.checkerframework</groupId>
-                <artifactId>checker-qual</artifactId>
-                <version>3.42.0</version>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>42.7.11</version>
+            </dependency>
+            <dependency>
+                <groupId>org.asynchttpclient</groupId>
+                <artifactId>async-http-client</artifactId>
+                <version>3.0.10</version>
             </dependency>
             <!-- Scala -->
             <dependency>
@@ -118,10 +122,35 @@
             </dependency>
 
             <dependency>
-                <!-- Tietoturvahaavoittuvuus versiossa 10.1.53, joka tulee Spring Boot 3.5.13 mukana. -->
+                <!-- Tietoturvahaavoittuvuus versiossa 10.1.54, joka tulee Spring Boot 3.5.14 mukana. -->
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-core</artifactId>
-                <version>10.1.54</version>
+                <version>10.1.55</version>
+            </dependency>
+
+            <dependency>
+                <!-- Tietoturvahaavoittuvuus versiossa 4.1.132.Final, joka tulee Spring Boot 3.5.14 mukana. -->
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec</artifactId>
+                <version>4.1.133.Final</version>
+            </dependency>
+            <dependency>
+                <!-- Tietoturvahaavoittuvuus versiossa 4.1.132.Final, joka tulee Spring Boot 3.5.14 mukana. -->
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec-dns</artifactId>
+                <version>4.1.133.Final</version>
+            </dependency>
+            <dependency>
+                <!-- Tietoturvahaavoittuvuus versiossa 4.1.132.Final, joka tulee Spring Boot 3.5.14 mukana. -->
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec-http</artifactId>
+                <version>4.1.133.Final</version>
+            </dependency>
+            <dependency>
+                <!-- Tietoturvahaavoittuvuus versiossa 4.1.132.Final, joka tulee Spring Boot 3.5.14 mukana. -->
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec-http2</artifactId>
+                <version>4.1.133.Final</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -156,7 +185,6 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -298,7 +326,6 @@
         <dependency>
             <groupId>org.asynchttpclient</groupId>
             <artifactId>async-http-client</artifactId>
-            <version>3.0.1</version>
         </dependency>
     </dependencies>
 
