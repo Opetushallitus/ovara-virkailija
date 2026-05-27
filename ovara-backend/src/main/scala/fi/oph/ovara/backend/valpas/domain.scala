@@ -35,10 +35,7 @@ case class Hakutoive(
     valintatila: String,
     ilmoittautumistila: String,
     harkinnanvaraisuus: String,
-        paasykoe: Option[Paasykoe],       // ???
-        lisanaytto: Option[Paasykoe],     // ???
-        // valintakoe: Seq[Valintakoe],      // Ei ehkä tarvita, katsotaan suresta jos tarvii
-    alinHyvaksyttyPistemaara: BigDecimal, // Valintatapajonolla, pitäisi olla vain yksi jono per hakukohde
+    alinHyvaksyttyPistemaara: BigDecimal,
     pisteet: Option[BigDecimal],
     varasijanumero: Option[Int],
 )
@@ -46,12 +43,6 @@ case class Hakutoive(
 case class ValpasHakuaika(
     alkaa: Option[LocalDateTime],
     paattyy: Option[LocalDateTime]
-)
-
-case class Paasykoe(
-    tunniste: String,
-    arvo: String,
-    osallistuminen: String
 )
 
 case class KoodistoArvo(

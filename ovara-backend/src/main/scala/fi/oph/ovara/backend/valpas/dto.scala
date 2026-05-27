@@ -148,10 +148,6 @@ case class HakutoiveResponse(
     )
     @BeanProperty harkinnanvaraisuus: String,
     @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty paasykoe: Option[PaasykoeResponse],
-    @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
-    @BeanProperty lisanaytto: Option[PaasykoeResponse],
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
     @BeanProperty alinHyvaksyttyPistemaara: BigDecimal,
     @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
     @BeanProperty pisteet: Option[BigDecimal],
@@ -174,29 +170,9 @@ object HakutoiveResponse {
       hakutoive.valintatila,
       hakutoive.ilmoittautumistila,
       hakutoive.harkinnanvaraisuus,
-      hakutoive.paasykoe.map(PaasykoeResponse.apply),
-      hakutoive.lisanaytto.map(PaasykoeResponse.apply),
       hakutoive.alinHyvaksyttyPistemaara,
       hakutoive.pisteet,
       hakutoive.varasijanumero
-    )
-}
-
-case class PaasykoeResponse(
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty tunniste: String,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty arvo: String,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty osallistuminen: String
-)
-
-object PaasykoeResponse {
-  def apply(paasykoe: Paasykoe): PaasykoeResponse =
-    PaasykoeResponse(
-      tunniste = paasykoe.tunniste,
-      arvo = paasykoe.arvo,
-      osallistuminen = paasykoe.osallistuminen
     )
 }
 

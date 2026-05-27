@@ -19,6 +19,7 @@ trait ValpasTestUtils {
 
   def insertHakemus(): Unit = {
     val tomorrow = OffsetDateTime.now().plusDays(2)
+    val yesterday = OffsetDateTime.now().minusDays(1)
 
     db.run(sqlu"""INSERT INTO gen.gen_henkilo values($OPPIJANUMERO, $OPPIJANUMERO)""", "Insert test haku")
     db.run(
@@ -42,7 +43,9 @@ trait ValpasTestUtils {
           'Yhteishaku',
           'Gemensamma',
           'Joint application',
-          'haunkohdejoukko_11#1')""",
+          'haunkohdejoukko_11#1',
+          '[{"alkaa": "2024-08-31T23:59", "paattyy": "2027-08-31T23:59"},{"alkaa": "2026-08-31T23:59", "paattyy": "2027-09-31T23:59"},{"alkaa": "2022-08-31T23:59", "paattyy": "2023-08-31T23:59"}]'
+          )""",
       "Insert test haku"
     )
 
@@ -56,8 +59,12 @@ trait ValpasTestUtils {
     )
 
     db.run(
-      sqlu"""INSERT INTO gen.gen_ohjausparametri values($HAKU_OID, $HAKUKIERROS_PAATTYY, ${tomorrow.toString})""",
-      "Insert test ohjausparametri"
+      sqlu"""INSERT INTO gen.gen_ohjausparametri values($HAKU_OID, $HAKUKIERROS_PAATTYY, ${tomorrow.toString}, null)""",
+      "Insert test hkp-ohjausparametri"
+    )
+    db.run(
+      sqlu"""INSERT INTO gen.gen_ohjausparametri values($HAKU_OID, $VALINTATULOSTEN_JULKISTAMINEN_HAKIJOILLE, null, ${yesterday.toString})""",
+      "Insert test vtjh-ohjausparametri"
     )
   }
 
@@ -111,7 +118,7 @@ trait ValpasTestUtils {
     )
 
     db.run(
-      sqlu"""INSERT INTO gen.gen_valintarekisteri values($VALINTATAPAJONO_ID, $HAKEMUS_OID, $HAKUKOHDE_OID, 23.7, 4)""",
+      sqlu"""INSERT INTO gen.gen_valintarekisteri values($VALINTATAPAJONO_ID, $HAKEMUS_OID, $HAKUKOHDE_OID, 23.7, 4, true)""",
       "Insert test valintarekisteri"
     )
 
@@ -123,7 +130,7 @@ trait ValpasTestUtils {
 
   def initSchema(): Unit = {
     val query = sqlu"""
-          CREATE DOMAIN IF NOT EXISTS JSONB AS JSON;
+          CREATE DOMAIN IF NOT EXISTS JSONB AS TEXT;
           CREATE SCHEMA gen;
 
           CREATE TABLE gen.gen_hakemus (
@@ -150,7 +157,8 @@ trait ValpasTestUtils {
               haku_nimi_fi text,
               haku_nimi_sv text,
               haku_nimi_en text,
-              kohdejoukko_koodiuri text
+              kohdejoukko_koodiuri text,
+              hakuajat jsonb
           );
 
           CREATE TABLE gen.gen_hakutoive(
@@ -203,7 +211,8 @@ trait ValpasTestUtils {
           CREATE TABLE gen.gen_ohjausparametri(
               haku_oid text,
               avain text,
-              aikaleima timestamp with time zone
+              aikaleima timestamp with time zone,
+              aikaleima_alkaa timestamp with time zone
           );
 
           CREATE TABLE gen.gen_valintarekisteri(
@@ -211,7 +220,8 @@ trait ValpasTestUtils {
             hakemus_oid text,
             hakukohde_oid text,
             pisteet double precision,
-            varasijan_numero integer
+            varasijan_numero integer,
+            julkaistavissa boolean
           );
 
           CREATE TABLE gen.gen_valintarekisteri_valintatapajono(
