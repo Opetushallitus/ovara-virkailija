@@ -66,7 +66,7 @@ case class HakutoiveRow(
     ilmoittautumistila: String,
     harkinnanvaraisuus: String,
     valintatapajonoId: String,
-    alin_hyvaksytty_pistemaara: BigDecimal,
+    alinHyvaksyttyPistemaara: BigDecimal,
     pisteet: Option[BigDecimal],
     varasijanNumero: Option[Int]
 ) {
@@ -84,9 +84,7 @@ case class HakutoiveRow(
       valintatila = valintatila,
       ilmoittautumistila = ilmoittautumistila,
       harkinnanvaraisuus = harkinnanvaraisuus,
-      paasykoe = None,
-      lisanaytto = None,
-      alinHyvaksyttyPistemaara = alin_hyvaksytty_pistemaara,
+      alinHyvaksyttyPistemaara = alinHyvaksyttyPistemaara,
       pisteet = pisteet,
       varasijanumero = varasijanNumero
     )
