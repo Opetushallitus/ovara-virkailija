@@ -30,7 +30,8 @@ class ValpasRepository(db: ReadOnlyDatabase) extends ValpasExtractors {
       hakemus.asuinmaa,
       hakemus.lahiosoite,
       hakemus.postinumero,
-      hakemus.postitoimipaikka
+      hakemus.postitoimipaikka,
+      vtjh.aikaleima_alkaa
     FROM gen.gen_henkilo hlo
     INNER JOIN gen.gen_hakemus hakemus on hakemus.henkilo_oid = hlo.henkilo_oid
     INNER JOIN gen.gen_haku haku on hakemus.haku_oid = haku.haku_oid
@@ -38,7 +39,6 @@ class ValpasRepository(db: ReadOnlyDatabase) extends ValpasExtractors {
     LEFT JOIN gen.gen_ohjausparametri vtjh on hakemus.haku_oid = vtjh.haku_oid and vtjh.avain = $VALINTATULOSTEN_JULKISTAMINEN_HAKIJOILLE
     WHERE hlo.oppijanumero in (#${RepositoryUtils.makeListOfValuesQueryStr(oppijanumerot)})
     AND haku.kohdejoukko_koodiuri LIKE 'haunkohdejoukko_11%'
-    AND COALESCE(vtjh.aikaleima_alkaa, now()) <= now()
     """.as[HakemusRow]
 
     LOG.debug(s"selectHakemuksetQuery: ${query.statements.head}")
@@ -70,16 +70,16 @@ class ValpasRepository(db: ReadOnlyDatabase) extends ValpasExtractors {
       vr.valintatapajono_id,
       vj.alin_hyvaksytty_pistemaara,
       vr.pisteet,
-      vr.varasijan_numero
+      vr.varasijan_numero,
+      vr.julkaistavissa
     FROM gen.gen_hakutoive ht
     LEFT JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
     LEFT JOIN gen.gen_organisaatio o ON hk.jarjestyspaikka_oid = o.organisaatio_oid
     LEFT JOIN gen.gen_toteutus t ON hk.toteutus_oid = t.toteutus_oid
     LEFT JOIN gen.gen_koulutus k ON t.koulutus_oid = k.koulutus_oid
-    INNER JOIN gen.gen_valintarekisteri vr ON ht.hakemus_oid = vr.hakemus_oid AND ht.hakukohde_oid = vr.hakukohde_oid
+    LEFT JOIN gen.gen_valintarekisteri vr ON ht.hakemus_oid = vr.hakemus_oid AND ht.hakukohde_oid = vr.hakukohde_oid
     LEFT JOIN gen.gen_valintarekisteri_valintatapajono vj ON vr.valintatapajono_id = vj.valintatapajono_id
     WHERE ht.hakemus_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(hakemusOids)})
-    AND vr.julkaistavissa = true
     """.as[HakutoiveRow]
 
     LOG.debug(s"selectHakutoiveetQuery: ${query.statements.head}")
