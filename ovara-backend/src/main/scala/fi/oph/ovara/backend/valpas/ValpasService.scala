@@ -40,8 +40,12 @@ class ValpasService(repository: ValpasRepository, mapper: ObjectMapper) {
     )
     val koodistot = repository.selectKoodistot(koodiurit).map(k => k.versioituUri -> k).toMap
 
-    val hakutoiveet = hakutoiveRows.groupMap(_.hakemusOid)(_.asHakutoive(koodistot))
-    hakemusRows.map(h => h.asHakemus(koodistot, hakutoiveet.getOrElse(h.hakemusOid, Seq.empty)))
+    val hakutoiveet = hakutoiveRows.groupBy(_.hakemusOid)
+    hakemusRows.map { h =>
+      val toiveet = hakutoiveet.getOrElse(h.hakemusOid, Seq.empty).map(_.asHakutoive(koodistot, h.julkaisuAika))
+
+      h.asHakemus(koodistot, toiveet)
+    }
   }
 
   private def warnAboutMissingAktiivisuus(hakemusRows: Seq[HakemusRow]): Seq[HakemusRow] = {

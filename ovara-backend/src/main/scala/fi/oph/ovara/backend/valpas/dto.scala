@@ -100,7 +100,7 @@ case class HakutoiveResponse(
         "EHDOLLISESTI_VASTAANOTTANUT"
       )
     )
-    @BeanProperty vastaanottotieto: String,
+    @BeanProperty vastaanottotieto: Option[String],
     @(Schema @field)(
       requiredMode = RequiredMode.NOT_REQUIRED,
       allowableValues = Array(
@@ -115,7 +115,7 @@ case class HakutoiveResponse(
         "KESKEN"
       )
     )
-    @BeanProperty valintatila: String,
+    @BeanProperty valintatila: Option[String],
     @(Schema @field)(
       requiredMode = RequiredMode.NOT_REQUIRED,
       allowableValues = Array(
@@ -129,9 +129,9 @@ case class HakutoiveResponse(
         "POISSA"
       )
     )
-    @BeanProperty ilmoittautumistila: String,
+    @BeanProperty ilmoittautumistila: Option[String],
     @(Schema @field)(
-      requiredMode = RequiredMode.REQUIRED,
+      requiredMode = RequiredMode.NOT_REQUIRED,
       allowableValues = Array(
         "SURE_YKS_MAT_AI",
         "SURE_EI_PAATTOTODISTUSTA",
@@ -147,8 +147,8 @@ case class HakutoiveResponse(
       )
     )
     @BeanProperty harkinnanvaraisuus: String,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty alinHyvaksyttyPistemaara: BigDecimal,
+    @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
+    @BeanProperty alinHyvaksyttyPistemaara: Option[BigDecimal],
     @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
     @BeanProperty pisteet: Option[BigDecimal],
     @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)

@@ -21,7 +21,8 @@ class ValpasExtractors extends Extractors with ValpasFormats {
       asuinmaa = r.nextString(),
       lahiosoite = r.nextString(),
       postinumero = r.nextString(),
-      postitoimipaikka = r.nextString()
+      postitoimipaikka = r.nextString(),
+      julkaisuAika = getOffsetDateTime(r)
     )
   }
 
@@ -43,7 +44,8 @@ class ValpasExtractors extends Extractors with ValpasFormats {
       valintatapajonoId = r.nextString(),
       alinHyvaksyttyPistemaara = r.nextBigDecimal(),
       pisteet = r.nextBigDecimalOption(),
-      varasijanNumero = r.nextIntOption()
+      varasijanNumero = r.nextIntOption(),
+      julkaistavissa = r.nextBooleanOption()
     )
   }
 

@@ -19,7 +19,8 @@ case class HakemusRow(
     hakuajat: List[ValpasHakuaika],
     hakukierrosPaattyy: Option[OffsetDateTime],
     hakutapaKoodiuri: String,
-    oppijanumero: String
+    oppijanumero: String,
+    julkaisuAika: Option[OffsetDateTime]
 ) {
   def asHakemus(koodistot: Map[String, KoodistoArvo], hakutoiveet: Seq[Hakutoive]): Hakemus = {
     Hakemus(
@@ -62,15 +63,18 @@ case class HakutoiveRow(
     koulutusNimi: Kielistetty,
     hakukohdeKoulutuskoodi: Seq[String], // Koutan toteutus.koulutuksetKoodiUri? koulutus.koulutuksetKoodiUri?
     vastaanottotieto: String,
-    valintatila: String,
     ilmoittautumistila: String,
+    valintatila: String,
     harkinnanvaraisuus: String,
     valintatapajonoId: String,
     alinHyvaksyttyPistemaara: BigDecimal,
     pisteet: Option[BigDecimal],
-    varasijanNumero: Option[Int]
+    varasijanNumero: Option[Int],
+    julkaistavissa: Option[Boolean]
 ) {
-  def asHakutoive(koodistot: Map[String, KoodistoArvo]): Hakutoive = {
+  def asHakutoive(koodistot: Map[String, KoodistoArvo], julkaisuAika: Option[OffsetDateTime]): Hakutoive = {
+    val julkaistu = julkaistavissa.contains(true) && julkaisuAika.forall(_.isBefore(OffsetDateTime.now()))
+
     Hakutoive(
       hakukohdeOid = hakukohdeOid,
       hakukohdeNimi = hakukohdeNimi,
@@ -80,13 +84,13 @@ case class HakutoiveRow(
       koulutusOid = koulutusOid,
       koulutusNimi = koulutusNimi,
       hakukohdeKoulutuskoodi = hakukohdeKoulutuskoodi.map(koodistot),
-      vastaanottotieto = vastaanottotieto,
-      valintatila = valintatila,
-      ilmoittautumistila = ilmoittautumistila,
+      vastaanottotieto = if (julkaistu) Some(vastaanottotieto) else None,
+      ilmoittautumistila = if (julkaistu) Some(ilmoittautumistila) else None,
+      valintatila = if (julkaistu) Some(valintatila) else None,
       harkinnanvaraisuus = harkinnanvaraisuus,
-      alinHyvaksyttyPistemaara = alinHyvaksyttyPistemaara,
-      pisteet = pisteet,
-      varasijanumero = varasijanNumero
+      alinHyvaksyttyPistemaara = if (julkaistu) Some(alinHyvaksyttyPistemaara) else None,
+      pisteet = if (julkaistu) pisteet else None,
+      varasijanumero = if (julkaistu) varasijanNumero else None
     )
   }
 }
