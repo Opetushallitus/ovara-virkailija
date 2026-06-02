@@ -8,6 +8,7 @@ export const KK_RAPORTIT = [
   'kk-hakijat',
   'kk-hakeneet-hyvaksytyt-vastaanottaneet',
   'kk-koulutukset-toteutukset-hakukohteet',
+  'kk-paatettavat-opiskeluoikeudet',
 ];
 
 export const RADIOGROUP_OPTIONS = ['neutral', 'yes', 'no'];

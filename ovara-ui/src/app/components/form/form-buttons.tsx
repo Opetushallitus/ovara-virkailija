@@ -4,6 +4,7 @@ import { Box, Stack } from '@mui/material';
 import { useHakijatSearchParams } from '@/app/hooks/searchParams/useHakijatSearchParams';
 import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { useHakeneetSearchParams } from '@/app/hooks/searchParams/useHakeneetSearchParams';
+import { usePaatettavatOpiskeluoikeudetSearchParams } from '@/app/hooks/searchParams/usePaatettavatOpiskeluoikeudetSearchParams';
 
 type ExcelDownloadButton = {
   disabled: boolean;
@@ -46,12 +47,15 @@ export const TyhjennaHakuehdotButton = ({
   const { emptyAllHakijatParams } = useHakijatSearchParams();
   const { emptyAllCommonParams } = useCommonSearchParams();
   const { emptyAllHakeneetParams } = useHakeneetSearchParams();
+  const { emptyAllPaatettavatOpiskeluoikeudetParams } =
+    usePaatettavatOpiskeluoikeudetSearchParams();
 
   const emptyAllSearchParams = () => {
     emptySearchParams();
     emptyAllHakijatParams();
     emptyAllHakeneetParams();
     emptyAllCommonParams();
+    emptyAllPaatettavatOpiskeluoikeudetParams();
   };
 
   return (
