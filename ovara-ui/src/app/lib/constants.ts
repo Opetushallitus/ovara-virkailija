@@ -8,6 +8,7 @@ export const KK_RAPORTIT = [
   'kk-hakijat',
   'kk-hakeneet-hyvaksytyt-vastaanottaneet',
   'kk-koulutukset-toteutukset-hakukohteet',
+  'kk-paatettavat-opiskeluoikeudet',
 ];
 
 export const RADIOGROUP_OPTIONS = ['neutral', 'yes', 'no'];
@@ -15,6 +16,7 @@ export const RADIOGROUP_BOOLEAN_OPTIONS = ['yes', 'no'];
 
 export const TILAT = ['julkaistu', 'tallennettu', 'arkistoitu'];
 export const SUKUPUOLET = ['neutral', '2', '1'];
+export const OPISKELUOIKEUDEN_TILAT = ['kaikki', 'paatettavissa', 'paatetty'];
 
 export const KOULUTUSTOIMIJAORGANISAATIOTYYPPI = '01';
 export const OPPILAITOSORGANISAATIOTYYPPI = '02';
