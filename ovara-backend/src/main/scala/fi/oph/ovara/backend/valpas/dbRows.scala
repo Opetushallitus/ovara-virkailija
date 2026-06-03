@@ -62,9 +62,9 @@ case class HakutoiveRow(
     koulutusOid: String,
     koulutusNimi: Kielistetty,
     hakukohdeKoulutuskoodi: Seq[String], // Koutan toteutus.koulutuksetKoodiUri? koulutus.koulutuksetKoodiUri?
-    vastaanottotieto: String,
-    ilmoittautumistila: String,
-    valintatila: String,
+    vastaanottotieto: Option[String],
+    ilmoittautumistila: Option[String],
+    valintatila: Option[String],
     harkinnanvaraisuus: String,
     valintatapajonoId: String,
     alinHyvaksyttyPistemaara: BigDecimal,
@@ -75,6 +75,9 @@ case class HakutoiveRow(
   def asHakutoive(koodistot: Map[String, KoodistoArvo], julkaisuAika: Option[OffsetDateTime]): Hakutoive = {
     val julkaistu = julkaistavissa.contains(true) && julkaisuAika.forall(_.isBefore(OffsetDateTime.now()))
 
+    def keskenIfMissingOrNotJulkaistu(tila: Option[String], kesken: String = "KESKEN"): String =
+      tila.collect { case arvo if julkaistu => arvo }.getOrElse(kesken)
+
     Hakutoive(
       hakukohdeOid = hakukohdeOid,
       hakukohdeNimi = hakukohdeNimi,
@@ -84,9 +87,9 @@ case class HakutoiveRow(
       koulutusOid = koulutusOid,
       koulutusNimi = koulutusNimi,
       hakukohdeKoulutuskoodi = hakukohdeKoulutuskoodi.map(koodistot),
-      vastaanottotieto = if (julkaistu) Some(vastaanottotieto) else None,
-      ilmoittautumistila = if (julkaistu) Some(ilmoittautumistila) else None,
-      valintatila = if (julkaistu) Some(valintatila) else None,
+      vastaanottotieto = keskenIfMissingOrNotJulkaistu(vastaanottotieto),
+      ilmoittautumistila = keskenIfMissingOrNotJulkaistu(ilmoittautumistila, "EI_TEHTY"),
+      valintatila = keskenIfMissingOrNotJulkaistu(valintatila),
       harkinnanvaraisuus = harkinnanvaraisuus,
       alinHyvaksyttyPistemaara = if (julkaistu) Some(alinHyvaksyttyPistemaara) else None,
       pisteet = if (julkaistu) pisteet else None,

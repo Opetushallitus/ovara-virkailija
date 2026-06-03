@@ -1,50 +1,53 @@
 package fi.oph.ovara.backend.valpas
 
 import fi.oph.ovara.backend.repository.ReadOnlyDatabase
+import fi.oph.ovara.backend.valpas.ValpasFactory.*
 import slick.jdbc.H2Profile.api.*
-
-import java.time.OffsetDateTime
 
 trait ValpasTestUtils {
   val db: ReadOnlyDatabase
 
-  val OPPIJANUMERO       = "1.2.246.562.24.9"
-  val HAKEMUS_OID        = "1.2.246.562.11.580"
-  val HAKU_OID           = "1.2.246.562.29.001"
-  val HAKUKOHDE_OID      = "1.2.246.562.20.012"
-  val TOTEUTUS_OID       = "1.2.246.562.17.122"
-  val KOULUTUS_OID       = "1.2.246.562.13.022"
-  val ORGANISAATIO_OID   = "1.2.246.562.10.486"
-  val VALINTATAPAJONO_ID = "16799"
+  def insertHenkilo(oppijanumero: String = OPPIJANUMERO): Unit = {
+    db.run(sqlu"""INSERT INTO gen.gen_henkilo VALUES ($oppijanumero, $oppijanumero)""", "Insert test henkilö")
+  }
 
-  def insertHakemus(): Unit = {
-    val tomorrow = OffsetDateTime.now().plusDays(2)
-    val yesterday = OffsetDateTime.now().minusDays(1)
+  private def addOffsetToOid(oid: String, offset: Int): String = {
+    val parts   = oid.split('.')
+    val newLast = parts.last.toInt + offset
+    (parts.dropRight(1) :+ newLast).mkString(".")
+  }
 
-    db.run(sqlu"""INSERT INTO gen.gen_henkilo values($OPPIJANUMERO, $OPPIJANUMERO)""", "Insert test haku")
+  def insertHakemus(aktiivinen: Boolean = true, idOffset: Int = 0): Unit = {
+
+    val oppijanumero = addOffsetToOid(OPPIJANUMERO, idOffset)
+    val hakemusOid   = addOffsetToOid(HAKEMUS_OID, idOffset)
+    val hakuOid      = addOffsetToOid(HAKU_OID, idOffset)
+
+    insertHenkilo(oppijanumero)
+
     db.run(
       sqlu"""INSERT INTO gen.gen_hakemus values(
-          $HAKEMUS_OID,
-          $HAKU_OID,
-          $OPPIJANUMERO,
-          'Katu 1',
-          '00100',
-          'Helsinki',
-          '246',
-          'oppija@example.test',
-          '+358401234567',
-          '2025-08-13T14:52:14+03')""",
+          $hakemusOid,
+          $hakuOid,
+          $oppijanumero,
+          $LAHIOSOITE,
+          $POSTINUMERO,
+          $HELSINKI,
+          $SUOMI_KOODI,
+          $EMAIL,
+          $MATKAPUHELIN,
+          $HAKEMUKSEN_MUOKKAUSAIKA)""",
       "Insert test hakemus"
     )
     db.run(
       sqlu"""INSERT INTO gen.gen_haku values(
-          $HAKU_OID,
+          $hakuOid,
           'hakutapa_03#1',
           'Yhteishaku',
           'Gemensamma',
           'Joint application',
           'haunkohdejoukko_11#1',
-          '[{"alkaa": "2024-08-31T23:59", "paattyy": "2027-08-31T23:59"},{"alkaa": "2026-08-31T23:59", "paattyy": "2027-09-31T23:59"},{"alkaa": "2022-08-31T23:59", "paattyy": "2023-08-31T23:59"}]'
+          '[{"alkaa": "2024-08-31T23:59", "paattyy": "2027-08-31T23:59"},{"alkaa": "2026-08-31T23:59", "paattyy": "2027-09-30T23:59"},{"alkaa": "2022-08-31T23:59", "paattyy": "2023-08-31T23:59"}]'
           )""",
       "Insert test haku"
     )
@@ -58,12 +61,16 @@ trait ValpasTestUtils {
       "Insert test koodit"
     )
 
+    val kierrosPaattyy =
+      if (aktiivinen) TOMORROW.toString
+      else YESTERDAY.toString
+
     db.run(
-      sqlu"""INSERT INTO gen.gen_ohjausparametri values($HAKU_OID, $HAKUKIERROS_PAATTYY, ${tomorrow.toString}, null)""",
+      sqlu"""INSERT INTO gen.gen_ohjausparametri values($hakuOid, $HAKUKIERROS_PAATTYY, $kierrosPaattyy, null)""",
       "Insert test hkp-ohjausparametri"
     )
     db.run(
-      sqlu"""INSERT INTO gen.gen_ohjausparametri values($HAKU_OID, $VALINTATULOSTEN_JULKISTAMINEN_HAKIJOILLE, null, ${yesterday.toString})""",
+      sqlu"""INSERT INTO gen.gen_ohjausparametri values($hakuOid, $VALINTATULOSTEN_JULKISTAMINEN_HAKIJOILLE, null, ${YESTERDAY.toString})""",
       "Insert test vtjh-ohjausparametri"
     )
   }
@@ -84,9 +91,9 @@ trait ValpasTestUtils {
           $HAKEMUS_OID,
           $HAKUKOHDE_OID,
           3,
-          null,
-          null,
-          null,
+          'VASTAANOTTANUT_SITOVASTI',
+          'LASNA',
+          'HYVAKSYTTY',
           'EI_HARKINNANVARAINEN')""",
       "Insert test hakutoive"
     )
@@ -107,23 +114,27 @@ trait ValpasTestUtils {
             'Kulttuurituottaja',
             'Kulturproducent',
             'Kulttuurituottaja',
-            JSON '["koulutus_621702#12"]')""",
+            JSON '["#$KOULUTUS_KOODIURI"]')""",
       "Insert test koulutus"
     )
 
     db.run(
       sqlu"""INSERT INTO gen.gen_koodi values
-             ('koulutus_621702#12' , 'koulutus','621702',  12, 'Kulttuurituottaja' , 'Kulturproducent', 'Bachelor of Culture and Arts, Cultural Manager')""",
+             ($KOULUTUS_KOODIURI , 'koulutus','621702',  12, 'Kulttuurituottaja' , 'Kulturproducent', 'Bachelor of Culture and Arts, Cultural Manager')""",
       "Insert test koodi"
     )
 
+    insertValinnanTulos()
+  }
+
+  def insertValinnanTulos(valintatapajonoId: String = VALINTATAPAJONO_ID): Unit = {
     db.run(
-      sqlu"""INSERT INTO gen.gen_valintarekisteri values($VALINTATAPAJONO_ID, $HAKEMUS_OID, $HAKUKOHDE_OID, 23.7, 4, true)""",
+      sqlu"""INSERT INTO gen.gen_valintarekisteri values($valintatapajonoId, $HAKEMUS_OID, $HAKUKOHDE_OID, 23.7, 4, true)""",
       "Insert test valintarekisteri"
     )
 
     db.run(
-      sqlu"""INSERT INTO gen.gen_valintarekisteri_valintatapajono values($VALINTATAPAJONO_ID, 21.1)""",
+      sqlu"""INSERT INTO gen.gen_valintarekisteri_valintatapajono values($valintatapajonoId, 21.1)""",
       "Insert test valintarekisteri valintatapajono"
     )
   }

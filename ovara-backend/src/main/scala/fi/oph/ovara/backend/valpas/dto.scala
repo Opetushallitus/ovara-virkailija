@@ -89,7 +89,8 @@ case class HakutoiveResponse(
     @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
     @BeanProperty hakukohdeKoulutuskoodi: java.util.List[KoodistoArvoResponse],
     @(Schema @field)(
-      requiredMode = RequiredMode.NOT_REQUIRED,
+      description = "Oletus on KESKEN, jos vastaanottotietoa ei ole.",
+      requiredMode = RequiredMode.REQUIRED,
       allowableValues = Array(
         "KESKEN",
         "VASTAANOTTANUT_SITOVASTI",
@@ -100,9 +101,10 @@ case class HakutoiveResponse(
         "EHDOLLISESTI_VASTAANOTTANUT"
       )
     )
-    @BeanProperty vastaanottotieto: Option[String],
+    @BeanProperty vastaanottotieto: String,
     @(Schema @field)(
-      requiredMode = RequiredMode.NOT_REQUIRED,
+      description = "Oletus on KESKEN, jos valintatietoa ei ole.",
+      requiredMode = RequiredMode.REQUIRED,
       allowableValues = Array(
         "HYVAKSYTTY",
         "VARASIJALTA_HYVAKSYTTY",
@@ -115,9 +117,10 @@ case class HakutoiveResponse(
         "KESKEN"
       )
     )
-    @BeanProperty valintatila: Option[String],
+    @BeanProperty valintatila: String,
     @(Schema @field)(
-      requiredMode = RequiredMode.NOT_REQUIRED,
+      description = "Oletus on EI_YRHTY, jos ilmoittautumistietoa ei ole.",
+      requiredMode = RequiredMode.REQUIRED,
       allowableValues = Array(
         "EI_TEHTY",
         "LASNA_KOKO_LUKUVUOSI",
@@ -129,7 +132,7 @@ case class HakutoiveResponse(
         "POISSA"
       )
     )
-    @BeanProperty ilmoittautumistila: Option[String],
+    @BeanProperty ilmoittautumistila: String,
     @(Schema @field)(
       requiredMode = RequiredMode.NOT_REQUIRED,
       allowableValues = Array(

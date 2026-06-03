@@ -1,6 +1,7 @@
 package fi.oph.ovara.backend.valpas
 
 import fi.oph.ovara.backend.repository.ReadOnlyDatabase
+import fi.oph.ovara.backend.valpas.ValpasFactory.*
 import org.junit.jupiter.api.{BeforeEach, Nested, Test}
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -231,7 +232,7 @@ class ValpasControllerTest extends ValpasTestUtils {
        |      "en" : "Finland"
        |    }
        |  },
-       |  "hakuOid" : "1.2.246.562.29.001",
+       |  "hakuOid" : "1.2.246.562.29.100",
        |  "hakuNimi" : {
        |    "fi" : "Yhteishaku",
        |    "sv" : "Gemensamma",
@@ -254,28 +255,28 @@ class ValpasControllerTest extends ValpasTestUtils {
        |} ]""".stripMargin
 
   private val expectedHakutoive =
-    """
+    s"""
       |{
-      |    "hakukohdeOid" : "1.2.246.562.20.012",
+      |    "hakukohdeOid" : "$HAKUKOHDE_OID",
       |    "hakukohdeNimi" : {
       |      "fi" : "Elokuvaleikkaus",
       |      "sv" : "Filmklippning",
       |      "en" : "Film Editing"
       |    },
       |    "hakutoivenumero" : 3,
-      |    "hakukohdeOrganisaatio" : "1.2.246.562.10.486",
+      |    "hakukohdeOrganisaatio" : "$ORGANISAATIO_OID",
       |    "organisaatioNimi" : {
       |      "fi" : "Porin toimipaikka",
       |      "sv" : "Björneborg verksamhetspunkt"
       |    },
-      |    "koulutusOid" : "1.2.246.562.13.022",
+      |    "koulutusOid" : "$KOULUTUS_OID",
       |    "koulutusNimi" : {
       |      "fi" : "Kulttuurituottaja",
       |      "sv" : "Kulturproducent",
       |      "en" : "Kulttuurituottaja"
       |    },
       |    "hakukohdeKoulutuskoodi" : [ {
-      |      "versioituUri" : "koulutus_621702#12",
+      |      "versioituUri" : "$KOULUTUS_KOODIURI",
       |      "koodiarvo" : "621702",
       |      "koodistoUri" : "koulutus",
       |      "koodistoVersio" : 12,
