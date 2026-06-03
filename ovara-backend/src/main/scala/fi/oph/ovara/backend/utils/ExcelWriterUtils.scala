@@ -30,7 +30,7 @@ object ExcelWriterUtils {
       case None => "-"
     }
   }
-  
+
   def writeStrToCell(row: XSSFRow, cellStyle: XSSFCellStyle, cellIndex: Int, str: String): Int = {
     val cell = createCell(row, cellStyle, cellIndex)
     cell.setCellValue(str)
@@ -38,7 +38,7 @@ object ExcelWriterUtils {
   }
 
   def writeOptionStrToCell(row: XSSFRow, cellStyle: XSSFCellStyle, cellIndex: Int, maybeStr: Option[String]): Int = {
-    val cell = createCell(row, cellStyle, cellIndex)
+    val cell  = createCell(row, cellStyle, cellIndex)
     val value = maybeStr match {
       case Some(str) => str
       case None      => "-"
@@ -48,13 +48,13 @@ object ExcelWriterUtils {
   }
 
   def writeOptionTranslationToCell(
-      row: XSSFRow,
-      cellStyle: XSSFCellStyle,
-      cellIndex: Int,
-      maybeStr: Option[String],
-      translations: Map[String, String]
+    row: XSSFRow,
+    cellStyle: XSSFCellStyle,
+    cellIndex: Int,
+    maybeStr: Option[String],
+    translations: Map[String, String]
   ): Int = {
-    val cell = createCell(row, cellStyle, cellIndex)
+    val cell  = createCell(row, cellStyle, cellIndex)
     val value = maybeStr match {
       case Some(str) =>
         getTranslationForCellValue(str, translations)
@@ -65,12 +65,12 @@ object ExcelWriterUtils {
   }
 
   def writeOptionLocalDateToCell(
-      row: XSSFRow,
-      cellStyle: XSSFCellStyle,
-      cellIndex: Int,
-      localDate: Option[LocalDate]
+    row: XSSFRow,
+    cellStyle: XSSFCellStyle,
+    cellIndex: Int,
+    localDate: Option[LocalDate]
   ): Int = {
-    val cell = createCell(row, cellStyle, cellIndex)
+    val cell  = createCell(row, cellStyle, cellIndex)
     val value = localDate match {
       case Some(date) => date.format(DATE_FORMATTER_FOR_EXCEL)
       case None       => "-"
@@ -80,26 +80,26 @@ object ExcelWriterUtils {
   }
 
   def writeKielistettyToCell(
-      row: XSSFRow,
-      cellStyle: XSSFCellStyle,
-      cellIndex: Int,
-      kielistetty: Kielistetty,
-      asiointikieli: String
+    row: XSSFRow,
+    cellStyle: XSSFCellStyle,
+    cellIndex: Int,
+    kielistetty: Kielistetty,
+    asiointikieli: String
   ): Int = {
-    val cell = createCell(row, cellStyle, cellIndex)
-    val kielistettyValue = getKielistettyCellValue(asiointikieli, kielistetty) 
+    val cell             = createCell(row, cellStyle, cellIndex)
+    val kielistettyValue = getKielistettyCellValue(asiointikieli, kielistetty)
     cell.setCellValue(kielistettyValue)
     cellIndex + 1
   }
 
   def writeKielistettyListToCell(
-                              row: XSSFRow,
-                              cellStyle: XSSFCellStyle,
-                              cellIndex: Int,
-                              kielistettyList: List[Kielistetty],
-                              asiointikieli: String
-                            ): Int = {
-    val cell = createCell(row, cellStyle, cellIndex)
+    row: XSSFRow,
+    cellStyle: XSSFCellStyle,
+    cellIndex: Int,
+    kielistettyList: List[Kielistetty],
+    asiointikieli: String
+  ): Int = {
+    val cell             = createCell(row, cellStyle, cellIndex)
     val kielistettyValue = if (kielistettyList.isEmpty) {
       "-"
     } else {
@@ -110,11 +110,11 @@ object ExcelWriterUtils {
   }
 
   def writeKoulutuksenAlkamisaikaToCell(
-      row: XSSFRow,
-      cellStyle: XSSFCellStyle,
-      cellIndex: Int,
-      alkamisaika: Kielistetty | Option[LocalDate],
-      asiointikieli: String
+    row: XSSFRow,
+    cellStyle: XSSFCellStyle,
+    cellIndex: Int,
+    alkamisaika: Kielistetty | Option[LocalDate],
+    asiointikieli: String
   ): Int = {
     alkamisaika match {
       case k: Kielistetty =>
@@ -144,13 +144,13 @@ object ExcelWriterUtils {
   }
 
   def writeOptionBooleanToCell(
-      row: XSSFRow,
-      cellStyle: XSSFCellStyle,
-      cellIndex: Int,
-      maybeBoolean: Option[Boolean],
-      translations: Map[String, String]
+    row: XSSFRow,
+    cellStyle: XSSFCellStyle,
+    cellIndex: Int,
+    maybeBoolean: Option[Boolean],
+    translations: Map[String, String]
   ): Int = {
-    val cell = createCell(row, cellStyle, cellIndex)
+    val cell  = createCell(row, cellStyle, cellIndex)
     val value = maybeBoolean match {
       case Some(b) =>
         if (b) translations.getOrElse("raportti.kylla", "raportti.kylla")
@@ -162,13 +162,13 @@ object ExcelWriterUtils {
   }
 
   def writeOptionHarkinnanvaraisuusToCell(
-      row: XSSFRow,
-      cellStyle: XSSFCellStyle,
-      cellIndex: Int,
-      maybeStr: Option[String],
-      translations: Map[String, String]
+    row: XSSFRow,
+    cellStyle: XSSFCellStyle,
+    cellIndex: Int,
+    maybeStr: Option[String],
+    translations: Map[String, String]
   ): Int = {
-    val cell = createCell(row, cellStyle, cellIndex)
+    val cell         = createCell(row, cellStyle, cellIndex)
     val valueToWrite = maybeStr match {
       case Some(s) =>
         if (s.startsWith("EI_HARKINNANVARAINEN")) {
@@ -194,13 +194,13 @@ object ExcelWriterUtils {
   }
 
   def writeOptionTilaToCell(
-      row: XSSFRow,
-      cellStyle: XSSFCellStyle,
-      cellIndex: Int,
-      maybeTila: Option[String],
-      translations: Map[String, String]
+    row: XSSFRow,
+    cellStyle: XSSFCellStyle,
+    cellIndex: Int,
+    maybeTila: Option[String],
+    translations: Map[String, String]
   ): Int = {
-    val cell = createCell(row, cellStyle, cellIndex)
+    val cell  = createCell(row, cellStyle, cellIndex)
     val value = maybeTila match {
       case Some(tila) =>
         val tilaKey = if (tila == "tallennettu") {
@@ -224,12 +224,12 @@ object ExcelWriterUtils {
   }
 
   def writeOptionKoodiToCell(
-      row: XSSFRow,
-      cellStyle: XSSFCellStyle,
-      cellIndex: Int,
-      maybeKoodi: Option[String]
+    row: XSSFRow,
+    cellStyle: XSSFCellStyle,
+    cellIndex: Int,
+    maybeKoodi: Option[String]
   ): Int = {
-    val cell = createCell(row, cellStyle, cellIndex)
+    val cell  = createCell(row, cellStyle, cellIndex)
     val value = maybeKoodi match {
       case Some(koodiarvo) => extractKoodi(koodiarvo)
       case None            => "-"
@@ -246,12 +246,12 @@ object ExcelWriterUtils {
   }
 
   def writeOptionHakuaikaToCell(
-      row: XSSFRow,
-      cellStyle: XSSFCellStyle,
-      cellIndex: Int,
-      maybeHakuaika: Option[Hakuaika]
+    row: XSSFRow,
+    cellStyle: XSSFCellStyle,
+    cellIndex: Int,
+    maybeHakuaika: Option[Hakuaika]
   ): Int = {
-    val cell = createCell(row, cellStyle, cellIndex)
+    val cell  = createCell(row, cellStyle, cellIndex)
     val value = maybeHakuaika match {
       case Some(hakuaika) =>
         val alkaaStr   = getDateStr(hakuaika.alkaa)
@@ -265,11 +265,11 @@ object ExcelWriterUtils {
   }
 
   def writeTutkinnonTasoToCell(
-      row: XSSFRow,
-      cellStyle: XSSFCellStyle,
-      cellIndex: Int,
-      tutkinnonTaso: Option[Int],
-      translations: Map[String, String]
+    row: XSSFRow,
+    cellStyle: XSSFCellStyle,
+    cellIndex: Int,
+    tutkinnonTaso: Option[Int],
+    translations: Map[String, String]
   ): Int = {
     val tutkinnonTasoValue = tutkinnonTaso match {
       case Some(value) =>
@@ -296,8 +296,8 @@ object ExcelWriterUtils {
   }
 
   def createHakutoiveenArvosanatWritableValues(
-      arvosanat: Map[String, String],
-      allSortedArvosanaNames: Seq[String]
+    arvosanat: Map[String, String],
+    allSortedArvosanaNames: Seq[String]
   ): Seq[String] = {
     allSortedArvosanaNames.map(arvosanaName =>
       arvosanat.get(arvosanaName) match {
@@ -308,9 +308,9 @@ object ExcelWriterUtils {
   }
 
   def createHakutoiveenValintatapajonoWritableValues(
-      hakukohteenValintatapajonot: Map[String, Seq[Valintatapajono]],
-      allSortedValintatapajonot: Seq[Valintatapajono],
-      translations: Map[String, String]
+    hakukohteenValintatapajonot: Map[String, Seq[Valintatapajono]],
+    allSortedValintatapajonot: Seq[Valintatapajono],
+    translations: Map[String, String]
   ): Seq[Kielistetty] = {
     allSortedValintatapajonot.map(valintatapajono => {
       hakukohteenValintatapajonot.get(valintatapajono.valintatapajonoOid) match {
@@ -321,23 +321,26 @@ object ExcelWriterUtils {
   }
 
   def createValintatapajonoCellValue(
-      valintatapajono: Valintatapajono,
-      translations: Map[String, String]
+    valintatapajono: Valintatapajono,
+    translations: Map[String, String]
   ): Kielistetty = {
-    //HYVAKSYTTY","HYLATTY","PERUUNTUNUT","VARALLA
+    // HYVAKSYTTY","HYLATTY","PERUUNTUNUT","VARALLA
     valintatapajono.valinnanTila match {
       // Peruuntuneelle palautetaan pelkkä selite koska se sisältää jo tilan
       case "PERUUNTUNUT" => valintatapajono.valinnanTilanKuvaus
-      case "HYLATTY" =>
+      case "HYLATTY"     =>
         // "Hylätty, hylkäämisen syy"
         val valinnanTila = getTranslationForCellValue(valintatapajono.valinnanTila, translations)
-        valintatapajono.valinnanTilanKuvaus.map {
-          case (kieli, value) => kieli -> s"$valinnanTila, $value"
+        valintatapajono.valinnanTilanKuvaus.map { case (kieli, value) =>
+          kieli -> s"$valinnanTila, $value"
         }
       // pelkkä valintatapajonon tila tiloille joille ei ole kuvausta
-      case _ => Map({Fi -> getTranslationForCellValue(valintatapajono.valinnanTila, translations)},
-                    {Sv -> getTranslationForCellValue(valintatapajono.valinnanTila, translations)},
-                    {En -> getTranslationForCellValue(valintatapajono.valinnanTila, translations)})
+      case _ =>
+        Map(
+          { Fi -> getTranslationForCellValue(valintatapajono.valinnanTila, translations) },
+          { Sv -> getTranslationForCellValue(valintatapajono.valinnanTila, translations) },
+          { En -> getTranslationForCellValue(valintatapajono.valinnanTila, translations) }
+        )
     }
   }
 }

@@ -49,10 +49,10 @@ object ExtractorUtils extends GenericOvaraJsonFormats {
   }
 
   def extractKoulutuksenAlkamisaika(
-      alkamiskausikoodiuri: Option[String],
-      alkamivuosi: Option[String],
-      alkamiskausiJsonObject: Option[String],
-      kausienNimet: Option[String]
+    alkamiskausikoodiuri: Option[String],
+    alkamivuosi: Option[String],
+    alkamiskausiJsonObject: Option[String],
+    kausienNimet: Option[String]
   ): Kielistetty | Option[LocalDate] = {
     val alkamiskausi            = extractAlkamiskausi(alkamiskausiJsonObject)
     val kielistetytKausienNimet = extractKielistetty(kausienNimet)

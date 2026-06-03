@@ -27,5 +27,5 @@ object AuthoritiesUtil {
     val regex = """^1\.2\.246\.562\.28.*""".r
     kayttooikeusOids.filter(oid => regex.matches(oid))
   }
-  
+
 }

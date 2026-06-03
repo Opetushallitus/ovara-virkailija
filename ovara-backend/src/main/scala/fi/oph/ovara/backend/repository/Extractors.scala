@@ -13,7 +13,7 @@ import fi.oph.ovara.backend.utils.ExtractorUtils.{
   extractOpintojenlaajuus,
   extractValintatapajonot
 }
-import fi.oph.ovara.backend.utils.{Constants, GenericOvaraJsonFormats, ParametriNimet}
+import fi.oph.ovara.backend.utils.GenericOvaraJsonFormats
 import org.json4s.jackson.Serialization.read
 import org.slf4j.{Logger, LoggerFactory}
 import slick.jdbc.*
@@ -110,7 +110,7 @@ trait Extractors extends GenericOvaraJsonFormats {
   }
 
   implicit val getKorkeakouluKoulutuksetToteutuksetHakukohteetResult
-      : GetResult[KorkeakouluKoulutusToteutusHakukohdeResult] = {
+    : GetResult[KorkeakouluKoulutusToteutusHakukohdeResult] = {
     GetResult(r => {
       KorkeakouluKoulutusToteutusHakukohdeResult(
         oppilaitosJaToimipiste = extractKielistetty(r.nextStringOption()),
@@ -247,7 +247,7 @@ trait Extractors extends GenericOvaraJsonFormats {
   )
 
   private def extractHakeneetHyvaksytytVastaanottaneetCommonFields(
-      r: PositionedResult
+    r: PositionedResult
   ): (Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int) = {
     (
       r.nextInt(), // hakijat
@@ -270,7 +270,7 @@ trait Extractors extends GenericOvaraJsonFormats {
   }
 
   implicit val getHakeneetHyvaksytytVastaanottaneetHakukohteittainResult
-      : GetResult[HakeneetHyvaksytytVastaanottaneetHakukohteittain] = GetResult { r =>
+    : GetResult[HakeneetHyvaksytytVastaanottaneetHakukohteittain] = GetResult { r =>
     val hakukohdeOid     = r.nextString()
     val hakukohdeNimi    = extractKielistetty(r.nextStringOption())
     val hakuOid          = r.nextString()
@@ -302,9 +302,9 @@ trait Extractors extends GenericOvaraJsonFormats {
   }
 
   implicit val getHakeneetHyvaksytytVastaanottaneetTunnisteellaResult
-  : GetResult[HakeneetHyvaksytytVastaanottaneetTunnisteella] = GetResult { r =>
-    val tunniste = r.nextString()
-    val otsikko = extractKielistetty(r.nextStringOption())
+    : GetResult[HakeneetHyvaksytytVastaanottaneetTunnisteella] = GetResult { r =>
+    val tunniste     = r.nextString()
+    val otsikko      = extractKielistetty(r.nextStringOption())
     val commonFields = extractHakeneetHyvaksytytVastaanottaneetCommonFields(r)
 
     HakeneetHyvaksytytVastaanottaneetTunnisteella(
@@ -356,7 +356,7 @@ trait Extractors extends GenericOvaraJsonFormats {
     }
 
   private def extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(
-      r: PositionedResult
+    r: PositionedResult
   ): (Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int) = {
     (
       r.nextInt(), // hakijat
@@ -380,7 +380,7 @@ trait Extractors extends GenericOvaraJsonFormats {
   }
 
   implicit val getKkHakeneetHyvaksytytVastaanottaneetHakukohteittainResult
-  : GetResult[KkHakeneetHyvaksytytVastaanottaneetHakukohteittain] = GetResult { r =>
+    : GetResult[KkHakeneetHyvaksytytVastaanottaneetHakukohteittain] = GetResult { r =>
     val hakukohdeOid     = r.nextString()
     val hakukohdeNimi    = extractKielistetty(r.nextStringOption())
     val hakuOid          = r.nextString()
@@ -413,9 +413,9 @@ trait Extractors extends GenericOvaraJsonFormats {
   }
 
   implicit val getKkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteellaResult
-  : GetResult[KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella] = GetResult { r =>
-    val hakuOid = r.nextString()
-    val haunNimi    = extractKielistetty(r.nextStringOption())
+    : GetResult[KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella] = GetResult { r =>
+    val hakuOid          = r.nextString()
+    val haunNimi         = extractKielistetty(r.nextStringOption())
     val organisaatioNimi = extractKielistetty(r.nextStringOption())
     val commonFields     = extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(r)
 
@@ -444,9 +444,9 @@ trait Extractors extends GenericOvaraJsonFormats {
   }
 
   implicit val getKkHakeneetHyvaksytytVastaanottaneetTunnisteella
-  : GetResult[KkHakeneetHyvaksytytVastaanottaneetTunnisteella] = GetResult { r =>
-    val tunniste = r.nextString()
-    val otsikko = extractKielistetty(r.nextStringOption())
+    : GetResult[KkHakeneetHyvaksytytVastaanottaneetTunnisteella] = GetResult { r =>
+    val tunniste     = r.nextString()
+    val otsikko      = extractKielistetty(r.nextStringOption())
     val commonFields = extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(r)
 
     KkHakeneetHyvaksytytVastaanottaneetTunnisteella(
@@ -473,7 +473,7 @@ trait Extractors extends GenericOvaraJsonFormats {
   }
 
   implicit val getKkHakeneetHyvaksytytVastaanottaneetToimipisteittainResult
-      : GetResult[KkHakeneetHyvaksytytVastaanottaneetToimipisteittain] = GetResult { r =>
+    : GetResult[KkHakeneetHyvaksytytVastaanottaneetToimipisteittain] = GetResult { r =>
     val toimipiste       = r.nextString()
     val organisaatioNimi = extractKielistetty(r.nextStringOption())
     val commonFields     = extractKkHakeneetHyvaksytytVastaanottaneetCommonFields(r)

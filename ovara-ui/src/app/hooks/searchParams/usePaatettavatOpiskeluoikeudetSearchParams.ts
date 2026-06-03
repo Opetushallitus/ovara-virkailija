@@ -11,6 +11,12 @@ export const usePaatettavatOpiskeluoikeudetSearchParams = () => {
       },
     );
 
+  const [selectedOppilaitos, setSelectedOppilaitos] =
+    useQueryStateWithLocalStorage<string | null>('ovara_oppilaitos', {
+      parse: (value) => (value === null ? null : String(value)),
+      defaultValue: null,
+    });
+
   const [etunimi, setEtunimi] = useQueryStateWithLocalStorage<string | null>(
     'ovara_etunimi',
     {
@@ -48,14 +54,17 @@ export const usePaatettavatOpiskeluoikeudetSearchParams = () => {
 
     keysToClear.forEach((key) => localStorage.removeItem(key));
 
-    setSelectedOpiskeluoikeudenTila(null);
+    setSelectedOppilaitos(null);
     setEtunimi(null);
     setSukunimi(null);
     setHetu(null);
     setOppijanumero(null);
+    setSelectedOpiskeluoikeudenTila(null);
   };
 
   return {
+    selectedOppilaitos,
+    setSelectedOppilaitos,
     etunimi,
     setEtunimi,
     sukunimi,

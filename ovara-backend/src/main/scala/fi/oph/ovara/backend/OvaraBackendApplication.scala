@@ -8,9 +8,9 @@ import org.springframework.web.servlet.config.annotation.{CorsRegistry, WebMvcCo
 
 object OvaraBackendApplication {
   val CALLER_ID = "1.2.246.562.10.00000000001.ovara-virkailija"
-  
+
   def main(args: Array[String]): Unit = {
-    SpringApplication.run(classOf[OvaraBackendApplication], args *)
+    SpringApplication.run(classOf[OvaraBackendApplication], args*)
   }
 }
 

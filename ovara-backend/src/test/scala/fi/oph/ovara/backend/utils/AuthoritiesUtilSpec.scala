@@ -14,8 +14,8 @@ class AuthoritiesUtilSpec extends AnyFlatSpec {
   }
 
   it should "return empty list when there is one role without the ROLE_APP_OVARA-VIRKAILIJA prefix" in {
-    val allAuthorities: java.util.Collection[SimpleGrantedAuthority] = List(
-      SimpleGrantedAuthority("ROLE_APP_SUORITUSREKISTERI_CRUD_1.2.246.562.10.00000000001")).asJava
+    val allAuthorities: java.util.Collection[SimpleGrantedAuthority] =
+      List(SimpleGrantedAuthority("ROLE_APP_SUORITUSREKISTERI_CRUD_1.2.246.562.10.00000000001")).asJava
     assert(AuthoritiesUtil.getOvaraAuthorities(allAuthorities).isEmpty)
   }
 
@@ -27,11 +27,13 @@ class AuthoritiesUtilSpec extends AnyFlatSpec {
       SimpleGrantedAuthority("ROLE_APP_KOUTA"),
       SimpleGrantedAuthority("ROLE_APP_OVARA-VIRKAILIJA_KK")
     ).asJava
-    assert(AuthoritiesUtil.getOvaraAuthorities(allAuthorities) == List(
-      "ROLE_APP_OVARA-VIRKAILIJA_KK_1.2.246.562.10.00000000001",
-      "ROLE_APP_OVARA-VIRKAILIJA",
-      "ROLE_APP_OVARA-VIRKAILIJA_KK",
-    ))
+    assert(
+      AuthoritiesUtil.getOvaraAuthorities(allAuthorities) == List(
+        "ROLE_APP_OVARA-VIRKAILIJA_KK_1.2.246.562.10.00000000001",
+        "ROLE_APP_OVARA-VIRKAILIJA",
+        "ROLE_APP_OVARA-VIRKAILIJA_KK"
+      )
+    )
   }
 
   "getRaportointiOrganisaatiot" should "return one organisaatio for user" in {
@@ -54,9 +56,14 @@ class AuthoritiesUtilSpec extends AnyFlatSpec {
       "ROLE_APP_KOUTA",
       "ROLE_APP_RAPORTOINTI_1.2.246.562.10.654321",
       "ROLE_APP_RAPORTOINTI_KK",
-      "ROLE_APP_RAPORTOINTI_1.2.246.562.10.333334445",
+      "ROLE_APP_RAPORTOINTI_1.2.246.562.10.333334445"
     )
-    assert(AuthoritiesUtil.getKayttooikeusOids(allAuthorities) == List(
-      "1.2.246.562.10.654321", "1.2.246.562.10.789101112", "1.2.246.562.10.333334445"))
+    assert(
+      AuthoritiesUtil.getKayttooikeusOids(allAuthorities) == List(
+        "1.2.246.562.10.654321",
+        "1.2.246.562.10.789101112",
+        "1.2.246.562.10.333334445"
+      )
+    )
   }
 }

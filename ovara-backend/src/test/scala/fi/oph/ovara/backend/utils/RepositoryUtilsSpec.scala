@@ -7,9 +7,13 @@ import org.scalatest.matchers.should.Matchers.shouldBe
 class RepositoryUtilsSpec extends AnyFlatSpec {
   "extractAlkamisvuosiKausiAndHenkKohtSuunnitelma" should "return year and alkamiskausikoodiuri for one alkamiskausi and false for henkilokohtainen suunnitelma" in {
     assert(
-      RepositoryUtils.extractAlkamisvuosiKausiAndHenkkohtSuunnitelma(List("2023_syksy")) == (List(
-        (2023, "kausi_s")
-      ), false, false)
+      RepositoryUtils.extractAlkamisvuosiKausiAndHenkkohtSuunnitelma(List("2023_syksy")) == (
+        List(
+          (2023, "kausi_s")
+        ),
+        false,
+        false
+      )
     )
   }
 
@@ -162,26 +166,33 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
   it should "return a WHERE clause with a single condition" in {
     val conditions = Map("kansallinenkoulutusluokitus2016koulutusastetaso2" -> List("02"))
     assert(
-      RepositoryUtils.makeOptionalWhereClause(conditions) == "WHERE kansallinenkoulutusluokitus2016koulutusastetaso2 IN ('02')")
+      RepositoryUtils.makeOptionalWhereClause(
+        conditions
+      ) == "WHERE kansallinenkoulutusluokitus2016koulutusastetaso2 IN ('02')"
+    )
   }
 
   it should "return a WHERE clause with multiple conditions" in {
     val conditions = Map(
       "kansallinenkoulutusluokitus2016koulutusastetaso2" -> List("001", "021"),
-      "kansallinenkoulutusluokitus2016koulutusalataso3" -> List("0732")
+      "kansallinenkoulutusluokitus2016koulutusalataso3"  -> List("0732")
     )
     assert(
       RepositoryUtils.makeOptionalWhereClause(conditions) ==
-        "WHERE kansallinenkoulutusluokitus2016koulutusastetaso2 IN ('001', '021') OR kansallinenkoulutusluokitus2016koulutusalataso3 IN ('0732')")
+        "WHERE kansallinenkoulutusluokitus2016koulutusastetaso2 IN ('001', '021') OR kansallinenkoulutusluokitus2016koulutusalataso3 IN ('0732')"
+    )
   }
 
   it should "ignore empty lists in conditions" in {
     val conditions = Map(
       "kansallinenkoulutusluokitus2016koulutusastetaso2" -> List("001"),
-      "kansallinenkoulutusluokitus2016koulutusalataso3" -> List()
+      "kansallinenkoulutusluokitus2016koulutusalataso3"  -> List()
     )
     assert(
-      RepositoryUtils.makeOptionalWhereClause(conditions) == "WHERE kansallinenkoulutusluokitus2016koulutusastetaso2 IN ('001')")
+      RepositoryUtils.makeOptionalWhereClause(
+        conditions
+      ) == "WHERE kansallinenkoulutusluokitus2016koulutusastetaso2 IN ('001')"
+    )
   }
 
   "optionalHenkilokohtainenSuunnitelmaQuery" should "return empty query str when 'henkilokohtainenSuunnitelma' is false" in {
@@ -325,7 +336,6 @@ class RepositoryUtilsSpec extends AnyFlatSpec {
     val result = RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(List("1.2.3"), List("4.5.6"))
     result shouldBe "AND (hk.hakukohde_oid IN (SELECT DISTINCT hkr_hk.hakukohde_oid FROM pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk WHERE hkr_hk.hakukohderyhma_oid IN ('4.5.6')) OR hk.jarjestyspaikka_oid in ('1.2.3'))"
   }
-
 
   "buildHakukohdeFilterQuery" should "not limit organisation or hakukohderyhma for OphPaakayttaja when there are no selected filters except haku" in {
     val result = RepositoryUtils.buildHakukohdeFilterQuery(

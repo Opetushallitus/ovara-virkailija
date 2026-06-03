@@ -29,35 +29,34 @@ class ExcelWriterUtilsSpec extends AnyFlatSpec {
     )
   }
 
-
   "writeKielistettyListToCell" should "write a list of Kielistetty values to a cell" in {
-    val workbook = new XSSFWorkbook()
-    val sheet = workbook.createSheet("TestSheet")
-    val row = sheet.createRow(0)
-    val cellStyle = workbook.createCellStyle()
+    val workbook                           = new XSSFWorkbook()
+    val sheet                              = workbook.createSheet("TestSheet")
+    val row                                = sheet.createRow(0)
+    val cellStyle                          = workbook.createCellStyle()
     val kielistettyList: List[Kielistetty] = List(
-      Map(Fi -> "Suomi", Sv -> "Finland", En -> "Finland"),
+      Map(Fi -> "Suomi", Sv  -> "Finland", En -> "Finland"),
       Map(Fi -> "Turkki", Sv -> "Turkiet")
     )
     val asiointikieli = "fi"
-    
+
     val nextCellIndex = ExcelWriterUtils.writeKielistettyListToCell(row, cellStyle, 0, kielistettyList, asiointikieli)
-    
+
     val cell = row.getCell(0)
     assert(cell.getStringCellValue == "Suomi, Turkki")
     nextCellIndex == 1
   }
 
   it should "write a dash when the list is empty" in {
-    val workbook = new XSSFWorkbook()
-    val sheet = workbook.createSheet("TestSheet")
-    val row = sheet.createRow(0)
-    val cellStyle = workbook.createCellStyle()
+    val workbook        = new XSSFWorkbook()
+    val sheet           = workbook.createSheet("TestSheet")
+    val row             = sheet.createRow(0)
+    val cellStyle       = workbook.createCellStyle()
     val kielistettyList = List.empty[Kielistetty]
-    val asiointikieli = "fi"
-    
+    val asiointikieli   = "fi"
+
     val nextCellIndex = ExcelWriterUtils.writeKielistettyListToCell(row, cellStyle, 0, kielistettyList, asiointikieli)
-    
+
     val cell = row.getCell(0)
     assert(cell.getStringCellValue == "-")
     assert(nextCellIndex == 1)
@@ -103,7 +102,7 @@ class ExcelWriterUtilsSpec extends AnyFlatSpec {
   "createHakutoiveenValintapajonoWritableValues" should "return empty list when there are no valintatapajonot in the result" in {
     val hakutoiveenValintapajonot: Map[String, Seq[Valintatapajono]] = Map()
     val sortedValintatapajonot                                       = List()
-    val translations = Map[String, String]()
+    val translations                                                 = Map[String, String]()
     assert(
       ExcelWriterUtils.createHakutoiveenValintatapajonoWritableValues(
         hakutoiveenValintapajonot,
@@ -115,7 +114,7 @@ class ExcelWriterUtilsSpec extends AnyFlatSpec {
 
   it should s"return a list with empty Map values because hakukohteen valintatapajonot list is empty" in {
     val hakutoiveenValintapajonot: Map[String, Seq[Valintatapajono]] = Map()
-    val sortedValintatapajonot = List(
+    val sortedValintatapajonot                                       = List(
       Valintatapajono(
         valintatapajonoOid = "17000468320548583779630214204232",
         valintatapajononNimi = "Koevalintajono kaikille hakijoille",
@@ -250,7 +249,8 @@ class ExcelWriterUtilsSpec extends AnyFlatSpec {
             valintatapajononNimi = "Todistusvalintajono ensikertalaisille hakijoille",
             valinnanTila = "HYVAKSYTTY",
             valinnanTilanKuvaus = Map()
-          )),
+          )
+        ),
       "1707384694164-3621431542682802084" ->
         List(
           Valintatapajono(

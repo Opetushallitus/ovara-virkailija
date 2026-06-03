@@ -15,7 +15,8 @@ class CacheConfiguration {
 
   @Bean
   def caffeineConfig(): Caffeine[AnyRef, AnyRef] = {
-    Caffeine.newBuilder()
+    Caffeine
+      .newBuilder()
       .expireAfterWrite(60, TimeUnit.MINUTES);
   }
 

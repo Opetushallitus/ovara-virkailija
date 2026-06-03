@@ -27,7 +27,7 @@ export const useCommonSearchParams = () => {
     });
 
   const [selectedOppilaitokset, setSelectedOppilaitokset] =
-    useQueryStateWithLocalStorage('ovara_oppilaitokset', {
+    useQueryStateWithLocalStorage('ovara_oppilaitos', {
       ...parseAsArrayOf(parseAsString),
       defaultValue: [],
     });

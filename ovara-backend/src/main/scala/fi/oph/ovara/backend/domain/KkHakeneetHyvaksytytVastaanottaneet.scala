@@ -23,121 +23,121 @@ abstract class KkHakeneetHyvaksytytVastaanottaneetBase {
 }
 
 case class KkHakeneetHyvaksytytVastaanottaneetHakukohteittain(
-    hakukohdeNimi: Kielistetty,
-    hakuNimi: Kielistetty,
-    organisaatioNimi: Kielistetty,
-    hakijat: Int,
-    ensisijaisia: Int,
-    ensikertalaisia: Int,
-    hyvaksytyt: Int,
-    vastaanottaneet: Int,
-    lasna: Int,
-    poissa: Int,
-    ilmYht: Int,
-    maksuvelvollisia: Int,
-    valinnanAloituspaikat: Int,
-    aloituspaikat: Int,
-    toive1: Int,
-    toive2: Int,
-    toive3: Int,
-    toive4: Int,
-    toive5: Int,
-    toive6: Int
+  hakukohdeNimi: Kielistetty,
+  hakuNimi: Kielistetty,
+  organisaatioNimi: Kielistetty,
+  hakijat: Int,
+  ensisijaisia: Int,
+  ensikertalaisia: Int,
+  hyvaksytyt: Int,
+  vastaanottaneet: Int,
+  lasna: Int,
+  poissa: Int,
+  ilmYht: Int,
+  maksuvelvollisia: Int,
+  valinnanAloituspaikat: Int,
+  aloituspaikat: Int,
+  toive1: Int,
+  toive2: Int,
+  toive3: Int,
+  toive4: Int,
+  toive5: Int,
+  toive6: Int
 ) extends KkHakeneetHyvaksytytVastaanottaneetBase
 
 case class KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella(
-    tunniste: String,
-    otsikko: Kielistetty,
-    organisaatioNimi: Kielistetty,
-    hakijat: Int,
-    ensisijaisia: Int,
-    ensikertalaisia: Int,
-    hyvaksytyt: Int,
-    vastaanottaneet: Int,
-    lasna: Int,
-    poissa: Int,
-    ilmYht: Int,
-    maksuvelvollisia: Int,
-    valinnanAloituspaikat: Int,
-    aloituspaikat: Int,
-    toive1: Int,
-    toive2: Int,
-    toive3: Int,
-    toive4: Int,
-    toive5: Int,
-    toive6: Int
+  tunniste: String,
+  otsikko: Kielistetty,
+  organisaatioNimi: Kielistetty,
+  hakijat: Int,
+  ensisijaisia: Int,
+  ensikertalaisia: Int,
+  hyvaksytyt: Int,
+  vastaanottaneet: Int,
+  lasna: Int,
+  poissa: Int,
+  ilmYht: Int,
+  maksuvelvollisia: Int,
+  valinnanAloituspaikat: Int,
+  aloituspaikat: Int,
+  toive1: Int,
+  toive2: Int,
+  toive3: Int,
+  toive4: Int,
+  toive5: Int,
+  toive6: Int
 ) extends KkHakeneetHyvaksytytVastaanottaneetBase
 
 case class KkHakeneetHyvaksytytVastaanottaneetTunnisteella(
-    tunniste: String,
-    otsikko: Kielistetty,
-    hakijat: Int,
-    ensisijaisia: Int,
-    ensikertalaisia: Int,
-    hyvaksytyt: Int,
-    vastaanottaneet: Int,
-    lasna: Int,
-    poissa: Int,
-    ilmYht: Int,
-    maksuvelvollisia: Int,
-    valinnanAloituspaikat: Int,
-    aloituspaikat: Int,
-    toive1: Int,
-    toive2: Int,
-    toive3: Int,
-    toive4: Int,
-    toive5: Int,
-    toive6: Int
+  tunniste: String,
+  otsikko: Kielistetty,
+  hakijat: Int,
+  ensisijaisia: Int,
+  ensikertalaisia: Int,
+  hyvaksytyt: Int,
+  vastaanottaneet: Int,
+  lasna: Int,
+  poissa: Int,
+  ilmYht: Int,
+  maksuvelvollisia: Int,
+  valinnanAloituspaikat: Int,
+  aloituspaikat: Int,
+  toive1: Int,
+  toive2: Int,
+  toive3: Int,
+  toive4: Int,
+  toive5: Int,
+  toive6: Int
 ) extends KkHakeneetHyvaksytytVastaanottaneetBase
 
 case class KkHakeneetHyvaksytytVastaanottaneetToimipisteittain(
-    toimipiste: String,
-    organisaatioNimi: Kielistetty,
-    hakijat: Int,
-    ensisijaisia: Int,
-    ensikertalaisia: Int,
-    hyvaksytyt: Int,
-    vastaanottaneet: Int,
-    lasna: Int,
-    poissa: Int,
-    ilmYht: Int,
-    maksuvelvollisia: Int,
-    valinnanAloituspaikat: Int,
-    aloituspaikat: Int,
-    toive1: Int,
-    toive2: Int,
-    toive3: Int,
-    toive4: Int,
-    toive5: Int,
-    toive6: Int
+  toimipiste: String,
+  organisaatioNimi: Kielistetty,
+  hakijat: Int,
+  ensisijaisia: Int,
+  ensikertalaisia: Int,
+  hyvaksytyt: Int,
+  vastaanottaneet: Int,
+  lasna: Int,
+  poissa: Int,
+  ilmYht: Int,
+  maksuvelvollisia: Int,
+  valinnanAloituspaikat: Int,
+  aloituspaikat: Int,
+  toive1: Int,
+  toive2: Int,
+  toive3: Int,
+  toive4: Int,
+  toive5: Int,
+  toive6: Int
 ) extends KkHakeneetHyvaksytytVastaanottaneetBase
 
 case class KkHakeneetHyvaksytytVastaanottaneetResult(
-    otsikko: Kielistetty,
-    hakijat: Int,
-    ensisijaisia: Int,
-    ensikertalaisia: Int,
-    hyvaksytyt: Int,
-    vastaanottaneet: Int,
-    lasna: Int,
-    poissa: Int,
-    ilmYht: Int,
-    maksuvelvollisia: Int,
-    valinnanAloituspaikat: Int,
-    aloituspaikat: Int,
-    toive1: Int,
-    toive2: Int,
-    toive3: Int,
-    toive4: Int,
-    toive5: Int,
-    toive6: Int
+  otsikko: Kielistetty,
+  hakijat: Int,
+  ensisijaisia: Int,
+  ensikertalaisia: Int,
+  hyvaksytyt: Int,
+  vastaanottaneet: Int,
+  lasna: Int,
+  poissa: Int,
+  ilmYht: Int,
+  maksuvelvollisia: Int,
+  valinnanAloituspaikat: Int,
+  aloituspaikat: Int,
+  toive1: Int,
+  toive2: Int,
+  toive3: Int,
+  toive4: Int,
+  toive5: Int,
+  toive6: Int
 ) extends KkHakeneetHyvaksytytVastaanottaneetBase
 
 object KkHakeneetHyvaksytytVastaanottaneetResult {
 
   def apply(
-             tunnisteella: KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella
-           ): KkHakeneetHyvaksytytVastaanottaneetResult = {
+    tunnisteella: KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella
+  ): KkHakeneetHyvaksytytVastaanottaneetResult = {
     val combinedName: Kielistetty = mergeKielistetty(tunnisteella.otsikko, tunnisteella.organisaatioNimi)
     new KkHakeneetHyvaksytytVastaanottaneetResult(
       otsikko = combinedName,
@@ -162,7 +162,7 @@ object KkHakeneetHyvaksytytVastaanottaneetResult {
   }
 
   def apply(
-      tunnisteella: KkHakeneetHyvaksytytVastaanottaneetTunnisteella
+    tunnisteella: KkHakeneetHyvaksytytVastaanottaneetTunnisteella
   ): KkHakeneetHyvaksytytVastaanottaneetResult = {
     new KkHakeneetHyvaksytytVastaanottaneetResult(
       otsikko = tunnisteella.otsikko,
@@ -187,7 +187,7 @@ object KkHakeneetHyvaksytytVastaanottaneetResult {
   }
 
   def apply(
-      toimipisteittain: KkHakeneetHyvaksytytVastaanottaneetToimipisteittain
+    toimipisteittain: KkHakeneetHyvaksytytVastaanottaneetToimipisteittain
   ): KkHakeneetHyvaksytytVastaanottaneetResult = {
     new KkHakeneetHyvaksytytVastaanottaneetResult(
       otsikko = toimipisteittain.organisaatioNimi,

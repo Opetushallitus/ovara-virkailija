@@ -15,24 +15,24 @@ class KkHakijatRepository extends Extractors {
   val LOG: Logger = LoggerFactory.getLogger(classOf[KkHakijatRepository])
 
   def selectWithParams(
-      kayttooikeusOrganisaatiot: List[String],
-      isOrganisaatioRajain: Boolean,
-      kayttooikeusHakukohderyhmat: List[String],
-      hakukohderyhmat: List[String],
-      haut: List[String],
-      oppilaitokset: List[String],
-      toimipisteet: List[String],
-      hakukohteet: List[String],
-      valintatiedot: List[String],
-      vastaanottotiedot: List[String],
-      kansalaisuusluokat: List[String],
-      markkinointilupa: Option[Boolean]
+    kayttooikeusOrganisaatiot: List[String],
+    isOrganisaatioRajain: Boolean,
+    kayttooikeusHakukohderyhmat: List[String],
+    hakukohderyhmat: List[String],
+    haut: List[String],
+    oppilaitokset: List[String],
+    toimipisteet: List[String],
+    hakukohteet: List[String],
+    valintatiedot: List[String],
+    vastaanottotiedot: List[String],
+    kansalaisuusluokat: List[String],
+    markkinointilupa: Option[Boolean]
   ): SqlStreamingAction[Vector[KkHakija], KkHakija, Effect] = {
-    val hakuStr                     = makeListOfValuesQueryStr(haut)
+    val hakuStr = makeListOfValuesQueryStr(haut)
 
     val vastaanottotiedotAsDbValues = mapVastaanottotiedotToDbValues(vastaanottotiedot)
     val valintatiedotAsDbValues     = mapValintatiedotToDbValues(valintatiedot)
-    val optionalHakukohdeQuery =
+    val optionalHakukohdeQuery      =
       makeOptionalListOfValuesQueryStr("AND", "hk.hakukohde_oid", hakukohteet)
     val optionalValintatietoQuery =
       makeOptionalListOfValuesQueryStr(
@@ -53,7 +53,10 @@ class KkHakijatRepository extends Extractors {
         // jos organisaatio on valittu, ei huomioida käyttäjän organisaatioiden ulkopuolisia hakukohderyhmiä
         RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(kayttooikeusOrganisaatiot, List.empty)
       } else {
-        RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(kayttooikeusOrganisaatiot, kayttooikeusHakukohderyhmat)
+        RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(
+          kayttooikeusOrganisaatiot,
+          kayttooikeusHakukohderyhmat
+        )
       }
 
     val optionalHakukohderyhmaSubSelect = makeOptionalHakukohderyhmatSubSelectQueryStr(hakukohderyhmat)
@@ -91,12 +94,41 @@ class KkHakijatRepository extends Extractors {
     query
   }
 
-  def hakuParamNamesQuery(haut: List[String], oppilaitokset: List[String], toimipisteet: List[String], hakukohderyhmat: List[String], hakukohteet: List[String]):
-  SqlStreamingAction[Vector[ParametriNimet], ParametriNimet, Effect] = {
-    val oppilaitosQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("oppilaitos", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", oppilaitokset)
-    val toimipisteQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("toimipiste", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", toimipisteet)
-    val hakukohderyhmaQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("hakukohderyhma", "hakukohderyhma_oid", "hakukohderyhma_nimi", "pub.pub_dim_hakukohderyhma", hakukohderyhmat)
-    val hakukohdeQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("hakukohde", "hakukohde_oid", "hakukohde_nimi", "pub.pub_dim_hakukohde", hakukohteet)
+  def hakuParamNamesQuery(
+    haut: List[String],
+    oppilaitokset: List[String],
+    toimipisteet: List[String],
+    hakukohderyhmat: List[String],
+    hakukohteet: List[String]
+  ): SqlStreamingAction[Vector[ParametriNimet], ParametriNimet, Effect] = {
+    val oppilaitosQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "oppilaitos",
+      "organisaatio_oid",
+      "organisaatio_nimi",
+      "pub.pub_dim_organisaatio",
+      oppilaitokset
+    )
+    val toimipisteQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "toimipiste",
+      "organisaatio_oid",
+      "organisaatio_nimi",
+      "pub.pub_dim_organisaatio",
+      toimipisteet
+    )
+    val hakukohderyhmaQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "hakukohderyhma",
+      "hakukohderyhma_oid",
+      "hakukohderyhma_nimi",
+      "pub.pub_dim_hakukohderyhma",
+      hakukohderyhmat
+    )
+    val hakukohdeQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "hakukohde",
+      "hakukohde_oid",
+      "hakukohde_nimi",
+      "pub.pub_dim_hakukohde",
+      hakukohteet
+    )
 
     val query = sql"""
         SELECT param, jsonb_agg(nimi) AS nimet

@@ -1,6 +1,9 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.domain.{HakeneetHyvaksytytVastaanottaneetHakukohteittain, HakeneetHyvaksytytVastaanottaneetTunnisteella}
+import fi.oph.ovara.backend.domain.{
+  HakeneetHyvaksytytVastaanottaneetHakukohteittain,
+  HakeneetHyvaksytytVastaanottaneetTunnisteella
+}
 import fi.oph.ovara.backend.utils.{ParametriNimet, RepositoryUtils}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.{Component, Repository}
@@ -13,17 +16,17 @@ import slick.sql.SqlStreamingAction
 class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   val LOG: Logger = LoggerFactory.getLogger(classOf[HakeneetHyvaksytytVastaanottaneetRepository]);
   private def buildFilters(
-      haut: List[String],
-      selectedKayttooikeusOrganisaatiot: List[String],
-      hakukohteet: List[String],
-      koulutusalat1: List[String],
-      koulutusalat2: List[String],
-      koulutusalat3: List[String],
-      opetuskielet: List[String],
-      maakunnat: List[String],
-      kunnat: List[String],
-      harkinnanvaraisuudet: List[String],
-      sukupuoli: Option[String]
+    haut: List[String],
+    selectedKayttooikeusOrganisaatiot: List[String],
+    hakukohteet: List[String],
+    koulutusalat1: List[String],
+    koulutusalat2: List[String],
+    koulutusalat3: List[String],
+    opetuskielet: List[String],
+    maakunnat: List[String],
+    kunnat: List[String],
+    harkinnanvaraisuudet: List[String],
+    sukupuoli: Option[String]
   ): String = {
     val harkinnanvaraisuudetWithSureValues = RepositoryUtils.enrichHarkinnanvaraisuudet(harkinnanvaraisuudet)
 
@@ -55,26 +58,26 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   private def buildOpetuskieletFilter(opetuskielet: List[String]): String = {
     if (opetuskielet.nonEmpty) {
       val opetuskieletStr = opetuskielet.map(k => s"'$k'").mkString(", ")
-        s"""AND EXISTS (
-           |  SELECT 1 FROM jsonb_array_elements_text(h.oppilaitoksen_opetuskieli) AS elem
-           |  WHERE elem IN ($opetuskieletStr)
-           |)""".stripMargin
+      s"""AND EXISTS (
+         |  SELECT 1 FROM jsonb_array_elements_text(h.oppilaitoksen_opetuskieli) AS elem
+         |  WHERE elem IN ($opetuskieletStr)
+         |)""".stripMargin
     } else ""
   }
 
   def selectHakukohteittainWithParams(
-                                       selectedKayttooikeusOrganisaatiot: List[String],
-                                       haut: List[String],
-                                       hakukohteet: List[String],
-                                       koulutusalat1: List[String],
-                                       koulutusalat2: List[String],
-                                       koulutusalat3: List[String],
-                                       opetuskielet: List[String],
-                                       maakunnat: List[String],
-                                       kunnat: List[String],
-                                       harkinnanvaraisuudet: List[String],
-                                       sukupuoli: Option[String]
-                                     ): SqlStreamingAction[Vector[
+    selectedKayttooikeusOrganisaatiot: List[String],
+    haut: List[String],
+    hakukohteet: List[String],
+    koulutusalat1: List[String],
+    koulutusalat2: List[String],
+    koulutusalat3: List[String],
+    opetuskielet: List[String],
+    maakunnat: List[String],
+    kunnat: List[String],
+    harkinnanvaraisuudet: List[String],
+    sukupuoli: Option[String]
+  ): SqlStreamingAction[Vector[
     HakeneetHyvaksytytVastaanottaneetHakukohteittain
   ], HakeneetHyvaksytytVastaanottaneetHakukohteittain, Effect] = {
 
@@ -120,36 +123,59 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     JOIN pub.pub_dim_haku ha
     ON h.haku_oid = ha.haku_oid
     WHERE #$filters
-    GROUP BY h.hakukohde_oid, h.hakukohde_nimi, h.haku_oid, ha.haku_nimi, h.organisaatio_nimi""".as[HakeneetHyvaksytytVastaanottaneetHakukohteittain]
+    GROUP BY h.hakukohde_oid, h.hakukohde_nimi, h.haku_oid, ha.haku_nimi, h.organisaatio_nimi"""
+      .as[HakeneetHyvaksytytVastaanottaneetHakukohteittain]
     LOG.debug(s"selectHakukohteittainWithParams: ${query.statements.head}")
     query
   }
 
   def selectHakijatYhteensaWithParams(
-      selectedKayttooikeusOrganisaatiot: List[String],
-      haut: List[String],
-      hakukohteet: List[String],
-      koulutusalat1: List[String],
-      koulutusalat2: List[String],
-      koulutusalat3: List[String],
-      opetuskielet: List[String],
-      maakunnat: List[String],
-      kunnat: List[String],
-      harkinnanvaraisuudet: List[String],
-      sukupuoli: Option[String]
+    selectedKayttooikeusOrganisaatiot: List[String],
+    haut: List[String],
+    hakukohteet: List[String],
+    koulutusalat1: List[String],
+    koulutusalat2: List[String],
+    koulutusalat3: List[String],
+    opetuskielet: List[String],
+    maakunnat: List[String],
+    kunnat: List[String],
+    harkinnanvaraisuudet: List[String],
+    sukupuoli: Option[String]
   ): DBIO[Int] = {
 
     val harkinnanvaraisuudetWithSureValues = RepositoryUtils.enrichHarkinnanvaraisuudet(harkinnanvaraisuudet)
-    val filters = Seq(
+    val filters                            = Seq(
       Some(s"ht.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.jarjestyspaikka_oid", selectedKayttooikeusOrganisaatiot)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.hakukohde_oid", hakukohteet)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_1", koulutusalat1)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_2", koulutusalat2)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_3", koulutusalat3)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintimaakunta", maakunnat)).filter(_.nonEmpty),
+      Option(
+        RepositoryUtils.makeOptionalListOfValuesQueryStr(
+          "AND",
+          "h.jarjestyspaikka_oid",
+          selectedKayttooikeusOrganisaatiot
+        )
+      ).filter(_.nonEmpty),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.hakukohde_oid", hakukohteet)).filter(
+        _.nonEmpty
+      ),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_1", koulutusalat1)).filter(
+        _.nonEmpty
+      ),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_2", koulutusalat2)).filter(
+        _.nonEmpty
+      ),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.koulutusalataso_3", koulutusalat3)).filter(
+        _.nonEmpty
+      ),
+      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintimaakunta", maakunnat)).filter(
+        _.nonEmpty
+      ),
       Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintikunta", kunnat)).filter(_.nonEmpty),
-      Option(RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht.harkinnanvaraisuuden_syy", harkinnanvaraisuudetWithSureValues)).filter(_.nonEmpty),
+      Option(
+        RepositoryUtils.makeOptionalListOfValuesQueryStr(
+          "AND",
+          "ht.harkinnanvaraisuuden_syy",
+          harkinnanvaraisuudetWithSureValues
+        )
+      ).filter(_.nonEmpty),
       Option(RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "he.sukupuoli", sukupuoli)).filter(_.nonEmpty),
       buildOpetuskieletFilter(opetuskielet)
     ).collect { case Some(value) => value }.mkString("\n")
@@ -166,18 +192,18 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   }
 
   def selectKoulutusaloittainWithParams(
-                                         selectedKayttooikeusOrganisaatiot: List[String],
-                                         haut: List[String],
-                                         hakukohteet: List[String],
-                                         koulutusalat1: List[String],
-                                         koulutusalat2: List[String],
-                                         koulutusalat3: List[String],
-                                         opetuskielet: List[String],
-                                         maakunnat: List[String],
-                                         kunnat: List[String],
-                                         harkinnanvaraisuudet: List[String],
-                                         sukupuoli: Option[String]
-                                       ): SqlStreamingAction[Vector[
+    selectedKayttooikeusOrganisaatiot: List[String],
+    haut: List[String],
+    hakukohteet: List[String],
+    koulutusalat1: List[String],
+    koulutusalat2: List[String],
+    koulutusalat3: List[String],
+    opetuskielet: List[String],
+    maakunnat: List[String],
+    kunnat: List[String],
+    harkinnanvaraisuudet: List[String],
+    sukupuoli: Option[String]
+  ): SqlStreamingAction[Vector[
     HakeneetHyvaksytytVastaanottaneetTunnisteella
   ], HakeneetHyvaksytytVastaanottaneetTunnisteella, Effect] = {
 
@@ -195,15 +221,15 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       sukupuoli
     )
 
-    val hakukohdeHakufilter = s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"
+    val hakukohdeHakufilter         = s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"
     val hakukohdeOrganisaatioFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr(
       "AND",
       "h.jarjestyspaikka_oid",
       selectedKayttooikeusOrganisaatiot
     )
     val hakukohdeFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.hakukohde_oid", hakukohteet)
-    val maakuntaFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintimaakunta", maakunnat)
-    val kuntaFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintikunta", kunnat)
+    val maakuntaFilter  = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintimaakunta", maakunnat)
+    val kuntaFilter     = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintikunta", kunnat)
 
     val query = sql"""SELECT
     h.koulutusala,
@@ -244,21 +270,20 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     query
   }
 
-
   def selectOrganisaatioittainWithParams(
-                                          selectedKayttooikeusOrganisaatiot: List[String],
-                                          haut: List[String],
-                                          hakukohteet: List[String],
-                                          koulutusalat1: List[String],
-                                          koulutusalat2: List[String],
-                                          koulutusalat3: List[String],
-                                          opetuskielet: List[String],
-                                          maakunnat: List[String],
-                                          kunnat: List[String],
-                                          harkinnanvaraisuudet: List[String],
-                                          sukupuoli: Option[String],
-                                          organisaatiotaso: String
-                                        ): SqlStreamingAction[Vector[
+    selectedKayttooikeusOrganisaatiot: List[String],
+    haut: List[String],
+    hakukohteet: List[String],
+    koulutusalat1: List[String],
+    koulutusalat2: List[String],
+    koulutusalat3: List[String],
+    opetuskielet: List[String],
+    maakunnat: List[String],
+    kunnat: List[String],
+    harkinnanvaraisuudet: List[String],
+    sukupuoli: Option[String],
+    organisaatiotaso: String
+  ): SqlStreamingAction[Vector[
     HakeneetHyvaksytytVastaanottaneetTunnisteella
   ], HakeneetHyvaksytytVastaanottaneetTunnisteella, Effect] = {
     val filters = buildFilters(
@@ -276,7 +301,7 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     )
     val organisaatioSelect = organisaatiotaso match {
       case "oppilaitoksittain" => "h.oppilaitos as tunniste, h.oppilaitos_nimi as otsikko"
-      case _ => "h.koulutustoimija as tunniste, h.koulutustoimija_nimi as otsikko"
+      case _                   => "h.koulutustoimija as tunniste, h.koulutustoimija_nimi as otsikko"
     }
     val organisaatioJoin = organisaatiotaso match {
       case "oppilaitoksittain" => "h.oppilaitos = a.oppilaitos"
@@ -286,15 +311,15 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       case "oppilaitoksittain" => "h.oppilaitos"
       case _                   => "h.koulutustoimija"
     }
-    val hakukohdeHakufilter = s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"
+    val hakukohdeHakufilter         = s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"
     val hakukohdeOrganisaatioFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr(
       "AND",
       "h.jarjestyspaikka_oid",
       selectedKayttooikeusOrganisaatiot
     )
     val hakukohdeFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.hakukohde_oid", hakukohteet)
-    val maakuntaFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintimaakunta", maakunnat)
-    val kuntaFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintikunta", kunnat)
+    val maakuntaFilter  = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintimaakunta", maakunnat)
+    val kuntaFilter     = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintikunta", kunnat)
 
     val query = sql"""SELECT
         #$organisaatioSelect,
@@ -334,20 +359,19 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     query
   }
 
-
   def selectToimipisteittainWithParams(
-                                        selectedKayttooikeusOrganisaatiot: List[String],
-                                        haut: List[String],
-                                        hakukohteet: List[String],
-                                        koulutusalat1: List[String],
-                                        koulutusalat2: List[String],
-                                        koulutusalat3: List[String],
-                                        opetuskielet: List[String],
-                                        maakunnat: List[String],
-                                        kunnat: List[String],
-                                        harkinnanvaraisuudet: List[String],
-                                        sukupuoli: Option[String]
-                                      ): SqlStreamingAction[Vector[
+    selectedKayttooikeusOrganisaatiot: List[String],
+    haut: List[String],
+    hakukohteet: List[String],
+    koulutusalat1: List[String],
+    koulutusalat2: List[String],
+    koulutusalat3: List[String],
+    opetuskielet: List[String],
+    maakunnat: List[String],
+    kunnat: List[String],
+    harkinnanvaraisuudet: List[String],
+    sukupuoli: Option[String]
+  ): SqlStreamingAction[Vector[
     HakeneetHyvaksytytVastaanottaneetTunnisteella
   ], HakeneetHyvaksytytVastaanottaneetTunnisteella, Effect] = {
     val filters = buildFilters(
@@ -363,15 +387,15 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       harkinnanvaraisuudet,
       sukupuoli
     )
-    val hakukohdeHakufilter = s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"
+    val hakukohdeHakufilter         = s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})"
     val hakukohdeOrganisaatioFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr(
       "AND",
       "h.jarjestyspaikka_oid",
       selectedKayttooikeusOrganisaatiot
     )
     val hakukohdeFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.hakukohde_oid", hakukohteet)
-    val maakuntaFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintimaakunta", maakunnat)
-    val kuntaFilter = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintikunta", kunnat)
+    val maakuntaFilter  = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintimaakunta", maakunnat)
+    val kuntaFilter     = RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "h.sijaintikunta", kunnat)
 
     val query = sql"""SELECT
     h.toimipiste as tunniste,
@@ -412,24 +436,88 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     query
   }
 
-  def hakuParamNamesQuery(haut: List[String], koulutustoimija: Option[String], oppilaitokset: List[String], toimipisteet: List[String],
-                         hakukohteet: List[String], opetuskielet: List[String], koulutusalat1: List[String], koulutusalat2: List[String], koulutusalat3: List[String],
-                         maakunnat: List[String], kunnat: List[String], sukupuoli: Option[String]):
-  SqlStreamingAction[Vector[ParametriNimet], ParametriNimet, Effect] = {
+  def hakuParamNamesQuery(
+    haut: List[String],
+    koulutustoimija: Option[String],
+    oppilaitokset: List[String],
+    toimipisteet: List[String],
+    hakukohteet: List[String],
+    opetuskielet: List[String],
+    koulutusalat1: List[String],
+    koulutusalat2: List[String],
+    koulutusalat3: List[String],
+    maakunnat: List[String],
+    kunnat: List[String],
+    sukupuoli: Option[String]
+  ): SqlStreamingAction[Vector[ParametriNimet], ParametriNimet, Effect] = {
     val koulutustoimijaQuery =
       if (koulutustoimija.isDefined)
         s"""UNION ALL SELECT 'koulutustoimija' AS param, organisaatio_nimi AS nimi FROM pub.pub_dim_organisaatio WHERE organisaatio_oid = '${koulutustoimija.get}'"""
       else
         ""
-    val oppilaitosQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("oppilaitos", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", oppilaitokset)
-    val toimipisteQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("toimipiste", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", toimipisteet)
-    val hakukohdeQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("hakukohde", "hakukohde_oid", "hakukohde_nimi", "pub.pub_dim_hakukohde", hakukohteet)
-    val opetuskieliQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("opetuskieli",  "koodiarvo", "koodinimi", "pub.pub_dim_koodisto_oppilaitoksenopetuskieli", opetuskielet)
-    val koulutusalat1Query = RepositoryUtils.makeHakuParamOptionalQueryStr("koulutusala1",  "koodiarvo", "koodinimi", "pub.pub_dim_koodisto_koulutusalataso1", koulutusalat1)
-    val koulutusalat2Query = RepositoryUtils.makeHakuParamOptionalQueryStr("koulutusala2", "koodiarvo", "koodinimi", "pub.pub_dim_koodisto_koulutusalataso2", koulutusalat2)
-    val koulutusalat3Query = RepositoryUtils.makeHakuParamOptionalQueryStr("koulutusala3", "koodiarvo", "koodinimi", "pub.pub_dim_koodisto_koulutusalataso3", koulutusalat3)
-    val maakunnatQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("maakunta", "koodiarvo", "koodinimi", "pub.pub_dim_koodisto_maakunta", maakunnat)
-    val kunnatQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("kunta", "koodiarvo", "koodinimi", "pub.pub_dim_koodisto_kunta", kunnat)
+    val oppilaitosQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "oppilaitos",
+      "organisaatio_oid",
+      "organisaatio_nimi",
+      "pub.pub_dim_organisaatio",
+      oppilaitokset
+    )
+    val toimipisteQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "toimipiste",
+      "organisaatio_oid",
+      "organisaatio_nimi",
+      "pub.pub_dim_organisaatio",
+      toimipisteet
+    )
+    val hakukohdeQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "hakukohde",
+      "hakukohde_oid",
+      "hakukohde_nimi",
+      "pub.pub_dim_hakukohde",
+      hakukohteet
+    )
+    val opetuskieliQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "opetuskieli",
+      "koodiarvo",
+      "koodinimi",
+      "pub.pub_dim_koodisto_oppilaitoksenopetuskieli",
+      opetuskielet
+    )
+    val koulutusalat1Query = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "koulutusala1",
+      "koodiarvo",
+      "koodinimi",
+      "pub.pub_dim_koodisto_koulutusalataso1",
+      koulutusalat1
+    )
+    val koulutusalat2Query = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "koulutusala2",
+      "koodiarvo",
+      "koodinimi",
+      "pub.pub_dim_koodisto_koulutusalataso2",
+      koulutusalat2
+    )
+    val koulutusalat3Query = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "koulutusala3",
+      "koodiarvo",
+      "koodinimi",
+      "pub.pub_dim_koodisto_koulutusalataso3",
+      koulutusalat3
+    )
+    val maakunnatQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "maakunta",
+      "koodiarvo",
+      "koodinimi",
+      "pub.pub_dim_koodisto_maakunta",
+      maakunnat
+    )
+    val kunnatQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "kunta",
+      "koodiarvo",
+      "koodinimi",
+      "pub.pub_dim_koodisto_kunta",
+      kunnat
+    )
     val sukupuoliQuery =
       if (sukupuoli.isDefined)
         s"""UNION ALL SELECT 'sukupuoli' AS param, koodinimi AS nimi FROM pub.pub_dim_koodisto_sukupuoli WHERE koodiarvo = '${sukupuoli.get}'"""
