@@ -48,13 +48,13 @@ object Constants {
       "lasna",
       "poissa",
       "ilm-yht",
-      "maksuvelvollisia",
+      "maksuvelvollisia"
     )
 
   val KK_HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_ALOITUSPAIKAT_TITLES: List[String] =
     List(
       "valinnan-aloituspaikat",
-      "aloituspaikat",
+      "aloituspaikat"
     )
 
   val OPH_PAAKAYTTAJA_OID       = "1.2.246.562.10.00000000001"

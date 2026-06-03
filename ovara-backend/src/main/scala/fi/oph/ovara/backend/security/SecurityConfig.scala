@@ -32,7 +32,7 @@ import org.springframework.session.web.http.{CookieSerializer, DefaultCookieSeri
 @EnableWebSecurity
 @EnableJdbcHttpSession(tableName = "VIRKAILIJA_SESSION")
 class SecurityConfig {
-  private final val SPRING_CAS_SECURITY_CHECK_PATH = "/j_spring_cas_security_check"
+  final private val SPRING_CAS_SECURITY_CHECK_PATH = "/j_spring_cas_security_check"
 
   @Value("${cas.url}")
   val cas_url: String = null
@@ -207,8 +207,9 @@ class SecurityConfig {
           .anyRequest()
           .fullyAuthenticated()
       )
-      .csrf(csrf => csrf
-        .ignoringRequestMatchers("/api/healthcheck", "/api/csrf", "/api/opiskelijavalintatiedot", "/api/valpas")
+      .csrf(csrf =>
+        csrf
+          .ignoringRequestMatchers("/api/healthcheck", "/api/csrf", "/api/opiskelijavalintatiedot", "/api/valpas")
       )
       .exceptionHandling(exceptionHandling =>
         // corsin takia suoran cas uudelleenohjauksen sijaan palautetaan http 401 ja käli hoitaa forwardoinnin login apiin

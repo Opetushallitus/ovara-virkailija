@@ -13,7 +13,7 @@ import fi.oph.ovara.backend.utils.ExtractorUtils.{
   extractOpintojenlaajuus,
   extractValintatapajonot
 }
-import fi.oph.ovara.backend.utils.GenericOvaraJsonFormats
+import fi.oph.ovara.backend.utils.{Constants, GenericOvaraJsonFormats, ParametriNimet}
 import org.json4s.jackson.Serialization.read
 import org.slf4j.{Logger, LoggerFactory}
 import slick.jdbc.*
@@ -23,7 +23,7 @@ import scala.util.control.NonFatal
 import scala.util.{Failure, Try}
 
 trait Extractors extends GenericOvaraJsonFormats {
-  private val LOG: Logger = LoggerFactory.getLogger(classOf[Extractors])
+  private val LOG: Logger                     = LoggerFactory.getLogger(classOf[Extractors])
   implicit val getHakuResult: GetResult[Haku] = GetResult(r =>
     Haku(
       haku_oid = r.nextString(),
@@ -236,13 +236,10 @@ trait Extractors extends GenericOvaraJsonFormats {
 
   implicit val getOffsetDateTime: GetResult[Option[OffsetDateTime]] = GetResult(r =>
     r.nextStringOption().flatMap { str =>
-      Try(OffsetDateTime.parse(str, Constants.PSQL_TIMESTAMPTZ_FORMATTER))
-        .recoverWith {
-          case NonFatal(e) =>
-            LOG.error(s"Error while parsing OffsetDateTime from string: $str", e)
-            Failure(e)
-        }
-        .toOption
+      Try(OffsetDateTime.parse(str, Constants.PSQL_TIMESTAMPTZ_FORMATTER)).recoverWith { case NonFatal(e) =>
+        LOG.error(s"Error while parsing OffsetDateTime from string: $str", e)
+        Failure(e)
+      }.toOption
     }
   )
 

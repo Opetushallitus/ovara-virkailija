@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 
 trait ValpasFormats extends GenericOvaraJsonFormats {
 
-  override implicit def jsonFormats: Formats = genericOvaraFormats + valpasHakuaikaSerializer
+  implicit override def jsonFormats: Formats = genericOvaraFormats + valpasHakuaikaSerializer
 
   private def valpasHakuaikaSerializer = new CustomSerializer[ValpasHakuaika](_ =>
     (

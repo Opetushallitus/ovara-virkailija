@@ -13,18 +13,18 @@ import scala.jdk.CollectionConverters.*
 import scala.jdk.OptionConverters.RichOption
 
 case class OpiskelijavalintatietoResponse(
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty oppijanumero: String,
-    @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
-    @BeanProperty hetu: String,
-    @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
-    @BeanProperty syntymaaika: String,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty sukunimi: String,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty etunimet: String,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty hakemukset: java.util.List[HakemusResponse]
+  @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
+  @BeanProperty oppijanumero: String,
+  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
+  @BeanProperty hetu: String,
+  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
+  @BeanProperty syntymaaika: String,
+  @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
+  @BeanProperty sukunimi: String,
+  @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
+  @BeanProperty etunimet: String,
+  @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
+  @BeanProperty hakemukset: java.util.List[HakemusResponse]
 )
 
 object OpiskelijavalintatietoResponse {
@@ -40,24 +40,24 @@ object OpiskelijavalintatietoResponse {
 }
 
 case class HakemusResponse(
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty hakemusOid: String,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty haku: NimettyResponse,
-    @(Schema @field)(
-      requiredMode = RequiredMode.REQUIRED,
-      description =
-        "Viittaa koodistoon [haun kohdejoukko](https://virkailija.opintopolku.fi/koodisto-service/ui/koodisto/view/haunkohdejoukko)"
-    )
-    @BeanProperty haunKohdejoukko: Optional[String],
-    @(Schema @field)(
-      requiredMode = RequiredMode.REQUIRED,
-      description =
-        "Viittaa koodistoon [hakutapa](https://virkailija.opintopolku.fi/koodisto-service/ui/koodisto/view/hakutapa)"
-    )
-    @BeanProperty hakutapa: Optional[String],
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty hakutoiveet: java.util.List[HakutoiveResponse]
+  @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
+  @BeanProperty hakemusOid: String,
+  @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
+  @BeanProperty haku: NimettyResponse,
+  @(Schema @field)(
+    requiredMode = RequiredMode.REQUIRED,
+    description =
+      "Viittaa koodistoon [haun kohdejoukko](https://virkailija.opintopolku.fi/koodisto-service/ui/koodisto/view/haunkohdejoukko)"
+  )
+  @BeanProperty haunKohdejoukko: Optional[String],
+  @(Schema @field)(
+    requiredMode = RequiredMode.REQUIRED,
+    description =
+      "Viittaa koodistoon [hakutapa](https://virkailija.opintopolku.fi/koodisto-service/ui/koodisto/view/hakutapa)"
+  )
+  @BeanProperty hakutapa: Optional[String],
+  @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
+  @BeanProperty hakutoiveet: java.util.List[HakutoiveResponse]
 )
 
 object HakemusResponse {
@@ -72,60 +72,60 @@ object HakemusResponse {
 }
 
 case class HakutoiveResponse(
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty hakukohde: NimettyResponse,
-    @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
-    @BeanProperty tarjoaja: Optional[NimettyResponse],
-    @(Schema @field)(
-      requiredMode = RequiredMode.NOT_REQUIRED,
-      description =
-        "Viittaa koodistoon [kausi](https://virkailija.opintopolku.fi/koodisto-service/ui/koodisto/view/kausi)"
+  @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
+  @BeanProperty hakukohde: NimettyResponse,
+  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
+  @BeanProperty tarjoaja: Optional[NimettyResponse],
+  @(Schema @field)(
+    requiredMode = RequiredMode.NOT_REQUIRED,
+    description =
+      "Viittaa koodistoon [kausi](https://virkailija.opintopolku.fi/koodisto-service/ui/koodisto/view/kausi)"
+  )
+  @BeanProperty koulutuksenAlkamiskausiUri: Optional[String],
+  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
+  @BeanProperty koulutuksenAlkamisvuosi: Optional[Integer],
+  @(Schema @field)(
+    requiredMode = RequiredMode.NOT_REQUIRED,
+    allowableValues = Array(
+      "HYVAKSYTTY",
+      "VARASIJALTA_HYVAKSYTTY",
+      "HARKINNANVARAISESTI_HYVAKSYTTY",
+      "VARALLA",
+      "HYLATTY",
+      "PERUUNTUNUT",
+      "PERUNUT",
+      "PERUUTETTU",
+      "KESKEN"
     )
-    @BeanProperty koulutuksenAlkamiskausiUri: Optional[String],
-    @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
-    @BeanProperty koulutuksenAlkamisvuosi: Optional[Integer],
-    @(Schema @field)(
-      requiredMode = RequiredMode.NOT_REQUIRED,
-      allowableValues = Array(
-        "HYVAKSYTTY",
-        "VARASIJALTA_HYVAKSYTTY",
-        "HARKINNANVARAISESTI_HYVAKSYTTY",
-        "VARALLA",
-        "HYLATTY",
-        "PERUUNTUNUT",
-        "PERUNUT",
-        "PERUUTETTU",
-        "KESKEN"
-      )
+  )
+  @BeanProperty valinnanTila: Optional[String],
+  @(Schema @field)(
+    requiredMode = RequiredMode.NOT_REQUIRED,
+    allowableValues = Array(
+      "EHDOLLISESTI_VASTAANOTTANUT",
+      "VASTAANOTTANUT_SITOVASTI",
+      "EI_VASTAANOTETTU_MAARA_AIKANA",
+      "PERUNUT",
+      "PERUUTETTU",
+      "OTTANUT_VASTAAN_TOISEN_PAIKAN",
+      "KESKEN"
     )
-    @BeanProperty valinnanTila: Optional[String],
-    @(Schema @field)(
-      requiredMode = RequiredMode.NOT_REQUIRED,
-      allowableValues = Array(
-        "EHDOLLISESTI_VASTAANOTTANUT",
-        "VASTAANOTTANUT_SITOVASTI",
-        "EI_VASTAANOTETTU_MAARA_AIKANA",
-        "PERUNUT",
-        "PERUUTETTU",
-        "OTTANUT_VASTAAN_TOISEN_PAIKAN",
-        "KESKEN"
-      )
+  )
+  @BeanProperty vastaanotonTila: Optional[String],
+  @(Schema @field)(
+    requiredMode = RequiredMode.NOT_REQUIRED,
+    allowableValues = Array(
+      "EI_TEHTY",
+      "LASNA_KOKO_LUKUVUOSI",
+      "POISSA_KOKO_LUKUVUOSI",
+      "EI_ILMOITTAUTUNUT",
+      "LASNA_SYKSY",
+      "POISSA_SYKSY",
+      "LASNA",
+      "POISSA"
     )
-    @BeanProperty vastaanotonTila: Optional[String],
-    @(Schema @field)(
-      requiredMode = RequiredMode.NOT_REQUIRED,
-      allowableValues = Array(
-        "EI_TEHTY",
-        "LASNA_KOKO_LUKUVUOSI",
-        "POISSA_KOKO_LUKUVUOSI",
-        "EI_ILMOITTAUTUNUT",
-        "LASNA_SYKSY",
-        "POISSA_SYKSY",
-        "LASNA",
-        "POISSA"
-      )
-    )
-    @BeanProperty ilmoittautumisenTila: Optional[String]
+  )
+  @BeanProperty ilmoittautumisenTila: Optional[String]
 )
 object HakutoiveResponse {
   def apply(hakutoive: Hakutoive): HakutoiveResponse =
@@ -141,10 +141,10 @@ object HakutoiveResponse {
 }
 
 case class NimettyResponse(
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty oid: String,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty nimi: KielistettyResponse
+  @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
+  @BeanProperty oid: String,
+  @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
+  @BeanProperty nimi: KielistettyResponse
 )
 
 object NimettyResponse {
@@ -152,22 +152,22 @@ object NimettyResponse {
 }
 
 case class ValidationError(
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty status: Int,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty message: String,
-    @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-    @BeanProperty details: java.util.List[String]
+  @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
+  @BeanProperty status: Int,
+  @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
+  @BeanProperty message: String,
+  @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
+  @BeanProperty details: java.util.List[String]
 )
 
 @JsonInclude(Include.NON_ABSENT)
 case class KielistettyResponse(
-    @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
-    @BeanProperty fi: Optional[String],
-    @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
-    @BeanProperty sv: Optional[String],
-    @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
-    @BeanProperty en: Optional[String]
+  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
+  @BeanProperty fi: Optional[String],
+  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
+  @BeanProperty sv: Optional[String],
+  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
+  @BeanProperty en: Optional[String]
 )
 
 object KielistettyResponse {

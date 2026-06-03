@@ -36,13 +36,14 @@ class OvaraBackendApplicationTests {
       .andExpect(status.isUnauthorized)
   }
 
-    @Test
-    @WithMockUser(username = "testuser", roles = Array("USER"))
-    def getAuthenticatedUserGets200ResponseFromAuthenticatedApi(): Unit = {
-        mvc.perform(MockMvcRequestBuilders.get("/api/session"))
-          .andExpect(status().isOk)
-          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-    }
+  @Test
+  @WithMockUser(username = "testuser", roles = Array("USER"))
+  def getAuthenticatedUserGets200ResponseFromAuthenticatedApi(): Unit = {
+    mvc
+      .perform(MockMvcRequestBuilders.get("/api/session"))
+      .andExpect(status().isOk)
+      .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+  }
 
   @Test
   @WithMockUser(username = "testuser", roles = Array("USER"))

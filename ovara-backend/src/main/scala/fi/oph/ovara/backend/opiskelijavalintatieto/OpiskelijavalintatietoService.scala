@@ -17,7 +17,7 @@ class OpiskelijavalintatietoService(db: ReadOnlyDatabase, repository: Opiskelija
       db.run(repository.selectOppijat(oppijanumerot), "selectHenkilot")
     }.map {
       case empty if empty.isEmpty => Nil
-      case oppijat =>
+      case oppijat                =>
         val hakemusRows = db
           .run(repository.selectHakemukset(oppijat.map(_.oppijanumero)), "selectHakemukset")
           .groupBy(_.oppijanumero)
