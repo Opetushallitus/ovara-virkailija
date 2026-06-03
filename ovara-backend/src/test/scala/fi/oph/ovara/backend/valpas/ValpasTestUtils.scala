@@ -66,11 +66,11 @@ trait ValpasTestUtils {
       else YESTERDAY.toString
 
     db.run(
-      sqlu"""INSERT INTO gen.gen_ohjausparametri values($hakuOid, $HAKUKIERROS_PAATTYY, $kierrosPaattyy, null)""",
+      sqlu"""INSERT INTO gen.gen_ohjausparametri_haku values($hakuOid, $HAKUKIERROS_PAATTYY, $kierrosPaattyy, null)""",
       "Insert test hkp-ohjausparametri"
     )
     db.run(
-      sqlu"""INSERT INTO gen.gen_ohjausparametri values($hakuOid, $VALINTATULOSTEN_JULKISTAMINEN_HAKIJOILLE, null, ${YESTERDAY.toString})""",
+      sqlu"""INSERT INTO gen.gen_ohjausparametri_haku values($hakuOid, $VALINTATULOSTEN_JULKISTAMINEN_HAKIJOILLE, null, ${YESTERDAY.toString})""",
       "Insert test vtjh-ohjausparametri"
     )
   }
@@ -219,7 +219,7 @@ trait ValpasTestUtils {
               nimi_en text
           );
 
-          CREATE TABLE gen.gen_ohjausparametri(
+          CREATE TABLE gen.gen_ohjausparametri_haku(
               haku_oid text,
               avain text,
               aikaleima timestamp with time zone,

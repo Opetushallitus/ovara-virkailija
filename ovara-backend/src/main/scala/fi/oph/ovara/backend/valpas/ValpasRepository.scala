@@ -35,8 +35,8 @@ class ValpasRepository(db: ReadOnlyDatabase) extends ValpasExtractors {
     FROM gen.gen_henkilo hlo
     INNER JOIN gen.gen_hakemus hakemus on hakemus.henkilo_oid = hlo.henkilo_oid
     INNER JOIN gen.gen_haku haku on hakemus.haku_oid = haku.haku_oid
-    LEFT JOIN gen.gen_ohjausparametri hkp on hakemus.haku_oid = hkp.haku_oid and hkp.avain = $HAKUKIERROS_PAATTYY
-    LEFT JOIN gen.gen_ohjausparametri vtjh on hakemus.haku_oid = vtjh.haku_oid and vtjh.avain = $VALINTATULOSTEN_JULKISTAMINEN_HAKIJOILLE
+    LEFT JOIN gen.gen_ohjausparametri_haku hkp on hakemus.haku_oid = hkp.haku_oid and hkp.avain = $HAKUKIERROS_PAATTYY
+    LEFT JOIN gen.gen_ohjausparametri_haku vtjh on hakemus.haku_oid = vtjh.haku_oid and vtjh.avain = $VALINTATULOSTEN_JULKISTAMINEN_HAKIJOILLE
     WHERE hlo.oppijanumero in (#${RepositoryUtils.makeListOfValuesQueryStr(oppijanumerot)})
     AND haku.kohdejoukko_koodiuri LIKE 'haunkohdejoukko_11%'
     """.as[HakemusRow]
