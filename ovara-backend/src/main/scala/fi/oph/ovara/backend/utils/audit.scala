@@ -116,6 +116,10 @@ object AuditOperation {
   case object KkHakeneetHyvaksytytVastaanottaneet extends AuditOperation {
     val name = "KK-HAKENEET-HYVAKSYTYT-VASTAANOTTANEET"
   }
+
+  case object KkPaatettavatOpiskeluoikeudet extends AuditOperation {
+    val name = "KK-PAATETTAVAT-OPISKELUOIKEUDET"
+  }
 }
 
 case class AuditException(message: String) extends Exception(message)

@@ -3,10 +3,10 @@ package fi.oph.ovara.backend.raportointi
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.UserResponse
-import fi.oph.ovara.backend.raportointi.dto.{RawHakeneetHyvaksytytVastaanottaneetParams, RawHakijatParams, RawKkHakeneetHyvaksytytVastaanottaneetParams, RawKkHakijatParams, RawKkKoulutuksetToteutuksetHakukohteetParams, RawKoulutuksetToteutuksetHakukohteetParams, buildHakeneetHyvaksytytVastaanottaneetAuditParams, buildHakijatAuditParams, buildKkHakeneetHyvaksytytVastaanottaneetAuditParams, buildKkHakijatAuditParams, buildKkKoulutuksetToteutuksetHakukohteetAuditParams, buildKoulutuksetToteutuksetHakukohteetAuditParams}
-import fi.oph.ovara.backend.service.{CommonService, HakeneetHyvaksytytVastaanottaneetService, KkHakeneetHyvaksytytVastaanottaneetService, KkHakijatService, KorkeakouluKoulutuksetToteutuksetHakukohteetService, KoulutuksetToteutuksetHakukohteetService, ToisenAsteenHakijatService, UserService}
-import fi.oph.ovara.backend.utils.AuditOperation.{HakeneetHyvaksytytVastaanottaneet, KkHakeneetHyvaksytytVastaanottaneet, KkHakijat, KorkeakouluKoulutuksetToteutuksetHakukohteet, KoulutuksetToteutuksetHakukohteet, ToisenAsteenHakijat}
-import fi.oph.ovara.backend.utils.ParameterValidator.{validateAlphanumeric, validateAlphanumericList, validateHakeneetHyvaksytytVastaanottaneetParams, validateHakijatParams, validateKkHakeneetHyvaksytytVastaanottaneetParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKoulutuksetToteutuksetHakukohteetParams, validateNumericList, validateOidList, validateOrganisaatioOid, validateOrganisaatioOidList}
+import fi.oph.ovara.backend.raportointi.dto.{RawHakeneetHyvaksytytVastaanottaneetParams, RawHakijatParams, RawKkHakeneetHyvaksytytVastaanottaneetParams, RawKkHakijatParams, RawKkKoulutuksetToteutuksetHakukohteetParams, RawKkPaatettavatOpiskeluoikeudetParams, RawKoulutuksetToteutuksetHakukohteetParams, buildHakeneetHyvaksytytVastaanottaneetAuditParams, buildHakijatAuditParams, buildKkHakeneetHyvaksytytVastaanottaneetAuditParams, buildKkHakijatAuditParams, buildKkKoulutuksetToteutuksetHakukohteetAuditParams, buildKkPaatettavatOpiskeluoikeudetAuditParams, buildKoulutuksetToteutuksetHakukohteetAuditParams}
+import fi.oph.ovara.backend.service.{CommonService, HakeneetHyvaksytytVastaanottaneetService, KkHakeneetHyvaksytytVastaanottaneetService, KkHakijatService, KkPaatettavatOpiskeluoikeudetService, KorkeakouluKoulutuksetToteutuksetHakukohteetService, KoulutuksetToteutuksetHakukohteetService, ToisenAsteenHakijatService, UserService}
+import fi.oph.ovara.backend.utils.AuditOperation.{HakeneetHyvaksytytVastaanottaneet, KkHakeneetHyvaksytytVastaanottaneet, KkHakijat, KkPaatettavatOpiskeluoikeudet, KorkeakouluKoulutuksetToteutuksetHakukohteet, KoulutuksetToteutuksetHakukohteet, ToisenAsteenHakijat}
+import fi.oph.ovara.backend.utils.ParameterValidator.{validateAlphanumeric, validateAlphanumericList, validateHakeneetHyvaksytytVastaanottaneetParams, validateHakijatParams, validateKkHakeneetHyvaksytytVastaanottaneetParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKkPaatettavatOpiskeluoikeudetParams, validateKoulutuksetToteutuksetHakukohteetParams, validateNumericList, validateOidList, validateOrganisaatioOid, validateOrganisaatioOidList}
 import fi.oph.ovara.backend.utils.{AuditLog, AuditLogObj, AuditOperation, ControllerUtils}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -37,6 +37,7 @@ class Controller(
     kkHakijatService: KkHakijatService,
     hakeneetHyvaksytytVastaanottaneetService: HakeneetHyvaksytytVastaanottaneetService,
     kkHakeneetHyvaksytytVastaanottaneetService: KkHakeneetHyvaksytytVastaanottaneetService,
+    kkPaatettavatOpiskeluoikeudetService: KkPaatettavatOpiskeluoikeudetService,
     val userService: UserService,
     val auditLog: AuditLog = AuditLogObj
 ) extends ControllerUtils {
@@ -49,7 +50,7 @@ class Controller(
   mapper.registerModule(DefaultScalaModule)
   mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
   mapper.configure(SerializationFeature.INDENT_OUTPUT, true)
-
+  
   private def handleRequest[T](
                         validationErrors: List[String],
                         mapper: ObjectMapper
@@ -76,7 +77,7 @@ class Controller(
       }
     }
   }
-  
+
   @GetMapping(path = Array("healthcheck"))
   def healthcheck = "Ovara application is running!"
 
@@ -741,6 +742,54 @@ class Controller(
             validParams.sukupuoli,
             validParams.ensikertalainen,
             validParams.naytaHakutoiveet,
+          )
+      }
+    }
+  }
+
+  @GetMapping(path = Array("kk-paatettavat-opiskeluoikeudet"))
+  def kk_paatettavat_opiskeluoikeudet(
+      @RequestParam("ovara_oppilaitokset", required = true) oppilaitokset: java.util.Collection[String],
+      @RequestParam("ovara_sukunimi", required = false) sukunimi: String,
+      @RequestParam("ovara_etunimet", required = false) etunimet: String,
+      @RequestParam("ovara_hetu", required = false) hetu: String,
+      @RequestParam("ovara_oppijanumero", required = false) oppijanumero: String,
+      @RequestParam("ovara_opiskeluoikeuden_tila", required = false) opiskeluoikeudenTila: String,
+                                                request: HttpServletRequest,
+                                              response: HttpServletResponse
+                                            ): Unit = {
+    val params = RawKkPaatettavatOpiskeluoikeudetParams(
+      oppilaitokset = getListParamAsScalaList(oppilaitokset),
+      sukunimi = Option(sukunimi),
+      etunimet = Option(etunimet),
+      hetu = Option(hetu),
+      oppijanumero = Option(oppijanumero),
+      opiskeluoikeudenTila = Option(opiskeluoikeudenTila)
+    )
+
+    val validationResult = validateKkPaatettavatOpiskeluoikeudetParams(params)
+
+    handleExcelRequest(
+      validationErrors = validationResult.left.getOrElse(Nil),
+      response = response,
+      request = request,
+      id = "kk-paatettavat-opiskeluoikeudet",
+      raporttiParams = validationResult.toOption.map(buildKkPaatettavatOpiskeluoikeudetAuditParams).getOrElse(Map.empty),
+      auditOperation = KkPaatettavatOpiskeluoikeudet,
+      mapper = mapper
+    ) {
+      validationResult match {
+        case Left(_) =>
+          Left("virhe.validointi")
+
+        case Right(validParams) =>
+          kkPaatettavatOpiskeluoikeudetService.get(
+            validParams.oppilaitokset,
+            validParams.sukunimi,
+            validParams.etunimet,
+            validParams.hetu,
+            validParams.oppijanumero,
+            validParams.opiskeluoikeudenTila
           )
       }
     }
