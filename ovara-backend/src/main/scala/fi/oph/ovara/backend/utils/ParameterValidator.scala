@@ -1,19 +1,6 @@
 package fi.oph.ovara.backend.utils
 
-import fi.oph.ovara.backend.raportointi.dto.{
-  RawHakeneetHyvaksytytVastaanottaneetParams,
-  RawHakijatParams,
-  RawKkHakeneetHyvaksytytVastaanottaneetParams,
-  RawKkHakijatParams,
-  RawKkKoulutuksetToteutuksetHakukohteetParams,
-  RawKoulutuksetToteutuksetHakukohteetParams,
-  ValidatedHakeneetHyvaksytytVastaanottaneetParams,
-  ValidatedHakijatParams,
-  ValidatedKkHakeneetHyvaksytytVastaanottaneetParams,
-  ValidatedKkHakijatParams,
-  ValidatedKkKoulutuksetToteutuksetHakukohteetParams,
-  ValidatedKoulutuksetToteutuksetHakukohteetParams
-}
+import fi.oph.ovara.backend.raportointi.dto.{RawHakeneetHyvaksytytVastaanottaneetParams, RawHakijatParams, RawKkHakeneetHyvaksytytVastaanottaneetParams, RawKkHakijatParams, RawKkKoulutuksetToteutuksetHakukohteetParams, RawKkPaatettavatOpiskeluoikeudetParams, RawKoulutuksetToteutuksetHakukohteetParams, ValidatedHakeneetHyvaksytytVastaanottaneetParams, ValidatedHakijatParams, ValidatedKkHakeneetHyvaksytytVastaanottaneetParams, ValidatedKkHakijatParams, ValidatedKkKoulutuksetToteutuksetHakukohteetParams, ValidatedKkPaatettavatOpiskeluoikeudetParams, ValidatedKoulutuksetToteutuksetHakukohteetParams}
 
 import scala.util.matching.Regex
 
@@ -25,7 +12,8 @@ object ParameterValidator {
   private val numericRegex          = """^\d+$""".r
 
   private val tulostustavat    = Set("hakukohteittain", "oppilaitoksittain")
-  private val oidPattern       = """^1\.\d{4}\.\w{1,}$""".r
+  private val opiskeluoikeudenTilat = Set("paatettavissa", "paatetty")
+  private val oidPattern = """^1\.\d{4}\.\w{1,}$""".r
   private val koodiarvoPattern = """^\d+$""".r
 
   val TULOSTUSTAVAT = Set(
@@ -363,6 +351,33 @@ object ParameterValidator {
           params.sukupuoli,
           strToOptionBoolean(params.ensikertalainen),
           strToOptionBoolean(params.naytaHakutoiveet).getOrElse(true)
+        )
+      )
+    }
+  }
+
+  def validateKkPaatettavatOpiskeluoikeudetParams(params: RawKkPaatettavatOpiskeluoikeudetParams
+                                                       ): Either[List[String], ValidatedKkPaatettavatOpiskeluoikeudetParams] = {
+    val errors = List(
+      validateOrganisaatioOidList(params.oppilaitokset, "oppilaitokset"),
+      validateAlphanumeric(params.sukunimi, "sukunimi"),
+      validateAlphanumeric(params.etunimet, "etunimet"),
+      validateNumeric(params.hetu, "hetu"),
+      validateOid(params.oppijanumero, "oppijanumero"),
+      valueBelongsToSetOfValidValues(params.opiskeluoikeudenTila, "opiskeluoikeuden-tila", opiskeluoikeudenTilat)
+    ).flatten
+
+    if (errors.nonEmpty) {
+      Left(errors.distinct)
+    } else {
+      Right(
+        ValidatedKkPaatettavatOpiskeluoikeudetParams(
+          params.oppilaitokset,
+          params.sukunimi,
+          params.etunimet,
+          params.hetu,
+          params.oppijanumero,
+          params.opiskeluoikeudenTila
         )
       )
     }
