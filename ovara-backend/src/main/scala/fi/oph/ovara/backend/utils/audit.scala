@@ -122,6 +122,10 @@ object AuditOperation {
     val name = "KK-HAKENEET-HYVAKSYTYT-VASTAANOTTANEET"
   }
 
+  case object KkPaatettavatOpiskeluoikeudet extends AuditOperation {
+    val name = "KK-PAATETTAVAT-OPISKELUOIKEUDET"
+  }
+
   case object Opiskelijavalintatiedot extends AuditOperation {
     val name = "OPISKELIJAVALINTATIEDOT"
   }

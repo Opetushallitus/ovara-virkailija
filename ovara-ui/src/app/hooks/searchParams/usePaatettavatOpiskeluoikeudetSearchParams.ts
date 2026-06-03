@@ -20,7 +20,7 @@ export const usePaatettavatOpiskeluoikeudetSearchParams = () => {
   );
 
   const [sukunimi, setSukunimi] = useQueryStateWithLocalStorage<string | null>(
-    'ovara_etunimi',
+    'ovara_sukunimi',
     {
       parse: (value) => (value === null ? null : String(value)),
       defaultValue: null,
@@ -28,7 +28,7 @@ export const usePaatettavatOpiskeluoikeudetSearchParams = () => {
   );
 
   const [hetu, setHetu] = useQueryStateWithLocalStorage<string | null>(
-    'ovara_htu',
+    'ovara_hetu',
     {
       parse: (value) => (value === null ? null : String(value)),
       defaultValue: null,
