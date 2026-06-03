@@ -1,7 +1,5 @@
 package fi.oph.ovara.backend.opiskelijavalintatieto
 
-import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.repository.ReadOnlyDatabase
 import slick.jdbc.H2Profile.api.*
 
@@ -13,12 +11,6 @@ trait OpiskelijavalintatietoTestUtils {
   val HAKU_OID         = "1.2.246.562.29.001"
   val HAKUKOHDE_OID    = "1.2.246.562.20.012"
   val ORGANISAATIO_OID = "1.2.246.562.10.486"
-
-  val mapper = new ObjectMapper()
-  mapper.registerModule(DefaultScalaModule)
-  mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-  mapper.configure(SerializationFeature.INDENT_OUTPUT, true)
-  mapper.configure(SerializationFeature.WRITE_SELF_REFERENCES_AS_NULL, true)
 
   def initAndInsert(): Unit = {
     initSchema()

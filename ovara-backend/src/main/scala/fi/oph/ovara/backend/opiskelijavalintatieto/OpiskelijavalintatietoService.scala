@@ -10,11 +10,6 @@ import scala.util.Try
 
 @Service
 class OpiskelijavalintatietoService(db: ReadOnlyDatabase, repository: OpiskelijavalintatietoRepository) {
-  private val mapper = new ObjectMapper()
-  mapper.registerModule(DefaultScalaModule)
-  mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-  mapper.configure(SerializationFeature.INDENT_OUTPUT, true)
-
   val LOG: Logger = LoggerFactory.getLogger(classOf[OpiskelijavalintatietoService])
 
   def get(oppijanumerot: List[String]): Either[String, Seq[Opiskelijavalintatieto]] = {

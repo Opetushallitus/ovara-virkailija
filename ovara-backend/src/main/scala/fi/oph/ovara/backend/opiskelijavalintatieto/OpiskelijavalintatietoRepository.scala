@@ -9,7 +9,7 @@ import slick.jdbc.PostgresProfile.api.*
 import slick.sql.SqlStreamingAction
 
 @Repository
-class OpiskelijavalintatietoRepository extends Extractors {
+class OpiskelijavalintatietoRepository extends OpiskelijavalintatietoExtractors {
   val LOG: Logger = LoggerFactory.getLogger(classOf[OpiskelijavalintatietoRepository])
 
   def selectOppijat(oppijanumerot: List[String]): SqlStreamingAction[Vector[OppijaRow], OppijaRow, Effect] = {

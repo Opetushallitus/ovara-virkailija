@@ -1,6 +1,8 @@
 package fi.oph.ovara.backend.utils
 
-import java.time.format.DateTimeFormatter
+import java.time.ZoneId
+import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder}
+import java.time.temporal.ChronoField
 
 object Constants {
   val HAKUTOIVEET_TITLES: List[String] =
@@ -68,5 +70,15 @@ object Constants {
   val POSTIOSOITEFIELDS: List[String] = List("lahiosoite", "postinumero", "postitoimipaikka")
 
   val ISO_LOCAL_DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")
-  val DATE_FORMATTER_FOR_EXCEL: DateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy")
+  val DATE_FORMATTER_FOR_EXCEL: DateTimeFormatter      = DateTimeFormatter.ofPattern("d.M.yyyy")
+
+  val PSQL_TIMESTAMPTZ_FORMATTER: DateTimeFormatter = new DateTimeFormatterBuilder()
+    .append(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+    .optionalStart()
+    .appendFraction(ChronoField.NANO_OF_SECOND, 0, 6, true)
+    .optionalEnd()
+    .appendOffset("+HH:mm", "+00")
+    .toFormatter()
+
+  val HELSINKI_TIMEZONE: ZoneId = ZoneId.of("Europe/Helsinki")
 }
