@@ -20,9 +20,9 @@ trait ControllerUtils {
   }
 
   def withPaakayttajaRole[T](f: => T): T = {
-    val user = userService.getEnrichedUserDetails
+    val authorities = userService.getAuthorities
 
-    if (user.authorities.contains(OPH_PAAKAYTTAJA_AUTHORITY)) {
+    if (authorities.contains(OPH_PAAKAYTTAJA_AUTHORITY)) {
       f
     } else {
       throw ResponseStatusException(HttpStatus.FORBIDDEN)

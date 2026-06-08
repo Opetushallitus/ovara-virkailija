@@ -29,4 +29,15 @@ class UserService(onrService: OnrService, authenticationFacade: AuthenticationFa
       )
     }
   }
+
+  def getAuthorities: List[String] = {
+    val principal = authenticationFacade.getAuthentication.getPrincipal.asInstanceOf[UserDetails]
+    if (principal == null) {
+      null
+    } else {
+      val username = principal.getUsername
+
+      AuthoritiesUtil.getOvaraAuthorities(principal.getAuthorities)
+    }
+  }
 }
