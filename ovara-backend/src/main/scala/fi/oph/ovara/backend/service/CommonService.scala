@@ -35,7 +35,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     Try {
       db.run(commonRepository.selectDistinctAlkamisvuodet(), "selectDistinctAlkamisvuodet")
     } match {
-      case Success(result) => Right(result)
+      case Success(result)    => Right(result)
       case Failure(exception) =>
         LOG.error("Error fetching alkamisvuodet", exception)
         Left("virhe.tietokanta")
@@ -49,9 +49,9 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
   }
 
   def getHaut(
-      alkamiskaudet: List[String],
-      selectedHaut: List[String],
-      haunTyyppi: String
+    alkamiskaudet: List[String],
+    selectedHaut: List[String],
+    haunTyyppi: String
   ): Either[String, Vector[Haku]] = {
     Try {
       db.run(
@@ -59,7 +59,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
         "selectDistinctExistingHaut"
       )
     } match {
-      case Success(result) => Right(result)
+      case Success(result)    => Right(result)
       case Failure(exception) =>
         LOG.error("Error fetching haut", exception)
         Left("virhe.tietokanta")
@@ -67,12 +67,12 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
   }
 
   def getHakukohteet(
-      koulutustoimija: Option[String],
-      oppilaitokset: List[String],
-      toimipisteet: List[String],
-      haut: List[String],
-      selectedHakukohderyhmat: List[String],
-      hakukohteet: List[String]
+    koulutustoimija: Option[String],
+    oppilaitokset: List[String],
+    toimipisteet: List[String],
+    haut: List[String],
+    selectedHakukohderyhmat: List[String],
+    hakukohteet: List[String]
   ): Either[String, Vector[Hakukohde]] = {
     val user                      = userService.getEnrichedUserDetails
     val authorities               = user.authorities
@@ -81,7 +81,8 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
 
     val allowedOrgOidsFromSelection =
       getAllowedOrgOidsFromOrgSelection(kayttooikeusOrganisaatiot, oppilaitokset, toimipisteet, koulutustoimija)
-    val isOrganisaatioRajain        = (koulutustoimija.isDefined || oppilaitokset.nonEmpty || toimipisteet.nonEmpty) && allowedOrgOidsFromSelection.nonEmpty
+    val isOrganisaatioRajain =
+      (koulutustoimija.isDefined || oppilaitokset.nonEmpty || toimipisteet.nonEmpty) && allowedOrgOidsFromSelection.nonEmpty
     val kayttooikeusHakukohderyhmat = AuthoritiesUtil.filterHakukohderyhmaOids(kayttooikeusOrganisaatiot)
     Try {
       db.run(
@@ -98,7 +99,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
         "selectDistinctExistingHakukohteetWithSelectedOrgAndAndHakukohderyhmaFilter"
       )
     } match {
-      case Success(result) => Right(result)
+      case Success(result)    => Right(result)
       case Failure(exception) =>
         LOG.error("Error fetching hakukohteet", exception)
         Left("virhe.tietokanta")
@@ -109,7 +110,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     Try {
       db.run(commonRepository.selectToisenAsteenPohjakoulutukset, "selectToisenAsteenPohjakoulutukset")
     } match {
-      case Success(result) => Right(result)
+      case Success(result)    => Right(result)
       case Failure(exception) =>
         LOG.error("Error fetching pohjakoulutukset", exception)
         Left("virhe.tietokanta")
@@ -120,7 +121,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     Try {
       db.run(commonRepository.selectDistinctHarkinnanvaraisuudet(), "selectDistinctHarkinnanvaraisuudet")
     } match {
-      case Success(result) => Right(result)
+      case Success(result)    => Right(result)
       case Failure(exception) =>
         LOG.error("Error fetching harkinnanvaraisuudet", exception)
         Left("virhe.tietokanta")
@@ -131,7 +132,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     Try {
       db.run(commonRepository.selectDistinctValintatiedot, "selectDistinctValintatiedot")
     } match {
-      case Success(result) => Right(result)
+      case Success(result)    => Right(result)
       case Failure(exception) =>
         LOG.error("Error fetching valintatiedot", exception)
         Left("virhe.tietokanta")
@@ -142,7 +143,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     Try {
       db.run(commonRepository.selectDistinctVastaanottotiedot, "selectDistinctVastaanottotiedot")
     } match {
-      case Success(result) => Right(result)
+      case Success(result)    => Right(result)
       case Failure(exception) =>
         LOG.error("Error fetching vastaanottotiedot", exception)
         Left("virhe.tietokanta")
@@ -153,7 +154,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     Try {
       db.run(commonRepository.selectDistinctOpetuskielet, "selectDistinctOpetuskielet")
     } match {
-      case Success(result) => Right(result)
+      case Success(result)    => Right(result)
       case Failure(exception) =>
         LOG.error("Error fetching opetuskielet", exception)
         Left("virhe.tietokanta")
@@ -165,17 +166,16 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       if (koodiarvot.nonEmpty) {
         db.run(commonRepository.selectOpetuskieliKoodiurit(koodiarvot), "selectOpetuskieliKoodiurit")
       } else Vector.empty
-    }.recoverWith {
-      case NonFatal(exception) =>
-        LOG.error("Error fetching opetuskielet", exception)
-        Failure(exception)
+    }.recoverWith { case NonFatal(exception) =>
+      LOG.error("Error fetching opetuskielet", exception)
+      Failure(exception)
     }
 
   def getMaakunnat: Either[String, Vector[Koodi]] = {
     Try {
       db.run(commonRepository.selectDistinctMaakunnat, "selectDistinctMaakunnat")
     } match {
-      case Success(result) => Right(result)
+      case Success(result)    => Right(result)
       case Failure(exception) =>
         LOG.error("Error fetching maakunnat", exception)
         Left("virhe.tietokanta")
@@ -187,17 +187,16 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       if (koodiarvot.nonEmpty) {
         db.run(commonRepository.selectMaakuntaKoodiurit(koodiarvot), "selectMaakuntaKoodiurit")
       } else Vector.empty
-    }.recoverWith {
-      case NonFatal(exception) =>
-        LOG.error("Error fetching maakunnat", exception)
-        Failure(exception)
+    }.recoverWith { case NonFatal(exception) =>
+      LOG.error("Error fetching maakunnat", exception)
+      Failure(exception)
     }
 
   def getKunnat(maakunnat: List[String], selectedKunnat: List[String]): Either[String, Vector[Koodi]] = {
     Try {
       db.run(commonRepository.selectDistinctKunnat(maakunnat, selectedKunnat), "selectDistinctKunnat")
     } match {
-      case Success(result) => Right(result)
+      case Success(result)    => Right(result)
       case Failure(exception) =>
         LOG.error("Error fetching kunnat", exception)
         Left("virhe.tietokanta")
@@ -209,10 +208,9 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
       if (koodiarvot.nonEmpty) {
         db.run(commonRepository.selectKuntaKoodiurit(koodiarvot), "selectKuntaKoodiurit")
       } else Vector.empty
-    }.recoverWith {
-      case NonFatal(exception) =>
-        LOG.error("Error fetching kunnat", exception)
-        Failure(exception)
+    }.recoverWith { case NonFatal(exception) =>
+      LOG.error("Error fetching kunnat", exception)
+      Failure(exception)
     }
   }
 
@@ -220,7 +218,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     Try {
       db.run(commonRepository.selectDistinctKoulutusalat1(), "selectDistinctKoulutusalat1")
     } match {
-      case Success(result) => Right(result)
+      case Success(result)    => Right(result)
       case Failure(exception) =>
         LOG.error("Error fetching koulutusalat1", exception)
         Left("virhe.tietokanta")
@@ -228,8 +226,8 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
   }
 
   def getKoulutusalat2(
-      koulutusalat1: List[String],
-      selectedKoulutusalat2: List[String]
+    koulutusalat1: List[String],
+    selectedKoulutusalat2: List[String]
   ): Either[String, Vector[Koodi]] = {
     Try {
       db.run(
@@ -237,7 +235,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
         "selectDistinctKoulutusalat2"
       )
     } match {
-      case Success(result) => Right(result)
+      case Success(result)    => Right(result)
       case Failure(exception) =>
         LOG.error("Error fetching koulutusalat2", exception)
         Left("virhe.tietokanta")
@@ -245,8 +243,8 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
   }
 
   def getKoulutusalat3(
-      koulutusalat2: List[String],
-      selectedKoulutusalat3: List[String]
+    koulutusalat2: List[String],
+    selectedKoulutusalat3: List[String]
   ): Either[String, Vector[Koodi]] = {
     Try {
       db.run(
@@ -254,7 +252,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
         "selectDistinctKoulutusalat3"
       )
     } match {
-      case Success(result) => Right(result)
+      case Success(result)    => Right(result)
       case Failure(exception) =>
         LOG.error("Error fetching koulutusalat3", exception)
         Left("virhe.tietokanta")
@@ -265,7 +263,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     Try {
       db.run(commonRepository.selectDistinctOkmOhjauksenAlat, "selectDistinctOkmOhjauksenAlat")
     } match {
-      case Success(result) => Right(result)
+      case Success(result)    => Right(result)
       case Failure(exception) =>
         LOG.error("Error fetching okm-ohjauksen-alat", exception)
         Left("virhe.tietokanta")
@@ -274,9 +272,9 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
 
   def getHakukohderyhmat(haut: List[String]): Either[String, Vector[Hakukohderyhma]] = {
     Try {
-      val user             = userService.getEnrichedUserDetails
-      val kayttooikeusOids = AuthoritiesUtil.getKayttooikeusOids(user.authorities)
-      val allUsersOrgOids  = getAllAllowedOrgOidsFromAuthorities
+      val user               = userService.getEnrichedUserDetails
+      val kayttooikeusOids   = AuthoritiesUtil.getKayttooikeusOids(user.authorities)
+      val allUsersOrgOids    = getAllAllowedOrgOidsFromAuthorities
       val hakukohderyhmaOids =
         if (AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOids))
           List() // ei rajata listaa pääkäyttäjälle
@@ -292,7 +290,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
         "selectHakukohderyhmat"
       )
     } match {
-      case Success(result) => Right(result)
+      case Success(result)    => Right(result)
       case Failure(exception) =>
         LOG.error("Error fetching hakukohderyhmat", exception)
         Left("virhe.tietokanta")
@@ -326,7 +324,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
 
       kayttoOikeushierarkiat.flatMap(hierarkia => OrganisaatioUtils.filterActiveOrgsWithoutPeruskoulu(hierarkia))
     } match {
-      case Success(result) => Right(result)
+      case Success(result)    => Right(result)
       case Failure(exception) =>
         LOG.error("Error fetching organisaatio hierarkiat with user rights", exception)
         Left("virhe.tietokanta")
@@ -386,10 +384,10 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
   }
 
   def getAllowedOrgsFromOrgSelection(
-      kayttooikeusOrganisaatioOids: List[String],
-      koulutustoimijaOid: Option[String],
-      toimipisteOids: List[String],
-      oppilaitosOids: List[String]
+    kayttooikeusOrganisaatioOids: List[String],
+    koulutustoimijaOid: Option[String],
+    toimipisteOids: List[String],
+    oppilaitosOids: List[String]
   ): (List[String], List[OrganisaatioHierarkia], String) = {
 
     def enrichHierarkiatWithKoulutustoimijaParent(oppilaitoshierarkiat: List[OrganisaatioHierarkia]) = {
@@ -449,10 +447,10 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
   }
 
   def getAllowedOrgOidsFromOrgSelection(
-      kayttooikeusOrganisaatioOids: List[String],
-      oppilaitosOids: List[String],
-      toimipisteOids: List[String],
-      koulutustoimijaOid: Option[String] = None
+    kayttooikeusOrganisaatioOids: List[String],
+    oppilaitosOids: List[String],
+    toimipisteOids: List[String],
+    koulutustoimijaOid: Option[String] = None
   ): List[String] = {
     val hierarkiat =
       if (toimipisteOids.nonEmpty) {
@@ -465,7 +463,7 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
         LOG.info("Fetching organisaatio hierarkiat with user rights")
         getOrganisaatioHierarkiatWithUserRights match {
           case Right(hierarkiat) => hierarkiat
-          case Left(error) =>
+          case Left(error)       =>
             throw new RuntimeException(error)
         }
       }

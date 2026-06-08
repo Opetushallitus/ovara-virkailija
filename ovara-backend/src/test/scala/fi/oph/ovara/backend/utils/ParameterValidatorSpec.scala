@@ -1,6 +1,15 @@
 package fi.oph.ovara.backend.utils
 
-import fi.oph.ovara.backend.raportointi.dto.{RawHakeneetHyvaksytytVastaanottaneetParams, RawHakijatParams, RawKkHakeneetHyvaksytytVastaanottaneetParams, RawKkHakijatParams, RawKoulutuksetToteutuksetHakukohteetParams, ValidatedHakeneetHyvaksytytVastaanottaneetParams, ValidatedKkHakeneetHyvaksytytVastaanottaneetParams, ValidatedKoulutuksetToteutuksetHakukohteetParams}
+import fi.oph.ovara.backend.raportointi.dto.{
+  RawHakeneetHyvaksytytVastaanottaneetParams,
+  RawHakijatParams,
+  RawKkHakeneetHyvaksytytVastaanottaneetParams,
+  RawKkHakijatParams,
+  RawKoulutuksetToteutuksetHakukohteetParams,
+  ValidatedHakeneetHyvaksytytVastaanottaneetParams,
+  ValidatedKkHakeneetHyvaksytytVastaanottaneetParams,
+  ValidatedKoulutuksetToteutuksetHakukohteetParams
+}
 import fi.oph.ovara.backend.utils.AuditOperation.KoulutuksetToteutuksetHakukohteet
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -21,13 +30,15 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
 
     val result = ParameterValidator.validateKoulutuksetToteutuksetHakukohteetParams(params)
 
-    result shouldBe Left(List(
-      "haut.invalid.oid",
-      "koulutustoimija.invalid.org",
-      "oppilaitokset.invalid.org",
-      "koulutuksen-tila.invalid",
-      "valintakoe.invalid"
-    ))
+    result shouldBe Left(
+      List(
+        "haut.invalid.oid",
+        "koulutustoimija.invalid.org",
+        "oppilaitokset.invalid.org",
+        "koulutuksen-tila.invalid",
+        "valintakoe.invalid"
+      )
+    )
   }
 
   it should "return no errors for valid parameters" in {
@@ -44,7 +55,7 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
 
     val result = ParameterValidator.validateKoulutuksetToteutuksetHakukohteetParams(params)
 
-    val expected =  ValidatedKoulutuksetToteutuksetHakukohteetParams(
+    val expected = ValidatedKoulutuksetToteutuksetHakukohteetParams(
       haut = List("1.2.246.562.29.00000000000000049925"),
       koulutustoimija = Some("1.2.246.562.10.1000000000000000000"),
       oppilaitokset = List("1.2.246.562.10.1000000000000000001"),
@@ -52,11 +63,11 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
       koulutuksenTila = Some("julkaistu"),
       toteutuksenTila = Some("julkaistu"),
       hakukohteenTila = Some("julkaistu"),
-      valintakoe = Some(false))
+      valintakoe = Some(false)
+    )
 
     result shouldBe Right(expected)
   }
-
 
   "validateHakijatParams" should "return errors for invalid parameters" in {
     val params = RawHakijatParams(
@@ -78,22 +89,24 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
 
     val result = ParameterValidator.validateHakijatParams(params)
 
-    result shouldBe Left(List(
-      "haut.invalid.oid",
-      "oppilaitokset.invalid.org",
-      "toimipisteet.invalid.org",
-      "hakukohteet.invalid.oid",
-      "pohjakoulutukset.invalid",
-      "valintatiedot.invalid",
-      "vastaanottotiedot.invalid",
-      "harkinnanvaraisuudet.invalid",
-      "kaksoistutkinto-kiinnostaa.invalid",
-      "urheilijatutkinto-kiinnostaa.invalid",
-      "soraterveys.invalid",
-      "sora-aiempi.invalid",
-      "markkinointilupa.invalid",
-      "julkaisulupa.invalid"
-    ))
+    result shouldBe Left(
+      List(
+        "haut.invalid.oid",
+        "oppilaitokset.invalid.org",
+        "toimipisteet.invalid.org",
+        "hakukohteet.invalid.oid",
+        "pohjakoulutukset.invalid",
+        "valintatiedot.invalid",
+        "vastaanottotiedot.invalid",
+        "harkinnanvaraisuudet.invalid",
+        "kaksoistutkinto-kiinnostaa.invalid",
+        "urheilijatutkinto-kiinnostaa.invalid",
+        "soraterveys.invalid",
+        "sora-aiempi.invalid",
+        "markkinointilupa.invalid",
+        "julkaisulupa.invalid"
+      )
+    )
   }
 
   "validateKkHakijatParams" should "return errors for invalid parameters" in {
@@ -114,20 +127,22 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
 
     val result = ParameterValidator.validateKkHakijatParams(params)
 
-    result shouldBe Left(List(
-      "haut.invalid.oid",
-      "oppilaitokset.invalid.org",
-      "toimipisteet.invalid.org",
-      "hakukohteet.invalid.oid",
-      "valintatiedot.invalid",
-      "vastaanottotiedot.invalid",
-      "hakukohderyhmat.invalid.oid",
-      "kansalaisuusluokat.invalid",
-      "markkinointilupa.invalid",
-      "nayta-yo-arvosanat.invalid",
-      "nayta-hetu.invalid",
-      "nayta-postiosoite.invalid"
-    ))
+    result shouldBe Left(
+      List(
+        "haut.invalid.oid",
+        "oppilaitokset.invalid.org",
+        "toimipisteet.invalid.org",
+        "hakukohteet.invalid.oid",
+        "valintatiedot.invalid",
+        "vastaanottotiedot.invalid",
+        "hakukohderyhmat.invalid.oid",
+        "kansalaisuusluokat.invalid",
+        "markkinointilupa.invalid",
+        "nayta-yo-arvosanat.invalid",
+        "nayta-hetu.invalid",
+        "nayta-postiosoite.invalid"
+      )
+    )
   }
 
   "validateHakeneetHyvaksytytVastaanottaneetParams" should "return errors for invalid parameters" in {
@@ -151,23 +166,25 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
 
     val result = ParameterValidator.validateHakeneetHyvaksytytVastaanottaneetParams(params)
 
-    result shouldBe Left(List(
-      "haut.invalid.oid",
-      "tulostustapa.invalid",
-      "koulutustoimija.invalid.org",
-      "oppilaitokset.invalid.org",
-      "toimipisteet.invalid.org",
-      "hakukohteet.invalid.oid",
-      "koulutusalat1.invalid",
-      "koulutusalat2.invalid",
-      "koulutusalat3.invalid",
-      "opetuskielet.invalid",
-      "maakunnat.invalid",
-      "kunnat.invalid",
-      "harkinnanvaraisuudet.invalid",
-      "sukupuoli.invalid",
-      "nayta-hakutoiveet.invalid"
-    ))
+    result shouldBe Left(
+      List(
+        "haut.invalid.oid",
+        "tulostustapa.invalid",
+        "koulutustoimija.invalid.org",
+        "oppilaitokset.invalid.org",
+        "toimipisteet.invalid.org",
+        "hakukohteet.invalid.oid",
+        "koulutusalat1.invalid",
+        "koulutusalat2.invalid",
+        "koulutusalat3.invalid",
+        "opetuskielet.invalid",
+        "maakunnat.invalid",
+        "kunnat.invalid",
+        "harkinnanvaraisuudet.invalid",
+        "sukupuoli.invalid",
+        "nayta-hakutoiveet.invalid"
+      )
+    )
   }
 
   it should "return no errors for valid parameters" in {
@@ -205,7 +222,7 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
       kunnat = List("004"),
       harkinnanvaraisuudet = List("ATARU_EI_PAATTOTODISTUSTA"),
       sukupuoli = Some("2"),
-      naytaHakutoiveet = true,
+      naytaHakutoiveet = true
     )
     val result = ParameterValidator.validateHakeneetHyvaksytytVastaanottaneetParams(params)
 
@@ -232,22 +249,24 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
 
     val result = ParameterValidator.validateKkHakeneetHyvaksytytVastaanottaneetParams(params)
 
-    result shouldBe Left(List(
-      "haut.invalid.oid",
-      "tulostustapa.invalid",
-      "koulutustoimija.invalid.org",
-      "oppilaitokset.invalid.org",
-      "toimipisteet.invalid.org",
-      "hakukohteet.invalid.oid",
-      "hakukohderyhmat.invalid.oid",
-      "okm-ohjauksen-alat.invalid",
-      "tutkinnontasot.invalid",
-      "aidinkielet.invalid",
-      "kansalaisuusluokat.invalid",
-      "sukupuoli.invalid",
-      "ensikertalainen.invalid",
-      "nayta-hakutoiveet.invalid"
-    ))
+    result shouldBe Left(
+      List(
+        "haut.invalid.oid",
+        "tulostustapa.invalid",
+        "koulutustoimija.invalid.org",
+        "oppilaitokset.invalid.org",
+        "toimipisteet.invalid.org",
+        "hakukohteet.invalid.oid",
+        "hakukohderyhmat.invalid.oid",
+        "okm-ohjauksen-alat.invalid",
+        "tutkinnontasot.invalid",
+        "aidinkielet.invalid",
+        "kansalaisuusluokat.invalid",
+        "sukupuoli.invalid",
+        "ensikertalainen.invalid",
+        "nayta-hakutoiveet.invalid"
+      )
+    )
   }
 
   it should "return no errors for valid parameters" in {
@@ -283,7 +302,7 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
       kansalaisuusluokat = List("013"),
       sukupuoli = Some("2"),
       ensikertalainen = Some(true),
-      naytaHakutoiveet = true,
+      naytaHakutoiveet = true
     )
     val result = ParameterValidator.validateKkHakeneetHyvaksytytVastaanottaneetParams(params)
 

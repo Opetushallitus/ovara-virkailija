@@ -1,7 +1,7 @@
 package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.domain.ToisenAsteenHakija
-import fi.oph.ovara.backend.raportointi.dto.{ValidatedHakijatParams, buildHakijatParamsForExcel}
+import fi.oph.ovara.backend.raportointi.dto.{buildHakijatParamsForExcel, ValidatedHakijatParams}
 import fi.oph.ovara.backend.repository.{ReadOnlyDatabase, ToisenAsteenHakijatRepository}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -14,10 +14,10 @@ import scala.util.{Failure, Success, Try}
 @Component
 @Service
 class ToisenAsteenHakijatService(
-    toisenAsteenHakijatRepository: ToisenAsteenHakijatRepository,
-    userService: UserService,
-    commonService: CommonService,
-    lokalisointiService: LokalisointiService
+  toisenAsteenHakijatRepository: ToisenAsteenHakijatRepository,
+  userService: UserService,
+  commonService: CommonService,
+  lokalisointiService: LokalisointiService
 ) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[ToisenAsteenHakijatService]);
 
@@ -25,27 +25,27 @@ class ToisenAsteenHakijatService(
   val db: ReadOnlyDatabase = null
 
   def get(
-           haut: List[String],
-           oppilaitokset: List[String],
-           toimipisteet: List[String],
-           hakukohteet: List[String],
-           pohjakoulutukset: List[String],
-           valintatiedot: List[String],
-           vastaanottotiedot: List[String],
-           harkinnanvaraisuudet: List[String],
-           kaksoistutkintoKiinnostaa: Option[Boolean],
-           urheilijatutkintoKiinnostaa: Option[Boolean],
-           soraTerveys: Option[Boolean],
-           soraAiempi: Option[Boolean],
-           markkinointilupa: Option[Boolean],
-           julkaisulupa: Option[Boolean]
-         ): Either[String, XSSFWorkbook] = {
+    haut: List[String],
+    oppilaitokset: List[String],
+    toimipisteet: List[String],
+    hakukohteet: List[String],
+    pohjakoulutukset: List[String],
+    valintatiedot: List[String],
+    vastaanottotiedot: List[String],
+    harkinnanvaraisuudet: List[String],
+    kaksoistutkintoKiinnostaa: Option[Boolean],
+    urheilijatutkintoKiinnostaa: Option[Boolean],
+    soraTerveys: Option[Boolean],
+    soraAiempi: Option[Boolean],
+    markkinointilupa: Option[Boolean],
+    julkaisulupa: Option[Boolean]
+  ): Either[String, XSSFWorkbook] = {
 
-    val user = userService.getEnrichedUserDetails
+    val user          = userService.getEnrichedUserDetails
     val asiointikieli = user.asiointikieli.getOrElse("fi")
-    val translations = lokalisointiService.getOvaraTranslations(asiointikieli)
+    val translations  = lokalisointiService.getOvaraTranslations(asiointikieli)
 
-    val authorities = user.authorities
+    val authorities               = user.authorities
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
 
     val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
@@ -74,20 +74,25 @@ class ToisenAsteenHakijatService(
       )
 
       val queryResult = db.run(query, "toisenAsteenHakijatRepository.selectWithParams")
-      val sortedList =
-        queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi.toLowerCase(), resultRow.hakijanEtunimi.toLowerCase, resultRow.oppijanumero))
+      val sortedList  =
+        queryResult.sortBy(resultRow =>
+          (resultRow.hakijanSukunimi.toLowerCase(), resultRow.hakijanEtunimi.toLowerCase, resultRow.oppijanumero)
+        )
 
-      val raporttiParamNames = db.run(
-        toisenAsteenHakijatRepository.hakuParamNamesQuery(
-          haut,
-          oppilaitokset,
-          toimipisteet,
-          hakukohteet,
-          pohjakoulutukset,
-        ),
-        "hakuParamNamesQuery"
-      ).map(param => param.parametri -> param.nimet).toMap
-      
+      val raporttiParamNames = db
+        .run(
+          toisenAsteenHakijatRepository.hakuParamNamesQuery(
+            haut,
+            oppilaitokset,
+            toimipisteet,
+            hakukohteet,
+            pohjakoulutukset
+          ),
+          "hakuParamNamesQuery"
+        )
+        .map(param => param.parametri -> param.nimet)
+        .toMap
+
       val raporttiParams = buildHakijatParamsForExcel(
         ValidatedHakijatParams(
           haut,
@@ -103,10 +108,11 @@ class ToisenAsteenHakijatService(
           soraTerveys,
           soraAiempi,
           markkinointilupa,
-          julkaisulupa,
-        ), 
-        raporttiParamNames)
-      
+          julkaisulupa
+        ),
+        raporttiParamNames
+      )
+
       ExcelWriter.writeToisenAsteenHakijatRaportti(
         sortedList,
         asiointikieli,

@@ -7,10 +7,10 @@ import org.springframework.stereotype.{Component, Repository}
 @Component
 @Repository
 class ReadOnlyDatabase(
-                        @Value("${app.readonly.datasource.url}") url: String,
-                        @Value("${spring.datasource.username}") username: String,
-                        @Value("${spring.datasource.password}") password: String
-                      ) extends OvaraDatabase {
+  @Value("${app.readonly.datasource.url}") url: String,
+  @Value("${spring.datasource.username}") username: String,
+  @Value("${spring.datasource.password}") password: String
+) extends OvaraDatabase {
   override protected def hikariConfig: HikariConfig = {
     val config = new HikariConfig()
     config.setJdbcUrl(url)

@@ -1,7 +1,11 @@
 package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.domain.Kielistetty
-import fi.oph.ovara.backend.raportointi.dto.{KoulutuksetToteutuksetHakukohteetReadableParams, ValidatedKoulutuksetToteutuksetHakukohteetParams, buildKoulutuksetToteutuksetHakukohteetParamsForExcel}
+import fi.oph.ovara.backend.raportointi.dto.{
+  buildKoulutuksetToteutuksetHakukohteetParamsForExcel,
+  KoulutuksetToteutuksetHakukohteetReadableParams,
+  ValidatedKoulutuksetToteutuksetHakukohteetParams
+}
 import fi.oph.ovara.backend.repository.{KoulutuksetToteutuksetHakukohteetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter, OrganisaatioUtils}
 import org.slf4j.{Logger, LoggerFactory}
@@ -14,10 +18,10 @@ import scala.util.{Failure, Success, Try}
 @Component
 @Service
 class KoulutuksetToteutuksetHakukohteetService(
-    koulutuksetToteutuksetHakukohteetRepository: KoulutuksetToteutuksetHakukohteetRepository,
-    userService: UserService,
-    commonService: CommonService,
-    lokalisointiService: LokalisointiService
+  koulutuksetToteutuksetHakukohteetRepository: KoulutuksetToteutuksetHakukohteetRepository,
+  userService: UserService,
+  commonService: CommonService,
+  lokalisointiService: LokalisointiService
 ) {
 
   @Autowired
@@ -26,20 +30,20 @@ class KoulutuksetToteutuksetHakukohteetService(
   val LOG: Logger = LoggerFactory.getLogger(classOf[KoulutuksetToteutuksetHakukohteetService])
 
   def get(
-           haut: List[String],
-           koulutustoimija: Option[String],
-           oppilaitokset: List[String],
-           toimipisteet: List[String],
-           koulutuksenTila: Option[String],
-           toteutuksenTila: Option[String],
-           hakukohteenTila: Option[String],
-           valintakoe: Option[Boolean]
-         ): Either[String, XSSFWorkbook] = {
-    val user = userService.getEnrichedUserDetails
-    val asiointikieli = user.asiointikieli.getOrElse("fi")
-    val authorities = user.authorities
+    haut: List[String],
+    koulutustoimija: Option[String],
+    oppilaitokset: List[String],
+    toimipisteet: List[String],
+    koulutuksenTila: Option[String],
+    toteutuksenTila: Option[String],
+    hakukohteenTila: Option[String],
+    valintakoe: Option[Boolean]
+  ): Either[String, XSSFWorkbook] = {
+    val user                      = userService.getEnrichedUserDetails
+    val asiointikieli             = user.asiointikieli.getOrElse("fi")
+    val authorities               = user.authorities
     val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
-    val translations = lokalisointiService.getOvaraTranslations(asiointikieli)
+    val translations              = lokalisointiService.getOvaraTranslations(asiointikieli)
 
     val (orgOidsForQuery, hierarkiat, raporttityyppi) = commonService.getAllowedOrgsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
@@ -69,15 +73,18 @@ class KoulutuksetToteutuksetHakukohteetService(
           groupedQueryResult
         )
 
-      val raporttiParamNames = db.run(
-        koulutuksetToteutuksetHakukohteetRepository.hakuParamNamesQuery(
-          haut,
-          koulutustoimija,
-          oppilaitokset,
-          toimipisteet
-        ),
-        "hakuParamNamesQuery"
-      ).map(param => param.parametri -> param.nimet).toMap
+      val raporttiParamNames = db
+        .run(
+          koulutuksetToteutuksetHakukohteetRepository.hakuParamNamesQuery(
+            haut,
+            koulutustoimija,
+            oppilaitokset,
+            toimipisteet
+          ),
+          "hakuParamNamesQuery"
+        )
+        .map(param => param.parametri -> param.nimet)
+        .toMap
       val raporttiParams = buildKoulutuksetToteutuksetHakukohteetParamsForExcel(
         ValidatedKoulutuksetToteutuksetHakukohteetParams(
           haut,
@@ -87,10 +94,11 @@ class KoulutuksetToteutuksetHakukohteetService(
           koulutuksenTila,
           toteutuksenTila,
           hakukohteenTila,
-          valintakoe), 
+          valintakoe
+        ),
         raporttiParamNames
       )
-        
+
       ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         organisaationKoulutuksetHakukohteetToteutukset,
         asiointikieli,

@@ -10,7 +10,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.{GetMapping, PostMapping, RequestBody, RequestMapping, RequestParam, RestController}
+import org.springframework.web.bind.annotation.{
+  GetMapping,
+  PostMapping,
+  RequestBody,
+  RequestMapping,
+  RequestParam,
+  RestController
+}
 import org.springframework.web.server.ResponseStatusException
 
 import scala.jdk.CollectionConverters.*
@@ -18,9 +25,9 @@ import scala.jdk.CollectionConverters.*
 @RestController
 @RequestMapping(path = Array("api"))
 class ValpasController(
-    val userService: UserService,
-    valpasService: ValpasService,
-    @Value("${opintopolku.virkailija.url}") virkailijaUrl: String
+  val userService: UserService,
+  valpasService: ValpasService,
+  @Value("${opintopolku.virkailija.url}") virkailijaUrl: String
 ) extends ControllerUtils {
   val LOG: Logger = LoggerFactory.getLogger(classOf[ValpasController])
 
@@ -44,8 +51,8 @@ class ValpasController(
     )
   )
   def singleValpas(
-      @RequestParam("ovara_oppijanumero", required = true) oppijanumero: String,
-      @RequestParam("ovara_vain_aktiiviset", defaultValue = "false") vainAktiiviset: Boolean
+    @RequestParam("ovara_oppijanumero", required = true) oppijanumero: String,
+    @RequestParam("ovara_vain_aktiiviset", defaultValue = "false") vainAktiiviset: Boolean
   ): java.util.List[HakemusResponse] =
     withPaakayttajaRole {
       validate {
@@ -79,8 +86,8 @@ class ValpasController(
     )
   )
   def manyValpas(
-      @RequestBody oppijanumerot: java.util.Collection[String],
-      @RequestParam("ovara_vain_aktiiviset", defaultValue = "false") vainAktiiviset: Boolean
+    @RequestBody oppijanumerot: java.util.Collection[String],
+    @RequestParam("ovara_vain_aktiiviset", defaultValue = "false") vainAktiiviset: Boolean
   ): java.util.List[HakemusResponse] =
     withPaakayttajaRole {
       val numeroList = getListParamAsScalaList(oppijanumerot)

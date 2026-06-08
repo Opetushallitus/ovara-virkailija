@@ -17,7 +17,7 @@ trait ValpasFormats extends GenericOvaraJsonFormats {
     .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
     .toFormatter()
 
-  override implicit def jsonFormats: Formats = genericOvaraFormats + valpasHakuaikaSerializer
+  implicit override def jsonFormats: Formats = genericOvaraFormats + valpasHakuaikaSerializer
 
   private def valpasHakuaikaSerializer = new CustomSerializer[ValpasHakuaika](_ =>
     (

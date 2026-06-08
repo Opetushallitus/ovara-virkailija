@@ -7,7 +7,12 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.session.{Session, SessionRepository}
 import slick.jdbc.PostgresProfile.api.*
 
-class JdbcSessionMappingStorage(sessionRepository: SessionRepository[Session], serviceName: String, ovaraDatabase: OvaraDatabase, @Value("${session.schema.name}") schema: String) extends OphSessionMappingStorage {
+class JdbcSessionMappingStorage(
+  sessionRepository: SessionRepository[Session],
+  serviceName: String,
+  ovaraDatabase: OvaraDatabase,
+  @Value("${session.schema.name}") schema: String
+) extends OphSessionMappingStorage {
 
   val LOG = LoggerFactory.getLogger(classOf[JdbcSessionMappingStorage])
 
@@ -16,7 +21,9 @@ class JdbcSessionMappingStorage(sessionRepository: SessionRepository[Session], s
   @Override
   def removeSessionByMappingId(mappingId: String): HttpSession = {
     LOG.debug(s"Poistetaan sessiomappaus cas tiketillä $mappingId")
-    val query = sql"""SELECT virkailija_session_id FROM #$mappingTableName WHERE mapped_ticket_id = $mappingId""".as[String].headOption
+    val query = sql"""SELECT virkailija_session_id FROM #$mappingTableName WHERE mapped_ticket_id = $mappingId"""
+      .as[String]
+      .headOption
     val sessionIdOpt = ovaraDatabase.run(query, "selectSessionIdByMappingId")
 
     sessionIdOpt
@@ -46,7 +53,8 @@ class JdbcSessionMappingStorage(sessionRepository: SessionRepository[Session], s
   @Override
   def clean(): Unit = {
     LOG.debug("Siivotaan sessiomappaukset joille ei löydy sessiota")
-    val sql = sqlu"""DELETE FROM #$mappingTableName WHERE virkailija_session_id NOT IN (SELECT session_id FROM #$sessionTableName)"""
+    val sql =
+      sqlu"""DELETE FROM #$mappingTableName WHERE virkailija_session_id NOT IN (SELECT session_id FROM #$sessionTableName)"""
     ovaraDatabase.run(sql, "clean")
   }
 

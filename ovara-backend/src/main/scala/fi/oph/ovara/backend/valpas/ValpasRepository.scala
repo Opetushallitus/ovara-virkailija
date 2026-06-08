@@ -6,7 +6,7 @@ import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.Repository
 import slick.jdbc.PostgresProfile.api.actionBasedSQLInterpolation
 
-final val HAKUKIERROS_PAATTYY = "PH_HKP"
+final val HAKUKIERROS_PAATTYY                      = "PH_HKP"
 final val VALINTATULOSTEN_JULKISTAMINEN_HAKIJOILLE = "PH_VTJH"
 
 @Repository

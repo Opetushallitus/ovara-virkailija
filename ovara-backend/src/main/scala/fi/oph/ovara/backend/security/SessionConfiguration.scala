@@ -20,7 +20,12 @@ class SessionConfiguration {
 
   @Bean
   def sessionMappingStorage(sessionRepository: JdbcIndexedSessionRepository): SessionMappingStorage = {
-    val jdbcSessionMappingStorage = new JdbcSessionMappingStorage(sessionRepository.asInstanceOf[SessionRepository[Session]], "ovara-virkailija", db, schema)
+    val jdbcSessionMappingStorage = new JdbcSessionMappingStorage(
+      sessionRepository.asInstanceOf[SessionRepository[Session]],
+      "ovara-virkailija",
+      db,
+      schema
+    )
     jdbcSessionMappingStorage
   }
 }

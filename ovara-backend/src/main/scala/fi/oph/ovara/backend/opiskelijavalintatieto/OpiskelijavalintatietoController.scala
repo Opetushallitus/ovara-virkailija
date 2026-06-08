@@ -25,8 +25,8 @@ import scala.jdk.OptionConverters.RichOption
 @RestController
 @RequestMapping(path = Array("api"))
 class OpiskelijavalintatietoController @Autowired() (
-    val userService: UserService,
-    opiskelijavalintatietoService: OpiskelijavalintatietoService
+  val userService: UserService,
+  opiskelijavalintatietoService: OpiskelijavalintatietoService
 ) extends ControllerUtils {
   val LOG: Logger = LoggerFactory.getLogger(classOf[OpiskelijavalintatietoController])
 
@@ -52,7 +52,7 @@ class OpiskelijavalintatietoController @Autowired() (
     )
   )
   def opiskelijavalintatiedot(
-      @RequestParam("ovara_oppijanumero", required = true) oppijanumero: String
+    @RequestParam("ovara_oppijanumero", required = true) oppijanumero: String
   ): OpiskelijavalintatietoResponse = withPaakayttajaRole {
     validate {
       validateOid(Some(oppijanumero), "ovara_oppijanumero")
@@ -86,7 +86,7 @@ class OpiskelijavalintatietoController @Autowired() (
     )
   )
   def opiskelijavalintatiedot(
-      @RequestBody oppijanumerot: java.util.Collection[String]
+    @RequestBody oppijanumerot: java.util.Collection[String]
   ): java.util.List[OpiskelijavalintatietoResponse] =
     withPaakayttajaRole {
       val numeroList = getListParamAsScalaList(oppijanumerot)

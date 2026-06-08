@@ -14,21 +14,21 @@ class ToisenAsteenHakijatRepository extends Extractors {
   val LOG: Logger = LoggerFactory.getLogger(classOf[ToisenAsteenHakijatRepository])
 
   def selectWithParams(
-      kayttooikeusOrganisaatiot: List[String],
-      haut: List[String],
-      oppilaitokset: List[String],
-      toimipisteet: List[String],
-      hakukohteet: List[String],
-      pohjakoulutukset: List[String],
-      valintatieto: List[String],
-      vastaanottotieto: List[String],
-      harkinnanvaraisuudet: List[String],
-      kaksoistutkintoKiinnostaa: Option[Boolean],
-      urheilijatutkintoKiinnostaa: Option[Boolean],
-      soraTerveys: Option[Boolean],
-      soraAiempi: Option[Boolean],
-      markkinointilupa: Option[Boolean],
-      julkaisulupa: Option[Boolean]
+    kayttooikeusOrganisaatiot: List[String],
+    haut: List[String],
+    oppilaitokset: List[String],
+    toimipisteet: List[String],
+    hakukohteet: List[String],
+    pohjakoulutukset: List[String],
+    valintatieto: List[String],
+    vastaanottotieto: List[String],
+    harkinnanvaraisuudet: List[String],
+    kaksoistutkintoKiinnostaa: Option[Boolean],
+    urheilijatutkintoKiinnostaa: Option[Boolean],
+    soraTerveys: Option[Boolean],
+    soraAiempi: Option[Boolean],
+    markkinointilupa: Option[Boolean],
+    julkaisulupa: Option[Boolean]
   ): SqlStreamingAction[Vector[ToisenAsteenHakija], ToisenAsteenHakija, Effect] = {
     val hakuStr                     = RepositoryUtils.makeListOfValuesQueryStr(haut)
     val raportointiorganisaatiotStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusOrganisaatiot)
@@ -36,7 +36,7 @@ class ToisenAsteenHakijatRepository extends Extractors {
     val vastaanottotiedotAsDbValues        = RepositoryUtils.mapVastaanottotiedotToDbValues(vastaanottotieto)
     val valintatiedotAsDbValues            = RepositoryUtils.mapValintatiedotToDbValues(valintatieto)
     val harkinnanvaraisuudetWithSureValues = RepositoryUtils.enrichHarkinnanvaraisuudet(harkinnanvaraisuudet)
-    val optionalHakukohdeQuery =
+    val optionalHakukohdeQuery             =
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "hk.hakukohde_oid", hakukohteet)
     val optionalPohjakoulutusQuery =
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "ht2.pohjakoulutus", pohjakoulutukset)
@@ -109,12 +109,41 @@ class ToisenAsteenHakijatRepository extends Extractors {
     query
   }
 
-  def hakuParamNamesQuery(haut: List[String], oppilaitokset: List[String], toimipisteet: List[String], hakukohteet: List[String], pohjakoulutukset: List[String]):
-  SqlStreamingAction[Vector[ParametriNimet], ParametriNimet, Effect] = {
-    val oppilaitosQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("oppilaitos", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", oppilaitokset)
-    val toimipisteQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("toimipiste", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", toimipisteet)
-    val hakukohdeQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("hakukohde", "hakukohde_oid", "hakukohde_nimi", "pub.pub_dim_hakukohde", hakukohteet)
-    val pohjakoulutusQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("pohjakoulutus", "koodiarvo", "koodinimi", "pub.pub_dim_koodisto_pohjakoulutustoinenaste", pohjakoulutukset)
+  def hakuParamNamesQuery(
+    haut: List[String],
+    oppilaitokset: List[String],
+    toimipisteet: List[String],
+    hakukohteet: List[String],
+    pohjakoulutukset: List[String]
+  ): SqlStreamingAction[Vector[ParametriNimet], ParametriNimet, Effect] = {
+    val oppilaitosQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "oppilaitos",
+      "organisaatio_oid",
+      "organisaatio_nimi",
+      "pub.pub_dim_organisaatio",
+      oppilaitokset
+    )
+    val toimipisteQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "toimipiste",
+      "organisaatio_oid",
+      "organisaatio_nimi",
+      "pub.pub_dim_organisaatio",
+      toimipisteet
+    )
+    val hakukohdeQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "hakukohde",
+      "hakukohde_oid",
+      "hakukohde_nimi",
+      "pub.pub_dim_hakukohde",
+      hakukohteet
+    )
+    val pohjakoulutusQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "pohjakoulutus",
+      "koodiarvo",
+      "koodinimi",
+      "pub.pub_dim_koodisto_pohjakoulutustoinenaste",
+      pohjakoulutukset
+    )
 
     val query = sql"""
         SELECT param, jsonb_agg(nimi) AS nimet

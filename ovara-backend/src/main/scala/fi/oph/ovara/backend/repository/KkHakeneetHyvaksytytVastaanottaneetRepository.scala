@@ -1,8 +1,19 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.domain.{KkHakeneetHyvaksytytVastaanottaneetHakukohteittain, KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella, KkHakeneetHyvaksytytVastaanottaneetResult, KkHakeneetHyvaksytytVastaanottaneetToimipisteittain, KkHakeneetHyvaksytytVastaanottaneetTunnisteella}
+import fi.oph.ovara.backend.domain.{
+  KkHakeneetHyvaksytytVastaanottaneetHakukohteittain,
+  KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella,
+  KkHakeneetHyvaksytytVastaanottaneetResult,
+  KkHakeneetHyvaksytytVastaanottaneetToimipisteittain,
+  KkHakeneetHyvaksytytVastaanottaneetTunnisteella
+}
 import fi.oph.ovara.backend.utils.{ParametriNimet, RepositoryUtils}
-import fi.oph.ovara.backend.utils.RepositoryUtils.{buildTutkinnonTasoFilters, makeHakukohderyhmaQueryWithKayttooikeudet, makeOptionalHakukohderyhmatSubSelectQueryStr, makeHakukohderyhmaSubSelectQueryWithKayttooikeudet}
+import fi.oph.ovara.backend.utils.RepositoryUtils.{
+  buildTutkinnonTasoFilters,
+  makeHakukohderyhmaQueryWithKayttooikeudet,
+  makeHakukohderyhmaSubSelectQueryWithKayttooikeudet,
+  makeOptionalHakukohderyhmatSubSelectQueryStr
+}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.Component
 import slick.dbio.{DBIO, Effect}
@@ -14,29 +25,37 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
 
   val LOG: Logger = LoggerFactory.getLogger(classOf[KkHakeneetHyvaksytytVastaanottaneetRepository]);
   private def buildFilters(
-      haut: List[String],
-      selectedKayttooikeusOrganisaatiot: List[String],
-      isOrganisaatioRajain: Boolean,
-      isOphPaakayttaja: Boolean,
-      kayttooikeusHakukohderyhmat: List[String],
-      hakukohteet: List[String],
-      hakukohderyhmat: List[String],
-      okmOhjauksenAlat: List[String],
-      tutkinnonTasot: List[String],
-      aidinkielet: List[String],
-      kansalaisuudet: List[String],
-      sukupuoli: Option[String],
-      ensikertalainen: Option[Boolean]
+    haut: List[String],
+    selectedKayttooikeusOrganisaatiot: List[String],
+    isOrganisaatioRajain: Boolean,
+    isOphPaakayttaja: Boolean,
+    kayttooikeusHakukohderyhmat: List[String],
+    hakukohteet: List[String],
+    hakukohderyhmat: List[String],
+    okmOhjauksenAlat: List[String],
+    tutkinnonTasot: List[String],
+    aidinkielet: List[String],
+    kansalaisuudet: List[String],
+    sukupuoli: Option[String],
+    ensikertalainen: Option[Boolean]
   ): String = {
 
     val organisaatioKayttooikeusQueryStr =
       if (isOrganisaatioRajain) {
         // jos organisaatio on valittu, ei huomioida käyttäjän organisaatioiden ulkopuolisia hakukohderyhmiä
-        RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(selectedKayttooikeusOrganisaatiot, List.empty, "h")
+        RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(
+          selectedKayttooikeusOrganisaatiot,
+          List.empty,
+          "h"
+        )
       } else if (isOphPaakayttaja) {
         ""
       } else {
-        RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(selectedKayttooikeusOrganisaatiot, kayttooikeusHakukohderyhmat, "h")
+        RepositoryUtils.makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(
+          selectedKayttooikeusOrganisaatiot,
+          kayttooikeusHakukohderyhmat,
+          "h"
+        )
       }
 
     val optionalHakukohderyhmaSubSelect = makeOptionalHakukohderyhmatSubSelectQueryStr(hakukohderyhmat, "h")
@@ -58,33 +77,38 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   }
 
   private def buildFiltersForMainQuery(
-                                        haut: List[String],
-                                        aidinkielet: List[String],
-                                        kansalaisuudet: List[String],
-                                        sukupuoli: Option[String],
-                                        ensikertalainen: Option[Boolean]
-                                      ): String = {
+    haut: List[String],
+    aidinkielet: List[String],
+    kansalaisuudet: List[String],
+    sukupuoli: Option[String],
+    ensikertalainen: Option[Boolean]
+  ): String = {
     Seq(
       s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})",
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.aidinkieli", aidinkielet),
       RepositoryUtils.makeOptionalListOfValuesQueryStr("AND", "t.kansalaisuusluokka", kansalaisuudet),
       RepositoryUtils.makeEqualsQueryStrOfOptional("AND", "t.sukupuoli", sukupuoli),
-      RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "t.ensikertalainen", ensikertalainen),
+      RepositoryUtils.makeEqualsQueryStrOfOptionalBoolean("AND", "t.ensikertalainen", ensikertalainen)
     ).filter(_.nonEmpty).mkString("\n")
   }
   private def buildHakukohdeFilters(
-                                     haut: List[String],
-                                     selectedKayttooikeusOrganisaatiot: List[String],
-                                     isOrganisaatioRajain: Boolean,
-                                     isOphPaakayttaja: Boolean,
-                                     kayttooikeusHakukohderyhmat: List[String],
-                                     hakukohteet: List[String],
-                                     hakukohderyhmat: List[String],
-                                     okmOhjauksenAlat: List[String],
-                                     tutkinnonTasot: List[String]
-                                   ): String = {
+    haut: List[String],
+    selectedKayttooikeusOrganisaatiot: List[String],
+    isOrganisaatioRajain: Boolean,
+    isOphPaakayttaja: Boolean,
+    kayttooikeusHakukohderyhmat: List[String],
+    hakukohteet: List[String],
+    hakukohderyhmat: List[String],
+    okmOhjauksenAlat: List[String],
+    tutkinnonTasot: List[String]
+  ): String = {
     val hakukohteetOrganisaatioJaKayttooikeusrajauksillaFilter =
-      buildOrganisaatioKayttooikeusFilter(selectedKayttooikeusOrganisaatiot, isOrganisaatioRajain, isOphPaakayttaja, kayttooikeusHakukohderyhmat)
+      buildOrganisaatioKayttooikeusFilter(
+        selectedKayttooikeusOrganisaatiot,
+        isOrganisaatioRajain,
+        isOphPaakayttaja,
+        kayttooikeusHakukohderyhmat
+      )
 
     Seq(
       s"h.haku_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(haut)})",
@@ -96,32 +120,41 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     ).filter(_.nonEmpty).mkString("\n")
   }
 
-  private def buildOrganisaatioKayttooikeusFilter(selectedKayttooikeusOrganisaatiot: List[String], isOrganisaatioRajain: Boolean, isOphPaakayttaja: Boolean, kayttooikeusHakukohderyhmat: List[String]) = {
+  private def buildOrganisaatioKayttooikeusFilter(
+    selectedKayttooikeusOrganisaatiot: List[String],
+    isOrganisaatioRajain: Boolean,
+    isOphPaakayttaja: Boolean,
+    kayttooikeusHakukohderyhmat: List[String]
+  ) = {
     if (isOrganisaatioRajain) {
       // jos organisaatio valittu, ei huomioida käyttäjän organisaation ulkopuolisia hakukohderyhmiä
       makeHakukohderyhmaQueryWithKayttooikeudet(selectedKayttooikeusOrganisaatiot, List.empty, "hh", "h")
     } else if (isOphPaakayttaja) {
       ""
-    }
-    else {
-      makeHakukohderyhmaQueryWithKayttooikeudet(selectedKayttooikeusOrganisaatiot, kayttooikeusHakukohderyhmat, "hh", "h")
+    } else {
+      makeHakukohderyhmaQueryWithKayttooikeudet(
+        selectedKayttooikeusOrganisaatiot,
+        kayttooikeusHakukohderyhmat,
+        "hh",
+        "h"
+      )
     }
   }
 
   def selectHakukohteittainWithParams(
-      selectedKayttooikeusOrganisaatiot: List[String],
-      isOrganisaatioRajain: Boolean,
-      isOphPaakayttaja: Boolean,
-      kayttooikeusHakukohderyhmat: List[String],
-      haut: List[String],
-      hakukohteet: List[String],
-      hakukohderyhmat: List[String],
-      okmOhjauksenAlat: List[String],
-      tutkinnonTasot: List[String],
-      aidinkielet: List[String],
-      kansalaisuudet: List[String],
-      sukupuoli: Option[String],
-      ensikertalainen: Option[Boolean],
+    selectedKayttooikeusOrganisaatiot: List[String],
+    isOrganisaatioRajain: Boolean,
+    isOphPaakayttaja: Boolean,
+    kayttooikeusHakukohderyhmat: List[String],
+    haut: List[String],
+    hakukohteet: List[String],
+    hakukohderyhmat: List[String],
+    okmOhjauksenAlat: List[String],
+    tutkinnonTasot: List[String],
+    aidinkielet: List[String],
+    kansalaisuudet: List[String],
+    sukupuoli: Option[String],
+    ensikertalainen: Option[Boolean]
   ): SqlStreamingAction[Vector[
     KkHakeneetHyvaksytytVastaanottaneetHakukohteittain
   ], KkHakeneetHyvaksytytVastaanottaneetHakukohteittain, Effect] = {
@@ -178,19 +211,19 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   }
 
   def selectHauittainWithParams(
-      selectedKayttooikeusOrganisaatiot: List[String],
-      isOrganisaatioRajain: Boolean,
-      isOphPaakayttaja: Boolean,
-      kayttooikeusHakukohderyhmat: List[String],
-      haut: List[String],
-      hakukohteet: List[String],
-      hakukohderyhmat: List[String],
-      okmOhjauksenAlat: List[String],
-      tutkinnonTasot: List[String],
-      aidinkielet: List[String],
-      kansalaisuudet: List[String],
-      sukupuoli: Option[String],
-      ensikertalainen: Option[Boolean]
+    selectedKayttooikeusOrganisaatiot: List[String],
+    isOrganisaatioRajain: Boolean,
+    isOphPaakayttaja: Boolean,
+    kayttooikeusHakukohderyhmat: List[String],
+    haut: List[String],
+    hakukohteet: List[String],
+    hakukohderyhmat: List[String],
+    okmOhjauksenAlat: List[String],
+    tutkinnonTasot: List[String],
+    aidinkielet: List[String],
+    kansalaisuudet: List[String],
+    sukupuoli: Option[String],
+    ensikertalainen: Option[Boolean]
   ): SqlStreamingAction[Vector[
     KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella
   ], KkHakeneetHyvaksytytVastaanottaneetHauittainTunnisteella, Effect] = {
@@ -223,8 +256,8 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
          )
       """
 
-      val query =
-        sql"""#$filteredHakukohteet
+    val query =
+      sql"""#$filteredHakukohteet
         SELECT
           ha.haku_oid,
           ha.haku_nimi,
@@ -274,19 +307,19 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   }
 
   def selectToimipisteittainWithParams(
-      selectedKayttooikeusOrganisaatiot: List[String],
-      isOrganisaatioRajain: Boolean,
-      isOphPaakayttaja: Boolean,
-      kayttooikeusHakukohderyhmat: List[String],
-      haut: List[String],
-      hakukohteet: List[String],
-      hakukohderyhmat: List[String],
-      okmOhjauksenAlat: List[String],
-      tutkinnonTasot: List[String],
-      aidinkielet: List[String],
-      kansalaisuudet: List[String],
-      sukupuoli: Option[String],
-      ensikertalainen: Option[Boolean]
+    selectedKayttooikeusOrganisaatiot: List[String],
+    isOrganisaatioRajain: Boolean,
+    isOphPaakayttaja: Boolean,
+    kayttooikeusHakukohderyhmat: List[String],
+    haut: List[String],
+    hakukohteet: List[String],
+    hakukohderyhmat: List[String],
+    okmOhjauksenAlat: List[String],
+    tutkinnonTasot: List[String],
+    aidinkielet: List[String],
+    kansalaisuudet: List[String],
+    sukupuoli: Option[String],
+    ensikertalainen: Option[Boolean]
   ): SqlStreamingAction[Vector[
     KkHakeneetHyvaksytytVastaanottaneetToimipisteittain
   ], KkHakeneetHyvaksytytVastaanottaneetToimipisteittain, Effect] = {
@@ -364,20 +397,20 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   }
 
   def selectOrganisaatioittainWithParams(
-      selectedKayttooikeusOrganisaatiot: List[String],
-      isOrganisaatioRajain: Boolean,
-      isOphPaakayttaja: Boolean,
-      kayttooikeusHakukohderyhmat: List[String],
-      haut: List[String],
-      hakukohteet: List[String],
-      hakukohderyhmat: List[String],
-      okmOhjauksenAlat: List[String],
-      tutkinnonTasot: List[String],
-      aidinkielet: List[String],
-      kansalaisuudet: List[String],
-      sukupuoli: Option[String],
-      ensikertalainen: Option[Boolean],
-      organisaatiotaso: String
+    selectedKayttooikeusOrganisaatiot: List[String],
+    isOrganisaatioRajain: Boolean,
+    isOphPaakayttaja: Boolean,
+    kayttooikeusHakukohderyhmat: List[String],
+    haut: List[String],
+    hakukohteet: List[String],
+    hakukohderyhmat: List[String],
+    okmOhjauksenAlat: List[String],
+    tutkinnonTasot: List[String],
+    aidinkielet: List[String],
+    kansalaisuudet: List[String],
+    sukupuoli: Option[String],
+    ensikertalainen: Option[Boolean],
+    organisaatiotaso: String
   ): SqlStreamingAction[Vector[
     KkHakeneetHyvaksytytVastaanottaneetTunnisteella
   ], KkHakeneetHyvaksytytVastaanottaneetTunnisteella, Effect] = {
@@ -463,21 +496,20 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     query
   }
 
-
   def selectOkmOhjauksenAloittainWithParams(
-      selectedKayttooikeusOrganisaatiot: List[String],
-      isOrganisaatioRajain: Boolean,
-      isOphPaakayttaja: Boolean,
-      kayttooikeusHakukohderyhmat: List[String],
-      haut: List[String],
-      hakukohteet: List[String],
-      hakukohderyhmat: List[String],
-      okmOhjauksenAlat: List[String],
-      tutkinnonTasot: List[String],
-      aidinkielet: List[String],
-      kansalaisuudet: List[String],
-      sukupuoli: Option[String],
-      ensikertalainen: Option[Boolean]
+    selectedKayttooikeusOrganisaatiot: List[String],
+    isOrganisaatioRajain: Boolean,
+    isOphPaakayttaja: Boolean,
+    kayttooikeusHakukohderyhmat: List[String],
+    haut: List[String],
+    hakukohteet: List[String],
+    hakukohderyhmat: List[String],
+    okmOhjauksenAlat: List[String],
+    tutkinnonTasot: List[String],
+    aidinkielet: List[String],
+    kansalaisuudet: List[String],
+    sukupuoli: Option[String],
+    ensikertalainen: Option[Boolean]
   ): SqlStreamingAction[Vector[
     KkHakeneetHyvaksytytVastaanottaneetTunnisteella
   ], KkHakeneetHyvaksytytVastaanottaneetTunnisteella, Effect] = {
@@ -557,19 +589,19 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
   }
 
   def selectKansalaisuuksittainWithParams(
-      selectedKayttooikeusOrganisaatiot: List[String],
-      isOrganisaatioRajain: Boolean,
-      isOphPaakayttaja: Boolean,
-      kayttooikeusHakukohderyhmat: List[String],
-      haut: List[String],
-      hakukohteet: List[String],
-      hakukohderyhmat: List[String],
-      okmOhjauksenAlat: List[String],
-      tutkinnonTasot: List[String],
-      aidinkielet: List[String],
-      kansalaisuudet: List[String],
-      sukupuoli: Option[String],
-      ensikertalainen: Option[Boolean]
+    selectedKayttooikeusOrganisaatiot: List[String],
+    isOrganisaatioRajain: Boolean,
+    isOphPaakayttaja: Boolean,
+    kayttooikeusHakukohderyhmat: List[String],
+    haut: List[String],
+    hakukohteet: List[String],
+    hakukohderyhmat: List[String],
+    okmOhjauksenAlat: List[String],
+    tutkinnonTasot: List[String],
+    aidinkielet: List[String],
+    kansalaisuudet: List[String],
+    sukupuoli: Option[String],
+    ensikertalainen: Option[Boolean]
   ): SqlStreamingAction[Vector[
     KkHakeneetHyvaksytytVastaanottaneetResult
   ], KkHakeneetHyvaksytytVastaanottaneetResult, Effect] = {
@@ -620,21 +652,20 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     query
   }
 
-
   def selectHakukohderyhmittainWithParams(
-      selectedKayttooikeusOrganisaatiot: List[String],
-      isOrganisaatioRajain: Boolean,
-      isOphPaakayttaja: Boolean,
-      kayttooikeusHakukohderyhmat: List[String],
-      haut: List[String],
-      hakukohteet: List[String],
-      hakukohderyhmat: List[String],
-      okmOhjauksenAlat: List[String],
-      tutkinnonTasot: List[String],
-      aidinkielet: List[String],
-      kansalaisuudet: List[String],
-      sukupuoli: Option[String],
-      ensikertalainen: Option[Boolean]
+    selectedKayttooikeusOrganisaatiot: List[String],
+    isOrganisaatioRajain: Boolean,
+    isOphPaakayttaja: Boolean,
+    kayttooikeusHakukohderyhmat: List[String],
+    haut: List[String],
+    hakukohteet: List[String],
+    hakukohderyhmat: List[String],
+    okmOhjauksenAlat: List[String],
+    tutkinnonTasot: List[String],
+    aidinkielet: List[String],
+    kansalaisuudet: List[String],
+    sukupuoli: Option[String],
+    ensikertalainen: Option[Boolean]
   ): SqlStreamingAction[Vector[
     KkHakeneetHyvaksytytVastaanottaneetTunnisteella
   ], KkHakeneetHyvaksytytVastaanottaneetTunnisteella, Effect] = {
@@ -714,26 +745,25 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     query
   }
 
-
   def selectHakijatYhteensaWithParams(
-      selectedKayttooikeusOrganisaatiot: List[String],
-      isOrganisaatioRajain: Boolean,
-      isOphPaakayttaja: Boolean,
-      kayttooikeusHakukohderyhmat: List[String],
-      haut: List[String],
-      hakukohteet: List[String],
-      hakukohderyhmat: List[String],
-      okmOhjauksenAlat: List[String],
-      tutkinnonTasot: List[String],
-      aidinkielet: List[String],
-      kansalaisuudet: List[String],
-      sukupuoli: Option[String],
-      ensikertalainen: Option[Boolean],
-      maksuvelvollinen: Option[String] = None
+    selectedKayttooikeusOrganisaatiot: List[String],
+    isOrganisaatioRajain: Boolean,
+    isOphPaakayttaja: Boolean,
+    kayttooikeusHakukohderyhmat: List[String],
+    haut: List[String],
+    hakukohteet: List[String],
+    hakukohderyhmat: List[String],
+    okmOhjauksenAlat: List[String],
+    tutkinnonTasot: List[String],
+    aidinkielet: List[String],
+    kansalaisuudet: List[String],
+    sukupuoli: Option[String],
+    ensikertalainen: Option[Boolean],
+    maksuvelvollinen: Option[String] = None
   ): DBIO[Int] = {
     val hakukohderyhmaFilter =
       if (hakukohderyhmat.nonEmpty) {
-          s"AND (ht.hakukohde_oid IN (SELECT DISTINCT hakukohde_oid FROM pub.pub_dim_hakukohderyhma_ja_hakukohteet WHERE hakukohderyhma_oid IN (${RepositoryUtils
+        s"AND (ht.hakukohde_oid IN (SELECT DISTINCT hakukohde_oid FROM pub.pub_dim_hakukohderyhma_ja_hakukohteet WHERE hakukohderyhma_oid IN (${RepositoryUtils
             .makeListOfValuesQueryStr(hakukohderyhmat)})))"
       } else
         ""
@@ -744,7 +774,11 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
       } else if (isOphPaakayttaja) {
         ""
       } else {
-        makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(selectedKayttooikeusOrganisaatiot, kayttooikeusHakukohderyhmat, "h")
+        makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(
+          selectedKayttooikeusOrganisaatiot,
+          kayttooikeusHakukohderyhmat,
+          "h"
+        )
       }
 
     val filters = Seq(
@@ -779,20 +813,56 @@ class KkHakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     query
   }
 
-  def hakuParamNamesQuery(haut: List[String], koulutustoimija: Option[String], oppilaitokset: List[String], toimipisteet: List[String],
-                          hakukohderyhmat: List[String], hakukohteet: List[String], okmOhjauksenAlat: List[String],
-                          sukupuoli: Option[String]):
-  SqlStreamingAction[Vector[ParametriNimet], ParametriNimet, Effect] = {
+  def hakuParamNamesQuery(
+    haut: List[String],
+    koulutustoimija: Option[String],
+    oppilaitokset: List[String],
+    toimipisteet: List[String],
+    hakukohderyhmat: List[String],
+    hakukohteet: List[String],
+    okmOhjauksenAlat: List[String],
+    sukupuoli: Option[String]
+  ): SqlStreamingAction[Vector[ParametriNimet], ParametriNimet, Effect] = {
     val koulutustoimijaQuery =
       if (koulutustoimija.isDefined)
         s"""UNION ALL SELECT 'koulutustoimija' AS param, organisaatio_nimi AS nimi FROM pub.pub_dim_organisaatio WHERE organisaatio_oid = '${koulutustoimija.get}'"""
       else
         ""
-    val oppilaitosQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("oppilaitos", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", oppilaitokset)
-    val toimipisteQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("toimipiste", "organisaatio_oid", "organisaatio_nimi", "pub.pub_dim_organisaatio", toimipisteet)
-    val hakukohderyhmaQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("hakukohderyhma", "hakukohderyhma_oid", "hakukohderyhma_nimi", "pub.pub_dim_hakukohderyhma", hakukohderyhmat)
-    val hakukohdeQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("hakukohde", "hakukohde_oid", "hakukohde_nimi", "pub.pub_dim_hakukohde", hakukohteet)
-    val okmOhjauksenAlaQuery = RepositoryUtils.makeHakuParamOptionalQueryStr("okm-ohjauksen-ala", "koodiarvo", "koodinimi", "pub.pub_dim_koodisto_okmohjauksenala", okmOhjauksenAlat)
+    val oppilaitosQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "oppilaitos",
+      "organisaatio_oid",
+      "organisaatio_nimi",
+      "pub.pub_dim_organisaatio",
+      oppilaitokset
+    )
+    val toimipisteQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "toimipiste",
+      "organisaatio_oid",
+      "organisaatio_nimi",
+      "pub.pub_dim_organisaatio",
+      toimipisteet
+    )
+    val hakukohderyhmaQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "hakukohderyhma",
+      "hakukohderyhma_oid",
+      "hakukohderyhma_nimi",
+      "pub.pub_dim_hakukohderyhma",
+      hakukohderyhmat
+    )
+    val hakukohdeQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "hakukohde",
+      "hakukohde_oid",
+      "hakukohde_nimi",
+      "pub.pub_dim_hakukohde",
+      hakukohteet
+    )
+    val okmOhjauksenAlaQuery = RepositoryUtils.makeHakuParamOptionalQueryStr(
+      "okm-ohjauksen-ala",
+      "koodiarvo",
+      "koodinimi",
+      "pub.pub_dim_koodisto_okmohjauksenala",
+      okmOhjauksenAlat
+    )
     val sukupuoliQuery =
       if (sukupuoli.isDefined)
         s"""UNION ALL SELECT 'sukupuoli' AS param, koodinimi AS nimi FROM pub.pub_dim_koodisto_sukupuoli WHERE koodiarvo = '${sukupuoli.get}'"""

@@ -3,40 +3,40 @@ package fi.oph.ovara.backend.opiskelijavalintatieto
 import fi.oph.ovara.backend.domain.Kielistetty
 
 case class Opiskelijavalintatieto(
-    oppijanumero: String,
-    hetu: String,
-    syntymaaika: String,
-    sukunimi: String,
-    etunimet: String,
-    hakemukset: Seq[Hakemus]
+  oppijanumero: String,
+  hetu: String,
+  syntymaaika: String,
+  sukunimi: String,
+  etunimet: String,
+  hakemukset: Seq[Hakemus]
 )
 
 case class Hakemus(
-    hakemusOid: String,
-    haku: Nimetty,
-    haunKohdejoukko: Option[String],
-    hakutapa: Option[String],
-    hakutoiveet: Seq[Hakutoive]
+  hakemusOid: String,
+  haku: Nimetty,
+  haunKohdejoukko: Option[String],
+  hakutapa: Option[String],
+  hakutoiveet: Seq[Hakutoive]
 )
 
 case class Hakutoive(
-    hakukohde: Nimetty,
-    tarjoaja: Option[Nimetty],
-    koulutuksenAlkamiskausiUri: Option[String],
-    koulutuksenAlkamisvuosi: Option[Int],
-    valinnanTila: Option[String],
-    vastaanotonTila: Option[String],
-    ilmoittautumisenTila: Option[String]
+  hakukohde: Nimetty,
+  tarjoaja: Option[Nimetty],
+  koulutuksenAlkamiskausiUri: Option[String],
+  koulutuksenAlkamisvuosi: Option[Int],
+  valinnanTila: Option[String],
+  vastaanotonTila: Option[String],
+  ilmoittautumisenTila: Option[String]
 )
 
 case class Nimetty(oid: String, nimi: Kielistetty)
 
 case class OppijaRow(
-    oppijanumero: String,
-    hetu: String,
-    syntymaaika: String,
-    sukunimi: String,
-    etunimet: String
+  oppijanumero: String,
+  hetu: String,
+  syntymaaika: String,
+  sukunimi: String,
+  etunimet: String
 ) {
   def asOpiskelijavalintatieto(hakemukset: Seq[Hakemus]): Opiskelijavalintatieto = Opiskelijavalintatieto(
     oppijanumero,
@@ -49,21 +49,21 @@ case class OppijaRow(
 }
 
 case class HakemusRow(
-    oppijanumero: String,
-    hakemusOid: String,
-    hakuOid: String,
-    hakuNimi: Kielistetty,
-    kohdejoukkoKoodiuri: Option[String],
-    hakutapakoodiuri: Option[String],
-    hakukohdeOid: String,
-    hakukohdeNimi: Kielistetty,
-    tarjoajanOid: Option[String],
-    tarjoajanNimi: Kielistetty,
-    koulutuksenAlkamiskausiuri: Option[String],
-    koulutuksenAlkamisvuosi: Option[Int],
-    valinnanTila: Option[String],
-    vastaanottoTila: Option[String],
-    ilmoituksenTila: Option[String]
+  oppijanumero: String,
+  hakemusOid: String,
+  hakuOid: String,
+  hakuNimi: Kielistetty,
+  kohdejoukkoKoodiuri: Option[String],
+  hakutapakoodiuri: Option[String],
+  hakukohdeOid: String,
+  hakukohdeNimi: Kielistetty,
+  tarjoajanOid: Option[String],
+  tarjoajanNimi: Kielistetty,
+  koulutuksenAlkamiskausiuri: Option[String],
+  koulutuksenAlkamisvuosi: Option[Int],
+  valinnanTila: Option[String],
+  vastaanottoTila: Option[String],
+  ilmoituksenTila: Option[String]
 ) {
 
   def asHakutoive: Hakutoive = Hakutoive(

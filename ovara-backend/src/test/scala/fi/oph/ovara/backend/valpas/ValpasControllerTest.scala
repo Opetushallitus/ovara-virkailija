@@ -36,7 +36,7 @@ class ValpasControllerTest extends ValpasTestUtils {
   @Nested
   class SingleValpas {
     private def get(
-        oppijanumero: String
+      oppijanumero: String
     )(mutator: MockHttpServletRequestBuilder => MockHttpServletRequestBuilder): ResultActions = {
       mvc.perform(
         mutator(
@@ -256,39 +256,39 @@ class ValpasControllerTest extends ValpasTestUtils {
 
   private val expectedHakutoive =
     s"""
-      |{
-      |    "hakukohdeOid" : "$HAKUKOHDE_OID",
-      |    "hakukohdeNimi" : {
-      |      "fi" : "Elokuvaleikkaus",
-      |      "sv" : "Filmklippning",
-      |      "en" : "Film Editing"
-      |    },
-      |    "hakutoivenumero" : 3,
-      |    "hakukohdeOrganisaatio" : "$ORGANISAATIO_OID",
-      |    "organisaatioNimi" : {
-      |      "fi" : "Porin toimipaikka",
-      |      "sv" : "Björneborg verksamhetspunkt"
-      |    },
-      |    "koulutusOid" : "$KOULUTUS_OID",
-      |    "koulutusNimi" : {
-      |      "fi" : "Kulttuurituottaja",
-      |      "sv" : "Kulturproducent",
-      |      "en" : "Kulttuurituottaja"
-      |    },
-      |    "hakukohdeKoulutuskoodi" : [ {
-      |      "versioituUri" : "$KOULUTUS_KOODIURI",
-      |      "koodiarvo" : "621702",
-      |      "koodistoUri" : "koulutus",
-      |      "koodistoVersio" : 12,
-      |      "nimi" : {
-      |        "fi" : "Kulttuurituottaja",
-      |        "sv" : "Kulturproducent",
-      |        "en" : "Bachelor of Culture and Arts, Cultural Manager"
-      |      }
-      |    } ],
-      |    "harkinnanvaraisuus" : "EI_HARKINNANVARAINEN",
-      |    "alinHyvaksyttyPistemaara" : 21.1,
-      |    "pisteet" : 23.7,
-      |    "varasijanumero" : 4
-      |}""".stripMargin
+       |{
+       |    "hakukohdeOid" : "$HAKUKOHDE_OID",
+       |    "hakukohdeNimi" : {
+       |      "fi" : "Elokuvaleikkaus",
+       |      "sv" : "Filmklippning",
+       |      "en" : "Film Editing"
+       |    },
+       |    "hakutoivenumero" : 3,
+       |    "hakukohdeOrganisaatio" : "$ORGANISAATIO_OID",
+       |    "organisaatioNimi" : {
+       |      "fi" : "Porin toimipaikka",
+       |      "sv" : "Björneborg verksamhetspunkt"
+       |    },
+       |    "koulutusOid" : "$KOULUTUS_OID",
+       |    "koulutusNimi" : {
+       |      "fi" : "Kulttuurituottaja",
+       |      "sv" : "Kulturproducent",
+       |      "en" : "Kulttuurituottaja"
+       |    },
+       |    "hakukohdeKoulutuskoodi" : [ {
+       |      "versioituUri" : "$KOULUTUS_KOODIURI",
+       |      "koodiarvo" : "621702",
+       |      "koodistoUri" : "koulutus",
+       |      "koodistoVersio" : 12,
+       |      "nimi" : {
+       |        "fi" : "Kulttuurituottaja",
+       |        "sv" : "Kulturproducent",
+       |        "en" : "Bachelor of Culture and Arts, Cultural Manager"
+       |      }
+       |    } ],
+       |    "harkinnanvaraisuus" : "EI_HARKINNANVARAINEN",
+       |    "alinHyvaksyttyPistemaara" : 21.1,
+       |    "pisteet" : 23.7,
+       |    "varasijanumero" : 4
+       |}""".stripMargin
 }

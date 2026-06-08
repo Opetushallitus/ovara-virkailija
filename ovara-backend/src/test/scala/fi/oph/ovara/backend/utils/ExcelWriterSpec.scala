@@ -95,7 +95,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     "raportti.opetuskieli"                      -> "Opetuskieli SV",
     "raportti.koulutusala1"                     -> "Koulutusala 1 SV",
     "raportti.koulutusala2"                     -> "Koulutusala 2 SV",
-    "raportti.koulutusala3"                     -> "Koulutusala 3 SV",
+    "raportti.koulutusala3"                     -> "Koulutusala 3 SV"
   )
 
   def checkAloituspaikatRowValidity(sheet: XSSFSheet, rowNumber: Int, expected: Int): Unit = {
@@ -436,7 +436,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val workbook: XSSFWorkbook          = new XSSFWorkbook()
     val sheet: XSSFSheet                = workbook.createSheet()
     val headingCellstyle: XSSFCellStyle = workbook.createCellStyle()
-    val titles = classOf[KoulutusToteutusHakukohdeResult].getDeclaredFields
+    val titles                          = classOf[KoulutusToteutusHakukohdeResult].getDeclaredFields
       .map(_.getName)
       .toList
 
@@ -477,7 +477,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val workbook: XSSFWorkbook          = new XSSFWorkbook()
     val sheet: XSSFSheet                = workbook.createSheet()
     val headingCellstyle: XSSFCellStyle = workbook.createCellStyle()
-    val titles = classOf[KoulutusToteutusHakukohdeResult].getDeclaredFields
+    val titles                          = classOf[KoulutusToteutusHakukohdeResult].getDeclaredFields
       .map(_.getName)
       .toList
 
@@ -499,9 +499,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
   val koulutuksetToteutuksetHakukohteetParams: List[(String, String | Boolean | List[String])] =
     List(
-      "haku" -> List("1.2.246.562.29.00000000000000015722"),
+      "haku"       -> List("1.2.246.562.29.00000000000000015722"),
       "oppilaitos" -> List.empty,
-      "toimipiste" -> List("1.2.246.562.10.00000000001"),
+      "toimipiste" -> List("1.2.246.562.10.00000000001")
     )
 
   "writeKoulutuksetToteutuksetHakukohteetRaportti" should "create two sheets and set 'Yhteenveto' as the name of the first sheet" in {
@@ -536,7 +536,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
   it should "create a sheet with the column title row and no results" in {
     val hierarkiatWithHakukohteet = List()
-    val wb =
+    val wb                        =
       ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         hierarkiatWithHakukohteet,
         userLng,
@@ -560,17 +560,17 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "create a second sheet with all search terms listed" in {
     val hakuParams: List[(String, String | Boolean | List[String])] =
       List(
-        "haku" -> List("1.2.246.562.29.00000000000000015722"),
+        "haku"            -> List("1.2.246.562.29.00000000000000015722"),
         "koulutustoimija" -> "1.2.246.562.10.2781706420000",
-        "oppilaitos" -> List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
-        "toimipiste" -> List("1.2.246.562.10.2781706420001"),
+        "oppilaitos"      -> List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        "toimipiste"      -> List("1.2.246.562.10.2781706420001"),
         "koulutuksenTila" -> "julkaistu",
         "toteutuksenTila" -> "arkistoitu",
         "hakukohteenTila" -> "julkaistu",
-        "valintakoe" -> false
+        "valintakoe"      -> false
       )
     val hierarkiatWithHakukohteet = List()
-    val wb =
+    val wb                        =
       ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         hierarkiatWithHakukohteet,
         userLng,
@@ -580,8 +580,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
 
     val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
-    val expectedRows = List(
-      List("Haku SV","1.2.246.562.29.00000000000000015722"),
+    val expectedRows    = List(
+      List("Haku SV", "1.2.246.562.29.00000000000000015722"),
       List("Koulutustoimija SV", "1.2.246.562.10.2781706420000"),
       List("Oppilaitos SV", "1.2.246.562.10.00000000001, 1.2.246.562.10.2781706420000"),
       List("Toimipiste SV", "1.2.246.562.10.2781706420001"),
@@ -1904,9 +1904,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
   val kkKoulutuksetToteutuksetHakukohteetParams: List[(String, String | Boolean | List[String])] =
     List(
-      "haku" -> List("1.2.246.562.29.00000000000000015722"),
+      "haku"       -> List("1.2.246.562.29.00000000000000015722"),
       "oppilaitos" -> List.empty,
-      "toimipiste" -> List("1.2.246.562.10.00000000001"),
+      "toimipiste" -> List("1.2.246.562.10.00000000001")
     )
 
   "writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti" should "create Korkeakoulujen koulutukset toteutukset ja hakukohteet -raportti koulutuksittain with four result rows" in {
@@ -2052,7 +2052,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(3).getCell(11).getStringCellValue == "-")
     assert(sheet.getRow(3).getCell(12).getStringCellValue == "30.9.2023")
     assert(
-      sheet.getRow(3).getCell(13).getStringCellValue == "Hakukohde Collaborative and Industrial Design, Master of Arts (2 yrs) SV"
+      sheet
+        .getRow(3)
+        .getCell(13)
+        .getStringCellValue == "Hakukohde Collaborative and Industrial Design, Master of Arts (2 yrs) SV"
     )
     assert(sheet.getRow(3).getCell(14).getStringCellValue == "1.2.246.562.20.00000000000000017881")
     assert(sheet.getRow(3).getCell(15).getStringCellValue == "Arkistoitu SV")
@@ -2218,7 +2221,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(3).getCell(4).getStringCellValue == "-")
     assert(sheet.getRow(3).getCell(5).getStringCellValue == "30.9.2023")
     assert(
-      sheet.getRow(3).getCell(6).getStringCellValue == "Hakukohde Collaborative and Industrial Design, Master of Arts (2 yrs) SV"
+      sheet
+        .getRow(3)
+        .getCell(6)
+        .getStringCellValue == "Hakukohde Collaborative and Industrial Design, Master of Arts (2 yrs) SV"
     )
     assert(sheet.getRow(3).getCell(7).getStringCellValue == "1.2.246.562.20.00000000000000017881")
     assert(sheet.getRow(3).getCell(8).getStringCellValue == "Arkistoitu SV")
@@ -2418,7 +2424,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(3).getCell(14).getStringCellValue == "Arkistoitu SV")
     assert(sheet.getRow(3).getCell(15).getStringCellValue == "-")
     assert(sheet.getRow(3).getCell(16).getStringCellValue == "Höst 2023")
-    assert(sheet.getRow(3).getCell(17).getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år)")
+    assert(
+      sheet.getRow(3).getCell(17).getStringCellValue == "Film- och tv-manuskript - Filmkonst, konstmagister (2 år)"
+    )
     assert(sheet.getRow(3).getCell(18).getStringCellValue == "1.2.246.562.13.00000000000000002677")
     assert(sheet.getRow(3).getCell(19).getStringCellValue == "Julkaistu SV")
     assert(sheet.getRow(3).getCell(20).getStringCellValue == "309902")
@@ -2431,7 +2439,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
       sheet.getRow(4).getCell(0).getStringCellValue == "Aalto-universitetet, Högskolan för konst design och arkitektur"
     )
     assert(
-      sheet.getRow(4).getCell(1).getStringCellValue == "Hakukohde Collaborative and Industrial Design, Master of Arts (2 yrs) SV"
+      sheet
+        .getRow(4)
+        .getCell(1)
+        .getStringCellValue == "Hakukohde Collaborative and Industrial Design, Master of Arts (2 yrs) SV"
     )
     assert(sheet.getRow(4).getCell(2).getStringCellValue == "1.2.246.562.20.00000000000000017881")
     assert(sheet.getRow(4).getCell(3).getStringCellValue == "Arkistoitu SV")
@@ -2479,14 +2490,14 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "create hakuparametrit sheet in Korkeakoulujen koulutukset toteutukset ja hakukohteet" in {
     val hakuParams: List[(String, String | Boolean | List[String])] =
       List(
-        "haku" -> List("1.2.246.562.29.00000000000000015722"),
-        "tulostustapa" -> "hakukohteittain",
-        "oppilaitos" -> List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
-        "toimipiste" -> List("1.2.246.562.10.2781706420001"),
-        "hakukohderyhma" -> List("1.2.246.562.28.28396122930"),
-        "koulutuksenTila" -> "julkaistu",
-        "toteutuksenTila" -> "arkistoitu",
-        "hakukohteenTila" -> "julkaistu",
+        "haku"              -> List("1.2.246.562.29.00000000000000015722"),
+        "tulostustapa"      -> "hakukohteittain",
+        "oppilaitos"        -> List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        "toimipiste"        -> List("1.2.246.562.10.2781706420001"),
+        "hakukohderyhma"    -> List("1.2.246.562.28.28396122930"),
+        "koulutuksenTila"   -> "julkaistu",
+        "toteutuksenTila"   -> "arkistoitu",
+        "hakukohteenTila"   -> "julkaistu",
         "kk-tutkinnon-taso" -> List("ylempi")
       )
     val wb = ExcelWriter.writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
@@ -2498,7 +2509,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
 
     val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
-    val expectedRows = List(
+    val expectedRows    = List(
       List("Haku SV", "1.2.246.562.29.00000000000000015722"),
       List("Tulostustapa SV", "Hakukohteittain SV"),
       List("Oppilaitos SV", "1.2.246.562.10.00000000001, 1.2.246.562.10.2781706420000"),
@@ -2518,7 +2529,6 @@ class ExcelWriterSpec extends AnyFlatSpec {
       validateRow(sheet, rowIndex + 1, expectedRow)
     }
   }
-
 
   "createHeadingRow" should "create heading row with translated column names or translation keys for hakijat raportti" in {
     val wb: XSSFWorkbook                = new XSSFWorkbook()
@@ -2641,19 +2651,19 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
   val hakijatParams: List[(String, String | Boolean | List[String])] =
     List(
-      "haku" -> List("1.2.246.562.29.00000000000000015722"),
-      "oppilaitos" -> List("1.2.246.562.10.00000000001"),
-      "valintatieto" -> List("HYVAKSYTTY"),
+      "haku"         -> List("1.2.246.562.29.00000000000000015722"),
+      "oppilaitos"   -> List("1.2.246.562.10.00000000001"),
+      "valintatieto" -> List("HYVAKSYTTY")
     )
 
   "writeToisenAsteenHakijatRaportti" should "create one sheet with a sheet name, heading row and no results and parameter sheet" in {
     val hakijatQueryResult = Vector()
-    val wb =
+    val wb                 =
       ExcelWriter.writeToisenAsteenHakijatRaportti(
         hakijatQueryResult,
         userLng,
         translations,
-        hakijatParams,
+        hakijatParams
       )
 
     assert(wb.getNumberOfSheets == 2)
@@ -2697,32 +2707,32 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "create hakuparametrit sheet" in {
     val hakuParams: List[(String, String | Boolean | List[String])] =
       List(
-        "haku" -> List("1.2.246.562.29.00000000000000015722"),
-        "oppilaitos" -> List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
-        "toimipiste" -> List("1.2.246.562.10.2781706420001"),
-        "hakukohde" -> List("1.2.246.562.20.00000000000000059957"),
-        "pohjakoulutus" -> List("Perusopetuksen oppimäärä"),
-        "valintatieto" -> List("HYVAKSYTTY"),
-        "vastaanottotieto" -> List("PERUUTETTU"),
-        "harkinnanvaraisuus" -> List("OPPIMISVAIKEUDET"),
-        "kaksoistutkintoKiinnostaa" -> false,
+        "haku"                        -> List("1.2.246.562.29.00000000000000015722"),
+        "oppilaitos"                  -> List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        "toimipiste"                  -> List("1.2.246.562.10.2781706420001"),
+        "hakukohde"                   -> List("1.2.246.562.20.00000000000000059957"),
+        "pohjakoulutus"               -> List("Perusopetuksen oppimäärä"),
+        "valintatieto"                -> List("HYVAKSYTTY"),
+        "vastaanottotieto"            -> List("PERUUTETTU"),
+        "harkinnanvaraisuus"          -> List("OPPIMISVAIKEUDET"),
+        "kaksoistutkintoKiinnostaa"   -> false,
         "urheilijatutkintoKiinnostaa" -> false,
-        "soraTerveys" -> true,
-        "soraAiempi" -> true,
-        "markkinointilupa" -> true,
-        "julkaisulupa" -> true
+        "soraTerveys"                 -> true,
+        "soraAiempi"                  -> true,
+        "markkinointilupa"            -> true,
+        "julkaisulupa"                -> true
       )
     val hakijatQueryResult = Vector()
-    val wb =
+    val wb                 =
       ExcelWriter.writeToisenAsteenHakijatRaportti(
         hakijatQueryResult,
         userLng,
         translations,
-        hakuParams,
+        hakuParams
       )
 
     val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
-    val expectedRows = List(
+    val expectedRows    = List(
       List("Haku SV", "1.2.246.562.29.00000000000000015722"),
       List("Oppilaitos SV", "1.2.246.562.10.00000000001, 1.2.246.562.10.2781706420000"),
       List("Toimipiste SV", "1.2.246.562.10.2781706420001"),
@@ -2754,7 +2764,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
         "Rautiainen-Testi",
         "Dina Testi",
         Some(false),
-        List(Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"), Map(En -> "Sweden", Fi -> "Ruotsi", Sv -> "Sverige")),
+        List(
+          Map(En -> "Finland", Fi -> "Suomi", Sv  -> "Finland"),
+          Map(En -> "Sweden", Fi  -> "Ruotsi", Sv -> "Sverige")
+        ),
         "1.2.246.562.24.30646006111",
         "1.2.246.562.11.00000000000002179045",
         Map(En -> "Oppilaitos en", Fi  -> "Oppilaitos fi", Sv -> "Oppilaitos sv"),
@@ -2793,7 +2806,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         hakijatResult,
         userLng,
         translations,
-        hakijatParams,
+        hakijatParams
       )
 
     assert(wb.getNumberOfSheets == 2)
@@ -2957,7 +2970,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         hakijatResult,
         userLng,
         translations,
-        hakijatParams,
+        hakijatParams
       )
 
     assert(wb.getNumberOfSheets == 2)
@@ -3069,7 +3082,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb: XSSFWorkbook                = new XSSFWorkbook()
     val sheet: XSSFSheet                = wb.createSheet()
     val headingCellStyle: XSSFCellStyle = wb.createCellStyle()
-    val valintatapajonot = List(
+    val valintatapajonot                = List(
       Valintatapajono(
         valintatapajonoOid = "1704199256878262657431481297336",
         valintatapajononNimi = "Todistusvalintajono ensikertalaisille hakijoille",
@@ -3128,7 +3141,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb: XSSFWorkbook                = new XSSFWorkbook()
     val sheet: XSSFSheet                = wb.createSheet()
     val headingCellStyle: XSSFCellStyle = wb.createCellStyle()
-    val valintatapajonot = List(
+    val valintatapajonot                = List(
       Valintatapajono(
         valintatapajonoOid = "1704199256878262657431481297336",
         valintatapajononNimi = "Todistusvalintajono ensikertalaisille hakijoille",
@@ -3329,11 +3342,20 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
   )
 
-  val yokokeet = Vector(Koodi("A", Map(En -> "Äidinkielen koe, suomi", Fi -> "Äidinkielen koe", Sv -> "Provet i modersmålet, finska")),
+  val yokokeet = Vector(
+    Koodi("A", Map(En -> "Äidinkielen koe, suomi", Fi -> "Äidinkielen koe", Sv -> "Provet i modersmålet, finska")),
     Koodi("BB", Map(En -> "Biologian koe", Fi -> "Biologian koe", Sv -> "Biologi provet")),
     Koodi("EA", Map(En -> "Englannin koe", Fi -> "Englannin koe", Sv -> "Engelska provet")),
-    Koodi("I", Map(En -> "Äidinkielen koe, inarinsaame", Fi -> "Äidinkielen koe, inarinsaame", Sv -> "Provet i modersmålet, enaresamiska")),
-    Koodi("M", Map(En -> "Matematiikan koe", Fi -> "Matematiikan koe", Sv -> "Matematikprovet")))
+    Koodi(
+      "I",
+      Map(
+        En -> "Äidinkielen koe, inarinsaame",
+        Fi -> "Äidinkielen koe, inarinsaame",
+        Sv -> "Provet i modersmålet, enaresamiska"
+      )
+    ),
+    Koodi("M", Map(En -> "Matematiikan koe", Fi -> "Matematiikan koe", Sv -> "Matematikprovet"))
+  )
 
   def validateHeaders(sheet: XSSFSheet, rowIndex: Int = 0, expectedHeaders: List[String]): Unit = {
     val headerRow = sheet.getRow(rowIndex)
@@ -3348,10 +3370,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
       val cell = row.getCell(index)
       expectedValue match {
         case value: String => assert(cell.getStringCellValue == value, s"Value at index $index does not match")
-        case value: Int => assert(cell.getNumericCellValue == value, s"Value at index $index does not match")
+        case value: Int    => assert(cell.getNumericCellValue == value, s"Value at index $index does not match")
         case value: Double => assert(cell.getNumericCellValue == value, s"Value at index $index does not match")
         case null => assert(cell == null || cell.getStringCellValue.isEmpty, s"Value at index $index should be null")
-        case _ => throw new IllegalArgumentException(s"Unsupported value type at index $index")
+        case _    => throw new IllegalArgumentException(s"Unsupported value type at index $index")
       }
     }
   }
@@ -3382,34 +3404,120 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
 
     val expectedHeaders = List(
-      "Sukunimi SV", "Etunimi SV", "Turvakielto SV", "raportti.hetu", "raportti.syntymaAika",
-      "Kansalaisuudet SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
-      "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "Valintatieto SV",
-      "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV", "Vastaanottotieto SV",
-      "raportti.viimVastaanottopaiva", "raportti.ensikertalainen", "raportti.ilmoittautuminen",
-      "Pohjakoulutus SV", "raportti.maksuvelvollisuus", "raportti.hakemusmaksunTila",
-      "LupaMark SV", "raportti.sahkoinenViestintalupa", "raportti.lahiosoite",
-      "raportti.postinumero", "raportti.postitoimipaikka", "raportti.kotikunta", "raportti.asuinmaa",
-      "Puhelinnumero SV", "raportti.sahkoposti", "A", "BB", "EA", "I", "M"
+      "Sukunimi SV",
+      "Etunimi SV",
+      "Turvakielto SV",
+      "raportti.hetu",
+      "raportti.syntymaAika",
+      "Kansalaisuudet SV",
+      "raportti.oppijanumero",
+      "raportti.hakemusOid",
+      "Toimipiste SV",
+      "Hakukohde SV",
+      "Hakukelpoisuus SV",
+      "raportti.prioriteetti",
+      "Valintatieto SV",
+      "raportti.ehdollisestiHyvaksytty",
+      "Valintatiedon päivämäärä SV",
+      "Vastaanottotieto SV",
+      "raportti.viimVastaanottopaiva",
+      "raportti.ensikertalainen",
+      "raportti.ilmoittautuminen",
+      "Pohjakoulutus SV",
+      "raportti.maksuvelvollisuus",
+      "raportti.hakemusmaksunTila",
+      "LupaMark SV",
+      "raportti.sahkoinenViestintalupa",
+      "raportti.lahiosoite",
+      "raportti.postinumero",
+      "raportti.postitoimipaikka",
+      "raportti.kotikunta",
+      "raportti.asuinmaa",
+      "Puhelinnumero SV",
+      "raportti.sahkoposti",
+      "A",
+      "BB",
+      "EA",
+      "I",
+      "M"
     )
 
     val expectedRows = List(
       List(
-        "Rautiainen-Testi", "Dina Testi", "Nej", "120393-129E", "12.3.1993", "Finland",
-        "1.2.246.562.24.30646006111", "1.2.246.562.11.00000000000002179045", "Toimipiste 1 sv",
-        "Hakukohde 1 SV", "-", 2, "Hyvaksytty SV", "Nej", "13.6.2024", "raportti.perunut",
-        "26.6.2024", "Ja", "raportti.lasna_koko_lukuvuosi", """["pohjakoulutus_yo", "pohjakoulutus_kk"]""",
-        "Ei velvollinen", "raportti.overdue", "Ja", "Ja", "Rämsöönranta 368", "00100", "HELSINKI",
-        "Helsingfors", "Finland", "050 64292261", "hakija-33919666@oph.fi",
-        "E", "M", "C", "-", "E"
+        "Rautiainen-Testi",
+        "Dina Testi",
+        "Nej",
+        "120393-129E",
+        "12.3.1993",
+        "Finland",
+        "1.2.246.562.24.30646006111",
+        "1.2.246.562.11.00000000000002179045",
+        "Toimipiste 1 sv",
+        "Hakukohde 1 SV",
+        "-",
+        2,
+        "Hyvaksytty SV",
+        "Nej",
+        "13.6.2024",
+        "raportti.perunut",
+        "26.6.2024",
+        "Ja",
+        "raportti.lasna_koko_lukuvuosi",
+        """["pohjakoulutus_yo", "pohjakoulutus_kk"]""",
+        "Ei velvollinen",
+        "raportti.overdue",
+        "Ja",
+        "Ja",
+        "Rämsöönranta 368",
+        "00100",
+        "HELSINKI",
+        "Helsingfors",
+        "Finland",
+        "050 64292261",
+        "hakija-33919666@oph.fi",
+        "E",
+        "M",
+        "C",
+        "-",
+        "E"
       ),
       List(
-        "Lehto-Testi", "Vikke Testi", "Ja", "04041990-345K", "4.4.1990", "Finland",
-        "1.2.246.562.24.18441866015", "1.2.246.562.11.00000000000002126102", "Toimipiste 2 sv",
-        "Hakukohde 2 SV", "hakukelpoinen SV", 1, "-", "-", "-", "-",
-        "26.6.2024", "Nej", "-", "-", "-", "-", "Nej", "Ja",
-        "Laholanaukio 834", "15700", "LAHTI", "Lahtis", "Finland", "-", "hakija-33919611@oph.fi",
-        "-", "-", "M", "-", "M"
+        "Lehto-Testi",
+        "Vikke Testi",
+        "Ja",
+        "04041990-345K",
+        "4.4.1990",
+        "Finland",
+        "1.2.246.562.24.18441866015",
+        "1.2.246.562.11.00000000000002126102",
+        "Toimipiste 2 sv",
+        "Hakukohde 2 SV",
+        "hakukelpoinen SV",
+        1,
+        "-",
+        "-",
+        "-",
+        "-",
+        "26.6.2024",
+        "Nej",
+        "-",
+        "-",
+        "-",
+        "-",
+        "Nej",
+        "Ja",
+        "Laholanaukio 834",
+        "15700",
+        "LAHTI",
+        "Lahtis",
+        "Finland",
+        "-",
+        "hakija-33919611@oph.fi",
+        "-",
+        "-",
+        "M",
+        "-",
+        "M"
       )
     )
 
@@ -3457,33 +3565,108 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1) != null)
 
     val expectedHeaders = List(
-      "Sukunimi SV", "Etunimi SV", "Turvakielto SV", "raportti.syntymaAika",
-      "Kansalaisuudet SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
-      "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "Valintatieto SV",
-      "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV", "Vastaanottotieto SV",
-      "raportti.viimVastaanottopaiva", "raportti.ensikertalainen", "raportti.ilmoittautuminen",
-      "Pohjakoulutus SV", "raportti.maksuvelvollisuus", "raportti.hakemusmaksunTila",
-      "LupaMark SV", "raportti.sahkoinenViestintalupa", "raportti.kotikunta", "raportti.asuinmaa",
-      "Puhelinnumero SV", "raportti.sahkoposti", "A", "BB", "EA", "I", "M"
+      "Sukunimi SV",
+      "Etunimi SV",
+      "Turvakielto SV",
+      "raportti.syntymaAika",
+      "Kansalaisuudet SV",
+      "raportti.oppijanumero",
+      "raportti.hakemusOid",
+      "Toimipiste SV",
+      "Hakukohde SV",
+      "Hakukelpoisuus SV",
+      "raportti.prioriteetti",
+      "Valintatieto SV",
+      "raportti.ehdollisestiHyvaksytty",
+      "Valintatiedon päivämäärä SV",
+      "Vastaanottotieto SV",
+      "raportti.viimVastaanottopaiva",
+      "raportti.ensikertalainen",
+      "raportti.ilmoittautuminen",
+      "Pohjakoulutus SV",
+      "raportti.maksuvelvollisuus",
+      "raportti.hakemusmaksunTila",
+      "LupaMark SV",
+      "raportti.sahkoinenViestintalupa",
+      "raportti.kotikunta",
+      "raportti.asuinmaa",
+      "Puhelinnumero SV",
+      "raportti.sahkoposti",
+      "A",
+      "BB",
+      "EA",
+      "I",
+      "M"
     )
 
     val expectedRows = List(
       List(
-        "Rautiainen-Testi", "Dina Testi", "Nej", "12.3.1993", "Finland",
-        "1.2.246.562.24.30646006111", "1.2.246.562.11.00000000000002179045", "Toimipiste 1 sv",
-        "Hakukohde 1 SV", "raportti.conditionally-eligible", 2, "Hyvaksytty SV", "Ja", "5.6.2024", "raportti.perunut",
-        "26.6.2024", "Ja", "raportti.lasna_koko_lukuvuosi", """["pohjakoulutus_yo", "pohjakoulutus_kk"]""",
-        "Velvollinen", "raportti.overdue", "Ja", "Ja",
-        "Helsingfors", "Finland", "050 64292261", "hakija-33919666@oph.fi",
-        "E", "M", "C", "-", "E"
+        "Rautiainen-Testi",
+        "Dina Testi",
+        "Nej",
+        "12.3.1993",
+        "Finland",
+        "1.2.246.562.24.30646006111",
+        "1.2.246.562.11.00000000000002179045",
+        "Toimipiste 1 sv",
+        "Hakukohde 1 SV",
+        "raportti.conditionally-eligible",
+        2,
+        "Hyvaksytty SV",
+        "Ja",
+        "5.6.2024",
+        "raportti.perunut",
+        "26.6.2024",
+        "Ja",
+        "raportti.lasna_koko_lukuvuosi",
+        """["pohjakoulutus_yo", "pohjakoulutus_kk"]""",
+        "Velvollinen",
+        "raportti.overdue",
+        "Ja",
+        "Ja",
+        "Helsingfors",
+        "Finland",
+        "050 64292261",
+        "hakija-33919666@oph.fi",
+        "E",
+        "M",
+        "C",
+        "-",
+        "E"
       ),
       List(
-        "Lehto-Testi", "Vikke Testi", "Ja", "4.4.1990", "Finland",
-        "1.2.246.562.24.18441866015", "1.2.246.562.11.00000000000002126102", "Toimipiste 2 sv",
-        "Hakukohde 2 SV", "raportti.uneligible", 1, "Hylatty SV", "-", "11.6.2024", "-",
-        "26.6.2024", "Nej", "-", "-", "Tarkastamatta SV", "-", "Ja", "Ja",
-        "Lahtis", "Finland", "050 64293345", "-",
-        "-", "-", "M", "-", "M"
+        "Lehto-Testi",
+        "Vikke Testi",
+        "Ja",
+        "4.4.1990",
+        "Finland",
+        "1.2.246.562.24.18441866015",
+        "1.2.246.562.11.00000000000002126102",
+        "Toimipiste 2 sv",
+        "Hakukohde 2 SV",
+        "raportti.uneligible",
+        1,
+        "Hylatty SV",
+        "-",
+        "11.6.2024",
+        "-",
+        "26.6.2024",
+        "Nej",
+        "-",
+        "-",
+        "Tarkastamatta SV",
+        "-",
+        "Ja",
+        "Ja",
+        "Lahtis",
+        "Finland",
+        "050 64293345",
+        "-",
+        "-",
+        "-",
+        "M",
+        "-",
+        "M"
       )
     )
 
@@ -3505,7 +3688,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
           valintatiedonPvm = None,
           pohjakoulutus = None,
           maksuvelvollisuus = None,
-          kansalaisuudet = List(Map(En -> "Finland", Fi -> "Suomi", Sv -> "Finland"), Map(En -> "Sweden", Fi -> "Ruotsi", Sv -> "Sverige")),
+          kansalaisuudet = List(
+            Map(En -> "Finland", Fi -> "Suomi", Sv  -> "Finland"),
+            Map(En -> "Sweden", Fi  -> "Ruotsi", Sv -> "Sverige")
+          ),
           valintatapajonot = List(
             Valintatapajono(
               valintatapajonoOid = "1709304116443-4815957697640331820",
@@ -3540,26 +3726,79 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(0).getCell(15).getStringCellValue == "Valintatapajonokohtainen tila SV")
 
     val expectedHeaders = List(
-      "Sukunimi SV", "Etunimi SV", "Turvakielto SV", "raportti.hetu", "raportti.syntymaAika",
-      "Kansalaisuudet SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
-      "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "Valintatieto SV",
-      "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV", "Lukiokoulutus",
-      "Vastaanottotieto SV", "raportti.viimVastaanottopaiva", "raportti.ensikertalainen",
-      "raportti.ilmoittautuminen", "Pohjakoulutus SV", "raportti.maksuvelvollisuus", "raportti.hakemusmaksunTila",
-      "LupaMark SV", "raportti.sahkoinenViestintalupa", "raportti.kotikunta", "raportti.asuinmaa",
-      "Puhelinnumero SV", "raportti.sahkoposti", "A", "BB", "EA", "I", "M"
+      "Sukunimi SV",
+      "Etunimi SV",
+      "Turvakielto SV",
+      "raportti.hetu",
+      "raportti.syntymaAika",
+      "Kansalaisuudet SV",
+      "raportti.oppijanumero",
+      "raportti.hakemusOid",
+      "Toimipiste SV",
+      "Hakukohde SV",
+      "Hakukelpoisuus SV",
+      "raportti.prioriteetti",
+      "Valintatieto SV",
+      "raportti.ehdollisestiHyvaksytty",
+      "Valintatiedon päivämäärä SV",
+      "Lukiokoulutus",
+      "Vastaanottotieto SV",
+      "raportti.viimVastaanottopaiva",
+      "raportti.ensikertalainen",
+      "raportti.ilmoittautuminen",
+      "Pohjakoulutus SV",
+      "raportti.maksuvelvollisuus",
+      "raportti.hakemusmaksunTila",
+      "LupaMark SV",
+      "raportti.sahkoinenViestintalupa",
+      "raportti.kotikunta",
+      "raportti.asuinmaa",
+      "Puhelinnumero SV",
+      "raportti.sahkoposti",
+      "A",
+      "BB",
+      "EA",
+      "I",
+      "M"
     )
 
     val expectedRows = List(
       List(
-        "Rautiainen-Testi", "Dina Testi", "Nej", "120393-129E", "12.3.1993", "Finland, Sverige",
-        "1.2.246.562.24.30646006111", "1.2.246.562.11.00000000000002179045", "Toimipiste 1 sv",
-        "Hakukohde 1 SV", "-", 2, "Hyvaksytty SV", "Ja", "-", "Annullerad, godkänt till ansökningsmål med högre prioritet",
-        "raportti.perunut", "26.6.2024", "Ja", "raportti.lasna_koko_lukuvuosi", "-",
-        "-", "raportti.overdue", "Ja", "Ja",
-        "Helsingfors", "Finland", "050 64292261", "hakija-33919666@oph.fi",
-        "E", "M", "C", "-", "E"
-      ),
+        "Rautiainen-Testi",
+        "Dina Testi",
+        "Nej",
+        "120393-129E",
+        "12.3.1993",
+        "Finland, Sverige",
+        "1.2.246.562.24.30646006111",
+        "1.2.246.562.11.00000000000002179045",
+        "Toimipiste 1 sv",
+        "Hakukohde 1 SV",
+        "-",
+        2,
+        "Hyvaksytty SV",
+        "Ja",
+        "-",
+        "Annullerad, godkänt till ansökningsmål med högre prioritet",
+        "raportti.perunut",
+        "26.6.2024",
+        "Ja",
+        "raportti.lasna_koko_lukuvuosi",
+        "-",
+        "-",
+        "raportti.overdue",
+        "Ja",
+        "Ja",
+        "Helsingfors",
+        "Finland",
+        "050 64292261",
+        "hakija-33919666@oph.fi",
+        "E",
+        "M",
+        "C",
+        "-",
+        "E"
+      )
     )
 
     val sheet = wb.getSheetAt(0)
@@ -3593,58 +3832,142 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
 
     val expectedHeaders = List(
-      "Sukunimi SV", "Etunimi SV", "Turvakielto SV", "raportti.syntymaAika",
-      "Kansalaisuudet SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
-      "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "Valintatieto SV",
-      "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV",
-      "Koevalintajono kaikille hakijoille", "Todistusvalinta (YO)",
-      "Todistusvalintajono ensikertalaisille hakijoille", "Todistusvalintajono ensikertalaisille hakijoille",
-      "Todistusvalintajono kaikille hakijoille", "Vastaanottotieto SV",
-      "raportti.viimVastaanottopaiva", "raportti.ensikertalainen", "raportti.ilmoittautuminen",
-      "Pohjakoulutus SV", "raportti.maksuvelvollisuus", "raportti.hakemusmaksunTila",
-      "LupaMark SV", "raportti.sahkoinenViestintalupa", "raportti.lahiosoite",
-      "raportti.postinumero", "raportti.postitoimipaikka", "raportti.kotikunta", "raportti.asuinmaa",
-      "Puhelinnumero SV", "raportti.sahkoposti", "A", "BB", "EA", "I", "M"
+      "Sukunimi SV",
+      "Etunimi SV",
+      "Turvakielto SV",
+      "raportti.syntymaAika",
+      "Kansalaisuudet SV",
+      "raportti.oppijanumero",
+      "raportti.hakemusOid",
+      "Toimipiste SV",
+      "Hakukohde SV",
+      "Hakukelpoisuus SV",
+      "raportti.prioriteetti",
+      "Valintatieto SV",
+      "raportti.ehdollisestiHyvaksytty",
+      "Valintatiedon päivämäärä SV",
+      "Koevalintajono kaikille hakijoille",
+      "Todistusvalinta (YO)",
+      "Todistusvalintajono ensikertalaisille hakijoille",
+      "Todistusvalintajono ensikertalaisille hakijoille",
+      "Todistusvalintajono kaikille hakijoille",
+      "Vastaanottotieto SV",
+      "raportti.viimVastaanottopaiva",
+      "raportti.ensikertalainen",
+      "raportti.ilmoittautuminen",
+      "Pohjakoulutus SV",
+      "raportti.maksuvelvollisuus",
+      "raportti.hakemusmaksunTila",
+      "LupaMark SV",
+      "raportti.sahkoinenViestintalupa",
+      "raportti.lahiosoite",
+      "raportti.postinumero",
+      "raportti.postitoimipaikka",
+      "raportti.kotikunta",
+      "raportti.asuinmaa",
+      "Puhelinnumero SV",
+      "raportti.sahkoposti",
+      "A",
+      "BB",
+      "EA",
+      "I",
+      "M"
     )
 
     val expectedRows = List(
       List(
-        "Rautiainen-Testi", "Dina Testi", "Nej", "12.3.1993", "Finland",
-        "1.2.246.562.24.30646006111", "1.2.246.562.11.00000000000002179045", "Toimipiste 1 sv",
-        "Hakukohde 1 SV", "-", 2, "Hyvaksytty SV", "Ja", "-",
+        "Rautiainen-Testi",
+        "Dina Testi",
+        "Nej",
+        "12.3.1993",
+        "Finland",
+        "1.2.246.562.24.30646006111",
+        "1.2.246.562.11.00000000000002179045",
+        "Toimipiste 1 sv",
+        "Hakukohde 1 SV",
+        "-",
+        2,
+        "Hyvaksytty SV",
+        "Ja",
+        "-",
         // Koevalintajono kaikille hakijoille
         "-",
         // Todistusvalinta (YO)
         "Hyvaksytty SV",
-        //Todistusvalintajono ensikertalaisille hakijoille
+        // Todistusvalintajono ensikertalaisille hakijoille
         "Hylatty SV, Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 2.",
         // Todistusvalintajono ensikertalaisille hakijoille
         "-",
         // Todistusvalintajono kaikille hakijoille
         "Hylatty SV, Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 1.",
-        "raportti.perunut", "26.6.2024", "Ja", "raportti.lasna_koko_lukuvuosi", "-",
-        "-", "raportti.overdue", "Ja", "Ja", "Rämsöönranta 368", "00100", "HELSINKI",
-        "Helsingfors", "Finland", "050 64292261", "hakija-33919666@oph.fi",
-        "E", "M", "C", "-", "E"
+        "raportti.perunut",
+        "26.6.2024",
+        "Ja",
+        "raportti.lasna_koko_lukuvuosi",
+        "-",
+        "-",
+        "raportti.overdue",
+        "Ja",
+        "Ja",
+        "Rämsöönranta 368",
+        "00100",
+        "HELSINKI",
+        "Helsingfors",
+        "Finland",
+        "050 64292261",
+        "hakija-33919666@oph.fi",
+        "E",
+        "M",
+        "C",
+        "-",
+        "E"
       ),
       List(
-        "Lehto-Testi", "Vikke Testi", "Ja", "4.4.1990", "Finland",
-        "1.2.246.562.24.18441866015", "1.2.246.562.11.00000000000002126102", "Toimipiste 2 sv",
-        "Hakukohde 2 SV", "raportti.uneligible", 1, "Hylatty SV", "-",
+        "Lehto-Testi",
+        "Vikke Testi",
+        "Ja",
+        "4.4.1990",
+        "Finland",
+        "1.2.246.562.24.18441866015",
+        "1.2.246.562.11.00000000000002126102",
+        "Toimipiste 2 sv",
+        "Hakukohde 2 SV",
+        "raportti.uneligible",
+        1,
+        "Hylatty SV",
+        "-",
         "11.6.2024",
         // Koevalintajono kaikille hakijoille
         "Hylatty SV, Et osallistunut valintakokeeseen SV",
         // Todistusvalinta (YO)
         "-",
-        //Todistusvalintajono ensikertalaisille hakijoille - 1707384681516-2842344525807969324
+        // Todistusvalintajono ensikertalaisille hakijoille - 1707384681516-2842344525807969324
         "-",
         // Todistusvalintajono ensikertalaisille hakijoille - 1704199256878262657431481297336
         "Hylatty SV, Du är inte en förstagångssökande.",
         // Todistusvalintajono kaikille hakijoille
         "Hylatty SV, Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt.",
-        "-", "26.6.2024", "Nej", "-", "-", "Tarkastamatta SV", "-", "Ja", "Ja",
-        "Laholanaukio 834", "15700", "LAHTI", "Lahtis", "Finland", "050 64293345", "hakija-33919611@oph.fi",
-        "-", "-", "M", "-", "M"
+        "-",
+        "26.6.2024",
+        "Nej",
+        "-",
+        "-",
+        "Tarkastamatta SV",
+        "-",
+        "Ja",
+        "Ja",
+        "Laholanaukio 834",
+        "15700",
+        "LAHTI",
+        "Lahtis",
+        "Finland",
+        "050 64293345",
+        "hakija-33919611@oph.fi",
+        "-",
+        "-",
+        "M",
+        "-",
+        "M"
       )
     )
 
@@ -3680,57 +4003,133 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
 
     val expectedHeaders = List(
-      "Sukunimi SV", "Etunimi SV", "Turvakielto SV", "raportti.syntymaAika",
-      "Kansalaisuudet SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
-      "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "Valintatieto SV",
-      "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV",
-      "Koevalintajono kaikille hakijoille", "Todistusvalinta (YO)",
-      "Todistusvalintajono ensikertalaisille hakijoille", "Todistusvalintajono ensikertalaisille hakijoille",
-      "Todistusvalintajono kaikille hakijoille", "Vastaanottotieto SV",
-      "raportti.viimVastaanottopaiva", "raportti.ensikertalainen", "raportti.ilmoittautuminen",
-      "Pohjakoulutus SV", "raportti.maksuvelvollisuus", "raportti.hakemusmaksunTila",
-      "LupaMark SV", "raportti.sahkoinenViestintalupa", "raportti.kotikunta", "raportti.asuinmaa",
-      "Puhelinnumero SV", "raportti.sahkoposti", "A", "BB", "EA", "I", "M"
+      "Sukunimi SV",
+      "Etunimi SV",
+      "Turvakielto SV",
+      "raportti.syntymaAika",
+      "Kansalaisuudet SV",
+      "raportti.oppijanumero",
+      "raportti.hakemusOid",
+      "Toimipiste SV",
+      "Hakukohde SV",
+      "Hakukelpoisuus SV",
+      "raportti.prioriteetti",
+      "Valintatieto SV",
+      "raportti.ehdollisestiHyvaksytty",
+      "Valintatiedon päivämäärä SV",
+      "Koevalintajono kaikille hakijoille",
+      "Todistusvalinta (YO)",
+      "Todistusvalintajono ensikertalaisille hakijoille",
+      "Todistusvalintajono ensikertalaisille hakijoille",
+      "Todistusvalintajono kaikille hakijoille",
+      "Vastaanottotieto SV",
+      "raportti.viimVastaanottopaiva",
+      "raportti.ensikertalainen",
+      "raportti.ilmoittautuminen",
+      "Pohjakoulutus SV",
+      "raportti.maksuvelvollisuus",
+      "raportti.hakemusmaksunTila",
+      "LupaMark SV",
+      "raportti.sahkoinenViestintalupa",
+      "raportti.kotikunta",
+      "raportti.asuinmaa",
+      "Puhelinnumero SV",
+      "raportti.sahkoposti",
+      "A",
+      "BB",
+      "EA",
+      "I",
+      "M"
     )
 
     val expectedRows = List(
       List(
-        "Rautiainen-Testi", "Dina Testi", "Nej", "12.3.1993", "Finland",
-        "1.2.246.562.24.30646006111", "1.2.246.562.11.00000000000002179045", "Toimipiste 1 sv",
-        "Hakukohde 1 SV", "-", 2, "Hyvaksytty SV", "Ja", "-",
+        "Rautiainen-Testi",
+        "Dina Testi",
+        "Nej",
+        "12.3.1993",
+        "Finland",
+        "1.2.246.562.24.30646006111",
+        "1.2.246.562.11.00000000000002179045",
+        "Toimipiste 1 sv",
+        "Hakukohde 1 SV",
+        "-",
+        2,
+        "Hyvaksytty SV",
+        "Ja",
+        "-",
         // Koevalintajono kaikille hakijoille
         "-",
         // Todistusvalinta (YO)
         "Hyvaksytty SV",
-        //Todistusvalintajono ensikertalaisille hakijoille
+        // Todistusvalintajono ensikertalaisille hakijoille
         "Hylatty SV, Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 2.",
         // Todistusvalintajono ensikertalaisille hakijoille
         "-",
         // Todistusvalintajono kaikille hakijoille
         "Hylatty SV, Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt 1.",
-        "raportti.perunut", "26.6.2024", "Ja", "raportti.lasna_koko_lukuvuosi", "-",
-        "-", "raportti.overdue", "Ja", "Ja", "Helsingfors", "Finland",
-        "050 64292261", "hakija-33919666@oph.fi",
-        "E", "M", "C", "-", "E"
+        "raportti.perunut",
+        "26.6.2024",
+        "Ja",
+        "raportti.lasna_koko_lukuvuosi",
+        "-",
+        "-",
+        "raportti.overdue",
+        "Ja",
+        "Ja",
+        "Helsingfors",
+        "Finland",
+        "050 64292261",
+        "hakija-33919666@oph.fi",
+        "E",
+        "M",
+        "C",
+        "-",
+        "E"
       ),
       List(
-        "Lehto-Testi", "Vikke Testi", "Ja", "4.4.1990", "Finland",
-        "1.2.246.562.24.18441866015", "1.2.246.562.11.00000000000002126102", "Toimipiste 2 sv",
-        "Hakukohde 2 SV", "raportti.uneligible", 1, "Hylatty SV", "-",
+        "Lehto-Testi",
+        "Vikke Testi",
+        "Ja",
+        "4.4.1990",
+        "Finland",
+        "1.2.246.562.24.18441866015",
+        "1.2.246.562.11.00000000000002126102",
+        "Toimipiste 2 sv",
+        "Hakukohde 2 SV",
+        "raportti.uneligible",
+        1,
+        "Hylatty SV",
+        "-",
         "11.6.2024",
         // Koevalintajono kaikille hakijoille
         "Hylatty SV, Et osallistunut valintakokeeseen SV",
         // Todistusvalinta (YO)
         "-",
-        //Todistusvalintajono ensikertalaisille hakijoille - 1707384681516-2842344525807969324
+        // Todistusvalintajono ensikertalaisille hakijoille - 1707384681516-2842344525807969324
         "-",
         // Todistusvalintajono ensikertalaisille hakijoille - 1704199256878262657431481297336
         "Hylatty SV, Du är inte en förstagångssökande.",
         // Todistusvalintajono kaikille hakijoille
         "Hylatty SV, Du har inget vitsord i kemi, eller ditt vitsord i kemi är inte tillräckligt högt.",
-        "-", "26.6.2024", "Nej", "-", "-", "Tarkastamatta SV", "-", "Ja", "Ja",
-        "Lahtis", "Finland", "050 64293345", "hakija-33919611@oph.fi",
-        "-", "-", "M", "-", "M"
+        "-",
+        "26.6.2024",
+        "Nej",
+        "-",
+        "-",
+        "Tarkastamatta SV",
+        "-",
+        "Ja",
+        "Ja",
+        "Lahtis",
+        "Finland",
+        "050 64293345",
+        "hakija-33919611@oph.fi",
+        "-",
+        "-",
+        "M",
+        "-",
+        "M"
       )
     )
 
@@ -3784,30 +4183,30 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "create hakuparametrit sheet after yokokeet sheet" in {
     val hakuParams: List[(String, String | Boolean | List[String])] =
       List(
-        "haku" -> List("1.2.246.562.29.00000000000000015722"),
-        "oppilaitos" -> List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
-        "toimipiste" -> List("1.2.246.562.10.2781706420001"),
-        "hakukohde" -> List("1.2.246.562.20.00000000000000059957"),
-        "hakukohderyhma" -> List("1.2.246.562.28.28396122930"),
-        "valintatieto" -> List("HYVAKSYTTY"),
-        "vastaanottotieto" -> List("PERUUTETTU"),
-        "kansalaisuus" -> List("1"),
-        "markkinointilupa" -> true,
+        "haku"               -> List("1.2.246.562.29.00000000000000015722"),
+        "oppilaitos"         -> List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        "toimipiste"         -> List("1.2.246.562.10.2781706420001"),
+        "hakukohde"          -> List("1.2.246.562.20.00000000000000059957"),
+        "hakukohderyhma"     -> List("1.2.246.562.28.28396122930"),
+        "valintatieto"       -> List("HYVAKSYTTY"),
+        "vastaanottotieto"   -> List("PERUUTETTU"),
+        "kansalaisuus"       -> List("1"),
+        "markkinointilupa"   -> true,
         "nayta-yo-arvosanat" -> true,
-        "nayta-hetu" -> false,
-        "nayta-postiosoite" -> false,
+        "nayta-hetu"         -> false,
+        "nayta-postiosoite"  -> false
       )
     val hakijatQueryResult = Vector()
-    val wb =
+    val wb                 =
       ExcelWriter.writeToisenAsteenHakijatRaportti(
         hakijatQueryResult,
         userLng,
         translations,
-        hakuParams,
+        hakuParams
       )
 
     val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
-    val expectedRows = List(
+    val expectedRows    = List(
       List("Haku SV", "1.2.246.562.29.00000000000000015722"),
       List("Oppilaitos SV", "1.2.246.562.10.00000000001, 1.2.246.562.10.2781706420000"),
       List("Toimipiste SV", "1.2.246.562.10.2781706420001"),
@@ -3850,10 +4249,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
 
     val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
-    val expectedRows = List(
+    val expectedRows    = List(
       List("Haku SV", "1.2.246.562.29.00000000000000015722"),
       List("Oppilaitos SV", "1.2.246.562.10.00000000001"),
-      List("Valintatieto SV", "Hyvaksytty SV"),
+      List("Valintatieto SV", "Hyvaksytty SV")
     )
     assert(wb.getNumberOfSheets == 2)
     assert(wb.getSheetAt(1).getRow(1) != null)
@@ -3930,7 +4329,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(2).getCell(15).getStringCellValue == "-")
     // Todistusvalinta (YO)
     assert(wb.getSheetAt(0).getRow(2).getCell(16).getStringCellValue == "Hyvaksytty SV")
-    //Todistusvalintajono ensikertalaisille hakijoille
+    // Todistusvalintajono ensikertalaisille hakijoille
     assert(
       wb.getSheetAt(0)
         .getRow(2)
@@ -3984,10 +4383,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(3).getCell(14).getStringCellValue == "11.6.2024")
     // Valintatapajonosarakkeet alkaa
     // Koevalintajono kaikille hakijoille
-    assert(wb.getSheetAt(0).getRow(3).getCell(15).getStringCellValue == "Hylatty SV, Et osallistunut valintakokeeseen SV")
+    assert(
+      wb.getSheetAt(0).getRow(3).getCell(15).getStringCellValue == "Hylatty SV, Et osallistunut valintakokeeseen SV"
+    )
     // Todistusvalinta (YO)
     assert(wb.getSheetAt(0).getRow(3).getCell(16).getStringCellValue == "-")
-    //Todistusvalintajono ensikertalaisille hakijoille - 1707384681516-2842344525807969324
+    // Todistusvalintajono ensikertalaisille hakijoille - 1707384681516-2842344525807969324
     assert(wb.getSheetAt(0).getRow(3).getCell(17).getStringCellValue == "-")
     // Todistusvalintajono ensikertalaisille hakijoille - 1704199256878262657431481297336
     assert(wb.getSheetAt(0).getRow(3).getCell(18).getStringCellValue == "Hylatty SV, Du är inte en förstagångssökande.")
@@ -4092,7 +4493,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     // Valintatapajonosarakkeet alkaa
     // Todistusvalinta (YO)
     assert(wb.getSheetAt(0).getRow(2).getCell(14).getStringCellValue == "Hyvaksytty SV")
-    //Todistusvalintajono ensikertalaisille hakijoille
+    // Todistusvalintajono ensikertalaisille hakijoille
     assert(
       wb.getSheetAt(0)
         .getRow(2)
@@ -4159,28 +4560,79 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
 
     val expectedHeaders = List(
-      "Sukunimi SV", "Etunimi SV", "Turvakielto SV", "raportti.hetu", "raportti.syntymaAika",
-      "Kansalaisuudet SV", "raportti.oppijanumero", "raportti.hakemusOid", "Toimipiste SV",
-      "Hakukohde SV", "Hakukelpoisuus SV", "raportti.prioriteetti", "Valintatieto SV",
-      "raportti.ehdollisestiHyvaksytty", "Valintatiedon päivämäärä SV", "Lukiokoulutus",
-      "Vastaanottotieto SV", "raportti.viimVastaanottopaiva", "raportti.ensikertalainen",
-      "raportti.ilmoittautuminen", "Pohjakoulutus SV", "raportti.maksuvelvollisuus",
-      "raportti.hakemusmaksunTila", "LupaMark SV", "raportti.sahkoinenViestintalupa",
-      "raportti.kotikunta", "raportti.asuinmaa", "Puhelinnumero SV", "raportti.sahkoposti",
-      "A", "BB", "EA", "I", "M"
+      "Sukunimi SV",
+      "Etunimi SV",
+      "Turvakielto SV",
+      "raportti.hetu",
+      "raportti.syntymaAika",
+      "Kansalaisuudet SV",
+      "raportti.oppijanumero",
+      "raportti.hakemusOid",
+      "Toimipiste SV",
+      "Hakukohde SV",
+      "Hakukelpoisuus SV",
+      "raportti.prioriteetti",
+      "Valintatieto SV",
+      "raportti.ehdollisestiHyvaksytty",
+      "Valintatiedon päivämäärä SV",
+      "Lukiokoulutus",
+      "Vastaanottotieto SV",
+      "raportti.viimVastaanottopaiva",
+      "raportti.ensikertalainen",
+      "raportti.ilmoittautuminen",
+      "Pohjakoulutus SV",
+      "raportti.maksuvelvollisuus",
+      "raportti.hakemusmaksunTila",
+      "LupaMark SV",
+      "raportti.sahkoinenViestintalupa",
+      "raportti.kotikunta",
+      "raportti.asuinmaa",
+      "Puhelinnumero SV",
+      "raportti.sahkoposti",
+      "A",
+      "BB",
+      "EA",
+      "I",
+      "M"
     )
 
     val expectedRows = List(
       List(
-        "Rautiainen-Testi", "Dina Testi", "Nej", "120393-129E", "12.3.1993", "Finland",
-        "1.2.246.562.24.30646006111", "1.2.246.562.11.00000000000002179045", "Toimipiste 1 sv",
-        "Hakukohde 1 SV", "-", "-", "Hyvaksytty SV", "Ja", "-",
-        "Annullerad, godkänt till ansökningsmål med högre prioritet", "raportti.perunut",
-        "26.6.2024", "Ja", "raportti.lasna_koko_lukuvuosi", "-",
-        "-", "raportti.overdue", "Ja", "Ja",
-        "Helsingfors", "Finland", "050 64292261", "hakija-33919666@oph.fi",
-        "E", "M", "C", "-", "E"
-      ),
+        "Rautiainen-Testi",
+        "Dina Testi",
+        "Nej",
+        "120393-129E",
+        "12.3.1993",
+        "Finland",
+        "1.2.246.562.24.30646006111",
+        "1.2.246.562.11.00000000000002179045",
+        "Toimipiste 1 sv",
+        "Hakukohde 1 SV",
+        "-",
+        "-",
+        "Hyvaksytty SV",
+        "Ja",
+        "-",
+        "Annullerad, godkänt till ansökningsmål med högre prioritet",
+        "raportti.perunut",
+        "26.6.2024",
+        "Ja",
+        "raportti.lasna_koko_lukuvuosi",
+        "-",
+        "-",
+        "raportti.overdue",
+        "Ja",
+        "Ja",
+        "Helsingfors",
+        "Finland",
+        "050 64292261",
+        "hakija-33919666@oph.fi",
+        "E",
+        "M",
+        "C",
+        "-",
+        "E"
+      )
     )
 
     assert(wb.getNumberOfSheets == 3)
@@ -4198,9 +4650,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
   val hakeneetHyvaksytytVastaanottaneetParams: List[(String, String | Boolean | List[String])] =
     List(
-      "haku" -> List("1.2.246.562.29.00000000000000015722"),
-      "oppilaitos" -> List("1.2.246.562.10.52251087186"),
-      "toimipiste" -> List("1.2.246.562.10.23017513880"),
+      "haku"         -> List("1.2.246.562.29.00000000000000015722"),
+      "oppilaitos"   -> List("1.2.246.562.10.52251087186"),
+      "toimipiste"   -> List("1.2.246.562.10.23017513880"),
       "tulostustapa" -> "toimipisteittain"
     )
   "writeHakeneetHyvaksytytVastaanottaneetRaportti" should "return excel with three heading columns, three result rows and two summary rows for hakukohteittain" in {
@@ -4347,7 +4799,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
     assert(sheet.getRow(1).getCell(1).getStringCellValue == "OSAO, Haukiputaan yksikkö")
     assert(
-      sheet.getRow(1).getCell(2).getStringCellValue == "Gemensam ansökan till utbildning efter den grundläggande utbildningen 2024"
+      sheet
+        .getRow(1)
+        .getCell(2)
+        .getStringCellValue == "Gemensam ansökan till utbildning efter den grundläggande utbildningen 2024"
     )
     assert(sheet.getRow(1).getCell(3).getNumericCellValue == 354)
     assert(sheet.getRow(1).getCell(4).getNumericCellValue == 95)
@@ -4370,7 +4825,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(sheet.getRow(2).getCell(0).getStringCellValue == "Grundexamen inom fordonsbranschen")
     assert(sheet.getRow(2).getCell(1).getStringCellValue == "OSAO, Muhoksen yksikkö")
     assert(
-      sheet.getRow(2).getCell(2).getStringCellValue == "Gemensam ansökan till utbildning efter den grundläggande utbildningen 2024"
+      sheet
+        .getRow(2)
+        .getCell(2)
+        .getStringCellValue == "Gemensam ansökan till utbildning efter den grundläggande utbildningen 2024"
     )
     assert(sheet.getRow(2).getCell(3).getNumericCellValue == 148)
     assert(sheet.getRow(2).getCell(4).getNumericCellValue == 39)
@@ -4395,7 +4853,10 @@ class ExcelWriterSpec extends AnyFlatSpec {
       sheet.getRow(3).getCell(1).getStringCellValue == "OSAO, Kaukovainion yksikkö, palvelut"
     )
     assert(
-      sheet.getRow(3).getCell(2).getStringCellValue == "Gemensam ansökan till utbildning efter den grundläggande utbildningen 2024"
+      sheet
+        .getRow(3)
+        .getCell(2)
+        .getStringCellValue == "Gemensam ansökan till utbildning efter den grundläggande utbildningen 2024"
     )
     assert(sheet.getRow(3).getCell(3).getNumericCellValue == 112)
     assert(sheet.getRow(3).getCell(4).getNumericCellValue == 25)
@@ -4431,23 +4892,23 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "create hakuparametrit sheet" in {
     val hakuParams: List[(String, String | Boolean | List[String])] =
       List(
-        "haku" -> List("1.2.246.562.29.00000000000000015722"),
-        "tulostustapa" -> "toimipisteittain",
-        "oppilaitos" -> List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
-        "toimipiste" -> List("1.2.246.562.10.2781706420001"),
-        "hakukohde" -> List("1.2.246.562.20.00000000000000059957"),
-        "opetuskieli" -> List("1", "4"),
-        "koulutusala1" -> List("10"),
-        "koulutusala2" -> List("092"),
-        "koulutusala3" -> List("1018"),
-        "maakunta" -> List("01"),
-        "kunta" -> List("091"),
+        "haku"               -> List("1.2.246.562.29.00000000000000015722"),
+        "tulostustapa"       -> "toimipisteittain",
+        "oppilaitos"         -> List("1.2.246.562.10.00000000001", "1.2.246.562.10.2781706420000"),
+        "toimipiste"         -> List("1.2.246.562.10.2781706420001"),
+        "hakukohde"          -> List("1.2.246.562.20.00000000000000059957"),
+        "opetuskieli"        -> List("1", "4"),
+        "koulutusala1"       -> List("10"),
+        "koulutusala2"       -> List("092"),
+        "koulutusala3"       -> List("1018"),
+        "maakunta"           -> List("01"),
+        "kunta"              -> List("091"),
         "harkinnanvaraisuus" -> List("OPPIMISVAIKEUDET"),
-        "sukupuoli" -> List("2"),
-        "nayta-hakutoiveet" -> true,
+        "sukupuoli"          -> List("2"),
+        "nayta-hakutoiveet"  -> true
       )
     val data = List.empty
-    val wb = ExcelWriter.writeHakeneetHyvaksytytVastaanottaneetRaportti(
+    val wb   = ExcelWriter.writeHakeneetHyvaksytytVastaanottaneetRaportti(
       asiointikieli = "sv",
       translations = translations,
       data = data,
@@ -4458,7 +4919,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
 
     val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
-    val expectedRows = List(
+    val expectedRows    = List(
       List("Haku SV", "1.2.246.562.29.00000000000000015722"),
       List("Tulostustapa SV", "toimipisteittain"),
       List("Oppilaitos SV", "1.2.246.562.10.00000000001, 1.2.246.562.10.2781706420000"),
@@ -5293,23 +5754,23 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "create hakuparametrit sheet" in {
     val hakuParams: List[(String, String | Boolean | List[String])] =
       List(
-        "haku" -> List("1.2.246.562.29.00000000000000015722"),
-        "tulostustapa" -> "toimipisteittain",
-        "koulutustoimija" -> List("1.2.246.562.10.53814745062"),
-        "oppilaitos" -> List("1.2.246.562.10.39218317368"),
-        "toimipiste" -> List("1.2.246.562.10.94997228401"),
-        "hakukohderyhma" -> List("1.2.246.562.28.87571420741"),
-        "hakukohde" -> List("1.2.246.562.20.00000000000000038238","1.2.246.562.20.00000000000000038237"),
+        "haku"              -> List("1.2.246.562.29.00000000000000015722"),
+        "tulostustapa"      -> "toimipisteittain",
+        "koulutustoimija"   -> List("1.2.246.562.10.53814745062"),
+        "oppilaitos"        -> List("1.2.246.562.10.39218317368"),
+        "toimipiste"        -> List("1.2.246.562.10.94997228401"),
+        "hakukohderyhma"    -> List("1.2.246.562.28.87571420741"),
+        "hakukohde"         -> List("1.2.246.562.20.00000000000000038238", "1.2.246.562.20.00000000000000038237"),
         "okm-ohjauksen-ala" -> List("10"),
-        "tutkinnon-taso" -> List("1"),
-        "aidinkieli" -> List("sv"),
-        "kansalaisuus" -> List("muu"),
-        "sukupuoli" -> List("2"),
-        "ensikertalainen" -> false,
-        "nayta-hakutoiveet" -> true,
+        "tutkinnon-taso"    -> List("1"),
+        "aidinkieli"        -> List("sv"),
+        "kansalaisuus"      -> List("muu"),
+        "sukupuoli"         -> List("2"),
+        "ensikertalainen"   -> false,
+        "nayta-hakutoiveet" -> true
       )
     val data = List.empty
-    val wb = ExcelWriter.writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
+    val wb   = ExcelWriter.writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
       asiointikieli = "sv",
       translations = translations,
       data = data,
@@ -5322,7 +5783,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
 
     val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
-    val expectedRows = List(
+    val expectedRows    = List(
       List("Haku SV", "1.2.246.562.29.00000000000000015722"),
       List("Tulostustapa SV", "toimipisteittain"),
       List("Koulutustoimija SV", "1.2.246.562.10.53814745062"),
