@@ -1,6 +1,21 @@
 package fi.oph.ovara.backend.utils
 
-import fi.oph.ovara.backend.raportointi.dto.{RawHakeneetHyvaksytytVastaanottaneetParams, RawHakijatParams, RawKkHakeneetHyvaksytytVastaanottaneetParams, RawKkHakijatParams, RawKkKoulutuksetToteutuksetHakukohteetParams, RawKkPaatettavatOpiskeluoikeudetParams, RawKoulutuksetToteutuksetHakukohteetParams, ValidatedHakeneetHyvaksytytVastaanottaneetParams, ValidatedHakijatParams, ValidatedKkHakeneetHyvaksytytVastaanottaneetParams, ValidatedKkHakijatParams, ValidatedKkKoulutuksetToteutuksetHakukohteetParams, ValidatedKkPaatettavatOpiskeluoikeudetParams, ValidatedKoulutuksetToteutuksetHakukohteetParams}
+import fi.oph.ovara.backend.raportointi.dto.{
+  RawHakeneetHyvaksytytVastaanottaneetParams,
+  RawHakijatParams,
+  RawKkHakeneetHyvaksytytVastaanottaneetParams,
+  RawKkHakijatParams,
+  RawKkKoulutuksetToteutuksetHakukohteetParams,
+  RawKkPaatettavatOpiskeluoikeudetParams,
+  RawKoulutuksetToteutuksetHakukohteetParams,
+  ValidatedHakeneetHyvaksytytVastaanottaneetParams,
+  ValidatedHakijatParams,
+  ValidatedKkHakeneetHyvaksytytVastaanottaneetParams,
+  ValidatedKkHakijatParams,
+  ValidatedKkKoulutuksetToteutuksetHakukohteetParams,
+  ValidatedKkPaatettavatOpiskeluoikeudetParams,
+  ValidatedKoulutuksetToteutuksetHakukohteetParams
+}
 
 import scala.util.matching.Regex
 
@@ -11,10 +26,10 @@ object ParameterValidator {
   val alphanumericPattern: Regex    = """^[a-zA-Z0-9_\\-]+$""".r
   private val numericRegex          = """^\d+$""".r
 
-  private val tulostustavat    = Set("hakukohteittain", "oppilaitoksittain")
+  private val tulostustavat         = Set("hakukohteittain", "oppilaitoksittain")
   private val opiskeluoikeudenTilat = Set("paatettavissa", "paatetty")
-  private val oidPattern = """^1\.\d{4}\.\w{1,}$""".r
-  private val koodiarvoPattern = """^\d+$""".r
+  private val oidPattern            = """^1\.\d{4}\.\w{1,}$""".r
+  private val koodiarvoPattern      = """^\d+$""".r
 
   val TULOSTUSTAVAT = Set(
     "koulutustoimijoittain",
@@ -356,8 +371,9 @@ object ParameterValidator {
     }
   }
 
-  def validateKkPaatettavatOpiskeluoikeudetParams(params: RawKkPaatettavatOpiskeluoikeudetParams
-                                                       ): Either[List[String], ValidatedKkPaatettavatOpiskeluoikeudetParams] = {
+  def validateKkPaatettavatOpiskeluoikeudetParams(
+    params: RawKkPaatettavatOpiskeluoikeudetParams
+  ): Either[List[String], ValidatedKkPaatettavatOpiskeluoikeudetParams] = {
     val errors = List(
       validateOrganisaatioOidList(params.oppilaitokset, "oppilaitokset"),
       validateAlphanumeric(params.sukunimi, "sukunimi"),

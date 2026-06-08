@@ -3,10 +3,57 @@ package fi.oph.ovara.backend.raportointi
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.UserResponse
-import fi.oph.ovara.backend.raportointi.dto.{RawHakeneetHyvaksytytVastaanottaneetParams, RawHakijatParams, RawKkHakeneetHyvaksytytVastaanottaneetParams, RawKkHakijatParams, RawKkKoulutuksetToteutuksetHakukohteetParams, RawKkPaatettavatOpiskeluoikeudetParams, RawKoulutuksetToteutuksetHakukohteetParams, buildHakeneetHyvaksytytVastaanottaneetAuditParams, buildHakijatAuditParams, buildKkHakeneetHyvaksytytVastaanottaneetAuditParams, buildKkHakijatAuditParams, buildKkKoulutuksetToteutuksetHakukohteetAuditParams, buildKkPaatettavatOpiskeluoikeudetAuditParams, buildKoulutuksetToteutuksetHakukohteetAuditParams}
-import fi.oph.ovara.backend.service.{CommonService, HakeneetHyvaksytytVastaanottaneetService, KkHakeneetHyvaksytytVastaanottaneetService, KkHakijatService, KkPaatettavatOpiskeluoikeudetService, KorkeakouluKoulutuksetToteutuksetHakukohteetService, KoulutuksetToteutuksetHakukohteetService, ToisenAsteenHakijatService, UserService}
-import fi.oph.ovara.backend.utils.AuditOperation.{HakeneetHyvaksytytVastaanottaneet, KkHakeneetHyvaksytytVastaanottaneet, KkHakijat, KkPaatettavatOpiskeluoikeudet, KorkeakouluKoulutuksetToteutuksetHakukohteet, KoulutuksetToteutuksetHakukohteet, ToisenAsteenHakijat}
-import fi.oph.ovara.backend.utils.ParameterValidator.{validateAlphanumeric, validateAlphanumericList, validateHakeneetHyvaksytytVastaanottaneetParams, validateHakijatParams, validateKkHakeneetHyvaksytytVastaanottaneetParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKkPaatettavatOpiskeluoikeudetParams, validateKoulutuksetToteutuksetHakukohteetParams, validateNumericList, validateOidList, validateOrganisaatioOid, validateOrganisaatioOidList}
+import fi.oph.ovara.backend.raportointi.dto.{
+  buildHakeneetHyvaksytytVastaanottaneetAuditParams,
+  buildHakijatAuditParams,
+  buildKkHakeneetHyvaksytytVastaanottaneetAuditParams,
+  buildKkHakijatAuditParams,
+  buildKkKoulutuksetToteutuksetHakukohteetAuditParams,
+  buildKkPaatettavatOpiskeluoikeudetAuditParams,
+  buildKoulutuksetToteutuksetHakukohteetAuditParams,
+  RawHakeneetHyvaksytytVastaanottaneetParams,
+  RawHakijatParams,
+  RawKkHakeneetHyvaksytytVastaanottaneetParams,
+  RawKkHakijatParams,
+  RawKkKoulutuksetToteutuksetHakukohteetParams,
+  RawKkPaatettavatOpiskeluoikeudetParams,
+  RawKoulutuksetToteutuksetHakukohteetParams
+}
+import fi.oph.ovara.backend.service.{
+  CommonService,
+  HakeneetHyvaksytytVastaanottaneetService,
+  KkHakeneetHyvaksytytVastaanottaneetService,
+  KkHakijatService,
+  KkPaatettavatOpiskeluoikeudetService,
+  KorkeakouluKoulutuksetToteutuksetHakukohteetService,
+  KoulutuksetToteutuksetHakukohteetService,
+  ToisenAsteenHakijatService,
+  UserService
+}
+import fi.oph.ovara.backend.utils.AuditOperation.{
+  HakeneetHyvaksytytVastaanottaneet,
+  KkHakeneetHyvaksytytVastaanottaneet,
+  KkHakijat,
+  KkPaatettavatOpiskeluoikeudet,
+  KorkeakouluKoulutuksetToteutuksetHakukohteet,
+  KoulutuksetToteutuksetHakukohteet,
+  ToisenAsteenHakijat
+}
+import fi.oph.ovara.backend.utils.ParameterValidator.{
+  validateAlphanumeric,
+  validateAlphanumericList,
+  validateHakeneetHyvaksytytVastaanottaneetParams,
+  validateHakijatParams,
+  validateKkHakeneetHyvaksytytVastaanottaneetParams,
+  validateKkHakijatParams,
+  validateKkKoulutuksetToteutuksetHakukohteetParams,
+  validateKkPaatettavatOpiskeluoikeudetParams,
+  validateKoulutuksetToteutuksetHakukohteetParams,
+  validateNumericList,
+  validateOidList,
+  validateOrganisaatioOid,
+  validateOrganisaatioOidList
+}
 import fi.oph.ovara.backend.raportointi.dto.{
   buildHakeneetHyvaksytytVastaanottaneetAuditParams,
   buildHakijatAuditParams,
@@ -76,16 +123,16 @@ case class ErrorResponse(
 @RestController
 @RequestMapping(path = Array("api"))
 class Controller(
-    commonService: CommonService,
-    koulutuksetToteutuksetHakukohteetService: KoulutuksetToteutuksetHakukohteetService,
-    kkKoulutuksetToteutuksetHakukohteetService: KorkeakouluKoulutuksetToteutuksetHakukohteetService,
-    hakijatService: ToisenAsteenHakijatService,
-    kkHakijatService: KkHakijatService,
-    hakeneetHyvaksytytVastaanottaneetService: HakeneetHyvaksytytVastaanottaneetService,
-    kkHakeneetHyvaksytytVastaanottaneetService: KkHakeneetHyvaksytytVastaanottaneetService,
-    kkPaatettavatOpiskeluoikeudetService: KkPaatettavatOpiskeluoikeudetService,
-    val userService: UserService,
-    val auditLog: AuditLog = AuditLogObj
+  commonService: CommonService,
+  koulutuksetToteutuksetHakukohteetService: KoulutuksetToteutuksetHakukohteetService,
+  kkKoulutuksetToteutuksetHakukohteetService: KorkeakouluKoulutuksetToteutuksetHakukohteetService,
+  hakijatService: ToisenAsteenHakijatService,
+  kkHakijatService: KkHakijatService,
+  hakeneetHyvaksytytVastaanottaneetService: HakeneetHyvaksytytVastaanottaneetService,
+  kkHakeneetHyvaksytytVastaanottaneetService: KkHakeneetHyvaksytytVastaanottaneetService,
+  kkPaatettavatOpiskeluoikeudetService: KkPaatettavatOpiskeluoikeudetService,
+  val userService: UserService,
+  val auditLog: AuditLog = AuditLogObj
 ) extends ControllerUtils {
   val LOG: Logger = LoggerFactory.getLogger(classOf[Controller])
 
@@ -801,15 +848,15 @@ class Controller(
 
   @GetMapping(path = Array("kk-paatettavat-opiskeluoikeudet"))
   def kk_paatettavat_opiskeluoikeudet(
-      @RequestParam("ovara_oppilaitokset", required = true) oppilaitokset: java.util.Collection[String],
-      @RequestParam("ovara_sukunimi", required = false) sukunimi: String,
-      @RequestParam("ovara_etunimet", required = false) etunimet: String,
-      @RequestParam("ovara_hetu", required = false) hetu: String,
-      @RequestParam("ovara_oppijanumero", required = false) oppijanumero: String,
-      @RequestParam("ovara_opiskeluoikeuden_tila", required = false) opiskeluoikeudenTila: String,
-                                                request: HttpServletRequest,
-                                              response: HttpServletResponse
-                                            ): Unit = {
+    @RequestParam("ovara_oppilaitokset", required = true) oppilaitokset: java.util.Collection[String],
+    @RequestParam("ovara_sukunimi", required = false) sukunimi: String,
+    @RequestParam("ovara_etunimet", required = false) etunimet: String,
+    @RequestParam("ovara_hetu", required = false) hetu: String,
+    @RequestParam("ovara_oppijanumero", required = false) oppijanumero: String,
+    @RequestParam("ovara_opiskeluoikeuden_tila", required = false) opiskeluoikeudenTila: String,
+    request: HttpServletRequest,
+    response: HttpServletResponse
+  ): Unit = {
     val params = RawKkPaatettavatOpiskeluoikeudetParams(
       oppilaitokset = getListParamAsScalaList(oppilaitokset),
       sukunimi = Option(sukunimi),
@@ -826,7 +873,8 @@ class Controller(
       response = response,
       request = request,
       id = "kk-paatettavat-opiskeluoikeudet",
-      raporttiParams = validationResult.toOption.map(buildKkPaatettavatOpiskeluoikeudetAuditParams).getOrElse(Map.empty),
+      raporttiParams =
+        validationResult.toOption.map(buildKkPaatettavatOpiskeluoikeudetAuditParams).getOrElse(Map.empty),
       auditOperation = KkPaatettavatOpiskeluoikeudet,
       mapper = mapper
     ) {
