@@ -13,7 +13,7 @@ import { FormBox } from '@/app/components/form/form-box';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { OphInput, OphTypography } from '@opetushallitus/oph-design-system';
 import { Box, Divider } from '@mui/material';
-import { Oppilaitos } from '@/app/components/form/organisaatiovalikot';
+import { OppilaitosSelect } from '@/app/components/form/organisaatiovalikot';
 import { FormButtons } from '@/app/components/form/form-buttons';
 import { OpiskeluoikeudenTila } from '@/app/components/form/opiskeluoikeuden-tila';
 import { OvaraTextInput } from '@/app/components/form/OvaraTextInput';
@@ -53,7 +53,7 @@ export default function KkPaatettavatOpiskeluoikeudet() {
         <FormBox>
           {isLoading && <SpinnerModal open />}
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
-          <Oppilaitos organisaatiot={organisaatiot} required={true} />
+          <OppilaitosSelect organisaatiot={organisaatiot} required={true} />
           <Divider />
           <Box sx={{ display: 'flex', width: '100%', gap: 2 }}>
             <LabelSpacer />
