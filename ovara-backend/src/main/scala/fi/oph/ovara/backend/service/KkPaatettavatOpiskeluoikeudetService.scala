@@ -1,9 +1,9 @@
 package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.raportointi.dto.{
+  buildKkPaatettavatOpiskeluoikeudetParamsForExcel,
   ValidatedKkKoulutuksetToteutuksetHakukohteetParams,
-  ValidatedKkPaatettavatOpiskeluoikeudetParams,
-  buildKkPaatettavatOpiskeluoikeudetParamsForExcel
+  ValidatedKkPaatettavatOpiskeluoikeudetParams
 }
 import fi.oph.ovara.backend.repository.{KorkeakouluKoulutuksetToteutuksetHakukohteetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
@@ -17,9 +17,9 @@ import scala.util.{Failure, Success, Try}
 @Component
 @Service
 class KkPaatettavatOpiskeluoikeudetService(
-    userService: UserService,
-    commonService: CommonService,
-    lokalisointiService: LokalisointiService
+  userService: UserService,
+  commonService: CommonService,
+  lokalisointiService: LokalisointiService
 ) {
 
   @Autowired
@@ -28,12 +28,12 @@ class KkPaatettavatOpiskeluoikeudetService(
   val LOG: Logger = LoggerFactory.getLogger(classOf[KorkeakouluKoulutuksetToteutuksetHakukohteetService])
 
   def get(
-      oppilaitokset: List[String],
-      sukunimi: Option[String],
-      etunimet: Option[String],
-      hetu: Option[String],
-      oppijanumero: Option[String],
-      opiskeluoikeudenTila: Option[String]
+    oppilaitokset: List[String],
+    sukunimi: Option[String],
+    etunimet: Option[String],
+    hetu: Option[String],
+    oppijanumero: Option[String],
+    opiskeluoikeudenTila: Option[String]
   ): Either[String, XSSFWorkbook] = {
     val user                      = userService.getEnrichedUserDetails
     val asiointikieli             = user.asiointikieli.getOrElse("fi")
