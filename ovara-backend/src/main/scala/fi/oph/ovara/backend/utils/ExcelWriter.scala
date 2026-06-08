@@ -1853,15 +1853,15 @@ object ExcelWriter {
   }
 
   def writeKorkeakouluPaatettavatOpiskeluoikeudetRaportti(
-                                                           asiointikieli: String,
-                                                           translations: Map[String, String],
-                                                           parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
-                                                         ): XSSFWorkbook = {
+    asiointikieli: String,
+    translations: Map[String, String],
+    parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
+  ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
       LOG.info("Creating new KkPaatettavatOpiskeluoikeudetExcel from db results")
-      val sheet: XSSFSheet = workbook.createSheet()
-      val headingCellStyle: XSSFCellStyle = workbook.createCellStyle()
+      val sheet: XSSFSheet                 = workbook.createSheet()
+      val headingCellStyle: XSSFCellStyle  = workbook.createCellStyle()
       val bodyTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
 
       createHeadingFont(workbook, headingCellStyle)
