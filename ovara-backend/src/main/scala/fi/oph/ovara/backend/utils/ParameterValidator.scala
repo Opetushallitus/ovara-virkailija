@@ -1,32 +1,54 @@
 package fi.oph.ovara.backend.utils
 
-import fi.oph.ovara.backend.raportointi.dto.{RawHakeneetHyvaksytytVastaanottaneetParams, RawHakijatParams, RawKkHakeneetHyvaksytytVastaanottaneetParams, RawKkHakijatParams, RawKkKoulutuksetToteutuksetHakukohteetParams, RawKoulutuksetToteutuksetHakukohteetParams, ValidatedHakeneetHyvaksytytVastaanottaneetParams, ValidatedHakijatParams, ValidatedKkHakeneetHyvaksytytVastaanottaneetParams, ValidatedKkHakijatParams, ValidatedKkKoulutuksetToteutuksetHakukohteetParams, ValidatedKoulutuksetToteutuksetHakukohteetParams}
+import fi.oph.ovara.backend.raportointi.dto.{
+  RawHakeneetHyvaksytytVastaanottaneetParams,
+  RawHakijatParams,
+  RawKkHakeneetHyvaksytytVastaanottaneetParams,
+  RawKkHakijatParams,
+  RawKkKoulutuksetToteutuksetHakukohteetParams,
+  RawKoulutuksetToteutuksetHakukohteetParams,
+  ValidatedHakeneetHyvaksytytVastaanottaneetParams,
+  ValidatedHakijatParams,
+  ValidatedKkHakeneetHyvaksytytVastaanottaneetParams,
+  ValidatedKkHakijatParams,
+  ValidatedKkKoulutuksetToteutuksetHakukohteetParams,
+  ValidatedKoulutuksetToteutuksetHakukohteetParams
+}
 
 import scala.util.matching.Regex
 
-
 object ParameterValidator {
 
-  val ophOidPattern: Regex = "^1\\.2\\.246\\.562\\.\\d+\\.\\d+$".r
+  val ophOidPattern: Regex          = "^1\\.2\\.246\\.562\\.\\d+\\.\\d+$".r
   val organisaatioOidPattern: Regex = "^1\\.2\\.246\\.562\\.(10|99|199|299)\\.\\d+$".r
-  val alphanumericPattern: Regex = """^[a-zA-Z0-9_\\-]+$""".r
-  private val numericRegex = """^\d+$""".r
+  val alphanumericPattern: Regex    = """^[a-zA-Z0-9_\\-]+$""".r
+  private val numericRegex          = """^\d+$""".r
 
-  private val tulostustavat = Set("hakukohteittain", "oppilaitoksittain")
-  private val oidPattern = """^1\.\d{4}\.\w{1,}$""".r
+  private val tulostustavat    = Set("hakukohteittain", "oppilaitoksittain")
+  private val oidPattern       = """^1\.\d{4}\.\w{1,}$""".r
   private val koodiarvoPattern = """^\d+$""".r
 
-
-  val TULOSTUSTAVAT = Set("koulutustoimijoittain", "oppilaitoksittain", "toimipisteittain", "hauittain", "hakukohteittain", "hakukohderyhmittain",
-    "okm-ohjauksen-aloittain", "koulutusaloittain", "kansalaisuuksittain", "koulutuksittain", "toteutuksittain")
-  val TILAT = Set("julkaistu", "tallennettu", "arkistoitu")
+  val TULOSTUSTAVAT = Set(
+    "koulutustoimijoittain",
+    "oppilaitoksittain",
+    "toimipisteittain",
+    "hauittain",
+    "hakukohteittain",
+    "hakukohderyhmittain",
+    "okm-ohjauksen-aloittain",
+    "koulutusaloittain",
+    "kansalaisuuksittain",
+    "koulutuksittain",
+    "toteutuksittain"
+  )
+  val TILAT              = Set("julkaistu", "tallennettu", "arkistoitu")
   val KK_TUTKINNON_TASOT = Set("alempi-ja-ylempi", "alempi", "ylempi")
 
   def strToOptionBoolean(value: String): Option[Boolean] = value match {
-    case null | "" => None
-    case v if v.equalsIgnoreCase("true") => Some(true)
+    case null | ""                        => None
+    case v if v.equalsIgnoreCase("true")  => Some(true)
     case v if v.equalsIgnoreCase("false") => Some(false)
-    case _ => None // eroteltu parsiminen ja validointi
+    case _                                => None // eroteltu parsiminen ja validointi
   }
 
   def validateTulostustapa(tulostustapa: Option[String]): Option[String] =
@@ -38,7 +60,11 @@ object ParameterValidator {
       case _ => None
     }
 
-  def valueBelongsToSetOfValidValues(value: Option[String], fieldName: String, validValues: Set[String]): Option[String] =
+  def valueBelongsToSetOfValidValues(
+    value: Option[String],
+    fieldName: String,
+    validValues: Set[String]
+  ): Option[String] =
     value.filter(_.nonEmpty).collect {
       case v if !validValues.contains(v) => s"$fieldName.invalid"
     }
@@ -86,8 +112,9 @@ object ParameterValidator {
   def validateNonEmpty(list: List[String], fieldName: String): Option[String] =
     if (list.isEmpty) Some(s"$fieldName.required") else None
 
-  def validateKoulutuksetToteutuksetHakukohteetParams(params: RawKoulutuksetToteutuksetHakukohteetParams
-                                                     ): Either[List[String], ValidatedKoulutuksetToteutuksetHakukohteetParams] = {
+  def validateKoulutuksetToteutuksetHakukohteetParams(
+    params: RawKoulutuksetToteutuksetHakukohteetParams
+  ): Either[List[String], ValidatedKoulutuksetToteutuksetHakukohteetParams] = {
     val errors = List(
       validateNonEmpty(params.haut, "haut"),
       validateOidList(params.haut, "haut"),
@@ -97,10 +124,10 @@ object ParameterValidator {
       valueBelongsToSetOfValidValues(params.koulutuksenTila, "koulutuksen-tila", TILAT),
       valueBelongsToSetOfValidValues(params.toteutuksenTila, "toteutuksen-tila", TILAT),
       valueBelongsToSetOfValidValues(params.hakukohteenTila, "hakukohteen-tila", TILAT),
-      validateBoolean(params.valintakoe, "valintakoe"),
+      validateBoolean(params.valintakoe, "valintakoe")
     ).flatten
 
-    if(errors.nonEmpty) {
+    if (errors.nonEmpty) {
       Left(errors.distinct)
     } else {
       Right(
@@ -118,8 +145,9 @@ object ParameterValidator {
     }
   }
 
-  def validateKkKoulutuksetToteutuksetHakukohteetParams(params: RawKkKoulutuksetToteutuksetHakukohteetParams
-                                                       ): Either[List[String], ValidatedKkKoulutuksetToteutuksetHakukohteetParams] = {
+  def validateKkKoulutuksetToteutuksetHakukohteetParams(
+    params: RawKkKoulutuksetToteutuksetHakukohteetParams
+  ): Either[List[String], ValidatedKkKoulutuksetToteutuksetHakukohteetParams] = {
     val errors = List(
       validateNonEmpty(params.haut, "haut"),
       validateOidList(params.haut, "haut"),
@@ -172,7 +200,9 @@ object ParameterValidator {
       validateBoolean(params.julkaisulupa, "julkaisulupa")
     ).flatten
 
-    val combinedErrors = errors ++ Option.when(params.oppilaitokset.isEmpty && params.toimipisteet.isEmpty)("virhe.pakollinen.puuttuu").toList
+    val combinedErrors = errors ++ Option
+      .when(params.oppilaitokset.isEmpty && params.toimipisteet.isEmpty)("virhe.pakollinen.puuttuu")
+      .toList
 
     if (combinedErrors.nonEmpty) {
       Left(combinedErrors.distinct)
@@ -216,9 +246,11 @@ object ParameterValidator {
       validateBoolean(params.naytaPostiosoite, "nayta-postiosoite")
     ).flatten
 
-    val combinedErrors = errors ++ Option.when(
-      params.oppilaitokset.isEmpty && params.toimipisteet.isEmpty && params.hakukohderyhmat.isEmpty
-    )("virhe.pakollinen.puuttuu").toList
+    val combinedErrors = errors ++ Option
+      .when(
+        params.oppilaitokset.isEmpty && params.toimipisteet.isEmpty && params.hakukohderyhmat.isEmpty
+      )("virhe.pakollinen.puuttuu")
+      .toList
 
     if (combinedErrors.nonEmpty) {
       Left(combinedErrors.distinct)
@@ -243,8 +275,8 @@ object ParameterValidator {
   }
 
   def validateHakeneetHyvaksytytVastaanottaneetParams(
-                                                       params: RawHakeneetHyvaksytytVastaanottaneetParams
-                                                     ): Either[List[String], ValidatedHakeneetHyvaksytytVastaanottaneetParams] = {
+    params: RawHakeneetHyvaksytytVastaanottaneetParams
+  ): Either[List[String], ValidatedHakeneetHyvaksytytVastaanottaneetParams] = {
 
     val errors = List(
       validateNonEmpty(params.haut, "haut"),
@@ -291,8 +323,8 @@ object ParameterValidator {
   }
 
   def validateKkHakeneetHyvaksytytVastaanottaneetParams(
-                                                         params: RawKkHakeneetHyvaksytytVastaanottaneetParams
-                                                       ): Either[List[String], ValidatedKkHakeneetHyvaksytytVastaanottaneetParams] = {
+    params: RawKkHakeneetHyvaksytytVastaanottaneetParams
+  ): Either[List[String], ValidatedKkHakeneetHyvaksytytVastaanottaneetParams] = {
 
     val errors = List(
       validateNonEmpty(params.haut, "haut"),

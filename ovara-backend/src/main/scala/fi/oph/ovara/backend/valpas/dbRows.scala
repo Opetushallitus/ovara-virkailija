@@ -6,21 +6,21 @@ import fi.oph.ovara.backend.utils.Constants.HELSINKI_TIMEZONE
 import java.time.{LocalDateTime, OffsetDateTime}
 
 case class HakemusRow(
-    hakemusOid: String,
-    muokattu: Option[OffsetDateTime],
-    sahkoposti: String,
-    puhelin: String,
-    lahiosoite: String,
-    postinumero: String,
-    postitoimipaikka: String,
-    asuinmaa: String,
-    hakuOid: String,
-    haunNimi: Kielistetty,
-    hakuajat: List[ValpasHakuaika],
-    hakukierrosPaattyy: Option[OffsetDateTime],
-    hakutapaKoodiuri: String,
-    oppijanumero: String,
-    julkaisuAika: Option[OffsetDateTime]
+  hakemusOid: String,
+  muokattu: Option[OffsetDateTime],
+  sahkoposti: String,
+  puhelin: String,
+  lahiosoite: String,
+  postinumero: String,
+  postitoimipaikka: String,
+  asuinmaa: String,
+  hakuOid: String,
+  haunNimi: Kielistetty,
+  hakuajat: List[ValpasHakuaika],
+  hakukierrosPaattyy: Option[OffsetDateTime],
+  hakutapaKoodiuri: String,
+  oppijanumero: String,
+  julkaisuAika: Option[OffsetDateTime]
 ) {
   def asHakemus(koodistot: Map[String, KoodistoArvo], hakutoiveet: Seq[Hakutoive]): Hakemus = {
     Hakemus(
@@ -53,24 +53,24 @@ case class HakemusRow(
 }
 
 case class HakutoiveRow(
-    hakemusOid: String,
-    hakukohdeOid: String,
-    hakukohdeNimi: Kielistetty,
-    hakutoivenumero: Int,
-    hakukohdeOrganisaatio: String,
-    organisaatioNimi: Kielistetty,
-    koulutusOid: String,
-    koulutusNimi: Kielistetty,
-    hakukohdeKoulutuskoodi: Seq[String], // Koutan toteutus.koulutuksetKoodiUri? koulutus.koulutuksetKoodiUri?
-    vastaanottotieto: Option[String],
-    ilmoittautumistila: Option[String],
-    valintatila: Option[String],
-    harkinnanvaraisuus: String,
-    valintatapajonoId: String,
-    alinHyvaksyttyPistemaara: BigDecimal,
-    pisteet: Option[BigDecimal],
-    varasijanNumero: Option[Int],
-    julkaistavissa: Option[Boolean]
+  hakemusOid: String,
+  hakukohdeOid: String,
+  hakukohdeNimi: Kielistetty,
+  hakutoivenumero: Int,
+  hakukohdeOrganisaatio: String,
+  organisaatioNimi: Kielistetty,
+  koulutusOid: String,
+  koulutusNimi: Kielistetty,
+  hakukohdeKoulutuskoodi: Seq[String], // Koutan toteutus.koulutuksetKoodiUri? koulutus.koulutuksetKoodiUri?
+  vastaanottotieto: Option[String],
+  ilmoittautumistila: Option[String],
+  valintatila: Option[String],
+  harkinnanvaraisuus: String,
+  valintatapajonoId: String,
+  alinHyvaksyttyPistemaara: BigDecimal,
+  pisteet: Option[BigDecimal],
+  varasijanNumero: Option[Int],
+  julkaistavissa: Option[Boolean]
 ) {
   def asHakutoive(koodistot: Map[String, KoodistoArvo], julkaisuAika: Option[OffsetDateTime]): Hakutoive = {
     val julkaistu = julkaistavissa.contains(true) && julkaisuAika.forall(_.isBefore(OffsetDateTime.now()))

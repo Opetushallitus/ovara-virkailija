@@ -22,73 +22,73 @@ abstract class HakeneetHyvaksytytVastaanottaneetBase {
 }
 
 case class HakeneetHyvaksytytVastaanottaneetHakukohteittain(
-    hakukohdeNimi: Kielistetty,
-    hakuNimi: Kielistetty,
-    organisaatioNimi: Kielistetty,
-    hakijat: Int,
-    ensisijaisia: Int,
-    varasija: Int,
-    hyvaksytyt: Int,
-    vastaanottaneet: Int,
-    lasna: Int,
-    poissa: Int,
-    ilmYht: Int,
-    aloituspaikat: Int,
-    toive1: Int,
-    toive2: Int,
-    toive3: Int,
-    toive4: Int,
-    toive5: Int,
-    toive6: Int,
-    toive7: Int
+  hakukohdeNimi: Kielistetty,
+  hakuNimi: Kielistetty,
+  organisaatioNimi: Kielistetty,
+  hakijat: Int,
+  ensisijaisia: Int,
+  varasija: Int,
+  hyvaksytyt: Int,
+  vastaanottaneet: Int,
+  lasna: Int,
+  poissa: Int,
+  ilmYht: Int,
+  aloituspaikat: Int,
+  toive1: Int,
+  toive2: Int,
+  toive3: Int,
+  toive4: Int,
+  toive5: Int,
+  toive6: Int,
+  toive7: Int
 ) extends HakeneetHyvaksytytVastaanottaneetBase
 
 case class HakeneetHyvaksytytVastaanottaneetTunnisteella(
-    tunniste: String,
-    otsikko: Kielistetty,
-    hakijat: Int,
-    ensisijaisia: Int,
-    varasija: Int,
-    hyvaksytyt: Int,
-    vastaanottaneet: Int,
-    lasna: Int,
-    poissa: Int,
-    ilmYht: Int,
-    aloituspaikat: Int,
-    toive1: Int,
-    toive2: Int,
-    toive3: Int,
-    toive4: Int,
-    toive5: Int,
-    toive6: Int,
-    toive7: Int
+  tunniste: String,
+  otsikko: Kielistetty,
+  hakijat: Int,
+  ensisijaisia: Int,
+  varasija: Int,
+  hyvaksytyt: Int,
+  vastaanottaneet: Int,
+  lasna: Int,
+  poissa: Int,
+  ilmYht: Int,
+  aloituspaikat: Int,
+  toive1: Int,
+  toive2: Int,
+  toive3: Int,
+  toive4: Int,
+  toive5: Int,
+  toive6: Int,
+  toive7: Int
 ) extends HakeneetHyvaksytytVastaanottaneetBase {}
 
 case class HakeneetHyvaksytytVastaanottaneetResult(
-    otsikko: Kielistetty,
-    hakijat: Int,
-    ensisijaisia: Int,
-    varasija: Int,
-    hyvaksytyt: Int,
-    vastaanottaneet: Int,
-    lasna: Int,
-    poissa: Int,
-    ilmYht: Int,
-    aloituspaikat: Int,
-    toive1: Int,
-    toive2: Int,
-    toive3: Int,
-    toive4: Int,
-    toive5: Int,
-    toive6: Int,
-    toive7: Int
+  otsikko: Kielistetty,
+  hakijat: Int,
+  ensisijaisia: Int,
+  varasija: Int,
+  hyvaksytyt: Int,
+  vastaanottaneet: Int,
+  lasna: Int,
+  poissa: Int,
+  ilmYht: Int,
+  aloituspaikat: Int,
+  toive1: Int,
+  toive2: Int,
+  toive3: Int,
+  toive4: Int,
+  toive5: Int,
+  toive6: Int,
+  toive7: Int
 ) extends HakeneetHyvaksytytVastaanottaneetBase {}
 
 object HakeneetHyvaksytytVastaanottaneetResult {
 
   def apply(
-             tunnisteella: HakeneetHyvaksytytVastaanottaneetTunnisteella
-           ): HakeneetHyvaksytytVastaanottaneetResult = {
+    tunnisteella: HakeneetHyvaksytytVastaanottaneetTunnisteella
+  ): HakeneetHyvaksytytVastaanottaneetResult = {
     new HakeneetHyvaksytytVastaanottaneetResult(
       otsikko = tunnisteella.otsikko,
       hakijat = tunnisteella.hakijat,

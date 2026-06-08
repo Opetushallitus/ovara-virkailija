@@ -4,10 +4,10 @@ import scala.util.matching.Regex
 
 object RepositoryUtils {
   def extractAlkamisvuosiKausiAndHenkkohtSuunnitelma(
-      alkamiskaudet: List[String]
+    alkamiskaudet: List[String]
   ): (List[(Int, String)], Boolean, Boolean) = {
     val alkamiskausiRegex: Regex = """(\d{4})_([a-z]+)""".r
-    val alkamiskaudetAndVuodet = alkamiskaudet.flatMap { alkamiskausi =>
+    val alkamiskaudetAndVuodet   = alkamiskaudet.flatMap { alkamiskausi =>
       for {
         alkamiskausiMatches <- alkamiskausiRegex.findAllMatchIn(alkamiskausi)
       } yield {
@@ -65,9 +65,16 @@ object RepositoryUtils {
     }
   }
 
-  def makeHakuParamOptionalQueryStr(paramName: String, idColumn: String, nameColumn: String, tableName: String, selectedParams: List[String]): String = {
+  def makeHakuParamOptionalQueryStr(
+    paramName: String,
+    idColumn: String,
+    nameColumn: String,
+    tableName: String,
+    selectedParams: List[String]
+  ): String = {
     if (selectedParams.nonEmpty)
-      s"""UNION ALL SELECT '$paramName' AS param, $nameColumn AS nimi FROM $tableName WHERE $idColumn IN (${RepositoryUtils.makeListOfValuesQueryStr(selectedParams)})"""
+      s"""UNION ALL SELECT '$paramName' AS param, $nameColumn AS nimi FROM $tableName WHERE $idColumn IN (${RepositoryUtils
+          .makeListOfValuesQueryStr(selectedParams)})"""
     else
       ""
   }
@@ -85,11 +92,11 @@ object RepositoryUtils {
 
   def makeAlkamiskausiQueryStr(tableNames: List[String], alkamiskausi: (Int, String)): String = {
     s"(${tableNames
-      .map(tableName =>
-        s"($tableName.koulutuksen_alkamisvuosi = ${alkamiskausi._1} AND " +
-          s"$tableName.koulutuksen_alkamiskausi_koodiuri LIKE '${alkamiskausi._2}%')"
-      )
-      .mkString(" OR ")})"
+        .map(tableName =>
+          s"($tableName.koulutuksen_alkamisvuosi = ${alkamiskausi._1} AND " +
+            s"$tableName.koulutuksen_alkamiskausi_koodiuri LIKE '${alkamiskausi._2}%')"
+        )
+        .mkString(" OR ")})"
   }
 
   def makeOptionalHenkilokohtainenSuunnitelmaQuery(henkkohtSuunnitelma: Boolean): String = {
@@ -107,16 +114,16 @@ object RepositoryUtils {
   }
 
   def makeHakuQueryWithAlkamiskausiParams(
-      alkamiskaudetAndHenkKohtSuunnitelma: (List[(Int, String)], Boolean, Boolean)
+    alkamiskaudetAndHenkKohtSuunnitelma: (List[(Int, String)], Boolean, Boolean)
   ): String = {
-    val hlokohtSuunnitelma = alkamiskaudetAndHenkKohtSuunnitelma._2
+    val hlokohtSuunnitelma         = alkamiskaudetAndHenkKohtSuunnitelma._2
     val hlokohtSuunnitelmaQueryStr = if (hlokohtSuunnitelma) {
       s"h.koulutuksen_alkamiskausi @> '[{\"type\": \"henkkoht\"}]'::jsonb"
     } else {
       ""
     }
 
-    val eiAlkamiskautta = alkamiskaudetAndHenkKohtSuunnitelma._3
+    val eiAlkamiskautta         = alkamiskaudetAndHenkKohtSuunnitelma._3
     val eiAlkamiskauttaQueryStr = if (eiAlkamiskautta) {
       val operator = if (hlokohtSuunnitelma) {
         " OR "
@@ -139,7 +146,7 @@ object RepositoryUtils {
       }
 
     val alkamiskaudetAndVuodet = alkamiskaudetAndHenkKohtSuunnitelma._1
-    val alkamiskaudetStr = alkamiskaudetAndVuodet
+    val alkamiskaudetStr       = alkamiskaudetAndVuodet
       .map(alkamiskausiAndVuosi => makeHakuTableAlkamiskausiQueryStr(alkamiskausiAndVuosi))
       .mkString(" OR ")
     val alkamiskaudetQueryStr = if (alkamiskaudetStr.isEmpty) {
@@ -162,15 +169,15 @@ object RepositoryUtils {
   }
 
   def makeHakukohderyhmaQueryWithKayttooikeudet(
-      kayttooikeusOrgOids: List[String],
-      kayttooikeusHakukohderyhmaOids: List[String],
-      hakukohderyhmaTablename: String = "hkr",
-      hakukohdeTablename: String = "hk"
+    kayttooikeusOrgOids: List[String],
+    kayttooikeusHakukohderyhmaOids: List[String],
+    hakukohderyhmaTablename: String = "hkr",
+    hakukohdeTablename: String = "hk"
   ): String = {
     val hakukohderyhmaStr      = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusHakukohderyhmaOids)
     val hakukohderyhmaQueryStr = s"$hakukohderyhmaTablename.hakukohderyhma_oid IN ($hakukohderyhmaStr)"
 
-    val hakukohdeOrgStr = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusOrgOids)
+    val hakukohdeOrgStr   = RepositoryUtils.makeListOfValuesQueryStr(kayttooikeusOrgOids)
     val hakukohdeQueryStr = s"$hakukohdeTablename.jarjestyspaikka_oid IN ($hakukohdeOrgStr)"
 
     (kayttooikeusHakukohderyhmaOids.isEmpty, kayttooikeusOrgOids.isEmpty) match {
@@ -182,35 +189,36 @@ object RepositoryUtils {
   }
 
   def makeHakukohderyhmaSubSelectQueryWithKayttooikeudet(
-                                               kayttooikeusOrgOids: List[String],
-                                               kayttooikeusHakukohderyhmaOids: List[String],
-                                               hakukohdeTablename: String = "hk",
-                                               operator: String = "AND"
-                                             ): String = {
+    kayttooikeusOrgOids: List[String],
+    kayttooikeusHakukohderyhmaOids: List[String],
+    hakukohdeTablename: String = "hk",
+    operator: String = "AND"
+  ): String = {
     val kayttooikeusHakukohderyhmaEhto = makeOptionalHakukohderyhmatSubSelectQueryStr(
       hakukohderyhmat = kayttooikeusHakukohderyhmaOids,
       hakukohdeTablename = hakukohdeTablename,
       operator = "" // lisätään operaattori vasta lopuksi
     )
 
-    val organisaatioEhto = makeOptionalListOfValuesQueryStr("", s"$hakukohdeTablename.jarjestyspaikka_oid", kayttooikeusOrgOids)
+    val organisaatioEhto =
+      makeOptionalListOfValuesQueryStr("", s"$hakukohdeTablename.jarjestyspaikka_oid", kayttooikeusOrgOids)
 
     (kayttooikeusHakukohderyhmaEhto.trim, organisaatioEhto.trim) match {
-      case ("", "") => ""
-      case (hakukohderyhmaEhto, "") => s"$operator $hakukohderyhmaEhto"
-      case ("", organisaatioEhto) => s"$operator $organisaatioEhto"
+      case ("", "")                               => ""
+      case (hakukohderyhmaEhto, "")               => s"$operator $hakukohderyhmaEhto"
+      case ("", organisaatioEhto)                 => s"$operator $organisaatioEhto"
       case (hakukohderyhmaEhto, organisaatioEhto) => s"$operator ($hakukohderyhmaEhto OR $organisaatioEhto)"
     }
   }
 
   def buildHakukohdeFilterQuery(
-      selectedHakukohteet: List[String],
-      selectedHaut: List[String],
-      selectedHakukohderyhmat: List[String],
-      kayttooikeusHakukohderyhmat: List[String],
-      orgs: List[String],
-      isOrganisaatioRajain: Boolean,
-      isOphPaakayttaja: Boolean
+    selectedHakukohteet: List[String],
+    selectedHaut: List[String],
+    selectedHakukohderyhmat: List[String],
+    kayttooikeusHakukohderyhmat: List[String],
+    orgs: List[String],
+    isOrganisaatioRajain: Boolean,
+    isOphPaakayttaja: Boolean
   ): String = {
     if (selectedHaut.isEmpty)
       throw new IllegalArgumentException("Haku must be selected before fetching hakukohteet")
@@ -220,9 +228,9 @@ object RepositoryUtils {
     val hakukohteetOrganisaatioJaKayttooikeusrajauksilla = if (isOrganisaatioRajain) {
       makeHakukohderyhmaQueryWithKayttooikeudet(orgs, List.empty, "hkr_hk")
     } else if (isOphPaakayttaja) {
-        ""
+      ""
     } else {
-        makeHakukohderyhmaQueryWithKayttooikeudet(orgs, kayttooikeusHakukohderyhmat, "hkr_hk")
+      makeHakukohderyhmaQueryWithKayttooikeudet(orgs, kayttooikeusHakukohderyhmat, "hkr_hk")
     }
     val selectedHakukohdeRajaus = if (selectedHakukohteet.nonEmpty) {
       s"hk.hakukohde_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(selectedHakukohteet)}) OR"
@@ -275,8 +283,8 @@ object RepositoryUtils {
   }
 
   def buildTutkinnonTasoFilters(
-      tutkinnonTasot: List[String],
-      hakukohdeTable: String
+    tutkinnonTasot: List[String],
+    hakukohdeTable: String
   ): String = {
     if (tutkinnonTasot.nonEmpty) {
       var conditions = List[String]()
@@ -294,7 +302,11 @@ object RepositoryUtils {
       ""
   }
 
-  def makeOptionalHakukohderyhmatSubSelectQueryStr(hakukohderyhmat: List[String], hakukohdeTablename: String = "hk", operator: String = "AND"): String = {
+  def makeOptionalHakukohderyhmatSubSelectQueryStr(
+    hakukohderyhmat: List[String],
+    hakukohdeTablename: String = "hk",
+    operator: String = "AND"
+  ): String = {
     val hakukohderyhmatStr = makeListOfValuesQueryStr(hakukohderyhmat)
     if (hakukohderyhmatStr.isEmpty) {
       ""

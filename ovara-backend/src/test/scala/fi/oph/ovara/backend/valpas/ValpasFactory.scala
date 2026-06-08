@@ -30,17 +30,17 @@ object ValpasFactory {
   val KOULUTUS_NIMI: Kielistetty     = createKielistetty("Kulttuurituottaja", "Kulturproducent", "Kulttuurituottaja")
 
   def createKielistetty(
-      fi: String = "Elokuvaleikkaus",
-      sv: String = "Filmklippning",
-      en: String = "Film Editing"
+    fi: String = "Elokuvaleikkaus",
+    sv: String = "Filmklippning",
+    en: String = "Film Editing"
   ): Map[Kieli, String] =
     Map(Fi -> fi, Sv -> sv, En -> en)
 
   def createHakutoiveRow(
-      vastaanottotieto: Option[String] = Some("VASTAANOTTANUT_SITOVASTI"),
-      ilmoittautumistila: Option[String] = Some("LASNA_KOKO_LUKUVUOSI"),
-      valintatila: Option[String] = Some("HYVAKSYTTY"),
-      julkaistavissa: Option[Boolean] = Some(true)
+    vastaanottotieto: Option[String] = Some("VASTAANOTTANUT_SITOVASTI"),
+    ilmoittautumistila: Option[String] = Some("LASNA_KOKO_LUKUVUOSI"),
+    valintatila: Option[String] = Some("HYVAKSYTTY"),
+    julkaistavissa: Option[Boolean] = Some(true)
   ): HakutoiveRow = HakutoiveRow(
     hakemusOid = HAKEMUS_OID,
     hakukohdeOid = HAKUKOHDE_OID,
@@ -66,8 +66,8 @@ object ValpasFactory {
     ValpasHakuaika(Option(alkaa), Option(paattyy))
 
   def createHakemusRow(
-      hakuajat: List[ValpasHakuaika] = List(createValpasHakuaika(YESTERDAY.toLocalDateTime, TOMORROW.toLocalDateTime)),
-      hakukierrosPaattyy: Option[OffsetDateTime] = Some(TOMORROW)
+    hakuajat: List[ValpasHakuaika] = List(createValpasHakuaika(YESTERDAY.toLocalDateTime, TOMORROW.toLocalDateTime)),
+    hakukierrosPaattyy: Option[OffsetDateTime] = Some(TOMORROW)
   ) =
     HakemusRow(
       hakemusOid = HAKEMUS_OID,

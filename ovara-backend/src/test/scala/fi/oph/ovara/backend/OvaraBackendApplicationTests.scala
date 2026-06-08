@@ -16,48 +16,52 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.{conten
 @AutoConfigureMockMvc
 @ActiveProfiles(Array("test"))
 class OvaraBackendApplicationTests {
-    @Autowired
-    private val mvc: MockMvc = null
+  @Autowired
+  private val mvc: MockMvc = null
 
-    @Test
-    def get200ResponseFromHealthcheckUnautheticated(): Unit = {
-        mvc.perform(MockMvcRequestBuilders.get("/api/healthcheck").accept(MediaType.APPLICATION_JSON))
-          .andExpect(status.isOk)
-          .andExpect(content.string(equalTo("Ovara application is running!")))
-    }
+  @Test
+  def get200ResponseFromHealthcheckUnautheticated(): Unit = {
+    mvc
+      .perform(MockMvcRequestBuilders.get("/api/healthcheck").accept(MediaType.APPLICATION_JSON))
+      .andExpect(status.isOk)
+      .andExpect(content.string(equalTo("Ovara application is running!")))
+  }
 
-    @Test
-    def get401ResponseFromAuthenticatedApi(): Unit = {
-        mvc.perform(MockMvcRequestBuilders.get("/api/alkamisvuodet").accept(MediaType.APPLICATION_JSON))
-          .andExpect(status.isUnauthorized)
-    }
+  @Test
+  def get401ResponseFromAuthenticatedApi(): Unit = {
+    mvc
+      .perform(MockMvcRequestBuilders.get("/api/alkamisvuodet").accept(MediaType.APPLICATION_JSON))
+      .andExpect(status.isUnauthorized)
+  }
 
-    @Test
-    @WithMockUser(username = "testuser", roles = Array("USER"))
-    def getAuthenticatedUserGets200ResponseFromAuthenticatedApi(): Unit = {
-        mvc.perform(MockMvcRequestBuilders.get("/api/session"))
-          .andExpect(status().isOk)
-          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-    }
+  @Test
+  @WithMockUser(username = "testuser", roles = Array("USER"))
+  def getAuthenticatedUserGets200ResponseFromAuthenticatedApi(): Unit = {
+    mvc
+      .perform(MockMvcRequestBuilders.get("/api/session"))
+      .andExpect(status().isOk)
+      .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+  }
 
-    @Test
-    @WithMockUser(username = "testuser", roles = Array("USER"))
-    def testInvalidHautRequestWithValidationError(): Unit = {
-        mvc.perform(MockMvcRequestBuilders
-            .get("/api/haut")
-            .param("ovara_alkamiskaudet", "foo'")
-            .param("ovara_haut", "123,456")
-            .param("ovara_haun_tyyppi", "blaa*")
-            .accept(MediaType.APPLICATION_JSON)
-          )
-          .andExpect(status().isBadRequest)
-          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-          .andExpect(content().json(
-              """{
+  @Test
+  @WithMockUser(username = "testuser", roles = Array("USER"))
+  def testInvalidHautRequestWithValidationError(): Unit = {
+    mvc
+      .perform(
+        MockMvcRequestBuilders
+          .get("/api/haut")
+          .param("ovara_alkamiskaudet", "foo'")
+          .param("ovara_haut", "123,456")
+          .param("ovara_haun_tyyppi", "blaa*")
+          .accept(MediaType.APPLICATION_JSON)
+      )
+      .andExpect(status().isBadRequest)
+      .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+      .andExpect(content().json("""{
               "status": 400,
               "message": "virhe.validointi",
               "details": ["alkamiskaudet.invalid", "haut.invalid.oid", "haun-tyyppi.invalid"]
             }"""))
-    }
+  }
 
 }

@@ -10,8 +10,8 @@ import org.scalatest.matchers.should.Matchers
 class CommonServiceTest extends AnyFlatSpec with Matchers {
 
   val mockCommonRepository: CommonRepository = mock(classOf[CommonRepository])
-  val mockUserService: UserService = mock(classOf[UserService])
-  val commonService = new CommonService(mockCommonRepository, mockUserService)
+  val mockUserService: UserService           = mock(classOf[UserService])
+  val commonService                          = new CommonService(mockCommonRepository, mockUserService)
 
   "selectToimipisteDescendants" should "return empty descendant list when no organisations are provided" in {
     val toimipisteet = List()
@@ -39,9 +39,9 @@ class CommonServiceTest extends AnyFlatSpec with Matchers {
 
   "getAllowedOrgOidsFromOrgSelection" should "return descendants of kayttooikeusOrganisaatioOids when all organization inputs are empty" in {
     val kayttooikeusOrganisaatioOids = List("1.2.246.562.10.12345678901")
-    val oppilaitosOids = List()
-    val toimipisteOids = List()
-    val koulutustoimijaOid = None
+    val oppilaitosOids               = List()
+    val toimipisteOids               = List()
+    val koulutustoimijaOid           = None
 
     val mockOrganisaatioHierarkia = OrganisaatioHierarkia(
       organisaatio_oid = "1.2.246.562.10.12345678901",
@@ -50,11 +50,13 @@ class CommonServiceTest extends AnyFlatSpec with Matchers {
       oppilaitostyyppi = Some("mockType"),
       tila = "AKTIIVINEN",
       parent_oids = List("1.2.246.562.10.98765432101"),
-      koulutustoimijaParent = Some(Organisaatio(
-        organisaatio_oid = "1.2.246.562.10.98765432101",
-        organisaatio_nimi = Map(Fi -> "Parent Organisaatio"),
-        organisaatiotyypit = List("parentType")
-      )),
+      koulutustoimijaParent = Some(
+        Organisaatio(
+          organisaatio_oid = "1.2.246.562.10.98765432101",
+          organisaatio_nimi = Map(Fi -> "Parent Organisaatio"),
+          organisaatiotyypit = List("parentType")
+        )
+      ),
       children = List(
         OrganisaatioHierarkia(
           organisaatio_oid = "1.2.246.562.10.12345678902",
@@ -70,7 +72,7 @@ class CommonServiceTest extends AnyFlatSpec with Matchers {
     )
 
     val mockOrganisaatioHierarkiaList = List(mockOrganisaatioHierarkia)
-    val spyCommonService = spy(commonService)
+    val spyCommonService              = spy(commonService)
     when(spyCommonService.getOrganisaatioHierarkiatWithUserRights).thenReturn(Right(mockOrganisaatioHierarkiaList))
 
     val result = spyCommonService.getAllowedOrgOidsFromOrgSelection(

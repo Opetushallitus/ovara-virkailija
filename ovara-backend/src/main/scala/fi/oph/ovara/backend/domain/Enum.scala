@@ -11,6 +11,7 @@ trait Enum[T <: EnumType] {
 
   def values: List[T]
 
-  def withName(n: String): T = values.find(_.name.equals(n))
+  def withName(n: String): T = values
+    .find(_.name.equals(n))
     .getOrElse(throw new IllegalArgumentException(s"Unknown $name '$n'"))
 }

@@ -5,18 +5,18 @@ import fi.oph.ovara.backend.service.CommonService
 
 object OrganisaatioUtils {
   def mapOrganisaationHakukohteetToParent(
-      hierarkia: OrganisaatioHierarkia,
-      organisaatiotWithHakukohteet: Map[Option[String], Vector[OrganisaationKoulutusToteutusHakukohde]]
+    hierarkia: OrganisaatioHierarkia,
+    organisaatiotWithHakukohteet: Map[Option[String], Vector[OrganisaationKoulutusToteutusHakukohde]]
   ): OrganisaatioHierarkiaWithHakukohteet = {
     val organisaatioOid = hierarkia.organisaatio_oid
-    val kths = organisaatiotWithHakukohteet.find(o => {
+    val kths            = organisaatiotWithHakukohteet.find(o => {
       o._1.getOrElse("") == organisaatioOid
     }) match {
       case Some((o, kths)) => kths.toList
       case None            => List()
     }
 
-    val children = hierarkia.children
+    val children        = hierarkia.children
     val childHierarkiat = if (children.isEmpty) {
       List()
     } else {
@@ -35,8 +35,8 @@ object OrganisaatioUtils {
   }
 
   def mapOrganisaationHakukohteetToParents(
-      hierarkiat: List[OrganisaatioHierarkia],
-      organisaatiotWithHakukohteet: Map[Option[String], Vector[OrganisaationKoulutusToteutusHakukohde]]
+    hierarkiat: List[OrganisaatioHierarkia],
+    organisaatiotWithHakukohteet: Map[Option[String], Vector[OrganisaationKoulutusToteutusHakukohde]]
   ): List[OrganisaatioHierarkiaWithHakukohteet] = {
     hierarkiat.map(hierarkia => mapOrganisaationHakukohteetToParent(hierarkia, organisaatiotWithHakukohteet))
   }
@@ -48,8 +48,8 @@ object OrganisaatioUtils {
   }
 
   def getKayttooikeusDescendantAndSelfOids(
-      hierarkia: OrganisaatioHierarkia,
-      organisaatioOids: List[String]
+    hierarkia: OrganisaatioHierarkia,
+    organisaatioOids: List[String]
   ): List[String] = {
     val children   = hierarkia.children
     val parentOids = hierarkia.parent_oids
@@ -66,9 +66,11 @@ object OrganisaatioUtils {
   def filterActiveOrgsWithoutPeruskoulu(hierarkia: OrganisaatioHierarkia): Option[OrganisaatioHierarkia] = {
     val children = hierarkia.children
 
-    if (hierarkia.tila != "AKTIIVINEN" ||
+    if (
+      hierarkia.tila != "AKTIIVINEN" ||
       hierarkia.oppilaitostyyppi.contains("oppilaitostyyppi_11#1") ||
-      hierarkia.oppilaitostyyppi.contains("oppilaitostyyppi_12#1")) {
+      hierarkia.oppilaitostyyppi.contains("oppilaitostyyppi_12#1")
+    ) {
       None
     } else {
       val filteredChildHierarkiat = children.flatMap(child => filterActiveOrgsWithoutPeruskoulu(child))
@@ -81,8 +83,8 @@ object OrganisaatioUtils {
   }
 
   def addKoulutustoimijaParentToHierarkiaDescendants(
-      organisaatioHierarkia: OrganisaatioHierarkia,
-      koulutustoimija: Option[Organisaatio]
+    organisaatioHierarkia: OrganisaatioHierarkia,
+    koulutustoimija: Option[Organisaatio]
   ): OrganisaatioHierarkia = {
     val childrenWithKoulutustoimija = organisaatioHierarkia.children.map(child =>
       addKoulutustoimijaParentToHierarkiaDescendants(child, koulutustoimija)

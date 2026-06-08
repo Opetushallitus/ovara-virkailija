@@ -24,13 +24,13 @@ object AuditLogObj extends AuditLog(AuditLogger)
 
 class AuditLog(val logger: Logger) {
 
-  val audit = new Audit(logger, "ovara-virkailija", ApplicationType.VIRKAILIJA)
+  val audit               = new Audit(logger, "ovara-virkailija", ApplicationType.VIRKAILIJA)
   private val errorLogger = LoggerFactory.getLogger(classOf[AuditLog])
 
   def logWithParams(request: HttpServletRequest, operation: Operation, raporttiParams: Map[String, Any]): Unit = {
     try {
       val paramsJson = toJson(raporttiParams)
-      val target = new Target.Builder().setField("parametrit", paramsJson).build()
+      val target     = new Target.Builder().setField("parametrit", paramsJson).build()
       audit.log(getUser(request), operation, target, Changes.EMPTY)
     } catch {
       case e: Exception =>
@@ -60,8 +60,13 @@ class AuditLog(val logger: Logger) {
 
   def getUser(request: HttpServletRequest): User = {
     val userOid = getCurrentPersonOid
-    val ip = getInetAddress(request)
-    new User(userOid, ip, request.getSession(false).getId, Option(request.getHeader("User-Agent")).getOrElse("Tuntematon user agent"))
+    val ip      = getInetAddress(request)
+    new User(
+      userOid,
+      ip,
+      request.getSession(false).getId,
+      Option(request.getHeader("User-Agent")).getOrElse("Tuntematon user agent")
+    )
   }
 
   private def getCurrentPersonOid: Oid = {

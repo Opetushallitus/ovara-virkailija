@@ -15,14 +15,14 @@ object ExcelWriter {
   val LOG: Logger = LoggerFactory.getLogger("ExcelWriter")
 
   def countAloituspaikat(
-      organisaationKoulutuksetToteutuksetHakukohteet: List[OrganisaationKoulutusToteutusHakukohde]
+    organisaationKoulutuksetToteutuksetHakukohteet: List[OrganisaationKoulutusToteutusHakukohde]
   ): Int = {
     val koulutuksetToteutuksetHakukohteet = organisaationKoulutuksetToteutuksetHakukohteet
     koulutuksetToteutuksetHakukohteet.flatMap(kth => kth.koulutusToteutusHakukohde.aloituspaikat).sum
   }
 
   def flattenHierarkiaHakukohteet(
-      organisaatioHierarkiaWithHakukohteet: OrganisaatioHierarkiaWithHakukohteet
+    organisaatioHierarkiaWithHakukohteet: OrganisaatioHierarkiaWithHakukohteet
   ): List[OrganisaationKoulutusToteutusHakukohde] = {
     if (organisaatioHierarkiaWithHakukohteet.children.isEmpty) {
       organisaatioHierarkiaWithHakukohteet.hakukohteet
@@ -34,13 +34,13 @@ object ExcelWriter {
   }
 
   def createOrganisaatioHeadingRow(
-      sheet: XSSFSheet,
-      initialRowIndex: Int,
-      indentedHeadingCellStyle: XSSFCellStyle,
-      headingCellStyle: XSSFCellStyle,
-      asiointikieli: String,
-      hierarkiaWithHakukohteet: OrganisaatioHierarkiaWithHakukohteet,
-      raporttiColumnTitlesWithIndex: List[(String, Int)]
+    sheet: XSSFSheet,
+    initialRowIndex: Int,
+    indentedHeadingCellStyle: XSSFCellStyle,
+    headingCellStyle: XSSFCellStyle,
+    asiointikieli: String,
+    hierarkiaWithHakukohteet: OrganisaatioHierarkiaWithHakukohteet,
+    raporttiColumnTitlesWithIndex: List[(String, Int)]
   ): Int = {
     val hakukohteet = flattenHierarkiaHakukohteet(hierarkiaWithHakukohteet)
 
@@ -70,11 +70,11 @@ object ExcelWriter {
   }
 
   private def addOrgSubHeading(
-      sheet: XSSFSheet,
-      initialRowIndex: Int,
-      orgSubHeadingCellStyle: XSSFCellStyle,
-      organisaatioHierarkiaWithHakukohteet: OrganisaatioHierarkiaWithHakukohteet,
-      asiointikieli: String
+    sheet: XSSFSheet,
+    initialRowIndex: Int,
+    orgSubHeadingCellStyle: XSSFCellStyle,
+    organisaatioHierarkiaWithHakukohteet: OrganisaatioHierarkiaWithHakukohteet,
+    asiointikieli: String
   ) = {
     val hakukohteet = flattenHierarkiaHakukohteet(organisaatioHierarkiaWithHakukohteet)
 
@@ -97,13 +97,13 @@ object ExcelWriter {
   }
 
   private def createKoulutuksetToteutuksetHakukohteetRow(
-      sheet: XSSFSheet,
-      initialRowIndex: Int,
-      cellStyle: XSSFCellStyle,
-      hakukohteenNimiCellStyle: XSSFCellStyle,
-      kth: KoulutusToteutusHakukohdeResult,
-      asiointikieli: String,
-      translations: Map[String, String]
+    sheet: XSSFSheet,
+    initialRowIndex: Int,
+    cellStyle: XSSFCellStyle,
+    hakukohteenNimiCellStyle: XSSFCellStyle,
+    kth: KoulutusToteutusHakukohdeResult,
+    asiointikieli: String,
+    translations: Map[String, String]
   ) = {
     val hakukohteenTiedotRow = sheet.createRow(initialRowIndex)
     var cellIndex            = 0
@@ -171,19 +171,19 @@ object ExcelWriter {
   }
 
   def createKoulutuksetToteutuksetHakukohteetResultRows(
-      workbook: XSSFWorkbook,
-      sheet: XSSFSheet,
-      hierarkiatWithHakukohteet: List[OrganisaatioHierarkiaWithHakukohteet],
-      initialRowIndex: Int,
-      headingCellStyle: XSSFCellStyle,
-      bodyTextCellStyle: XSSFCellStyle,
-      hakukohteenNimiTextCellStyle: XSSFCellStyle,
-      headingFont: XSSFFont,
-      subHeadingFont: XSSFFont,
-      asiointikieli: String,
-      raporttiColumnTitlesWithIndex: List[(String, Int)],
-      raporttityyppi: String,
-      translations: Map[String, String]
+    workbook: XSSFWorkbook,
+    sheet: XSSFSheet,
+    hierarkiatWithHakukohteet: List[OrganisaatioHierarkiaWithHakukohteet],
+    initialRowIndex: Int,
+    headingCellStyle: XSSFCellStyle,
+    bodyTextCellStyle: XSSFCellStyle,
+    hakukohteenNimiTextCellStyle: XSSFCellStyle,
+    headingFont: XSSFFont,
+    subHeadingFont: XSSFFont,
+    asiointikieli: String,
+    raporttiColumnTitlesWithIndex: List[(String, Int)],
+    raporttityyppi: String,
+    translations: Map[String, String]
   ): Int = {
     var currentRowIndex = initialRowIndex
 
@@ -327,11 +327,11 @@ object ExcelWriter {
   }
 
   def writeKoulutuksetToteutuksetHakukohteetRaportti(
-      hierarkiatWithResults: List[OrganisaatioHierarkiaWithHakukohteet],
-      asiointikieli: String,
-      raporttityyppi: String,
-      translations: Map[String, String],
-      parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
+    hierarkiatWithResults: List[OrganisaatioHierarkiaWithHakukohteet],
+    asiointikieli: String,
+    raporttityyppi: String,
+    translations: Map[String, String],
+    parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
@@ -355,7 +355,7 @@ object ExcelWriter {
       )
 
       var currentRowIndex = 0
-      val titles = classOf[KoulutusToteutusHakukohdeResult].getDeclaredFields
+      val titles          = classOf[KoulutusToteutusHakukohdeResult].getDeclaredFields
         .map(_.getName)
         .toList
 
@@ -402,7 +402,14 @@ object ExcelWriter {
     workbook
   }
 
-  private def createHakuparametritSheet(translations: Map[String, String], asiointikieli: String, parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])], workbook: XSSFWorkbook, parametritSheet: XSSFSheet, sheetIndex: Int = 1): Unit = {
+  private def createHakuparametritSheet(
+    translations: Map[String, String],
+    asiointikieli: String,
+    parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])],
+    workbook: XSSFWorkbook,
+    parametritSheet: XSSFSheet,
+    sheetIndex: Int = 1
+  ): Unit = {
     workbook.setSheetName(
       sheetIndex,
       WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.hakuparametrit", "raportti.hakuparametrit"))
@@ -412,8 +419,8 @@ object ExcelWriter {
 
     // otsikkorivi
     val headingRow = parametritSheet.createRow(0)
-    val keyCell = headingRow.createCell(0)
-    val valueCell = headingRow.createCell(1)
+    val keyCell    = headingRow.createCell(0)
+    val valueCell  = headingRow.createCell(1)
     keyCell.setCellStyle(paramHeadingCellStyle)
     valueCell.setCellStyle(paramHeadingCellStyle)
     keyCell.setCellValue(translations.getOrElse("raportti.hakuehto", "raportti.hakuehto"))
@@ -422,14 +429,17 @@ object ExcelWriter {
     // hakuparametrit
     var paramRowIndex = 1
     parametrit.foreach { case (key, value) =>
-      val row = parametritSheet.createRow(paramRowIndex)
-      val keyCell = row.createCell(0)
+      val row       = parametritSheet.createRow(paramRowIndex)
+      val keyCell   = row.createCell(0)
       val valueCell = row.createCell(1)
       keyCell.setCellValue(translations.getOrElse(s"raportti.$key", key))
       if (key == "kansalaisuus") {
         value match {
           case v: List[String] =>
-            valueCell.setCellValue(v.map(valueString => ParameterUtils.getKansalaisuusluokkaTranslation(valueString, translations)).mkString(", "))
+            valueCell.setCellValue(
+              v.map(valueString => ParameterUtils.getKansalaisuusluokkaTranslation(valueString, translations))
+                .mkString(", ")
+            )
           case _ =>
             valueCell.setCellValue(value.toString)
         }
@@ -450,11 +460,15 @@ object ExcelWriter {
             }
             valueCell.setCellValue(translatedValue)
           case v: List[_] if v.forall(_.isInstanceOf[Kielistetty]) =>
-            val kielistettyValues = v.asInstanceOf[List[Kielistetty]].map(k => getKielistettyCellValue(asiointikieli, k)).mkString(", ")
+            val kielistettyValues =
+              v.asInstanceOf[List[Kielistetty]].map(k => getKielistettyCellValue(asiointikieli, k)).mkString(", ")
             valueCell.setCellValue(kielistettyValues)
           case v: List[String] =>
             // etsitään käännös ja jos ei löydy (esim oidit) laitetaan alkuperäinen arvo sellaisenaan
-            valueCell.setCellValue(v.map(valueString => translations.getOrElse(s"raportti.${valueString.toLowerCase}", valueString)).mkString(", "))
+            valueCell.setCellValue(
+              v.map(valueString => translations.getOrElse(s"raportti.${valueString.toLowerCase}", valueString))
+                .mkString(", ")
+            )
           case _ =>
             valueCell.setCellValue(value.toString)
         }
@@ -467,12 +481,12 @@ object ExcelWriter {
   }
 
   private def writeKorkeakouluKoulutuksetToteutuksetHakukohteetKoulutuksittainRows(
-      sheet: XSSFSheet,
-      bodyTextCellStyle: XSSFCellStyle,
-      currentRowIndex: Int,
-      korkeakouluKoulutuksetToteutuksetHakukohteetResults: Seq[KorkeakouluKoulutusToteutusHakukohdeResult],
-      asiointikieli: String,
-      translations: Map[String, String]
+    sheet: XSSFSheet,
+    bodyTextCellStyle: XSSFCellStyle,
+    currentRowIndex: Int,
+    korkeakouluKoulutuksetToteutuksetHakukohteetResults: Seq[KorkeakouluKoulutusToteutusHakukohdeResult],
+    asiointikieli: String,
+    translations: Map[String, String]
   ): Unit = {
     var rowIndex = currentRowIndex
     korkeakouluKoulutuksetToteutuksetHakukohteetResults.foreach(result => {
@@ -516,12 +530,12 @@ object ExcelWriter {
   }
 
   private def writeKorkeakouluKoulutuksetToteutuksetHakukohteetToteutuksittainRows(
-      sheet: XSSFSheet,
-      bodyTextCellStyle: XSSFCellStyle,
-      currentRowIndex: Int,
-      korkeakouluKoulutuksetToteutuksetHakukohteetResults: Seq[KorkeakouluKoulutusToteutusHakukohdeResult],
-      asiointikieli: String,
-      translations: Map[String, String]
+    sheet: XSSFSheet,
+    bodyTextCellStyle: XSSFCellStyle,
+    currentRowIndex: Int,
+    korkeakouluKoulutuksetToteutuksetHakukohteetResults: Seq[KorkeakouluKoulutusToteutusHakukohdeResult],
+    asiointikieli: String,
+    translations: Map[String, String]
   ): Unit = {
     var rowIndex = currentRowIndex
     korkeakouluKoulutuksetToteutuksetHakukohteetResults.foreach(result => {
@@ -557,12 +571,12 @@ object ExcelWriter {
   }
 
   private def writeKorkeakouluKoulutuksetToteutuksetHakukohteetHakukohteittainRows(
-      sheet: XSSFSheet,
-      bodyTextCellStyle: XSSFCellStyle,
-      currentRowIndex: Int,
-      korkeakouluKoulutuksetToteutuksetHakukohteetResults: Seq[KorkeakouluKoulutusToteutusHakukohdeResult],
-      asiointikieli: String,
-      translations: Map[String, String]
+    sheet: XSSFSheet,
+    bodyTextCellStyle: XSSFCellStyle,
+    currentRowIndex: Int,
+    korkeakouluKoulutuksetToteutuksetHakukohteetResults: Seq[KorkeakouluKoulutusToteutusHakukohdeResult],
+    asiointikieli: String,
+    translations: Map[String, String]
   ): Unit = {
     var rowIndex = currentRowIndex
     korkeakouluKoulutuksetToteutuksetHakukohteetResults.foreach(result => {
@@ -570,7 +584,8 @@ object ExcelWriter {
       rowIndex += 1
       var cellIndex = 0
 
-      cellIndex = writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.oppilaitosJaToimipiste, asiointikieli)
+      cellIndex =
+        writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.oppilaitosJaToimipiste, asiointikieli)
       cellIndex = writeKielistettyToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakukohteenNimi, asiointikieli)
       cellIndex = writeStrToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakukohdeOid)
       cellIndex = writeOptionTilaToCell(resultRow, bodyTextCellStyle, cellIndex, result.hakukohteenTila, translations)
@@ -606,11 +621,11 @@ object ExcelWriter {
   }
 
   def writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
-      korkeakouluKoulutuksetToteutuksetHakukohteetResults: Seq[KorkeakouluKoulutusToteutusHakukohdeResult],
-      asiointikieli: String,
-      translations: Map[String, String],
-      tulostustapa: String,
-      parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
+    korkeakouluKoulutuksetToteutuksetHakukohteetResults: Seq[KorkeakouluKoulutusToteutusHakukohdeResult],
+    asiointikieli: String,
+    translations: Map[String, String],
+    tulostustapa: String,
+    parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
@@ -777,11 +792,11 @@ object ExcelWriter {
   }
 
   def createHeadingRow(
-      sheet: XSSFSheet,
-      translations: Map[String, String],
-      currentRowIndex: Int,
-      fieldNames: List[String],
-      headingCellStyle: XSSFCellStyle
+    sheet: XSSFSheet,
+    translations: Map[String, String],
+    currentRowIndex: Int,
+    fieldNames: List[String],
+    headingCellStyle: XSSFCellStyle
   ): Int = {
     val headingRow = sheet.createRow(currentRowIndex)
     fieldNames.zipWithIndex.foreach((fieldName, index) => {
@@ -796,12 +811,12 @@ object ExcelWriter {
   }
 
   def createHeadingRowWithValintatapajonotAndYoArvosanat(
-      sheet: XSSFSheet,
-      translations: Map[String, String],
-      currentRowIndex: Int,
-      fieldNames: List[String],
-      origFieldNames: List[String],
-      headingCellStyle: XSSFCellStyle
+    sheet: XSSFSheet,
+    translations: Map[String, String],
+    currentRowIndex: Int,
+    fieldNames: List[String],
+    origFieldNames: List[String],
+    headingCellStyle: XSSFCellStyle
   ): Int = {
     val headingRow = sheet.createRow(currentRowIndex)
     fieldNames.zipWithIndex.foreach((fieldName, index) => {
@@ -821,12 +836,12 @@ object ExcelWriter {
   }
 
   private def writeToisenAsteenHakijatRows(
-      sheet: XSSFSheet,
-      bodyTextCellStyle: XSSFCellStyle,
-      currentRowIndex: Int,
-      hakijoidenHakutoiveet: Seq[ToisenAsteenHakija],
-      asiointikieli: String,
-      translations: Map[String, String]
+    sheet: XSSFSheet,
+    bodyTextCellStyle: XSSFCellStyle,
+    currentRowIndex: Int,
+    hakijoidenHakutoiveet: Seq[ToisenAsteenHakija],
+    asiointikieli: String,
+    translations: Map[String, String]
   ): Unit = {
     var rowIndex = currentRowIndex
     hakijoidenHakutoiveet.foreach(hakutoive => {
@@ -839,8 +854,13 @@ object ExcelWriter {
       cellIndex =
         writeOptionBooleanToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.turvakielto, translations)
 
-      cellIndex =
-        writeKielistettyListToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.kansalaisuudet, asiointikieli)
+      cellIndex = writeKielistettyListToCell(
+        hakijanHakutoiveRow,
+        bodyTextCellStyle,
+        cellIndex,
+        hakutoive.kansalaisuudet,
+        asiointikieli
+      )
       cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.oppijanumero)
       cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.hakemusOid)
       cellIndex =
@@ -969,10 +989,10 @@ object ExcelWriter {
   }
 
   def writeToisenAsteenHakijatRaportti(
-      hakijat: Seq[ToisenAsteenHakija],
-      asiointikieli: String,
-      translations: Map[String, String],
-      parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
+    hakijat: Seq[ToisenAsteenHakija],
+    asiointikieli: String,
+    translations: Map[String, String],
+    parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new ToisenAsteenHakijatExcel from db results")
@@ -1023,11 +1043,11 @@ object ExcelWriter {
   }
 
   def getHeadingFieldNames(
-      naytaArvosanat: Boolean,
-      naytaHetu: Boolean,
-      naytaPostiosoite: Boolean,
-      valintatapajonot: Seq[Valintatapajono],
-      arvosanat: Seq[String]
+    naytaArvosanat: Boolean,
+    naytaHetu: Boolean,
+    naytaPostiosoite: Boolean,
+    valintatapajonot: Seq[Valintatapajono],
+    arvosanat: Seq[String]
   ): List[String] = {
     val optionallyShowableFields = List("hetu", "arvosanat") ::: POSTIOSOITEFIELDS
 
@@ -1038,11 +1058,11 @@ object ExcelWriter {
 
     val showableFieldNames = fieldNames.filter(fieldName => {
       !optionallyShowableFields.contains(fieldName) ||
-        fieldName == "hetu" && naytaHetu ||
-        POSTIOSOITEFIELDS.contains(
-          fieldName
-        ) && naytaPostiosoite ||
-        fieldName == "arvosanat" && naytaArvosanat
+      fieldName == "hetu" && naytaHetu ||
+      POSTIOSOITEFIELDS.contains(
+        fieldName
+      ) && naytaPostiosoite ||
+      fieldName == "arvosanat" && naytaArvosanat
     })
 
     (for (field <- showableFieldNames) yield {
@@ -1065,13 +1085,13 @@ object ExcelWriter {
   }
 
   def createValintatapajonokohtainenTilaHeadingRow(
-      workbook: XSSFWorkbook,
-      sheet: XSSFSheet,
-      translations: Map[String, String],
-      currentRowIndex: Int,
-      fieldNames: List[String],
-      valintatapajonot: Seq[Valintatapajono],
-      naytaHetu: Boolean
+    workbook: XSSFWorkbook,
+    sheet: XSSFSheet,
+    translations: Map[String, String],
+    currentRowIndex: Int,
+    fieldNames: List[String],
+    valintatapajonot: Seq[Valintatapajono],
+    naytaHetu: Boolean
   ): Int = {
     val headingRow                      = sheet.createRow(currentRowIndex)
     val headingCellStyle: XSSFCellStyle = workbook.createCellStyle()
@@ -1105,17 +1125,17 @@ object ExcelWriter {
   }
 
   private def writeKKHakijatRows(
-      sheet: XSSFSheet,
-      bodyTextCellStyle: XSSFCellStyle,
-      currentRowIndex: Int,
-      hakijoidenHakutoiveet: Seq[KkHakija],
-      asiointikieli: String,
-      translations: Map[String, String],
-      naytaArvosanat: Boolean,
-      naytaHetu: Boolean,
-      naytaPostiosoite: Boolean,
-      distinctSortedValintatapajonotInQueryResult: Seq[Valintatapajono],
-      allSortedYoKokeet: Seq[String]
+    sheet: XSSFSheet,
+    bodyTextCellStyle: XSSFCellStyle,
+    currentRowIndex: Int,
+    hakijoidenHakutoiveet: Seq[KkHakija],
+    asiointikieli: String,
+    translations: Map[String, String],
+    naytaArvosanat: Boolean,
+    naytaHetu: Boolean,
+    naytaPostiosoite: Boolean,
+    distinctSortedValintatapajonotInQueryResult: Seq[Valintatapajono],
+    allSortedYoKokeet: Seq[String]
   ): Unit = {
     var rowIndex = currentRowIndex
     hakijoidenHakutoiveet.foreach(hakutoive => {
@@ -1125,15 +1145,21 @@ object ExcelWriter {
 
       cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.hakijanSukunimi)
       cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.hakijanEtunimi)
-      cellIndex = writeOptionBooleanToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.turvakielto, translations)
+      cellIndex =
+        writeOptionBooleanToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.turvakielto, translations)
 
       if (naytaHetu) {
         cellIndex = writeOptionStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.hetu)
       }
 
       cellIndex = writeOptionLocalDateToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.syntymaAika)
-      cellIndex =
-        writeKielistettyListToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.kansalaisuudet, asiointikieli)
+      cellIndex = writeKielistettyListToCell(
+        hakijanHakutoiveRow,
+        bodyTextCellStyle,
+        cellIndex,
+        hakutoive.kansalaisuudet,
+        asiointikieli
+      )
       cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.oppijanumero)
       cellIndex = writeStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.hakemusOid)
       cellIndex =
@@ -1174,7 +1200,7 @@ object ExcelWriter {
       cellIndex =
         writeOptionLocalDateToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.valintatiedonPvm)
 
-      val hakutoiveValintatapajonot = hakutoive.valintatapajonot.groupBy(_.valintatapajonoOid)
+      val hakutoiveValintatapajonot         = hakutoive.valintatapajonot.groupBy(_.valintatapajonoOid)
       val hakukohteenValinnanTilanKuvaukset = createHakutoiveenValintatapajonoWritableValues(
         hakutoiveValintatapajonot,
         distinctSortedValintatapajonotInQueryResult,
@@ -1257,7 +1283,7 @@ object ExcelWriter {
       cellIndex = writeOptionStrToCell(hakijanHakutoiveRow, bodyTextCellStyle, cellIndex, hakutoive.sahkoposti)
 
       if (naytaArvosanat) {
-        val hakutoiveArvosanat = hakutoive.arvosanat
+        val hakutoiveArvosanat             = hakutoive.arvosanat
         val hakutoiveenArvosanatCellValues =
           createHakutoiveenArvosanatWritableValues(hakutoiveArvosanat, allSortedYoKokeet)
         hakutoiveenArvosanatCellValues.foreach(arvosanaValue => {
@@ -1268,14 +1294,14 @@ object ExcelWriter {
   }
 
   def writeKkHakijatRaportti(
-      hakijoidenHakutoiveet: Seq[KkHakija],
-      asiointikieli: String,
-      translations: Map[String, String],
-      maybeNaytaYoArvosanat: Option[Boolean] = None,
-      maybeNaytaHetu: Option[Boolean] = None,
-      maybeNaytaPostiosoite: Option[Boolean] = None,
-      yokokeet: Vector[Koodi],
-      parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
+    hakijoidenHakutoiveet: Seq[KkHakija],
+    asiointikieli: String,
+    translations: Map[String, String],
+    maybeNaytaYoArvosanat: Option[Boolean] = None,
+    maybeNaytaHetu: Option[Boolean] = None,
+    maybeNaytaPostiosoite: Option[Boolean] = None,
+    yokokeet: Vector[Koodi],
+    parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new KkHakijatExcel from db results")
@@ -1366,7 +1392,7 @@ object ExcelWriter {
       yokokeetRowIndex = createHeadingRow(yoKokeetSheet, translations, yokokeetRowIndex, yoKoeTitles, headingCellStyle)
       // yo-kokeiden selitteet koodistosta
       yokokeet.foreach { yokoe =>
-        val row = yoKokeetSheet.createRow(yokokeetRowIndex)
+        val row       = yoKokeetSheet.createRow(yokokeetRowIndex)
         val yoRowData = List(
           yokoe.koodiarvo,
           yokoe.koodinimi(Kieli.withName(asiointikieli))
@@ -1381,7 +1407,7 @@ object ExcelWriter {
     }
 
     // Erillinen välilehti hakuparametreille
-    val parametriSheetIndex = if (naytaArvosanat) 2 else 1
+    val parametriSheetIndex        = if (naytaArvosanat) 2 else 1
     val parametritSheet: XSSFSheet = workbook.createSheet()
     createHakuparametritSheet(translations, asiointikieli, parametrit, workbook, parametritSheet, parametriSheetIndex)
 
@@ -1394,14 +1420,16 @@ object ExcelWriter {
     }
   }
 
-  def writeHakeneetHyvaksytytVastaanottaneetRaportti[T <: HakeneetHyvaksytytVastaanottaneetResult | HakeneetHyvaksytytVastaanottaneetHakukohteittain](
-      asiointikieli: String,
-      translations: Map[String, String],
-      data: List[T],
-      yksittaisetHakijat: Int,
-      naytaHakutoiveet: Boolean,
-      tulostustapa: String,
-      parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
+  def writeHakeneetHyvaksytytVastaanottaneetRaportti[
+    T <: HakeneetHyvaksytytVastaanottaneetResult | HakeneetHyvaksytytVastaanottaneetHakukohteittain
+  ](
+    asiointikieli: String,
+    translations: Map[String, String],
+    data: List[T],
+    yksittaisetHakijat: Int,
+    naytaHakutoiveet: Boolean,
+    tulostustapa: String,
+    parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new HakeneetHyvaksytytVastaanottaneet excel from db results")
@@ -1465,7 +1493,7 @@ object ExcelWriter {
             hakukohteittain.aloituspaikat
           ) ++ generateHakutoiveet(naytaHakutoiveet, hakukohteittain)
       }
-      if(tulostustapa == "hakukohteittain") {
+      if (tulostustapa == "hakukohteittain") {
         createHakukohteittainRowCells(rowData, dataRow, workbook, createBodyTextCellStyle(workbook))
       } else {
         createRowCells(rowData, dataRow, workbook, createBodyTextCellStyle(workbook))
@@ -1491,12 +1519,19 @@ object ExcelWriter {
       createHakukohteittainSummaryRowCells(summaryData, summaryRow, workbook, createSummaryCellStyle(workbook))
       currentRowIndex += 1
       // yksittäiset hakijat -rivi
-      val hakijatSummaryRow = sheet.createRow(currentRowIndex)
+      val hakijatSummaryRow  = sheet.createRow(currentRowIndex)
       val hakijatSummaryData = List(
-        "", "", // 2 tyhjää solua rivin alkuun jotta summa tulee kohdalleen
+        "",
+        "", // 2 tyhjää solua rivin alkuun jotta summa tulee kohdalleen
         translations.getOrElse("raportti.yksittaiset-hakijat", "raportti.yksittaiset-hakijat"),
-        yksittaisetHakijat)
-      createHakukohteittainSummaryRowCells(hakijatSummaryData, hakijatSummaryRow, workbook, createSummaryCellStyle(workbook))
+        yksittaisetHakijat
+      )
+      createHakukohteittainSummaryRowCells(
+        hakijatSummaryData,
+        hakijatSummaryRow,
+        workbook,
+        createSummaryCellStyle(workbook)
+      )
     } else {
       val summaryData = List(
         translations.getOrElse("raportti.yhteensa", "raportti.yhteensa"),
@@ -1514,9 +1549,9 @@ object ExcelWriter {
       createRowCells(summaryData, summaryRow, workbook, createSummaryCellStyle(workbook))
       currentRowIndex += 1
       // yksittäiset hakijat -rivi
-      val hakijatSummaryRow = sheet.createRow(currentRowIndex)
-      val hakijatSummaryData = List(translations.getOrElse("raportti.yksittaiset-hakijat", "raportti.yksittaiset-hakijat"),
-        yksittaisetHakijat)
+      val hakijatSummaryRow  = sheet.createRow(currentRowIndex)
+      val hakijatSummaryData =
+        List(translations.getOrElse("raportti.yksittaiset-hakijat", "raportti.yksittaiset-hakijat"), yksittaisetHakijat)
       createRowCells(hakijatSummaryData, hakijatSummaryRow, workbook, createSummaryCellStyle(workbook))
     }
 
@@ -1538,8 +1573,10 @@ object ExcelWriter {
     }
   }
 
-  private def generateHakutoiveet[T <: HakeneetHyvaksytytVastaanottaneetResult | HakeneetHyvaksytytVastaanottaneetHakukohteittain](naytaHakutoiveet: Boolean, item: T) = {
-    (if (naytaHakutoiveet) {
+  private def generateHakutoiveet[
+    T <: HakeneetHyvaksytytVastaanottaneetResult | HakeneetHyvaksytytVastaanottaneetHakukohteittain
+  ](naytaHakutoiveet: Boolean, item: T) = {
+    if (naytaHakutoiveet) {
       List(
         item.toive1,
         item.toive2,
@@ -1551,10 +1588,12 @@ object ExcelWriter {
       )
     } else {
       List()
-    })
+    }
   }
 
-  private def generateHakutoiveetSum[T <: HakeneetHyvaksytytVastaanottaneetResult | HakeneetHyvaksytytVastaanottaneetHakukohteittain](data: List[T], naytaHakutoiveet: Boolean) = {
+  private def generateHakutoiveetSum[
+    T <: HakeneetHyvaksytytVastaanottaneetResult | HakeneetHyvaksytytVastaanottaneetHakukohteittain
+  ](data: List[T], naytaHakutoiveet: Boolean) = {
     if (naytaHakutoiveet) {
       List(
         data.map(_.toive1).sum,
@@ -1570,16 +1609,18 @@ object ExcelWriter {
     }
   }
 
-  def writeKkHakeneetHyvaksytytVastaanottaneetRaportti[T <: KkHakeneetHyvaksytytVastaanottaneetResult | KkHakeneetHyvaksytytVastaanottaneetHakukohteittain](
-      asiointikieli: String,
-      translations: Map[String, String],
-      data: List[T],
-      yksittaisetHakijat: Int,
-      ensikertalaisetYksittaisetHakijat: Int,
-      maksuvelvollisetYksittaisetHakijat: Int,
-      naytaHakutoiveet: Boolean,
-      tulostustapa: String,
-      parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
+  def writeKkHakeneetHyvaksytytVastaanottaneetRaportti[
+    T <: KkHakeneetHyvaksytytVastaanottaneetResult | KkHakeneetHyvaksytytVastaanottaneetHakukohteittain
+  ](
+    asiointikieli: String,
+    translations: Map[String, String],
+    data: List[T],
+    yksittaisetHakijat: Int,
+    ensikertalaisetYksittaisetHakijat: Int,
+    maksuvelvollisetYksittaisetHakijat: Int,
+    naytaHakutoiveet: Boolean,
+    tulostustapa: String,
+    parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new KkHakeneetHyvaksytytVastaanottaneet excel from db results")
@@ -1599,10 +1640,10 @@ object ExcelWriter {
         ++ KK_HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES
         ++ KK_HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_ALOITUSPAIKAT_TITLES
         ++ (
-        if (naytaHakutoiveet)
-          KK_HAKUTOIVEET_TITLES
-        else
-          List()
+          if (naytaHakutoiveet)
+            KK_HAKUTOIVEET_TITLES
+          else
+            List()
         )
       currentRowIndex = createHeadingRow(sheet, translations, currentRowIndex, otsikkorivi, headingCellStyle)
       val otsikotWithIndex = otsikkorivi.zipWithIndex
@@ -1626,21 +1667,21 @@ object ExcelWriter {
             item.valinnanAloituspaikat,
             item.aloituspaikat
           ) ++ (if (naytaHakutoiveet) {
-            List(
-              item.toive1,
-              item.toive2,
-              item.toive3,
-              item.toive4,
-              item.toive5,
-              item.toive6
-            )
-          } else {
-            List()
-          })
+                  List(
+                    item.toive1,
+                    item.toive2,
+                    item.toive3,
+                    item.toive4,
+                    item.toive5,
+                    item.toive6
+                  )
+                } else {
+                  List()
+                })
           createHakukohteittainRowCells(rowData, dataRow, workbook, createBodyTextCellStyle(workbook))
           currentRowIndex += 1
       }
-      val summaryRow = sheet.createRow(currentRowIndex)
+      val summaryRow  = sheet.createRow(currentRowIndex)
       val summaryData = {
         // 2 tyhjää solua rivin alkuun jotta summa tulee kohdalleen
         List("", "") ++
@@ -1658,22 +1699,22 @@ object ExcelWriter {
             data.map(_.valinnanAloituspaikat).sum,
             data.map(_.aloituspaikat).sum
           ) ++ (if (naytaHakutoiveet) {
-          List(
-            data.map(_.toive1).sum,
-            data.map(_.toive2).sum,
-            data.map(_.toive3).sum,
-            data.map(_.toive4).sum,
-            data.map(_.toive5).sum,
-            data.map(_.toive6).sum
-          )
-        } else {
-          List()
-        })
+                  List(
+                    data.map(_.toive1).sum,
+                    data.map(_.toive2).sum,
+                    data.map(_.toive3).sum,
+                    data.map(_.toive4).sum,
+                    data.map(_.toive5).sum,
+                    data.map(_.toive6).sum
+                  )
+                } else {
+                  List()
+                })
       }
       createHakukohteittainSummaryRowCells(summaryData, summaryRow, workbook, createSummaryCellStyle(workbook))
       currentRowIndex += 1
       // yksittäiset hakijat -rivi
-      val hakijatSummaryRow = sheet.createRow(currentRowIndex)
+      val hakijatSummaryRow  = sheet.createRow(currentRowIndex)
       val hakijatSummaryData =
         List(
           "",
@@ -1690,27 +1731,31 @@ object ExcelWriter {
           maksuvelvollisetYksittaisetHakijat
         )
 
-      createHakukohteittainSummaryRowCells(hakijatSummaryData, hakijatSummaryRow, workbook, createSummaryCellStyle(workbook))
+      createHakukohteittainSummaryRowCells(
+        hakijatSummaryData,
+        hakijatSummaryRow,
+        workbook,
+        createSummaryCellStyle(workbook)
+      )
 
       // Erillinen välilehti hakuparametreille
       val parametritSheet: XSSFSheet = workbook.createSheet()
       createHakuparametritSheet(translations, asiointikieli, parametrit, workbook, parametritSheet)
-      
+
       // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
       otsikotWithIndex.foreach { case (title, index) =>
         sheet.autoSizeColumn(index)
       }
-    }
-    else {
+    } else {
       // muut tulostustavat
       val otsikkoList = tulostustapa match {
-        case "oppilaitoksittain" => List("oppilaitos")
-        case "toimipisteittain" => List("toimipiste")
-        case "koulutustoimijoittain" => List("koulutustoimija")
+        case "oppilaitoksittain"       => List("oppilaitos")
+        case "toimipisteittain"        => List("toimipiste")
+        case "koulutustoimijoittain"   => List("koulutustoimija")
         case "okm-ohjauksen-aloittain" => List("okm-ohjauksen-ala")
-        case "hauittain" => List("haku")
-        case "hakukohderyhmittain" => List("hakukohderyhma")
-        case "kansalaisuuksittain" => List("kansalaisuus")
+        case "hauittain"               => List("haku")
+        case "hakukohderyhmittain"     => List("hakukohderyhma")
+        case "kansalaisuuksittain"     => List("kansalaisuus")
       }
 
       val fieldNames =
@@ -1718,51 +1763,50 @@ object ExcelWriter {
           otsikkoList ++ KK_HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES ++ (
             if (tulostustapa != "kansalaisuuksittain") KK_HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_ALOITUSPAIKAT_TITLES
             else List()
-            )
+          )
             ++ KK_HAKUTOIVEET_TITLES
         } else {
           otsikkoList ++ KK_HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_COMMON_TITLES ++ (
             if (tulostustapa != "kansalaisuuksittain") KK_HAKENEET_HYVAKSYTYT_VASTAANOTTANEET_ALOITUSPAIKAT_TITLES
             else List()
-            )
+          )
         }
       val fieldNamesWithIndex = fieldNames.zipWithIndex
 
       currentRowIndex = createHeadingRow(sheet, translations, currentRowIndex, fieldNames, headingCellStyle)
 
-      data.foreach {
-        case item: KkHakeneetHyvaksytytVastaanottaneetResult =>
-          val dataRow = sheet.createRow(currentRowIndex)
-          val rowData =
-            List(
-              item.otsikko(Kieli.withName(asiointikieli)),
-              item.hakijat,
-              item.ensisijaisia,
-              item.ensikertalaisia,
-              item.hyvaksytyt,
-              item.vastaanottaneet,
-              item.lasna,
-              item.poissa,
-              item.ilmYht,
-              item.maksuvelvollisia,
-            ) ++ (if (tulostustapa != "kansalaisuuksittain") {
-              List(item.valinnanAloituspaikat, item.aloituspaikat)
-            } else {
-              List()
-            }) ++ (if (naytaHakutoiveet) {
-              List(
-                item.toive1,
-                item.toive2,
-                item.toive3,
-                item.toive4,
-                item.toive5,
-                item.toive6
-              )
-            } else {
-              List()
-            })
-          createRowCells(rowData, dataRow, workbook, createBodyTextCellStyle(workbook))
-          currentRowIndex += 1
+      data.foreach { case item: KkHakeneetHyvaksytytVastaanottaneetResult =>
+        val dataRow = sheet.createRow(currentRowIndex)
+        val rowData =
+          List(
+            item.otsikko(Kieli.withName(asiointikieli)),
+            item.hakijat,
+            item.ensisijaisia,
+            item.ensikertalaisia,
+            item.hyvaksytyt,
+            item.vastaanottaneet,
+            item.lasna,
+            item.poissa,
+            item.ilmYht,
+            item.maksuvelvollisia
+          ) ++ (if (tulostustapa != "kansalaisuuksittain") {
+                  List(item.valinnanAloituspaikat, item.aloituspaikat)
+                } else {
+                  List()
+                }) ++ (if (naytaHakutoiveet) {
+                         List(
+                           item.toive1,
+                           item.toive2,
+                           item.toive3,
+                           item.toive4,
+                           item.toive5,
+                           item.toive6
+                         )
+                       } else {
+                         List()
+                       })
+        createRowCells(rowData, dataRow, workbook, createBodyTextCellStyle(workbook))
+        currentRowIndex += 1
       }
 
       if (!tulostustapa.equals("hakukohderyhmittain")) {
@@ -1772,7 +1816,7 @@ object ExcelWriter {
       }
 
       // yksittäiset hakijat -rivi
-      val hakijatSummaryRow = sheet.createRow(currentRowIndex)
+      val hakijatSummaryRow  = sheet.createRow(currentRowIndex)
       val hakijatSummaryData =
         List(
           translations.getOrElse("raportti.yksittaiset-hakijat", "raportti.yksittaiset-hakijat"),
@@ -1809,13 +1853,13 @@ object ExcelWriter {
   }
 
   private def createSummaryRow(
-      translations: Map[String, String],
-      data: List[KkHakeneetHyvaksytytVastaanottaneetResult | KkHakeneetHyvaksytytVastaanottaneetHakukohteittain],
-      naytaHakutoiveet: Boolean,
-      sheet: XSSFSheet,
-      currentRowIndex: Int,
-      workbook: XSSFWorkbook,
-      tulostustapa: String
+    translations: Map[String, String],
+    data: List[KkHakeneetHyvaksytytVastaanottaneetResult | KkHakeneetHyvaksytytVastaanottaneetHakukohteittain],
+    naytaHakutoiveet: Boolean,
+    sheet: XSSFSheet,
+    currentRowIndex: Int,
+    workbook: XSSFWorkbook,
+    tulostustapa: String
   ): Unit = {
     // yhteensä-rivi
     val summaryRow = sheet.createRow(currentRowIndex)
@@ -1838,21 +1882,21 @@ object ExcelWriter {
           data.map(_.ilmYht).sum,
           data.map(_.maksuvelvollisia).sum
         ) ++ (if (tulostustapa != "kansalaisuuksittain") {
-        List(data.map(_.valinnanAloituspaikat).sum, data.map(_.aloituspaikat).sum)
-      } else {
-        List()
-      }) ++ (if (naytaHakutoiveet) {
-        List(
-          data.map(_.toive1).sum,
-          data.map(_.toive2).sum,
-          data.map(_.toive3).sum,
-          data.map(_.toive4).sum,
-          data.map(_.toive5).sum,
-          data.map(_.toive6).sum
-        )
-      } else {
-        List()
-      })
+                List(data.map(_.valinnanAloituspaikat).sum, data.map(_.aloituspaikat).sum)
+              } else {
+                List()
+              }) ++ (if (naytaHakutoiveet) {
+                       List(
+                         data.map(_.toive1).sum,
+                         data.map(_.toive2).sum,
+                         data.map(_.toive3).sum,
+                         data.map(_.toive4).sum,
+                         data.map(_.toive5).sum,
+                         data.map(_.toive6).sum
+                       )
+                     } else {
+                       List()
+                     })
     }
     if (tulostustapa == "hakukohteittain") {
       createHakukohteittainSummaryRowCells(summaryData, summaryRow, workbook, createSummaryCellStyle(workbook))
@@ -1862,10 +1906,10 @@ object ExcelWriter {
   }
 
   private def createRowCells(
-      rowData: List[String | Int],
-      row: XSSFRow,
-      workbook: XSSFWorkbook,
-      firstCellStyle: XSSFCellStyle
+    rowData: List[String | Int],
+    row: XSSFRow,
+    workbook: XSSFWorkbook,
+    firstCellStyle: XSSFCellStyle
   ): Unit = {
     val numericCellStyle = createNumericCellStyle(workbook)
     rowData.zipWithIndex.foreach { case (value, index) =>
@@ -1883,11 +1927,11 @@ object ExcelWriter {
   }
 
   private def createHakukohteittainRowCells(
-                              rowData: List[String | Int],
-                              row: XSSFRow,
-                              workbook: XSSFWorkbook,
-                              firstCellStyle: XSSFCellStyle
-                            ): Unit = {
+    rowData: List[String | Int],
+    row: XSSFRow,
+    workbook: XSSFWorkbook,
+    firstCellStyle: XSSFCellStyle
+  ): Unit = {
     val numericCellStyle = createNumericCellStyle(workbook)
     rowData.zipWithIndex.foreach { case (value, index) =>
       val cell = row.createCell(index)
@@ -1898,17 +1942,17 @@ object ExcelWriter {
       }
       value match {
         case intValue: Int => cell.setCellValue(intValue)
-        case _ => cell.setCellValue(value.toString)
+        case _             => cell.setCellValue(value.toString)
       }
     }
   }
 
   private def createHakukohteittainSummaryRowCells(
-                              rowData: List[String | Int],
-                              row: XSSFRow,
-                              workbook: XSSFWorkbook,
-                              headingCellStyle: XSSFCellStyle
-                            ): Unit = {
+    rowData: List[String | Int],
+    row: XSSFRow,
+    workbook: XSSFWorkbook,
+    headingCellStyle: XSSFCellStyle
+  ): Unit = {
     val numericCellStyle = createNumericCellStyle(workbook)
     rowData.zipWithIndex.foreach { case (value, index) =>
       val cell = row.createCell(index)
@@ -1919,7 +1963,7 @@ object ExcelWriter {
       }
       value match {
         case intValue: Int => cell.setCellValue(intValue)
-        case _ => cell.setCellValue(value.toString)
+        case _             => cell.setCellValue(value.toString)
       }
     }
   }

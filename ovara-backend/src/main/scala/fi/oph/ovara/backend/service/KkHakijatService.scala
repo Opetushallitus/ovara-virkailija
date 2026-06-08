@@ -1,7 +1,7 @@
 package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.domain.{KkHakija, Koodi}
-import fi.oph.ovara.backend.raportointi.dto.{ValidatedKkHakijatParams, buildKkHakijatParamsForExcel}
+import fi.oph.ovara.backend.raportointi.dto.{buildKkHakijatParamsForExcel, ValidatedKkHakijatParams}
 import fi.oph.ovara.backend.repository.{CommonRepository, KkHakijatRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -14,11 +14,11 @@ import scala.util.{Failure, Success, Try}
 @Component
 @Service
 class KkHakijatService(
-    kkHakijatRepository: KkHakijatRepository,
-    commonRepository: CommonRepository,
-    userService: UserService,
-    commonService: CommonService,
-    lokalisointiService: LokalisointiService
+  kkHakijatRepository: KkHakijatRepository,
+  commonRepository: CommonRepository,
+  userService: UserService,
+  commonService: CommonService,
+  lokalisointiService: LokalisointiService
 ) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[KkHakijatService]);
 
@@ -26,28 +26,28 @@ class KkHakijatService(
   val db: ReadOnlyDatabase = null
 
   def get(
-      haut: List[String],
-      oppilaitokset: List[String],
-      toimipisteet: List[String],
-      hakukohteet: List[String],
-      valintatiedot: List[String],
-      vastaanottotiedot: List[String],
-      hakukohderyhmat: List[String],
-      kansalaisuusluokat: List[String],
-      markkinointilupa: Option[Boolean],
-      naytaYoArvosanat: Boolean,
-      naytaHetu: Boolean,
-      naytaPostiosoite: Boolean
+    haut: List[String],
+    oppilaitokset: List[String],
+    toimipisteet: List[String],
+    hakukohteet: List[String],
+    valintatiedot: List[String],
+    vastaanottotiedot: List[String],
+    hakukohderyhmat: List[String],
+    kansalaisuusluokat: List[String],
+    markkinointilupa: Option[Boolean],
+    naytaYoArvosanat: Boolean,
+    naytaHetu: Boolean,
+    naytaPostiosoite: Boolean
   ): Either[String, XSSFWorkbook] = {
     val user          = userService.getEnrichedUserDetails
     val asiointikieli = user.asiointikieli.getOrElse("fi")
 
     val translations = lokalisointiService.getOvaraTranslations(asiointikieli)
 
-    val authorities               = user.authorities
-    val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
+    val authorities                 = user.authorities
+    val kayttooikeusOrganisaatiot   = AuthoritiesUtil.getKayttooikeusOids(authorities)
     val kayttooikeusHakukohderyhmat = AuthoritiesUtil.filterHakukohderyhmaOids(kayttooikeusOrganisaatiot)
-    val isOphPaakayttaja          = AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)
+    val isOphPaakayttaja            = AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOrganisaatiot)
 
     val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
@@ -75,25 +75,30 @@ class KkHakijatService(
         "kkHakijatRepository.selectWithParams"
       )
 
-      val sortedList = queryResult.sortBy(resultRow => (resultRow.hakijanSukunimi.toLowerCase, resultRow.hakijanEtunimi.toLowerCase(), resultRow.oppijanumero))
+      val sortedList = queryResult.sortBy(resultRow =>
+        (resultRow.hakijanSukunimi.toLowerCase, resultRow.hakijanEtunimi.toLowerCase(), resultRow.oppijanumero)
+      )
 
       val yokokeet = {
-        if(Some(naytaYoArvosanat).getOrElse(false))
+        if (Some(naytaYoArvosanat).getOrElse(false))
           db.run(commonRepository.selectDistinctYokokeet, "selectDistinctYokokeet")
         else
           Vector()
       }
 
-      val raporttiParamNames = db.run(
-        kkHakijatRepository.hakuParamNamesQuery(
-          haut,
-          oppilaitokset,
-          toimipisteet,
-          hakukohderyhmat,
-          hakukohteet,
-        ),
-        "hakuParamNamesQuery"
-      ).map(param => param.parametri -> param.nimet).toMap
+      val raporttiParamNames = db
+        .run(
+          kkHakijatRepository.hakuParamNamesQuery(
+            haut,
+            oppilaitokset,
+            toimipisteet,
+            hakukohderyhmat,
+            hakukohteet
+          ),
+          "hakuParamNamesQuery"
+        )
+        .map(param => param.parametri -> param.nimet)
+        .toMap
 
       val raporttiParams = buildKkHakijatParamsForExcel(
         ValidatedKkHakijatParams(
@@ -110,7 +115,8 @@ class KkHakijatService(
           naytaHetu,
           naytaPostiosoite
         ),
-        raporttiParamNames)
+        raporttiParamNames
+      )
 
       ExcelWriter.writeKkHakijatRaportti(
         sortedList,

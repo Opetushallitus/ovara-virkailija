@@ -6,6 +6,7 @@ import org.json4s.JsonAST.{JObject, JString}
 import org.json4s.MonadicJValue.jvalueToMonadic
 import org.json4s.jackson.Serialization.write
 import org.json4s.{
+  jvalue2extractable,
   CustomKeySerializer,
   CustomSerializer,
   DefaultFormats,
@@ -13,8 +14,7 @@ import org.json4s.{
   Formats,
   JNull,
   JValue,
-  MappingException,
-  jvalue2extractable
+  MappingException
 }
 
 import java.time.LocalDate
@@ -130,14 +130,14 @@ trait GenericOvaraFormats {
           Option(LocalDate.from(ISO_LOCAL_DATE_TIME_FORMATTER.parse(str)))
         }
 
-        val alkamiskausityyppi = (s \ "alkamiskausityyppi").extract[String]
+        val alkamiskausityyppi   = (s \ "alkamiskausityyppi").extract[String]
         val alkamiskausikoodiuri = s \ "koulutuksenAlkamiskausiKoodiUri" match {
           case JString(kausikoodiuri) => Some(kausikoodiuri)
-          case _ => None
+          case _                      => None
         }
         val alkamisvuosi = s \ "koulutuksenAlkamisvuosi" match {
           case JString(kausikoodiuri) => Some(kausikoodiuri)
-          case _ => None
+          case _                      => None
         }
         val alkamispaivamaara = s \ "koulutuksenAlkamispaivamaara" match {
           case JString(alkaaStr) => parseLocalDate(alkaaStr)

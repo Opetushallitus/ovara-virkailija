@@ -21,10 +21,12 @@ class ValpasService(repository: ValpasRepository, mapper: ObjectMapper) {
         combineWithHakutoiveet(hakemusRows.filter(_.isAktiivinen.contains(true)))
       case hakemusRows =>
         combineWithHakutoiveet(hakemusRows)
-    }.toEither.left.map { exception =>
-      LOG.error("Error fetching Valpas information", exception)
-      "virhe.tietokanta"
-    }
+    }.toEither
+      .left
+      .map { exception =>
+        LOG.error("Error fetching Valpas information", exception)
+        "virhe.tietokanta"
+      }
   }
 
   private def combineWithHakutoiveet(hakemusRows: Seq[HakemusRow]): Seq[Hakemus] = {

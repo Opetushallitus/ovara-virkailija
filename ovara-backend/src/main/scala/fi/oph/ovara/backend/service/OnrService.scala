@@ -35,7 +35,7 @@ class OnrService {
     LOG.info("Fetching asiointikieli from oppijanumerorekisteri")
     val url = s"$opintopolku_virkailija_domain/oppijanumerorekisteri-service/henkilo/$personOid/asiointiKieli"
     fetch(url) match {
-      case Left(e)  =>
+      case Left(e) =>
         LOG.info(s"Failed to fetch asiointikieli for personOid $personOid: ${e.getMessage}")
         Left(e)
       case Right(o) => Right(o)
