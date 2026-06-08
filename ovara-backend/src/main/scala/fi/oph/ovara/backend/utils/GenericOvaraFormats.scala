@@ -12,6 +12,7 @@ import org.json4s.{
   DefaultFormats,
   Extraction,
   Formats,
+  JNothing,
   JNull,
   JValue,
   MappingException
@@ -78,9 +79,18 @@ trait GenericOvaraFormats {
 
         Valintatapajono(
           valintatapajonoOid = (s \ "valintatapajono_oid").extract[String],
-          valintatapajononNimi = (s \ "valintatapajono_nimi").extract[String],
-          valinnanTila = (s \ "valinnan_tila").extract[String],
-          valinnanTilanKuvaus = (s \ "valinnantilan_kuvauksen_teksti").extract[Kielistetty]
+          valintatapajononNimi = (s \ "valintatapajono_nimi") match {
+            case JNull | JNothing => "Valintatapajono"
+            case v                => v.extract[String]
+          },
+          valinnanTila = (s \ "valinnan_tila") match {
+            case JNull | JNothing => ""
+            case v                => v.extract[String]
+          },
+          valinnanTilanKuvaus = (s \ "valinnantilan_kuvauksen_teksti") match {
+            case JNull | JNothing => Map.empty
+            case v                => v.extract[Kielistetty]
+          }
         )
       },
       { case v: Valintatapajono =>
