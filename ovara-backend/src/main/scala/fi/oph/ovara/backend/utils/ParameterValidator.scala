@@ -30,6 +30,7 @@ object ParameterValidator {
   private val opiskeluoikeudenTilat = Set("paatettavissa", "paatetty")
   private val oidPattern            = """^1\.\d{4}\.\w{1,}$""".r
   private val koodiarvoPattern      = """^\d+$""".r
+  val hetuPattern: Regex            = """^\d{6}[-+A]\d{3}[0-9A-Y]$""".r
 
   val TULOSTUSTAVAT = Set(
     "koulutustoimijoittain",
@@ -83,6 +84,11 @@ object ParameterValidator {
   def validateOrganisaatioOid(opt: Option[String], fieldName: String): Option[String] =
     opt.filter(_.nonEmpty).collect {
       case oid if !organisaatioOidPattern.matches(oid) => s"$fieldName.invalid.org"
+    }
+
+  def validateHetu(opt: Option[String]): Option[String] =
+    opt.filter(_.nonEmpty).collect {
+      case hetu if !hetuPattern.matches(hetu) => "hetu.invalid"
     }
 
   def validateBoolean(value: String, fieldName: String): Option[String] = {
@@ -375,10 +381,10 @@ object ParameterValidator {
     params: RawKkPaatettavatOpiskeluoikeudetParams
   ): Either[List[String], ValidatedKkPaatettavatOpiskeluoikeudetParams] = {
     val errors = List(
-      validateOrganisaatioOidList(params.oppilaitokset, "oppilaitokset"),
+      validateOrganisaatioOid(Some(params.oppilaitos), "oppilaitokset"),
       validateAlphanumeric(params.sukunimi, "sukunimi"),
       validateAlphanumeric(params.etunimet, "etunimet"),
-      validateNumeric(params.hetu, "hetu"),
+      validateHetu(params.hetu),
       validateOid(params.oppijanumero, "oppijanumero"),
       valueBelongsToSetOfValidValues(params.opiskeluoikeudenTila, "opiskeluoikeuden-tila", opiskeluoikeudenTilat)
     ).flatten
@@ -388,7 +394,7 @@ object ParameterValidator {
     } else {
       Right(
         ValidatedKkPaatettavatOpiskeluoikeudetParams(
-          params.oppilaitokset,
+          params.oppilaitos,
           params.sukunimi,
           params.etunimet,
           params.hetu,
