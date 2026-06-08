@@ -5,12 +5,13 @@ import fi.oph.ovara.backend.raportointi.dto.{
   RawHakijatParams,
   RawKkHakeneetHyvaksytytVastaanottaneetParams,
   RawKkHakijatParams,
+  RawKkPaatettavatOpiskeluoikeudetParams,
   RawKoulutuksetToteutuksetHakukohteetParams,
   ValidatedHakeneetHyvaksytytVastaanottaneetParams,
   ValidatedKkHakeneetHyvaksytytVastaanottaneetParams,
+  ValidatedKkPaatettavatOpiskeluoikeudetParams,
   ValidatedKoulutuksetToteutuksetHakukohteetParams
 }
-import fi.oph.ovara.backend.utils.AuditOperation.KoulutuksetToteutuksetHakukohteet
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -305,6 +306,54 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
       naytaHakutoiveet = true
     )
     val result = ParameterValidator.validateKkHakeneetHyvaksytytVastaanottaneetParams(params)
+
+    result shouldBe Right(expected)
+  }
+
+  "validateKkPaatettavatOpiskeluoikeudetParams" should "return errors for invalid parameters" in {
+    val params = RawKkPaatettavatOpiskeluoikeudetParams(
+      oppilaitos = "invalid-oid",
+      sukunimi = Some("%"),
+      etunimet = Some("?"),
+      hetu = Some("invalid"),
+      oppijanumero = Some("invalid"),
+      opiskeluoikeudenTila = Some("invalid-tila")
+    )
+
+    val result = ParameterValidator.validateKkPaatettavatOpiskeluoikeudetParams(params)
+
+    result shouldBe Left(
+      List(
+        "oppilaitokset.invalid.org",
+        "sukunimi.invalid",
+        "etunimet.invalid",
+        "hetu.invalid",
+        "oppijanumero.invalid.oid",
+        "opiskeluoikeuden-tila.invalid"
+      )
+    )
+  }
+
+  it should "return no errors for valid parameters" in {
+
+    val params = RawKkPaatettavatOpiskeluoikeudetParams(
+      oppilaitos = "1.2.246.562.10.52251087186",
+      sukunimi = Some("Testi"),
+      etunimet = Some("Testaaja"),
+      hetu = Some("010101-123A"),
+      oppijanumero = Some("1.2.246.562.10.55711304158"),
+      opiskeluoikeudenTila = Some("paatettavissa")
+    )
+
+    val expected = ValidatedKkPaatettavatOpiskeluoikeudetParams(
+      oppilaitos = "1.2.246.562.10.52251087186",
+      sukunimi = Some("Testi"),
+      etunimet = Some("Testaaja"),
+      hetu = Some("010101-123A"),
+      oppijanumero = Some("1.2.246.562.10.55711304158"),
+      opiskeluoikeudenTila = Some("paatettavissa")
+    )
+    val result = ParameterValidator.validateKkPaatettavatOpiskeluoikeudetParams(params)
 
     result shouldBe Right(expected)
   }

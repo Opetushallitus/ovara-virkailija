@@ -15,6 +15,7 @@ import {
   getOppilaitoksetToShow,
   getToimipisteetToShow,
 } from '@/app/lib/utils';
+import { usePaatettavatOpiskeluoikeudetSearchParams } from '@/app/hooks/searchParams/usePaatettavatOpiskeluoikeudetSearchParams';
 
 const getOrganisaatioOptions = (
   locale: string,
@@ -94,6 +95,43 @@ export const Koulutustoimija = ({
         value={selectedKoulutustoimija ?? ''}
         options={getOrganisaatioOptions(locale, koulutustoimijat)}
         onChange={changeKoulutustoimija}
+      />
+    </Box>
+  );
+};
+
+export const OppilaitosSelect = ({
+  organisaatiot,
+  required = false,
+}: {
+  organisaatiot: Array<OrganisaatioHierarkia> | null;
+  required?: boolean;
+}) => {
+  const { t } = useTranslate();
+  const user = useAuthorizedUser();
+  const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
+
+  const { selectedOppilaitos, setSelectedOppilaitos } =
+    usePaatettavatOpiskeluoikeudetSearchParams();
+
+  const oppilaitokset = getOppilaitoksetToShow(organisaatiot, null);
+
+  const changeOppilaitos = (
+    _: React.SyntheticEvent,
+    value: SelectOption | null,
+  ) => {
+    setSelectedOppilaitos(isNullish(value) ? null : value?.value);
+  };
+
+  return (
+    <Box>
+      <ComboBox
+        id="oppilaitos"
+        label={t('raportti.oppilaitos')}
+        value={selectedOppilaitos ?? ''}
+        options={getOrganisaatioOptions(locale, oppilaitokset)}
+        onChange={changeOppilaitos}
+        required={required}
       />
     </Box>
   );
