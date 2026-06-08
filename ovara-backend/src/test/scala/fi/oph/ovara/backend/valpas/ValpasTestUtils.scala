@@ -47,7 +47,7 @@ trait ValpasTestUtils {
           'Gemensamma',
           'Joint application',
           'haunkohdejoukko_11#1',
-          '[{"alkaa": "2024-08-31T23:59", "paattyy": "2027-08-31T23:59"},{"alkaa": "2026-08-31T23:59", "paattyy": "2027-09-30T23:59"},{"alkaa": "2022-08-31T23:59", "paattyy": "2023-08-31T23:59"}]'
+          '[{"alkaa": "2024-08-31T23:59", "paattyy": "2027-08-31T23:59"},{"alkaa": "2026-08-31", "paattyy": "2027-09-30"},{"alkaa": "2022-08-31T23:59", "paattyy": "2023-08-31T23:59"}]'
           )""",
       "Insert test haku"
     )
