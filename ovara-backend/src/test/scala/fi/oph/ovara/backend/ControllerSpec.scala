@@ -30,6 +30,7 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
     val mockKkHakijatService                           = mock(classOf[KkHakijatService])
     val mockHakeneetHyvaksytytVastaanottaneetService   = mock(classOf[HakeneetHyvaksytytVastaanottaneetService])
     val mockKkHakeneetHyvaksytytVastaanottaneetService = mock(classOf[KkHakeneetHyvaksytytVastaanottaneetService])
+    val mockPaatettavatOpiskeluoikeudetService         = mock(classOf[KkPaatettavatOpiskeluoikeudetService])
     val mockRequest                                    = mock(classOf[HttpServletRequest])
     val mockResponse                                   = mock(classOf[HttpServletResponse])
     val mockAudit                                      = mock(classOf[Audit])
@@ -49,6 +50,7 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
       mockKkHakijatService,
       mockHakeneetHyvaksytytVastaanottaneetService,
       mockKkHakeneetHyvaksytytVastaanottaneetService,
+      mockPaatettavatOpiskeluoikeudetService,
       mockUserService,
       mockAuditLog
     )
@@ -132,6 +134,7 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
     val mockKkHakijatService                           = mock(classOf[KkHakijatService])
     val mockHakeneetHyvaksytytVastaanottaneetService   = mock(classOf[HakeneetHyvaksytytVastaanottaneetService])
     val mockKkHakeneetHyvaksytytVastaanottaneetService = mock(classOf[KkHakeneetHyvaksytytVastaanottaneetService])
+    val mockPaatettavatOpiskeluoikeudetService         = mock(classOf[KkPaatettavatOpiskeluoikeudetService])
     val mockRequest                                    = mock(classOf[HttpServletRequest])
     val mockResponse                                   = mock(classOf[HttpServletResponse])
     val mockAudit                                      = mock(classOf[Audit])
@@ -153,6 +156,7 @@ class ControllerSpec extends AnyFlatSpec with Matchers {
       mockKkHakijatService,
       mockHakeneetHyvaksytytVastaanottaneetService,
       mockKkHakeneetHyvaksytytVastaanottaneetService,
+      mockPaatettavatOpiskeluoikeudetService,
       mockUserService,
       mockAuditLog
     )

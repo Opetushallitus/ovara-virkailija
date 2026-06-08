@@ -28,7 +28,7 @@ class KkPaatettavatOpiskeluoikeudetService(
   val LOG: Logger = LoggerFactory.getLogger(classOf[KorkeakouluKoulutuksetToteutuksetHakukohteetService])
 
   def get(
-    oppilaitokset: List[String],
+    oppilaitos: String,
     sukunimi: Option[String],
     etunimet: Option[String],
     hetu: Option[String],
@@ -43,17 +43,17 @@ class KkPaatettavatOpiskeluoikeudetService(
 
     val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
-      oppilaitosOids = oppilaitokset,
+      oppilaitosOids = List(oppilaitos),
       List.empty
     )
     LOG.info(s"organization OIDs for query: $orgOidsForQuery")
-    val isOrganisaatioRajain = oppilaitokset.nonEmpty && orgOidsForQuery.nonEmpty
+    val isOrganisaatioRajain = oppilaitos.nonEmpty && orgOidsForQuery.nonEmpty
 
     Try {
       // TODO OPHYOS-193
       val raporttiParams = buildKkPaatettavatOpiskeluoikeudetParamsForExcel(
         ValidatedKkPaatettavatOpiskeluoikeudetParams(
-          oppilaitokset,
+          oppilaitos,
           sukunimi,
           etunimet,
           hetu,

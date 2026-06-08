@@ -19,17 +19,7 @@ import fi.oph.ovara.backend.raportointi.dto.{
   RawKkPaatettavatOpiskeluoikeudetParams,
   RawKoulutuksetToteutuksetHakukohteetParams
 }
-import fi.oph.ovara.backend.service.{
-  CommonService,
-  HakeneetHyvaksytytVastaanottaneetService,
-  KkHakeneetHyvaksytytVastaanottaneetService,
-  KkHakijatService,
-  KkPaatettavatOpiskeluoikeudetService,
-  KorkeakouluKoulutuksetToteutuksetHakukohteetService,
-  KoulutuksetToteutuksetHakukohteetService,
-  ToisenAsteenHakijatService,
-  UserService
-}
+import fi.oph.ovara.backend.service.*
 import fi.oph.ovara.backend.utils.AuditOperation.{
   HakeneetHyvaksytytVastaanottaneet,
   KkHakeneetHyvaksytytVastaanottaneet,
@@ -848,17 +838,17 @@ class Controller(
 
   @GetMapping(path = Array("kk-paatettavat-opiskeluoikeudet"))
   def kk_paatettavat_opiskeluoikeudet(
-      @RequestParam("ovara_oppilaitokset", required = true) oppilaitokset: java.util.Collection[String],
-      @RequestParam("ovara_sukunimi", required = false) sukunimi: String,
-      @RequestParam("ovara_etunimet", required = false) etunimet: String,
-      @RequestParam("ovara_hetu", required = false) hetu: String,
-      @RequestParam("ovara_oppijanumero", required = false) oppijanumero: String,
-      @RequestParam("ovara_opiskeluoikeuden_tila", required = false) opiskeluoikeudenTila: String,
-                                                request: HttpServletRequest,
-                                              response: HttpServletResponse
-                                            ): Unit = {
+    @RequestParam("ovara_oppilaitos", required = true) oppilaitos: String,
+    @RequestParam("ovara_sukunimi", required = false) sukunimi: String,
+    @RequestParam("ovara_etunimet", required = false) etunimet: String,
+    @RequestParam("ovara_hetu", required = false) hetu: String,
+    @RequestParam("ovara_oppijanumero", required = false) oppijanumero: String,
+    @RequestParam("ovara_opiskeluoikeuden_tila", required = false) opiskeluoikeudenTila: String,
+    request: HttpServletRequest,
+    response: HttpServletResponse
+  ): Unit = {
     val params = RawKkPaatettavatOpiskeluoikeudetParams(
-      oppilaitokset = getListParamAsScalaList(oppilaitokset),
+      oppilaitos = oppilaitos,
       sukunimi = Option(sukunimi),
       etunimet = Option(etunimet),
       hetu = Option(hetu),
@@ -873,7 +863,8 @@ class Controller(
       response = response,
       request = request,
       id = "kk-paatettavat-opiskeluoikeudet",
-      raporttiParams = validationResult.toOption.map(buildKkPaatettavatOpiskeluoikeudetAuditParams).getOrElse(Map.empty),
+      raporttiParams =
+        validationResult.toOption.map(buildKkPaatettavatOpiskeluoikeudetAuditParams).getOrElse(Map.empty),
       auditOperation = KkPaatettavatOpiskeluoikeudet,
       mapper = mapper
     ) {
@@ -883,7 +874,7 @@ class Controller(
 
         case Right(validParams) =>
           kkPaatettavatOpiskeluoikeudetService.get(
-            validParams.oppilaitokset,
+            validParams.oppilaitos,
             validParams.sukunimi,
             validParams.etunimet,
             validParams.hetu,

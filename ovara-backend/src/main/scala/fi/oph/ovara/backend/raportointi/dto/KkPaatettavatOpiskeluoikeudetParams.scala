@@ -3,7 +3,7 @@ package fi.oph.ovara.backend.raportointi.dto
 import fi.oph.ovara.backend.domain.Kielistetty
 
 case class RawKkPaatettavatOpiskeluoikeudetParams(
-  oppilaitokset: List[String],
+  oppilaitos: String,
   sukunimi: Option[String],
   etunimet: Option[String],
   hetu: Option[String],
@@ -12,7 +12,7 @@ case class RawKkPaatettavatOpiskeluoikeudetParams(
 )
 
 case class ValidatedKkPaatettavatOpiskeluoikeudetParams(
-  oppilaitokset: List[String],
+  oppilaitos: String,
   sukunimi: Option[String],
   etunimet: Option[String],
   hetu: Option[String],
@@ -24,7 +24,7 @@ def buildKkPaatettavatOpiskeluoikeudetAuditParams(
   params: ValidatedKkPaatettavatOpiskeluoikeudetParams
 ): Map[String, Any] = {
   Map(
-    "oppilaitokset"        -> Option(params.oppilaitokset).filter(_.nonEmpty),
+    "oppilaitos"           -> params.oppilaitos,
     "sukunimi"             -> params.sukunimi,
     "etunimet"             -> params.etunimet,
     "hetu"                 -> params.hetu,
@@ -38,7 +38,7 @@ def buildKkPaatettavatOpiskeluoikeudetParamsForExcel(
   paramNames: Map[String, List[Kielistetty]]
 ): List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])] = {
   List(
-    "oppilaitos"           -> paramNames.getOrElse("oppilaitos", List.empty),
+    "oppilaitos"           -> "oppilaitos",
     "sukunimi"             -> params.sukunimi.getOrElse(""),
     "etunimet"             -> params.etunimet.getOrElse(""),
     "hetu"                 -> params.hetu.getOrElse(""),
@@ -46,9 +46,8 @@ def buildKkPaatettavatOpiskeluoikeudetParamsForExcel(
     "opiskeluoikeudenTila" -> params.opiskeluoikeudenTila.getOrElse("")
   ).filterNot { case (_, value) =>
     value match {
-      case list: List[_] => list.isEmpty
-      case str: String   => str.isEmpty
-      case _             => false
+      case str: String => str.isEmpty
+      case _           => false
     }
   }
 }
