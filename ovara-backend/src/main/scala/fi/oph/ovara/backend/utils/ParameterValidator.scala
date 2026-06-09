@@ -1,6 +1,7 @@
 package fi.oph.ovara.backend.utils
 
 import fi.oph.ovara.backend.raportointi.dto.{
+  KkPaatettavatOpiskeluoikeudetParams,
   RawHakeneetHyvaksytytVastaanottaneetParams,
   RawHakijatParams,
   RawKkHakeneetHyvaksytytVastaanottaneetParams,
@@ -24,9 +25,11 @@ object ParameterValidator {
   val alphanumericPattern: Regex    = """^[a-zA-Z0-9_\\-]+$""".r
   private val numericRegex          = """^\d+$""".r
 
-  private val tulostustavat    = Set("hakukohteittain", "oppilaitoksittain")
-  private val oidPattern       = """^1\.\d{4}\.\w{1,}$""".r
-  private val koodiarvoPattern = """^\d+$""".r
+  private val tulostustavat         = Set("hakukohteittain", "oppilaitoksittain")
+  private val opiskeluoikeudenTilat = Set("paatettavissa", "paatetty")
+  private val oidPattern            = """^1\.\d{4}\.\w{1,}$""".r
+  private val koodiarvoPattern      = """^\d+$""".r
+  val hetuPattern: Regex            = """^\d{6}[-+A]\d{3}[0-9A-Y]$""".r
 
   val TULOSTUSTAVAT = Set(
     "koulutustoimijoittain",
@@ -80,6 +83,11 @@ object ParameterValidator {
   def validateOrganisaatioOid(opt: Option[String], fieldName: String): Option[String] =
     opt.filter(_.nonEmpty).collect {
       case oid if !organisaatioOidPattern.matches(oid) => s"$fieldName.invalid.org"
+    }
+
+  def validateHetu(opt: Option[String]): Option[String] =
+    opt.filter(_.nonEmpty).collect {
+      case hetu if !hetuPattern.matches(hetu) => "hetu.invalid"
     }
 
   def validateBoolean(value: String, fieldName: String): Option[String] = {
@@ -363,6 +371,34 @@ object ParameterValidator {
           params.sukupuoli,
           strToOptionBoolean(params.ensikertalainen),
           strToOptionBoolean(params.naytaHakutoiveet).getOrElse(true)
+        )
+      )
+    }
+  }
+
+  def validateKkPaatettavatOpiskeluoikeudetParams(
+    params: KkPaatettavatOpiskeluoikeudetParams
+  ): Either[List[String], KkPaatettavatOpiskeluoikeudetParams] = {
+    val errors = List(
+      validateOrganisaatioOid(Some(params.oppilaitos), "oppilaitokset"),
+      validateAlphanumeric(params.sukunimi, "sukunimi"),
+      validateAlphanumeric(params.etunimet, "etunimet"),
+      validateHetu(params.hetu),
+      validateOid(params.oppijanumero, "oppijanumero"),
+      valueBelongsToSetOfValidValues(params.opiskeluoikeudenTila, "opiskeluoikeuden-tila", opiskeluoikeudenTilat)
+    ).flatten
+
+    if (errors.nonEmpty) {
+      Left(errors.distinct)
+    } else {
+      Right(
+        KkPaatettavatOpiskeluoikeudetParams(
+          params.oppilaitos,
+          params.sukunimi,
+          params.etunimet,
+          params.hetu,
+          params.oppijanumero,
+          params.opiskeluoikeudenTila
         )
       )
     }
