@@ -3,10 +3,57 @@ package fi.oph.ovara.backend.raportointi
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.domain.UserResponse
-import fi.oph.ovara.backend.raportointi.dto.{RawHakeneetHyvaksytytVastaanottaneetParams, RawHakijatParams, RawKkHakeneetHyvaksytytVastaanottaneetParams, RawKkHakijatParams, RawKkKoulutuksetToteutuksetHakukohteetParams, RawKkPaatettavatOpiskeluoikeudetParams, RawKoulutuksetToteutuksetHakukohteetParams, buildHakeneetHyvaksytytVastaanottaneetAuditParams, buildHakijatAuditParams, buildKkHakeneetHyvaksytytVastaanottaneetAuditParams, buildKkHakijatAuditParams, buildKkKoulutuksetToteutuksetHakukohteetAuditParams, buildKkPaatettavatOpiskeluoikeudetAuditParams, buildKoulutuksetToteutuksetHakukohteetAuditParams}
-import fi.oph.ovara.backend.service.{CommonService, HakeneetHyvaksytytVastaanottaneetService, KkHakeneetHyvaksytytVastaanottaneetService, KkHakijatService, KkPaatettavatOpiskeluoikeudetService, KorkeakouluKoulutuksetToteutuksetHakukohteetService, KoulutuksetToteutuksetHakukohteetService, ToisenAsteenHakijatService, UserService}
-import fi.oph.ovara.backend.utils.AuditOperation.{HakeneetHyvaksytytVastaanottaneet, KkHakeneetHyvaksytytVastaanottaneet, KkHakijat, KkPaatettavatOpiskeluoikeudet, KorkeakouluKoulutuksetToteutuksetHakukohteet, KoulutuksetToteutuksetHakukohteet, ToisenAsteenHakijat}
-import fi.oph.ovara.backend.utils.ParameterValidator.{validateAlphanumeric, validateAlphanumericList, validateHakeneetHyvaksytytVastaanottaneetParams, validateHakijatParams, validateKkHakeneetHyvaksytytVastaanottaneetParams, validateKkHakijatParams, validateKkKoulutuksetToteutuksetHakukohteetParams, validateKkPaatettavatOpiskeluoikeudetParams, validateKoulutuksetToteutuksetHakukohteetParams, validateNumericList, validateOidList, validateOrganisaatioOid, validateOrganisaatioOidList}
+import fi.oph.ovara.backend.raportointi.dto.{
+  buildHakeneetHyvaksytytVastaanottaneetAuditParams,
+  buildHakijatAuditParams,
+  buildKkHakeneetHyvaksytytVastaanottaneetAuditParams,
+  buildKkHakijatAuditParams,
+  buildKkKoulutuksetToteutuksetHakukohteetAuditParams,
+  buildKkPaatettavatOpiskeluoikeudetAuditParams,
+  buildKoulutuksetToteutuksetHakukohteetAuditParams,
+  RawHakeneetHyvaksytytVastaanottaneetParams,
+  RawHakijatParams,
+  RawKkHakeneetHyvaksytytVastaanottaneetParams,
+  RawKkHakijatParams,
+  RawKkKoulutuksetToteutuksetHakukohteetParams,
+  RawKkPaatettavatOpiskeluoikeudetParams,
+  RawKoulutuksetToteutuksetHakukohteetParams
+}
+import fi.oph.ovara.backend.service.{
+  CommonService,
+  HakeneetHyvaksytytVastaanottaneetService,
+  KkHakeneetHyvaksytytVastaanottaneetService,
+  KkHakijatService,
+  KkPaatettavatOpiskeluoikeudetService,
+  KorkeakouluKoulutuksetToteutuksetHakukohteetService,
+  KoulutuksetToteutuksetHakukohteetService,
+  ToisenAsteenHakijatService,
+  UserService
+}
+import fi.oph.ovara.backend.utils.AuditOperation.{
+  HakeneetHyvaksytytVastaanottaneet,
+  KkHakeneetHyvaksytytVastaanottaneet,
+  KkHakijat,
+  KkPaatettavatOpiskeluoikeudet,
+  KorkeakouluKoulutuksetToteutuksetHakukohteet,
+  KoulutuksetToteutuksetHakukohteet,
+  ToisenAsteenHakijat
+}
+import fi.oph.ovara.backend.utils.ParameterValidator.{
+  validateAlphanumeric,
+  validateAlphanumericList,
+  validateHakeneetHyvaksytytVastaanottaneetParams,
+  validateHakijatParams,
+  validateKkHakeneetHyvaksytytVastaanottaneetParams,
+  validateKkHakijatParams,
+  validateKkKoulutuksetToteutuksetHakukohteetParams,
+  validateKkPaatettavatOpiskeluoikeudetParams,
+  validateKoulutuksetToteutuksetHakukohteetParams,
+  validateNumericList,
+  validateOidList,
+  validateOrganisaatioOid,
+  validateOrganisaatioOidList
+}
 import fi.oph.ovara.backend.utils.{AuditLog, AuditLogObj, AuditOperation, ControllerUtils}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
