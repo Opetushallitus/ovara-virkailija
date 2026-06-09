@@ -11,12 +11,12 @@ import fi.oph.ovara.backend.raportointi.dto.{
   buildKkKoulutuksetToteutuksetHakukohteetAuditParams,
   buildKkPaatettavatOpiskeluoikeudetAuditParams,
   buildKoulutuksetToteutuksetHakukohteetAuditParams,
+  KkPaatettavatOpiskeluoikeudetParams,
   RawHakeneetHyvaksytytVastaanottaneetParams,
   RawHakijatParams,
   RawKkHakeneetHyvaksytytVastaanottaneetParams,
   RawKkHakijatParams,
   RawKkKoulutuksetToteutuksetHakukohteetParams,
-  RawKkPaatettavatOpiskeluoikeudetParams,
   RawKoulutuksetToteutuksetHakukohteetParams
 }
 import fi.oph.ovara.backend.service.{
@@ -811,7 +811,7 @@ class Controller(
     request: HttpServletRequest,
     response: HttpServletResponse
   ): Unit = {
-    val params = RawKkPaatettavatOpiskeluoikeudetParams(
+    val params = KkPaatettavatOpiskeluoikeudetParams(
       oppilaitos = oppilaitos,
       sukunimi = Option(sukunimi),
       etunimet = Option(etunimet),

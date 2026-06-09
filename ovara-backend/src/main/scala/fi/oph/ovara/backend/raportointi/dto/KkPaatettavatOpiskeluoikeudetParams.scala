@@ -2,16 +2,7 @@ package fi.oph.ovara.backend.raportointi.dto
 
 import fi.oph.ovara.backend.domain.Kielistetty
 
-case class RawKkPaatettavatOpiskeluoikeudetParams(
-  oppilaitos: String,
-  sukunimi: Option[String],
-  etunimet: Option[String],
-  hetu: Option[String],
-  oppijanumero: Option[String],
-  opiskeluoikeudenTila: Option[String]
-)
-
-case class ValidatedKkPaatettavatOpiskeluoikeudetParams(
+case class KkPaatettavatOpiskeluoikeudetParams(
   oppilaitos: String,
   sukunimi: Option[String],
   etunimet: Option[String],
@@ -21,7 +12,7 @@ case class ValidatedKkPaatettavatOpiskeluoikeudetParams(
 )
 
 def buildKkPaatettavatOpiskeluoikeudetAuditParams(
-  params: ValidatedKkPaatettavatOpiskeluoikeudetParams
+  params: KkPaatettavatOpiskeluoikeudetParams
 ): Map[String, Any] = {
   Map(
     "oppilaitos"           -> params.oppilaitos,
@@ -34,7 +25,7 @@ def buildKkPaatettavatOpiskeluoikeudetAuditParams(
 }
 
 def buildKkPaatettavatOpiskeluoikeudetParamsForExcel(
-  params: ValidatedKkPaatettavatOpiskeluoikeudetParams,
+  params: KkPaatettavatOpiskeluoikeudetParams,
   paramNames: Map[String, List[Kielistetty]]
 ): List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])] = {
   List(

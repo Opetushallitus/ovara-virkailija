@@ -1,15 +1,14 @@
 package fi.oph.ovara.backend.utils
 
 import fi.oph.ovara.backend.raportointi.dto.{
+  KkPaatettavatOpiskeluoikeudetParams,
   RawHakeneetHyvaksytytVastaanottaneetParams,
   RawHakijatParams,
   RawKkHakeneetHyvaksytytVastaanottaneetParams,
   RawKkHakijatParams,
-  RawKkPaatettavatOpiskeluoikeudetParams,
   RawKoulutuksetToteutuksetHakukohteetParams,
   ValidatedHakeneetHyvaksytytVastaanottaneetParams,
   ValidatedKkHakeneetHyvaksytytVastaanottaneetParams,
-  ValidatedKkPaatettavatOpiskeluoikeudetParams,
   ValidatedKoulutuksetToteutuksetHakukohteetParams
 }
 import org.scalatest.flatspec.AnyFlatSpec
@@ -311,7 +310,7 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
   }
 
   "validateKkPaatettavatOpiskeluoikeudetParams" should "return errors for invalid parameters" in {
-    val params = RawKkPaatettavatOpiskeluoikeudetParams(
+    val params = KkPaatettavatOpiskeluoikeudetParams(
       oppilaitos = "invalid-oid",
       sukunimi = Some("%"),
       etunimet = Some("?"),
@@ -336,7 +335,7 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
 
   it should "return no errors for valid parameters" in {
 
-    val params = RawKkPaatettavatOpiskeluoikeudetParams(
+    val params = KkPaatettavatOpiskeluoikeudetParams(
       oppilaitos = "1.2.246.562.10.52251087186",
       sukunimi = Some("Testi"),
       etunimet = Some("Testaaja"),
@@ -345,7 +344,7 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
       opiskeluoikeudenTila = Some("paatettavissa")
     )
 
-    val expected = ValidatedKkPaatettavatOpiskeluoikeudetParams(
+    val expected = KkPaatettavatOpiskeluoikeudetParams(
       oppilaitos = "1.2.246.562.10.52251087186",
       sukunimi = Some("Testi"),
       etunimet = Some("Testaaja"),

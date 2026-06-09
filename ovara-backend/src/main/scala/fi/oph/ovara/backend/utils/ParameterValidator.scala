@@ -1,19 +1,18 @@
 package fi.oph.ovara.backend.utils
 
 import fi.oph.ovara.backend.raportointi.dto.{
+  KkPaatettavatOpiskeluoikeudetParams,
   RawHakeneetHyvaksytytVastaanottaneetParams,
   RawHakijatParams,
   RawKkHakeneetHyvaksytytVastaanottaneetParams,
   RawKkHakijatParams,
   RawKkKoulutuksetToteutuksetHakukohteetParams,
-  RawKkPaatettavatOpiskeluoikeudetParams,
   RawKoulutuksetToteutuksetHakukohteetParams,
   ValidatedHakeneetHyvaksytytVastaanottaneetParams,
   ValidatedHakijatParams,
   ValidatedKkHakeneetHyvaksytytVastaanottaneetParams,
   ValidatedKkHakijatParams,
   ValidatedKkKoulutuksetToteutuksetHakukohteetParams,
-  ValidatedKkPaatettavatOpiskeluoikeudetParams,
   ValidatedKoulutuksetToteutuksetHakukohteetParams
 }
 
@@ -378,8 +377,8 @@ object ParameterValidator {
   }
 
   def validateKkPaatettavatOpiskeluoikeudetParams(
-    params: RawKkPaatettavatOpiskeluoikeudetParams
-  ): Either[List[String], ValidatedKkPaatettavatOpiskeluoikeudetParams] = {
+    params: KkPaatettavatOpiskeluoikeudetParams
+  ): Either[List[String], KkPaatettavatOpiskeluoikeudetParams] = {
     val errors = List(
       validateOrganisaatioOid(Some(params.oppilaitos), "oppilaitokset"),
       validateAlphanumeric(params.sukunimi, "sukunimi"),
@@ -393,7 +392,7 @@ object ParameterValidator {
       Left(errors.distinct)
     } else {
       Right(
-        ValidatedKkPaatettavatOpiskeluoikeudetParams(
+        KkPaatettavatOpiskeluoikeudetParams(
           params.oppilaitos,
           params.sukunimi,
           params.etunimet,
