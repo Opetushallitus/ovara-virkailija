@@ -75,7 +75,7 @@ class ValpasServiceTest extends AnyFlatSpec with Matchers with BeforeAndAfterEac
   it should "return hakemus only for the requested oppijanumerot" in {
     initSchema()
     insertHakemus()
-    insertHakemus(idOffset = 1)
+    insertHakemus(oppijanumero = OPPIJANUMERO_2, hakemusOid = HAKEMUS_OID_2, hakuOid = HAKU_OID_2)
 
     val response = service.getValpasTiedot(List(OPPIJANUMERO, "1.2.246.562.24.331"), false)
 

@@ -11,18 +11,12 @@ trait ValpasTestUtils {
     db.run(sqlu"""INSERT INTO gen.gen_henkilo VALUES ($oppijanumero, $oppijanumero)""", "Insert test henkilö")
   }
 
-  private def addOffsetToOid(oid: String, offset: Int): String = {
-    val parts   = oid.split('.')
-    val newLast = parts.last.toInt + offset
-    (parts.dropRight(1) :+ newLast).mkString(".")
-  }
-
-  def insertHakemus(aktiivinen: Boolean = true, idOffset: Int = 0): Unit = {
-
-    val oppijanumero = addOffsetToOid(OPPIJANUMERO, idOffset)
-    val hakemusOid   = addOffsetToOid(HAKEMUS_OID, idOffset)
-    val hakuOid      = addOffsetToOid(HAKU_OID, idOffset)
-
+  def insertHakemus(
+    aktiivinen: Boolean = true,
+    oppijanumero: String = OPPIJANUMERO,
+    hakemusOid: String = HAKEMUS_OID,
+    hakuOid: String = HAKU_OID
+  ): Unit = {
     insertHenkilo(oppijanumero)
 
     db.run(
