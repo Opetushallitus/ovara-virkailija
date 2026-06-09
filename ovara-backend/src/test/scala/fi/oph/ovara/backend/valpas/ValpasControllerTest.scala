@@ -213,8 +213,8 @@ class ValpasControllerTest extends ValpasTestUtils {
   private def expectedHakemus(hakutoive: String = "") =
     s"""
        |[ {
-       |  "hakemusOid" : "1.2.246.562.11.580",
-       |  "hakemusUrl" : "https://virkailija.testiopintopolku.fi/lomake-editori/applications/search?term=1.2.246.562.11.580",
+       |  "hakemusOid" : "1.2.246.562.11.00000000000003511892",
+       |  "hakemusUrl" : "https://virkailija.testiopintopolku.fi/lomake-editori/applications/search?term=1.2.246.562.11.00000000000003511892",
        |  "hakemuksenMuokkauksenAikaleima" : "2025-08-13T14:52:14+03:00",
        |  "email" : "oppija@example.test",
        |  "matkapuhelin" : "+358401234567",
