@@ -13,6 +13,12 @@ final val VALINTATULOSTEN_JULKISTAMINEN_HAKIJOILLE = "PH_VTJH"
 class ValpasRepository(db: ReadOnlyDatabase) extends ValpasExtractors {
   val LOG: Logger = LoggerFactory.getLogger(classOf[ValpasRepository])
 
+  /**
+   * Hakemuspalvelu (Ataru) uses 35 character long OIDs. Earlier haku-app uses shorther ones.
+   * We don't need the old haku-app applications in this API.
+   */
+  private val ataruOidLength = 35
+
   def selectHakemukset(oppijanumerot: List[String]): Seq[HakemusRow] = {
     val query = sql"""
     SELECT haku.haku_oid,
@@ -38,6 +44,7 @@ class ValpasRepository(db: ReadOnlyDatabase) extends ValpasExtractors {
     LEFT JOIN gen.gen_ohjausparametri_haku hkp on hakemus.haku_oid = hkp.haku_oid and hkp.avain = $HAKUKIERROS_PAATTYY
     LEFT JOIN gen.gen_ohjausparametri_haku vtjh on hakemus.haku_oid = vtjh.haku_oid and vtjh.avain = $VALINTATULOSTEN_JULKISTAMINEN_HAKIJOILLE
     WHERE hlo.oppijanumero in (#${RepositoryUtils.makeListOfValuesQueryStr(oppijanumerot)})
+    AND length(hakemus.hakemus_oid) = #$ataruOidLength
     AND haku.kohdejoukko_koodiuri LIKE 'haunkohdejoukko_11%'
     """.as[HakemusRow]
 

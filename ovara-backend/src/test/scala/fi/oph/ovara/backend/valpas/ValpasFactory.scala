@@ -6,8 +6,11 @@ import java.time.{LocalDateTime, OffsetDateTime}
 
 object ValpasFactory {
   val OPPIJANUMERO       = "1.2.246.562.24.9"
-  val HAKEMUS_OID        = "1.2.246.562.11.580"
+  val OPPIJANUMERO_2     = "1.2.246.562.24.10"
+  val HAKEMUS_OID        = "1.2.246.562.11.00000000000003511892"
+  val HAKEMUS_OID_2      = "1.2.246.562.11.00000000000003511893"
   val HAKU_OID           = "1.2.246.562.29.100"
+  val HAKU_OID_2         = "1.2.246.562.29.101"
   val HAKUKOHDE_OID      = "1.2.246.562.20.012"
   val TOTEUTUS_OID       = "1.2.246.562.17.122"
   val KOULUTUS_OID       = "1.2.246.562.13.022"
