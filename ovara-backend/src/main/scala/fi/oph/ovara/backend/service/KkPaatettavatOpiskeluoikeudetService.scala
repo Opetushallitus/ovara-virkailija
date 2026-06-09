@@ -2,8 +2,7 @@ package fi.oph.ovara.backend.service
 
 import fi.oph.ovara.backend.raportointi.dto.{
   buildKkPaatettavatOpiskeluoikeudetParamsForExcel,
-  ValidatedKkKoulutuksetToteutuksetHakukohteetParams,
-  ValidatedKkPaatettavatOpiskeluoikeudetParams
+  KkPaatettavatOpiskeluoikeudetParams
 }
 import fi.oph.ovara.backend.repository.{KorkeakouluKoulutuksetToteutuksetHakukohteetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
@@ -52,7 +51,7 @@ class KkPaatettavatOpiskeluoikeudetService(
     Try {
       // TODO OPHYOS-193
       val raporttiParams = buildKkPaatettavatOpiskeluoikeudetParamsForExcel(
-        ValidatedKkPaatettavatOpiskeluoikeudetParams(
+        KkPaatettavatOpiskeluoikeudetParams(
           oppilaitos,
           sukunimi,
           etunimet,
