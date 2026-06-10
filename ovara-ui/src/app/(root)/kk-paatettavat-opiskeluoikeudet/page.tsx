@@ -2,7 +2,6 @@
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import { hasOvaraKkRole } from '@/app/lib/utils';
-import { useCommonSearchParams } from '@/app/hooks/searchParams/useCommonSearchParams';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
 import { isEmpty } from 'remeda';
 import { useDownloadWithErrorBoundary } from '@/app/hooks/useDownloadWithErrorBoundary';
@@ -26,7 +25,6 @@ export default function KkPaatettavatOpiskeluoikeudet() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const hasKkRights = hasOvaraKkRole(user?.authorities);
-  const { selectedOppilaitokset } = useCommonSearchParams();
   const {
     etunimi,
     setEtunimi,
@@ -36,10 +34,11 @@ export default function KkPaatettavatOpiskeluoikeudet() {
     setHetu,
     oppijanumero,
     setOppijanumero,
+    selectedOppilaitos,
   } = usePaatettavatOpiskeluoikeudetSearchParams();
   const { data: organisaatiot } = useFetchOrganisaatiohierarkiat();
 
-  const isDisabled = [selectedOppilaitokset || []].every(isEmpty);
+  const isDisabled = [selectedOppilaitos || []].every(isEmpty);
   const { run, isLoading } = useDownloadWithErrorBoundary();
 
   const queryParamsStr = useSearchParams().toString();

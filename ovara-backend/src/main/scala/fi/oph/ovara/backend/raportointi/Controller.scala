@@ -804,7 +804,7 @@ class Controller(
   def kk_paatettavat_opiskeluoikeudet(
     @RequestParam("ovara_oppilaitos", required = true) oppilaitos: String,
     @RequestParam("ovara_sukunimi", required = false) sukunimi: String,
-    @RequestParam("ovara_etunimet", required = false) etunimet: String,
+    @RequestParam("ovara_etunimi", required = false) etunimet: String,
     @RequestParam("ovara_hetu", required = false) hetu: String,
     @RequestParam("ovara_oppijanumero", required = false) oppijanumero: String,
     @RequestParam("ovara_opiskeluoikeuden_tila", required = false) opiskeluoikeudenTila: String,
