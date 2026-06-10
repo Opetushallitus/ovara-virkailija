@@ -26,10 +26,10 @@ def buildKkPaatettavatOpiskeluoikeudetAuditParams(
 
 def buildKkPaatettavatOpiskeluoikeudetParamsForExcel(
   params: KkPaatettavatOpiskeluoikeudetParams,
-  paramNames: Map[String, List[Kielistetty]]
-): List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])] = {
+  paramNames: Map[String, Kielistetty]
+): List[(String, String | Kielistetty)] = {
   List(
-    "oppilaitos"           -> "oppilaitos",
+    "oppilaitos"           -> paramNames.getOrElse("oppilaitos",""),
     "sukunimi"             -> params.sukunimi.getOrElse(""),
     "etunimet"             -> params.etunimet.getOrElse(""),
     "hetu"                 -> params.hetu.getOrElse(""),

@@ -1,7 +1,5 @@
 package fi.oph.ovara.backend.domain
 
-import fi.oph.ovara.backend.domain.DomainUtils.mergeKielistetty
-
 abstract class HakeneetHyvaksytytVastaanottaneetBase {
   val hakijat: Int
   val ensisijaisia: Int
