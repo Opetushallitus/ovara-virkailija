@@ -20,7 +20,7 @@ def buildKkPaatettavatOpiskeluoikeudetAuditParams(
     "etunimet"             -> params.etunimet,
     "hetu"                 -> params.hetu,
     "oppijanumero"         -> params.oppijanumero,
-    "opiskeluoikeudenTila" -> params.opiskeluoikeudenTila
+    "opiskeluoikeuden-tila" -> params.opiskeluoikeudenTila
   ).collect { case (key, Some(value)) => key -> value }
 }
 
@@ -29,7 +29,7 @@ def buildKkPaatettavatOpiskeluoikeudetParamsForExcel(
   paramNames: Map[String, Kielistetty]
 ): List[(String, String | Kielistetty)] = {
   List(
-    "oppilaitos"           -> paramNames.getOrElse("oppilaitos",""),
+    "oppilaitos"           -> paramNames.getOrElse("oppilaitos", ""),
     "sukunimi"             -> params.sukunimi.getOrElse(""),
     "etunimet"             -> params.etunimet.getOrElse(""),
     "hetu"                 -> params.hetu.getOrElse(""),
