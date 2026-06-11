@@ -1,8 +1,11 @@
 package fi.oph.ovara.backend.utils
 
+import fi.oph.ovara.backend.domain.{En, Fi, Kieli, Sv}
+
 import java.time.ZoneId
 import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder}
 import java.time.temporal.ChronoField
+import java.util.Locale
 
 object Constants {
   val HAKUTOIVEET_TITLES: List[String] =
@@ -80,5 +83,13 @@ object Constants {
     .appendOffset("+HH:mm", "+00")
     .toFormatter()
 
-  val HELSINKI_TIMEZONE: ZoneId = ZoneId.of("Europe/Helsinki")
+  val HELSINKI_TIMEZONE: ZoneId                   = ZoneId.of("Europe/Helsinki")
+  val DEFAULT_DATE_TIME_FORMAT: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("d.M.yyyy 'klo' HH:mm").withZone(HELSINKI_TIMEZONE)
+  val SWEDISH_DATE_TIME_FORMAT: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("d.M.yyyy 'kl.' HH:mm").withZone(HELSINKI_TIMEZONE)
+  val ENGLISH_DATE_TIME_FORMAT: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("MMM. d, yyyy 'at' HH:mm a z").withLocale(Locale.US).withZone(HELSINKI_TIMEZONE)
+  val LANGUAGE_FORMATTER_MAP: Map[String, DateTimeFormatter] =
+    Map("fi" -> DEFAULT_DATE_TIME_FORMAT, "sv" -> SWEDISH_DATE_TIME_FORMAT, "en" -> ENGLISH_DATE_TIME_FORMAT)
 }
