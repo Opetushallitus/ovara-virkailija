@@ -50,7 +50,7 @@ class KkPaatettavatOpiskeluoikeudetService(
     val mockData = List(
       KkPaatettavaOpiskeluoikeus(
         oppijanumero = "1.2.246.562.24.10002324020",
-        henkilotunnus = Some("010101-1234"),
+        hetu = Some("010101-1234"),
         syntymaaika = "1901-01-01",
         sukunimi = "Testinen",
         etunimet = "Testi",
