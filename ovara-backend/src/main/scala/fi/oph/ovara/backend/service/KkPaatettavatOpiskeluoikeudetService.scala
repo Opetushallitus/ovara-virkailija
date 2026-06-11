@@ -1,5 +1,6 @@
 package fi.oph.ovara.backend.service
 
+import fi.oph.ovara.backend.domain.{Fi, KkPaatettavaOpiskeluoikeus}
 import fi.oph.ovara.backend.raportointi.dto.{
   buildKkPaatettavatOpiskeluoikeudetParamsForExcel,
   KkPaatettavatOpiskeluoikeudetParams
@@ -45,9 +46,32 @@ class KkPaatettavatOpiskeluoikeudetService(
       oppilaitosOids = List(oppilaitos),
       List.empty
     )
-    LOG.info(s"organization OIDs for query: $orgOidsForQuery")
-    val isOrganisaatioRajain = oppilaitos.nonEmpty && orgOidsForQuery.nonEmpty
 
+    val mockData = List(
+      KkPaatettavaOpiskeluoikeus(
+        oppijanumero = "1.2.246.562.24.10002324020",
+        henkilotunnus = Some("010101-1234"),
+        syntymaaika = "1901-01-01",
+        sukunimi = "Testinen",
+        etunimet = "Testi",
+        kutsumanimi = "Testi",
+        opiskelijaAvain = "opiskelija-avain-1",
+        opiskeluoikeusAvain = "opiskeluoikeus-avain-1",
+        opiskeluoikeudenNimi = Map(Fi -> "Meteorologi, Hurrikaanien tutkimislinja"),
+        opiskeluoikeudenPaattymispvm = Some("2026-12-31"),
+        opiskeluoikeudenViimeisinTila = "Loma",
+        hakemusOid = "1.2.246.562.11.00000000000000000001",
+        hakuOid = "1.2.246.562.20.00000000000000000001",
+        hakuNimi = Map(Fi -> "Hurrikaaniopiston erillishaku 2026"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000000002",
+        hakukohdeNimi = Map(Fi -> "Meteorologi, Hurrikaanien tutkimislinja"),
+        oppilaitosOid = "1.2.246.562.10.00000000000000000001",
+        oppilaitosNimi = Map(Fi -> "Hurrikaaniopisto"),
+        vastaanottoAjankohta = "2026-01-15T12:00:00",
+        koulutusluokitusKoodi = "12345",
+        uudenOpiskeluoikeudenAlkamispvm = "2026-01-15"
+      )
+    )
     Try {
       // TODO OPHYOS-193
       val raporttiParams = buildKkPaatettavatOpiskeluoikeudetParamsForExcel(
@@ -62,6 +86,7 @@ class KkPaatettavatOpiskeluoikeudetService(
         Map.empty
       )
       ExcelWriter.writeKorkeakouluPaatettavatOpiskeluoikeudetRaportti(
+        mockData,
         asiointikieli,
         translations,
         raporttiParams
