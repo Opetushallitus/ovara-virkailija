@@ -15,11 +15,11 @@ def buildKkPaatettavatOpiskeluoikeudetAuditParams(
   params: KkPaatettavatOpiskeluoikeudetParams
 ): Map[String, Any] = {
   Map(
-    "oppilaitos"           -> params.oppilaitos,
-    "sukunimi"             -> params.sukunimi,
-    "etunimet"             -> params.etunimet,
-    "hetu"                 -> params.hetu,
-    "oppijanumero"         -> params.oppijanumero,
+    "oppilaitos"            -> params.oppilaitos,
+    "sukunimi"              -> params.sukunimi,
+    "etunimet"              -> params.etunimet,
+    "hetu"                  -> params.hetu,
+    "oppijanumero"          -> params.oppijanumero,
     "opiskeluoikeuden-tila" -> params.opiskeluoikeudenTila
   ).collect { case (key, Some(value)) => key -> value }
 }

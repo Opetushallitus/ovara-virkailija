@@ -1087,7 +1087,7 @@ object ExcelWriter {
       workbook,
       parametritSheet,
       "raporttilista.hakijat",
-      tietosuojaohje=true
+      tietosuojaohje = true
     )
 
     // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
@@ -1968,6 +1968,38 @@ object ExcelWriter {
 
       var currentRowIndex = 0
 
+      val fieldNames: List[String] = classOf[KkPaatettavaOpiskeluoikeus].getDeclaredFields.map(_.getName).toList
+      val fieldNamesWithIndex      = fieldNames.zipWithIndex
+      currentRowIndex = createHeadingRow(sheet, translations, currentRowIndex, fieldNames, headingCellStyle)
+
+      opiskeluoikeudet.foreach { case item: KkPaatettavaOpiskeluoikeus =>
+        val dataRow = sheet.createRow(currentRowIndex)
+        val rowData =
+          List(
+            item.oppijanumero,
+            item.hetu.getOrElse(""),
+            item.syntymaaika,
+            item.sukunimi,
+            item.etunimet,
+            item.kutsumanimi,
+            item.opiskelijaAvain,
+            item.opiskeluoikeusAvain,
+            item.opiskeluoikeudenNimi(Kieli.withName(asiointikieli)),
+            item.opiskeluoikeudenPaattymispvm.getOrElse(""),
+            item.hakemusOid,
+            item.hakuNimi(Kieli.withName(asiointikieli)),
+            item.hakukohdeOid,
+            item.hakukohdeNimi(Kieli.withName(asiointikieli)),
+            item.oppilaitosOid,
+            item.oppilaitosNimi(Kieli.withName(asiointikieli)),
+            item.vastaanottoAjankohta,
+            item.koulutusluokitusKoodi,
+            item.uudenOpiskeluoikeudenAlkamispvm
+          )
+        createRowCells(rowData, dataRow, workbook, createBodyTextCellStyle(workbook))
+        currentRowIndex += 1
+      }
+
       // Erillinen välilehti hakuparametreille
       val parametritSheet: XSSFSheet = workbook.createSheet()
       createHakuparametritSheet(
@@ -1977,13 +2009,15 @@ object ExcelWriter {
         workbook,
         parametritSheet,
         "raporttilista.kk-paatettavat-opiskeluoikeudet",
-        tietosuojaohje=true
+        tietosuojaohje = true
       )
 
       // TODO raportin parametrivälilehdelle organisaation nimi ja oid
 
-      // TODO Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
-
+      // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
+      fieldNamesWithIndex.foreach { case (title, index) =>
+        sheet.autoSizeColumn(index)
+      }
     } catch {
       case e: Exception =>
         LOG.error(s"Error creating excel: ${e.getMessage}")
