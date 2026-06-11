@@ -2,7 +2,7 @@ package fi.oph.ovara.backend.domain
 
 case class KkPaatettavaOpiskeluoikeus(
   oppijanumero: String,
-  henkilotunnus: Option[String],
+  hetu: Option[String],
   syntymaaika: String,
   sukunimi: String,
   etunimet: String,
