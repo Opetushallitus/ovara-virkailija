@@ -8,10 +8,15 @@ import org.apache.poi.ss.util.{CellRangeAddress, WorkbookUtil}
 import org.apache.poi.xssf.usermodel.*
 import org.slf4j.{Logger, LoggerFactory}
 
-import java.time.{LocalDateTime, ZoneId}
-import java.time.format.DateTimeFormatter
-import java.util.Locale
-import scala.collection.immutable.List as data
+import java.time.LocalDateTime
+//import scala.collection.immutable.List as data
+
+case class CommonExcelParams(
+  asiointikieli: String,
+  translations: Map[String, String],
+  parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])],
+  tulostusaika: LocalDateTime
+)
 
 object ExcelWriter {
 
@@ -331,10 +336,8 @@ object ExcelWriter {
 
   def writeKoulutuksetToteutuksetHakukohteetRaportti(
     hierarkiatWithResults: List[OrganisaatioHierarkiaWithHakukohteet],
-    asiointikieli: String,
     raporttityyppi: String,
-    translations: Map[String, String],
-    parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
+    commonExcelParams: CommonExcelParams
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
@@ -352,6 +355,7 @@ object ExcelWriter {
       hakukohteenNimiTextCellStyle.setAlignment(HorizontalAlignment.LEFT)
       hakukohteenNimiTextCellStyle.setIndention(2.toShort)
 
+      val translations = commonExcelParams.translations
       workbook.setSheetName(
         0,
         WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yhteenveto", "raportti.yhteenveto"))
@@ -382,7 +386,7 @@ object ExcelWriter {
         hakukohteenNimiTextCellStyle = hakukohteenNimiTextCellStyle,
         headingFont = headingFont,
         subHeadingFont = subHeadingFont,
-        asiointikieli = asiointikieli,
+        asiointikieli = commonExcelParams.asiointikieli,
         raporttiColumnTitlesWithIndex = raporttiColumnTitlesWithIndex,
         raporttityyppi = raporttityyppi,
         translations = translations
@@ -392,9 +396,7 @@ object ExcelWriter {
       val parametritSheet: XSSFSheet = workbook.createSheet()
 
       createHakuparametritSheet(
-        translations,
-        asiointikieli,
-        parametrit,
+        commonExcelParams,
         workbook,
         parametritSheet,
         "raporttilista.koulutukset-toteutukset-hakukohteet"
@@ -414,15 +416,14 @@ object ExcelWriter {
   }
 
   private def createHakuparametritSheet(
-    translations: Map[String, String],
-    asiointikieli: String,
-    parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])],
+    commonExcelParams: CommonExcelParams,
     workbook: XSSFWorkbook,
     parametritSheet: XSSFSheet,
     raportinNimi: String,
     tietosuojaohje: Boolean = false,
     sheetIndex: Int = 1
   ): Unit = {
+    val translations = commonExcelParams.translations
     workbook.setSheetName(
       sheetIndex,
       WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.hakuparametrit", "raportti.hakuparametrit"))
@@ -451,7 +452,9 @@ object ExcelWriter {
     val keyCell2   = aikaRow.createCell(0)
     val valueCell2 = aikaRow.createCell(1)
     keyCell2.setCellValue(translations.getOrElse("raportti.raportin-muodostussaika", "raportti.raportin-muodostusaika"))
-    valueCell2.setCellValue(LocalDateTime.now().format(LANGUAGE_FORMATTER_MAP(asiointikieli)))
+    valueCell2.setCellValue(
+      commonExcelParams.tulostusaika.format(LANGUAGE_FORMATTER_MAP(commonExcelParams.asiointikieli))
+    )
     if (tietosuojaohje) {
       rowIndex += 1
       val tietosuojaRow         = parametritSheet.createRow(rowIndex)
@@ -475,7 +478,7 @@ object ExcelWriter {
 
     rowIndex += 1
     // hakuparametrit
-    parametrit.foreach { case (key, value) =>
+    commonExcelParams.parametrit.foreach { case (key, value) =>
       val row       = parametritSheet.createRow(rowIndex)
       val keyCell   = row.createCell(0)
       val valueCell = row.createCell(1)
@@ -508,7 +511,9 @@ object ExcelWriter {
             valueCell.setCellValue(translatedValue)
           case v: List[_] if v.forall(_.isInstanceOf[Kielistetty]) =>
             val kielistettyValues =
-              v.asInstanceOf[List[Kielistetty]].map(k => getKielistettyCellValue(asiointikieli, k)).mkString(", ")
+              v.asInstanceOf[List[Kielistetty]]
+                .map(k => getKielistettyCellValue(commonExcelParams.asiointikieli, k))
+                .mkString(", ")
             valueCell.setCellValue(kielistettyValues)
           case v: List[String] =>
             // etsitään käännös ja jos ei löydy (esim oidit) laitetaan alkuperäinen arvo sellaisenaan
@@ -669,10 +674,8 @@ object ExcelWriter {
 
   def writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
     korkeakouluKoulutuksetToteutuksetHakukohteetResults: Seq[KorkeakouluKoulutusToteutusHakukohdeResult],
-    asiointikieli: String,
-    translations: Map[String, String],
     tulostustapa: String,
-    parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
+    commonExcelParams: CommonExcelParams
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
@@ -685,6 +688,8 @@ object ExcelWriter {
       createSubHeadingFont(workbook)
       createBodyTextFont(workbook, bodyTextCellStyle)
 
+      val translations  = commonExcelParams.translations
+      val asiointikieli = commonExcelParams.asiointikieli
       workbook.setSheetName(
         0,
         WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yhteenveto", "raportti.yhteenveto"))
@@ -824,9 +829,7 @@ object ExcelWriter {
       // Erillinen välilehti hakuparametreille
       val parametritSheet: XSSFSheet = workbook.createSheet()
       createHakuparametritSheet(
-        translations,
-        asiointikieli,
-        parametrit,
+        commonExcelParams,
         workbook,
         parametritSheet,
         "raporttilista.kk-koulutukset-toteutukset-hakukohteet"
@@ -1044,13 +1047,12 @@ object ExcelWriter {
 
   def writeToisenAsteenHakijatRaportti(
     hakijat: Seq[ToisenAsteenHakija],
-    asiointikieli: String,
-    translations: Map[String, String],
-    parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
+    commonExcelParams: CommonExcelParams
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new ToisenAsteenHakijatExcel from db results")
     val sheet: XSSFSheet = workbook.createSheet()
+    val translations     = commonExcelParams.translations
     workbook.setSheetName(
       0,
       WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yhteenveto", "raportti.yhteenveto"))
@@ -1074,16 +1076,14 @@ object ExcelWriter {
       bodyTextCellStyle = bodyTextCellStyle,
       currentRowIndex = currentRowIndex,
       hakijoidenHakutoiveet = hakijat,
-      asiointikieli = asiointikieli,
+      asiointikieli = commonExcelParams.asiointikieli,
       translations = translations
     )
 
     // Erillinen välilehti hakuparametreille
     val parametritSheet: XSSFSheet = workbook.createSheet()
     createHakuparametritSheet(
-      translations,
-      asiointikieli,
-      parametrit,
+      commonExcelParams,
       workbook,
       parametritSheet,
       "raporttilista.hakijat",
@@ -1357,17 +1357,16 @@ object ExcelWriter {
 
   def writeKkHakijatRaportti(
     hakijoidenHakutoiveet: Seq[KkHakija],
-    asiointikieli: String,
-    translations: Map[String, String],
     maybeNaytaYoArvosanat: Option[Boolean] = None,
     maybeNaytaHetu: Option[Boolean] = None,
     maybeNaytaPostiosoite: Option[Boolean] = None,
     yokokeet: Vector[Koodi],
-    parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
+    commonExcelParams: CommonExcelParams
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new KkHakijatExcel from db results")
     val sheet: XSSFSheet = workbook.createSheet()
+    val translations     = commonExcelParams.translations
     workbook.setSheetName(
       0,
       WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yhteenveto", "raportti.yhteenveto"))
@@ -1427,7 +1426,7 @@ object ExcelWriter {
       bodyTextCellStyle = bodyTextCellStyle,
       currentRowIndex = currentRowIndex,
       hakijoidenHakutoiveet = hakijoidenHakutoiveet,
-      asiointikieli = asiointikieli,
+      asiointikieli = commonExcelParams.asiointikieli,
       translations = translations,
       naytaArvosanat = naytaArvosanat,
       naytaHetu = naytaHetu,
@@ -1457,7 +1456,7 @@ object ExcelWriter {
         val row       = yoKokeetSheet.createRow(yokokeetRowIndex)
         val yoRowData = List(
           yokoe.koodiarvo,
-          yokoe.koodinimi(Kieli.withName(asiointikieli))
+          yokoe.koodinimi(Kieli.withName(commonExcelParams.asiointikieli))
         )
         createRowCells(yoRowData, row, workbook, createBodyTextCellStyle(workbook))
         yokokeetRowIndex += 1
@@ -1472,9 +1471,7 @@ object ExcelWriter {
     val parametriSheetIndex        = if (naytaArvosanat) 2 else 1
     val parametritSheet: XSSFSheet = workbook.createSheet()
     createHakuparametritSheet(
-      translations,
-      asiointikieli,
-      parametrit,
+      commonExcelParams,
       workbook,
       parametritSheet,
       "raporttilista.kk-hakijat",
@@ -1494,17 +1491,16 @@ object ExcelWriter {
   def writeHakeneetHyvaksytytVastaanottaneetRaportti[
     T <: HakeneetHyvaksytytVastaanottaneetResult | HakeneetHyvaksytytVastaanottaneetHakukohteittain
   ](
-    asiointikieli: String,
-    translations: Map[String, String],
     data: List[T],
     yksittaisetHakijat: Int,
     naytaHakutoiveet: Boolean,
     tulostustapa: String,
-    parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
+    commonExcelParams: CommonExcelParams
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new HakeneetHyvaksytytVastaanottaneet excel from db results")
     val sheet: XSSFSheet = workbook.createSheet()
+    val translations     = commonExcelParams.translations
     workbook.setSheetName(
       0,
       WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yhteenveto", "raportti.yhteenveto"))
@@ -1537,7 +1533,7 @@ object ExcelWriter {
       val rowData = item match {
         case result: HakeneetHyvaksytytVastaanottaneetResult =>
           List(
-            result.otsikko(Kieli.withName(asiointikieli)),
+            result.otsikko(Kieli.withName(commonExcelParams.asiointikieli)),
             result.hakijat,
             result.ensisijaisia,
             result.varasija,
@@ -1550,9 +1546,9 @@ object ExcelWriter {
           ) ++ generateHakutoiveet(naytaHakutoiveet, item)
         case hakukohteittain: HakeneetHyvaksytytVastaanottaneetHakukohteittain =>
           List(
-            hakukohteittain.hakukohdeNimi(Kieli.withName(asiointikieli)),
-            hakukohteittain.organisaatioNimi(Kieli.withName(asiointikieli)),
-            hakukohteittain.hakuNimi(Kieli.withName(asiointikieli)),
+            hakukohteittain.hakukohdeNimi(Kieli.withName(commonExcelParams.asiointikieli)),
+            hakukohteittain.organisaatioNimi(Kieli.withName(commonExcelParams.asiointikieli)),
+            hakukohteittain.hakuNimi(Kieli.withName(commonExcelParams.asiointikieli)),
             hakukohteittain.hakijat,
             hakukohteittain.ensisijaisia,
             hakukohteittain.varasija,
@@ -1629,9 +1625,7 @@ object ExcelWriter {
     // Erillinen välilehti hakuparametreille
     val parametritSheet: XSSFSheet = workbook.createSheet()
     createHakuparametritSheet(
-      translations,
-      asiointikieli,
-      parametrit,
+      commonExcelParams,
       workbook,
       parametritSheet,
       "raporttilista.hakeneet-hyvaksytyt-vastaanottaneet"
@@ -1690,19 +1684,19 @@ object ExcelWriter {
   def writeKkHakeneetHyvaksytytVastaanottaneetRaportti[
     T <: KkHakeneetHyvaksytytVastaanottaneetResult | KkHakeneetHyvaksytytVastaanottaneetHakukohteittain
   ](
-    asiointikieli: String,
-    translations: Map[String, String],
     data: List[T],
     yksittaisetHakijat: Int,
     ensikertalaisetYksittaisetHakijat: Int,
     maksuvelvollisetYksittaisetHakijat: Int,
     naytaHakutoiveet: Boolean,
     tulostustapa: String,
-    parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
+    commonExcelParams: CommonExcelParams
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     LOG.info("Creating new KkHakeneetHyvaksytytVastaanottaneet excel from db results")
     val sheet: XSSFSheet = workbook.createSheet()
+    val translations     = commonExcelParams.translations
+    val asiointikieli    = commonExcelParams.asiointikieli
     workbook.setSheetName(
       0,
       WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yhteenveto", "raportti.yhteenveto"))
@@ -1819,9 +1813,7 @@ object ExcelWriter {
       // Erillinen välilehti hakuparametreille
       val parametritSheet: XSSFSheet = workbook.createSheet()
       createHakuparametritSheet(
-        translations,
-        asiointikieli,
-        parametrit,
+        commonExcelParams,
         workbook,
         parametritSheet,
         "raporttilista.kk-hakeneet-hyvaksytyt-vastaanottaneet"
@@ -1921,9 +1913,7 @@ object ExcelWriter {
       // Erillinen välilehti hakuparametreille
       val parametritSheet: XSSFSheet = workbook.createSheet()
       createHakuparametritSheet(
-        translations,
-        asiointikieli,
-        parametrit,
+        commonExcelParams,
         workbook,
         parametritSheet,
         "raporttilista.kk-hakeneet-hyvaksytyt-vastaanottaneet"
@@ -1946,13 +1936,13 @@ object ExcelWriter {
 
   def writeKorkeakouluPaatettavatOpiskeluoikeudetRaportti(
     opiskeluoikeudet: List[KkPaatettavaOpiskeluoikeus],
-    asiointikieli: String,
-    translations: Map[String, String],
-    parametrit: List[(String, String | Kielistetty)]
+    commonExcelParams: CommonExcelParams
   ): XSSFWorkbook = {
     val workbook: XSSFWorkbook = new XSSFWorkbook()
     try {
       LOG.info("Creating new KkPaatettavatOpiskeluoikeudetExcel from db results")
+      val translations                     = commonExcelParams.translations
+      val asiointikieli                    = commonExcelParams.asiointikieli
       val sheet: XSSFSheet                 = workbook.createSheet()
       val headingCellStyle: XSSFCellStyle  = workbook.createCellStyle()
       val bodyTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
@@ -2003,9 +1993,7 @@ object ExcelWriter {
       // Erillinen välilehti hakuparametreille
       val parametritSheet: XSSFSheet = workbook.createSheet()
       createHakuparametritSheet(
-        translations,
-        asiointikieli,
-        parametrit,
+        commonExcelParams,
         workbook,
         parametritSheet,
         "raporttilista.kk-paatettavat-opiskeluoikeudet",
