@@ -6,96 +6,102 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment
 import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFSheet, XSSFWorkbook}
 import org.scalatest.flatspec.AnyFlatSpec
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 
 class ExcelWriterSpec extends AnyFlatSpec {
   val userLng: String = "sv"
 
   val translations: Map[String, String] = Map(
-    "raportti.yhteenveto"                       -> "Yhteenveto SV",
-    "raportti.hakijanSukunimi"                  -> "Sukunimi SV",
-    "raportti.hakijanEtunimi"                   -> "Etunimi SV",
-    "raportti.turvakielto"                      -> "Turvakielto SV",
-    "raportti.kansalaisuus"                     -> "Kansalaisuus SV",
-    "raportti.kansalaisuudet"                   -> "Kansalaisuudet SV",
-    "raportti.hakukohteenNimi"                  -> "Hakukohde SV",
-    "raportti.haku"                             -> "Haku SV",
-    "raportti.kaksoistutkintoKiinnostaa"        -> "Kaksoistutkinto kiinnostaa SV",
-    "raportti.urheilijatutkintoKiinnostaa"      -> "Urheilijatutkinto kiinnostaa SV",
-    "raportti.markkinointilupa"                 -> "LupaMark SV",
-    "raportti.kylla"                            -> "Ja",
-    "raportti.ei"                               -> "Nej",
-    "raportti.hylatty"                          -> "Hylatty SV",
-    "raportti.hyvaksytty"                       -> "Hyvaksytty SV",
-    "raportti.peruuntunut"                      -> "Peruuntunut SV",
-    "raportti.peruutettu"                       -> "Peruutettu SV",
-    "raportti.ei_vastaanotettu_maara_aikana"    -> "Ei vastaanotettu SV",
-    "raportti.kokonaispisteet"                  -> "Kokonaispisteet SV",
-    "raportti.valintatapajonokohtainenTila"     -> "Valintatapajonokohtainen tila SV",
-    "raportti.toimipiste"                       -> "Toimipiste SV",
-    "raportti.hakukohde"                        -> "Hakukohde SV",
-    "raportti.hakukelpoisuus"                   -> "Hakukelpoisuus SV",
-    "raportti.eligible"                         -> "hakukelpoinen SV",
-    "raportti.oppilaitos"                       -> "Oppilaitos SV",
-    "raportti.hakijat-yht"                      -> "Hakijat SV",
-    "raportti.ensisijaisia"                     -> "Ensisijaisia SV",
-    "raportti.ensikertalaisia"                  -> "Ensikertalaisia SV",
-    "raportti.maksuvelvollisia"                 -> "Maksuvelvollisia SV",
-    "raportti.hakukohderyhma"                   -> "Hakukohderyhma SV",
-    "raportti.varasija"                         -> "Varasija SV",
-    "raportti.hyvaksytyt"                       -> "Hyväksytyt SV",
-    "raportti.pohjakoulutus"                    -> "Pohjakoulutus SV",
-    "raportti.puhelinnumero"                    -> "Puhelinnumero SV",
-    "raportti.not-obligated"                    -> "Ei velvollinen",
-    "raportti.obligated"                        -> "Velvollinen",
-    "raportti.organisaatio"                     -> "Organisaatio SV",
-    "raportti.unreviewed"                       -> "Tarkastamatta SV",
-    "raportti.vastaanottaneet"                  -> "Vastaanottaneet SV",
-    "raportti.valintatiedonPvm"                 -> "Valintatiedon päivämäärä SV",
-    "raportti.lasna"                            -> "Läsnä SV",
-    "raportti.poissa"                           -> "Poissa SV",
-    "raportti.ilm-yht"                          -> "IlmYht SV",
-    "raportti.aloituspaikat"                    -> "Aloituspaikat SV",
-    "raportti.valinnan-aloituspaikat"           -> "Valinnan aloituspaikat SV",
-    "raportti.toive1"                           -> "Toive1 SV",
-    "raportti.toive2"                           -> "Toive2 SV",
-    "raportti.toive3"                           -> "Toive3 SV",
-    "raportti.toive4"                           -> "Toive4 SV",
-    "raportti.toive5"                           -> "Toive5 SV",
-    "raportti.toive6"                           -> "Toive6 SV",
-    "raportti.toive7"                           -> "Toive7 SV",
-    "raportti.yhteensa"                         -> "Yhteensä SV",
-    "raportti.yksittaiset-hakijat"              -> "Yksittäiset hakijat SV",
-    "raportti.oppilaitosJaToimipiste"           -> "Oppilaitos ja toimipiste SV",
-    "raportti.julkaistu"                        -> "Julkaistu SV",
-    "raportti.arkistoitu"                       -> "Arkistoitu SV",
-    "raportti.luonnos"                          -> "Luonnos SV",
-    "raportti.hakukohdeOid"                     -> "Hakukohteen oid SV",
-    "raportti.koulutuksenTila"                  -> "Kou.tila SV",
-    "raportti.toteutuksenTila"                  -> "Tot.tila SV",
-    "raportti.hakukohteenTila"                  -> "Hak.tila SV",
-    "raportti.onValintakoe"                     -> "Koe SV",
-    "raportti.voiSuorittaaKaksoistutkinnon"     -> "Voi suorittaa kaksoistutkinnon? SV",
-    "raportti.jarjestaaUrheilijanAmmKoulutusta" -> "Voi suorittaa tutkinnon urheilijana? SV",
-    "raportti.hakuparametrit"                   -> "Hakuparametrit SV",
-    "raportti.koulutustoimija"                  -> "Koulutustoimija SV",
-    "raportti.oppilaitos"                       -> "Oppilaitos SV",
-    "raportti.valintakoe"                       -> "Valintakoe SV",
-    "raportti.tulostustapa"                     -> "Tulostustapa SV",
-    "raportti.tulostustapa.hakukohteittain"     -> "Hakukohteittain SV",
-    "raportti.kk-tutkinnon-taso"                -> "Tutkinnon taso SV",
-    "raportti.ylempi"                           -> "ylempi SV",
-    "raportti.valintatieto"                     -> "Valintatieto SV",
-    "raportti.vastaanottotieto"                 -> "Vastaanottotieto SV",
-    "raportti.harkinnanvaraisuus"               -> "Harkinnanvaraisuus SV",
-    "raportti.oppimisvaikeudet"                 -> "Oppimisvaikeudet SV",
-    "raportti.soraTerveys"                      -> "Sora terveydentila SV",
-    "raportti.soraAiempi"                       -> "Sora aiempi SV",
-    "raportti.julkaisulupa"                     -> "Julkaisulupa SV",
-    "raportti.opetuskieli"                      -> "Opetuskieli SV",
-    "raportti.koulutusala1"                     -> "Koulutusala 1 SV",
-    "raportti.koulutusala2"                     -> "Koulutusala 2 SV",
-    "raportti.koulutusala3"                     -> "Koulutusala 3 SV"
+    "raportti.yhteenveto"                                  -> "Yhteenveto SV",
+    "raportti.hakijanSukunimi"                             -> "Sukunimi SV",
+    "raportti.hakijanEtunimi"                              -> "Etunimi SV",
+    "raportti.turvakielto"                                 -> "Turvakielto SV",
+    "raportti.kansalaisuus"                                -> "Kansalaisuus SV",
+    "raportti.kansalaisuudet"                              -> "Kansalaisuudet SV",
+    "raportti.hakukohteenNimi"                             -> "Hakukohde SV",
+    "raportti.haku"                                        -> "Haku SV",
+    "raportti.kaksoistutkintoKiinnostaa"                   -> "Kaksoistutkinto kiinnostaa SV",
+    "raportti.urheilijatutkintoKiinnostaa"                 -> "Urheilijatutkinto kiinnostaa SV",
+    "raportti.markkinointilupa"                            -> "LupaMark SV",
+    "raportti.kylla"                                       -> "Ja",
+    "raportti.ei"                                          -> "Nej",
+    "raportti.hylatty"                                     -> "Hylatty SV",
+    "raportti.hyvaksytty"                                  -> "Hyvaksytty SV",
+    "raportti.peruuntunut"                                 -> "Peruuntunut SV",
+    "raportti.peruutettu"                                  -> "Peruutettu SV",
+    "raportti.ei_vastaanotettu_maara_aikana"               -> "Ei vastaanotettu SV",
+    "raportti.kokonaispisteet"                             -> "Kokonaispisteet SV",
+    "raportti.valintatapajonokohtainenTila"                -> "Valintatapajonokohtainen tila SV",
+    "raportti.toimipiste"                                  -> "Toimipiste SV",
+    "raportti.hakukohde"                                   -> "Hakukohde SV",
+    "raportti.hakukelpoisuus"                              -> "Hakukelpoisuus SV",
+    "raportti.eligible"                                    -> "hakukelpoinen SV",
+    "raportti.oppilaitos"                                  -> "Oppilaitos SV",
+    "raportti.hakijat-yht"                                 -> "Hakijat SV",
+    "raportti.ensisijaisia"                                -> "Ensisijaisia SV",
+    "raportti.ensikertalaisia"                             -> "Ensikertalaisia SV",
+    "raportti.maksuvelvollisia"                            -> "Maksuvelvollisia SV",
+    "raportti.hakukohderyhma"                              -> "Hakukohderyhma SV",
+    "raportti.varasija"                                    -> "Varasija SV",
+    "raportti.hyvaksytyt"                                  -> "Hyväksytyt SV",
+    "raportti.pohjakoulutus"                               -> "Pohjakoulutus SV",
+    "raportti.puhelinnumero"                               -> "Puhelinnumero SV",
+    "raportti.not-obligated"                               -> "Ei velvollinen",
+    "raportti.obligated"                                   -> "Velvollinen",
+    "raportti.organisaatio"                                -> "Organisaatio SV",
+    "raportti.unreviewed"                                  -> "Tarkastamatta SV",
+    "raportti.vastaanottaneet"                             -> "Vastaanottaneet SV",
+    "raportti.valintatiedonPvm"                            -> "Valintatiedon päivämäärä SV",
+    "raportti.lasna"                                       -> "Läsnä SV",
+    "raportti.poissa"                                      -> "Poissa SV",
+    "raportti.ilm-yht"                                     -> "IlmYht SV",
+    "raportti.aloituspaikat"                               -> "Aloituspaikat SV",
+    "raportti.valinnan-aloituspaikat"                      -> "Valinnan aloituspaikat SV",
+    "raportti.toive1"                                      -> "Toive1 SV",
+    "raportti.toive2"                                      -> "Toive2 SV",
+    "raportti.toive3"                                      -> "Toive3 SV",
+    "raportti.toive4"                                      -> "Toive4 SV",
+    "raportti.toive5"                                      -> "Toive5 SV",
+    "raportti.toive6"                                      -> "Toive6 SV",
+    "raportti.toive7"                                      -> "Toive7 SV",
+    "raportti.yhteensa"                                    -> "Yhteensä SV",
+    "raportti.yksittaiset-hakijat"                         -> "Yksittäiset hakijat SV",
+    "raportti.oppilaitosJaToimipiste"                      -> "Oppilaitos ja toimipiste SV",
+    "raportti.julkaistu"                                   -> "Julkaistu SV",
+    "raportti.arkistoitu"                                  -> "Arkistoitu SV",
+    "raportti.luonnos"                                     -> "Luonnos SV",
+    "raportti.hakukohdeOid"                                -> "Hakukohteen oid SV",
+    "raportti.koulutuksenTila"                             -> "Kou.tila SV",
+    "raportti.toteutuksenTila"                             -> "Tot.tila SV",
+    "raportti.hakukohteenTila"                             -> "Hak.tila SV",
+    "raportti.onValintakoe"                                -> "Koe SV",
+    "raportti.voiSuorittaaKaksoistutkinnon"                -> "Voi suorittaa kaksoistutkinnon? SV",
+    "raportti.jarjestaaUrheilijanAmmKoulutusta"            -> "Voi suorittaa tutkinnon urheilijana? SV",
+    "raportti.hakuparametrit"                              -> "Hakuparametrit SV",
+    "raportti.koulutustoimija"                             -> "Koulutustoimija SV",
+    "raportti.oppilaitos"                                  -> "Oppilaitos SV",
+    "raportti.valintakoe"                                  -> "Valintakoe SV",
+    "raportti.tulostustapa"                                -> "Tulostustapa SV",
+    "raportti.tulostustapa.hakukohteittain"                -> "Hakukohteittain SV",
+    "raportti.kk-tutkinnon-taso"                           -> "Tutkinnon taso SV",
+    "raportti.ylempi"                                      -> "ylempi SV",
+    "raportti.valintatieto"                                -> "Valintatieto SV",
+    "raportti.vastaanottotieto"                            -> "Vastaanottotieto SV",
+    "raportti.harkinnanvaraisuus"                          -> "Harkinnanvaraisuus SV",
+    "raportti.oppimisvaikeudet"                            -> "Oppimisvaikeudet SV",
+    "raportti.soraTerveys"                                 -> "Sora terveydentila SV",
+    "raportti.soraAiempi"                                  -> "Sora aiempi SV",
+    "raportti.julkaisulupa"                                -> "Julkaisulupa SV",
+    "raportti.opetuskieli"                                 -> "Opetuskieli SV",
+    "raportti.koulutusala1"                                -> "Koulutusala 1 SV",
+    "raportti.koulutusala2"                                -> "Koulutusala 2 SV",
+    "raportti.koulutusala3"                                -> "Koulutusala 3 SV",
+    "raporttilista.koulutukset-toteutukset-hakukohteet"    -> "Koulutukset, toteutukset ja hakukohteet",
+    "raporttilista.kk-koulutukset-toteutukset-hakukohteet" -> "Korkeakoulujen koulutukset, toteutukset ja hakukohteet",
+    "raporttilista.hakijat"                                -> "Toisen asteen hakijat",
+    "raporttilista.kk-hakijat"                             -> "Korkeakoulujen hakijat",
+    "raporttilista.hakeneet-hyvaksytyt-vastaanottaneet"    -> "Hakeneet, hyväksytyt ja vastaanottaneet",
+    "raporttilista.kk-hakeneet-hyvaksytyt-vastaanottaneet" -> "Korkeakoulujen hakeneet, hyväksytyt ja vastaanottaneet"
   )
 
   def checkAloituspaikatRowValidity(sheet: XSSFSheet, rowNumber: Int, expected: Int): Unit = {
@@ -524,10 +530,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb =
       ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         hierarkiatWithHakukohteet,
-        userLng,
         KOULUTUSTOIMIJARAPORTTI,
-        translations,
-        koulutuksetToteutuksetHakukohteetParams
+        CommonExcelParams(
+          userLng,
+          translations,
+          koulutuksetToteutuksetHakukohteetParams,
+          LocalDateTime.now()
+        )
       )
     assert(wb.getNumberOfSheets == 2)
     assert(wb.getSheetName(0) == "Yhteenveto SV")
@@ -539,10 +548,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb                        =
       ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         hierarkiatWithHakukohteet,
-        userLng,
         KOULUTUSTOIMIJARAPORTTI,
-        translations,
-        koulutuksetToteutuksetHakukohteetParams
+        CommonExcelParams(
+          userLng,
+          translations,
+          koulutuksetToteutuksetHakukohteetParams,
+          LocalDateTime.now()
+        )
       )
     assert(wb.getSheetAt(0).getRow(0).getCell(0).getStringCellValue == "Hakukohde SV")
     assert(wb.getSheetAt(0).getRow(0).getCell(1).getStringCellValue == "Hakukohteen oid SV")
@@ -557,7 +569,8 @@ class ExcelWriterSpec extends AnyFlatSpec {
     assert(wb.getSheetAt(0).getRow(1) == null)
   }
 
-  it should "create a second sheet with all search terms listed" in {
+  it should "create a second sheet with report information and all search terms listed" in {
+    val dateTime                                                    = LocalDateTime.of(2026, 6, 12, 15, 30, 0)
     val hakuParams: List[(String, String | Boolean | List[String])] =
       List(
         "haku"            -> List("1.2.246.562.29.00000000000000015722"),
@@ -573,14 +586,22 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb                        =
       ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         hierarkiatWithHakukohteet,
-        userLng,
         KOULUTUSTOIMIJARAPORTTI,
-        translations,
-        hakuParams
+        CommonExcelParams(
+          userLng,
+          translations,
+          hakuParams,
+          dateTime
+        )
       )
 
-    val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
-    val expectedRows    = List(
+    val expectedHeaders      = List("raportti.perustiedot")
+    val expectedParamHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
+    val expectedRows         = List(
+      List("raportti.raportin-nimi", "Koulutukset, toteutukset ja hakukohteet"),
+      List("raportti.raportin-muodostusaika", "12.6.2026 kl. 15:30"),
+      List(),
+      List(),
       List("Haku SV", "1.2.246.562.29.00000000000000015722"),
       List("Koulutustoimija SV", "1.2.246.562.10.2781706420000"),
       List("Oppilaitos SV", "1.2.246.562.10.00000000001, 1.2.246.562.10.2781706420000"),
@@ -595,6 +616,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val sheet = wb.getSheetAt(1)
 
     validateHeaders(sheet = sheet, expectedHeaders = expectedHeaders)
+    validateHeaders(sheet = sheet, rowIndex = 4, expectedHeaders = expectedParamHeaders)
     expectedRows.zipWithIndex.foreach { case (expectedRow, rowIndex) =>
       validateRow(sheet, rowIndex + 1, expectedRow)
     }
@@ -620,10 +642,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb =
       ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         hierarkiatWithHakukohteet,
-        userLng,
         KOULUTUSTOIMIJARAPORTTI,
-        translations,
-        koulutuksetToteutuksetHakukohteetParams
+        CommonExcelParams(
+          userLng,
+          translations,
+          koulutuksetToteutuksetHakukohteetParams,
+          LocalDateTime.now()
+        )
       )
     val sheet = wb.getSheetAt(0)
     // Heading row
@@ -700,10 +725,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb =
       ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         hierarkiatWithHakukohteet,
-        userLng,
         KOULUTUSTOIMIJARAPORTTI,
-        translations,
-        koulutuksetToteutuksetHakukohteetParams
+        CommonExcelParams(
+          userLng,
+          translations,
+          koulutuksetToteutuksetHakukohteetParams,
+          LocalDateTime.now()
+        )
       )
     val sheet = wb.getSheetAt(0)
     // Heading row
@@ -797,10 +825,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val wb = ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
       koulutustoimijaWithHakukohteet,
-      userLng,
       KOULUTUSTOIMIJARAPORTTI,
-      translations,
-      koulutuksetToteutuksetHakukohteetParams
+      CommonExcelParams(
+        userLng,
+        translations,
+        koulutuksetToteutuksetHakukohteetParams,
+        LocalDateTime.now()
+      )
     )
     val sheet = wb.getSheetAt(0)
     // Parent organisaatio row with aloituspaikat sum
@@ -1089,10 +1120,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val wb = ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
       hierarkiatWithHakukohteet,
-      userLng,
       OPPILAITOSRAPORTTI,
-      translations,
-      koulutuksetToteutuksetHakukohteetParams
+      CommonExcelParams(
+        userLng,
+        translations,
+        koulutuksetToteutuksetHakukohteetParams,
+        LocalDateTime.now()
+      )
     )
     val sheet = wb.getSheetAt(0)
     // Parent organisaatio row with aloituspaikat sum
@@ -1345,10 +1379,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val wb = ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
       hierarkiatWithHakukohteet,
-      userLng,
       TOIMIPISTERAPORTTI,
-      translations,
-      koulutuksetToteutuksetHakukohteetParams
+      CommonExcelParams(
+        userLng,
+        translations,
+        koulutuksetToteutuksetHakukohteetParams,
+        LocalDateTime.now()
+      )
     )
     val sheet = wb.getSheetAt(0)
     // Parent organisaatio row with aloituspaikat sum
@@ -1912,10 +1949,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
   "writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti" should "create Korkeakoulujen koulutukset toteutukset ja hakukohteet -raportti koulutuksittain with four result rows" in {
     val wb = ExcelWriter.writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
       korkeakouluKoulutuksetToteutuksetHakukohteetResults = korkeakouluKoulutuksetToteutuksetHakukohteet,
-      asiointikieli = userLng,
-      translations = translations,
       tulostustapa = "koulutuksittain",
-      parametrit = kkKoulutuksetToteutuksetHakukohteetParams
+      CommonExcelParams(
+        asiointikieli = userLng,
+        translations = translations,
+        parametrit = kkKoulutuksetToteutuksetHakukohteetParams,
+        LocalDateTime.now()
+      )
     )
 
     val sheet = wb.getSheetAt(0)
@@ -2119,10 +2159,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "create Korkeakoulujen koulutukset toteutukset ja hakukohteet -raportti toteutuksittain with four result rows" in {
     val wb = ExcelWriter.writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
       korkeakouluKoulutuksetToteutuksetHakukohteetResults = korkeakouluKoulutuksetToteutuksetHakukohteet,
-      asiointikieli = userLng,
-      translations = translations,
       tulostustapa = "toteutuksittain",
-      parametrit = kkKoulutuksetToteutuksetHakukohteetParams
+      CommonExcelParams(
+        asiointikieli = userLng,
+        translations = translations,
+        parametrit = kkKoulutuksetToteutuksetHakukohteetParams,
+        LocalDateTime.now()
+      )
     )
 
     val sheet = wb.getSheetAt(0)
@@ -2281,10 +2324,13 @@ class ExcelWriterSpec extends AnyFlatSpec {
   it should "create Korkeakoulujen koulutukset toteutukset ja hakukohteet -raportti hakukohteittain with four result rows" in {
     val wb = ExcelWriter.writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
       korkeakouluKoulutuksetToteutuksetHakukohteetResults = korkeakouluKoulutuksetToteutuksetHakukohteet,
-      asiointikieli = userLng,
-      translations = translations,
       tulostustapa = "hakukohteittain",
-      parametrit = kkKoulutuksetToteutuksetHakukohteetParams
+      CommonExcelParams(
+        asiointikieli = userLng,
+        translations = translations,
+        parametrit = kkKoulutuksetToteutuksetHakukohteetParams,
+        LocalDateTime.now()
+      )
     )
 
     val sheet = wb.getSheetAt(0)
@@ -2488,6 +2534,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   it should "create hakuparametrit sheet in Korkeakoulujen koulutukset toteutukset ja hakukohteet" in {
+    val dateTime                                                    = LocalDateTime.of(2026, 6, 12, 15, 30, 0)
     val hakuParams: List[(String, String | Boolean | List[String])] =
       List(
         "haku"              -> List("1.2.246.562.29.00000000000000015722"),
@@ -2502,14 +2549,21 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
     val wb = ExcelWriter.writeKorkeakouluKoulutuksetToteutuksetHakukohteetRaportti(
       korkeakouluKoulutuksetToteutuksetHakukohteetResults = korkeakouluKoulutuksetToteutuksetHakukohteet,
-      asiointikieli = userLng,
-      translations = translations,
       tulostustapa = "hakukohteittain",
-      parametrit = hakuParams
+      CommonExcelParams(
+        asiointikieli = userLng,
+        translations = translations,
+        parametrit = hakuParams,
+        dateTime
+      )
     )
 
-    val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
+    val expectedHeaders = List("raportti.perustiedot")
     val expectedRows    = List(
+      List("raportti.raportin-nimi", "Korkeakoulujen koulutukset, toteutukset ja hakukohteet"),
+      List("raportti.raportin-muodostusaika", "12.6.2026 kl. 15:30"),
+      List(),
+      List(),
       List("Haku SV", "1.2.246.562.29.00000000000000015722"),
       List("Tulostustapa SV", "Hakukohteittain SV"),
       List("Oppilaitos SV", "1.2.246.562.10.00000000001, 1.2.246.562.10.2781706420000"),
@@ -2661,9 +2715,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb                 =
       ExcelWriter.writeToisenAsteenHakijatRaportti(
         hakijatQueryResult,
-        userLng,
-        translations,
-        hakijatParams
+        CommonExcelParams(
+          userLng,
+          translations,
+          hakijatParams,
+          LocalDateTime.now()
+        )
       )
 
     assert(wb.getNumberOfSheets == 2)
@@ -2705,6 +2762,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   it should "create hakuparametrit sheet" in {
+    val dateTime                                                    = LocalDateTime.of(2026, 6, 12, 15, 30, 0)
     val hakuParams: List[(String, String | Boolean | List[String])] =
       List(
         "haku"                        -> List("1.2.246.562.29.00000000000000015722"),
@@ -2726,13 +2784,21 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb                 =
       ExcelWriter.writeToisenAsteenHakijatRaportti(
         hakijatQueryResult,
-        userLng,
-        translations,
-        hakuParams
+        CommonExcelParams(
+          userLng,
+          translations,
+          hakuParams,
+          dateTime
+        )
       )
 
-    val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
+    val expectedHeaders = List("raportti.perustiedot")
     val expectedRows    = List(
+      List("raportti.raportin-nimi", "Toisen asteen hakijat"),
+      List("raportti.raportin-muodostusaika", "12.6.2026 kl. 15:30"),
+      List(),
+      List(),
+      List("raportti.hakuehto", "raportti.hakuarvo"),
       List("Haku SV", "1.2.246.562.29.00000000000000015722"),
       List("Oppilaitos SV", "1.2.246.562.10.00000000001, 1.2.246.562.10.2781706420000"),
       List("Toimipiste SV", "1.2.246.562.10.2781706420001"),
@@ -2804,9 +2870,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb =
       ExcelWriter.writeToisenAsteenHakijatRaportti(
         hakijatResult,
-        userLng,
-        translations,
-        hakijatParams
+        CommonExcelParams(
+          userLng,
+          translations,
+          hakijatParams,
+          LocalDateTime.now()
+        )
       )
 
     assert(wb.getNumberOfSheets == 2)
@@ -2968,9 +3037,12 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb =
       ExcelWriter.writeToisenAsteenHakijatRaportti(
         hakijatResult,
-        userLng,
-        translations,
-        hakijatParams
+        CommonExcelParams(
+          userLng,
+          translations,
+          hakijatParams,
+          LocalDateTime.now()
+        )
       )
 
     assert(wb.getNumberOfSheets == 2)
@@ -3394,13 +3466,16 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
         hakijoidenHakutoiveet = kkHakijatResult,
-        asiointikieli = userLng,
-        translations = translations,
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(true),
         maybeNaytaPostiosoite = Some(true),
         yokokeet = yokokeet,
-        parametrit = hakijatParams
+        CommonExcelParams(
+          asiointikieli = userLng,
+          translations = translations,
+          parametrit = hakijatParams,
+          LocalDateTime.now()
+        )
       )
 
     val expectedHeaders = List(
@@ -3552,13 +3627,16 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
         hakijoidenHakutoiveet = kkHakijatResult,
-        asiointikieli = userLng,
-        translations = translations,
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(false),
         maybeNaytaPostiosoite = Some(false),
         yokokeet = yokokeet,
-        parametrit = hakijatParams
+        CommonExcelParams(
+          asiointikieli = userLng,
+          translations = translations,
+          parametrit = hakijatParams,
+          LocalDateTime.now()
+        )
       )
 
     assert(wb.getNumberOfSheets == 3)
@@ -3710,13 +3788,16 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
         hakijoidenHakutoiveet = kkHakijatResult,
-        asiointikieli = userLng,
-        translations = translations,
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(true),
         maybeNaytaPostiosoite = Some(false),
         yokokeet = yokokeet,
-        parametrit = hakijatParams
+        CommonExcelParams(
+          asiointikieli = userLng,
+          translations = translations,
+          parametrit = hakijatParams,
+          LocalDateTime.now()
+        )
       )
 
     assert(wb.getNumberOfSheets == 3)
@@ -3822,13 +3903,16 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
         hakijoidenHakutoiveet = kkHakijatResult,
-        asiointikieli = userLng,
-        translations = translations,
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(false),
         maybeNaytaPostiosoite = Some(true),
         yokokeet = yokokeet,
-        parametrit = hakijatParams
+        CommonExcelParams(
+          asiointikieli = userLng,
+          translations = translations,
+          parametrit = hakijatParams,
+          LocalDateTime.now()
+        )
       )
 
     val expectedHeaders = List(
@@ -3993,13 +4077,16 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
         hakijoidenHakutoiveet = kkHakijatResult,
-        asiointikieli = userLng,
-        translations = translations,
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(false),
         maybeNaytaPostiosoite = Some(false),
         yokokeet = yokokeet,
-        parametrit = hakijatParams
+        CommonExcelParams(
+          asiointikieli = userLng,
+          translations = translations,
+          parametrit = hakijatParams,
+          LocalDateTime.now()
+        )
       )
 
     val expectedHeaders = List(
@@ -4150,13 +4237,16 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
         hakijoidenHakutoiveet = kkHakijatResult,
-        asiointikieli = userLng,
-        translations = translations,
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(false),
         maybeNaytaPostiosoite = Some(false),
         yokokeet = yokokeet,
-        parametrit = hakijatParams
+        CommonExcelParams(
+          asiointikieli = userLng,
+          translations = translations,
+          parametrit = hakijatParams,
+          LocalDateTime.now()
+        )
       )
 
     assert(wb.getNumberOfSheets == 3)
@@ -4181,6 +4271,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   it should "create hakuparametrit sheet after yokokeet sheet" in {
+    val dateTime                                                    = LocalDateTime.of(2026, 6, 26, 12, 0)
     val hakuParams: List[(String, String | Boolean | List[String])] =
       List(
         "haku"               -> List("1.2.246.562.29.00000000000000015722"),
@@ -4198,15 +4289,27 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
     val hakijatQueryResult = Vector()
     val wb                 =
-      ExcelWriter.writeToisenAsteenHakijatRaportti(
+      ExcelWriter.writeKkHakijatRaportti(
         hakijatQueryResult,
-        userLng,
-        translations,
-        hakuParams
+        maybeNaytaYoArvosanat = Some(true),
+        maybeNaytaHetu = Some(false),
+        maybeNaytaPostiosoite = Some(false),
+        yokokeet = yokokeet,
+        CommonExcelParams(
+          asiointikieli = userLng,
+          translations = translations,
+          parametrit = hakuParams,
+          dateTime
+        )
       )
 
-    val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
+    val expectedHeaders = List("raportti.perustiedot")
     val expectedRows    = List(
+      List("raportti.raportin-nimi", "Korkeakoulujen hakijat"),
+      List("raportti.raportin-muodostusaika", "26.6.2026 kl. 12:00"),
+      List("raportti.tietosuojaohje", "raportti.tietosuojaohje-teksti"),
+      List(),
+      List("raportti.hakuehto", "raportti.hakuarvo"),
       List("Haku SV", "1.2.246.562.29.00000000000000015722"),
       List("Oppilaitos SV", "1.2.246.562.10.00000000001, 1.2.246.562.10.2781706420000"),
       List("Toimipiste SV", "1.2.246.562.10.2781706420001"),
@@ -4220,9 +4323,9 @@ class ExcelWriterSpec extends AnyFlatSpec {
       List("nayta-hetu", "Nej"),
       List("nayta-postiosoite", "Nej")
     )
-    assert(wb.getNumberOfSheets == 2)
-    assert(wb.getSheetAt(1).getRow(1) != null)
-    val sheet = wb.getSheetAt(1)
+    assert(wb.getNumberOfSheets == 3)
+    assert(wb.getSheetAt(2).getRow(1) != null)
+    val sheet = wb.getSheetAt(2)
 
     validateHeaders(sheet = sheet, expectedHeaders = expectedHeaders)
     expectedRows.zipWithIndex.foreach { case (expectedRow, rowIndex) =>
@@ -4231,6 +4334,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   it should "return excel without arvosanat and yokokeet sheet and with parametrit sheet when nayta arvosanat is false" in {
+    val dateTime        = LocalDateTime.of(2026, 6, 26, 12, 0)
     val kkHakijatResult = Vector(
       kkHakijatRautiainenWithValintatapajonot,
       kkHakijaLehtoWithValintatapajonot
@@ -4239,17 +4343,25 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
         hakijoidenHakutoiveet = kkHakijatResult,
-        asiointikieli = userLng,
-        translations = translations,
         maybeNaytaYoArvosanat = Some(false),
         maybeNaytaHetu = Some(true),
         maybeNaytaPostiosoite = Some(true),
         yokokeet = Vector(),
-        parametrit = hakijatParams
+        CommonExcelParams(
+          asiointikieli = userLng,
+          translations = translations,
+          parametrit = hakijatParams,
+          dateTime
+        )
       )
 
-    val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
+    val expectedHeaders = List("raportti.perustiedot")
     val expectedRows    = List(
+      List("raportti.raportin-nimi", "Korkeakoulujen hakijat"),
+      List("raportti.raportin-muodostusaika", "26.6.2026 kl. 12:00"),
+      List("raportti.tietosuojaohje", "raportti.tietosuojaohje-teksti"),
+      List(),
+      List("raportti.hakuehto", "raportti.hakuarvo"),
       List("Haku SV", "1.2.246.562.29.00000000000000015722"),
       List("Oppilaitos SV", "1.2.246.562.10.00000000001"),
       List("Valintatieto SV", "Hyvaksytty SV")
@@ -4428,13 +4540,16 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
         hakijoidenHakutoiveet = kkHakijatResult,
-        asiointikieli = userLng,
-        translations = translations,
         maybeNaytaYoArvosanat = None,
         maybeNaytaHetu = Some(false),
         maybeNaytaPostiosoite = Some(false),
         yokokeet = Vector(),
-        parametrit = hakijatParams
+        CommonExcelParams(
+          asiointikieli = userLng,
+          translations = translations,
+          parametrit = hakijatParams,
+          LocalDateTime.now()
+        )
       )
 
     assert(wb.getNumberOfSheets == 2)
@@ -4550,13 +4665,16 @@ class ExcelWriterSpec extends AnyFlatSpec {
     val wb =
       ExcelWriter.writeKkHakijatRaportti(
         hakijoidenHakutoiveet = kkHakijatResult,
-        asiointikieli = userLng,
-        translations = translations,
         maybeNaytaYoArvosanat = Some(true),
         maybeNaytaHetu = Some(true),
         maybeNaytaPostiosoite = Some(false),
         yokokeet = yokokeet,
-        parametrit = hakijatParams
+        CommonExcelParams(
+          asiointikieli = userLng,
+          translations = translations,
+          parametrit = hakijatParams,
+          LocalDateTime.now()
+        )
       )
 
     val expectedHeaders = List(
@@ -4759,13 +4877,16 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
 
     val workbook = ExcelWriter.writeHakeneetHyvaksytytVastaanottaneetRaportti(
-      asiointikieli = "sv",
-      translations = translations,
       data = data,
       yksittaisetHakijat = 450,
       naytaHakutoiveet = true,
       tulostustapa = "hakukohteittain",
-      parametrit = hakeneetHyvaksytytVastaanottaneetParams
+      CommonExcelParams(
+        asiointikieli = "sv",
+        translations = translations,
+        parametrit = hakeneetHyvaksytytVastaanottaneetParams,
+        LocalDateTime.now()
+      )
     )
 
     assert(workbook.getNumberOfSheets == 2)
@@ -4890,6 +5011,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   it should "create hakuparametrit sheet" in {
+    val dateTime                                                    = LocalDateTime.of(2026, 6, 30, 12, 0)
     val hakuParams: List[(String, String | Boolean | List[String])] =
       List(
         "haku"               -> List("1.2.246.562.29.00000000000000015722"),
@@ -4909,17 +5031,24 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
     val data = List.empty
     val wb   = ExcelWriter.writeHakeneetHyvaksytytVastaanottaneetRaportti(
-      asiointikieli = "sv",
-      translations = translations,
       data = data,
       yksittaisetHakijat = 0,
       naytaHakutoiveet = true,
       tulostustapa = "toimipisteittain",
-      parametrit = hakuParams
+      CommonExcelParams(
+        asiointikieli = "sv",
+        translations = translations,
+        parametrit = hakuParams,
+        dateTime
+      )
     )
 
-    val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
+    val expectedHeaders = List("raportti.perustiedot")
     val expectedRows    = List(
+      List("raportti.raportin-nimi", "Hakeneet, hyväksytyt ja vastaanottaneet"),
+      List("raportti.raportin-muodostusaika", "30.6.2026 kl. 12:00"),
+      List(),
+      List("raportti.hakuehto", "raportti.hakuarvo"),
       List("Haku SV", "1.2.246.562.29.00000000000000015722"),
       List("Tulostustapa SV", "toimipisteittain"),
       List("Oppilaitos SV", "1.2.246.562.10.00000000001, 1.2.246.562.10.2781706420000"),
@@ -5019,13 +5148,16 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
 
     val workbook = ExcelWriter.writeHakeneetHyvaksytytVastaanottaneetRaportti(
-      asiointikieli = "sv",
-      translations = translations,
       data = data,
       yksittaisetHakijat = 450,
       naytaHakutoiveet = true,
       tulostustapa = "toimipisteittain",
-      parametrit = hakeneetHyvaksytytVastaanottaneetParams
+      CommonExcelParams(
+        asiointikieli = "sv",
+        translations = translations,
+        parametrit = hakeneetHyvaksytytVastaanottaneetParams,
+        LocalDateTime.now()
+      )
     )
 
     assert(workbook.getNumberOfSheets == 2)
@@ -5154,13 +5286,16 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
 
     val workbook = ExcelWriter.writeHakeneetHyvaksytytVastaanottaneetRaportti(
-      asiointikieli = "sv",
-      translations = translations,
       data = data,
       yksittaisetHakijat = 300,
       naytaHakutoiveet = false,
       tulostustapa = "oppilaitoksittain",
-      parametrit = hakeneetHyvaksytytVastaanottaneetParams
+      CommonExcelParams(
+        asiointikieli = "sv",
+        translations = translations,
+        parametrit = hakeneetHyvaksytytVastaanottaneetParams,
+        LocalDateTime.now()
+      )
     )
 
     assert(workbook.getNumberOfSheets == 2)
@@ -5230,13 +5365,16 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
 
     val workbook = ExcelWriter.writeHakeneetHyvaksytytVastaanottaneetRaportti(
-      asiointikieli = "sv",
-      translations = translations,
       data = data,
       yksittaisetHakijat = 300,
       naytaHakutoiveet = false,
       tulostustapa = "toimipisteittain",
-      parametrit = hakeneetHyvaksytytVastaanottaneetParams
+      CommonExcelParams(
+        asiointikieli = "sv",
+        translations = translations,
+        parametrit = hakeneetHyvaksytytVastaanottaneetParams,
+        LocalDateTime.now()
+      )
     )
 
     assert(workbook.getNumberOfSheets == 2)
@@ -5629,15 +5767,18 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
 
     val workbook: XSSFWorkbook = ExcelWriter.writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
-      asiointikieli = "sv",
-      translations = translations,
       data = data,
       yksittaisetHakijat = 820,
       ensikertalaisetYksittaisetHakijat = 126,
       maksuvelvollisetYksittaisetHakijat = 2,
       naytaHakutoiveet = true,
       tulostustapa = "toimipisteittain",
-      hakeneetHyvaksytytVastaanottaneetParams
+      CommonExcelParams(
+        asiointikieli = "sv",
+        translations = translations,
+        parametrit = hakeneetHyvaksytytVastaanottaneetParams,
+        LocalDateTime.now()
+      )
     )
 
     assert(workbook.getNumberOfSheets == 2)
@@ -5752,6 +5893,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
   }
 
   it should "create hakuparametrit sheet" in {
+    val dateTime                                                    = LocalDateTime.of(2026, 6, 1, 12, 0)
     val hakuParams: List[(String, String | Boolean | List[String])] =
       List(
         "haku"              -> List("1.2.246.562.29.00000000000000015722"),
@@ -5771,19 +5913,26 @@ class ExcelWriterSpec extends AnyFlatSpec {
       )
     val data = List.empty
     val wb   = ExcelWriter.writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
-      asiointikieli = "sv",
-      translations = translations,
       data = data,
       yksittaisetHakijat = 0,
       ensikertalaisetYksittaisetHakijat = 0,
       maksuvelvollisetYksittaisetHakijat = 0,
       naytaHakutoiveet = true,
       tulostustapa = "toimipisteittain",
-      parametrit = hakuParams
+      CommonExcelParams(
+        asiointikieli = "sv",
+        translations = translations,
+        parametrit = hakuParams,
+        dateTime
+      )
     )
 
-    val expectedHeaders = List("raportti.hakuehto", "raportti.hakuarvo")
+    val expectedHeaders = List("raportti.perustiedot")
     val expectedRows    = List(
+      List("raportti.raportin-nimi", "Korkeakoulujen hakeneet, hyväksytyt ja vastaanottaneet"),
+      List("raportti.raportin-muodostusaika", "1.6.2026 kl. 12:00"),
+      List(),
+      List("raportti.hakuehto", "raportti.hakuarvo"),
       List("Haku SV", "1.2.246.562.29.00000000000000015722"),
       List("Tulostustapa SV", "toimipisteittain"),
       List("Koulutustoimija SV", "1.2.246.562.10.53814745062"),
@@ -5882,15 +6031,18 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
 
     val workbook: XSSFWorkbook = ExcelWriter.writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
-      asiointikieli = "sv",
-      translations = translations,
       data = data,
       yksittaisetHakijat = 820,
       ensikertalaisetYksittaisetHakijat = 126,
       maksuvelvollisetYksittaisetHakijat = 2,
       naytaHakutoiveet = true,
       tulostustapa = "hakukohteittain",
-      hakeneetHyvaksytytVastaanottaneetParams
+      CommonExcelParams(
+        asiointikieli = "sv",
+        translations = translations,
+        parametrit = hakeneetHyvaksytytVastaanottaneetParams,
+        LocalDateTime.now()
+      )
     )
 
     assert(workbook.getNumberOfSheets == 2)
@@ -6067,15 +6219,18 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
 
     val workbook: XSSFWorkbook = ExcelWriter.writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
-      asiointikieli = "sv",
-      translations = translations,
       data = data,
       yksittaisetHakijat = 820,
       ensikertalaisetYksittaisetHakijat = 126,
       maksuvelvollisetYksittaisetHakijat = 2,
       naytaHakutoiveet = false,
       tulostustapa = "toimipisteittain",
-      hakeneetHyvaksytytVastaanottaneetParams
+      CommonExcelParams(
+        asiointikieli = "sv",
+        translations = translations,
+        parametrit = hakeneetHyvaksytytVastaanottaneetParams,
+        LocalDateTime.now()
+      )
     )
 
     assert(workbook.getNumberOfSheets == 2)
@@ -6250,15 +6405,18 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
 
     val workbook: XSSFWorkbook = ExcelWriter.writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
-      "sv",
-      translations,
       data,
       yksittaisetHakijat = 2759,
       ensikertalaisetYksittaisetHakijat = 1289,
       maksuvelvollisetYksittaisetHakijat = 0,
       naytaHakutoiveet = true,
       tulostustapa = "kansalaisuuksittain",
-      hakeneetHyvaksytytVastaanottaneetParams
+      CommonExcelParams(
+        asiointikieli = "sv",
+        translations = translations,
+        parametrit = hakeneetHyvaksytytVastaanottaneetParams,
+        LocalDateTime.now()
+      )
     )
 
     assert(workbook.getNumberOfSheets == 2)
@@ -6472,15 +6630,18 @@ class ExcelWriterSpec extends AnyFlatSpec {
     )
 
     val workbook: XSSFWorkbook = ExcelWriter.writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
-      "sv",
-      translations,
       data,
       yksittaisetHakijat = 6739,
       ensikertalaisetYksittaisetHakijat = 1578,
       maksuvelvollisetYksittaisetHakijat = 0,
       naytaHakutoiveet = true,
       tulostustapa = "hakukohderyhmittain",
-      hakeneetHyvaksytytVastaanottaneetParams
+      CommonExcelParams(
+        asiointikieli = "sv",
+        translations = translations,
+        parametrit = hakeneetHyvaksytytVastaanottaneetParams,
+        LocalDateTime.now()
+      )
     )
 
     assert(workbook.getNumberOfSheets == 2)
