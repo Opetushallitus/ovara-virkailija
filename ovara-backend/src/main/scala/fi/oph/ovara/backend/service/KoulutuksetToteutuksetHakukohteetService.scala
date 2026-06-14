@@ -7,12 +7,13 @@ import fi.oph.ovara.backend.raportointi.dto.{
   ValidatedKoulutuksetToteutuksetHakukohteetParams
 }
 import fi.oph.ovara.backend.repository.{KoulutuksetToteutuksetHakukohteetRepository, ReadOnlyDatabase}
-import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter, OrganisaatioUtils}
+import fi.oph.ovara.backend.utils.{AuthoritiesUtil, CommonExcelParams, ExcelWriter, OrganisaatioUtils}
 import org.slf4j.{Logger, LoggerFactory}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.{Component, Service}
 
+import java.time.LocalDateTime
 import scala.util.{Failure, Success, Try}
 
 @Component
@@ -101,10 +102,13 @@ class KoulutuksetToteutuksetHakukohteetService(
 
       ExcelWriter.writeKoulutuksetToteutuksetHakukohteetRaportti(
         organisaationKoulutuksetHakukohteetToteutukset,
-        asiointikieli,
         raporttityyppi,
-        translations,
-        raporttiParams
+        CommonExcelParams(
+          asiointikieli,
+          translations,
+          raporttiParams,
+          LocalDateTime.now()
+        )
       )
     } match {
       case Success(excelFile) => Right(excelFile)

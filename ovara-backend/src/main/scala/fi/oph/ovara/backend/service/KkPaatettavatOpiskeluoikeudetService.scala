@@ -5,18 +5,24 @@ import fi.oph.ovara.backend.raportointi.dto.{
   buildKkPaatettavatOpiskeluoikeudetParamsForExcel,
   KkPaatettavatOpiskeluoikeudetParams
 }
-import fi.oph.ovara.backend.repository.{KorkeakouluKoulutuksetToteutuksetHakukohteetRepository, ReadOnlyDatabase}
-import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
+import fi.oph.ovara.backend.repository.{
+  KkPaatettavatOpiskeluoikeudetRepository,
+  KorkeakouluKoulutuksetToteutuksetHakukohteetRepository,
+  ReadOnlyDatabase
+}
+import fi.oph.ovara.backend.utils.{AuthoritiesUtil, CommonExcelParams, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.{Component, Service}
 
+import java.time.LocalDateTime
 import scala.util.{Failure, Success, Try}
 
 @Component
 @Service
 class KkPaatettavatOpiskeluoikeudetService(
+  kkPaatettavatOpiskeluoikeudetRepository: KkPaatettavatOpiskeluoikeudetRepository,
   userService: UserService,
   commonService: CommonService,
   lokalisointiService: LokalisointiService
@@ -46,7 +52,7 @@ class KkPaatettavatOpiskeluoikeudetService(
       oppilaitosOids = List(oppilaitos),
       List.empty
     )
-
+    // placeholder havainnollistamaan sisältöä
     val mockData = List(
       KkPaatettavaOpiskeluoikeus(
         oppijanumero = "1.2.246.562.24.10002324020",
@@ -73,7 +79,15 @@ class KkPaatettavatOpiskeluoikeudetService(
       )
     )
     Try {
-      // TODO OPHYOS-193
+      // TODO varsinainen data raportille
+      val raporttiParamNames = db
+        .run(
+          kkPaatettavatOpiskeluoikeudetRepository.hakuParamNamesQuery(oppilaitos),
+          "hakuParamNamesQuery"
+        )
+        .map(param => param.parametri -> param.nimet.head)
+        .toMap
+
       val raporttiParams = buildKkPaatettavatOpiskeluoikeudetParamsForExcel(
         KkPaatettavatOpiskeluoikeudetParams(
           oppilaitos,
@@ -83,13 +97,11 @@ class KkPaatettavatOpiskeluoikeudetService(
           oppijanumero,
           opiskeluoikeudenTila
         ),
-        Map.empty
+        raporttiParamNames
       )
       ExcelWriter.writeKorkeakouluPaatettavatOpiskeluoikeudetRaportti(
         mockData,
-        asiointikieli,
-        translations,
-        raporttiParams
+        CommonExcelParams(asiointikieli, translations, raporttiParams, LocalDateTime.now())
       )
     } match {
       case Success(excelFile) => Right(excelFile)
