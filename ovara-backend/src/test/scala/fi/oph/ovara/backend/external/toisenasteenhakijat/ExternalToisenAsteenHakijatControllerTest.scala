@@ -141,7 +141,21 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
       .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO))
       .andExpect(jsonPath("$.hakijat[0].sahkoposti").value(EMAIL))
+      .andExpect(jsonPath("$.hakijat[0].hetu").value(HETU))
+      .andExpect(jsonPath("$.hakijat[0].sukunimi").value(SUKUNIMI))
+      .andExpect(jsonPath("$.hakijat[0].etunimet").value(ETUNIMET))
+      .andExpect(jsonPath("$.hakijat[0].kutsumanimi").value(KUTSUMANIMI))
+      .andExpect(jsonPath("$.hakijat[0].kotikunta").value(KOTIKUNTA))
+      .andExpect(jsonPath("$.hakijat[0].maa").value(SUOMI_KOODI))
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet[0]").value("246"))
+      .andExpect(jsonPath("$.hakijat[0].sukupuoli").value(SUKUPUOLI.toString))
+      .andExpect(jsonPath("$.hakijat[0].koulutusmarkkinointilupa").value(KOULUTUSMARKKINOINTILUPA))
+      .andExpect(jsonPath("$.hakijat[0].kiinnostunutoppisopimuksesta").value(KIINNOSTUNUT_OPPISOPIMUKSESTA))
+      .andExpect(jsonPath("$.hakijat[0].sahkoisenAsioinninLupa").value(SAHKOINENVIESTINTALUPA))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakemusnumero").value(HAKEMUS_OID))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.julkaisulupa").value(VALINTATULOKSEN_JULKAISULUPA))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakemuksenJattopaiva").value(JATETTY.toString))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakemuksenMuokkauspaiva").value(MUOKATTU.toString))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet", hasSize[Any](1)))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].hakukohdeOid").value(HAKUKOHDE_OID))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].opetuspiste").value(ORGANISAATIO_OID))
@@ -162,7 +176,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
   }
 
   @Test
-  def placeholderFieldsArePresentAsNullOrEmpty(): Unit = {
+  def fieldsWithoutDataSourceAreNullOrEmpty(): Unit = {
     initSchema()
     insertHakemus()
     insertHakukohde()
@@ -170,19 +184,38 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
     get()()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hetu").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].sukunimi").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].etunimet").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].kutsumanimi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].muupuhelin").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].aidinkieli").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].opetuskieli").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].huoltaja1").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].huoltaja2").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet").isEmpty)
+      .andExpect(jsonPath("$.hakijat[0].oikeusMaksuttomaanKoulutukseenVoimassaAsti").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].oppivelvollisuusVoimassaAsti").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].lisakysymykset").isEmpty)
       .andExpect(jsonPath("$.hakijat[0].hakemus.vuosi").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemus.kausi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.pohjakoulutus").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemus.osaaminen.yleinen_kielitutkinto_fi").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].terveys").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].urheilijanLisakysymykset").value(nullValue()))
+  }
+
+  @Test
+  def datesWithZeroSecondsRetainSecondsInJson(): Unit = {
+    initSchema()
+    insertHakemus(
+      jatetty = Some(java.time.OffsetDateTime.parse("2025-08-01T10:00:00+03:00")),
+      muokattu = Some(java.time.OffsetDateTime.parse("2025-08-13T14:52:00+03:00"))
+    )
+    insertHakukohde()
+    insertHakutoive()
+
+    get()()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakemuksenJattopaiva").value("2025-08-01T10:00:00+03:00"))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakemuksenMuokkauspaiva").value("2025-08-13T14:52:00+03:00"))
   }
 
   @Test

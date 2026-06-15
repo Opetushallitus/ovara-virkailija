@@ -1,5 +1,7 @@
 package fi.oph.ovara.backend.external.toisenasteenhakijat
 
+import java.time.OffsetDateTime
+
 object ExternalToisenAsteenHakijatTestData {
   val OPPIJANUMERO      = "1.2.246.562.24.9"
   val HAKEMUS_OID       = "1.2.246.562.11.00000000000003511892"
@@ -19,4 +21,18 @@ object ExternalToisenAsteenHakijatTestData {
   val POSTINUMERO  = "00100"
   val HELSINKI     = "Helsinki"
   val SUOMI_KOODI  = "246"
+
+  val ETUNIMET                      = "Matti Ilmari"
+  val KUTSUMANIMI                   = "Matti"
+  val SUKUNIMI                      = "Meikäläinen"
+  val HETU                          = "010101A1234"
+  val KOTIKUNTA                     = "091"
+  val SUKUPUOLI                     = 1
+  val KANSALAISUUS_JSON             = """["246"]"""
+  val KOULUTUSMARKKINOINTILUPA      = true
+  val KIINNOSTUNUT_OPPISOPIMUKSESTA = false
+  val SAHKOINENVIESTINTALUPA        = true
+  val VALINTATULOKSEN_JULKAISULUPA  = true
+  val JATETTY                       = OffsetDateTime.parse("2025-08-01T10:00:30+03:00")
+  val MUOKATTU                      = OffsetDateTime.parse("2025-08-13T14:52:14+03:00")
 }
