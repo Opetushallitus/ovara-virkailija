@@ -34,6 +34,20 @@ class ExtractorUtilsSpec extends AnyFlatSpec {
       )
     )
   }
+  "extractKielistettyList" should "return empty list when input is None" in {
+    assert(ExtractorUtils.extractKielistettyList(None) == List())
+  }
+
+  it should "skip null elements in the JSON array" in {
+    val json = Some("""[null, {"fi": "Suomi", "sv": "Finland"}]""")
+    assert(ExtractorUtils.extractKielistettyList(json) == List(Map(Fi -> "Suomi", Sv -> "Finland")))
+  }
+
+  it should "return all elements when none are null" in {
+    val json = Some("""[{"fi": "Suomi"}, {"fi": "Ruotsi"}]""")
+    assert(ExtractorUtils.extractKielistettyList(json).length == 2)
+  }
+
   "extractCommaSeparatedString" should "return None for an empty list and a comma-separated string for a non-empty list" in {
     assert(ExtractorUtils.extractCommaSeparatedString(None) == None)
     assert(ExtractorUtils.extractCommaSeparatedString(Some("[]")) == None)
