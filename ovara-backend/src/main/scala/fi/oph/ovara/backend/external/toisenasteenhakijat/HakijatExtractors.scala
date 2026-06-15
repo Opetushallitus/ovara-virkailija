@@ -1,0 +1,40 @@
+package fi.oph.ovara.backend.external.toisenasteenhakijat
+
+import fi.oph.ovara.backend.repository.Extractors
+import fi.oph.ovara.backend.utils.ExtractorUtils.extractArray
+import slick.jdbc.GetResult
+
+class HakijatExtractors extends Extractors {
+  implicit val getHakijaRow: GetResult[HakijaRow] = GetResult { r =>
+    HakijaRow(
+      oppijanumero = r.nextString(),
+      hakemusOid = r.nextString(),
+      sahkoposti = r.nextString(),
+      puhelin = r.nextString(),
+      lahiosoite = r.nextString(),
+      postinumero = r.nextString(),
+      postitoimipaikka = r.nextString(),
+      hakuOid = r.nextString()
+    )
+  }
+
+  implicit val getHakijaHakutoiveRow: GetResult[HakijaHakutoiveRow] = GetResult { r =>
+    HakijaHakutoiveRow(
+      hakemusOid = r.nextString(),
+      hakukohdeOid = r.nextString(),
+      hakutoivenumero = r.nextInt(),
+      jarjestyspaikkaOid = r.nextStringOption(),
+      koulutusKoodiurit = extractArray(r.nextStringOption())
+    )
+  }
+
+  implicit val getHakijatKoodistoArvo: GetResult[KoodistoArvo] = GetResult { r =>
+    KoodistoArvo(
+      versioituUri = r.nextString(),
+      koodiarvo = r.nextString(),
+      koodistoUri = r.nextString(),
+      koodistoVersio = r.nextInt(),
+      nimi = getKielistetty(r)
+    )
+  }
+}
