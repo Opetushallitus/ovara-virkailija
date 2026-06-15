@@ -1,11 +1,12 @@
 package fi.oph.ovara.backend.external.toisenasteenhakijat
 
-import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.{JsonFormat, JsonInclude}
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import fi.oph.ovara.backend.opiskelijavalintatieto.KielistettyResponse
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode
 
+import java.time.OffsetDateTime
 import scala.annotation.meta.field
 import scala.beans.BeanProperty
 import scala.jdk.CollectionConverters.*
@@ -135,9 +136,11 @@ case class HakijaHakemusResponse(
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
   @BeanProperty hakemusnumero: String,
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-  @BeanProperty hakemuksenJattopaiva: Option[String],
+  @(JsonFormat @field)(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
+  @BeanProperty hakemuksenJattopaiva: Option[OffsetDateTime],
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-  @BeanProperty hakemuksenMuokkauspaiva: Option[String],
+  @(JsonFormat @field)(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
+  @BeanProperty hakemuksenMuokkauspaiva: Option[OffsetDateTime],
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
   @BeanProperty lahtokoulu: Option[String],
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)

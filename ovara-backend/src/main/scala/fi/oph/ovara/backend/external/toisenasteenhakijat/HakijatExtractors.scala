@@ -14,7 +14,21 @@ class HakijatExtractors extends Extractors {
       lahiosoite = r.nextString(),
       postinumero = r.nextString(),
       postitoimipaikka = r.nextString(),
-      hakuOid = r.nextString()
+      hakuOid = r.nextString(),
+      etunimet = r.nextStringOption(),
+      kutsumanimi = r.nextStringOption(),
+      sukunimi = r.nextStringOption(),
+      hetu = r.nextStringOption(),
+      asuinmaa = r.nextStringOption(),
+      kansalaisuudet = extractArray(r.nextStringOption()),
+      kotikunta = r.nextStringOption(),
+      sukupuoli = r.nextIntOption(),
+      koulutusmarkkinointilupa = r.nextBooleanOption(),
+      kiinnostunutOppisopimuksesta = r.nextBooleanOption(),
+      sahkoinenviestintalupa = r.nextBooleanOption(),
+      valintatuloksenJulkaisulupa = r.nextBooleanOption(),
+      jatetty = getOffsetDateTime(r),
+      muokattu = getOffsetDateTime(r)
     )
   }
 

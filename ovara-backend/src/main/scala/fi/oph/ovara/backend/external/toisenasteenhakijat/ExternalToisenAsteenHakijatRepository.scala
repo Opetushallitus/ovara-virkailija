@@ -27,7 +27,21 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
           hakemus.lahiosoite,
           hakemus.postinumero,
           hakemus.postitoimipaikka,
-          haku.haku_oid
+          haku.haku_oid,
+          hakemus.etunimet,
+          hakemus.kutsumanimi,
+          hakemus.sukunimi,
+          hakemus.hetu,
+          hakemus.asuinmaa,
+          hakemus.kansalaisuus,
+          hakemus.kotikunta,
+          hakemus.sukupuoli,
+          hakemus.koulutusmarkkinointilupa,
+          hakemus.kiinnostunut_oppisopimuksesta,
+          hakemus.sahkoinenviestintalupa,
+          hakemus.valintatuloksen_julkaisulupa,
+          hakemus.jatetty,
+          hakemus.muokattu
         FROM gen.gen_henkilo hlo
         INNER JOIN gen.gen_hakemus hakemus ON hakemus.henkilo_oid = hlo.henkilo_oid
         INNER JOIN gen.gen_haku    haku    ON hakemus.haku_oid    = haku.haku_oid
@@ -49,7 +63,21 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
           hakemus.lahiosoite,
           hakemus.postinumero,
           hakemus.postitoimipaikka,
-          haku.haku_oid
+          haku.haku_oid,
+          hakemus.etunimet,
+          hakemus.kutsumanimi,
+          hakemus.sukunimi,
+          hakemus.hetu,
+          hakemus.asuinmaa,
+          hakemus.kansalaisuus,
+          hakemus.kotikunta,
+          hakemus.sukupuoli,
+          hakemus.koulutusmarkkinointilupa,
+          hakemus.kiinnostunut_oppisopimuksesta,
+          hakemus.sahkoinenviestintalupa,
+          hakemus.valintatuloksen_julkaisulupa,
+          hakemus.jatetty,
+          hakemus.muokattu
         FROM gen.gen_henkilo hlo
         INNER JOIN gen.gen_hakemus hakemus ON hakemus.henkilo_oid = hlo.henkilo_oid
         INNER JOIN gen.gen_haku    haku    ON hakemus.haku_oid    = haku.haku_oid
