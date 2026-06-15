@@ -62,7 +62,21 @@ class ExternalToisenAsteenHakijatServiceTest
     assert(hakija.lahiosoite == LAHIOSOITE)
     assert(hakija.postinumero == POSTINUMERO)
     assert(hakija.postitoimipaikka == HELSINKI)
+    assert(hakija.hetu.contains(HETU))
+    assert(hakija.sukunimi.contains(SUKUNIMI))
+    assert(hakija.etunimet.contains(ETUNIMET))
+    assert(hakija.kutsumanimi.contains(KUTSUMANIMI))
+    assert(hakija.kotikunta.contains(KOTIKUNTA))
+    assert(hakija.maa.contains(SUOMI_KOODI))
+    assert(hakija.kansalaisuudet == Seq("246"))
+    assert(hakija.sukupuoli.contains(SUKUPUOLI.toString))
+    assert(hakija.koulutusmarkkinointilupa.contains(KOULUTUSMARKKINOINTILUPA))
+    assert(hakija.kiinnostunutoppisopimuksesta.contains(KIINNOSTUNUT_OPPISOPIMUKSESTA))
+    assert(hakija.sahkoisenAsioinninLupa.contains(SAHKOINENVIESTINTALUPA))
     assert(hakija.hakemus.hakemusnumero == HAKEMUS_OID)
+    assert(hakija.hakemus.julkaisulupa.contains(VALINTATULOKSEN_JULKAISULUPA))
+    assert(hakija.hakemus.hakemuksenJattopaiva.contains(JATETTY))
+    assert(hakija.hakemus.hakemuksenMuokkauspaiva.contains(MUOKATTU))
     assert(hakija.hakemus.hakutoiveet.size == 1)
     val hakutoive = hakija.hakemus.hakutoiveet.head
     assert(hakutoive.hakukohdeOid == HAKUKOHDE_OID)
@@ -83,9 +97,49 @@ class ExternalToisenAsteenHakijatServiceTest
     assert(hakija.oppijanumero == OPPIJANUMERO)
   }
 
-  it should "return placeholder fields as None / empty by default" in {
+  it should "return None / empty for fields that have no source yet" in {
     initSchema()
     insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+
+    val hakija = getOnlyHakija(response)
+    assert(hakija.muupuhelin.isEmpty)
+    assert(hakija.aidinkieli.isEmpty)
+    assert(hakija.opetuskieli.isEmpty)
+    assert(hakija.huoltaja1.isEmpty)
+    assert(hakija.huoltaja2.isEmpty)
+    assert(hakija.oikeusMaksuttomaanKoulutukseenVoimassaAsti.isEmpty)
+    assert(hakija.oppivelvollisuusVoimassaAsti.isEmpty)
+    assert(hakija.lisakysymykset.isEmpty)
+    assert(hakija.hakemus.vuosi.isEmpty)
+    assert(hakija.hakemus.kausi.isEmpty)
+    assert(hakija.hakemus.lahtokoulu.isEmpty)
+    assert(hakija.hakemus.luokka.isEmpty)
+    assert(hakija.hakemus.pohjakoulutus.isEmpty)
+    assert(hakija.hakemus.osaaminen.yleinen_kielitutkinto_fi.isEmpty)
+    assert(hakija.hakemus.osaaminen.valtionhallinnon_kielitutkinto_en.isEmpty)
+  }
+
+  it should "return None for fields whose gen_hakemus columns are NULL" in {
+    initSchema()
+    insertHakemus(
+      etunimet = None,
+      kutsumanimi = None,
+      sukunimi = None,
+      hetu = None,
+      kotikunta = None,
+      sukupuoli = None,
+      kansalaisuusJson = None,
+      koulutusmarkkinointilupa = None,
+      kiinnostunutOppisopimuksesta = None,
+      sahkoinenviestintalupa = None,
+      valintatuloksenJulkaisulupa = None,
+      jatetty = None,
+      muokattu = None
+    )
     insertHakukohde()
     insertHakutoive()
 
@@ -95,12 +149,12 @@ class ExternalToisenAsteenHakijatServiceTest
     assert(hakija.hetu.isEmpty)
     assert(hakija.sukunimi.isEmpty)
     assert(hakija.etunimet.isEmpty)
-    assert(hakija.huoltaja1.isEmpty)
-    assert(hakija.huoltaja2.isEmpty)
     assert(hakija.kansalaisuudet.isEmpty)
-    assert(hakija.lisakysymykset.isEmpty)
-    assert(hakija.hakemus.osaaminen.yleinen_kielitutkinto_fi.isEmpty)
-    assert(hakija.hakemus.osaaminen.valtionhallinnon_kielitutkinto_en.isEmpty)
+    assert(hakija.sukupuoli.isEmpty)
+    assert(hakija.sahkoisenAsioinninLupa.isEmpty)
+    assert(hakija.hakemus.julkaisulupa.isEmpty)
+    assert(hakija.hakemus.hakemuksenJattopaiva.isEmpty)
+    assert(hakija.hakemus.hakemuksenMuokkauspaiva.isEmpty)
   }
 
   it should "not return hakemus when hakemus_oid is not 35 characters" in {

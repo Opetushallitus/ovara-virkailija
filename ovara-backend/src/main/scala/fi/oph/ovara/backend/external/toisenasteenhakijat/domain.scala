@@ -2,6 +2,8 @@ package fi.oph.ovara.backend.external.toisenasteenhakijat
 
 import fi.oph.ovara.backend.domain.Kielistetty
 
+import java.time.OffsetDateTime
+
 case class ToisenAsteenHakija(
   oppijanumero: String,
   sahkoposti: String,
@@ -36,8 +38,8 @@ case class HakijaHakemus(
   hakutoiveet: Seq[HakijaHakutoive],
   vuosi: Option[String] = None,
   kausi: Option[String] = None,
-  hakemuksenJattopaiva: Option[String] = None,
-  hakemuksenMuokkauspaiva: Option[String] = None,
+  hakemuksenJattopaiva: Option[OffsetDateTime] = None,
+  hakemuksenMuokkauspaiva: Option[OffsetDateTime] = None,
   lahtokoulu: Option[String] = None,
   lahtokoulunnimi: Option[String] = None,
   luokka: Option[String] = None,

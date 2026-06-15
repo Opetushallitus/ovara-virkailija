@@ -4,7 +4,12 @@ import fi.oph.ovara.backend.external.toisenasteenhakijat.ExternalToisenAsteenHak
 import fi.oph.ovara.backend.repository.ReadOnlyDatabase
 import slick.jdbc.H2Profile.api.*
 
+import java.time.format.DateTimeFormatter
+
 trait ExternalToisenAsteenHakijatTestUtils {
+  private val SECONDS_TZ_FORMATTER: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
+
   val db: ReadOnlyDatabase
 
   def insertHenkilo(oppijanumero: String = OPPIJANUMERO): Unit = {
@@ -36,10 +41,26 @@ trait ExternalToisenAsteenHakijatTestUtils {
     hakemusOid: String = HAKEMUS_OID,
     hakuOid: String = HAKU_OID,
     insertHenkilo: Boolean = true,
-    insertHaku: Boolean = true
+    insertHaku: Boolean = true,
+    etunimet: Option[String] = Some(ETUNIMET),
+    kutsumanimi: Option[String] = Some(KUTSUMANIMI),
+    sukunimi: Option[String] = Some(SUKUNIMI),
+    hetu: Option[String] = Some(HETU),
+    kotikunta: Option[String] = Some(KOTIKUNTA),
+    sukupuoli: Option[Int] = Some(SUKUPUOLI),
+    kansalaisuusJson: Option[String] = Some(KANSALAISUUS_JSON),
+    koulutusmarkkinointilupa: Option[Boolean] = Some(KOULUTUSMARKKINOINTILUPA),
+    kiinnostunutOppisopimuksesta: Option[Boolean] = Some(KIINNOSTUNUT_OPPISOPIMUKSESTA),
+    sahkoinenviestintalupa: Option[Boolean] = Some(SAHKOINENVIESTINTALUPA),
+    valintatuloksenJulkaisulupa: Option[Boolean] = Some(VALINTATULOKSEN_JULKAISULUPA),
+    jatetty: Option[java.time.OffsetDateTime] = Some(JATETTY),
+    muokattu: Option[java.time.OffsetDateTime] = Some(MUOKATTU)
   ): Unit = {
     if (insertHenkilo) this.insertHenkilo(oppijanumero)
     if (insertHaku) this.insertHaku(hakuOid)
+
+    val jatettyStr  = jatetty.map(_.format(SECONDS_TZ_FORMATTER))
+    val muokattuStr = muokattu.map(_.format(SECONDS_TZ_FORMATTER))
 
     db.run(
       sqlu"""INSERT INTO gen.gen_hakemus VALUES(
@@ -51,7 +72,20 @@ trait ExternalToisenAsteenHakijatTestUtils {
           $HELSINKI,
           $SUOMI_KOODI,
           $EMAIL,
-          $MATKAPUHELIN)""",
+          $MATKAPUHELIN,
+          $etunimet,
+          $kutsumanimi,
+          $sukunimi,
+          $hetu,
+          $kotikunta,
+          $sukupuoli,
+          $kansalaisuusJson,
+          $koulutusmarkkinointilupa,
+          $kiinnostunutOppisopimuksesta,
+          $sahkoinenviestintalupa,
+          $valintatuloksenJulkaisulupa,
+          $jatettyStr,
+          $muokattuStr)""",
       "Insert test hakemus"
     )
   }
@@ -116,15 +150,28 @@ trait ExternalToisenAsteenHakijatTestUtils {
           CREATE SCHEMA gen;
 
           CREATE TABLE gen.gen_hakemus (
-              hakemus_oid      text NOT NULL PRIMARY KEY,
-              haku_oid         text,
-              henkilo_oid      text,
-              lahiosoite       text,
-              postinumero      text,
-              postitoimipaikka text,
-              asuinmaa         character varying,
-              sahkoposti       text,
-              puhelin          text
+              hakemus_oid                    text NOT NULL PRIMARY KEY,
+              haku_oid                       text,
+              henkilo_oid                    text,
+              lahiosoite                     text,
+              postinumero                    text,
+              postitoimipaikka               text,
+              asuinmaa                       character varying,
+              sahkoposti                     text,
+              puhelin                        text,
+              etunimet                       text,
+              kutsumanimi                    text,
+              sukunimi                       text,
+              hetu                           text,
+              kotikunta                      text,
+              sukupuoli                      integer,
+              kansalaisuus                   jsonb,
+              koulutusmarkkinointilupa       boolean,
+              kiinnostunut_oppisopimuksesta  boolean,
+              sahkoinenviestintalupa         boolean,
+              valintatuloksen_julkaisulupa   boolean,
+              jatetty                        timestamp with time zone,
+              muokattu                       timestamp with time zone
           );
 
           CREATE TABLE gen.gen_henkilo (
