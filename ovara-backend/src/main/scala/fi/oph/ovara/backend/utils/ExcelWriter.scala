@@ -1960,6 +1960,40 @@ object ExcelWriter {
 
       var currentRowIndex = 0
 
+      val titleRow = sheet.createRow(currentRowIndex)
+
+      val paatettavaTitleCell = titleRow.createCell(0)
+      paatettavaTitleCell.setCellValue(
+        translations.getOrElse("raportti.paatettava-opiskeluoikeus", "raportti.paatettava-opiskeluoikeus")
+      )
+      paatettavaTitleCell.setCellStyle(headingCellStyle)
+
+      val vastaanotettuTitleCell = titleRow.createCell(11)
+      vastaanotettuTitleCell.setCellValue(
+        translations.getOrElse("raportti.vastaanotettu-opiskelupaikka", "raportti.vastaanotettu-opiskelupaikka")
+      )
+      vastaanotettuTitleCell.setCellStyle(headingCellStyle)
+
+      // HUOM! Jos lisätään uusia sarakkeita, pitää tarvittaessa säätää myös otsikkosolujen leveys
+      sheet.addMergedRegion(
+        new CellRangeAddress(
+          currentRowIndex,
+          currentRowIndex,
+          0,
+          10
+        )
+      )
+      sheet.addMergedRegion(
+        new CellRangeAddress(
+          currentRowIndex,
+          currentRowIndex,
+          11,
+          19
+        )
+      )
+
+      currentRowIndex += 1
+
       val fieldNames: List[String] = classOf[KkPaatettavaOpiskeluoikeus].getDeclaredFields.map(_.getName).toList
       val fieldNamesWithIndex      = fieldNames.zipWithIndex
       currentRowIndex = createHeadingRow(sheet, translations, currentRowIndex, fieldNames, headingCellStyle)
@@ -1968,25 +2002,27 @@ object ExcelWriter {
         val dataRow = sheet.createRow(currentRowIndex)
         val rowData =
           List(
-            item.oppijanumero,
-            item.hetu.getOrElse(""),
-            item.syntymaaika,
             item.sukunimi,
             item.etunimet,
             item.kutsumanimi,
-            item.opiskelijaAvain,
-            item.opiskeluoikeusAvain,
+            item.hetu.getOrElse(""),
+            item.syntymaAika,
+            item.oppijanumero,
             item.opiskeluoikeudenNimi(Kieli.withName(asiointikieli)),
             item.opiskeluoikeudenPaattymispvm.getOrElse(""),
+            item.opiskeluoikeudenViimeisinTila,
+            item.opiskelijaAvain,
+            item.opiskeluoikeusAvain,
             item.hakemusOid,
-            item.hakuNimi(Kieli.withName(asiointikieli)),
-            item.hakukohdeOid,
             item.hakukohdeNimi(Kieli.withName(asiointikieli)),
-            item.oppilaitosOid,
+            item.hakukohdeOid,
             item.oppilaitosNimi(Kieli.withName(asiointikieli)),
+            item.oppilaitosOid,
+            item.uudenOpiskeluoikeudenAlkamispvm,
             item.vastaanottoAjankohta,
-            item.koulutusluokitusKoodit,
-            item.uudenOpiskeluoikeudenAlkamispvm
+            item.hakuNimi(Kieli.withName(asiointikieli)),
+            item.hakuOid,
+            item.koulutusluokitusKoodit
           )
         createRowCells(rowData, dataRow, workbook, createBodyTextCellStyle(workbook))
         currentRowIndex += 1

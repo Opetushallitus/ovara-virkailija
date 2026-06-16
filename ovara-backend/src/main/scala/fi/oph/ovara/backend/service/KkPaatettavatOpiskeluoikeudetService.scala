@@ -57,7 +57,7 @@ class KkPaatettavatOpiskeluoikeudetService(
       KkPaatettavaOpiskeluoikeus(
         oppijanumero = "1.2.246.562.24.10002324020",
         hetu = Some("010101-1234"),
-        syntymaaika = "1901-01-01",
+        syntymaAika = "1901-01-01",
         sukunimi = "Testinen",
         etunimet = "Testi",
         kutsumanimi = "Testi",
@@ -73,9 +73,9 @@ class KkPaatettavatOpiskeluoikeudetService(
         hakukohdeNimi = Map(Fi -> "Meteorologi, Hurrikaanien tutkimislinja"),
         oppilaitosOid = "1.2.246.562.10.00000000000000000001",
         oppilaitosNimi = Map(Fi -> "Hurrikaaniopisto"),
-        vastaanottoAjankohta = "2026-01-15T12:00:00",
+        vastaanottoAjankohta = "2026-08-15T12:00:00",
         koulutusluokitusKoodit = "12345",
-        uudenOpiskeluoikeudenAlkamispvm = "2026-01-15"
+        uudenOpiskeluoikeudenAlkamispvm = "2026-09-01"
       )
     )
     Try {
