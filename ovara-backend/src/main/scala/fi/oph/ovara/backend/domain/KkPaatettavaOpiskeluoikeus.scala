@@ -1,25 +1,25 @@
 package fi.oph.ovara.backend.domain
 
 case class KkPaatettavaOpiskeluoikeus(
-  oppijanumero: String,
-  hetu: Option[String],
-  syntymaaika: String,
   sukunimi: String,
   etunimet: String,
   kutsumanimi: String,
-  opiskelijaAvain: String,
-  opiskeluoikeusAvain: String,
+  hetu: Option[String],
+  syntymaAika: String,
+  oppijanumero: String,
   opiskeluoikeudenNimi: Kielistetty,
   opiskeluoikeudenPaattymispvm: Option[String],
   opiskeluoikeudenViimeisinTila: String,
+  opiskelijaAvain: String,
+  opiskeluoikeusAvain: String,
   hakemusOid: String,
-  hakuOid: String,
-  hakuNimi: Kielistetty,
-  hakukohdeOid: String,
   hakukohdeNimi: Kielistetty,
-  oppilaitosOid: String,
+  hakukohdeOid: String,
   oppilaitosNimi: Kielistetty,
+  oppilaitosOid: String,
+  uudenOpiskeluoikeudenAlkamispvm: String,
   vastaanottoAjankohta: String,
-  koulutusluokitusKoodit: String,
-  uudenOpiskeluoikeudenAlkamispvm: String
+  hakuNimi: Kielistetty,
+  hakuOid: String,
+  koulutusluokitusKoodit: String
 )
