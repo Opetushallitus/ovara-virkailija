@@ -183,7 +183,7 @@ class HakeneetHyvaksytytVastaanottaneetRepository extends Extractors {
     val query = sql"""SELECT count(distinct ht.henkilo_oid)
       FROM pub.pub_dim_hakutoive ht
       JOIN pub.pub_dim_hakukohde h ON ht.hakukohde_oid = h.hakukohde_oid
-      JOIN pub.pub_fct_raportti_tilastoraportti_toinen_aste t ON t.hakukohde_oid = ht.hakukohde_oid
+      JOIN pub.pub_fct_raportti_tilastoraportti_2aste_hakutoive t ON t.hakutoive_id = ht.hakutoive_id
       JOIN pub.pub_dim_henkilo he on ht.henkilo_hakemus_id = he.henkilo_hakemus_id
     WHERE #$filters
     """.as[Int].head
