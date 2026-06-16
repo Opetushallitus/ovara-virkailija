@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import fi.oph.ovara.backend.opiskelijavalintatieto.ValidationError
 import fi.oph.ovara.backend.service.UserService
 import fi.oph.ovara.backend.utils.ParameterValidator.{validateOid, validateOrganisaatioOid}
-import fi.oph.ovara.backend.utils.{ApiException, ControllerUtils}
+import fi.oph.ovara.backend.utils.{ApiException, AuditLog, AuditLogObj, AuditOperation, ControllerUtils}
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.{Content, Schema}
 import io.swagger.v3.oas.annotations.responses.ApiResponse
-import jakarta.servlet.http.HttpServletResponse
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.http.{HttpHeaders, HttpStatus}
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
@@ -22,9 +22,22 @@ import scala.jdk.CollectionConverters.*
 class ExternalToisenAsteenHakijatController(
   val userService: UserService,
   hakijatService: ExternalToisenAsteenHakijatService,
-  mapper: ObjectMapper
+  mapper: ObjectMapper,
+  val auditLog: AuditLog = AuditLogObj
 ) extends ControllerUtils {
   val LOG: Logger = LoggerFactory.getLogger(classOf[ExternalToisenAsteenHakijatController])
+
+  private def auditParams(
+    format: String,
+    hakuOid: String,
+    hakukohdeOid: Option[String],
+    organisaatioOid: Option[String]
+  ): Map[String, Any] = Map(
+    "format"          -> format,
+    "hakuOid"         -> hakuOid,
+    "hakukohdeOid"    -> hakukohdeOid.getOrElse(""),
+    "organisaatioOid" -> organisaatioOid.getOrElse("")
+  )
 
   @GetMapping(path = Array("toisenasteenhakijat"))
   @Operation(
@@ -50,7 +63,8 @@ class ExternalToisenAsteenHakijatController(
   def getHakijat(
     @RequestParam("hakuOid", required = true) hakuOid: String,
     @RequestParam(value = "hakukohdeOid", required = false) hakukohdeOid: String,
-    @RequestParam(value = "organisaatioOid", required = false) organisaatioOid: String
+    @RequestParam(value = "organisaatioOid", required = false) organisaatioOid: String,
+    request: HttpServletRequest
   ): HakijatResponse =
     withPaakayttajaRole {
       val hakukohde    = Option(hakukohdeOid).filter(_.nonEmpty)
@@ -69,6 +83,11 @@ class ExternalToisenAsteenHakijatController(
 
       LOG.info(
         s"Haetaan toisen asteen hakijat. HakuOid: $hakuOid, HakukohdeOid: $hakukohdeOid, OrganisaatioOid: $organisaatioOid"
+      )
+      auditLog.logWithParams(
+        request,
+        AuditOperation.ExternalToisenAsteenHakijat,
+        auditParams("json", hakuOid, hakukohde, organisaatio)
       )
       handleRequest {
         hakijatService.getHakijat(hakuOid, hakukohde, organisaatio).map(HakijatResponse.apply)
@@ -98,6 +117,7 @@ class ExternalToisenAsteenHakijatController(
     @RequestParam("hakuOid", required = true) hakuOid: String,
     @RequestParam(value = "hakukohdeOid", required = false) hakukohdeOid: String,
     @RequestParam(value = "organisaatioOid", required = false) organisaatioOid: String,
+    request: HttpServletRequest,
     response: HttpServletResponse
   ): Unit = {
     val hakukohde    = Option(hakukohdeOid).filter(_.nonEmpty)
@@ -133,6 +153,11 @@ class ExternalToisenAsteenHakijatController(
     LOG.info(
       s"Haetaan toisen asteen hakijat Excel-muodossa. HakuOid: $hakuOid, HakukohdeOid: $hakukohdeOid, " +
         s"OrganisaatioOid: $organisaatioOid"
+    )
+    auditLog.logWithParams(
+      request,
+      AuditOperation.ExternalToisenAsteenHakijat,
+      auditParams("excel", hakuOid, hakukohde, organisaatio)
     )
 
     hakijatService.getHakijat(hakuOid, hakukohde, organisaatio) match {

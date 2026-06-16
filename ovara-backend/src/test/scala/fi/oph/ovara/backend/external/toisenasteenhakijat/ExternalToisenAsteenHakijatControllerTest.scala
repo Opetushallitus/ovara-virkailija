@@ -2,12 +2,17 @@ package fi.oph.ovara.backend.external.toisenasteenhakijat
 
 import fi.oph.ovara.backend.external.toisenasteenhakijat.ExternalToisenAsteenHakijatTestData.*
 import fi.oph.ovara.backend.repository.ReadOnlyDatabase
+import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation}
+import fi.vm.sade.auditlog.Operation
+import jakarta.servlet.http.HttpServletRequest
 import org.junit.jupiter.api.{BeforeEach, Test}
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.{Bean, Import, Primary}
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.{WithAnonymousUser, WithMockUser}
 import org.springframework.test.context.ActiveProfiles
@@ -19,10 +24,12 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import slick.jdbc.H2Profile.api.*
 
 import java.io.ByteArrayInputStream
+import scala.jdk.CollectionConverters.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles(Array("test"))
+@Import(Array(classOf[ExternalToisenAsteenHakijatControllerTest.RecordingAuditConfig]))
 @WithMockUser(
   username = "testuser",
   roles = Array("APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA_1.2.246.562.10.00000000001")
@@ -39,6 +46,14 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
   def clearDb(): Unit = {
     db.run(sqlu"""DROP ALL OBJECTS""", "Drop everything")
   }
+
+  @BeforeEach
+  def clearAuditRecord(): Unit = {
+    ExternalToisenAsteenHakijatControllerTest.recordedAuditCalls.clear()
+  }
+
+  private def recordedAuditCalls: List[ExternalToisenAsteenHakijatControllerTest.AuditCall] =
+    ExternalToisenAsteenHakijatControllerTest.recordedAuditCalls.asScala.toList
 
   private def get(
     hakuOid: String = HAKU_OID,
@@ -328,5 +343,140 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     get()()
       .andExpect(status.isOk)
       .andExpect(content.json("""{"hakijat": []}"""))
+  }
+
+  @Test
+  def jsonEndpointEmitsAuditLogEntryOnSuccess(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+
+    get(organisaatioOid = None)().andExpect(status.isOk)
+
+    val calls = recordedAuditCalls
+    assert(calls.size == 1, s"expected exactly one audit entry, got $calls")
+    val call = calls.head
+    assert(call.operation == AuditOperation.ExternalToisenAsteenHakijat)
+    assert(call.params("format") == "json")
+    assert(call.params("hakuOid") == HAKU_OID)
+    assert(call.params("hakukohdeOid") == HAKUKOHDE_OID)
+    assert(call.params("organisaatioOid") == "")
+    assert(
+      call.principalName.contains("testuser"),
+      s"expected authenticated principal 'testuser' in audit entry, got ${call.principalName}"
+    )
+  }
+
+  @Test
+  def excelEndpointEmitsAuditLogEntryOnSuccess(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertToteutusJaKoulutus()
+
+    mvc
+      .perform(
+        MockMvcRequestBuilders
+          .get("/api/external/toisenasteenhakijat/excel")
+          .param("hakuOid", HAKU_OID)
+          .param("organisaatioOid", ORGANISAATIO_OID)
+          .header("User-Agent", "ovara-integration-test/1.0")
+      )
+      .andExpect(status.isOk)
+
+    val calls = recordedAuditCalls
+    assert(calls.size == 1, s"expected exactly one audit entry, got $calls")
+    val call = calls.head
+    assert(call.operation == AuditOperation.ExternalToisenAsteenHakijat)
+    assert(call.params("format") == "excel")
+    assert(call.params("hakuOid") == HAKU_OID)
+    assert(call.params("hakukohdeOid") == "")
+    assert(call.params("organisaatioOid") == ORGANISAATIO_OID)
+    assert(
+      call.principalName.contains("testuser"),
+      s"expected authenticated principal 'testuser' in audit entry, got ${call.principalName}"
+    )
+    assert(
+      call.userAgent.contains("ovara-integration-test/1.0"),
+      s"expected request User-Agent in audit entry, got ${call.userAgent}"
+    )
+  }
+
+  @Test
+  @WithMockUser(
+    username = "another-user",
+    roles = Array("APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA_1.2.246.562.10.00000000001")
+  )
+  def auditEntryCarriesTheCallersPrincipalName(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+
+    get(organisaatioOid = None)().andExpect(status.isOk)
+
+    assert(
+      recordedAuditCalls.head.principalName.contains("another-user"),
+      s"audit entry must carry the calling user; got ${recordedAuditCalls.head.principalName}"
+    )
+  }
+
+  @Test
+  @WithMockUser(username = "testuser", roles = Array("USER"))
+  def forbiddenRequestEmitsNoAuditEntry(): Unit = {
+    get()().andExpect(status.isForbidden)
+    assert(recordedAuditCalls.isEmpty, s"expected no audit entry, got $recordedAuditCalls")
+  }
+
+  @Test
+  def validationErrorEmitsNoAuditEntry(): Unit = {
+    get(hakukohdeOid = None, organisaatioOid = None)().andExpect(status.isBadRequest)
+    assert(recordedAuditCalls.isEmpty, s"expected no audit entry, got $recordedAuditCalls")
+  }
+
+  @Test
+  def auditEntryRecordedEvenWhenDbQueryFails(): Unit = {
+    // No initSchema call → gen.* tables don't exist → service returns Left("virhe.tietokanta")
+    get()().andExpect(status.isInternalServerError)
+
+    val calls = recordedAuditCalls
+    assert(calls.size == 1, s"audit must fire before the DB query; got $calls")
+    assert(calls.head.operation == AuditOperation.ExternalToisenAsteenHakijat)
+    assert(calls.head.params("format") == "json")
+  }
+}
+
+object ExternalToisenAsteenHakijatControllerTest {
+
+  case class AuditCall(
+    operation: Operation,
+    params: Map[String, Any],
+    principalName: Option[String],
+    sessionId: Option[String],
+    userAgent: Option[String]
+  )
+
+  val recordedAuditCalls = new java.util.concurrent.ConcurrentLinkedQueue[AuditCall]()
+
+  @TestConfiguration
+  class RecordingAuditConfig {
+    @Bean
+    @Primary
+    def recordingAuditLog(): AuditLog = new AuditLog(fi.oph.ovara.backend.utils.AuditLogger) {
+      override def logWithParams(
+        request: HttpServletRequest,
+        operation: Operation,
+        raporttiParams: Map[String, Any]
+      ): Unit = {
+        val principal = Option(
+          org.springframework.security.core.context.SecurityContextHolder.getContext.getAuthentication
+        ).map(_.getName)
+        val session = Option(request.getSession(false)).map(_.getId)
+        val agent   = Option(request.getHeader("User-Agent"))
+        recordedAuditCalls.add(AuditCall(operation, raporttiParams, principal, session, agent))
+      }
+    }
   }
 }
