@@ -110,6 +110,10 @@ object AuditOperation {
     val name = "TOISEN-ASTEEN-HAKIJAT"
   }
 
+  case object ExternalToisenAsteenHakijat extends AuditOperation {
+    val name = "EXTERNAL-TOISEN-ASTEEN-HAKIJAT"
+  }
+
   case object KkHakijat extends AuditOperation {
     val name = "KK-HAKIJAT"
   }
