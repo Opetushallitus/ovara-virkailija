@@ -74,7 +74,7 @@ class KkPaatettavatOpiskeluoikeudetService(
         oppilaitosOid = "1.2.246.562.10.00000000000000000001",
         oppilaitosNimi = Map(Fi -> "Hurrikaaniopisto"),
         vastaanottoAjankohta = "2026-01-15T12:00:00",
-        koulutusluokitusKoodi = "12345",
+        koulutusluokitusKoodit = "12345",
         uudenOpiskeluoikeudenAlkamispvm = "2026-01-15"
       )
     )
@@ -85,7 +85,7 @@ class KkPaatettavatOpiskeluoikeudetService(
           kkPaatettavatOpiskeluoikeudetRepository.hakuParamNamesQuery(oppilaitos),
           "hakuParamNamesQuery"
         )
-        .map(param => param.parametri -> param.nimet.head)
+        .map(param => param.parametri -> param.nimi)
         .toMap
 
       val raporttiParams = buildKkPaatettavatOpiskeluoikeudetParamsForExcel(
