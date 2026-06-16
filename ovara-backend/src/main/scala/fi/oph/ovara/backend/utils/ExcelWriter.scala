@@ -509,6 +509,8 @@ object ExcelWriter {
               translations.getOrElse("raportti.ei", v.toString)
             }
             valueCell.setCellValue(translatedValue)
+          case v: Kielistetty =>
+            valueCell.setCellValue(getKielistettyCellValue(commonExcelParams.asiointikieli, v))
           case v: List[_] if v.forall(_.isInstanceOf[Kielistetty]) =>
             val kielistettyValues =
               v.asInstanceOf[List[Kielistetty]]
@@ -1983,7 +1985,7 @@ object ExcelWriter {
             item.oppilaitosOid,
             item.oppilaitosNimi(Kieli.withName(asiointikieli)),
             item.vastaanottoAjankohta,
-            item.koulutusluokitusKoodi,
+            item.koulutusluokitusKoodit,
             item.uudenOpiskeluoikeudenAlkamispvm
           )
         createRowCells(rowData, dataRow, workbook, createBodyTextCellStyle(workbook))
