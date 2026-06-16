@@ -1,6 +1,8 @@
 package fi.oph.ovara.backend.utils
 
 import fi.oph.ovara.backend.domain.*
+import org.json4s.{jvalue2extractable, JArray, JObject}
+import org.json4s.jackson.JsonMethods.parse
 import org.json4s.jackson.Serialization.read
 import slick.jdbc.PositionedResult
 
@@ -24,7 +26,14 @@ object ExtractorUtils extends GenericOvaraJsonFormats {
     json.map(read[Map[Kieli, String]]).getOrElse(Map())
 
   def extractKielistettyList(json: Option[String]): List[Kielistetty] = {
-    json.map(read[List[Kielistetty]]).getOrElse(List())
+    json
+      .map { jsonStr =>
+        parse(jsonStr) match {
+          case JArray(arr) => arr.collect { case obj: JObject => obj.extract[Kielistetty] }
+          case _           => List()
+        }
+      }
+      .getOrElse(List())
   }
 
   def extractArray(json: Option[String]): List[String] = {
