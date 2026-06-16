@@ -20,6 +20,6 @@ case class KkPaatettavaOpiskeluoikeus(
   oppilaitosOid: String,
   oppilaitosNimi: Kielistetty,
   vastaanottoAjankohta: String,
-  koulutusluokitusKoodi: String,
+  koulutusluokitusKoodit: String,
   uudenOpiskeluoikeudenAlkamispvm: String
 )

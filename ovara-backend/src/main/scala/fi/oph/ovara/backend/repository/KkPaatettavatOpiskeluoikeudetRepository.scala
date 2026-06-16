@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.utils.{ParametriNimet, RepositoryUtils}
+import fi.oph.ovara.backend.utils.ParametriKaannos
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.{Component, Repository}
 import slick.dbio.Effect
@@ -14,13 +14,13 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
   val LOG: Logger = LoggerFactory.getLogger(classOf[KkPaatettavatOpiskeluoikeudetRepository])
   def hakuParamNamesQuery(
     oppilaitos: String
-  ): SqlStreamingAction[Vector[ParametriNimet], ParametriNimet, Effect] = {
+  ): SqlStreamingAction[Vector[ParametriKaannos], ParametriKaannos, Effect] = {
 
     val query = sql"""
-       SELECT 'oppilaitos' AS param, organisaatio_nimi AS nimi 
-       FROM pub.pub_dim_organisaatio 
+       SELECT 'oppilaitos' AS param, organisaatio_nimi AS nimi
+       FROM pub.pub_dim_organisaatio
        WHERE organisaatio_oid = $oppilaitos
-      """.as[ParametriNimet]
+      """.as[ParametriKaannos]
     LOG.debug(s"hakuParamNamesQuery: ${query.statements.head}")
     query
   }
