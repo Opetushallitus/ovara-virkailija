@@ -13,9 +13,12 @@ import org.springframework.security.test.context.support.{WithAnonymousUser, Wit
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.{MockMvc, ResultActions}
 import org.springframework.test.web.servlet.request.{MockHttpServletRequestBuilder, MockMvcRequestBuilders}
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.{content, jsonPath, status}
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.{content, header, jsonPath, status}
 import org.hamcrest.Matchers.*
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import slick.jdbc.H2Profile.api.*
+
+import java.io.ByteArrayInputStream
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -216,6 +219,89 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakemuksenJattopaiva").value("2025-08-01T10:00:00+03:00"))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakemuksenMuokkauspaiva").value("2025-08-13T14:52:00+03:00"))
+  }
+
+  @Test
+  @WithMockUser(username = "testuser", roles = Array("USER"))
+  def excelReturns403WhenUserMissingRole(): Unit = {
+    mvc
+      .perform(
+        MockMvcRequestBuilders
+          .get("/api/external/toisenasteenhakijat/excel")
+          .param("hakuOid", HAKU_OID)
+          .param("hakukohdeOid", HAKUKOHDE_OID)
+      )
+      .andExpect(status.isForbidden)
+  }
+
+  @Test
+  def excelReturns400WhenNeitherHakukohdeNorOrganisaatioProvided(): Unit = {
+    mvc
+      .perform(
+        MockMvcRequestBuilders
+          .get("/api/external/toisenasteenhakijat/excel")
+          .param("hakuOid", HAKU_OID)
+      )
+      .andExpect(status.isBadRequest)
+      .andExpect(
+        content.json(
+          """{"status": 400, "message": "virhe.validointi", "details": ["hakukohdeOid_or_organisaatioOid.required"] }"""
+        )
+      )
+  }
+
+  @Test
+  def excelHasHeadersInExpectedOrderAndDataRow(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertToteutusJaKoulutus()
+
+    val result = mvc
+      .perform(
+        MockMvcRequestBuilders
+          .get("/api/external/toisenasteenhakijat/excel")
+          .param("hakuOid", HAKU_OID)
+          .param("hakukohdeOid", HAKUKOHDE_OID)
+      )
+      .andExpect(status.isOk)
+      .andExpect(
+        content.contentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+      )
+      .andExpect(header.string("Content-Disposition", startsWith("attachment; filename=toisenasteenhakijat-")))
+      .andReturn()
+
+    val bytes    = result.getResponse.getContentAsByteArray
+    val workbook = new XSSFWorkbook(new ByteArrayInputStream(bytes))
+    try {
+      val sheet     = workbook.getSheetAt(0)
+      val headerRow = sheet.getRow(0)
+      assert(headerRow.getCell(0).getStringCellValue == "Hetu")
+      assert(headerRow.getCell(1).getStringCellValue == "Oppijanumero")
+      assert(headerRow.getCell(2).getStringCellValue == "Sukunimi")
+      assert(headerRow.getCell(31).getStringCellValue == "Hakemusnumero")
+      assert(headerRow.getCell(47).getStringCellValue == "Hakujno")
+      assert(headerRow.getCell(52).getStringCellValue == "HakukohdeOid")
+      assert(headerRow.getCell(77).getStringCellValue == "Sähköisen asioinnin lupa")
+
+      val dataRow = sheet.getRow(1)
+      assert(dataRow.getCell(0).getStringCellValue == HETU)
+      assert(dataRow.getCell(1).getStringCellValue == OPPIJANUMERO)
+      assert(dataRow.getCell(2).getStringCellValue == SUKUNIMI)
+      assert(dataRow.getCell(3).getStringCellValue == ETUNIMET)
+      assert(dataRow.getCell(4).getStringCellValue == KUTSUMANIMI)
+      assert(dataRow.getCell(8).getStringCellValue == SUOMI_KOODI)
+      assert(dataRow.getCell(9).getStringCellValue == "246")
+      assert(dataRow.getCell(25).getStringCellValue == "Kyllä") // koulutusmarkkinointilupa = true
+      assert(dataRow.getCell(26).getStringCellValue == "Ei")    // kiinnostunutoppisopimuksesta = false
+      assert(dataRow.getCell(31).getStringCellValue == HAKEMUS_OID)
+      assert(dataRow.getCell(40).getStringCellValue == "Kyllä") // julkaisulupa
+      assert(dataRow.getCell(47).getStringCellValue == "1")     // hakujno
+      assert(dataRow.getCell(49).getStringCellValue == ORGANISAATIO_OID)
+      assert(dataRow.getCell(52).getStringCellValue == HAKUKOHDE_OID)
+      assert(dataRow.getCell(77).getStringCellValue == "Kyllä") // sahkoinenviestintalupa
+    } finally workbook.close()
   }
 
   @Test
