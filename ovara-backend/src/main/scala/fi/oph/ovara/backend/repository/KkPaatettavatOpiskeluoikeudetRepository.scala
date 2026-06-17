@@ -12,7 +12,7 @@ import slick.sql.SqlStreamingAction
 class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
 
   val LOG: Logger = LoggerFactory.getLogger(classOf[KkPaatettavatOpiskeluoikeudetRepository])
-  def hakuParamNamesQuery(
+  def organisaatioNameQuery(
     oppilaitos: String
   ): SqlStreamingAction[Vector[ParametriKaannos], ParametriKaannos, Effect] = {
 
