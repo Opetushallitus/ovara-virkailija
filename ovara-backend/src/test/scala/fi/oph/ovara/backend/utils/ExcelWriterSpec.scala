@@ -1,6 +1,7 @@
 package fi.oph.ovara.backend.utils
 
 import fi.oph.ovara.backend.domain.{Koodi, *}
+import fi.oph.ovara.backend.raportointi.dto.KkPaatettavatOpiskeluoikeudetParams
 import fi.oph.ovara.backend.utils.Constants.*
 import org.apache.poi.ss.usermodel.HorizontalAlignment
 import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFSheet, XSSFWorkbook}
@@ -96,12 +97,15 @@ class ExcelWriterSpec extends AnyFlatSpec {
     "raportti.koulutusala1"                                -> "Koulutusala 1 SV",
     "raportti.koulutusala2"                                -> "Koulutusala 2 SV",
     "raportti.koulutusala3"                                -> "Koulutusala 3 SV",
+    "raportti.opiskeluoikeudenTila"                        -> "Opiskeluoikeuden tila",
+    "raportti.paatettavissa"                               -> "Voimassa, päätettävissä",
     "raporttilista.koulutukset-toteutukset-hakukohteet"    -> "Koulutukset, toteutukset ja hakukohteet",
     "raporttilista.kk-koulutukset-toteutukset-hakukohteet" -> "Korkeakoulujen koulutukset, toteutukset ja hakukohteet",
     "raporttilista.hakijat"                                -> "Toisen asteen hakijat",
     "raporttilista.kk-hakijat"                             -> "Korkeakoulujen hakijat",
     "raporttilista.hakeneet-hyvaksytyt-vastaanottaneet"    -> "Hakeneet, hyväksytyt ja vastaanottaneet",
-    "raporttilista.kk-hakeneet-hyvaksytyt-vastaanottaneet" -> "Korkeakoulujen hakeneet, hyväksytyt ja vastaanottaneet"
+    "raporttilista.kk-hakeneet-hyvaksytyt-vastaanottaneet" -> "Korkeakoulujen hakeneet, hyväksytyt ja vastaanottaneet",
+    "raporttilista.kk-paatettavat-opiskeluoikeudet"        -> "Korkeakoulujen päätettävät opiskeluoikeudet"
   )
 
   def checkAloituspaikatRowValidity(sheet: XSSFSheet, rowNumber: Int, expected: Int): Unit = {
@@ -6749,4 +6753,162 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     assert(sheet.getPhysicalNumberOfRows == 5)
   }
+
+  "writeKorkeakouluPaatettavatOpiskeluoikeudetRaportti" should "create one sheet with a title row, column heading row and result data" in {
+    val mockResult = List(
+      KkPaatettavaOpiskeluoikeus(
+        sukunimi = "Testinen",
+        etunimet = "Testi",
+        kutsumanimi = "Testi",
+        hetu = Some("010101-1234"),
+        syntymaAika = "1901-01-01",
+        oppijanumero = "1.2.246.562.24.10002324020",
+        opiskeluoikeudenNimi = Map(Fi -> "Tähtitiede", Sv -> "Astronomi"),
+        opiskeluoikeudenPaattymispvm = Some("2026-12-31"),
+        opiskeluoikeudenViimeisinTila = "Loma",
+        opiskelijaAvain = "opiskelija-avain-1",
+        opiskeluoikeusAvain = "opiskeluoikeus-avain-1",
+        hakemusOid = "1.2.246.562.11.00000000000000000001",
+        hakukohdeNimi = Map(Fi -> "Meteorologi, Hurrikaanien tutkimislinja", Sv -> "Meteorolog, Orkanforskningslinjen"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000000002",
+        oppilaitosNimi = Map(Sv -> "Orkaninstitut"),
+        oppilaitosOid = "1.2.246.562.10.00000000000000000001",
+        uudenOpiskeluoikeudenAlkamispvm = "2026-09-01",
+        vastaanottoAjankohta = "2026-08-15T12:00:00",
+        koulutusluokitusKoodit = "12345",
+        hakuOid = "1.2.246.562.20.00000000000000000001",
+        hakuNimi = Map(Sv -> "Separat ansökan i Orkaninstitut 2026")
+      )
+    )
+
+    val hakuParams: List[(String, String | Kielistetty)] =
+      List(
+        "oppilaitos"           -> Map(Fi -> "Oppilaitos", Sv -> "Oppilaitos SV"),
+        "sukunimi"             -> "Sukunimi",
+        "etunimet"             -> "Etunimet",
+        "hetu"                 -> "Hetu",
+        "oppijanumero"         -> "Oppijanumero",
+        "opiskeluoikeudenTila" -> "kaikki"
+      )
+    val wb =
+      ExcelWriter.writeKorkeakouluPaatettavatOpiskeluoikeudetRaportti(
+        mockResult,
+        CommonExcelParams(
+          userLng,
+          translations,
+          hakuParams,
+          LocalDateTime.now()
+        )
+      )
+
+    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getSheetName(0) == "Yhteenveto SV")
+
+    val expectedTitles = List(
+      "raportti.paatettava-opiskeluoikeus",
+      "raportti.vastaanotettu-opiskelupaikka"
+    )
+
+    val expectedHeaders = List(
+      "raportti.sukunimi",
+      "raportti.etunimet",
+      "raportti.kutsumanimi",
+      "raportti.hetu",
+      "raportti.syntymaAika",
+      "raportti.oppijanumero",
+      "raportti.opiskeluoikeudenNimi",
+      "raportti.opiskeluoikeudenPaattymispvm",
+      "raportti.opiskeluoikeudenViimeisinTila",
+      "raportti.opiskelijaAvain",
+      "raportti.opiskeluoikeusAvain",
+      "raportti.hakemusOid",
+      "raportti.hakukohdeNimi",
+      "Hakukohteen oid SV",
+      "raportti.oppilaitosNimi",
+      "raportti.oppilaitosOid",
+      "raportti.uudenOpiskeluoikeudenAlkamispvm",
+      "raportti.vastaanottoAjankohta",
+      "raportti.hakuNimi",
+      "raportti.hakuOid",
+      "raportti.koulutusluokitusKoodit"
+    )
+
+    val expectedRow =
+      List(
+        "Testinen",
+        "Testi",
+        "Testi",
+        "010101-1234",
+        "1901-01-01",
+        "1.2.246.562.24.10002324020",
+        "Astronomi",
+        "2026-12-31",
+        "Loma",
+        "opiskelija-avain-1",
+        "opiskeluoikeus-avain-1",
+        "1.2.246.562.11.00000000000000000001",
+        "Meteorolog, Orkanforskningslinjen",
+        "1.2.246.562.20.00000000000000000002",
+        "Orkaninstitut",
+        "1.2.246.562.10.00000000000000000001",
+        "2026-09-01",
+        "2026-08-15T12:00:00",
+        "Separat ansökan i Orkaninstitut 2026",
+        "1.2.246.562.20.00000000000000000001",
+        "12345"
+      )
+
+    val sheet = wb.getSheetAt(0)
+    assert(sheet.getRow(0).getCell(0).getStringCellValue == expectedTitles.head)
+    assert(sheet.getRow(0).getCell(11).getStringCellValue == expectedTitles.last)
+    validateHeaders(sheet, 1, expectedHeaders)
+    validateRow(sheet, 2, expectedRow)
+  }
+
+  it should "create hakuparametrit sheet" in {
+    val dateTime                           = LocalDateTime.of(2026, 6, 12, 15, 30, 0)
+    val hakuParams: List[(String, String)] =
+      List(
+        "oppilaitos"           -> "1.2.246.562.10.00000000001",
+        "sukunimi"             -> "Testi",
+        "etunimet"             -> "Testaaja",
+        "hetu"                 -> "010101-123A",
+        "oppijanumero"         -> "1.2.246.562.10.55711304158",
+        "opiskeluoikeudenTila" -> "paatettavissa"
+      )
+    val wb =
+      ExcelWriter.writeKorkeakouluPaatettavatOpiskeluoikeudetRaportti(
+        List(),
+        CommonExcelParams(
+          userLng,
+          translations,
+          hakuParams,
+          dateTime
+        )
+      )
+
+    val expectedHeaders = List("raportti.perustiedot")
+    val expectedRows    = List(
+      List("raportti.raportin-nimi", "Korkeakoulujen päätettävät opiskeluoikeudet"),
+      List("raportti.raportin-muodostusaika", "12.6.2026 kl. 15:30"),
+      List(),
+      List(),
+      List("raportti.hakuehto", "raportti.hakuarvo"),
+      List("Oppilaitos SV", "1.2.246.562.10.00000000001"),
+      List("sukunimi", "Testi"),
+      List("etunimet", "Testaaja"),
+      List("hetu", "010101-123A"),
+      List("oppijanumero", "1.2.246.562.10.55711304158"),
+      List("Opiskeluoikeuden tila", "Voimassa, päätettävissä")
+    )
+    assert(wb.getNumberOfSheets == 2)
+    assert(wb.getSheetAt(1).getRow(1) != null)
+    val sheet = wb.getSheetAt(1)
+
+    validateHeaders(sheet = sheet, expectedHeaders = expectedHeaders)
+    expectedRows.zipWithIndex.foreach { case (expectedRow, rowIndex) =>
+      validateRow(sheet, rowIndex + 1, expectedRow)
+    }
+  }
+
 }

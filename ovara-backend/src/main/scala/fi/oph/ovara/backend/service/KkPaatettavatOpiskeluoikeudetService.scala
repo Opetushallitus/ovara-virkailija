@@ -63,7 +63,7 @@ class KkPaatettavatOpiskeluoikeudetService(
         kutsumanimi = "Testi",
         opiskelijaAvain = "opiskelija-avain-1",
         opiskeluoikeusAvain = "opiskeluoikeus-avain-1",
-        opiskeluoikeudenNimi = Map(Fi -> "Meteorologi, Hurrikaanien tutkimislinja"),
+        opiskeluoikeudenNimi = Map(Fi -> "Tähtitiede"),
         opiskeluoikeudenPaattymispvm = Some("2026-12-31"),
         opiskeluoikeudenViimeisinTila = "Loma",
         hakemusOid = "1.2.246.562.11.00000000000000000001",
