@@ -82,7 +82,7 @@ class KkPaatettavatOpiskeluoikeudetService(
       // TODO varsinainen data raportille
       val raporttiParamNames = db
         .run(
-          kkPaatettavatOpiskeluoikeudetRepository.hakuParamNamesQuery(oppilaitos),
+          kkPaatettavatOpiskeluoikeudetRepository.organisaatioNameQuery(oppilaitos),
           "hakuParamNamesQuery"
         )
         .map(param => param.parametri -> param.nimi)
