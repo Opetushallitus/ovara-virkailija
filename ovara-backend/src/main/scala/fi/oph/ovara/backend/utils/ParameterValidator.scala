@@ -25,13 +25,10 @@ object ParameterValidator {
   val alphanumericPattern: Regex    = """^[a-zA-Z0-9_\\-]+$""".r
   private val numericRegex          = """^\d+$""".r
 
-  private val tulostustavat         = Set("hakukohteittain", "oppilaitoksittain")
-  private val opiskeluoikeudenTilat = Set("paatettavissa", "paatetty")
-  private val oidPattern            = """^1\.\d{4}\.\w{1,}$""".r
-  private val koodiarvoPattern      = """^\d+$""".r
-  val hetuPattern: Regex            = """^\d{6}[-+A]\d{3}[0-9A-Y]$""".r
+  val hetuPattern: Regex = """^\d{6}[-+A]\d{3}[0-9A-Y]$""".r
 
-  val TULOSTUSTAVAT = Set(
+  private val opiskeluoikeudenTilat = Set("paatettavissa", "paatetty")
+  val TULOSTUSTAVAT                 = Set(
     "koulutustoimijoittain",
     "oppilaitoksittain",
     "toimipisteittain",
