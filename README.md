@@ -46,12 +46,11 @@ server.ssl.key-store-type=PKCS12
 server.ssl.key-alias=ovara-backend
 ````
 
-Backendiä voi ajaa sekä lokaalia dockeriin käynnistettävää postgresia että testiympäristön tietokantaa vasten.
+Backendiä voi ajaa testiympäristön tietokantaa vasten.
 (Kirjoitushetkellä ovaran tietokanta on olemassa pelkästään QA:lla.) `justfile`:stä
 löytyvät komennot tietokannan pystyttämiseen tai tietokantayhteyden avaamiseen. [just](https://github.com/casey/just) on
 komentorivityökalu komentojen dokumentoimiseen ja ajamiseen. Esimerkiksi `just ssh-to-remote-db-in-pallero` avaa tietokantayhteyden
-QA:n ovara-tietokantaan. Lokaalin tietokannan käyttäminen vaatii tietokantadumpin lataamisen omalle koneelle,
-ja sen voi tehdä komennolla `just dump-remote-db`. `just`:in asentaminen ei ole välttämätöntä backendin ajamiseksi,
+QA:n ovara-tietokantaan. `just`:in asentaminen ei ole välttämätöntä backendin ajamiseksi,
 vaan voit katsoa tarvittavat komennot `justfile`:stä ja ajaa ne sellaisinaan komentoriviltä.
 
 `justfile`:stä löytyvät komennot QA-tietokantayhteydelle olettavat että QA-ympäristön bastion-putkitus löytyy ssh configista aliaksella `pallero-bastion`
