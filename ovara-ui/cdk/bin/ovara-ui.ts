@@ -27,8 +27,11 @@ const publicHostedZoneIds: { [p: string]: string } = {
 
 const hostedZoneStack = new HostedZoneStack(
   app,
-  'HostedZoneStack',
-  { env: envEU },
+    `${environmentName}-OvaraHostedZoneStack`,
+  {
+      env: envEU,
+      stackName: `${environmentName}-ovara-hosted-zone`,
+  },
   environmentName,
   publicHostedZones,
   publicHostedZoneIds,
@@ -38,7 +41,7 @@ const domainName = `ovara-virkailija.${publicHostedZones[environmentName]}`;
 
 const certificateStack = new OvaraCertificateStack(
   app,
-  'OvaraCertificateStack',
+    `${environmentName}-OvaraCertificateStack`,
   {
     env: envUS,
     stackName: `${environmentName}-ovara-certificate`,
@@ -48,7 +51,7 @@ const certificateStack = new OvaraCertificateStack(
   },
 );
 
-new OvaraUISovellusStack(app, 'OvaraUISovellusStack', {
+new OvaraUISovellusStack(app, `${environmentName}-OvaraUISovellusStack`, {
   stackName: `${environmentName}-ovara-ui`,
   environmentName,
   env: {
