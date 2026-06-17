@@ -9,7 +9,6 @@ import org.apache.poi.xssf.usermodel.*
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.time.LocalDateTime
-//import scala.collection.immutable.List as data
 
 case class CommonExcelParams(
   asiointikieli: String,
@@ -2037,8 +2036,6 @@ object ExcelWriter {
         "raporttilista.kk-paatettavat-opiskeluoikeudet",
         tietosuojaohje = true
       )
-
-      // TODO raportin parametrivälilehdelle organisaation nimi ja oid
 
       // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
       fieldNamesWithIndex.foreach { case (title, index) =>
