@@ -13,7 +13,7 @@ import fi.oph.ovara.backend.utils.ExtractorUtils.{
   extractOpintojenlaajuus,
   extractValintatapajonot
 }
-import fi.oph.ovara.backend.utils.{Constants, GenericOvaraJsonFormats, ParametriNimet}
+import fi.oph.ovara.backend.utils.{Constants, GenericOvaraJsonFormats, ParametriKaannos, ParametriNimet}
 import org.json4s.jackson.Serialization.read
 import org.slf4j.{Logger, LoggerFactory}
 import slick.jdbc.*
@@ -105,6 +105,15 @@ trait Extractors extends GenericOvaraJsonFormats {
       ParametriNimet(
         parametri = r.nextString(),
         nimet = extractKielistettyList(r.nextStringOption())
+      )
+    )
+  }
+
+  implicit val getParametriKaannosResult: GetResult[ParametriKaannos] = {
+    GetResult(r =>
+      ParametriKaannos(
+        parametri = r.nextString(),
+        nimi = extractKielistetty(r.nextStringOption())
       )
     )
   }

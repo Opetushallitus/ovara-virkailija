@@ -1,21 +1,28 @@
 package fi.oph.ovara.backend.service
 
+import fi.oph.ovara.backend.domain.{Fi, KkPaatettavaOpiskeluoikeus}
 import fi.oph.ovara.backend.raportointi.dto.{
   buildKkPaatettavatOpiskeluoikeudetParamsForExcel,
   KkPaatettavatOpiskeluoikeudetParams
 }
-import fi.oph.ovara.backend.repository.{KorkeakouluKoulutuksetToteutuksetHakukohteetRepository, ReadOnlyDatabase}
-import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
+import fi.oph.ovara.backend.repository.{
+  KkPaatettavatOpiskeluoikeudetRepository,
+  KorkeakouluKoulutuksetToteutuksetHakukohteetRepository,
+  ReadOnlyDatabase
+}
+import fi.oph.ovara.backend.utils.{AuthoritiesUtil, CommonExcelParams, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.{Component, Service}
 
+import java.time.{LocalDate, LocalDateTime}
 import scala.util.{Failure, Success, Try}
 
 @Component
 @Service
 class KkPaatettavatOpiskeluoikeudetService(
+  kkPaatettavatOpiskeluoikeudetRepository: KkPaatettavatOpiskeluoikeudetRepository,
   userService: UserService,
   commonService: CommonService,
   lokalisointiService: LokalisointiService
@@ -45,11 +52,42 @@ class KkPaatettavatOpiskeluoikeudetService(
       oppilaitosOids = List(oppilaitos),
       List.empty
     )
-    LOG.info(s"organization OIDs for query: $orgOidsForQuery")
-    val isOrganisaatioRajain = oppilaitos.nonEmpty && orgOidsForQuery.nonEmpty
-
+    // placeholder mock-data havainnollistamaan sisältöä
+    val mockData = List(
+      KkPaatettavaOpiskeluoikeus(
+        oppijanumero = "1.2.246.562.24.10002324020",
+        hetu = Some("010101-1234"),
+        syntymaAika = LocalDate.of(2001, 1, 1),
+        sukunimi = "Testinen",
+        etunimet = "Testi",
+        kutsumanimi = "Testi",
+        opiskelijaAvain = "opiskelija-avain-1",
+        opiskeluoikeusAvain = "opiskeluoikeus-avain-1",
+        opiskeluoikeudenNimi = Map(Fi -> "Tähtitiede"),
+        opiskeluoikeudenPaattymispvm = Some(LocalDate.of(2026, 12, 31)),
+        opiskeluoikeudenViimeisinTila = "Loma",
+        hakemusOid = "1.2.246.562.11.00000000000000000001",
+        hakuOid = "1.2.246.562.20.00000000000000000001",
+        hakuNimi = Map(Fi -> "Hurrikaaniopiston erillishaku 2026"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000000002",
+        hakukohdeNimi = Map(Fi -> "Meteorologi, Hurrikaanien tutkimislinja"),
+        oppilaitosOid = "1.2.246.562.10.00000000000000000001",
+        oppilaitosNimi = Map(Fi -> "Hurrikaaniopisto"),
+        vastaanottoAjankohta = LocalDate.of(2026, 8, 15),
+        koulutusluokitusKoodit = "12345",
+        uudenOpiskeluoikeudenAlkamispvm = LocalDate.of(2026, 9, 1)
+      )
+    )
     Try {
-      // TODO OPHYOS-193
+      // TODO kannasta varsinainen data raportille
+      val raporttiParamNames = db
+        .run(
+          kkPaatettavatOpiskeluoikeudetRepository.organisaatioNameQuery(oppilaitos),
+          "hakuParamNamesQuery"
+        )
+        .map(param => param.parametri -> param.nimi)
+        .toMap
+
       val raporttiParams = buildKkPaatettavatOpiskeluoikeudetParamsForExcel(
         KkPaatettavatOpiskeluoikeudetParams(
           oppilaitos,
@@ -59,12 +97,11 @@ class KkPaatettavatOpiskeluoikeudetService(
           oppijanumero,
           opiskeluoikeudenTila
         ),
-        Map.empty
+        raporttiParamNames
       )
       ExcelWriter.writeKorkeakouluPaatettavatOpiskeluoikeudetRaportti(
-        asiointikieli,
-        translations,
-        raporttiParams
+        mockData,
+        CommonExcelParams(asiointikieli, translations, raporttiParams, LocalDateTime.now())
       )
     } match {
       case Success(excelFile) => Right(excelFile)
