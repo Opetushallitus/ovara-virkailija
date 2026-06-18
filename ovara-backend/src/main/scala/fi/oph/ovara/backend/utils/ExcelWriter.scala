@@ -1998,32 +1998,31 @@ object ExcelWriter {
       currentRowIndex = createHeadingRow(sheet, translations, currentRowIndex, fieldNames, headingCellStyle)
 
       opiskeluoikeudet.foreach { case item: KkPaatettavaOpiskeluoikeus =>
-        val dataRow = sheet.createRow(currentRowIndex)
-        val rowData =
-          List(
-            item.sukunimi,
-            item.etunimet,
-            item.kutsumanimi,
-            item.hetu.getOrElse(""),
-            item.syntymaAika,
-            item.oppijanumero,
-            item.opiskeluoikeudenNimi(Kieli.withName(asiointikieli)),
-            item.opiskeluoikeudenPaattymispvm.getOrElse(""),
-            item.opiskeluoikeudenViimeisinTila,
-            item.opiskelijaAvain,
-            item.opiskeluoikeusAvain,
-            item.hakemusOid,
-            item.hakukohdeNimi(Kieli.withName(asiointikieli)),
-            item.hakukohdeOid,
-            item.oppilaitosNimi(Kieli.withName(asiointikieli)),
-            item.oppilaitosOid,
-            item.uudenOpiskeluoikeudenAlkamispvm,
-            item.vastaanottoAjankohta,
-            item.hakuNimi(Kieli.withName(asiointikieli)),
-            item.hakuOid,
-            item.koulutusluokitusKoodit
-          )
-        createRowCells(rowData, dataRow, workbook, createBodyTextCellStyle(workbook))
+        val dataRow   = sheet.createRow(currentRowIndex)
+        var cellIndex = 0
+        cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.sukunimi)
+        cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.etunimet)
+        cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.kutsumanimi)
+        cellIndex = writeOptionStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.hetu)
+        cellIndex = writeOptionLocalDateToCell(dataRow, bodyTextCellStyle, cellIndex, Some(item.syntymaAika))
+        cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.oppijanumero)
+        cellIndex =
+          writeKielistettyToCell(dataRow, bodyTextCellStyle, cellIndex, item.opiskeluoikeudenNimi, asiointikieli)
+        cellIndex = writeOptionLocalDateToCell(dataRow, bodyTextCellStyle, cellIndex, item.opiskeluoikeudenPaattymispvm)
+        cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.opiskeluoikeudenViimeisinTila)
+        cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.opiskelijaAvain)
+        cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.opiskeluoikeusAvain)
+        cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.hakemusOid)
+        cellIndex = writeKielistettyToCell(dataRow, bodyTextCellStyle, cellIndex, item.hakukohdeNimi, asiointikieli)
+        cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.hakukohdeOid)
+        cellIndex = writeKielistettyToCell(dataRow, bodyTextCellStyle, cellIndex, item.oppilaitosNimi, asiointikieli)
+        cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.oppilaitosOid)
+        cellIndex =
+          writeOptionLocalDateToCell(dataRow, bodyTextCellStyle, cellIndex, Some(item.uudenOpiskeluoikeudenAlkamispvm))
+        cellIndex = writeOptionLocalDateToCell(dataRow, bodyTextCellStyle, cellIndex, Some(item.vastaanottoAjankohta))
+        cellIndex = writeKielistettyToCell(dataRow, bodyTextCellStyle, cellIndex, item.hakuNimi, asiointikieli)
+        cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.hakuOid)
+        cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.koulutusluokitusKoodit)
         currentRowIndex += 1
       }
 

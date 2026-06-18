@@ -16,7 +16,7 @@ import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.{Component, Service}
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 import scala.util.{Failure, Success, Try}
 
 @Component
@@ -52,19 +52,19 @@ class KkPaatettavatOpiskeluoikeudetService(
       oppilaitosOids = List(oppilaitos),
       List.empty
     )
-    // placeholder havainnollistamaan sisältöä
+    // placeholder mock-data havainnollistamaan sisältöä
     val mockData = List(
       KkPaatettavaOpiskeluoikeus(
         oppijanumero = "1.2.246.562.24.10002324020",
         hetu = Some("010101-1234"),
-        syntymaAika = "1901-01-01",
+        syntymaAika = LocalDate.of(2001, 1, 1),
         sukunimi = "Testinen",
         etunimet = "Testi",
         kutsumanimi = "Testi",
         opiskelijaAvain = "opiskelija-avain-1",
         opiskeluoikeusAvain = "opiskeluoikeus-avain-1",
         opiskeluoikeudenNimi = Map(Fi -> "Tähtitiede"),
-        opiskeluoikeudenPaattymispvm = Some("2026-12-31"),
+        opiskeluoikeudenPaattymispvm = Some(LocalDate.of(2026, 12, 31)),
         opiskeluoikeudenViimeisinTila = "Loma",
         hakemusOid = "1.2.246.562.11.00000000000000000001",
         hakuOid = "1.2.246.562.20.00000000000000000001",
@@ -73,13 +73,13 @@ class KkPaatettavatOpiskeluoikeudetService(
         hakukohdeNimi = Map(Fi -> "Meteorologi, Hurrikaanien tutkimislinja"),
         oppilaitosOid = "1.2.246.562.10.00000000000000000001",
         oppilaitosNimi = Map(Fi -> "Hurrikaaniopisto"),
-        vastaanottoAjankohta = "2026-08-15T12:00:00",
+        vastaanottoAjankohta = LocalDate.of(2026, 8, 15),
         koulutusluokitusKoodit = "12345",
-        uudenOpiskeluoikeudenAlkamispvm = "2026-09-01"
+        uudenOpiskeluoikeudenAlkamispvm = LocalDate.of(2026, 9, 1)
       )
     )
     Try {
-      // TODO varsinainen data raportille
+      // TODO kannasta varsinainen data raportille
       val raporttiParamNames = db
         .run(
           kkPaatettavatOpiskeluoikeudetRepository.organisaatioNameQuery(oppilaitos),
