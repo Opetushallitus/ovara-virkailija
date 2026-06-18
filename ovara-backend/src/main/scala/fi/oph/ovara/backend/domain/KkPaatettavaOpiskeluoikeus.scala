@@ -1,14 +1,16 @@
 package fi.oph.ovara.backend.domain
 
+import java.time.LocalDate
+
 case class KkPaatettavaOpiskeluoikeus(
   sukunimi: String,
   etunimet: String,
   kutsumanimi: String,
   hetu: Option[String],
-  syntymaAika: String,
+  syntymaAika: LocalDate,
   oppijanumero: String,
   opiskeluoikeudenNimi: Kielistetty,
-  opiskeluoikeudenPaattymispvm: Option[String],
+  opiskeluoikeudenPaattymispvm: Option[LocalDate],
   opiskeluoikeudenViimeisinTila: String,
   opiskelijaAvain: String,
   opiskeluoikeusAvain: String,
@@ -17,8 +19,8 @@ case class KkPaatettavaOpiskeluoikeus(
   hakukohdeOid: String,
   oppilaitosNimi: Kielistetty,
   oppilaitosOid: String,
-  uudenOpiskeluoikeudenAlkamispvm: String,
-  vastaanottoAjankohta: String,
+  uudenOpiskeluoikeudenAlkamispvm: LocalDate,
+  vastaanottoAjankohta: LocalDate,
   hakuNimi: Kielistetty,
   hakuOid: String,
   koulutusluokitusKoodit: String
