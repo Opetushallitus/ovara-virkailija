@@ -1852,6 +1852,43 @@ object ExcelWriter {
     }
   }
 
+  def writeKorkeakouluPaatettavatOpiskeluoikeudetRaportti(
+    asiointikieli: String,
+    translations: Map[String, String],
+    parametrit: List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])]
+  ): XSSFWorkbook = {
+    val workbook: XSSFWorkbook = new XSSFWorkbook()
+    try {
+      LOG.info("Creating new KkPaatettavatOpiskeluoikeudetExcel from db results")
+      val sheet: XSSFSheet                 = workbook.createSheet()
+      val headingCellStyle: XSSFCellStyle  = workbook.createCellStyle()
+      val bodyTextCellStyle: XSSFCellStyle = workbook.createCellStyle()
+
+      createHeadingFont(workbook, headingCellStyle)
+      createSubHeadingFont(workbook)
+      createBodyTextFont(workbook, bodyTextCellStyle)
+
+      workbook.setSheetName(
+        0,
+        WorkbookUtil.createSafeSheetName(translations.getOrElse("raportti.yhteenveto", "raportti.yhteenveto"))
+      )
+
+      var currentRowIndex = 0
+
+      // Erillinen välilehti hakuparametreille
+      val parametritSheet: XSSFSheet = workbook.createSheet()
+      createHakuparametritSheet(translations, asiointikieli, parametrit, workbook, parametritSheet)
+
+      // Asetetaan lopuksi kolumnien leveys automaattisesti leveimmän arvon mukaan
+    } catch {
+      case e: Exception =>
+        LOG.error(s"Error creating excel: ${e.getMessage}")
+        throw e
+    }
+
+    workbook
+  }
+
   private def createSummaryRow(
     translations: Map[String, String],
     data: List[KkHakeneetHyvaksytytVastaanottaneetResult | KkHakeneetHyvaksytytVastaanottaneetHakukohteittain],

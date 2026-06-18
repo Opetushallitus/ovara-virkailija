@@ -1,0 +1,44 @@
+package fi.oph.ovara.backend.raportointi.dto
+
+import fi.oph.ovara.backend.domain.Kielistetty
+
+case class KkPaatettavatOpiskeluoikeudetParams(
+  oppilaitos: String,
+  sukunimi: Option[String],
+  etunimet: Option[String],
+  hetu: Option[String],
+  oppijanumero: Option[String],
+  opiskeluoikeudenTila: Option[String]
+)
+
+def buildKkPaatettavatOpiskeluoikeudetAuditParams(
+  params: KkPaatettavatOpiskeluoikeudetParams
+): Map[String, Any] = {
+  Map(
+    "oppilaitos"           -> params.oppilaitos,
+    "sukunimi"             -> params.sukunimi,
+    "etunimet"             -> params.etunimet,
+    "hetu"                 -> params.hetu,
+    "oppijanumero"         -> params.oppijanumero,
+    "opiskeluoikeudenTila" -> params.opiskeluoikeudenTila
+  ).collect { case (key, Some(value)) => key -> value }
+}
+
+def buildKkPaatettavatOpiskeluoikeudetParamsForExcel(
+  params: KkPaatettavatOpiskeluoikeudetParams,
+  paramNames: Map[String, List[Kielistetty]]
+): List[(String, Boolean | String | List[String] | Kielistetty | List[Kielistetty])] = {
+  List(
+    "oppilaitos"           -> "oppilaitos",
+    "sukunimi"             -> params.sukunimi.getOrElse(""),
+    "etunimet"             -> params.etunimet.getOrElse(""),
+    "hetu"                 -> params.hetu.getOrElse(""),
+    "oppijanumero"         -> params.oppijanumero.getOrElse(""),
+    "opiskeluoikeudenTila" -> params.opiskeluoikeudenTila.getOrElse("")
+  ).filterNot { case (_, value) =>
+    value match {
+      case str: String => str.isEmpty
+      case _           => false
+    }
+  }
+}
