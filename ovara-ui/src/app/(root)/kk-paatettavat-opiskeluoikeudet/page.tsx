@@ -24,7 +24,7 @@ const LabelSpacer = () => <div style={{ width: '96px' }} />;
 export default function KkPaatettavatOpiskeluoikeudet() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
-  const hasKkYosRights = hasOvaraYosKkRole(user?.authorities);
+  const hasKkYosRights = hasOvaraKkYosRole(user?.authorities);
   const {
     etunimi,
     setEtunimi,
