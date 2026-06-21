@@ -39,6 +39,7 @@ import fi.oph.ovara.backend.utils.AuditOperation.{
   KoulutuksetToteutuksetHakukohteet,
   ToisenAsteenHakijat
 }
+import fi.oph.ovara.backend.utils.Constants.OPH_PAAKAYTTAJA_AUTHORITY
 import fi.oph.ovara.backend.utils.ParameterValidator.{
   validateAlphanumeric,
   validateAlphanumericList,
@@ -820,31 +821,40 @@ class Controller(
       opiskeluoikeudenTila = Option(opiskeluoikeudenTila)
     )
 
-    val validationResult = validateKkPaatettavatOpiskeluoikeudetParams(params)
+    val authorities              = userService.getAuthorities
+    val isOphPaakayttaja         = authorities.contains(OPH_PAAKAYTTAJA_AUTHORITY)
+    val hasYosAuthority: Boolean =
+      authorities.exists(_.startsWith("ROLE_APP_OVARA-VIRKAILIJA_KK_YOS"))
 
-    handleExcelRequest(
-      validationErrors = validationResult.left.getOrElse(Nil),
-      response = response,
-      request = request,
-      id = "kk-paatettavat-opiskeluoikeudet",
-      raporttiParams =
-        validationResult.toOption.map(buildKkPaatettavatOpiskeluoikeudetAuditParams).getOrElse(Map.empty),
-      auditOperation = KkPaatettavatOpiskeluoikeudet,
-      mapper = mapper
-    ) {
-      validationResult match {
-        case Left(_) =>
-          Left("virhe.validointi")
+    if (!hasYosAuthority || isOphPaakayttaja) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN)
+    } else {
+      val validationResult = validateKkPaatettavatOpiskeluoikeudetParams(params)
 
-        case Right(validParams) =>
-          kkPaatettavatOpiskeluoikeudetService.get(
-            validParams.oppilaitos,
-            validParams.sukunimi,
-            validParams.etunimet,
-            validParams.hetu,
-            validParams.oppijanumero,
-            validParams.opiskeluoikeudenTila
-          )
+      handleExcelRequest(
+        validationErrors = validationResult.left.getOrElse(Nil),
+        response = response,
+        request = request,
+        id = "kk-paatettavat-opiskeluoikeudet",
+        raporttiParams =
+          validationResult.toOption.map(buildKkPaatettavatOpiskeluoikeudetAuditParams).getOrElse(Map.empty),
+        auditOperation = KkPaatettavatOpiskeluoikeudet,
+        mapper = mapper
+      ) {
+        validationResult match {
+          case Left(_) =>
+            Left("virhe.validointi")
+
+          case Right(validParams) =>
+            kkPaatettavatOpiskeluoikeudetService.get(
+              validParams.oppilaitos,
+              validParams.sukunimi,
+              validParams.etunimet,
+              validParams.hetu,
+              validParams.oppijanumero,
+              validParams.opiskeluoikeudenTila
+            )
+        }
       }
     }
   }
