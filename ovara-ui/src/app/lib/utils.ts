@@ -1,9 +1,12 @@
 import { sort, isEmpty, uniqueBy, isNullish } from 'remeda';
 import { OrganisaatioHierarkia } from './types/common';
 import {
+  KK_RAPORTIT,
+  KK_YOS_RAPORTTI,
   KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
   OPPILAITOSORGANISAATIOTYYPPI,
   TOIMIPISTEORGANISAATIOTYYPPI,
+  TOISEN_ASTEEN_RAPORTIT,
 } from './constants';
 import { match } from 'ts-pattern';
 
@@ -75,6 +78,31 @@ export const hasOvaraKkRole = (userRoles?: Array<string>) => {
     userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_KK') ||
     userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA')
   );
+};
+
+export const hasOvaraKkYosRole = (userRoles?: Array<string>) => {
+  return (
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_KK_YOS') ||
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA')
+  );
+};
+
+export const getRaporttiListByUserRights = (userRoles?: Array<string>) => {
+  const raportit = [];
+
+  if (hasOvaraToinenAsteRole(userRoles)) {
+    raportit.push(...TOISEN_ASTEEN_RAPORTIT);
+  }
+
+  if (hasOvaraKkRole(userRoles)) {
+    raportit.push(...KK_RAPORTIT);
+  }
+
+  if (hasOvaraKkYosRole(userRoles)) {
+    raportit.push(...[KK_YOS_RAPORTTI]);
+  }
+
+  return raportit;
 };
 
 export const findOrganisaatiotWithOrganisaatiotyyppi = (
