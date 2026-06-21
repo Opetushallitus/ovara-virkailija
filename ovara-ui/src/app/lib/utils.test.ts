@@ -8,10 +8,14 @@ import {
   getOppilaitoksetToShow,
   getToimipisteetToShow,
   getHarkinnanvaraisuusTranslation,
+  getRaporttiListByUserRights,
 } from './utils';
 import {
+  KK_RAPORTIT,
+  KK_YOS_RAPORTTI,
   KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
   TOIMIPISTEORGANISAATIOTYYPPI,
+  TOISEN_ASTEEN_RAPORTIT,
 } from './constants';
 
 describe('getSortedKoulutuksenAlkamiskaudet', () => {
@@ -142,6 +146,68 @@ describe('hasOvaraToinenAsteRole', () => {
       'ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA_1.2.246.562.10.00000000001',
     ];
     expect(hasOvaraToinenAsteRole(userRoles)).toBeTruthy();
+  });
+});
+
+describe('getRaporttiListByUserRights', () => {
+  test('should return only 2. aste reports when user has only 2aste role', () => {
+    const userRoles = ['ROLE_APP_OVARA-VIRKAILIJA_2ASTE'];
+
+    const result = getRaporttiListByUserRights(userRoles);
+
+    expect(result).toEqual([...TOISEN_ASTEEN_RAPORTIT]);
+  });
+
+  test('should return only KK reports when user has only KK role', () => {
+    const userRoles = ['ROLE_APP_OVARA-VIRKAILIJA_KK'];
+
+    const result = getRaporttiListByUserRights(userRoles);
+
+    expect(result).toEqual([...KK_RAPORTIT]);
+  });
+
+  test('should return only KK YOS report when user has KK YOS role', () => {
+    const userRoles = ['ROLE_APP_OVARA-VIRKAILIJA_KK_YOS'];
+
+    const result = getRaporttiListByUserRights(userRoles);
+
+    expect(result).toEqual([KK_YOS_RAPORTTI]);
+  });
+
+  test('should return combined reports when user has all roles', () => {
+    const userRoles = [
+      'ROLE_APP_OVARA-VIRKAILIJA_2ASTE',
+      'ROLE_APP_OVARA-VIRKAILIJA_KK',
+      'ROLE_APP_OVARA-VIRKAILIJA_KK_YOS',
+    ];
+
+    const result = getRaporttiListByUserRights(userRoles);
+
+    expect(result).toEqual([
+      ...TOISEN_ASTEEN_RAPORTIT,
+      ...KK_RAPORTIT,
+      KK_YOS_RAPORTTI,
+    ]);
+  });
+
+  test('should return empty array when user has no relevant roles', () => {
+    const userRoles = ['ROLE_APP_RAPORTOINTI'];
+
+    const result = getRaporttiListByUserRights(userRoles);
+
+    expect(result).toEqual([]);
+  });
+
+  test('should return empty array when userRoles is undefined', () => {
+    const result = getRaporttiListByUserRights(undefined);
+
+    expect(result).toEqual([]);
+  });
+
+  test('should return empty array when userRoles is empty', () => {
+    const result = getRaporttiListByUserRights([]);
+
+    expect(result).toEqual([]);
   });
 });
 
