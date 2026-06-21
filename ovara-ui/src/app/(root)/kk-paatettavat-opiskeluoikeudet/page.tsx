@@ -1,7 +1,7 @@
 'use client';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
-import { hasOvaraKkRole } from '@/app/lib/utils';
+import { hasOvaraKkYosRole } from '@/app/lib/utils';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
 import { isEmpty } from 'remeda';
 import { useDownloadWithErrorBoundary } from '@/app/hooks/useDownloadWithErrorBoundary';
@@ -24,7 +24,7 @@ const LabelSpacer = () => <div style={{ width: '96px' }} />;
 export default function KkPaatettavatOpiskeluoikeudet() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
-  const hasKkRights = hasOvaraKkRole(user?.authorities);
+  const hasKkYosRights = hasOvaraYosKkRole(user?.authorities);
   const {
     etunimi,
     setEtunimi,
@@ -49,7 +49,7 @@ export default function KkPaatettavatOpiskeluoikeudet() {
 
   return (
     <MainContainer>
-      {hasKkRights ? (
+      {hasKkYosRights ? (
         <FormBox>
           {isLoading && <SpinnerModal open />}
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
