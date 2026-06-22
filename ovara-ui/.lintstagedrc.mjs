@@ -1,8 +1,11 @@
 import path from 'path';
+import process from 'node:process';
+
+const shellQuote = (value) => JSON.stringify(value);
 
 const eslintCommand = (filenames) =>
-  `next lint --fix --no-ignore --max-warnings=0 ${filenames
-    .map((f) => `--file ${path.relative(process.cwd(), f)}`)
+  `eslint --fix --no-ignore --max-warnings=0 ${filenames
+    .map((f) => shellQuote(path.relative(process.cwd(), f)))
     .join(' ')}`;
 
 const prettierCommand = 'prettier --write -u';

@@ -15,10 +15,9 @@ const compat = new FlatCompat({
 });
 
 export default defineConfig([
-  globalIgnores(['.next/', '.open-next/', 'cdk/']),
+  globalIgnores(['dist/', 'cdk/', '.lintstagedrc.mjs']),
   {
     extends: compat.extends(
-      'next/core-web-vitals',
       'eslint:recommended',
       'plugin:@typescript-eslint/recommended',
       'plugin:prettier/recommended',

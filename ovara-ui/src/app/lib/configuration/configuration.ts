@@ -1,16 +1,18 @@
 export const DOMAIN =
-  process.env.APP_URL ?? process.env.VIRKAILIJA_URL ?? 'https://localhost:3405';
+  import.meta.env.VITE_APP_URL ??
+  import.meta.env.VITE_VIRKAILIJA_URL ??
+  'https://localhost:3405';
 
 export const OVARA_BACKEND =
-  process.env.OVARA_BACKEND ?? process.env.VIRKAILIJA_URL;
+  import.meta.env.VITE_OVARA_BACKEND ?? import.meta.env.VITE_VIRKAILIJA_URL;
 
 export const isLocalhost = DOMAIN.includes('localhost');
 
-export const isDev = process.env.NODE_ENV === 'development';
+export const isDev = import.meta.env.DEV;
 
-export const isProd = process.env.NODE_ENV === 'production';
+export const isProd = import.meta.env.PROD;
 
-export const isTesting = process.env.TEST === 'true';
+export const isTesting = import.meta.env.VITE_TEST === 'true';
 
 export const configuration = {
   raamitUrl: `${DOMAIN}/virkailija-raamit/apply-raamit.js`,

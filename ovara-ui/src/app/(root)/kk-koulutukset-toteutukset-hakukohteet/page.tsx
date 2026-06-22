@@ -11,7 +11,7 @@ import {
 import { FormBox } from '@/app/components/form/form-box';
 import { FormButtons } from '@/app/components/form/form-buttons';
 import { Divider } from '@mui/material';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'react-router';
 import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import { hasOvaraKkRole } from '@/app/lib/utils';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
@@ -51,7 +51,8 @@ export default function KoulutuksetToteutuksetHakukohteet() {
     ].every(isEmpty);
   const { run, isLoading } = useDownloadWithErrorBoundary();
 
-  const queryParamsStr = useSearchParams().toString();
+  const [queryParams] = useSearchParams();
+  const queryParamsStr = queryParams.toString();
 
   const KOULUTUKSITTAIN = 'koulutuksittain';
   const tulostustavat = [KOULUTUKSITTAIN, 'toteutuksittain', 'hakukohteittain'];

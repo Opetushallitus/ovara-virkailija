@@ -21,7 +21,7 @@ Light weight version of cdk.sh in cloud-base
 
 positional arguments:
   deploy                builds and deploys the stack to target environment, environment must be supplied.
-  build                 only builds the Lambda & synthesizes CDK (useful when developing)
+  build                 builds the UI & synthesizes CDK (useful when developing)
   loadup                create load testing instance, environment must be supplied.
   loaddown              destroy load testing instance, environment must be supplied.
   environment           Environment name (e.g. pallero)
@@ -85,20 +85,17 @@ if [[ "${loaddown}" == "true" ]]; then
     aws-vault exec oph-dev -- cdk destroy LoadtestStack -f -c "environment=$environment"
 fi
 
-if [[ "${build}" == "true" ]]; then
-    echo "Building Lambda code and synthesizing CDK template"
-    npx cdk synth
-fi
-
 if [[ -n "${dependencies}" ]]; then
-    echo "Installing CDK dependencies.."
-    cd "${git_root}/ovara-ui/cdk/" && npm ci
     echo "Installing app dependencies.."
     cd "${git_root}/ovara-ui/" && npm ci
+    echo "Installing CDK dependencies.."
+    cd "${git_root}/ovara-ui/cdk/" && npm ci
 fi
 
 if [[ "${build}" == "true" ]]; then
-    echo "Building Lambda code and synthesizing CDK template"
+    echo "Building UI and synthesizing CDK template"
+    cd "${git_root}/ovara-ui/" && npm run build
+    cd "${git_root}/ovara-ui/cdk/"
     npx cdk synth
 fi
 
@@ -118,7 +115,8 @@ if [[ "${deploy}" == "true" ]]; then
         exit 0
     fi
 
-   echo "Building Lambda code, synhesizing CDK code and deploying to environment: $environment"
+   echo "Building UI, synthesizing CDK code and deploying to environment: $environment"
+   cd "${git_root}/ovara-ui/" && npm run build
    cd "${git_root}/ovara-ui/cdk/"
    aws-vault exec $aws_profile -- cdk deploy HostedZoneStack -c "environment=${environment}"
    aws-vault exec $aws_profile -- cdk deploy OvaraCertificateStack -c "environment=${environment}"
