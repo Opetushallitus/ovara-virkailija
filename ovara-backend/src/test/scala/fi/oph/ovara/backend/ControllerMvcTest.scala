@@ -45,4 +45,16 @@ class ControllerMvcTest {
       .andExpect(status().isBadRequest)
   }
 
+  @Test
+  @WithMockUser(username = "testuser", roles = Array("APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA_1.2.246.562.10.00000000001"))
+  def testdoesNotReturn403ResponseForOphPaakayttaja(): Unit = {
+    mvc
+      .perform(
+        MockMvcRequestBuilders
+          .get("/api/kk-paatettavat-opiskeluoikeudet")
+          .param("ovara_oppilaitos", "foo")
+          .accept(MediaType.APPLICATION_JSON)
+      )
+      .andExpect(status().isBadRequest)
+  }
 }
