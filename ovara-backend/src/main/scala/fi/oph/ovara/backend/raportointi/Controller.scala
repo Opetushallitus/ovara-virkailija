@@ -826,7 +826,7 @@ class Controller(
     val hasYosAuthority: Boolean =
       authorities.exists(_.startsWith("ROLE_APP_OVARA-VIRKAILIJA_KK_YOS"))
 
-    if (!hasYosAuthority || isOphPaakayttaja) {
+    if (!hasYosAuthority && !isOphPaakayttaja) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN)
     } else {
       val validationResult = validateKkPaatettavatOpiskeluoikeudetParams(params)
