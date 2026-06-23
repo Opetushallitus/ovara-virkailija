@@ -826,9 +826,7 @@ class Controller(
     val hasYosAuthority: Boolean =
       authorities.exists(_.startsWith("ROLE_APP_OVARA-VIRKAILIJA_KK_YOS"))
 
-    if (!hasYosAuthority && !isOphPaakayttaja) {
-      response.sendError(HttpServletResponse.SC_FORBIDDEN)
-    } else {
+    if (hasYosAuthority || isOphPaakayttaja) {
       val validationResult = validateKkPaatettavatOpiskeluoikeudetParams(params)
 
       handleExcelRequest(
@@ -856,6 +854,8 @@ class Controller(
             )
         }
       }
+    } else {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN)
     }
   }
 }
