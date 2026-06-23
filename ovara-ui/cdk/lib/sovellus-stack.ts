@@ -106,13 +106,30 @@ function handler(event) {
       distributionPaths: ['/', '/ovara/*'],
     });
 
-    new route53.ARecord(this, 'OvaraUiAliasRecord', {
+    const cloudFrontTarget = route53.RecordTarget.fromAlias(
+      new targets.CloudFrontTarget(distribution),
+    );
+    const aRecord = new route53.ARecord(this, 'OvaraUiAliasRecord', {
       zone: props.hostedZone,
       recordName: props.domainName,
-      target: route53.RecordTarget.fromAlias(
-        new targets.CloudFrontTarget(distribution),
-      ),
+      target: cloudFrontTarget,
     });
+    const aaaaRecord = new route53.AaaaRecord(this, 'OvaraUiAliasIpv6Record', {
+      zone: props.hostedZone,
+      recordName: props.domainName,
+      target: cloudFrontTarget,
+    });
+
+    if (props.environmentName === 'pallero') {
+      const cfnARecord = aRecord.node.defaultChild as route53.CfnRecordSet;
+      cfnARecord.overrideLogicalId('palleroOvaraUIDomainARecordMain8D8963A7');
+
+      const cfnAaaaRecord = aaaaRecord.node
+        .defaultChild as route53.CfnRecordSet;
+      cfnAaaaRecord.overrideLogicalId(
+        'palleroOvaraUIDomainAaaaRecordMain85291870',
+      );
+    }
 
     new cdk.CfnOutput(this, 'CloudFrontDistributionDomain', {
       value: distribution.distributionDomainName,
