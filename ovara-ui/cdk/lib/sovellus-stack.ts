@@ -93,6 +93,11 @@ function handler(event) {
         priceClass: PriceClass.PRICE_CLASS_100,
       },
     );
+    if (props.environmentName === 'pallero') {
+      const cfnDistribution = distribution.node
+        .defaultChild as cloudfront.CfnDistribution;
+      cfnDistribution.overrideLogicalId('palleroOvaraUIDistributionA29498D9');
+    }
 
     new s3deploy.BucketDeployment(this, 'DeployOvaraUi', {
       sources: [s3deploy.Source.asset('../dist')],
