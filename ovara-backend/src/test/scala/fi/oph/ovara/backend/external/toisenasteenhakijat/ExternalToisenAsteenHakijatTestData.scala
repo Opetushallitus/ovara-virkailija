@@ -22,6 +22,13 @@ object ExternalToisenAsteenHakijatTestData {
   val HELSINKI     = "Helsinki"
   val SUOMI_KOODI  = "246"
 
+  // Raw values mimic what the production DB actually holds:
+  // gen_henkilo.aidinkieli is a lowercase code, gen_supa_tieto.arvo is a quoted lowercase code.
+  // Both are normalized (unquoted, uppercased) by the extractor.
+  val AIDINKIELI_RAW                = "fi"
+  val AIDINKIELI                    = "FI"
+  val OPETUSKIELI_RAW               = "\"sv\""
+  val OPETUSKIELI                   = "SV"
   val ETUNIMET                      = "Matti Ilmari"
   val KUTSUMANIMI                   = "Matti"
   val SUKUNIMI                      = "Meikäläinen"
