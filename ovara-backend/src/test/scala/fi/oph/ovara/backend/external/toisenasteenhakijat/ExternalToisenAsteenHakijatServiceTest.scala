@@ -77,6 +77,8 @@ class ExternalToisenAsteenHakijatServiceTest
     assert(hakija.kiinnostunutoppisopimuksesta.contains(KIINNOSTUNUT_OPPISOPIMUKSESTA))
     assert(hakija.sahkoisenAsioinninLupa.contains(SAHKOINENVIESTINTALUPA))
     assert(hakija.hakemus.hakemusnumero == HAKEMUS_OID)
+    assert(hakija.hakemus.vuosi.contains(VUOSI))
+    assert(hakija.hakemus.kausi.contains(KAUSI))
     assert(hakija.hakemus.julkaisulupa.contains(VALINTATULOKSEN_JULKAISULUPA))
     assert(hakija.hakemus.hakemuksenJattopaiva.contains(JATETTY))
     assert(hakija.hakemus.hakemuksenMuokkauspaiva.contains(MUOKATTU))
@@ -115,8 +117,6 @@ class ExternalToisenAsteenHakijatServiceTest
     assert(hakija.oikeusMaksuttomaanKoulutukseenVoimassaAsti.isEmpty)
     assert(hakija.oppivelvollisuusVoimassaAsti.isEmpty)
     assert(hakija.lisakysymykset.isEmpty)
-    assert(hakija.hakemus.vuosi.isEmpty)
-    assert(hakija.hakemus.kausi.isEmpty)
     assert(hakija.hakemus.lahtokoulu.isEmpty)
     assert(hakija.hakemus.luokka.isEmpty)
     assert(hakija.hakemus.pohjakoulutus.isEmpty)
@@ -156,6 +156,42 @@ class ExternalToisenAsteenHakijatServiceTest
     assert(hakija.hakemus.julkaisulupa.isEmpty)
     assert(hakija.hakemus.hakemuksenJattopaiva.isEmpty)
     assert(hakija.hakemus.hakemuksenMuokkauspaiva.isEmpty)
+  }
+
+  it should "normalize kausi koodisto uri 'kausi_k#1' to 'K'" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(koulutuksenAlkamiskausiuri = Some("kausi_k#1"))
+    insertHakutoive()
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+
+    val hakija = getOnlyHakija(response)
+    assert(hakija.hakemus.kausi.contains("K"))
+  }
+
+  it should "return None for kausi when koulutuksen_alkamiskausiuri is missing" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(koulutuksenAlkamiskausiuri = None)
+    insertHakutoive()
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+
+    val hakija = getOnlyHakija(response)
+    assert(hakija.hakemus.kausi.isEmpty)
+  }
+
+  it should "return None for kausi when koulutuksen_alkamiskausiuri is not a recognized value" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(koulutuksenAlkamiskausiuri = Some("kausi_v#1"))
+    insertHakutoive()
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+
+    val hakija = getOnlyHakija(response)
+    assert(hakija.hakemus.kausi.isEmpty)
   }
 
   it should "not return hakemus when hakemus_oid is not 35 characters" in {

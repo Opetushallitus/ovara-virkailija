@@ -46,7 +46,17 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
           (SELECT st.arvo FROM gen.gen_supa_tieto st
             WHERE st.hakemus_oid = hakemus.hakemus_oid
               AND st.avain = 'perusopetuksen_kieli'
-            LIMIT 1) AS opetuskieli
+            LIMIT 1) AS opetuskieli,
+          (SELECT hk.koulutuksen_alkamisvuosi FROM gen.gen_hakutoive ht
+            INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
+            WHERE ht.hakemus_oid = hakemus.hakemus_oid
+            ORDER BY ht.hakutoivenumero
+            LIMIT 1) AS vuosi,
+          (SELECT hk.koulutuksen_alkamiskausiuri FROM gen.gen_hakutoive ht
+            INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
+            WHERE ht.hakemus_oid = hakemus.hakemus_oid
+            ORDER BY ht.hakutoivenumero
+            LIMIT 1) AS kausi
         FROM gen.gen_henkilo hlo
         INNER JOIN gen.gen_hakemus hakemus ON hakemus.henkilo_oid = hlo.henkilo_oid
         INNER JOIN gen.gen_haku    haku    ON hakemus.haku_oid    = haku.haku_oid
@@ -87,7 +97,17 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
           (SELECT st.arvo FROM gen.gen_supa_tieto st
             WHERE st.hakemus_oid = hakemus.hakemus_oid
               AND st.avain = 'perusopetuksen_kieli'
-            LIMIT 1) AS opetuskieli
+            LIMIT 1) AS opetuskieli,
+          (SELECT hk.koulutuksen_alkamisvuosi FROM gen.gen_hakutoive ht
+            INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
+            WHERE ht.hakemus_oid = hakemus.hakemus_oid
+            ORDER BY ht.hakutoivenumero
+            LIMIT 1) AS vuosi,
+          (SELECT hk.koulutuksen_alkamiskausiuri FROM gen.gen_hakutoive ht
+            INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
+            WHERE ht.hakemus_oid = hakemus.hakemus_oid
+            ORDER BY ht.hakutoivenumero
+            LIMIT 1) AS kausi
         FROM gen.gen_henkilo hlo
         INNER JOIN gen.gen_hakemus hakemus ON hakemus.henkilo_oid = hlo.henkilo_oid
         INNER JOIN gen.gen_haku    haku    ON hakemus.haku_oid    = haku.haku_oid

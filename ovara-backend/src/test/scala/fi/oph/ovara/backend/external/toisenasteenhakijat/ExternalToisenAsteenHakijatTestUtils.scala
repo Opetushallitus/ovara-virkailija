@@ -112,7 +112,9 @@ trait ExternalToisenAsteenHakijatTestUtils {
   def insertHakukohde(
     hakukohdeOid: String = HAKUKOHDE_OID,
     toteutusOid: String = TOTEUTUS_OID,
-    jarjestyspaikkaOid: String = ORGANISAATIO_OID
+    jarjestyspaikkaOid: String = ORGANISAATIO_OID,
+    koulutuksenAlkamisvuosi: Option[Int] = Some(KOULUTUKSEN_ALKAMISVUOSI),
+    koulutuksenAlkamiskausiuri: Option[String] = Some(KOULUTUKSEN_ALKAMISKAUSIURI)
   ): Unit = {
     db.run(
       sqlu"""INSERT INTO gen.gen_hakukohde VALUES(
@@ -121,7 +123,9 @@ trait ExternalToisenAsteenHakijatTestUtils {
           $jarjestyspaikkaOid,
           'Elokuvaleikkaus',
           'Filmklippning',
-          'Film Editing')""",
+          'Film Editing',
+          $koulutuksenAlkamisvuosi,
+          $koulutuksenAlkamiskausiuri)""",
       "Insert test hakukohde"
     )
   }
@@ -226,7 +230,9 @@ trait ExternalToisenAsteenHakijatTestUtils {
               jarjestyspaikka_oid text,
               hakukohde_nimi_fi text,
               hakukohde_nimi_sv text,
-              hakukohde_nimi_en text
+              hakukohde_nimi_en text,
+              koulutuksen_alkamisvuosi integer,
+              koulutuksen_alkamiskausiuri text
           );
 
           CREATE TABLE gen.gen_koulutus(
