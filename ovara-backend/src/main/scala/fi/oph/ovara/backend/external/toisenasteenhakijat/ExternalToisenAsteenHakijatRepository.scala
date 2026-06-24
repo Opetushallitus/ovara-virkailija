@@ -41,7 +41,12 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
           hakemus.sahkoinenviestintalupa,
           hakemus.valintatuloksen_julkaisulupa,
           hakemus.jatetty,
-          hakemus.muokattu
+          hakemus.muokattu,
+          hlo.aidinkieli,
+          (SELECT st.arvo FROM gen.gen_supa_tieto st
+            WHERE st.hakemus_oid = hakemus.hakemus_oid
+              AND st.avain = 'perusopetuksen_kieli'
+            LIMIT 1) AS opetuskieli
         FROM gen.gen_henkilo hlo
         INNER JOIN gen.gen_hakemus hakemus ON hakemus.henkilo_oid = hlo.henkilo_oid
         INNER JOIN gen.gen_haku    haku    ON hakemus.haku_oid    = haku.haku_oid
@@ -77,7 +82,12 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
           hakemus.sahkoinenviestintalupa,
           hakemus.valintatuloksen_julkaisulupa,
           hakemus.jatetty,
-          hakemus.muokattu
+          hakemus.muokattu,
+          hlo.aidinkieli,
+          (SELECT st.arvo FROM gen.gen_supa_tieto st
+            WHERE st.hakemus_oid = hakemus.hakemus_oid
+              AND st.avain = 'perusopetuksen_kieli'
+            LIMIT 1) AS opetuskieli
         FROM gen.gen_henkilo hlo
         INNER JOIN gen.gen_hakemus hakemus ON hakemus.henkilo_oid = hlo.henkilo_oid
         INNER JOIN gen.gen_haku    haku    ON hakemus.haku_oid    = haku.haku_oid

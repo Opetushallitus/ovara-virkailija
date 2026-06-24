@@ -52,6 +52,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive()
     insertToteutusJaKoulutus()
+    insertOpetuskieli()
 
     val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
@@ -70,6 +71,8 @@ class ExternalToisenAsteenHakijatServiceTest
     assert(hakija.maa.contains(SUOMI_KOODI))
     assert(hakija.kansalaisuudet == Seq("246"))
     assert(hakija.sukupuoli.contains(SUKUPUOLI.toString))
+    assert(hakija.aidinkieli.contains(AIDINKIELI))
+    assert(hakija.opetuskieli.contains(OPETUSKIELI))
     assert(hakija.koulutusmarkkinointilupa.contains(KOULUTUSMARKKINOINTILUPA))
     assert(hakija.kiinnostunutoppisopimuksesta.contains(KIINNOSTUNUT_OPPISOPIMUKSESTA))
     assert(hakija.sahkoisenAsioinninLupa.contains(SAHKOINENVIESTINTALUPA))
@@ -107,8 +110,6 @@ class ExternalToisenAsteenHakijatServiceTest
 
     val hakija = getOnlyHakija(response)
     assert(hakija.muupuhelin.isEmpty)
-    assert(hakija.aidinkieli.isEmpty)
-    assert(hakija.opetuskieli.isEmpty)
     assert(hakija.huoltaja1.isEmpty)
     assert(hakija.huoltaja2.isEmpty)
     assert(hakija.oikeusMaksuttomaanKoulutukseenVoimassaAsti.isEmpty)
