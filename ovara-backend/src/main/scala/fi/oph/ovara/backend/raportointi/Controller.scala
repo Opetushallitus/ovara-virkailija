@@ -9,7 +9,9 @@ import fi.oph.ovara.backend.raportointi.dto.{
   buildKkHakeneetHyvaksytytVastaanottaneetAuditParams,
   buildKkHakijatAuditParams,
   buildKkKoulutuksetToteutuksetHakukohteetAuditParams,
+  buildKkPaatettavatOpiskeluoikeudetAuditParams,
   buildKoulutuksetToteutuksetHakukohteetAuditParams,
+  KkPaatettavatOpiskeluoikeudetParams,
   RawHakeneetHyvaksytytVastaanottaneetParams,
   RawHakijatParams,
   RawKkHakeneetHyvaksytytVastaanottaneetParams,
@@ -22,6 +24,7 @@ import fi.oph.ovara.backend.service.{
   HakeneetHyvaksytytVastaanottaneetService,
   KkHakeneetHyvaksytytVastaanottaneetService,
   KkHakijatService,
+  KkPaatettavatOpiskeluoikeudetService,
   KorkeakouluKoulutuksetToteutuksetHakukohteetService,
   KoulutuksetToteutuksetHakukohteetService,
   ToisenAsteenHakijatService,
@@ -31,10 +34,12 @@ import fi.oph.ovara.backend.utils.AuditOperation.{
   HakeneetHyvaksytytVastaanottaneet,
   KkHakeneetHyvaksytytVastaanottaneet,
   KkHakijat,
+  KkPaatettavatOpiskeluoikeudet,
   KorkeakouluKoulutuksetToteutuksetHakukohteet,
   KoulutuksetToteutuksetHakukohteet,
   ToisenAsteenHakijat
 }
+import fi.oph.ovara.backend.utils.Constants.OPH_PAAKAYTTAJA_AUTHORITY
 import fi.oph.ovara.backend.utils.ParameterValidator.{
   validateAlphanumeric,
   validateAlphanumericList,
@@ -43,6 +48,7 @@ import fi.oph.ovara.backend.utils.ParameterValidator.{
   validateKkHakeneetHyvaksytytVastaanottaneetParams,
   validateKkHakijatParams,
   validateKkKoulutuksetToteutuksetHakukohteetParams,
+  validateKkPaatettavatOpiskeluoikeudetParams,
   validateKoulutuksetToteutuksetHakukohteetParams,
   validateNumericList,
   validateOidList,
@@ -79,6 +85,7 @@ class Controller(
   kkHakijatService: KkHakijatService,
   hakeneetHyvaksytytVastaanottaneetService: HakeneetHyvaksytytVastaanottaneetService,
   kkHakeneetHyvaksytytVastaanottaneetService: KkHakeneetHyvaksytytVastaanottaneetService,
+  kkPaatettavatOpiskeluoikeudetService: KkPaatettavatOpiskeluoikeudetService,
   val userService: UserService,
   val auditLog: AuditLog = AuditLogObj
 ) extends ControllerUtils {
@@ -791,6 +798,64 @@ class Controller(
             validParams.naytaHakutoiveet
           )
       }
+    }
+  }
+
+  @GetMapping(path = Array("kk-paatettavat-opiskeluoikeudet"))
+  def kk_paatettavat_opiskeluoikeudet(
+    @RequestParam("ovara_oppilaitos", required = true) oppilaitos: String,
+    @RequestParam("ovara_sukunimi", required = false) sukunimi: String,
+    @RequestParam("ovara_etunimi", required = false) etunimet: String,
+    @RequestParam("ovara_hetu", required = false) hetu: String,
+    @RequestParam("ovara_oppijanumero", required = false) oppijanumero: String,
+    @RequestParam("ovara_opiskeluoikeuden_tila", required = false) opiskeluoikeudenTila: String,
+    request: HttpServletRequest,
+    response: HttpServletResponse
+  ): Unit = {
+    val params = KkPaatettavatOpiskeluoikeudetParams(
+      oppilaitos = oppilaitos,
+      sukunimi = Option(sukunimi),
+      etunimet = Option(etunimet),
+      hetu = Option(hetu),
+      oppijanumero = Option(oppijanumero),
+      opiskeluoikeudenTila = Option(opiskeluoikeudenTila)
+    )
+
+    val authorities              = userService.getAuthorities
+    val isOphPaakayttaja         = authorities.contains(OPH_PAAKAYTTAJA_AUTHORITY)
+    val hasYosAuthority: Boolean =
+      authorities.exists(_.startsWith("ROLE_APP_OVARA-VIRKAILIJA_KK_YOS"))
+
+    if (hasYosAuthority || isOphPaakayttaja) {
+      val validationResult = validateKkPaatettavatOpiskeluoikeudetParams(params)
+
+      handleExcelRequest(
+        validationErrors = validationResult.left.getOrElse(Nil),
+        response = response,
+        request = request,
+        id = "kk-paatettavat-opiskeluoikeudet",
+        raporttiParams =
+          validationResult.toOption.map(buildKkPaatettavatOpiskeluoikeudetAuditParams).getOrElse(Map.empty),
+        auditOperation = KkPaatettavatOpiskeluoikeudet,
+        mapper = mapper
+      ) {
+        validationResult match {
+          case Left(_) =>
+            Left("virhe.validointi")
+
+          case Right(validParams) =>
+            kkPaatettavatOpiskeluoikeudetService.get(
+              validParams.oppilaitos,
+              validParams.sukunimi,
+              validParams.etunimet,
+              validParams.hetu,
+              validParams.oppijanumero,
+              validParams.opiskeluoikeudenTila
+            )
+        }
+      }
+    } else {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN)
     }
   }
 }
