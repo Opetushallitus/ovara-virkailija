@@ -26,7 +26,9 @@ case class HakijaRow(
   jatetty: Option[OffsetDateTime],
   muokattu: Option[OffsetDateTime],
   aidinkieli: Option[String],
-  opetuskieli: Option[String]
+  opetuskieli: Option[String],
+  vuosi: Option[Int],
+  kausi: Option[String]
 ) {
   def asHakija(hakutoiveet: Seq[HakijaHakutoive]): ToisenAsteenHakija =
     ToisenAsteenHakija(
@@ -52,6 +54,8 @@ case class HakijaRow(
       hakemus = HakijaHakemus(
         hakemusnumero = hakemusOid,
         hakutoiveet = hakutoiveet,
+        vuosi = vuosi.map(_.toString),
+        kausi = kausi,
         hakemuksenJattopaiva = jatetty,
         hakemuksenMuokkauspaiva = muokattu,
         julkaisulupa = valintatuloksenJulkaisulupa

@@ -29,6 +29,10 @@ object ExternalToisenAsteenHakijatTestData {
   val AIDINKIELI                    = "FI"
   val OPETUSKIELI_RAW               = "\"sv\""
   val OPETUSKIELI                   = "SV"
+  val KOULUTUKSEN_ALKAMISVUOSI      = 2026
+  val VUOSI                         = "2026"
+  val KOULUTUKSEN_ALKAMISKAUSIURI   = "kausi_s#1"
+  val KAUSI                         = "S"
   val ETUNIMET                      = "Matti Ilmari"
   val KUTSUMANIMI                   = "Matti"
   val SUKUNIMI                      = "Meikäläinen"
