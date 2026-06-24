@@ -30,7 +30,9 @@ class HakijatExtractors extends Extractors {
       jatetty = getOffsetDateTime(r),
       muokattu = getOffsetDateTime(r),
       aidinkieli = normalizeKieliCode(r.nextStringOption()),
-      opetuskieli = normalizeKieliCode(r.nextStringOption())
+      opetuskieli = normalizeKieliCode(r.nextStringOption()),
+      vuosi = r.nextIntOption(),
+      kausi = normalizeKausi(r.nextStringOption())
     )
   }
 
@@ -38,6 +40,11 @@ class HakijatExtractors extends Extractors {
     opt
       .map(_.trim.stripPrefix("\"").stripSuffix("\"").toUpperCase)
       .filter(_.nonEmpty)
+
+  private val KausiPattern = """kausi_([sk])(?:#\d+)?""".r
+
+  private def normalizeKausi(opt: Option[String]): Option[String] =
+    opt.collect { case KausiPattern(arvo) => arvo.toUpperCase }
 
   implicit val getHakijaHakutoiveRow: GetResult[HakijaHakutoiveRow] = GetResult { r =>
     HakijaHakutoiveRow(
