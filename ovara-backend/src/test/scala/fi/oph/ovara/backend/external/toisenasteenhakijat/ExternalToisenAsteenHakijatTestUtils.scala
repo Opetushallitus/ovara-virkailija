@@ -12,9 +12,12 @@ trait ExternalToisenAsteenHakijatTestUtils {
 
   val db: ReadOnlyDatabase
 
-  def insertHenkilo(oppijanumero: String = OPPIJANUMERO): Unit = {
+  def insertHenkilo(
+    oppijanumero: String = OPPIJANUMERO,
+    aidinkieli: Option[String] = Some(AIDINKIELI_RAW)
+  ): Unit = {
     db.run(
-      sqlu"""INSERT INTO gen.gen_henkilo VALUES ($oppijanumero, $oppijanumero)""",
+      sqlu"""INSERT INTO gen.gen_henkilo VALUES ($oppijanumero, $oppijanumero, $aidinkieli)""",
       "Insert test henkilö"
     )
   }
@@ -89,6 +92,22 @@ trait ExternalToisenAsteenHakijatTestUtils {
       "Insert test hakemus"
     )
   }
+
+  def insertSupaTieto(
+    hakemusOid: String = HAKEMUS_OID,
+    avain: String,
+    arvo: Option[String]
+  ): Unit = {
+    db.run(
+      sqlu"""INSERT INTO gen.gen_supa_tieto VALUES($hakemusOid, $avain, $arvo)""",
+      "Insert test supa_tieto"
+    )
+  }
+
+  def insertOpetuskieli(
+    hakemusOid: String = HAKEMUS_OID,
+    arvo: Option[String] = Some(OPETUSKIELI_RAW)
+  ): Unit = insertSupaTieto(hakemusOid, "perusopetuksen_kieli", arvo)
 
   def insertHakukohde(
     hakukohdeOid: String = HAKUKOHDE_OID,
@@ -176,7 +195,14 @@ trait ExternalToisenAsteenHakijatTestUtils {
 
           CREATE TABLE gen.gen_henkilo (
               oppijanumero text NOT NULL PRIMARY KEY,
-              henkilo_oid  text
+              henkilo_oid  text,
+              aidinkieli   text
+          );
+
+          CREATE TABLE gen.gen_supa_tieto (
+              hakemus_oid text NOT NULL,
+              avain       text NOT NULL,
+              arvo        text
           );
 
           CREATE TABLE gen.gen_haku (

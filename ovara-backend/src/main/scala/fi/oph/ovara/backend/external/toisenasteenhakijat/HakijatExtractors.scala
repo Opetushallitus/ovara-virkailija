@@ -28,9 +28,16 @@ class HakijatExtractors extends Extractors {
       sahkoinenviestintalupa = r.nextBooleanOption(),
       valintatuloksenJulkaisulupa = r.nextBooleanOption(),
       jatetty = getOffsetDateTime(r),
-      muokattu = getOffsetDateTime(r)
+      muokattu = getOffsetDateTime(r),
+      aidinkieli = normalizeKieliCode(r.nextStringOption()),
+      opetuskieli = normalizeKieliCode(r.nextStringOption())
     )
   }
+
+  private def normalizeKieliCode(opt: Option[String]): Option[String] =
+    opt
+      .map(_.trim.stripPrefix("\"").stripSuffix("\"").toUpperCase)
+      .filter(_.nonEmpty)
 
   implicit val getHakijaHakutoiveRow: GetResult[HakijaHakutoiveRow] = GetResult { r =>
     HakijaHakutoiveRow(
