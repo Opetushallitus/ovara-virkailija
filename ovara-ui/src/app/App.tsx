@@ -20,14 +20,9 @@ import KkPaatettavatOpiskeluoikeudet from '@/app/(root)/kk-paatettavat-opiskeluo
 import KoulutuksetToteutuksetHakukohteet from '@/app/(root)/koulutukset-toteutukset-hakukohteet/page';
 import NotFound from '@/app/not-found';
 
-function RaamitScript() {
-  return <script src={configuration.raamitUrl} />;
-}
-
 export default function App() {
   return (
     <>
-      <RaamitScript />
       <OphThemeProvider variant="oph" overrides={THEME_OVERRIDES}>
         <ConfigurationProvider configuration={configuration}>
           <ReactQueryClientProvider>
