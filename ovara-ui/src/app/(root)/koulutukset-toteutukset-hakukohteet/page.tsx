@@ -13,7 +13,7 @@ import { FormBox } from '@/app/components/form/form-box';
 import { Valintakoe } from '@/app/components/form/valintakoe';
 import { FormButtons } from '@/app/components/form/form-buttons';
 import { Divider } from '@mui/material';
-import { useSearchParams } from 'react-router';
+import { useOptimisticSearchParams } from 'nuqs/adapters/react-router/v7';
 import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import { hasOvaraToinenAsteRole, isNullishOrEmpty } from '@/app/lib/utils';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
@@ -29,7 +29,7 @@ export default function KoulutuksetToteutuksetHakukohteet() {
   const { selectedAlkamiskaudet, selectedHaut } = useCommonSearchParams();
 
   const { run, isLoading } = useDownloadWithErrorBoundary();
-  const [queryParams] = useSearchParams();
+  const queryParams = useOptimisticSearchParams();
   const queryParamsStr = queryParams.toString();
   const handleDownload = () =>
     run(() =>

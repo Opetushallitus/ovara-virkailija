@@ -45,6 +45,7 @@ export const usePaatettavatOpiskeluoikeudetSearchParams = () => {
   const emptyAllPaatettavatOpiskeluoikeudetParams = () => {
     const keysToClear = [
       'ovara_opiskeluoikeuden_tila',
+      'ovara_oppilaitos',
       'ovara_etunimi',
       'ovara_sukunimi',
       'ovara_hetu',
