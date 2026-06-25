@@ -5,7 +5,7 @@ import { hasOvaraKkYosRole } from '@/app/lib/utils';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
 import { isEmpty } from 'remeda';
 import { useDownloadWithErrorBoundary } from '@/app/hooks/useDownloadWithErrorBoundary';
-import { useSearchParams } from 'react-router';
+import { useOptimisticSearchParams } from 'nuqs/adapters/react-router/v7';
 import { downloadExcel } from '@/app/components/form/utils';
 import { MainContainer } from '@/app/components/main-container';
 import { FormBox } from '@/app/components/form/form-box';
@@ -41,7 +41,7 @@ export default function KkPaatettavatOpiskeluoikeudet() {
   const isDisabled = [selectedOppilaitos || []].every(isEmpty);
   const { run, isLoading } = useDownloadWithErrorBoundary();
 
-  const [queryParams] = useSearchParams();
+  const queryParams = useOptimisticSearchParams();
   const queryParamsStr = queryParams.toString();
 
   const handleDownload = () =>
