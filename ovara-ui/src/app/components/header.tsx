@@ -6,12 +6,14 @@ import { PageContent } from './page-content';
 import { OphButton } from '@opetushallitus/oph-design-system';
 
 import { useTranslate } from '@tolgee/react';
-import { usePathname } from 'next/navigation';
+import { useLocation } from 'react-router';
 const DEFAULT_BOX_BORDER = `2px solid ${ophColors.grey100}`;
 
 export default function Header() {
   const { t } = useTranslate();
-  const currentRoute = usePathname();
+  const { pathname } = useLocation();
+  const currentRoute =
+    pathname === '/' ? pathname : pathname.replace(/^\//, '');
   const isHome = currentRoute == '/';
   const headerTranslationKey = isHome
     ? 'header.home'
@@ -35,7 +37,7 @@ export default function Header() {
       >
         {!isHome && (
           <OphButton
-            href="/"
+            href="/ovara"
             variant="outlined"
             startIcon={<HomeOutlinedIcon />}
           />

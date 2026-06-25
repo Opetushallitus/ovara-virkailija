@@ -50,7 +50,13 @@ export const usePaatettavatOpiskeluoikeudetSearchParams = () => {
 
   const emptyAllPaatettavatOpiskeluoikeudetParams = () => {
     console.debug('EMPTY ALL OPISKELUOIKEUDEN TILA PARAMS');
-    const keysToClear = ['ovara_opiskeluoikeuden_tila'];
+    const keysToClear = [
+      'ovara_opiskeluoikeuden_tila',
+      'ovara_etunimi',
+      'ovara_sukunimi',
+      'ovara_hetu',
+      'ovara_oppijanumero',
+    ];
 
     keysToClear.forEach((key) => localStorage.removeItem(key));
 
