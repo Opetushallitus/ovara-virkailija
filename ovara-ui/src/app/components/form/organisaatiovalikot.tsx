@@ -102,9 +102,11 @@ export const Koulutustoimija = ({
 export const Oppilaitos = ({
   organisaatiot,
   includeKoulutustoimija = false,
+  required = false,
 }: {
   organisaatiot: Array<OrganisaatioHierarkia> | null;
   includeKoulutustoimija?: boolean;
+  required?: boolean;
 }) => {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
@@ -139,6 +141,7 @@ export const Oppilaitos = ({
       value={selectedOppilaitokset ?? []}
       options={getOrganisaatioOptions(locale, oppilaitokset)}
       onChange={changeOppilaitokset}
+      required={required}
     />
   );
 };

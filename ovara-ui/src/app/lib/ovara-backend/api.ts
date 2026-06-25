@@ -1,13 +1,10 @@
 import { FetchError, PermissionError } from '@/app/lib/common';
-import { redirect } from 'next/navigation';
 import { getConfiguration } from '@/app/lib/configuration/client-configuration';
-import { configuration } from '@/app/lib/configuration/configuration';
 
 let _csrfToken: string;
-const isServer = typeof window === 'undefined';
 
 function getRuntimeConfiguration() {
-  return isServer ? configuration : getConfiguration();
+  return getConfiguration();
 }
 
 async function csrfToken() {
@@ -85,11 +82,7 @@ export async function apiFetch(
 const redirectToLogin = () => {
   const { ovaraBackendApiUrl } = getRuntimeConfiguration();
   const loginUrl = `${ovaraBackendApiUrl}/login`;
-  if (isServer) {
-    redirect(loginUrl);
-  } else {
-    location.assign(loginUrl);
-  }
+  location.assign(loginUrl);
 };
 
 const noContent = (response: Response) => response.status === 204;
