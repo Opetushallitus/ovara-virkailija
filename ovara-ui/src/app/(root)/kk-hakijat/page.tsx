@@ -17,7 +17,7 @@ import {
 import { Hakukohde } from '@/app/components/form/hakukohde';
 import { Vastaanottotieto } from '@/app/components/form/vastaanottotieto';
 import { Markkinointilupa } from '@/app/components/form/markkinointilupa';
-import { useSearchParams as useQueryParams } from 'react-router';
+import { useOptimisticSearchParams } from 'nuqs/adapters/react-router/v7';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { downloadExcel } from '@/app/components/form/utils';
 import { Valintatieto } from '@/app/components/form/valintatieto';
@@ -52,7 +52,7 @@ export default function KkHakijat() {
     selectedNaytaPostiosoite,
   } = useHakijatSearchParams();
 
-  const [queryParams] = useQueryParams();
+  const queryParams = useOptimisticSearchParams();
   const queryParamsStr = queryParams.toString();
   const queryParamsWithDefaults = new URLSearchParams(queryParamsStr);
   queryParamsWithDefaults.set(
