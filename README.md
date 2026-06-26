@@ -91,9 +91,10 @@ Asenna ensin käyttöliittymän riippuvuudet ja buildaa Vite-sovellus:
 ````
 Build tuottaa staattiset tiedostot hakemistoon `ovara-ui/dist/ovara`, josta erillinen UI-CDK-deploy julkaisee ne CloudFrontin kautta.
 
-Deploy onnistuu komennolla:
+## Deploy
+Ovara backend ja käyttöliittymä asennetaan (viedään Docker image haluttuun ympäristöön) samassa deploy komennossa cloud-base palvelussa, esim. seuraavasti:
 ````
-    ./deploy.sh untuva deploy -d
+    ./aws/deploy.sh pallero/untuva/hahtuva ovara-backend deploy
 ````
 
 # Tietokanta
