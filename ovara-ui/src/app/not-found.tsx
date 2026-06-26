@@ -44,7 +44,7 @@ export default function Custom404() {
               <Button
                 variant="contained"
                 aria-label={t('yleinen.palaa-etusivulle')}
-                href="/"
+                href="/ovara"
               >
                 {t('yleinen.palaa-etusivulle')}
               </Button>

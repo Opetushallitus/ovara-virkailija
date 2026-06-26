@@ -1,7 +1,7 @@
 ## Ovara-virkailija - Opiskelijavalinnan raportoinnin virkailijakäyttöliittymä
 
-Ovara koostuu kahdesta sovelluksesta: Spring bootilla ja Scalalla toteutetusta backendistä,
-jonka tarjoamien HTTP-rajapintojen kautta Next.js:llä toteutettu käyttöliittymä noutaa virkailijoiden tarvitsemia raportteja.
+Ovara koostuu Spring Bootilla ja Scalalla toteutetusta backendistä sekä Reactilla toteutetusta käyttöliittymästä.
+Käyttöliittymä noutaa backendin HTTP-rajapintojen kautta virkailijoiden tarvitsemia raportteja.
 Käyttöliittymässä käyttäjä täyttää lomakkeen avulla kyselyn, jonka perusteella backend noutaa tiedot Ovaran omasta tietokannasta ja
 muodostaa excel-tiedoston, joka ladataan käyttäjän selaimeen.
 
@@ -68,30 +68,33 @@ tai anna käynnistysparametri `-Dspring.profiles.active=dev`.
 
 # Ovara-ui
 
-Ovara-ui on toteutettu Next.js:llä.
+Ovara-ui on toteutettu React Routeria ja Viteä käyttävänä React-sovelluksena.
 
-Luo lokaaliajoon `.env.development.local`-tiedosto, johon lisäät seuraavat ympäristömuuttujat niin että ne vastaavat lokaalin backendin konfiguraatiota:
+Luo lokaaliajoon `.env.local`-tiedosto, johon lisäät seuraavat ympäristömuuttujat niin että ne vastaavat lokaalin backendin konfiguraatiota:
 ````
-VIRKAILIJA_URL=https://virkailija.testiopintopolku.fi
-OVARA_BACKEND=https://localhost:8443
-APP_URL=https://localhost:3405
+VITE_VIRKAILIJA_URL=https://virkailija.testiopintopolku.fi
+VITE_OVARA_BACKEND=https://localhost:8443
+VITE_APP_URL=https://localhost:3405
 ````
 
-Käyttöliittymän saa käynnistettyä komennolla `npm run dev`. Käyttöliittymä avautuu osoitteeseen: https://localhost:3405.
+Käyttöliittymän saa käynnistettyä komennolla `npm run dev`. Käyttöliittymä avautuu osoitteeseen: https://localhost:3405/ovara.
 
 Lokaaliympäristössä backendin ja käyttöliittymän käyttö https yli cas-autentikoinnilla ja sessiohallinnalla edellyttää sertifikaattien ja keystoren generointia.
 Nämä saa luotua ajamalla projektin juuressa skriptin `generate-certs.sh`.
 
-## Deploy
+## Build
 
-Asenna ensin sovelluksen riippuvuudet ja buildaa next.js sovellus:
+Asenna ensin käyttöliittymän riippuvuudet ja buildaa Vite-sovellus:
 ````
     npm ci
-    SKIP_TYPECHECK=true npm run build
+    npm run build
 ````
-Deploy onnistuu komennolla:
+Build tuottaa staattiset tiedostot hakemistoon `ovara-ui/dist/ovara`, josta erillinen UI-CDK-deploy julkaisee ne CloudFrontin kautta.
+
+## Deploy
+Ovara backend ja käyttöliittymä asennetaan (viedään Docker image haluttuun ympäristöön) samassa deploy komennossa cloud-base palvelussa, esim. seuraavasti:
 ````
-    SKIP_TYPECHECK=true ./deploy.sh untuva deploy -d
+    ./aws/deploy.sh pallero/untuva/hahtuva ovara-backend deploy
 ````
 
 # Tietokanta

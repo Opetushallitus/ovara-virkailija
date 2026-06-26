@@ -38,10 +38,22 @@ jobs:
           distribution: 'corretto'
           cache: 'maven'
 
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@opetushallitus'
+
       - name: Set timezone to Europe/Helsinki
         run: |
           sudo timedatectl set-timezone Europe/Helsinki
           echo "Europe/Helsinki" | sudo tee /etc/timezone
+
+      - name: Build UI
+        run: |
+          cd ovara-ui
+          npm ci --no-audit --prefer-offline
+          npm run build
 
       - name: Build with Maven
         env:
@@ -52,7 +64,7 @@ jobs:
           mvn clean package -B
 
   deploy-backend-container:
-    needs: build-backend
+    needs: [build-backend, lint, test]
     runs-on: ubuntu-latest
 
     steps:
@@ -122,37 +134,3 @@ jobs:
         run: |
           cd ovara-ui
           npm test
-
-  deploy-ui-zip:
-    needs: [lint, test]
-    timeout-minutes: 30
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-      packages: read
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '20'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@opetushallitus'
-      - name: Install dependencies
-        run: |
-          cd ovara-ui
-          npm ci --no-audit --prefer-offline
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          role-to-assume: ${{ secrets.AWS_OPH_UTILITY_ROLE_ARN }}
-          role-session-name: ovara-ui-deploy-zip
-          aws-region: eu-west-1
-      - name: Deploy zip to s3
-        env:
-          bucket: ${{ secrets.BUCKET_NAME }}
-        run: |
-          cd ovara-ui
-          SKIP_TYPECHECK=true npm run build
-          zip -r ga-${{github.run_number}}.zip .next/*.* .next/BUILD_ID .next/server .next/static .next/standalone public # OpenNext v3 needs server-files also in .next/server
-          aws s3 cp --no-progress ga-${{github.run_number}}.zip s3://"$bucket"/ovara-ui/ga-${{github.run_number}}.zip
