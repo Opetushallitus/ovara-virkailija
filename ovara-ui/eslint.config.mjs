@@ -15,7 +15,7 @@ const compat = new FlatCompat({
 });
 
 export default defineConfig([
-  globalIgnores(['dist/', 'cdk/', '.lintstagedrc.mjs']),
+  globalIgnores(['dist/', '.lintstagedrc.mjs']),
   {
     extends: compat.extends(
       'eslint:recommended',
