@@ -17,3 +17,5 @@ cdk.out
 cdk/**/*.d.ts
 
 .claude/
+
+*application-dev.properties
