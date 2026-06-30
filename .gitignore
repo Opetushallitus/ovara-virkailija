@@ -15,3 +15,5 @@ node_modules
 cdk.out
 .open-next
 cdk/**/*.d.ts
+
+*application-dev.properties

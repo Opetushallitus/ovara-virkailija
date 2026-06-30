@@ -1,6 +1,7 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.utils.ParametriKaannos
+import fi.oph.ovara.backend.domain.KKPaatettavaOpiskeluoikeusEntity
+import fi.oph.ovara.backend.utils.{ParametriKaannos, RepositoryUtils}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.{Component, Repository}
 import slick.dbio.Effect
@@ -22,6 +23,18 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
        WHERE organisaatio_oid = $oppilaitos
       """.as[ParametriKaannos]
     LOG.debug(s"hakuParamNamesQuery: ${query.statements.head}")
+    query
+  }
+
+  def opiskeluoikeudetQuery(
+                           organisaatioOids: List[String]
+                           ): SqlStreamingAction[Vector[KKPaatettavaOpiskeluoikeusEntity], KKPaatettavaOpiskeluoikeusEntity, Effect] = {
+    val query = sql"""
+        SELECT henkilo_oid AS opiskelijaAvain, virta_tunniste AS opiskeluoikeusAvain, nimi_fi, nimi_sv, nimi_en, virta_tila_nimi_fi AS opiskeluoikeudenViimeisinTila, koulutusaste
+        FROM gen.gen_opiskeluoikeus_kk
+        WHERE yos IS TRUE AND organisaatio_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(organisaatioOids)})
+      """.as[KKPaatettavaOpiskeluoikeusEntity]
+    LOG.debug(s"opiskeluoikeudetQuery: ${query.statements.head}")
     query
   }
 }
