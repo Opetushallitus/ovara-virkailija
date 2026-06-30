@@ -33,3 +33,13 @@ case class KKPaatettavaOpiskeluoikeusEntity(
   opiskeluoikeudenViimeisinTila: String,
   koulutusaste: Option[String],
 )
+
+case class KKSitovastiVastaanottanut(
+  oppijanumero: String,
+  hakemusOid: String,
+  hakukohdeOid: String,
+  hakukohdeNimi: Kielistetty,
+  vastaanottoAjankohta: Option[LocalDate],
+  hakuOid: String,
+  //koulutusaste: Option[String]
+)
