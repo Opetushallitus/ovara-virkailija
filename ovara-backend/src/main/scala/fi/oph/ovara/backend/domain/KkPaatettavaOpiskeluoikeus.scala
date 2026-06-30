@@ -80,3 +80,11 @@ case class YosValintarekisteriTiedot(
    */
   naytettyPaatettavaOikeus: String
 )
+
+case class KKPaatettavaOpiskeluoikeusEntity(
+  opiskelijaAvain: String,
+  opiskeluoikeusAvain: String,
+  opiskeluoikeudenNimi: Kielistetty,
+  opiskeluoikeudenViimeisinTila: String,
+  koulutusaste: Option[String],
+)

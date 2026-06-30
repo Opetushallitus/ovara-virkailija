@@ -49,12 +49,12 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
         )
         .getOrElse("")
     val query = sql"""
-        SELECT oo.henkilo_oid AS opiskelijaAvain, 
-          oo.virta_tunniste AS opiskeluoikeusAvain, 
-          oo.nimi_fi, oo.nimi_sv, oo.nimi_en, 
-          oo.virta_opiskeluoikeuden_tila AS opiskeluoikeudenViimeisinTila, 
-          oo.koulutusaste, 
-          oo.koulutus_koodi AS koulutusKoodi, 
+        SELECT oo.henkilo_oid AS opiskelijaAvain,
+          oo.virta_tunniste AS opiskeluoikeusAvain,
+          oo.nimi_fi, oo.nimi_sv, oo.nimi_en,
+          oo.virta_opiskeluoikeuden_tila AS opiskeluoikeudenViimeisinTila,
+          oo.koulutusaste,
+          oo.koulutus_koodi AS koulutusKoodi,
           linkitetty.koulutusaste AS linkitettyKoulutusAste,
           oo.myontaja
         FROM gen.gen_opiskeluoikeus_kk oo
@@ -81,7 +81,7 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
           org.organisaatio_oid,
           org.nimi_fi, org.nimi_sv, org.nimi_en,
           koulutus_koodit.koodit
-        FROM gen.gen_valintarekisteri vr 
+        FROM gen.gen_valintarekisteri vr
         INNER JOIN gen.gen_hakukohde hk ON vr.hakukohde_oid = hk.hakukohde_oid
         INNER JOIN gen.gen_haku haku on haku.haku_oid = hk.haku_oid
         INNER JOIN gen.gen_organisaatio org on org.organisaatio_oid = hk.jarjestyspaikka_oid
@@ -95,7 +95,7 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
           JOIN gen.gen_koodi koodi ON koodi.versioitu_koodiuri = ku.value) AS koulutus_koodit ON TRUE
         WHERE hk.yos IS TRUE
         AND vr.ehdollisesti_hyvaksyttavissa IS FALSE
-        AND vr.vastaanotto_tila = 'VASTAANOTTANUT_SITOVASTI' 
+        AND vr.vastaanotto_tila = 'VASTAANOTTANUT_SITOVASTI'
         AND vr.henkilo_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(henkiloOids)})
     """.as[KKSitovastiVastaanottanut]
     LOG.debug(s"sitovastiVastaanottaneetQuery: ${query.statements.head}")
