@@ -52,6 +52,7 @@ class HakijatExtractors extends Extractors {
       hakukohdeOid = r.nextString(),
       hakutoivenumero = r.nextInt(),
       jarjestyspaikkaOid = r.nextStringOption(),
+      oppilaitos = r.nextStringOption(),
       koulutusKoodiurit = extractArray(r.nextStringOption())
     )
   }

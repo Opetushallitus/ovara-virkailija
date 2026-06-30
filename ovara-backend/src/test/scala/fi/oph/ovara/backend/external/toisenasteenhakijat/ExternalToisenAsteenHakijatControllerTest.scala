@@ -154,6 +154,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertHakutoive()
     insertToteutusJaKoulutus()
     insertOpetuskieli()
+    insertOrganisaatio()
 
     get()()
       .andExpect(status.isOk)
@@ -182,6 +183,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet", hasSize[Any](1)))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].hakukohdeOid").value(HAKUKOHDE_OID))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].opetuspiste").value(ORGANISAATIO_OID))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].oppilaitos").value(OPPILAITOS))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].koulutus.koodiarvo").value("621702"))
   }
 
