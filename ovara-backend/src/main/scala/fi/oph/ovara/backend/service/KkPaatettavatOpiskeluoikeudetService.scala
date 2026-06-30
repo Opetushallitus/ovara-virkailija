@@ -52,34 +52,8 @@ class KkPaatettavatOpiskeluoikeudetService(
       oppilaitosOids = List(oppilaitos),
       List.empty
     )
-    // placeholder mock-data havainnollistamaan sisältöä
-    val mockData = List(
-      KkPaatettavaOpiskeluoikeus(
-        oppijanumero = "1.2.246.562.24.10002324020",
-        hetu = Some("010101-1234"),
-        syntymaAika = LocalDate.of(2001, 1, 1),
-        sukunimi = "Testinen",
-        etunimet = "Testi",
-        kutsumanimi = "Testi",
-        opiskelijaAvain = "opiskelija-avain-1",
-        opiskeluoikeusAvain = "opiskeluoikeus-avain-1",
-        opiskeluoikeudenNimi = Map(Fi -> "Tähtitiede"),
-        opiskeluoikeudenPaattymispvm = Some(LocalDate.of(2026, 12, 31)),
-        opiskeluoikeudenViimeisinTila = "Loma",
-        hakemusOid = "1.2.246.562.11.00000000000000000001",
-        hakuOid = "1.2.246.562.20.00000000000000000001",
-        hakuNimi = Map(Fi -> "Hurrikaaniopiston erillishaku 2026"),
-        hakukohdeOid = "1.2.246.562.20.00000000000000000002",
-        hakukohdeNimi = Map(Fi -> "Meteorologi, Hurrikaanien tutkimislinja"),
-        oppilaitosOid = "1.2.246.562.10.00000000000000000001",
-        oppilaitosNimi = Map(Fi -> "Hurrikaaniopisto"),
-        vastaanottoAjankohta = LocalDate.of(2026, 8, 15),
-        koulutusluokitusKoodit = "12345",
-        uudenOpiskeluoikeudenAlkamispvm = LocalDate.of(2026, 9, 1)
-      )
-    )
     Try {
-      // TODO kannasta varsinainen data raportille
+      val data = getPaattyvatOpiskeluOikeudet(orgOidsForQuery)
       val raporttiParamNames = db
         .run(
           kkPaatettavatOpiskeluoikeudetRepository.organisaatioNameQuery(oppilaitos),
@@ -100,7 +74,7 @@ class KkPaatettavatOpiskeluoikeudetService(
         raporttiParamNames
       )
       ExcelWriter.writeKorkeakouluPaatettavatOpiskeluoikeudetRaportti(
-        mockData,
+        data,
         CommonExcelParams(asiointikieli, translations, raporttiParams, LocalDateTime.now())
       )
     } match {
@@ -109,5 +83,37 @@ class KkPaatettavatOpiskeluoikeudetService(
         LOG.error("Error generating Excel report", exception)
         Left("virhe.tietokanta")
     }
+  }
+
+  private def getPaattyvatOpiskeluOikeudet(orgOids: List[String]): List[KkPaatettavaOpiskeluoikeus] = {
+    db
+      .run(
+        kkPaatettavatOpiskeluoikeudetRepository.opiskeluoikeudetQuery(orgOids),
+        "opiskeluoikeudetQuery"
+      )
+      .map(o => KkPaatettavaOpiskeluoikeus(
+        oppijanumero = "1.2.246.562.24.10002324020",
+        hetu = Some("010101-1234"),
+        syntymaAika = LocalDate.of(2001, 1, 1),
+        sukunimi = "Testinen",
+        etunimet = "Testi",
+        kutsumanimi = "Testi",
+        opiskelijaAvain = o.opiskelijaAvain,
+        opiskeluoikeusAvain = o.opiskeluoikeusAvain,
+        opiskeluoikeudenNimi = o.opiskeluoikeudenNimi,
+        opiskeluoikeudenPaattymispvm = Some(LocalDate.of(2026, 12, 31)),
+        opiskeluoikeudenViimeisinTila = o.opiskeluoikeudenViimeisinTila,
+        hakemusOid = "1.2.246.562.11.00000000000000000001",
+        hakuOid = "1.2.246.562.20.00000000000000000001",
+        hakuNimi = Map(Fi -> "Hurrikaaniopiston erillishaku 2026"),
+        hakukohdeOid = "1.2.246.562.20.00000000000000000002",
+        hakukohdeNimi = Map(Fi -> "Meteorologi, Hurrikaanien tutkimislinja"),
+        oppilaitosOid = "1.2.246.562.10.00000000000000000001",
+        oppilaitosNimi = Map(Fi -> "Hurrikaaniopisto"),
+        vastaanottoAjankohta = LocalDate.of(2026, 8, 15),
+        koulutusluokitusKoodit = "12345",
+        uudenOpiskeluoikeudenAlkamispvm = LocalDate.of(2026, 9, 1)
+      ))
+      .toList
   }
 }
