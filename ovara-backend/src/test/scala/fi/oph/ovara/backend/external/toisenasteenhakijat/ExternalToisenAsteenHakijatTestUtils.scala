@@ -113,6 +113,7 @@ trait ExternalToisenAsteenHakijatTestUtils {
     hakukohdeOid: String = HAKUKOHDE_OID,
     toteutusOid: String = TOTEUTUS_OID,
     jarjestyspaikkaOid: String = ORGANISAATIO_OID,
+    organisaatioOid: Option[String] = Some(ORGANISAATIO_OID),
     koulutuksenAlkamisvuosi: Option[Int] = Some(KOULUTUKSEN_ALKAMISVUOSI),
     koulutuksenAlkamiskausiuri: Option[String] = Some(KOULUTUKSEN_ALKAMISKAUSIURI)
   ): Unit = {
@@ -121,12 +122,23 @@ trait ExternalToisenAsteenHakijatTestUtils {
           $hakukohdeOid,
           $toteutusOid,
           $jarjestyspaikkaOid,
+          $organisaatioOid,
           'Elokuvaleikkaus',
           'Filmklippning',
           'Film Editing',
           $koulutuksenAlkamisvuosi,
           $koulutuksenAlkamiskausiuri)""",
       "Insert test hakukohde"
+    )
+  }
+
+  def insertOrganisaatio(
+    organisaatioOid: String = ORGANISAATIO_OID,
+    oppilaitosnumero: Option[String] = Some(OPPILAITOSNUMERO)
+  ): Unit = {
+    db.run(
+      sqlu"""INSERT INTO gen.gen_organisaatio VALUES($organisaatioOid, $oppilaitosnumero)""",
+      "Insert test organisaatio"
     )
   }
 
@@ -228,11 +240,17 @@ trait ExternalToisenAsteenHakijatTestUtils {
               hakukohde_oid text NOT NULL PRIMARY KEY,
               toteutus_oid text,
               jarjestyspaikka_oid text,
+              organisaatio_oid text,
               hakukohde_nimi_fi text,
               hakukohde_nimi_sv text,
               hakukohde_nimi_en text,
               koulutuksen_alkamisvuosi integer,
               koulutuksen_alkamiskausiuri text
+          );
+
+          CREATE TABLE gen.gen_organisaatio(
+              organisaatio_oid text NOT NULL PRIMARY KEY,
+              oppilaitosnumero text
           );
 
           CREATE TABLE gen.gen_koulutus(
