@@ -53,6 +53,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakutoive()
     insertToteutusJaKoulutus()
     insertOpetuskieli()
+    insertOrganisaatio()
 
     val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
@@ -87,6 +88,7 @@ class ExternalToisenAsteenHakijatServiceTest
     assert(hakutoive.hakukohdeOid == HAKUKOHDE_OID)
     assert(hakutoive.hakujno == 1)
     assert(hakutoive.opetuspiste.contains(ORGANISAATIO_OID))
+    assert(hakutoive.oppilaitos.contains(OPPILAITOS))
     assert(hakutoive.koulutus.exists(_.versioituUri == KOULUTUS_KOODIURI))
   }
 

@@ -68,12 +68,14 @@ case class HakijaHakutoiveRow(
   hakukohdeOid: String,
   hakutoivenumero: Int,
   jarjestyspaikkaOid: Option[String],
+  oppilaitos: Option[String],
   koulutusKoodiurit: Seq[String]
 ) {
   def asHakutoive(koodistot: Map[String, KoodistoArvo]): HakijaHakutoive =
     HakijaHakutoive(
       hakukohdeOid = hakukohdeOid,
       hakujno = hakutoivenumero,
+      oppilaitos = oppilaitos,
       opetuspiste = jarjestyspaikkaOid,
       koulutus = koulutusKoodiurit.headOption.flatMap(koodistot.get)
     )
