@@ -166,14 +166,25 @@ trait Extractors extends GenericOvaraJsonFormats {
       children = r.nextStringOption().map(read[List[OrganisaatioHierarkia]]).getOrElse(List())
     )
   )
-  
+
   implicit val getPaatettavatOpiskeluoikeudetResult: GetResult[KKPaatettavaOpiskeluoikeusEntity] = GetResult(r =>
     KKPaatettavaOpiskeluoikeusEntity(
-      opiskelijaAvain = r.nextString(), 
-      opiskeluoikeusAvain = r.nextString(), 
-      opiskeluoikeudenNimi = Map(Fi -> r.nextString(), Sv -> r.nextString(), En -> r.nextString()), 
-      opiskeluoikeudenViimeisinTila = r.nextString(), 
+      opiskelijaAvain = r.nextString(),
+      opiskeluoikeusAvain = r.nextString(),
+      opiskeluoikeudenNimi = Map(Fi -> r.nextString(), Sv -> r.nextString(), En -> r.nextString()),
+      opiskeluoikeudenViimeisinTila = r.nextString(),
       koulutusaste = r.nextStringOption()
+    )
+  )
+
+  implicit val getSitovastiVastaanottaneetResult: GetResult[KKSitovastiVastaanottanut] = GetResult(r =>
+    KKSitovastiVastaanottanut(
+      oppijanumero = r.nextString(), 
+      hakemusOid = r.nextString(), 
+      hakukohdeOid = r.nextString(), 
+      hakukohdeNimi = Map(Fi -> r.nextString(), Sv -> r.nextString(), En -> r.nextString()), 
+      vastaanottoAjankohta = extractDateOption(r.nextDateOption()), 
+      hakuOid = r.nextString(), 
     )
   )
 
