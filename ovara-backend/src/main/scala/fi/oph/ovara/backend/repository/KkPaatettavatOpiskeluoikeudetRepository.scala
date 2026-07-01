@@ -60,10 +60,14 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
   }
 
   def henkilotQuery(henkiloOids: List[String], params: KkPaatettavatOpiskeluoikeudetParams) : SqlStreamingAction[Vector[YosHenkilo], YosHenkilo, Effect] = {
+    val sukunimiQuery = params.sukunimi.map(s => s"AND sukunimi LIKE '%$s%'").getOrElse("")
+    val etunimetQuery = params.etunimet.map(e => s"AND etunimet LIKE '%$e%'").getOrElse("")
+    val hetuQuery = params.hetu.map(h => s"AND hetu = '$h'").getOrElse("")
     val query = sql"""
           SELECT sukunimi, etunimet, kutsumanimi, hetu, syntymaAika, oppijanumero
           FROM gen.gen_henkilo
           WHERE oppijanumero IN (#${RepositoryUtils.makeListOfValuesQueryStr(henkiloOids)})
+          $sukunimiQuery $etunimetQuery $hetuQuery
       """.as[YosHenkilo]
     LOG.debug(s"yosHenkilotQuery: ${query.statements.head}")
     query
