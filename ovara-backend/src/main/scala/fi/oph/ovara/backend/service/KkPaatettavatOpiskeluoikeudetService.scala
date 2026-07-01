@@ -1,16 +1,10 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.{Fi, KkPaatettavaOpiskeluoikeus}
-import fi.oph.ovara.backend.raportointi.dto.{
-  buildKkPaatettavatOpiskeluoikeudetParamsForExcel,
-  KkPaatettavatOpiskeluoikeudetParams
-}
-import fi.oph.ovara.backend.repository.{
-  KkPaatettavatOpiskeluoikeudetRepository,
-  KorkeakouluKoulutuksetToteutuksetHakukohteetRepository,
-  ReadOnlyDatabase
-}
+import fi.oph.ovara.backend.domain.{Fi, KKSitovastiVastaanottanut, KkPaatettavaOpiskeluoikeus}
+import fi.oph.ovara.backend.raportointi.dto.{KkPaatettavatOpiskeluoikeudetParams, buildKkPaatettavatOpiskeluoikeudetParamsForExcel}
+import fi.oph.ovara.backend.repository.{KkPaatettavatOpiskeluoikeudetRepository, KorkeakouluKoulutuksetToteutuksetHakukohteetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, CommonExcelParams, ExcelWriter}
+import fi.oph.ovara.backend.yos.YosPredicate
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
@@ -97,9 +91,12 @@ class KkPaatettavatOpiskeluoikeudetService(
       .run(
         kkPaatettavatOpiskeluoikeudetRepository.vastaanottaneetQuery(henkiloOids),
         "sitovastiVastaanottaneetQuery"
-      ).toList
+      )
+      .filter(v => v.koulutusaste.isDefined)
+      .toList
     opiskeluoikeudet.map(o => {
-      sitovastiVastaanottaneet.find(v => v.oppijanumero.equals(o.opiskelijaAvain)).map(v =>
+      sitovastiVastaanottaneet.find(v => v.oppijanumero.equals(o.opiskelijaAvain)
+          && YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(o, v)).map(v =>
         KkPaatettavaOpiskeluoikeus(
           oppijanumero = v.oppijanumero,
           hetu = Some("010101-1234"),
@@ -125,4 +122,5 @@ class KkPaatettavatOpiskeluoikeudetService(
         ))
       }).filter(_.isDefined).map(_.get)
   }
+
 }
