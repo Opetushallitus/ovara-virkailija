@@ -12,6 +12,17 @@ private val urheilijaLukioLinjaCodes: Set[String] =
 
 private val LinjaWithoutVersion = """([^#]+)(?:#.*)?""".r
 
+/**
+ * Per-hakukohde info attached to the toinen aste yhteishaku hakemus row.
+ *  Mirrors the JSON shape of `gen_hakemus_toinenaste_yhteishaku.hakukohteet[]`.
+ */
+case class HakemusHakukohde(
+  oid: String,
+  terveys: Option[Boolean],
+  aiempiPeruminen: Option[Boolean],
+  kiinnostunutKaksoistutkinnosta: Option[Boolean]
+)
+
 case class HakijaRow(
   oppijanumero: String,
   hakemusOid: String,
@@ -41,6 +52,7 @@ case class HakijaRow(
   kausi: Option[String],
   huoltaja1: Option[Huoltaja],
   huoltaja2: Option[Huoltaja],
+  hakukohteetTiedot: Map[String, HakemusHakukohde],
   kiinnostunutAmmatillinen: Option[Boolean],
   urheilijaKysymyksetLukio: Option[UrheilijanLisakysymykset],
   urheilijaKysymyksetAmm: Option[UrheilijanLisakysymykset]
@@ -94,17 +106,20 @@ case class HakijaHakutoiveRow(
     koodistot: Map[String, KoodistoArvo],
     urheilijanLisakysymyksetLukio: Option[UrheilijanLisakysymykset],
     urheilijanLisakysymyksetAmm: Option[UrheilijanLisakysymykset],
-    kiinnostunutAmmatillinen: Option[Boolean]
+    kiinnostunutAmmatillinen: Option[Boolean],
+    hakukohteetTiedot: Map[String, HakemusHakukohde]
   ): HakijaHakutoive = {
     val linja            = parseLinja(hakukohteenLinjaJson)
     val isUrheilijaLukio = linja.exists(urheilijaLukioLinjaCodes.contains)
     val isAmmUrheilija   = jarjestaaUrheilijanAmmkoulutusta.contains(true) && kiinnostunutAmmatillinen.getOrElse(false)
 
-    //Prioriteettijärjestys: jos kyseessä urheilijalukio, käytetään lomakkeelta lukiopuolen kysymyksiä. Jos ei lukio, käytetään ammatillisia jos relevanttia.
+    // Prioriteettijärjestys: jos kyseessä urheilijalukio, käytetään lomakkeelta lukiopuolen kysymyksiä. Jos ei lukio, käytetään ammatillisia jos relevanttia.
     val urheilijanLisakysymykset =
       if (isUrheilijaLukio) urheilijanLisakysymyksetLukio
       else if (isAmmUrheilija) urheilijanLisakysymyksetAmm
       else None
+
+    val hakukohdeTiedot = hakukohteetTiedot.get(hakukohdeOid)
 
     HakijaHakutoive(
       hakukohdeOid = hakukohdeOid,
@@ -114,7 +129,10 @@ case class HakijaHakutoiveRow(
       koulutus = koulutusKoodiurit.headOption.flatMap(koodistot.get),
       urheilijanammatillinenkoulutus =
         jarjestaaUrheilijanAmmkoulutusta.map(_ && kiinnostunutAmmatillinen.getOrElse(false)),
-      urheilijanLisakysymykset = urheilijanLisakysymykset
+      urheilijanLisakysymykset = urheilijanLisakysymykset,
+      terveys = hakukohdeTiedot.flatMap(_.terveys),
+      aiempiperuminen = hakukohdeTiedot.flatMap(_.aiempiPeruminen),
+      kaksoistutkinto = hakukohdeTiedot.flatMap(_.kiinnostunutKaksoistutkinnosta)
     )
   }
 

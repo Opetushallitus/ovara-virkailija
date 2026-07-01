@@ -84,6 +84,12 @@ object ExternalToisenAsteenHakijatTestData {
     valmennusryhma_seurajoukkue = Some("kyllä")
   )
 
+  val TERVEYS                     = true
+  val AIEMPI_PERUMINEN            = false
+  val KAKSOISTUTKINTO             = true
+  val TOINENASTE_HAKUKOHTEET_JSON =
+    s"""[{"oid":"$HAKUKOHDE_OID","terveys":$TERVEYS,"aiempiPeruminen":$AIEMPI_PERUMINEN,"kiinnostunutKaksoistutkinnosta":$KAKSOISTUTKINTO}]"""
+
   val LINJA_URHEILIJA_LUKIO_JSON    = """{"linja":"lukiopainotukset_0105"}"""
   val LINJA_TAVALLINEN_JSON         = """{"linja":"jokumuu"}"""
   val ETUNIMET                      = "Matti Ilmari"

@@ -93,6 +93,43 @@ class ExternalToisenAsteenHakijatServiceTest
     assert(hakutoive.opetuspiste.contains(ORGANISAATIO_OID))
     assert(hakutoive.oppilaitos.contains(OPPILAITOS))
     assert(hakutoive.koulutus.exists(_.versioituUri == KOULUTUS_KOODIURI))
+    assert(hakutoive.terveys.contains(TERVEYS))
+    assert(hakutoive.aiempiperuminen.contains(AIEMPI_PERUMINEN))
+    assert(hakutoive.kaksoistutkinto.contains(KAKSOISTUTKINTO))
+  }
+
+  it should "leave terveys/aiempiperuminen/kaksoistutkinto None when hakukohdeOid is not in hakukohteet array" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertHakemusToinenAsteYhteishaku(
+      hakukohteetJson = Some(
+        s"""[{"oid":"$HAKUKOHDE_OID_2","terveys":true,"aiempiPeruminen":true,"kiinnostunutKaksoistutkinnosta":true}]"""
+      )
+    )
+
+    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
+
+    assert(hakutoive.terveys.isEmpty)
+    assert(hakutoive.aiempiperuminen.isEmpty)
+    assert(hakutoive.kaksoistutkinto.isEmpty)
+  }
+
+  it should "leave terveys/aiempiperuminen/kaksoistutkinto None when hakukohteet column is null" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertHakemusToinenAsteYhteishaku(hakukohteetJson = None)
+
+    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
+
+    assert(hakutoive.terveys.isEmpty)
+    assert(hakutoive.aiempiperuminen.isEmpty)
+    assert(hakutoive.kaksoistutkinto.isEmpty)
   }
 
   it should "return hakija matched by organisaatioOid" in {

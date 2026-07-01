@@ -190,6 +190,9 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].opetuspiste").value(ORGANISAATIO_OID))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].oppilaitos").value(OPPILAITOS))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].koulutus.koodiarvo").value("621702"))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].terveys").value(TERVEYS))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].aiempiperuminen").value(AIEMPI_PERUMINEN))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].kaksoistutkinto").value(KAKSOISTUTKINTO))
   }
 
   @Test
@@ -278,6 +281,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertHakukohde()
     insertHakutoive()
     insertToteutusJaKoulutus()
+    insertHakemusToinenAsteYhteishaku()
 
     val result = mvc
       .perform(
@@ -304,6 +308,9 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       assert(headerRow.getCell(31).getStringCellValue == "Hakemusnumero")
       assert(headerRow.getCell(47).getStringCellValue == "Hakujno")
       assert(headerRow.getCell(52).getStringCellValue == "HakukohdeOid")
+      assert(headerRow.getCell(59).getStringCellValue == "Terveys")
+      assert(headerRow.getCell(60).getStringCellValue == "Aiempiperuminen")
+      assert(headerRow.getCell(61).getStringCellValue == "Kaksoistutkinto")
       assert(headerRow.getCell(77).getStringCellValue == "Sähköisen asioinnin lupa")
 
       val dataRow = sheet.getRow(1)
@@ -314,14 +321,17 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       assert(dataRow.getCell(4).getStringCellValue == KUTSUMANIMI)
       assert(dataRow.getCell(8).getStringCellValue == SUOMI_KOODI)
       assert(dataRow.getCell(9).getStringCellValue == "246")
-      assert(dataRow.getCell(25).getStringCellValue == "Kyllä") // koulutusmarkkinointilupa = true
-      assert(dataRow.getCell(26).getStringCellValue == "Ei")    // kiinnostunutoppisopimuksesta = false
+      assert(dataRow.getCell(25).getStringCellValue == "X") // koulutusmarkkinointilupa = true
+      assert(dataRow.getCell(26).getStringCellValue == "")  // kiinnostunutoppisopimuksesta = false
       assert(dataRow.getCell(31).getStringCellValue == HAKEMUS_OID)
-      assert(dataRow.getCell(40).getStringCellValue == "Kyllä") // julkaisulupa
-      assert(dataRow.getCell(47).getStringCellValue == "1")     // hakujno
+      assert(dataRow.getCell(40).getStringCellValue == "X") // julkaisulupa = true
+      assert(dataRow.getCell(47).getStringCellValue == "1") // hakujno
       assert(dataRow.getCell(49).getStringCellValue == ORGANISAATIO_OID)
       assert(dataRow.getCell(52).getStringCellValue == HAKUKOHDE_OID)
-      assert(dataRow.getCell(77).getStringCellValue == "Kyllä") // sahkoinenviestintalupa
+      assert(dataRow.getCell(59).getStringCellValue == "X")     // terveys = true
+      assert(dataRow.getCell(60).getStringCellValue == "")      // aiempiperuminen = false
+      assert(dataRow.getCell(61).getStringCellValue == "X")     // kaksoistutkinto = true
+      assert(dataRow.getCell(77).getStringCellValue == "Kyllä") // sähköisen asioinnin lupa
     } finally workbook.close()
   }
 
