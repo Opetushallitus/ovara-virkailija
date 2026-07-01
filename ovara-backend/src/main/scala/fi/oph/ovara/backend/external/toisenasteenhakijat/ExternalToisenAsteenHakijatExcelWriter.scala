@@ -157,8 +157,8 @@ object ExternalToisenAsteenHakijatExcelWriter {
     optStr(h.huoltaja2.map(_.sukunimi)),
     optStr(h.huoltaja2.map(_.puhelinnumero)),
     optStr(h.huoltaja2.map(_.sahkoposti)),
-    optBooleanKielistys(h.koulutusmarkkinointilupa),
-    optBooleanKielistys(h.kiinnostunutoppisopimuksesta),
+    onlyX(h.koulutusmarkkinointilupa),
+    onlyX(h.kiinnostunutoppisopimuksesta),
     optStr(h.oppivelvollisuusVoimassaAsti),
     optStr(h.oikeusMaksuttomaanKoulutukseenVoimassaAsti),
     optStr(h.hakemus.vuosi),
@@ -172,7 +172,7 @@ object ExternalToisenAsteenHakijatExcelWriter {
     optStr(h.hakemus.luokkataso),
     optStr(h.hakemus.pohjakoulutus),
     optStr(h.hakemus.todistusvuosi),
-    optBooleanKielistys(h.hakemus.julkaisulupa),
+    onlyX(h.hakemus.julkaisulupa),
     numericOrZero(h.hakemus.yhteisetaineet),
     numericOrZero(h.hakemus.lukiontasapisteet),
     numericOrZero(h.hakemus.yleinenkoulumenestys),
@@ -191,9 +191,9 @@ object ExternalToisenAsteenHakijatExcelWriter {
     optStr(ht.valinta),
     optStr(ht.vastaanotto),
     optStr(ht.lasnaolo),
-    optBooleanKielistys(ht.terveys),
-    optBooleanKielistys(ht.aiempiperuminen),
-    optBooleanKielistys(ht.kaksoistutkinto),
+    onlyX(ht.terveys),
+    onlyX(ht.aiempiperuminen),
+    onlyX(ht.kaksoistutkinto),
     optStr(ht.urheilijanLisakysymykset.flatMap(_.peruskoulu)),
     optStr(ht.urheilijanLisakysymykset.flatMap(_.keskiarvo)),
     optStr(ht.urheilijanLisakysymykset.flatMap(_.tamakausi)),
@@ -222,6 +222,9 @@ object ExternalToisenAsteenHakijatExcelWriter {
 
   private def onlyKylla(b: Option[Boolean]): String =
     if (b.contains(true)) "Kyllä" else ""
+
+  private def onlyX(b: Option[Boolean]): String =
+    if (b.contains(true)) "X" else ""
 
   private def numericOrZero(opt: Option[BigDecimal]): String =
     opt.getOrElse(BigDecimal(0)).toString
