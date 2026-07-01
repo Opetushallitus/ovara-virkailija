@@ -844,14 +844,7 @@ class Controller(
             Left("virhe.validointi")
 
           case Right(validParams) =>
-            kkPaatettavatOpiskeluoikeudetService.get(
-              validParams.oppilaitos,
-              validParams.sukunimi,
-              validParams.etunimet,
-              validParams.hetu,
-              validParams.oppijanumero,
-              validParams.opiskeluoikeudenTila
-            )
+            kkPaatettavatOpiskeluoikeudetService.get(validParams)
         }
       }
     } else {

@@ -27,14 +27,7 @@ class KkPaatettavatOpiskeluoikeudetService(
 
   val LOG: Logger = LoggerFactory.getLogger(classOf[KorkeakouluKoulutuksetToteutuksetHakukohteetService])
 
-  def get(
-    oppilaitos: String,
-    sukunimi: Option[String],
-    etunimet: Option[String],
-    hetu: Option[String],
-    oppijanumero: Option[String],
-    opiskeluoikeudenTila: Option[String]
-  ): Either[String, XSSFWorkbook] = {
+  def get(params: KkPaatettavatOpiskeluoikeudetParams): Either[String, XSSFWorkbook] = {
     val user                      = userService.getEnrichedUserDetails
     val asiointikieli             = user.asiointikieli.getOrElse("fi")
     val authorities               = user.authorities
@@ -43,14 +36,14 @@ class KkPaatettavatOpiskeluoikeudetService(
 
     val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
-      oppilaitosOids = List(oppilaitos),
+      oppilaitosOids = List(params.oppilaitos),
       List.empty
     )
     Try {
-      val data = getPaattyvatOpiskeluOikeudet(orgOidsForQuery)
+      val data = getPaattyvatOpiskeluOikeudet(orgOidsForQuery, params)
       val raporttiParamNames = db
         .run(
-          kkPaatettavatOpiskeluoikeudetRepository.organisaatioNameQuery(oppilaitos),
+          kkPaatettavatOpiskeluoikeudetRepository.organisaatioNameQuery(params.oppilaitos),
           "hakuParamNamesQuery"
         )
         .map(param => param.parametri -> param.nimi)
@@ -58,12 +51,12 @@ class KkPaatettavatOpiskeluoikeudetService(
 
       val raporttiParams = buildKkPaatettavatOpiskeluoikeudetParamsForExcel(
         KkPaatettavatOpiskeluoikeudetParams(
-          oppilaitos,
-          sukunimi,
-          etunimet,
-          hetu,
-          oppijanumero,
-          opiskeluoikeudenTila
+          params.oppilaitos,
+          params.sukunimi,
+          params.etunimet,
+          params.hetu,
+          params.oppijanumero,
+          params.opiskeluoikeudenTila
         ),
         raporttiParamNames
       )
@@ -79,10 +72,10 @@ class KkPaatettavatOpiskeluoikeudetService(
     }
   }
 
-  private def getPaattyvatOpiskeluOikeudet(orgOids: List[String]): List[KkPaatettavaOpiskeluoikeus] = {
+  private def getPaattyvatOpiskeluOikeudet(orgOids: List[String], params: KkPaatettavatOpiskeluoikeudetParams): List[KkPaatettavaOpiskeluoikeus] = {
     val opiskeluoikeudet = db
       .run(
-        kkPaatettavatOpiskeluoikeudetRepository.opiskeluoikeudetQuery(orgOids),
+        kkPaatettavatOpiskeluoikeudetRepository.opiskeluoikeudetQuery(orgOids, params.oppijanumero, params.opiskeluoikeudenTila),
         "opiskeluoikeudetQuery"
       ).filter(o => o.koulutusaste.isDefined)
       .toList
