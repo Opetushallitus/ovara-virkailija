@@ -56,10 +56,50 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
             INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
             WHERE ht.hakemus_oid = hakemus.hakemus_oid
             ORDER BY ht.hakutoivenumero
-            LIMIT 1) AS kausi
+            LIMIT 1) AS kausi,
+          toinenaste_yhteishaku_hakemus_data.huoltaja1_etunimi,
+          toinenaste_yhteishaku_hakemus_data.huoltaja1_sukunimi,
+          toinenaste_yhteishaku_hakemus_data.huoltaja1_matkapuhelin,
+          toinenaste_yhteishaku_hakemus_data.huoltaja1_email,
+          toinenaste_yhteishaku_hakemus_data.huoltaja2_etunimi,
+          toinenaste_yhteishaku_hakemus_data.huoltaja2_sukunimi,
+          toinenaste_yhteishaku_hakemus_data.huoltaja2_matkapuhelin,
+          toinenaste_yhteishaku_hakemus_data.huoltaja2_email,
+          toinenaste_yhteishaku_hakemus_data.kiinnostunut_urheilijan_ammatillisesta_koulutuksesta,
+          toinenaste_yhteishaku_hakemus_data.urh_laji,
+          toinenaste_yhteishaku_hakemus_data.urh_seura,
+          toinenaste_yhteishaku_hakemus_data.urh_liitto,
+          toinenaste_yhteishaku_hakemus_data.urh_sivulaji,
+          toinenaste_yhteishaku_hakemus_data.urh_keskiarvo,
+          toinenaste_yhteishaku_hakemus_data.urh_tamakausi,
+          toinenaste_yhteishaku_hakemus_data.urh_peruskoulu,
+          toinenaste_yhteishaku_hakemus_data.urh_viimekausi,
+          toinenaste_yhteishaku_hakemus_data.urh_toissakausi,
+          toinenaste_yhteishaku_hakemus_data.urh_valmentaja_puh,
+          toinenaste_yhteishaku_hakemus_data.urh_valmentaja_nimi,
+          toinenaste_yhteishaku_hakemus_data.urh_valmentaja_email,
+          toinenaste_yhteishaku_hakemus_data.urh_valmennusryhma_maajoukkue,
+          toinenaste_yhteishaku_hakemus_data.urh_valmennusryhma_piirijoukkue,
+          toinenaste_yhteishaku_hakemus_data.urh_valmennusryhma_seurajoukkue,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_laji,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_seura,
+          toinenaste_yhteishaku_hakemus_data.urh__amm_liitto,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_sivulaji,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_keskiarvo,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_tamakausi,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_peruskoulu,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_viimekausi,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_toissakausi,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_valmentaja_puh,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_valmentaja_nimi,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_valmentaja_email,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_valmennusryhma_maajoukkue,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_valmennusryhma_piirijoukkue,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_valmennusryhma_seurajoukkue
         FROM gen.gen_henkilo hlo
         INNER JOIN gen.gen_hakemus hakemus ON hakemus.henkilo_oid = hlo.henkilo_oid
         INNER JOIN gen.gen_haku    haku    ON hakemus.haku_oid    = haku.haku_oid
+        LEFT JOIN gen.gen_hakemus_toinenaste_yhteishaku toinenaste_yhteishaku_hakemus_data ON toinenaste_yhteishaku_hakemus_data.hakemus_oid = hakemus.hakemus_oid
         WHERE haku.haku_oid = $hakuOid
         AND length(hakemus.hakemus_oid) = #$ataruOidLength
         AND haku.kohdejoukko_koodiuri LIKE 'haunkohdejoukko_11%'
@@ -107,10 +147,50 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
             INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
             WHERE ht.hakemus_oid = hakemus.hakemus_oid
             ORDER BY ht.hakutoivenumero
-            LIMIT 1) AS kausi
+            LIMIT 1) AS kausi,
+          toinenaste_yhteishaku_hakemus_data.huoltaja1_etunimi,
+          toinenaste_yhteishaku_hakemus_data.huoltaja1_sukunimi,
+          toinenaste_yhteishaku_hakemus_data.huoltaja1_matkapuhelin,
+          toinenaste_yhteishaku_hakemus_data.huoltaja1_email,
+          toinenaste_yhteishaku_hakemus_data.huoltaja2_etunimi,
+          toinenaste_yhteishaku_hakemus_data.huoltaja2_sukunimi,
+          toinenaste_yhteishaku_hakemus_data.huoltaja2_matkapuhelin,
+          toinenaste_yhteishaku_hakemus_data.huoltaja2_email,
+          toinenaste_yhteishaku_hakemus_data.kiinnostunut_urheilijan_ammatillisesta_koulutuksesta,
+          toinenaste_yhteishaku_hakemus_data.urh_laji,
+          toinenaste_yhteishaku_hakemus_data.urh_seura,
+          toinenaste_yhteishaku_hakemus_data.urh_liitto,
+          toinenaste_yhteishaku_hakemus_data.urh_sivulaji,
+          toinenaste_yhteishaku_hakemus_data.urh_keskiarvo,
+          toinenaste_yhteishaku_hakemus_data.urh_tamakausi,
+          toinenaste_yhteishaku_hakemus_data.urh_peruskoulu,
+          toinenaste_yhteishaku_hakemus_data.urh_viimekausi,
+          toinenaste_yhteishaku_hakemus_data.urh_toissakausi,
+          toinenaste_yhteishaku_hakemus_data.urh_valmentaja_puh,
+          toinenaste_yhteishaku_hakemus_data.urh_valmentaja_nimi,
+          toinenaste_yhteishaku_hakemus_data.urh_valmentaja_email,
+          toinenaste_yhteishaku_hakemus_data.urh_valmennusryhma_maajoukkue,
+          toinenaste_yhteishaku_hakemus_data.urh_valmennusryhma_piirijoukkue,
+          toinenaste_yhteishaku_hakemus_data.urh_valmennusryhma_seurajoukkue,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_laji,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_seura,
+          toinenaste_yhteishaku_hakemus_data.urh__amm_liitto,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_sivulaji,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_keskiarvo,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_tamakausi,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_peruskoulu,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_viimekausi,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_toissakausi,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_valmentaja_puh,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_valmentaja_nimi,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_valmentaja_email,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_valmennusryhma_maajoukkue,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_valmennusryhma_piirijoukkue,
+          toinenaste_yhteishaku_hakemus_data.urh_amm_valmennusryhma_seurajoukkue
         FROM gen.gen_henkilo hlo
         INNER JOIN gen.gen_hakemus hakemus ON hakemus.henkilo_oid = hlo.henkilo_oid
         INNER JOIN gen.gen_haku    haku    ON hakemus.haku_oid    = haku.haku_oid
+        LEFT JOIN gen.gen_hakemus_toinenaste_yhteishaku toinenaste_yhteishaku_hakemus_data ON toinenaste_yhteishaku_hakemus_data.hakemus_oid = hakemus.hakemus_oid
         WHERE haku.haku_oid = $hakuOid
         AND length(hakemus.hakemus_oid) = #$ataruOidLength
         AND haku.kohdejoukko_koodiuri LIKE 'haunkohdejoukko_11%'
@@ -138,6 +218,8 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
       ht.hakutoivenumero,
       hk.jarjestyspaikka_oid,
       org.oppilaitosnumero,
+      hk.hakukohteen_linja,
+      hk.jarjestaa_urheilijan_ammkoulutusta,
       k.koulutukset_koodiuri
     FROM gen.gen_hakutoive ht
     LEFT JOIN gen.gen_hakukohde   hk  ON ht.hakukohde_oid    = hk.hakukohde_oid

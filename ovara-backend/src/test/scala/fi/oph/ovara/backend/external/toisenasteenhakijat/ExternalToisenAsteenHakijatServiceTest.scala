@@ -54,6 +54,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertToteutusJaKoulutus()
     insertOpetuskieli()
     insertOrganisaatio()
+    insertHakemusToinenAsteYhteishaku()
 
     val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
@@ -77,6 +78,8 @@ class ExternalToisenAsteenHakijatServiceTest
     assert(hakija.koulutusmarkkinointilupa.contains(KOULUTUSMARKKINOINTILUPA))
     assert(hakija.kiinnostunutoppisopimuksesta.contains(KIINNOSTUNUT_OPPISOPIMUKSESTA))
     assert(hakija.sahkoisenAsioinninLupa.contains(SAHKOINENVIESTINTALUPA))
+    assert(hakija.huoltaja1.contains(HUOLTAJA1))
+    assert(hakija.huoltaja2.contains(HUOLTAJA2))
     assert(hakija.hakemus.hakemusnumero == HAKEMUS_OID)
     assert(hakija.hakemus.vuosi.contains(VUOSI))
     assert(hakija.hakemus.kausi.contains(KAUSI))
@@ -114,8 +117,6 @@ class ExternalToisenAsteenHakijatServiceTest
 
     val hakija = getOnlyHakija(response)
     assert(hakija.muupuhelin.isEmpty)
-    assert(hakija.huoltaja1.isEmpty)
-    assert(hakija.huoltaja2.isEmpty)
     assert(hakija.oikeusMaksuttomaanKoulutukseenVoimassaAsti.isEmpty)
     assert(hakija.oppivelvollisuusVoimassaAsti.isEmpty)
     assert(hakija.lisakysymykset.isEmpty)
@@ -244,6 +245,158 @@ class ExternalToisenAsteenHakijatServiceTest
 
     assert(response.isRight)
     assert(response.toOption.get.isEmpty)
+  }
+
+  it should "populate urheilijanLisakysymykset from urli for urheilijaLukio hakukohde" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(hakukohteenLinjaJson = Some(LINJA_URHEILIJA_LUKIO_JSON))
+    insertHakutoive()
+    insertHakemusToinenAsteYhteishaku()
+
+    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
+
+    assert(
+      hakutoive.urheilijanLisakysymykset.contains(lukioKysymykset),
+      s"expected lukioKysymykset, got ${hakutoive.urheilijanLisakysymykset}"
+    )
+  }
+
+  it should "populate urheilijanLisakysymykset from urli when linja has a #version suffix" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(hakukohteenLinjaJson = Some("""{"linja":"lukiolinjaterityinenkoulutustehtava_0105#1"}"""))
+    insertHakutoive()
+    insertHakemusToinenAsteYhteishaku()
+
+    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
+
+    assert(
+      hakutoive.urheilijanLisakysymykset.contains(lukioKysymykset),
+      s"version-suffixed linja should still match; got ${hakutoive.urheilijanLisakysymykset}"
+    )
+  }
+
+  it should "populate urheilijanLisakysymykset from uram when amm hakukohde and applicant opted in" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(jarjestaaUrheilijanAmmkoulutusta = Some(true))
+    insertHakutoive()
+    insertHakemusToinenAsteYhteishaku(kiinnostunutUrheilijanAmmatillisestaKoulutuksesta = Some(true))
+
+    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
+
+    assert(
+      hakutoive.urheilijanLisakysymykset.contains(ammatillisetKysymykset),
+      s"expected ammatillisetKysymykset, got ${hakutoive.urheilijanLisakysymykset}"
+    )
+  }
+
+  it should "leave urheilijanLisakysymykset None for amm hakukohde when applicant did not opt in" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(jarjestaaUrheilijanAmmkoulutusta = Some(true))
+    insertHakutoive()
+    insertHakemusToinenAsteYhteishaku(kiinnostunutUrheilijanAmmatillisestaKoulutuksesta = Some(false))
+
+    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
+
+    assert(hakutoive.urheilijanLisakysymykset.isEmpty)
+  }
+
+  it should "pick urli when hakukohde is BOTH urheilijaLukio AND amm urheilija (lukio takes precedence)" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(
+      hakukohteenLinjaJson = Some(LINJA_URHEILIJA_LUKIO_JSON),
+      jarjestaaUrheilijanAmmkoulutusta = Some(true)
+    )
+    insertHakutoive()
+    insertHakemusToinenAsteYhteishaku(kiinnostunutUrheilijanAmmatillisestaKoulutuksesta = Some(true))
+
+    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
+
+    assert(
+      hakutoive.urheilijanLisakysymykset.contains(lukioKysymykset),
+      s"lukio should win precedence; got ${hakutoive.urheilijanLisakysymykset}"
+    )
+  }
+
+  it should "leave urheilijanLisakysymykset None for a non-urheilija hakukohde" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde() // defaults: linja=None, jarjestaa=false
+    insertHakutoive()
+    insertHakemusToinenAsteYhteishaku()
+
+    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
+
+    assert(hakutoive.urheilijanLisakysymykset.isEmpty)
+  }
+
+  it should "set urheilijanammatillinenkoulutus true only when both flags are true" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(jarjestaaUrheilijanAmmkoulutusta = Some(true))
+    insertHakutoive()
+    insertHakemusToinenAsteYhteishaku(kiinnostunutUrheilijanAmmatillisestaKoulutuksesta = Some(true))
+
+    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
+
+    assert(hakutoive.urheilijanammatillinenkoulutus.contains(true))
+  }
+
+  it should "set urheilijanammatillinenkoulutus false when hakukohde supports but applicant did not opt in" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(jarjestaaUrheilijanAmmkoulutusta = Some(true))
+    insertHakutoive()
+    insertHakemusToinenAsteYhteishaku(kiinnostunutUrheilijanAmmatillisestaKoulutuksesta = Some(false))
+
+    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
+
+    assert(hakutoive.urheilijanammatillinenkoulutus.contains(false))
+  }
+
+  it should "leave urheilijanammatillinenkoulutus None when hakukohde flag is null" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(jarjestaaUrheilijanAmmkoulutusta = None)
+    insertHakutoive()
+    insertHakemusToinenAsteYhteishaku(kiinnostunutUrheilijanAmmatillisestaKoulutuksesta = Some(true))
+
+    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
+
+    assert(hakutoive.urheilijanammatillinenkoulutus.isEmpty)
+  }
+
+  it should "leave urheilijan fields off when applicant opted in but hakukohde does not offer amm" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(jarjestaaUrheilijanAmmkoulutusta = Some(false))
+    insertHakutoive()
+    insertHakemusToinenAsteYhteishaku(kiinnostunutUrheilijanAmmatillisestaKoulutuksesta = Some(true))
+
+    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
+
+    assert(
+      hakutoive.urheilijanammatillinenkoulutus.contains(false),
+      s"applicant interest alone must not flip the per-hakutoive flag; got ${hakutoive.urheilijanammatillinenkoulutus}"
+    )
+    assert(
+      hakutoive.urheilijanLisakysymykset.isEmpty,
+      s"applicant interest alone must not surface ammatilliset lisäkysymykset; got ${hakutoive.urheilijanLisakysymykset}"
+    )
   }
 
   private def getOnlyHakija(response: Either[String, Seq[ToisenAsteenHakija]]): ToisenAsteenHakija = {
