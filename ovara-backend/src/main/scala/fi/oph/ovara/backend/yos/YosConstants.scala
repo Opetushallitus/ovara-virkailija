@@ -19,6 +19,7 @@ object YosConstants {
        - Lääketieteen lisensiaatti (772101, 772100)
        - Eläinlääketieteen lisensiaatti (772301, 772300)
        - Hammaslääketieteen lisensiaatti (772201, 772200)
-     */
-  def LAAKETIETEEN_LISENSIAATIT_KOULUTUSKOODIT: Seq[String] = Seq("772101", "772100", "772301", "772300", "772201", "772200")
+   */
+  def LAAKETIETEEN_LISENSIAATIT_KOULUTUSKOODIT: Seq[String] =
+    Seq("772101", "772100", "772301", "772300", "772201", "772200")
 }
