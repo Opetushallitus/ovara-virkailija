@@ -2,9 +2,15 @@ package fi.oph.ovara.backend.external.toisenasteenhakijat
 
 import fi.oph.ovara.backend.repository.Extractors
 import fi.oph.ovara.backend.utils.ExtractorUtils.extractArray
+import fi.oph.ovara.backend.utils.GenericOvaraJsonFormats
+import org.json4s.jackson.JsonMethods
+import org.json4s.jvalue2monadic
+import org.json4s.{JArray, JBool, JObject, JString}
 import slick.jdbc.GetResult
 
-class HakijatExtractors extends Extractors {
+import scala.util.Try
+
+class HakijatExtractors extends Extractors with GenericOvaraJsonFormats {
   implicit val getHakijaRow: GetResult[HakijaRow] = GetResult { r =>
     val oppijanumero                 = r.nextString()
     val hakemusOid                   = r.nextString()
@@ -56,6 +62,8 @@ class HakijatExtractors extends Extractors {
       puhelin = r.nextStringOption(),
       sahkoposti = r.nextStringOption()
     )
+
+    val hakukohteetTiedot = parseHakukohteet(r.nextStringOption())
 
     val kiinnostunutAmmatillinen = r.nextBooleanOption()
 
@@ -127,6 +135,7 @@ class HakijatExtractors extends Extractors {
       kausi = kausi,
       huoltaja1 = huoltaja1,
       huoltaja2 = huoltaja2,
+      hakukohteetTiedot = hakukohteetTiedot,
       kiinnostunutAmmatillinen = kiinnostunutAmmatillinen,
       urheilijaKysymyksetLukio = urheilijanLisakysymyksetLukio,
       urheilijaKysymyksetAmm = urheilijanLisakysymyksetAmm
@@ -165,6 +174,31 @@ class HakijatExtractors extends Extractors {
 
   private def normalizeKausi(opt: Option[String]): Option[String] =
     opt.collect { case KausiPattern(arvo) => arvo.toUpperCase }
+
+  /** Parse the jsonb `hakukohteet` array into a Map keyed by `oid`. Malformed JSON → empty Map. */
+  private def parseHakukohteet(jsonOpt: Option[String]): Map[String, HakemusHakukohde] = {
+    def boolField(obj: JObject, name: String): Option[Boolean] =
+      (obj \ name) match {
+        case JBool(b) => Some(b)
+        case _        => None
+      }
+    jsonOpt
+      .flatMap(s => Try(JsonMethods.parse(s)).toOption)
+      .collect { case JArray(items) => items }
+      .getOrElse(Nil)
+      .collect {
+        case obj: JObject if (obj \ "oid").isInstanceOf[JString] =>
+          val JString(oid) = (obj \ "oid"): @unchecked
+          HakemusHakukohde(
+            oid = oid,
+            terveys = boolField(obj, "terveys"),
+            aiempiPeruminen = boolField(obj, "aiempiPeruminen"),
+            kiinnostunutKaksoistutkinnosta = boolField(obj, "kiinnostunutKaksoistutkinnosta")
+          )
+      }
+      .map(h => h.oid -> h)
+      .toMap
+  }
 
   /**
    * Pick the first (vuosi, kausi) tuple where BOTH values are non-null.

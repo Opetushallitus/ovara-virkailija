@@ -150,6 +150,7 @@ trait ExternalToisenAsteenHakijatTestUtils {
     huoltaja2Sukunimi: Option[String] = Some(HUOLTAJA2.sukunimi),
     huoltaja2Matkapuhelin: Option[String] = Some(HUOLTAJA2.puhelinnumero),
     huoltaja2Email: Option[String] = Some(HUOLTAJA2.sahkoposti),
+    hakukohteetJson: Option[String] = Some(TOINENASTE_HAKUKOHTEET_JSON),
     kiinnostunutUrheilijanAmmatillisestaKoulutuksesta: Option[Boolean] = Some(false),
     urli: Option[UrheilijanLisakysymykset] = Some(lukioKysymykset),
     uram: Option[UrheilijanLisakysymykset] = Some(ammatillisetKysymykset)
@@ -167,6 +168,7 @@ trait ExternalToisenAsteenHakijatTestUtils {
           $huoltaja2Sukunimi,
           $huoltaja2Matkapuhelin,
           $huoltaja2Email,
+          $hakukohteetJson,
           $kiinnostunutUrheilijanAmmatillisestaKoulutuksesta,
           ${urli_.laji},
           ${urli_.seura},
@@ -339,6 +341,7 @@ trait ExternalToisenAsteenHakijatTestUtils {
               huoltaja2_sukunimi text,
               huoltaja2_matkapuhelin text,
               huoltaja2_email text,
+              hakukohteet jsonb,
               kiinnostunut_urheilijan_ammatillisesta_koulutuksesta boolean,
               urh_laji text,
               urh_seura text,

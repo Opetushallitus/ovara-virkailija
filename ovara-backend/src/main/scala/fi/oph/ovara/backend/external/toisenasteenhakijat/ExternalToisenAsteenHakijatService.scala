@@ -36,7 +36,8 @@ class ExternalToisenAsteenHakijatService(repository: ExternalToisenAsteenHakijat
                 koodistot,
                 row.urheilijaKysymyksetLukio,
                 row.urheilijaKysymyksetAmm,
-                row.kiinnostunutAmmatillinen
+                row.kiinnostunutAmmatillinen,
+                row.hakukohteetTiedot
               )
             )
           row.asHakija(toiveet)
