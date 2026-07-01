@@ -180,11 +180,11 @@ trait Extractors extends GenericOvaraJsonFormats {
 
   implicit val getSitovastiVastaanottaneetResult: GetResult[KKSitovastiVastaanottanut] = GetResult(r =>
     KKSitovastiVastaanottanut(
-      oppijanumero = r.nextString(), 
-      hakemusOid = r.nextString(), 
-      hakukohdeOid = r.nextString(), 
-      hakukohdeNimi = Map(Fi -> r.nextString(), Sv -> r.nextString(), En -> r.nextString()), 
-      vastaanottoAjankohta = extractDateOption(r.nextDateOption()), 
+      oppijanumero = r.nextString(),
+      hakemusOid = r.nextString(),
+      hakukohdeOid = r.nextString(),
+      hakukohdeNimi = Map(Fi -> r.nextString(), Sv -> r.nextString(), En -> r.nextString()),
+      vastaanottoAjankohta = extractDateOption(r.nextDateOption()),
       hakuOid = r.nextString(),
       koulutusaste = r.nextStringOption()
     )
@@ -192,12 +192,13 @@ trait Extractors extends GenericOvaraJsonFormats {
 
   implicit val getYosHenkilotResult: GetResult[YosHenkilo] = GetResult(r =>
     YosHenkilo(
-      sukunimi = r.nextString(), 
-      etunimet = r.nextString(), 
-      kutsumanimi = r.nextString(), 
-      hetu = r.nextStringOption(), 
-      syntymaAika = extractDateOption(r.nextDateOption()), 
-      oppijanumero = r.nextString())
+      sukunimi = r.nextString(),
+      etunimet = r.nextString(),
+      kutsumanimi = r.nextString(),
+      hetu = r.nextStringOption(),
+      syntymaAika = extractDateOption(r.nextDateOption()),
+      oppijanumero = r.nextString()
+    )
   )
 
   implicit val getToisenAsteenHakijaResult: GetResult[ToisenAsteenHakija] = GetResult(r =>
