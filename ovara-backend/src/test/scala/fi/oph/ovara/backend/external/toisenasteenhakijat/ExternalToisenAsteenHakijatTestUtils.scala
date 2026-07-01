@@ -24,7 +24,9 @@ trait ExternalToisenAsteenHakijatTestUtils {
 
   def insertHaku(
     hakuOid: String = HAKU_OID,
-    kohdejoukkoKoodiuri: String = "haunkohdejoukko_11#1"
+    kohdejoukkoKoodiuri: String = "haunkohdejoukko_11#1",
+    koulutuksenAlkamisvuosi: Option[Int] = None,
+    koulutuksenAlkamiskausiuri: Option[String] = None
   ): Unit = {
     db.run(
       sqlu"""INSERT INTO gen.gen_haku VALUES(
@@ -33,7 +35,9 @@ trait ExternalToisenAsteenHakijatTestUtils {
           'Yhteishaku',
           'Gemensamma',
           'Joint application',
-          $kohdejoukkoKoodiuri
+          $kohdejoukkoKoodiuri,
+          $koulutuksenAlkamisvuosi,
+          $koulutuksenAlkamiskausiuri
           )""",
       "Insert test haku"
     )
@@ -222,9 +226,16 @@ trait ExternalToisenAsteenHakijatTestUtils {
     )
   }
 
-  def insertToteutusJaKoulutus(): Unit = {
+  def insertToteutusJaKoulutus(
+    koulutuksenAlkamisvuosi: Option[Int] = None,
+    koulutuksenAlkamiskausiuri: Option[String] = None
+  ): Unit = {
     db.run(
-      sqlu"""INSERT INTO gen.gen_toteutus VALUES($TOTEUTUS_OID, $KOULUTUS_OID)""",
+      sqlu"""INSERT INTO gen.gen_toteutus VALUES(
+          $TOTEUTUS_OID,
+          $KOULUTUS_OID,
+          $koulutuksenAlkamisvuosi,
+          $koulutuksenAlkamiskausiuri)""",
       "Insert test toteutus"
     )
     db.run(
@@ -293,7 +304,9 @@ trait ExternalToisenAsteenHakijatTestUtils {
               haku_nimi_fi text,
               haku_nimi_sv text,
               haku_nimi_en text,
-              kohdejoukko_koodiuri text
+              kohdejoukko_koodiuri text,
+              koulutuksen_alkamisvuosi integer,
+              koulutuksen_alkamiskausiuri text
           );
 
           CREATE TABLE gen.gen_hakutoive(
@@ -374,7 +387,9 @@ trait ExternalToisenAsteenHakijatTestUtils {
 
           CREATE TABLE gen.gen_toteutus(
               toteutus_oid text NOT NULL PRIMARY KEY,
-              koulutus_oid text
+              koulutus_oid text,
+              koulutuksen_alkamisvuosi integer,
+              koulutuksen_alkamiskausiuri text
           );
 
           CREATE TABLE gen.gen_koodi(

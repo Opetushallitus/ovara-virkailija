@@ -185,6 +185,76 @@ class ExternalToisenAsteenHakijatServiceTest
     assert(hakija.hakemus.kausi.isEmpty)
   }
 
+  it should "fall back to haku for vuosi/kausi when hakukohde values are null" in {
+    initSchema()
+    insertHenkilo()
+    insertHaku(koulutuksenAlkamisvuosi = Some(2027), koulutuksenAlkamiskausiuri = Some("kausi_k#1"))
+    insertHakemus(insertHenkilo = false, insertHaku = false)
+    insertHakukohde(koulutuksenAlkamisvuosi = None, koulutuksenAlkamiskausiuri = None)
+    insertHakutoive()
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+
+    val hakija = getOnlyHakija(response)
+    assert(hakija.hakemus.vuosi.contains("2027"))
+    assert(hakija.hakemus.kausi.contains("K"))
+  }
+
+  it should "fall back to toteutus for vuosi/kausi when hakukohde and haku are null" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(koulutuksenAlkamisvuosi = None, koulutuksenAlkamiskausiuri = None)
+    insertHakutoive()
+    insertToteutusJaKoulutus(
+      koulutuksenAlkamisvuosi = Some(2028),
+      koulutuksenAlkamiskausiuri = Some("kausi_s#1")
+    )
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+
+    val hakija = getOnlyHakija(response)
+    assert(hakija.hakemus.vuosi.contains("2028"))
+    assert(hakija.hakemus.kausi.contains("S"))
+  }
+
+  it should "take both vuosi and kausi from haku when hakukohde has only vuosi (atomic rule)" in {
+    initSchema()
+    insertHenkilo()
+    insertHaku(koulutuksenAlkamisvuosi = Some(2029), koulutuksenAlkamiskausiuri = Some("kausi_k#1"))
+    insertHakemus(insertHenkilo = false, insertHaku = false)
+    insertHakukohde(
+      koulutuksenAlkamisvuosi = Some(2030),
+      koulutuksenAlkamiskausiuri = None
+    )
+    insertHakutoive()
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+
+    val hakija = getOnlyHakija(response)
+    assert(
+      hakija.hakemus.vuosi.contains("2029"),
+      s"vuosi must come from haku (both non-null), not from hakukohde; got ${hakija.hakemus.vuosi}"
+    )
+    assert(
+      hakija.hakemus.kausi.contains("K"),
+      s"kausi must come from haku, got ${hakija.hakemus.kausi}"
+    )
+  }
+
+  it should "return None for both vuosi and kausi when all three source tables have null values" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(koulutuksenAlkamisvuosi = None, koulutuksenAlkamiskausiuri = None)
+    insertHakutoive()
+    insertToteutusJaKoulutus()
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+
+    val hakija = getOnlyHakija(response)
+    assert(hakija.hakemus.vuosi.isEmpty)
+    assert(hakija.hakemus.kausi.isEmpty)
+  }
+
   it should "return None for kausi when koulutuksen_alkamiskausiuri is not a recognized value" in {
     initSchema()
     insertHakemus()

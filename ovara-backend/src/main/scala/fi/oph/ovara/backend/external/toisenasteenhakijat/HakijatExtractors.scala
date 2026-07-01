@@ -30,8 +30,19 @@ class HakijatExtractors extends Extractors {
     val muokattu                     = getOffsetDateTime(r)
     val aidinkieli                   = normalizeKieliCode(r.nextStringOption())
     val opetuskieli                  = normalizeKieliCode(r.nextStringOption())
-    val vuosi                        = r.nextIntOption()
-    val kausi                        = normalizeKausi(r.nextStringOption())
+    val hakukohdeVuosi               = r.nextIntOption()
+    val hakukohdeKausi               = r.nextStringOption()
+    val hakuVuosi                    = r.nextIntOption()
+    val hakuKausi                    = r.nextStringOption()
+    val toteutusVuosi                = r.nextIntOption()
+    val toteutusKausi                = r.nextStringOption()
+
+    val (vuosi, rawKausi) = pickVuosiKausiAtomically(
+      (hakukohdeVuosi, hakukohdeKausi),
+      (hakuVuosi, hakuKausi),
+      (toteutusVuosi, toteutusKausi)
+    )
+    val kausi = normalizeKausi(rawKausi)
 
     val huoltaja1 = buildHuoltaja(
       etunimi = r.nextStringOption(),
@@ -154,6 +165,18 @@ class HakijatExtractors extends Extractors {
 
   private def normalizeKausi(opt: Option[String]): Option[String] =
     opt.collect { case KausiPattern(arvo) => arvo.toUpperCase }
+
+  /**
+   * Pick the first (vuosi, kausi) tuple where BOTH values are non-null.
+   *  Returns (None, None) if no tuple qualifies. Atomic per source table —
+   *  callers pass one tuple per source in priority order.
+   */
+  private def pickVuosiKausiAtomically(
+    candidates: (Option[Int], Option[String])*
+  ): (Option[Int], Option[String]) =
+    candidates
+      .find { case (v, k) => v.isDefined && k.isDefined }
+      .getOrElse((None, None))
 
   private def buildHuoltaja(
     etunimi: Option[String],
