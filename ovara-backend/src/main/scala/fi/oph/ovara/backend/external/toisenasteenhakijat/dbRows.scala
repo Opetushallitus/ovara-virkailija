@@ -1,6 +1,16 @@
 package fi.oph.ovara.backend.external.toisenasteenhakijat
 
+import org.json4s.jackson.JsonMethods
+import org.json4s.JString
+import org.json4s.jvalue2monadic
+
 import java.time.OffsetDateTime
+import scala.util.Try
+
+private val urheilijaLukioLinjaCodes: Set[String] =
+  Set("lukiolinjaterityinenkoulutustehtava_0105", "lukiopainotukset_0105")
+
+private val LinjaWithoutVersion = """([^#]+)(?:#.*)?""".r
 
 case class HakijaRow(
   oppijanumero: String,
@@ -28,7 +38,12 @@ case class HakijaRow(
   aidinkieli: Option[String],
   opetuskieli: Option[String],
   vuosi: Option[Int],
-  kausi: Option[String]
+  kausi: Option[String],
+  huoltaja1: Option[Huoltaja],
+  huoltaja2: Option[Huoltaja],
+  kiinnostunutAmmatillinen: Option[Boolean],
+  urheilijaKysymyksetLukio: Option[UrheilijanLisakysymykset],
+  urheilijaKysymyksetAmm: Option[UrheilijanLisakysymykset]
 ) {
   def asHakija(hakutoiveet: Seq[HakijaHakutoive]): ToisenAsteenHakija =
     ToisenAsteenHakija(
@@ -51,6 +66,8 @@ case class HakijaRow(
       koulutusmarkkinointilupa = koulutusmarkkinointilupa,
       kiinnostunutoppisopimuksesta = kiinnostunutOppisopimuksesta,
       sahkoisenAsioinninLupa = sahkoinenviestintalupa,
+      huoltaja1 = huoltaja1,
+      huoltaja2 = huoltaja2,
       hakemus = HakijaHakemus(
         hakemusnumero = hakemusOid,
         hakutoiveet = hakutoiveet,
@@ -69,14 +86,44 @@ case class HakijaHakutoiveRow(
   hakutoivenumero: Int,
   jarjestyspaikkaOid: Option[String],
   oppilaitos: Option[String],
+  hakukohteenLinjaJson: Option[String],
+  jarjestaaUrheilijanAmmkoulutusta: Option[Boolean],
   koulutusKoodiurit: Seq[String]
 ) {
-  def asHakutoive(koodistot: Map[String, KoodistoArvo]): HakijaHakutoive =
+  def asHakutoive(
+    koodistot: Map[String, KoodistoArvo],
+    urheilijanLisakysymyksetLukio: Option[UrheilijanLisakysymykset],
+    urheilijanLisakysymyksetAmm: Option[UrheilijanLisakysymykset],
+    kiinnostunutAmmatillinen: Option[Boolean]
+  ): HakijaHakutoive = {
+    val linja            = parseLinja(hakukohteenLinjaJson)
+    val isUrheilijaLukio = linja.exists(urheilijaLukioLinjaCodes.contains)
+    val isAmmUrheilija   = jarjestaaUrheilijanAmmkoulutusta.contains(true) && kiinnostunutAmmatillinen.getOrElse(false)
+
+    //Prioriteettijärjestys: jos kyseessä urheilijalukio, käytetään lomakkeelta lukiopuolen kysymyksiä. Jos ei lukio, käytetään ammatillisia jos relevanttia.
+    val urheilijanLisakysymykset =
+      if (isUrheilijaLukio) urheilijanLisakysymyksetLukio
+      else if (isAmmUrheilija) urheilijanLisakysymyksetAmm
+      else None
+
     HakijaHakutoive(
       hakukohdeOid = hakukohdeOid,
       hakujno = hakutoivenumero,
       oppilaitos = oppilaitos,
       opetuspiste = jarjestyspaikkaOid,
-      koulutus = koulutusKoodiurit.headOption.flatMap(koodistot.get)
+      koulutus = koulutusKoodiurit.headOption.flatMap(koodistot.get),
+      urheilijanammatillinenkoulutus =
+        jarjestaaUrheilijanAmmkoulutusta.map(_ && kiinnostunutAmmatillinen.getOrElse(false)),
+      urheilijanLisakysymykset = urheilijanLisakysymykset
     )
+  }
+
+  /**
+   * Extract the `linja` koodi from the hakukohteen_linja jsonb and drop any
+   *  `#<version>` suffix so it can be compared against an unversioned koodi set.
+   */
+  private def parseLinja(jsonOpt: Option[String]): Option[String] =
+    jsonOpt
+      .flatMap(json => Try(JsonMethods.parse(json) \ "linja").toOption)
+      .collect { case JString(LinjaWithoutVersion(base)) => base }
 }
