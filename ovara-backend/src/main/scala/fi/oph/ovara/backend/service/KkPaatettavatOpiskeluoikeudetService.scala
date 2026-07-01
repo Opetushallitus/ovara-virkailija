@@ -1,6 +1,11 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.{Fi, KkPaatettavaOpiskeluoikeus}
+import fi.oph.ovara.backend.domain.{
+  Fi,
+  KKPaatettavaOpiskeluoikeusEntity,
+  KKSitovastiVastaanottanut,
+  KkPaatettavaOpiskeluoikeus
+}
 import fi.oph.ovara.backend.raportointi.dto.{
   buildKkPaatettavatOpiskeluoikeudetParamsForExcel,
   KkPaatettavatOpiskeluoikeudetParams
@@ -11,6 +16,7 @@ import fi.oph.ovara.backend.repository.{
   ReadOnlyDatabase
 }
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, CommonExcelParams, ExcelWriter}
+import fi.oph.ovara.backend.yos.YosPredicate
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,14 +39,7 @@ class KkPaatettavatOpiskeluoikeudetService(
 
   val LOG: Logger = LoggerFactory.getLogger(classOf[KorkeakouluKoulutuksetToteutuksetHakukohteetService])
 
-  def get(
-    oppilaitos: String,
-    sukunimi: Option[String],
-    etunimet: Option[String],
-    hetu: Option[String],
-    oppijanumero: Option[String],
-    opiskeluoikeudenTila: Option[String]
-  ): Either[String, XSSFWorkbook] = {
+  def get(params: KkPaatettavatOpiskeluoikeudetParams): Either[String, XSSFWorkbook] = {
     val user                      = userService.getEnrichedUserDetails
     val asiointikieli             = user.asiointikieli.getOrElse("fi")
     val authorities               = user.authorities
@@ -49,40 +48,14 @@ class KkPaatettavatOpiskeluoikeudetService(
 
     val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
-      oppilaitosOids = List(oppilaitos),
+      oppilaitosOids = List(params.oppilaitos),
       List.empty
     )
-    // placeholder mock-data havainnollistamaan sisältöä
-    val mockData = List(
-      KkPaatettavaOpiskeluoikeus(
-        oppijanumero = "1.2.246.562.24.10002324020",
-        hetu = Some("010101-1234"),
-        syntymaAika = LocalDate.of(2001, 1, 1),
-        sukunimi = "Testinen",
-        etunimet = "Testi",
-        kutsumanimi = "Testi",
-        opiskelijaAvain = "opiskelija-avain-1",
-        opiskeluoikeusAvain = "opiskeluoikeus-avain-1",
-        opiskeluoikeudenNimi = Map(Fi -> "Tähtitiede"),
-        opiskeluoikeudenPaattymispvm = Some(LocalDate.of(2026, 12, 31)),
-        opiskeluoikeudenViimeisinTila = "Loma",
-        hakemusOid = "1.2.246.562.11.00000000000000000001",
-        hakuOid = "1.2.246.562.20.00000000000000000001",
-        hakuNimi = Map(Fi -> "Hurrikaaniopiston erillishaku 2026"),
-        hakukohdeOid = "1.2.246.562.20.00000000000000000002",
-        hakukohdeNimi = Map(Fi -> "Meteorologi, Hurrikaanien tutkimislinja"),
-        oppilaitosOid = "1.2.246.562.10.00000000000000000001",
-        oppilaitosNimi = Map(Fi -> "Hurrikaaniopisto"),
-        vastaanottoAjankohta = LocalDate.of(2026, 8, 15),
-        koulutusluokitusKoodit = "12345",
-        uudenOpiskeluoikeudenAlkamispvm = LocalDate.of(2026, 9, 1)
-      )
-    )
     Try {
-      // TODO kannasta varsinainen data raportille
+      val data               = getPaattyvatOpiskeluOikeudet(orgOidsForQuery, params)
       val raporttiParamNames = db
         .run(
-          kkPaatettavatOpiskeluoikeudetRepository.organisaatioNameQuery(oppilaitos),
+          kkPaatettavatOpiskeluoikeudetRepository.organisaatioNameQuery(params.oppilaitos),
           "hakuParamNamesQuery"
         )
         .map(param => param.parametri -> param.nimi)
@@ -90,17 +63,17 @@ class KkPaatettavatOpiskeluoikeudetService(
 
       val raporttiParams = buildKkPaatettavatOpiskeluoikeudetParamsForExcel(
         KkPaatettavatOpiskeluoikeudetParams(
-          oppilaitos,
-          sukunimi,
-          etunimet,
-          hetu,
-          oppijanumero,
-          opiskeluoikeudenTila
+          params.oppilaitos,
+          params.sukunimi,
+          params.etunimet,
+          params.hetu,
+          params.oppijanumero,
+          params.opiskeluoikeudenTila
         ),
         raporttiParamNames
       )
       ExcelWriter.writeKorkeakouluPaatettavatOpiskeluoikeudetRaportti(
-        mockData,
+        data,
         CommonExcelParams(asiointikieli, translations, raporttiParams, LocalDateTime.now())
       )
     } match {
@@ -110,4 +83,77 @@ class KkPaatettavatOpiskeluoikeudetService(
         Left("virhe.tietokanta")
     }
   }
+
+  private def getPaattyvatOpiskeluOikeudet(
+    orgOids: List[String],
+    params: KkPaatettavatOpiskeluoikeudetParams
+  ): List[KkPaatettavaOpiskeluoikeus] = {
+    val opiskeluoikeudet = db
+      .run(
+        kkPaatettavatOpiskeluoikeudetRepository
+          .opiskeluoikeudetQuery(orgOids, params.oppijanumero, params.opiskeluoikeudenTila),
+        "opiskeluoikeudetQuery"
+      )
+      .filter(o => o.koulutusaste.isDefined)
+      .toList
+    val henkiloOids              = opiskeluoikeudet.map(o => o.opiskelijaAvain).distinct
+    val sitovastiVastaanottaneet = db
+      .run(
+        kkPaatettavatOpiskeluoikeudetRepository.vastaanottaneetQuery(henkiloOids),
+        "sitovastiVastaanottaneetQuery"
+      )
+      .filter(v => v.koulutusaste.isDefined)
+      .toList
+    val yossiinKuuluvat: List[(KKPaatettavaOpiskeluoikeusEntity, KKSitovastiVastaanottanut)] = opiskeluoikeudet
+      .map(o => {
+        sitovastiVastaanottaneet
+          .find(v =>
+            v.oppijanumero.equals(o.opiskelijaAvain)
+              && YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(o, v)
+          )
+          .map(v => (o, v))
+      })
+      .filter(_.isDefined)
+      .map(_.get)
+    val yossiinKuuluvatHenkiloOidit = yossiinKuuluvat.map((o, _) => o.opiskelijaAvain).distinct
+    val yossiinKuuluvatHenkilot     = db
+      .run(
+        kkPaatettavatOpiskeluoikeudetRepository.henkilotQuery(henkiloOids, params),
+        "yosHenkilotQuery"
+      )
+      .toList
+    yossiinKuuluvat
+      .map((o, v) =>
+        yossiinKuuluvatHenkilot
+          .find(h => h.oppijanumero.equals(o.opiskelijaAvain))
+          .map(h =>
+            KkPaatettavaOpiskeluoikeus(
+              oppijanumero = v.oppijanumero,
+              hetu = h.hetu,
+              syntymaAika = h.syntymaAika.orNull,
+              sukunimi = h.sukunimi,
+              etunimet = h.etunimet,
+              kutsumanimi = h.kutsumanimi,
+              opiskelijaAvain = o.opiskelijaAvain,
+              opiskeluoikeusAvain = o.opiskeluoikeusAvain,
+              opiskeluoikeudenNimi = o.opiskeluoikeudenNimi,
+              opiskeluoikeudenPaattymispvm = Some(LocalDate.of(2026, 12, 31)),
+              opiskeluoikeudenViimeisinTila = o.opiskeluoikeudenViimeisinTila,
+              hakemusOid = v.hakemusOid,
+              hakuOid = v.hakuOid,
+              hakuNimi = Map(Fi -> "Hurrikaaniopiston erillishaku 2026"),
+              hakukohdeOid = v.hakukohdeOid,
+              hakukohdeNimi = v.hakukohdeNimi,
+              oppilaitosOid = "1.2.246.562.10.00000000000000000001",
+              oppilaitosNimi = Map(Fi -> "Hurrikaaniopisto"),
+              vastaanottoAjankohta = v.vastaanottoAjankohta.get,
+              koulutusluokitusKoodit = "12345",
+              uudenOpiskeluoikeudenAlkamispvm = LocalDate.of(2026, 9, 1)
+            )
+          )
+      )
+      .filter(_.isDefined)
+      .map(_.get)
+  }
+
 }

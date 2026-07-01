@@ -25,3 +25,31 @@ case class KkPaatettavaOpiskeluoikeus(
   hakuOid: String,
   koulutusluokitusKoodit: String
 )
+
+case class KKPaatettavaOpiskeluoikeusEntity(
+  opiskelijaAvain: String,
+  opiskeluoikeusAvain: String,
+  opiskeluoikeudenNimi: Kielistetty,
+  opiskeluoikeudenViimeisinTila: String,
+  koulutusaste: Option[String],
+  koulutusKoodi: Option[String]
+)
+
+case class KKSitovastiVastaanottanut(
+  oppijanumero: String,
+  hakemusOid: String,
+  hakukohdeOid: String,
+  hakukohdeNimi: Kielistetty,
+  vastaanottoAjankohta: Option[LocalDate],
+  hakuOid: String,
+  koulutusaste: Option[String]
+)
+
+case class YosHenkilo(
+  sukunimi: String,
+  etunimet: String,
+  kutsumanimi: String,
+  hetu: Option[String],
+  syntymaAika: Option[LocalDate],
+  oppijanumero: String
+)
