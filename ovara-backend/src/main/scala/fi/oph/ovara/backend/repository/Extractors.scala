@@ -190,6 +190,16 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   )
 
+  implicit val getYosHenkilotResult: GetResult[YosHenkilo] = GetResult(r =>
+    YosHenkilo(
+      sukunimi = r.nextString(), 
+      etunimet = r.nextString(), 
+      kutsumanimi = r.nextString(), 
+      hetu = r.nextStringOption(), 
+      syntymaAika = extractDateOption(r.nextDateOption()), 
+      oppijanumero = r.nextString())
+  )
+
   implicit val getToisenAsteenHakijaResult: GetResult[ToisenAsteenHakija] = GetResult(r =>
     ToisenAsteenHakija(
       hakijanSukunimi = r.nextString(),
