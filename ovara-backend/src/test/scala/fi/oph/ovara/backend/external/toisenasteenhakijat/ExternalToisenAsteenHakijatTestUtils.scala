@@ -115,7 +115,9 @@ trait ExternalToisenAsteenHakijatTestUtils {
     jarjestyspaikkaOid: String = ORGANISAATIO_OID,
     organisaatioOid: Option[String] = Some(ORGANISAATIO_OID),
     koulutuksenAlkamisvuosi: Option[Int] = Some(KOULUTUKSEN_ALKAMISVUOSI),
-    koulutuksenAlkamiskausiuri: Option[String] = Some(KOULUTUKSEN_ALKAMISKAUSIURI)
+    koulutuksenAlkamiskausiuri: Option[String] = Some(KOULUTUKSEN_ALKAMISKAUSIURI),
+    hakukohteenLinjaJson: Option[String] = None,
+    jarjestaaUrheilijanAmmkoulutusta: Option[Boolean] = Some(false)
   ): Unit = {
     db.run(
       sqlu"""INSERT INTO gen.gen_hakukohde VALUES(
@@ -127,8 +129,72 @@ trait ExternalToisenAsteenHakijatTestUtils {
           'Filmklippning',
           'Film Editing',
           $koulutuksenAlkamisvuosi,
-          $koulutuksenAlkamiskausiuri)""",
+          $koulutuksenAlkamiskausiuri,
+          $hakukohteenLinjaJson,
+          $jarjestaaUrheilijanAmmkoulutusta)""",
       "Insert test hakukohde"
+    )
+  }
+
+  def insertHakemusToinenAsteYhteishaku(
+    hakemusOid: String = HAKEMUS_OID,
+    huoltaja1Etunimi: Option[String] = Some(HUOLTAJA1.etunimi),
+    huoltaja1Sukunimi: Option[String] = Some(HUOLTAJA1.sukunimi),
+    huoltaja1Matkapuhelin: Option[String] = Some(HUOLTAJA1.puhelinnumero),
+    huoltaja1Email: Option[String] = Some(HUOLTAJA1.sahkoposti),
+    huoltaja2Etunimi: Option[String] = Some(HUOLTAJA2.etunimi),
+    huoltaja2Sukunimi: Option[String] = Some(HUOLTAJA2.sukunimi),
+    huoltaja2Matkapuhelin: Option[String] = Some(HUOLTAJA2.puhelinnumero),
+    huoltaja2Email: Option[String] = Some(HUOLTAJA2.sahkoposti),
+    kiinnostunutUrheilijanAmmatillisestaKoulutuksesta: Option[Boolean] = Some(false),
+    urli: Option[UrheilijanLisakysymykset] = Some(lukioKysymykset),
+    uram: Option[UrheilijanLisakysymykset] = Some(ammatillisetKysymykset)
+  ): Unit = {
+    val urli_ = urli.getOrElse(UrheilijanLisakysymykset())
+    val uram_ = uram.getOrElse(UrheilijanLisakysymykset())
+    db.run(
+      sqlu"""INSERT INTO gen.gen_hakemus_toinenaste_yhteishaku VALUES(
+          $hakemusOid,
+          $huoltaja1Etunimi,
+          $huoltaja1Sukunimi,
+          $huoltaja1Matkapuhelin,
+          $huoltaja1Email,
+          $huoltaja2Etunimi,
+          $huoltaja2Sukunimi,
+          $huoltaja2Matkapuhelin,
+          $huoltaja2Email,
+          $kiinnostunutUrheilijanAmmatillisestaKoulutuksesta,
+          ${urli_.laji},
+          ${urli_.seura},
+          ${urli_.liitto},
+          ${urli_.sivulaji},
+          ${urli_.keskiarvo},
+          ${urli_.tamakausi},
+          ${urli_.peruskoulu},
+          ${urli_.viimekausi},
+          ${urli_.toissakausi},
+          ${urli_.valmentaja_puh},
+          ${urli_.valmentaja_nimi},
+          ${urli_.valmentaja_email},
+          ${urli_.valmennusryhma_maajoukkue},
+          ${urli_.valmennusryhma_piirijoukkue},
+          ${urli_.valmennusryhma_seurajoukkue},
+          ${uram_.laji},
+          ${uram_.seura},
+          ${uram_.liitto},
+          ${uram_.sivulaji},
+          ${uram_.keskiarvo},
+          ${uram_.tamakausi},
+          ${uram_.peruskoulu},
+          ${uram_.viimekausi},
+          ${uram_.toissakausi},
+          ${uram_.valmentaja_puh},
+          ${uram_.valmentaja_nimi},
+          ${uram_.valmentaja_email},
+          ${uram_.valmennusryhma_maajoukkue},
+          ${uram_.valmennusryhma_piirijoukkue},
+          ${uram_.valmennusryhma_seurajoukkue})""",
+      "Insert test hakemus_toinenaste_yhteishaku"
     )
   }
 
@@ -245,7 +311,52 @@ trait ExternalToisenAsteenHakijatTestUtils {
               hakukohde_nimi_sv text,
               hakukohde_nimi_en text,
               koulutuksen_alkamisvuosi integer,
-              koulutuksen_alkamiskausiuri text
+              koulutuksen_alkamiskausiuri text,
+              hakukohteen_linja jsonb,
+              jarjestaa_urheilijan_ammkoulutusta boolean
+          );
+
+          CREATE TABLE gen.gen_hakemus_toinenaste_yhteishaku (
+              hakemus_oid text NOT NULL PRIMARY KEY,
+              huoltaja1_etunimi text,
+              huoltaja1_sukunimi text,
+              huoltaja1_matkapuhelin text,
+              huoltaja1_email text,
+              huoltaja2_etunimi text,
+              huoltaja2_sukunimi text,
+              huoltaja2_matkapuhelin text,
+              huoltaja2_email text,
+              kiinnostunut_urheilijan_ammatillisesta_koulutuksesta boolean,
+              urh_laji text,
+              urh_seura text,
+              urh_liitto text,
+              urh_sivulaji text,
+              urh_keskiarvo text,
+              urh_tamakausi text,
+              urh_peruskoulu text,
+              urh_viimekausi text,
+              urh_toissakausi text,
+              urh_valmentaja_puh text,
+              urh_valmentaja_nimi text,
+              urh_valmentaja_email text,
+              urh_valmennusryhma_maajoukkue text,
+              urh_valmennusryhma_piirijoukkue text,
+              urh_valmennusryhma_seurajoukkue text,
+              urh_amm_laji text,
+              urh_amm_seura text,
+              urh__amm_liitto text,
+              urh_amm_sivulaji text,
+              urh_amm_keskiarvo text,
+              urh_amm_tamakausi text,
+              urh_amm_peruskoulu text,
+              urh_amm_viimekausi text,
+              urh_amm_toissakausi text,
+              urh_amm_valmentaja_puh text,
+              urh_amm_valmentaja_nimi text,
+              urh_amm_valmentaja_email text,
+              urh_amm_valmennusryhma_maajoukkue text,
+              urh_amm_valmennusryhma_piirijoukkue text,
+              urh_amm_valmennusryhma_seurajoukkue text
           );
 
           CREATE TABLE gen.gen_organisaatio(
