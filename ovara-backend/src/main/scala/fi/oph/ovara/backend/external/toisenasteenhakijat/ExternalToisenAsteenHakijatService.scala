@@ -31,7 +31,14 @@ class ExternalToisenAsteenHakijatService(repository: ExternalToisenAsteenHakijat
         hakijaRows.map { row =>
           val toiveet = hakutoiveetByHakemus
             .getOrElse(row.hakemusOid, Seq.empty)
-            .map(_.asHakutoive(koodistot, row.urheilijaKysymyksetLukio, row.urheilijaKysymyksetAmm, row.kiinnostunutAmmatillinen))
+            .map(
+              _.asHakutoive(
+                koodistot,
+                row.urheilijaKysymyksetLukio,
+                row.urheilijaKysymyksetAmm,
+                row.kiinnostunutAmmatillinen
+              )
+            )
           row.asHakija(toiveet)
         }
       }
