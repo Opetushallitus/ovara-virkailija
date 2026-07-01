@@ -28,13 +28,13 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
   }
 
   def opiskeluoikeudetQuery(
-   organisaatioOids: List[String],
-   oppijanumero: Option[String],
-   opiskeluoikeudenTila: Option[String]
-   ): SqlStreamingAction[Vector[KKPaatettavaOpiskeluoikeusEntity], KKPaatettavaOpiskeluoikeusEntity, Effect] = {
-    val queryOppijanumero = oppijanumero.map(o => s"AND oppijanumero = '$o'").getOrElse("")
+    organisaatioOids: List[String],
+    oppijanumero: Option[String],
+    opiskeluoikeudenTila: Option[String]
+  ): SqlStreamingAction[Vector[KKPaatettavaOpiskeluoikeusEntity], KKPaatettavaOpiskeluoikeusEntity, Effect] = {
+    val queryOppijanumero         = oppijanumero.map(o => s"AND oppijanumero = '$o'").getOrElse("")
     val queryOpiskeluOikeudenTila = opiskeluoikeudenTila.map(t => s"AND virta_opiskeluoikeuden_tila = '$t'")
-    val query = sql"""
+    val query                     = sql"""
         SELECT henkilo_oid AS opiskelijaAvain, virta_tunniste AS opiskeluoikeusAvain, nimi_fi, nimi_sv, nimi_en, virta_tila_nimi_fi AS opiskeluoikeudenViimeisinTila, koulutusaste, koulutus_koodi AS koulutusKoodi
         FROM gen.gen_opiskeluoikeus_kk
         WHERE yos IS TRUE AND organisaatio_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(organisaatioOids)})
@@ -59,11 +59,14 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
     query
   }
 
-  def henkilotQuery(henkiloOids: List[String], params: KkPaatettavatOpiskeluoikeudetParams) : SqlStreamingAction[Vector[YosHenkilo], YosHenkilo, Effect] = {
+  def henkilotQuery(
+    henkiloOids: List[String],
+    params: KkPaatettavatOpiskeluoikeudetParams
+  ): SqlStreamingAction[Vector[YosHenkilo], YosHenkilo, Effect] = {
     val sukunimiQuery = params.sukunimi.map(s => s"AND sukunimi LIKE '%$s%'").getOrElse("")
     val etunimetQuery = params.etunimet.map(e => s"AND etunimet LIKE '%$e%'").getOrElse("")
-    val hetuQuery = params.hetu.map(h => s"AND hetu = '$h'").getOrElse("")
-    val query = sql"""
+    val hetuQuery     = params.hetu.map(h => s"AND hetu = '$h'").getOrElse("")
+    val query         = sql"""
           SELECT sukunimi, etunimet, kutsumanimi, hetu, syntymaAika, oppijanumero
           FROM gen.gen_henkilo
           WHERE oppijanumero IN (#${RepositoryUtils.makeListOfValuesQueryStr(henkiloOids)})

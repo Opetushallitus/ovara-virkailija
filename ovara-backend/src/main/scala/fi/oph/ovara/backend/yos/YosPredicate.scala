@@ -1,17 +1,36 @@
 package fi.oph.ovara.backend.yos
 
-import fi.oph.ovara.backend.domain.{KKPaatettavaOpiskeluoikeusEntity, KKSitovastiVastaanottanut, KkPaatettavaOpiskeluoikeus}
-import fi.oph.ovara.backend.yos.YosConstants.{KOULUTUSASTE_ALEMMAT, KOULUTUSASTE_YLEMMAT, LAAKETIETEEN_LISENSIAATIT_KOULUTUSKOODIT}
-import fi.oph.ovara.backend.yos.YosKoulutusAsteLuokka.{ALEMMAT_ASTEET, EI_YOS_KOULUTUSASTETTA, YLEMMAT_ASTEET, YLEMMAT_JA_ALEMMAT_ASTEET}
+import fi.oph.ovara.backend.domain.{
+  KKPaatettavaOpiskeluoikeusEntity,
+  KKSitovastiVastaanottanut,
+  KkPaatettavaOpiskeluoikeus
+}
+import fi.oph.ovara.backend.yos.YosConstants.{
+  KOULUTUSASTE_ALEMMAT,
+  KOULUTUSASTE_YLEMMAT,
+  LAAKETIETEEN_LISENSIAATIT_KOULUTUSKOODIT
+}
+import fi.oph.ovara.backend.yos.YosKoulutusAsteLuokka.{
+  ALEMMAT_ASTEET,
+  EI_YOS_KOULUTUSASTETTA,
+  YLEMMAT_ASTEET,
+  YLEMMAT_JA_ALEMMAT_ASTEET
+}
 
 object YosPredicate {
-  def onkoOikeusKoulutusAsteenMukaanYosinPiirissa(oikeus: KKPaatettavaOpiskeluoikeusEntity, vastaanotto: KKSitovastiVastaanottanut): Boolean = {
-    val oikeudenAste = getKoulutusAsteOpiskeluOikeudelle(oikeus)
+  def onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
+    oikeus: KKPaatettavaOpiskeluoikeusEntity,
+    vastaanotto: KKSitovastiVastaanottanut
+  ): Boolean = {
+    val oikeudenAste       = getKoulutusAsteOpiskeluOikeudelle(oikeus)
     val vastaanottanutAste = getKoulutusAsteHakutoiveelle(vastaanotto)
     kuuluukoOpiskeluOikeusYosinPiiriinKoulutusAsteenMukaan(vastaanottanutAste, oikeudenAste)
   }
 
-  private def kuuluukoOpiskeluOikeusYosinPiiriinKoulutusAsteenMukaan(vastaanotettavanAste: YosKoulutusAsteLuokka, oikeudenAste: YosKoulutusAsteLuokka): Boolean = {
+  private def kuuluukoOpiskeluOikeusYosinPiiriinKoulutusAsteenMukaan(
+    vastaanotettavanAste: YosKoulutusAsteLuokka,
+    oikeudenAste: YosKoulutusAsteLuokka
+  ): Boolean = {
     (vastaanotettavanAste, oikeudenAste) match
       case (YLEMMAT_JA_ALEMMAT_ASTEET, YLEMMAT_ASTEET) =>
         true

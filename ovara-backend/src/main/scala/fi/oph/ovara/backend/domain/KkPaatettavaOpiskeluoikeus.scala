@@ -32,7 +32,7 @@ case class KKPaatettavaOpiskeluoikeusEntity(
   opiskeluoikeudenNimi: Kielistetty,
   opiskeluoikeudenViimeisinTila: String,
   koulutusaste: Option[String],
-  koulutusKoodi: Option[String]                                         
+  koulutusKoodi: Option[String]
 )
 
 case class KKSitovastiVastaanottanut(
@@ -51,5 +51,5 @@ case class YosHenkilo(
   kutsumanimi: String,
   hetu: Option[String],
   syntymaAika: Option[LocalDate],
-  oppijanumero: String                   
+  oppijanumero: String
 )
