@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.service
 
-import fi.oph.ovara.backend.domain.{Fi, KKSitovastiVastaanottanut, KkPaatettavaOpiskeluoikeus}
+import fi.oph.ovara.backend.domain.{Fi, KKPaatettavaOpiskeluoikeusEntity, KKSitovastiVastaanottanut, KkPaatettavaOpiskeluoikeus}
 import fi.oph.ovara.backend.raportointi.dto.{KkPaatettavatOpiskeluoikeudetParams, buildKkPaatettavatOpiskeluoikeudetParamsForExcel}
 import fi.oph.ovara.backend.repository.{KkPaatettavatOpiskeluoikeudetRepository, KorkeakouluKoulutuksetToteutuksetHakukohteetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, CommonExcelParams, ExcelWriter}
@@ -87,33 +87,45 @@ class KkPaatettavatOpiskeluoikeudetService(
       )
       .filter(v => v.koulutusaste.isDefined)
       .toList
-    opiskeluoikeudet.map(o => {
+    val yossiinKuuluvat: List[(KKPaatettavaOpiskeluoikeusEntity, KKSitovastiVastaanottanut)] = opiskeluoikeudet.map(o => {
       sitovastiVastaanottaneet.find(v => v.oppijanumero.equals(o.opiskelijaAvain)
           && YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(o, v)).map(v =>
-        KkPaatettavaOpiskeluoikeus(
-          oppijanumero = v.oppijanumero,
-          hetu = Some("010101-1234"),
-          syntymaAika = LocalDate.of(2001, 1, 1),
-          sukunimi = "Testinen",
-          etunimet = "Testi",
-          kutsumanimi = "Testi",
-          opiskelijaAvain = o.opiskelijaAvain,
-          opiskeluoikeusAvain = o.opiskeluoikeusAvain,
-          opiskeluoikeudenNimi = o.opiskeluoikeudenNimi,
-          opiskeluoikeudenPaattymispvm = Some(LocalDate.of(2026, 12, 31)),
-          opiskeluoikeudenViimeisinTila = o.opiskeluoikeudenViimeisinTila,
-          hakemusOid = v.hakemusOid,
-          hakuOid = v.hakuOid,
-          hakuNimi = Map(Fi -> "Hurrikaaniopiston erillishaku 2026"),
-          hakukohdeOid = "1.2.246.562.20.00000000000000000002",
-          hakukohdeNimi = v.hakukohdeNimi,
-          oppilaitosOid = "1.2.246.562.10.00000000000000000001",
-          oppilaitosNimi = Map(Fi -> "Hurrikaaniopisto"),
-          vastaanottoAjankohta = v.vastaanottoAjankohta.get,
-          koulutusluokitusKoodit = "12345",
-          uudenOpiskeluoikeudenAlkamispvm = LocalDate.of(2026, 9, 1)
-        ))
+            (o, v)
+        )
       }).filter(_.isDefined).map(_.get)
+    val yossiinKuuluvatHenkiloOidit = yossiinKuuluvat.map((o, _) => o.opiskelijaAvain).distinct
+    val yossiinKuuluvatHenkilot = db
+      .run(
+        kkPaatettavatOpiskeluoikeudetRepository.henkilotQuery(henkiloOids, params),
+        "yosHenkilotQuery"
+      )
+      .toList
+    yossiinKuuluvat.map((o, v) =>
+      yossiinKuuluvatHenkilot.find(h => h.oppijanumero.equals(o.opiskelijaAvain))
+        .map(h =>
+          KkPaatettavaOpiskeluoikeus(
+            oppijanumero = v.oppijanumero,
+            hetu = h.hetu,
+            syntymaAika = h.syntymaAika.orNull,
+            sukunimi = h.sukunimi,
+            etunimet = h.etunimet,
+            kutsumanimi = h.kutsumanimi,
+            opiskelijaAvain = o.opiskelijaAvain,
+            opiskeluoikeusAvain = o.opiskeluoikeusAvain,
+            opiskeluoikeudenNimi = o.opiskeluoikeudenNimi,
+            opiskeluoikeudenPaattymispvm = Some(LocalDate.of(2026, 12, 31)),
+            opiskeluoikeudenViimeisinTila = o.opiskeluoikeudenViimeisinTila,
+            hakemusOid = v.hakemusOid,
+            hakuOid = v.hakuOid,
+            hakuNimi = Map(Fi -> "Hurrikaaniopiston erillishaku 2026"),
+            hakukohdeOid = v.hakukohdeOid,
+            hakukohdeNimi = v.hakukohdeNimi,
+            oppilaitosOid = "1.2.246.562.10.00000000000000000001",
+            oppilaitosNimi = Map(Fi -> "Hurrikaaniopisto"),
+            vastaanottoAjankohta = v.vastaanottoAjankohta.get,
+            koulutusluokitusKoodit = "12345",
+            uudenOpiskeluoikeudenAlkamispvm = LocalDate.of(2026, 9, 1)
+          ))).filter(_.isDefined).map(_.get)
   }
 
 }

@@ -44,3 +44,12 @@ case class KKSitovastiVastaanottanut(
   hakuOid: String,
   koulutusaste: Option[String]
 )
+
+case class YosHenkilo(
+  sukunimi: String,
+  etunimet: String,
+  kutsumanimi: String,
+  hetu: Option[String],
+  syntymaAika: Option[LocalDate],
+  oppijanumero: String                   
+)

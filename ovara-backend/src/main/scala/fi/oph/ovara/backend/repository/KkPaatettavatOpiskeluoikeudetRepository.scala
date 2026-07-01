@@ -1,6 +1,7 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.domain.{KKPaatettavaOpiskeluoikeusEntity, KKSitovastiVastaanottanut}
+import fi.oph.ovara.backend.domain.{KKPaatettavaOpiskeluoikeusEntity, KKSitovastiVastaanottanut, YosHenkilo}
+import fi.oph.ovara.backend.raportointi.dto.KkPaatettavatOpiskeluoikeudetParams
 import fi.oph.ovara.backend.utils.{ParametriKaannos, RepositoryUtils}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.{Component, Repository}
@@ -55,6 +56,16 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
         AND vr.henkilo_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(henkiloOids)})
     """.as[KKSitovastiVastaanottanut]
     LOG.debug(s"sitovastiVastaanottaneetQuery: ${query.statements.head}")
+    query
+  }
+
+  def henkilotQuery(henkiloOids: List[String], params: KkPaatettavatOpiskeluoikeudetParams) : SqlStreamingAction[Vector[YosHenkilo], YosHenkilo, Effect] = {
+    val query = sql"""
+          SELECT sukunimi, etunimet, kutsumanimi, hetu, syntymaAika, oppijanumero
+          FROM gen.gen_henkilo
+          WHERE oppijanumero IN (#${RepositoryUtils.makeListOfValuesQueryStr(henkiloOids)})
+      """.as[YosHenkilo]
+    LOG.debug(s"yosHenkilotQuery: ${query.statements.head}")
     query
   }
 }
