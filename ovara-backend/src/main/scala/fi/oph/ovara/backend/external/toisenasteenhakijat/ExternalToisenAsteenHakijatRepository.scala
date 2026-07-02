@@ -250,7 +250,10 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
       org.oppilaitosnumero,
       hk.hakukohteen_linja,
       hk.jarjestaa_urheilijan_ammkoulutusta,
-      k.koulutukset_koodiuri
+      k.koulutukset_koodiuri,
+      ht.valintatieto,
+      ht.vastaanottotieto,
+      ht.ilmoittautumisen_tila
     FROM gen.gen_hakutoive ht
     LEFT JOIN gen.gen_hakukohde   hk  ON ht.hakukohde_oid    = hk.hakukohde_oid
     LEFT JOIN gen.gen_organisaatio org ON hk.organisaatio_oid = org.organisaatio_oid

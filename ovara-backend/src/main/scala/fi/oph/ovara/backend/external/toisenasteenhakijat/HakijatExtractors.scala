@@ -151,7 +151,10 @@ class HakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       oppilaitos = r.nextStringOption(),
       hakukohteenLinjaJson = r.nextStringOption(),
       jarjestaaUrheilijanAmmkoulutusta = r.nextBooleanOption(),
-      koulutusKoodiurit = extractArray(r.nextStringOption())
+      koulutusKoodiurit = extractArray(r.nextStringOption()),
+      valintatieto = r.nextStringOption(),
+      vastaanottotieto = r.nextStringOption(),
+      ilmoittautumisenTila = r.nextStringOption()
     )
   }
 

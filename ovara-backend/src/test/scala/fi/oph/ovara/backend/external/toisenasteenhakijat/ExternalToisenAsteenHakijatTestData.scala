@@ -87,6 +87,9 @@ object ExternalToisenAsteenHakijatTestData {
   val TERVEYS                     = true
   val AIEMPI_PERUMINEN            = false
   val KAKSOISTUTKINTO             = true
+  val VALINTATIETO                = "HYVAKSYTTY"
+  val VASTAANOTTOTIETO            = "VASTAANOTTANUT_SITOVASTI"
+  val ILMOITTAUTUMISEN_TILA       = "LASNA_KOKO_LUKUVUOSI"
   val TOINENASTE_HAKUKOHTEET_JSON =
     s"""[{"oid":"$HAKUKOHDE_OID","terveys":$TERVEYS,"aiempiPeruminen":$AIEMPI_PERUMINEN,"kiinnostunutKaksoistutkinnosta":$KAKSOISTUTKINTO}]"""
 
