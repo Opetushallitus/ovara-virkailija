@@ -96,6 +96,23 @@ class ExternalToisenAsteenHakijatServiceTest
     assert(hakutoive.terveys.contains(TERVEYS))
     assert(hakutoive.aiempiperuminen.contains(AIEMPI_PERUMINEN))
     assert(hakutoive.kaksoistutkinto.contains(KAKSOISTUTKINTO))
+    assert(hakutoive.valinta.contains(VALINTATIETO))
+    assert(hakutoive.vastaanotto.contains(VASTAANOTTOTIETO))
+    assert(hakutoive.lasnaolo.contains(ILMOITTAUTUMISEN_TILA))
+  }
+
+  it should "leave valinta / vastaanotto / lasnaolo None when hakutoive columns are null" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(valintatieto = None, vastaanottotieto = None, ilmoittautumisenTila = None)
+
+    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
+
+    assert(hakutoive.valinta.isEmpty)
+    assert(hakutoive.vastaanotto.isEmpty)
+    assert(hakutoive.lasnaolo.isEmpty)
   }
 
   it should "leave terveys/aiempiperuminen/kaksoistutkinto None when hakukohdeOid is not in hakukohteet array" in {
