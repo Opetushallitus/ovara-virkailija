@@ -37,7 +37,7 @@ class KkPaatettavatOpiskeluoikeudetService(
   @Autowired
   val db: ReadOnlyDatabase = null
 
-  val LOG: Logger = LoggerFactory.getLogger(classOf[KorkeakouluKoulutuksetToteutuksetHakukohteetService])
+  val LOG: Logger = LoggerFactory.getLogger(classOf[KkPaatettavatOpiskeluoikeudetService])
 
   def get(params: KkPaatettavatOpiskeluoikeudetParams): Either[String, XSSFWorkbook] = {
     val user                      = userService.getEnrichedUserDetails
@@ -97,13 +97,16 @@ class KkPaatettavatOpiskeluoikeudetService(
       .filter(o => o.koulutusaste.isDefined)
       .toList
     val henkiloOids              = opiskeluoikeudet.map(o => o.opiskelijaAvain).distinct
-    val sitovastiVastaanottaneet = db
-      .run(
-        kkPaatettavatOpiskeluoikeudetRepository.vastaanottaneetQuery(henkiloOids),
-        "sitovastiVastaanottaneetQuery"
-      )
-      .filter(v => v.koulutusaste.isDefined)
-      .toList
+    val sitovastiVastaanottaneet =
+      if (henkiloOids.isEmpty) List.empty
+      else
+        db
+          .run(
+            kkPaatettavatOpiskeluoikeudetRepository.vastaanottaneetQuery(henkiloOids),
+            "sitovastiVastaanottaneetQuery"
+          )
+          .filter(v => v.koulutusasteet.nonEmpty)
+          .toList
     val yossiinKuuluvat: List[(KKPaatettavaOpiskeluoikeusEntity, KKSitovastiVastaanottanut)] = opiskeluoikeudet
       .map(o => {
         sitovastiVastaanottaneet
@@ -116,12 +119,15 @@ class KkPaatettavatOpiskeluoikeudetService(
       .filter(_.isDefined)
       .map(_.get)
     val yossiinKuuluvatHenkiloOidit = yossiinKuuluvat.map((o, _) => o.opiskelijaAvain).distinct
-    val yossiinKuuluvatHenkilot     = db
-      .run(
-        kkPaatettavatOpiskeluoikeudetRepository.henkilotQuery(henkiloOids, params),
-        "yosHenkilotQuery"
-      )
-      .toList
+    val yossiinKuuluvatHenkilot     =
+      if (yossiinKuuluvatHenkiloOidit.isEmpty) List.empty
+      else
+        db
+          .run(
+            kkPaatettavatOpiskeluoikeudetRepository.henkilotQuery(yossiinKuuluvatHenkiloOidit, params),
+            "yosHenkilotQuery"
+          )
+          .toList
     yossiinKuuluvat
       .map((o, v) =>
         yossiinKuuluvatHenkilot

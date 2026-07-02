@@ -1,10 +1,6 @@
 package fi.oph.ovara.backend.yos
 
-import fi.oph.ovara.backend.domain.{
-  KKPaatettavaOpiskeluoikeusEntity,
-  KKSitovastiVastaanottanut,
-  KkPaatettavaOpiskeluoikeus
-}
+import fi.oph.ovara.backend.domain.{KKPaatettavaOpiskeluoikeusEntity, KKSitovastiVastaanottanut}
 import fi.oph.ovara.backend.yos.YosConstants.{
   KOULUTUSASTE_ALEMMAT,
   KOULUTUSASTE_YLEMMAT,
@@ -43,8 +39,8 @@ object YosPredicate {
   }
 
   private def getKoulutusAsteHakutoiveelle(hakutoive: KKSitovastiVastaanottanut): YosKoulutusAsteLuokka = {
-    val containsAlempi: Boolean = hakutoive.koulutusaste.exists(k => KOULUTUSASTE_ALEMMAT.contains(k))
-    val containsYlempi: Boolean = hakutoive.koulutusaste.exists(k => KOULUTUSASTE_YLEMMAT.contains(k))
+    val containsAlempi: Boolean = hakutoive.koulutusasteet.exists(k => KOULUTUSASTE_ALEMMAT.contains(k))
+    val containsYlempi: Boolean = hakutoive.koulutusasteet.exists(k => KOULUTUSASTE_YLEMMAT.contains(k))
     (containsAlempi, containsYlempi) match {
       case (_, true) =>
         YLEMMAT_JA_ALEMMAT_ASTEET
@@ -60,6 +56,7 @@ object YosPredicate {
       ALEMMAT_ASTEET
     } else {
       val containsAlempi: Boolean = oikeus.koulutusaste.exists(k => KOULUTUSASTE_ALEMMAT.contains(k))
+        || oikeus.linkitettyKoulutusAste.exists(k => KOULUTUSASTE_ALEMMAT.contains(k))
       val containsYlempi: Boolean = oikeus.koulutusaste.exists(k => KOULUTUSASTE_YLEMMAT.contains(k))
 
       (containsAlempi, containsYlempi) match {
