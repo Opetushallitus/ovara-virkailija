@@ -65,13 +65,18 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
     henkiloOids: List[String],
     params: KkPaatettavatOpiskeluoikeudetParams
   ): SqlStreamingAction[Vector[YosHenkilo], YosHenkilo, Effect] = {
-    val sukunimiQuery = params.sukunimi.map(s => s"AND sukunimi LIKE '%$s%'").getOrElse("")
-    val etunimetQuery = params.etunimet.map(e => s"AND etunimet LIKE '%$e%'").getOrElse("")
-    val hetuQuery     = params.hetu.map(h => s"AND hetu = '$h'").getOrElse("")
+    val sukunimiQuery = params.sukunimi.map(s => s"AND h.sukunimi LIKE '%$s%'").getOrElse("")
+    val etunimetQuery = params.etunimet.map(e => s"AND h.etunimet LIKE '%$e%'").getOrElse("")
+    val hetuQuery     = params.hetu.map(h => s"AND h.hetu = '$h'").getOrElse("")
     val query         = sql"""
-          SELECT sukunimi, etunimet, hetu, syntymaaika, oppijanumero
-          FROM gen.gen_henkilo
-          WHERE oppijanumero IN (#${RepositoryUtils.makeListOfValuesQueryStr(henkiloOids)})
+          SELECT h.sukunimi, h.etunimet, hakemus.kutsumanimi, h.hetu, h.syntymaaika, h.oppijanumero
+          FROM gen.gen_henkilo h
+          LEFT JOIN LATERAL (SELECT * FROM gen.gen_hakemus hak
+                             WHERE hak.kutsumanimi IS NOT NULL
+                             AND hak.henkilo_oid = h.oppijanumero
+                             ORDER BY hak.jatetty DESC LIMIT 1)
+                             hakemus on true
+          WHERE h.oppijanumero IN (#${RepositoryUtils.makeListOfValuesQueryStr(henkiloOids)})
           #$sukunimiQuery #$etunimetQuery #$hetuQuery
       """.as[YosHenkilo]
     LOG.debug(s"yosHenkilotQuery: ${query.statements.head}")

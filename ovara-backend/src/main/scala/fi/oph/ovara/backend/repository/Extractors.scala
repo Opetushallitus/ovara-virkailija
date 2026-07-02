@@ -195,7 +195,7 @@ trait Extractors extends GenericOvaraJsonFormats {
     YosHenkilo(
       sukunimi = r.nextString(),
       etunimet = r.nextString(),
-      kutsumanimi = "",
+      kutsumanimi = r.nextString(),
       hetu = r.nextStringOption(),
       syntymaAika = extractDateOption(r.nextDateOption()),
       oppijanumero = r.nextString()
