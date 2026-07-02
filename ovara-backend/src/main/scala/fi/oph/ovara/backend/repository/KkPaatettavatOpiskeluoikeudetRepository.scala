@@ -33,12 +33,14 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
     opiskeluoikeudenTila: Option[String]
   ): SqlStreamingAction[Vector[KKPaatettavaOpiskeluoikeusEntity], KKPaatettavaOpiskeluoikeusEntity, Effect] = {
     val queryOppijanumero         = oppijanumero.map(o => s"AND oppijanumero = '$o'").getOrElse("")
-    val queryOpiskeluOikeudenTila = opiskeluoikeudenTila.map(t => s"AND virta_opiskeluoikeuden_tila = '$t'")
-    val query                     = sql"""
-        SELECT henkilo_oid AS opiskelijaAvain, virta_tunniste AS opiskeluoikeusAvain, nimi_fi, nimi_sv, nimi_en, virta_tila_nimi_fi AS opiskeluoikeudenViimeisinTila, koulutusaste, koulutus_koodi AS koulutusKoodi
-        FROM gen.gen_opiskeluoikeus_kk
-        WHERE yos IS TRUE AND organisaatio_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(organisaatioOids)})
-        $queryOppijanumero $queryOpiskeluOikeudenTila
+    val queryOpiskeluOikeudenTila =
+      opiskeluoikeudenTila.map(t => s"AND virta_opiskeluoikeuden_tila = '$t'").getOrElse("")
+    val query = sql"""
+        SELECT oo.henkilo_oid AS opiskelijaAvain, oo.virta_tunniste AS opiskeluoikeusAvain, oo.nimi_fi, oo.nimi_sv, oo.nimi_en, oo.virta_tila_nimi_fi AS opiskeluoikeudenViimeisinTila, oo.koulutusaste, oo.koulutus_koodi AS koulutusKoodi, linkitetty.koulutusaste AS linkitettyKoulutusAste
+        FROM gen.gen_opiskeluoikeus_kk oo
+        LEFT JOIN gen.gen_opiskeluoikeus_kk linkitetty on linkitetty.virta_tunniste = oo.liittyva_opiskeluoikeus_avain
+        WHERE oo.yos IS TRUE AND oo.organisaatio_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(organisaatioOids)})
+        #$queryOppijanumero #$queryOpiskeluOikeudenTila
       """.as[KKPaatettavaOpiskeluoikeusEntity]
     LOG.debug(s"opiskeluoikeudetQuery: ${query.statements.head}")
     query
@@ -48,7 +50,7 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
     henkiloOids: List[String]
   ): SqlStreamingAction[Vector[KKSitovastiVastaanottanut], KKSitovastiVastaanottanut, Effect] = {
     val query = sql"""
-        SELECT vr.henkilo_oid AS oppijanumero, vr.hakemus_oid AS hakemusOid, vr.hakukohde_oid AS hakukohdeOid, hk.hakukohde_nimi_fi, hk.hakukohde_nimi_sv, hk.hakukohde_nimi_en, vr.vastaanotto_aikaleima as vastaanottoAjankohta, hk.haku_oid AS hakuOid, koulutusaste
+        SELECT vr.henkilo_oid AS oppijanumero, vr.hakemus_oid AS hakemusOid, vr.hakukohde_oid AS hakukohdeOid, hk.hakukohde_nimi_fi, hk.hakukohde_nimi_sv, hk.hakukohde_nimi_en, vr.vastaanotto_aikaleima as vastaanottoAjankohta, hk.haku_oid AS hakuOid, hk.koulutusasteet
         FROM gen.gen_valintarekisteri vr 
         INNER JOIN gen.gen_hakukohde hk ON vr.hakukohde_oid = hk.hakukohde_oid
         WHERE hk.yos IS TRUE
@@ -67,10 +69,10 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
     val etunimetQuery = params.etunimet.map(e => s"AND etunimet LIKE '%$e%'").getOrElse("")
     val hetuQuery     = params.hetu.map(h => s"AND hetu = '$h'").getOrElse("")
     val query         = sql"""
-          SELECT sukunimi, etunimet, kutsumanimi, hetu, syntymaAika, oppijanumero
+          SELECT sukunimi, etunimet, hetu, syntymaaika, oppijanumero
           FROM gen.gen_henkilo
           WHERE oppijanumero IN (#${RepositoryUtils.makeListOfValuesQueryStr(henkiloOids)})
-          $sukunimiQuery $etunimetQuery $hetuQuery
+          #$sukunimiQuery #$etunimetQuery #$hetuQuery
       """.as[YosHenkilo]
     LOG.debug(s"yosHenkilotQuery: ${query.statements.head}")
     query
