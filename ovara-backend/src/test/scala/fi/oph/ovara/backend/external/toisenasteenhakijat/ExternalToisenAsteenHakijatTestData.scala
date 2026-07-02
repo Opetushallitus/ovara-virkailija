@@ -3,17 +3,18 @@ package fi.oph.ovara.backend.external.toisenasteenhakijat
 import java.time.OffsetDateTime
 
 object ExternalToisenAsteenHakijatTestData {
-  val OPPIJANUMERO      = "1.2.246.562.24.9"
-  val HAKEMUS_OID       = "1.2.246.562.11.00000000000003511892"
-  val HAKEMUS_OID_2     = "1.2.246.562.11.00000000000003511893"
-  val HAKU_OID          = "1.2.246.562.29.100"
-  val HAKU_OID_2        = "1.2.246.562.29.101"
-  val HAKUKOHDE_OID     = "1.2.246.562.20.012"
-  val HAKUKOHDE_OID_2   = "1.2.246.562.20.013"
-  val TOTEUTUS_OID      = "1.2.246.562.17.122"
-  val KOULUTUS_OID      = "1.2.246.562.13.022"
-  val ORGANISAATIO_OID  = "1.2.246.562.10.486"
-  val KOULUTUS_KOODIURI = "koulutus_621702#12"
+  val OPPIJANUMERO       = "1.2.246.562.24.00000000009"
+  val HAKEMUS_OID        = "1.2.246.562.11.00000000000003511892"
+  val HAKEMUS_OID_2      = "1.2.246.562.11.00000000000003511893"
+  val HAKU_OID           = "1.2.246.562.29.00000000000000000100"
+  val HAKU_OID_2         = "1.2.246.562.29.00000000000000000101"
+  val HAKUKOHDE_OID      = "1.2.246.562.20.00000000000000000012"
+  val HAKUKOHDE_OID_2    = "1.2.246.562.20.00000000000000000013"
+  val TOTEUTUS_OID       = "1.2.246.562.17.00000000000000000122"
+  val KOULUTUS_OID       = "1.2.246.562.13.00000000000000000022"
+  val ORGANISAATIO_OID   = "1.2.246.562.10.00000000000000000486"
+  val ORGANISAATIO_OID_2 = "1.2.246.562.10.00000000000000000487"
+  val KOULUTUS_KOODIURI  = "koulutus_621702#12"
 
   val EMAIL        = "oppija@example.test"
   val MATKAPUHELIN = "+358401234567"
@@ -90,6 +91,10 @@ object ExternalToisenAsteenHakijatTestData {
   val VALINTATIETO                = "HYVAKSYTTY"
   val VASTAANOTTOTIETO            = "VASTAANOTTANUT_SITOVASTI"
   val ILMOITTAUTUMISEN_TILA       = "LASNA_KOKO_LUKUVUOSI"
+  val VALINTA_CODE                = "1"
+  val VASTAANOTTO_CODE            = "3"
+  val LASNAOLO_CODE               = "2"
+  val VASTAANOTTO_KESKEN_CODE     = "1"
   val TOINENASTE_HAKUKOHTEET_JSON =
     s"""[{"oid":"$HAKUKOHDE_OID","terveys":$TERVEYS,"aiempiPeruminen":$AIEMPI_PERUMINEN,"kiinnostunutKaksoistutkinnosta":$KAKSOISTUTKINTO}]"""
 

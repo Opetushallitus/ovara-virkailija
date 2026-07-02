@@ -4,7 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import fi.oph.ovara.backend.opiskelijavalintatieto.ValidationError
 import fi.oph.ovara.backend.service.UserService
 import fi.oph.ovara.backend.utils.ParameterValidator.{validateOid, validateOrganisaatioOid}
-import fi.oph.ovara.backend.utils.{ApiException, AuditLog, AuditLogObj, AuditOperation, ControllerUtils}
+import fi.oph.ovara.backend.utils.{
+  ApiException,
+  AuditLog,
+  AuditLogObj,
+  AuditOperation,
+  AuthoritiesUtil,
+  ControllerUtils
+}
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.{Content, Schema}
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -31,13 +38,21 @@ class ExternalToisenAsteenHakijatController(
     format: String,
     hakuOid: String,
     hakukohdeOid: Option[String],
-    organisaatioOid: Option[String]
+    organisaatioOid: Option[String],
+    valintarajaus: String
   ): Map[String, Any] = Map(
     "format"          -> format,
     "hakuOid"         -> hakuOid,
     "hakukohdeOid"    -> hakukohdeOid.getOrElse(""),
-    "organisaatioOid" -> organisaatioOid.getOrElse("")
+    "organisaatioOid" -> organisaatioOid.getOrElse(""),
+    "valintarajaus"   -> valintarajaus
   )
+
+  private def resolveKayttooikeusScope: KayttooikeusScope = {
+    val kayttooikeusOids = AuthoritiesUtil.getKayttooikeusOids(userService.getAuthorities)
+    if (AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOids)) KayttooikeusScope.paakayttaja
+    else KayttooikeusScope.limited(kayttooikeusOids.toSet)
+  }
 
   @GetMapping(path = Array("toisenasteenhakijat"))
   @Operation(
@@ -64,11 +79,13 @@ class ExternalToisenAsteenHakijatController(
     @RequestParam("hakuOid", required = true) hakuOid: String,
     @RequestParam(value = "hakukohdeOid", required = false) hakukohdeOid: String,
     @RequestParam(value = "organisaatioOid", required = false) organisaatioOid: String,
+    @RequestParam("valintarajaus", required = true) valintarajaus: String,
     request: HttpServletRequest
   ): HakijatResponse =
     withPaakayttajaRole {
       val hakukohde    = Option(hakukohdeOid).filter(_.nonEmpty)
       val organisaatio = Option(organisaatioOid).filter(_.nonEmpty)
+      val parsedRajaus = Valintarajaus.parse(valintarajaus)
 
       validate {
         List(
@@ -77,20 +94,24 @@ class ExternalToisenAsteenHakijatController(
           validateOrganisaatioOid(organisaatio, "organisaatioOid"),
           Option.when(hakukohde.isEmpty && organisaatio.isEmpty)(
             "hakukohdeOid_or_organisaatioOid.required"
-          )
+          ),
+          Option.when(parsedRajaus.isEmpty)("valintarajaus.invalid")
         ).flatten
       }
 
       LOG.info(
-        s"Haetaan toisen asteen hakijat. HakuOid: $hakuOid, HakukohdeOid: $hakukohdeOid, OrganisaatioOid: $organisaatioOid"
+        s"Haetaan toisen asteen hakijat. HakuOid: $hakuOid, HakukohdeOid: $hakukohdeOid, " +
+          s"OrganisaatioOid: $organisaatioOid, Valintarajaus: $valintarajaus"
       )
       auditLog.logWithParams(
         request,
         AuditOperation.ExternalToisenAsteenHakijat,
-        auditParams("json", hakuOid, hakukohde, organisaatio)
+        auditParams("json", hakuOid, hakukohde, organisaatio, valintarajaus)
       )
       handleRequest {
-        hakijatService.getHakijat(hakuOid, hakukohde, organisaatio).map(HakijatResponse.apply)
+        hakijatService
+          .getHakijat(hakuOid, hakukohde, organisaatio, parsedRajaus.get, resolveKayttooikeusScope)
+          .map(HakijatResponse.apply)
       }
     }
 
@@ -117,11 +138,13 @@ class ExternalToisenAsteenHakijatController(
     @RequestParam("hakuOid", required = true) hakuOid: String,
     @RequestParam(value = "hakukohdeOid", required = false) hakukohdeOid: String,
     @RequestParam(value = "organisaatioOid", required = false) organisaatioOid: String,
+    @RequestParam("valintarajaus", required = true) valintarajaus: String,
     request: HttpServletRequest,
     response: HttpServletResponse
   ): Unit = {
     val hakukohde    = Option(hakukohdeOid).filter(_.nonEmpty)
     val organisaatio = Option(organisaatioOid).filter(_.nonEmpty)
+    val parsedRajaus = Valintarajaus.parse(valintarajaus)
 
     val authorities = userService.getAuthorities
     if (!authorities.contains(fi.oph.ovara.backend.utils.Constants.OPH_PAAKAYTTAJA_AUTHORITY)) {
@@ -133,7 +156,8 @@ class ExternalToisenAsteenHakijatController(
       validateOid(Some(hakuOid), "hakuOid"),
       validateOid(hakukohde, "hakukohdeOid"),
       validateOrganisaatioOid(organisaatio, "organisaatioOid"),
-      Option.when(hakukohde.isEmpty && organisaatio.isEmpty)("hakukohdeOid_or_organisaatioOid.required")
+      Option.when(hakukohde.isEmpty && organisaatio.isEmpty)("hakukohdeOid_or_organisaatioOid.required"),
+      Option.when(parsedRajaus.isEmpty)("valintarajaus.invalid")
     ).flatten
 
     if (validationErrors.nonEmpty) {
@@ -152,15 +176,15 @@ class ExternalToisenAsteenHakijatController(
 
     LOG.info(
       s"Haetaan toisen asteen hakijat Excel-muodossa. HakuOid: $hakuOid, HakukohdeOid: $hakukohdeOid, " +
-        s"OrganisaatioOid: $organisaatioOid"
+        s"OrganisaatioOid: $organisaatioOid, Valintarajaus: $valintarajaus"
     )
     auditLog.logWithParams(
       request,
       AuditOperation.ExternalToisenAsteenHakijat,
-      auditParams("excel", hakuOid, hakukohde, organisaatio)
+      auditParams("excel", hakuOid, hakukohde, organisaatio, valintarajaus)
     )
 
-    hakijatService.getHakijat(hakuOid, hakukohde, organisaatio) match {
+    hakijatService.getHakijat(hakuOid, hakukohde, organisaatio, parsedRajaus.get, resolveKayttooikeusScope) match {
       case Left(errorKey) =>
         LOG.error(s"Excel-raportin haku epäonnistui: $errorKey")
         response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())

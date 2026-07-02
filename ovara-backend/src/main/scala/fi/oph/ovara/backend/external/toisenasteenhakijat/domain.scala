@@ -4,6 +4,33 @@ import fi.oph.ovara.backend.domain.Kielistetty
 
 import java.time.OffsetDateTime
 
+enum Valintarajaus {
+  case HAKENEET, HYVAKSYTYT, VASTAANOTTANEET
+}
+
+object Valintarajaus {
+  def parse(s: String): Option[Valintarajaus] =
+    values.find(_.toString == s)
+}
+
+/**
+ * Käyttöoikeus scope carried through the request. OPH_PAAKAYTTAJA is unrestricted
+ * (`isPaakayttaja = true`, `allowedOrgOids` ignored). Any other caller is limited to
+ * `allowedOrgOids` — an empty set means the caller has no rights → empty results.
+ */
+case class KayttooikeusScope(
+  isPaakayttaja: Boolean,
+  allowedOrgOids: Set[String]
+)
+
+object KayttooikeusScope {
+  val paakayttaja: KayttooikeusScope =
+    KayttooikeusScope(isPaakayttaja = true, allowedOrgOids = Set.empty)
+
+  def limited(orgs: Set[String]): KayttooikeusScope =
+    KayttooikeusScope(isPaakayttaja = false, allowedOrgOids = orgs)
+}
+
 case class ToisenAsteenHakija(
   oppijanumero: String,
   sahkoposti: String,
