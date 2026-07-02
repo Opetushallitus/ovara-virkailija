@@ -100,7 +100,10 @@ case class HakijaHakutoiveRow(
   oppilaitos: Option[String],
   hakukohteenLinjaJson: Option[String],
   jarjestaaUrheilijanAmmkoulutusta: Option[Boolean],
-  koulutusKoodiurit: Seq[String]
+  koulutusKoodiurit: Seq[String],
+  valintatieto: Option[String],
+  vastaanottotieto: Option[String],
+  ilmoittautumisenTila: Option[String]
 ) {
   def asHakutoive(
     koodistot: Map[String, KoodistoArvo],
@@ -132,7 +135,10 @@ case class HakijaHakutoiveRow(
       urheilijanLisakysymykset = urheilijanLisakysymykset,
       terveys = hakukohdeTiedot.flatMap(_.terveys),
       aiempiperuminen = hakukohdeTiedot.flatMap(_.aiempiPeruminen),
-      kaksoistutkinto = hakukohdeTiedot.flatMap(_.kiinnostunutKaksoistutkinnosta)
+      kaksoistutkinto = hakukohdeTiedot.flatMap(_.kiinnostunutKaksoistutkinnosta),
+      valinta = valintatieto,
+      vastaanotto = vastaanottotieto,
+      lasnaolo = ilmoittautumisenTila
     )
   }
 

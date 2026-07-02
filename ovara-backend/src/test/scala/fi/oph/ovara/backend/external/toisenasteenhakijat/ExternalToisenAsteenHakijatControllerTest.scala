@@ -190,6 +190,9 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].opetuspiste").value(ORGANISAATIO_OID))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].oppilaitos").value(OPPILAITOS))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].koulutus.koodiarvo").value("621702"))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].valinta").value(VALINTATIETO))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].vastaanotto").value(VASTAANOTTOTIETO))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].lasnaolo").value(ILMOITTAUTUMISEN_TILA))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].terveys").value(TERVEYS))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].aiempiperuminen").value(AIEMPI_PERUMINEN))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].kaksoistutkinto").value(KAKSOISTUTKINTO))
@@ -308,6 +311,9 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       assert(headerRow.getCell(31).getStringCellValue == "Hakemusnumero")
       assert(headerRow.getCell(47).getStringCellValue == "Hakujno")
       assert(headerRow.getCell(52).getStringCellValue == "HakukohdeOid")
+      assert(headerRow.getCell(56).getStringCellValue == "Valinta")
+      assert(headerRow.getCell(57).getStringCellValue == "Vastaanotto")
+      assert(headerRow.getCell(58).getStringCellValue == "Lasnaolo")
       assert(headerRow.getCell(59).getStringCellValue == "Terveys")
       assert(headerRow.getCell(60).getStringCellValue == "Aiempiperuminen")
       assert(headerRow.getCell(61).getStringCellValue == "Kaksoistutkinto")
@@ -328,6 +334,9 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       assert(dataRow.getCell(47).getStringCellValue == "1") // hakujno
       assert(dataRow.getCell(49).getStringCellValue == ORGANISAATIO_OID)
       assert(dataRow.getCell(52).getStringCellValue == HAKUKOHDE_OID)
+      assert(dataRow.getCell(56).getStringCellValue == VALINTATIETO)
+      assert(dataRow.getCell(57).getStringCellValue == VASTAANOTTOTIETO)
+      assert(dataRow.getCell(58).getStringCellValue == ILMOITTAUTUMISEN_TILA)
       assert(dataRow.getCell(59).getStringCellValue == "X")     // terveys = true
       assert(dataRow.getCell(60).getStringCellValue == "")      // aiempiperuminen = false
       assert(dataRow.getCell(61).getStringCellValue == "X")     // kaksoistutkinto = true
