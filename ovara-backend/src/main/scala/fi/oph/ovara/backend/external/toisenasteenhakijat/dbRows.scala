@@ -12,6 +12,36 @@ private val urheilijaLukioLinjaCodes: Set[String] =
 
 private val LinjaWithoutVersion = """([^#]+)(?:#.*)?""".r
 
+private val valintaTilaMapping: Map[String, String] = Map(
+  "HYVAKSYTTY"                     -> "1",
+  "HARKINNANVARAISESTI_HYVAKSYTTY" -> "1",
+  "VARASIJALTA_HYVAKSYTTY"         -> "1",
+  "VARALLA"                        -> "2",
+  "HYLATTY"                        -> "3",
+  "PERUNUT"                        -> "4",
+  "PERUUNTUNUT"                    -> "4",
+  "PERUUTETTU"                     -> "5"
+)
+
+private val vastaanotonTilaMapping: Map[String, String] = Map(
+  "VASTAANOTTANUT_SITOVASTI"      -> "3",
+  "EHDOLLISESTI_VASTAANOTTANUT"   -> "3",
+  "PERUNUT"                       -> "4",
+  "EI_VASTAANOTETTU_MAARA_AIKANA" -> "5",
+  "PERUUTETTU"                    -> "6"
+)
+
+private val ilmoittautumisenTilaMapping: Map[String, String] = Map(
+  "EI_TEHTY"              -> "1",
+  "LASNA_KOKO_LUKUVUOSI"  -> "2",
+  "POISSA_KOKO_LUKUVUOSI" -> "3",
+  "EI_ILMOITTAUTUNUT"     -> "4",
+  "LASNA_SYKSY"           -> "5",
+  "POISSA_SYKSY"          -> "6",
+  "LASNA"                 -> "7",
+  "POISSA"                -> "8"
+)
+
 /**
  * Per-hakukohde info attached to the toinen aste yhteishaku hakemus row.
  *  Mirrors the JSON shape of `gen_hakemus_toinenaste_yhteishaku.hakukohteet[]`.
@@ -136,9 +166,9 @@ case class HakijaHakutoiveRow(
       terveys = hakukohdeTiedot.flatMap(_.terveys),
       aiempiperuminen = hakukohdeTiedot.flatMap(_.aiempiPeruminen),
       kaksoistutkinto = hakukohdeTiedot.flatMap(_.kiinnostunutKaksoistutkinnosta),
-      valinta = valintatieto,
-      vastaanotto = vastaanottotieto,
-      lasnaolo = ilmoittautumisenTila
+      valinta = valintatieto.flatMap(valintaTilaMapping.get),
+      vastaanotto = vastaanottotieto.map(vastaanotonTilaMapping.get).getOrElse(Some("1")),
+      lasnaolo = ilmoittautumisenTila.flatMap(ilmoittautumisenTilaMapping.get)
     )
   }
 

@@ -96,12 +96,12 @@ class ExternalToisenAsteenHakijatServiceTest
     assert(hakutoive.terveys.contains(TERVEYS))
     assert(hakutoive.aiempiperuminen.contains(AIEMPI_PERUMINEN))
     assert(hakutoive.kaksoistutkinto.contains(KAKSOISTUTKINTO))
-    assert(hakutoive.valinta.contains(VALINTATIETO))
-    assert(hakutoive.vastaanotto.contains(VASTAANOTTOTIETO))
-    assert(hakutoive.lasnaolo.contains(ILMOITTAUTUMISEN_TILA))
+    assert(hakutoive.valinta.contains(VALINTA_CODE))
+    assert(hakutoive.vastaanotto.contains(VASTAANOTTO_CODE))
+    assert(hakutoive.lasnaolo.contains(LASNAOLO_CODE))
   }
 
-  it should "leave valinta / vastaanotto / lasnaolo None when hakutoive columns are null" in {
+  it should "default vastaanotto to 1 (kesken) when null; valinta / lasnaolo stay empty" in {
     initSchema()
     insertHakemus()
     insertHakukohde()
@@ -111,7 +111,7 @@ class ExternalToisenAsteenHakijatServiceTest
     val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
 
     assert(hakutoive.valinta.isEmpty)
-    assert(hakutoive.vastaanotto.isEmpty)
+    assert(hakutoive.vastaanotto.contains(VASTAANOTTO_KESKEN_CODE))
     assert(hakutoive.lasnaolo.isEmpty)
   }
 
@@ -521,6 +521,382 @@ class ExternalToisenAsteenHakijatServiceTest
       hakutoive.urheilijanLisakysymykset.isEmpty,
       s"applicant interest alone must not surface ammatilliset lisäkysymykset; got ${hakutoive.urheilijanLisakysymykset}"
     )
+  }
+
+  it should "HYVAKSYTYT includes hakija with HYVAKSYTTY" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(valintatieto = Some("HYVAKSYTTY"))
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
+
+    assert(response.toOption.get.size == 1)
+  }
+
+  it should "HYVAKSYTYT includes hakija with HARKINNANVARAISESTI_HYVAKSYTTY" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(valintatieto = Some("HARKINNANVARAISESTI_HYVAKSYTTY"))
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
+
+    assert(response.toOption.get.size == 1)
+  }
+
+  it should "HYVAKSYTYT includes hakija with VARASIJALTA_HYVAKSYTTY" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(valintatieto = Some("VARASIJALTA_HYVAKSYTTY"))
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
+
+    assert(response.toOption.get.size == 1)
+  }
+
+  it should "HYVAKSYTYT filters out hakija whose hakutoive is HYLATTY" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(valintatieto = Some("HYLATTY"))
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
+
+    assert(response.toOption.get.isEmpty)
+  }
+
+  it should "VASTAANOTTANEET includes hakija with VASTAANOTTANUT_SITOVASTI" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(vastaanottotieto = Some("VASTAANOTTANUT_SITOVASTI"))
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.VASTAANOTTANEET)
+
+    assert(response.toOption.get.size == 1)
+  }
+
+  it should "VASTAANOTTANEET filters out hakija with EHDOLLISESTI_VASTAANOTTANUT (strict binding only)" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(vastaanottotieto = Some("EHDOLLISESTI_VASTAANOTTANUT"))
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.VASTAANOTTANEET)
+
+    assert(response.toOption.get.isEmpty)
+  }
+
+  it should "HAKENEET returns hakija regardless of state" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(valintatieto = Some("HYLATTY"), vastaanottotieto = None)
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HAKENEET)
+
+    assert(response.toOption.get.size == 1)
+  }
+
+  it should "return only the matching hakutoive when hakija has hakutoiveet to multiple hakukohteet" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 1)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2)
+
+    val response    = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HAKENEET)
+    val hakutoiveet = getOnlyHakija(response).hakemus.hakutoiveet
+
+    assert(hakutoiveet.size == 1, s"expected only the matched hakutoive, got $hakutoiveet")
+    assert(hakutoiveet.head.hakukohdeOid == HAKUKOHDE_OID)
+  }
+
+  it should "HYVAKSYTYT + hakukohdeOid returns only that hakukohde's hakutoive when accepted, drops others" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 1, valintatieto = Some("HYVAKSYTTY"))
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2, valintatieto = Some("HYVAKSYTTY"))
+
+    val response    = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
+    val hakutoiveet = getOnlyHakija(response).hakemus.hakutoiveet
+
+    assert(hakutoiveet.size == 1)
+    assert(hakutoiveet.head.hakukohdeOid == HAKUKOHDE_OID)
+  }
+
+  it should "HYVAKSYTYT + hakukohdeOid drops hakija entirely when their matching hakutoive is HYLATTY" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, valintatieto = Some("HYLATTY"))
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
+
+    assert(response.toOption.get.isEmpty)
+  }
+
+  it should "paakayttaja scope returns all hakutoiveet" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+
+    val response = service.getHakijat(
+      HAKU_OID,
+      Some(HAKUKOHDE_OID),
+      None,
+      Valintarajaus.HAKENEET,
+      KayttooikeusScope.paakayttaja
+    )
+
+    assert(response.toOption.get.size == 1)
+  }
+
+  it should "limited scope with matching org keeps the hakutoive" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+
+    val response = service.getHakijat(
+      HAKU_OID,
+      Some(HAKUKOHDE_OID),
+      None,
+      Valintarajaus.HAKENEET,
+      KayttooikeusScope.limited(Set(ORGANISAATIO_OID))
+    )
+
+    assert(response.toOption.get.size == 1)
+  }
+
+  it should "limited scope with unrelated org drops the hakija" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+
+    val response = service.getHakijat(
+      HAKU_OID,
+      Some(HAKUKOHDE_OID),
+      None,
+      Valintarajaus.HAKENEET,
+      KayttooikeusScope.limited(Set("1.2.246.562.10.99999"))
+    )
+
+    assert(response.toOption.get.isEmpty)
+  }
+
+  it should "limited scope with empty org set drops all hakijas" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+
+    val response = service.getHakijat(
+      HAKU_OID,
+      Some(HAKUKOHDE_OID),
+      None,
+      Valintarajaus.HAKENEET,
+      KayttooikeusScope.limited(Set.empty)
+    )
+
+    assert(response.toOption.get.isEmpty)
+  }
+
+  it should "collapse HARKINNANVARAISESTI_HYVAKSYTTY and VARASIJALTA_HYVAKSYTTY to valinta code 1" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2)
+    insertHakutoive(
+      hakukohdeOid = HAKUKOHDE_OID,
+      hakutoivenumero = 1,
+      valintatieto = Some("HARKINNANVARAISESTI_HYVAKSYTTY")
+    )
+    insertHakutoive(
+      hakukohdeOid = HAKUKOHDE_OID_2,
+      hakutoivenumero = 2,
+      valintatieto = Some("VARASIJALTA_HYVAKSYTTY")
+    )
+
+    val response = service.getHakijat(HAKU_OID, None, Some(ORGANISAATIO_OID))
+    val hakija   = getOnlyHakija(response)
+
+    assert(hakija.hakemus.hakutoiveet.forall(_.valinta.contains("1")))
+  }
+
+  it should "map PERUUTETTU on valintatieto to code 5" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(valintatieto = Some("PERUUTETTU"))
+
+    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
+
+    assert(hakutoive.valinta.contains("5"))
+  }
+
+  it should "map unrecognised valintatieto value to None" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(valintatieto = Some("SOMETHING_ELSE"))
+
+    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
+
+    assert(hakutoive.valinta.isEmpty)
+  }
+
+  it should "still exclude EHDOLLISESTI_VASTAANOTTANUT from VASTAANOTTANEET despite both mapping to code 3" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(vastaanottotieto = Some("EHDOLLISESTI_VASTAANOTTANUT"))
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.VASTAANOTTANEET)
+
+    assert(response.toOption.get.isEmpty)
+  }
+
+  it should "map every valintatieto DB enum value to its numeric code" in {
+    val cases = Seq(
+      "HYVAKSYTTY"                     -> Some("1"),
+      "HARKINNANVARAISESTI_HYVAKSYTTY" -> Some("1"),
+      "VARASIJALTA_HYVAKSYTTY"         -> Some("1"),
+      "VARALLA"                        -> Some("2"),
+      "HYLATTY"                        -> Some("3"),
+      "PERUNUT"                        -> Some("4"),
+      "PERUUNTUNUT"                    -> Some("4"),
+      "PERUUTETTU"                     -> Some("5"),
+      "TOTALLY_UNKNOWN"                -> None
+    )
+    cases.foreach { case (raw, expected) =>
+      resetDb()
+      insertHakemus()
+      insertHakukohde()
+      insertHakutoive(valintatieto = Some(raw))
+      val hakutoive = getOnlyHakija(service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)).hakemus.hakutoiveet.head
+      assert(hakutoive.valinta == expected, s"$raw should map to $expected but got ${hakutoive.valinta}")
+    }
+  }
+
+  it should "map every vastaanottotieto DB enum value to its numeric code" in {
+    val cases = Seq(
+      "VASTAANOTTANUT_SITOVASTI"      -> Some("3"),
+      "EHDOLLISESTI_VASTAANOTTANUT"   -> Some("3"),
+      "PERUNUT"                       -> Some("4"),
+      "EI_VASTAANOTETTU_MAARA_AIKANA" -> Some("5"),
+      "PERUUTETTU"                    -> Some("6"),
+      "TOTALLY_UNKNOWN"               -> None
+    )
+    cases.foreach { case (raw, expected) =>
+      resetDb()
+      insertHakemus()
+      insertHakukohde()
+      insertHakutoive(vastaanottotieto = Some(raw))
+      val hakutoive = getOnlyHakija(service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)).hakemus.hakutoiveet.head
+      assert(hakutoive.vastaanotto == expected, s"$raw should map to $expected but got ${hakutoive.vastaanotto}")
+    }
+  }
+
+  it should "map every ilmoittautumisen_tila DB enum value to its numeric code" in {
+    val cases = Seq(
+      "EI_TEHTY"              -> Some("1"),
+      "LASNA_KOKO_LUKUVUOSI"  -> Some("2"),
+      "POISSA_KOKO_LUKUVUOSI" -> Some("3"),
+      "EI_ILMOITTAUTUNUT"     -> Some("4"),
+      "LASNA_SYKSY"           -> Some("5"),
+      "POISSA_SYKSY"          -> Some("6"),
+      "LASNA"                 -> Some("7"),
+      "POISSA"                -> Some("8"),
+      "TOTALLY_UNKNOWN"       -> None
+    )
+    cases.foreach { case (raw, expected) =>
+      resetDb()
+      insertHakemus()
+      insertHakukohde()
+      insertHakutoive(ilmoittautumisenTila = Some(raw))
+      val hakutoive = getOnlyHakija(service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)).hakemus.hakutoiveet.head
+      assert(hakutoive.lasnaolo == expected, s"$raw should map to $expected but got ${hakutoive.lasnaolo}")
+    }
+  }
+
+  it should "HYVAKSYTYT excludes hakija when valintatieto is NULL" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(valintatieto = None)
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
+
+    assert(response.toOption.get.isEmpty)
+  }
+
+  it should "VASTAANOTTANEET excludes hakija when vastaanottotieto is NULL" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(vastaanottotieto = None)
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.VASTAANOTTANEET)
+
+    assert(response.toOption.get.isEmpty)
+  }
+
+  it should "return only the org-matching hakutoive when hakija has hakutoiveet at multiple orgs" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID, jarjestyspaikkaOid = ORGANISAATIO_OID)
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2, jarjestyspaikkaOid = ORGANISAATIO_OID_2)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 1)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2)
+
+    val response    = service.getHakijat(HAKU_OID, None, Some(ORGANISAATIO_OID))
+    val hakutoiveet = getOnlyHakija(response).hakemus.hakutoiveet
+
+    assert(hakutoiveet.size == 1, s"expected only org-matched hakutoive, got $hakutoiveet")
+    assert(hakutoiveet.head.opetuspiste.contains(ORGANISAATIO_OID))
+  }
+
+  it should "HYVAKSYTYT + organisaatioOid returns only the org+state matching hakutoive" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID, jarjestyspaikkaOid = ORGANISAATIO_OID)
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2, jarjestyspaikkaOid = ORGANISAATIO_OID_2)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 1, valintatieto = Some("HYVAKSYTTY"))
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2, valintatieto = Some("HYVAKSYTTY"))
+
+    val response    = service.getHakijat(HAKU_OID, None, Some(ORGANISAATIO_OID), Valintarajaus.HYVAKSYTYT)
+    val hakutoiveet = getOnlyHakija(response).hakemus.hakutoiveet
+
+    assert(hakutoiveet.size == 1)
+    assert(hakutoiveet.head.opetuspiste.contains(ORGANISAATIO_OID))
+  }
+
+  it should "HYVAKSYTYT + organisaatioOid drops hakija when only the other-org hakutoive is HYVAKSYTTY" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID, jarjestyspaikkaOid = ORGANISAATIO_OID)
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2, jarjestyspaikkaOid = ORGANISAATIO_OID_2)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 1, valintatieto = Some("HYLATTY"))
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2, valintatieto = Some("HYVAKSYTTY"))
+
+    val response = service.getHakijat(HAKU_OID, None, Some(ORGANISAATIO_OID), Valintarajaus.HYVAKSYTYT)
+
+    assert(response.toOption.get.isEmpty)
+  }
+
+  private def resetDb(): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "Drop everything")
+    initSchema()
   }
 
   private def getOnlyHakija(response: Either[String, Seq[ToisenAsteenHakija]]): ToisenAsteenHakija = {

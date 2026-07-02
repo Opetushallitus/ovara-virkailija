@@ -15,226 +15,122 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
   def selectHakijat(
     hakuOid: String,
     hakukohdeOid: Option[String],
-    organisaatioOid: Option[String]
+    organisaatioOid: Option[String],
+    valintarajaus: Valintarajaus
   ): Seq[HakijaRow] = {
-    val query = (hakukohdeOid, organisaatioOid) match {
-      case (Some(hk), _) =>
-        sql"""
-        SELECT hlo.oppijanumero,
-          hakemus.hakemus_oid,
-          hakemus.sahkoposti,
-          hakemus.puhelin,
-          hakemus.lahiosoite,
-          hakemus.postinumero,
-          hakemus.postitoimipaikka,
-          haku.haku_oid,
-          hakemus.etunimet,
-          hakemus.kutsumanimi,
-          hakemus.sukunimi,
-          hakemus.hetu,
-          hakemus.asuinmaa,
-          hakemus.kansalaisuus,
-          hakemus.kotikunta,
-          hakemus.sukupuoli,
-          hakemus.koulutusmarkkinointilupa,
-          hakemus.kiinnostunut_oppisopimuksesta,
-          hakemus.sahkoinenviestintalupa,
-          hakemus.valintatuloksen_julkaisulupa,
-          hakemus.jatetty,
-          hakemus.muokattu,
-          hlo.aidinkieli,
-          (SELECT st.arvo FROM gen.gen_supa_tieto st
-            WHERE st.hakemus_oid = hakemus.hakemus_oid
-              AND st.avain = 'perusopetuksen_kieli'
-            LIMIT 1) AS opetuskieli,
-          (SELECT hk.koulutuksen_alkamisvuosi FROM gen.gen_hakutoive ht
-            INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
-            WHERE ht.hakemus_oid = hakemus.hakemus_oid
-            ORDER BY ht.hakutoivenumero
-            LIMIT 1) AS hakukohde_vuosi,
-          (SELECT hk.koulutuksen_alkamiskausiuri FROM gen.gen_hakutoive ht
-            INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
-            WHERE ht.hakemus_oid = hakemus.hakemus_oid
-            ORDER BY ht.hakutoivenumero
-            LIMIT 1) AS hakukohde_kausi,
-          haku.koulutuksen_alkamisvuosi    AS haku_vuosi,
-          haku.koulutuksen_alkamiskausiuri AS haku_kausi,
-          (SELECT t.koulutuksen_alkamisvuosi FROM gen.gen_hakutoive ht
-            INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
-            INNER JOIN gen.gen_toteutus  t  ON hk.toteutus_oid   = t.toteutus_oid
-            WHERE ht.hakemus_oid = hakemus.hakemus_oid
-            ORDER BY ht.hakutoivenumero
-            LIMIT 1) AS toteutus_vuosi,
-          (SELECT t.koulutuksen_alkamiskausiuri FROM gen.gen_hakutoive ht
-            INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
-            INNER JOIN gen.gen_toteutus  t  ON hk.toteutus_oid   = t.toteutus_oid
-            WHERE ht.hakemus_oid = hakemus.hakemus_oid
-            ORDER BY ht.hakutoivenumero
-            LIMIT 1) AS toteutus_kausi,
-          toinenaste_yhteishaku_hakemus_data.huoltaja1_etunimi,
-          toinenaste_yhteishaku_hakemus_data.huoltaja1_sukunimi,
-          toinenaste_yhteishaku_hakemus_data.huoltaja1_matkapuhelin,
-          toinenaste_yhteishaku_hakemus_data.huoltaja1_email,
-          toinenaste_yhteishaku_hakemus_data.huoltaja2_etunimi,
-          toinenaste_yhteishaku_hakemus_data.huoltaja2_sukunimi,
-          toinenaste_yhteishaku_hakemus_data.huoltaja2_matkapuhelin,
-          toinenaste_yhteishaku_hakemus_data.huoltaja2_email,
-          toinenaste_yhteishaku_hakemus_data.hakukohteet,
-          toinenaste_yhteishaku_hakemus_data.kiinnostunut_urheilijan_ammatillisesta_koulutuksesta,
-          toinenaste_yhteishaku_hakemus_data.urh_laji,
-          toinenaste_yhteishaku_hakemus_data.urh_seura,
-          toinenaste_yhteishaku_hakemus_data.urh_liitto,
-          toinenaste_yhteishaku_hakemus_data.urh_sivulaji,
-          toinenaste_yhteishaku_hakemus_data.urh_keskiarvo,
-          toinenaste_yhteishaku_hakemus_data.urh_tamakausi,
-          toinenaste_yhteishaku_hakemus_data.urh_peruskoulu,
-          toinenaste_yhteishaku_hakemus_data.urh_viimekausi,
-          toinenaste_yhteishaku_hakemus_data.urh_toissakausi,
-          toinenaste_yhteishaku_hakemus_data.urh_valmentaja_puh,
-          toinenaste_yhteishaku_hakemus_data.urh_valmentaja_nimi,
-          toinenaste_yhteishaku_hakemus_data.urh_valmentaja_email,
-          toinenaste_yhteishaku_hakemus_data.urh_valmennusryhma_maajoukkue,
-          toinenaste_yhteishaku_hakemus_data.urh_valmennusryhma_piirijoukkue,
-          toinenaste_yhteishaku_hakemus_data.urh_valmennusryhma_seurajoukkue,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_laji,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_seura,
-          toinenaste_yhteishaku_hakemus_data.urh__amm_liitto,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_sivulaji,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_keskiarvo,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_tamakausi,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_peruskoulu,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_viimekausi,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_toissakausi,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_valmentaja_puh,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_valmentaja_nimi,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_valmentaja_email,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_valmennusryhma_maajoukkue,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_valmennusryhma_piirijoukkue,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_valmennusryhma_seurajoukkue
-        FROM gen.gen_henkilo hlo
-        INNER JOIN gen.gen_hakemus hakemus ON hakemus.henkilo_oid = hlo.henkilo_oid
-        INNER JOIN gen.gen_haku    haku    ON hakemus.haku_oid    = haku.haku_oid
-        LEFT JOIN gen.gen_hakemus_toinenaste_yhteishaku toinenaste_yhteishaku_hakemus_data ON toinenaste_yhteishaku_hakemus_data.hakemus_oid = hakemus.hakemus_oid
-        WHERE haku.haku_oid = $hakuOid
-        AND length(hakemus.hakemus_oid) = #$ataruOidLength
-        AND haku.kohdejoukko_koodiuri LIKE 'haunkohdejoukko_11%'
-        AND EXISTS (
-          SELECT 1 FROM gen.gen_hakutoive ht
-          WHERE ht.hakemus_oid = hakemus.hakemus_oid
-          AND ht.hakukohde_oid = $hk
-        )
-        """.as[HakijaRow]
-      case (_, Some(org)) =>
-        sql"""
-        SELECT hlo.oppijanumero,
-          hakemus.hakemus_oid,
-          hakemus.sahkoposti,
-          hakemus.puhelin,
-          hakemus.lahiosoite,
-          hakemus.postinumero,
-          hakemus.postitoimipaikka,
-          haku.haku_oid,
-          hakemus.etunimet,
-          hakemus.kutsumanimi,
-          hakemus.sukunimi,
-          hakemus.hetu,
-          hakemus.asuinmaa,
-          hakemus.kansalaisuus,
-          hakemus.kotikunta,
-          hakemus.sukupuoli,
-          hakemus.koulutusmarkkinointilupa,
-          hakemus.kiinnostunut_oppisopimuksesta,
-          hakemus.sahkoinenviestintalupa,
-          hakemus.valintatuloksen_julkaisulupa,
-          hakemus.jatetty,
-          hakemus.muokattu,
-          hlo.aidinkieli,
-          (SELECT st.arvo FROM gen.gen_supa_tieto st
-            WHERE st.hakemus_oid = hakemus.hakemus_oid
-              AND st.avain = 'perusopetuksen_kieli'
-            LIMIT 1) AS opetuskieli,
-          (SELECT hk.koulutuksen_alkamisvuosi FROM gen.gen_hakutoive ht
-            INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
-            WHERE ht.hakemus_oid = hakemus.hakemus_oid
-            ORDER BY ht.hakutoivenumero
-            LIMIT 1) AS hakukohde_vuosi,
-          (SELECT hk.koulutuksen_alkamiskausiuri FROM gen.gen_hakutoive ht
-            INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
-            WHERE ht.hakemus_oid = hakemus.hakemus_oid
-            ORDER BY ht.hakutoivenumero
-            LIMIT 1) AS hakukohde_kausi,
-          haku.koulutuksen_alkamisvuosi    AS haku_vuosi,
-          haku.koulutuksen_alkamiskausiuri AS haku_kausi,
-          (SELECT t.koulutuksen_alkamisvuosi FROM gen.gen_hakutoive ht
-            INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
-            INNER JOIN gen.gen_toteutus  t  ON hk.toteutus_oid   = t.toteutus_oid
-            WHERE ht.hakemus_oid = hakemus.hakemus_oid
-            ORDER BY ht.hakutoivenumero
-            LIMIT 1) AS toteutus_vuosi,
-          (SELECT t.koulutuksen_alkamiskausiuri FROM gen.gen_hakutoive ht
-            INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
-            INNER JOIN gen.gen_toteutus  t  ON hk.toteutus_oid   = t.toteutus_oid
-            WHERE ht.hakemus_oid = hakemus.hakemus_oid
-            ORDER BY ht.hakutoivenumero
-            LIMIT 1) AS toteutus_kausi,
-          toinenaste_yhteishaku_hakemus_data.huoltaja1_etunimi,
-          toinenaste_yhteishaku_hakemus_data.huoltaja1_sukunimi,
-          toinenaste_yhteishaku_hakemus_data.huoltaja1_matkapuhelin,
-          toinenaste_yhteishaku_hakemus_data.huoltaja1_email,
-          toinenaste_yhteishaku_hakemus_data.huoltaja2_etunimi,
-          toinenaste_yhteishaku_hakemus_data.huoltaja2_sukunimi,
-          toinenaste_yhteishaku_hakemus_data.huoltaja2_matkapuhelin,
-          toinenaste_yhteishaku_hakemus_data.huoltaja2_email,
-          toinenaste_yhteishaku_hakemus_data.hakukohteet,
-          toinenaste_yhteishaku_hakemus_data.kiinnostunut_urheilijan_ammatillisesta_koulutuksesta,
-          toinenaste_yhteishaku_hakemus_data.urh_laji,
-          toinenaste_yhteishaku_hakemus_data.urh_seura,
-          toinenaste_yhteishaku_hakemus_data.urh_liitto,
-          toinenaste_yhteishaku_hakemus_data.urh_sivulaji,
-          toinenaste_yhteishaku_hakemus_data.urh_keskiarvo,
-          toinenaste_yhteishaku_hakemus_data.urh_tamakausi,
-          toinenaste_yhteishaku_hakemus_data.urh_peruskoulu,
-          toinenaste_yhteishaku_hakemus_data.urh_viimekausi,
-          toinenaste_yhteishaku_hakemus_data.urh_toissakausi,
-          toinenaste_yhteishaku_hakemus_data.urh_valmentaja_puh,
-          toinenaste_yhteishaku_hakemus_data.urh_valmentaja_nimi,
-          toinenaste_yhteishaku_hakemus_data.urh_valmentaja_email,
-          toinenaste_yhteishaku_hakemus_data.urh_valmennusryhma_maajoukkue,
-          toinenaste_yhteishaku_hakemus_data.urh_valmennusryhma_piirijoukkue,
-          toinenaste_yhteishaku_hakemus_data.urh_valmennusryhma_seurajoukkue,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_laji,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_seura,
-          toinenaste_yhteishaku_hakemus_data.urh__amm_liitto,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_sivulaji,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_keskiarvo,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_tamakausi,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_peruskoulu,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_viimekausi,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_toissakausi,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_valmentaja_puh,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_valmentaja_nimi,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_valmentaja_email,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_valmennusryhma_maajoukkue,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_valmennusryhma_piirijoukkue,
-          toinenaste_yhteishaku_hakemus_data.urh_amm_valmennusryhma_seurajoukkue
-        FROM gen.gen_henkilo hlo
-        INNER JOIN gen.gen_hakemus hakemus ON hakemus.henkilo_oid = hlo.henkilo_oid
-        INNER JOIN gen.gen_haku    haku    ON hakemus.haku_oid    = haku.haku_oid
-        LEFT JOIN gen.gen_hakemus_toinenaste_yhteishaku toinenaste_yhteishaku_hakemus_data ON toinenaste_yhteishaku_hakemus_data.hakemus_oid = hakemus.hakemus_oid
-        WHERE haku.haku_oid = $hakuOid
-        AND length(hakemus.hakemus_oid) = #$ataruOidLength
-        AND haku.kohdejoukko_koodiuri LIKE 'haunkohdejoukko_11%'
-        AND EXISTS (
-          SELECT 1 FROM gen.gen_hakutoive ht
-          INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
-          WHERE ht.hakemus_oid = hakemus.hakemus_oid
-          AND hk.jarjestyspaikka_oid = $org
-        )
-        """.as[HakijaRow]
-      case _ =>
-        // Controller-level validation guarantees this branch is unreachable.
-        return Seq.empty
-    }
+    // Controller-level validation guarantees at least one of these is set.
+    if (hakukohdeOid.isEmpty && organisaatioOid.isEmpty) return Seq.empty
+
+    val stateSql      = stateSqlFragment(valintarajaus)
+    val hakuFilterSql = hakuFilterSqlFragment(hakukohdeOid, organisaatioOid)
+
+    val query = sql"""
+    SELECT hlo.oppijanumero,
+      hakemus.hakemus_oid,
+      hakemus.sahkoposti,
+      hakemus.puhelin,
+      hakemus.lahiosoite,
+      hakemus.postinumero,
+      hakemus.postitoimipaikka,
+      haku.haku_oid,
+      hakemus.etunimet,
+      hakemus.kutsumanimi,
+      hakemus.sukunimi,
+      hakemus.hetu,
+      hakemus.asuinmaa,
+      hakemus.kansalaisuus,
+      hakemus.kotikunta,
+      hakemus.sukupuoli,
+      hakemus.koulutusmarkkinointilupa,
+      hakemus.kiinnostunut_oppisopimuksesta,
+      hakemus.sahkoinenviestintalupa,
+      hakemus.valintatuloksen_julkaisulupa,
+      hakemus.jatetty,
+      hakemus.muokattu,
+      hlo.aidinkieli,
+      (SELECT st.arvo FROM gen.gen_supa_tieto st
+        WHERE st.hakemus_oid = hakemus.hakemus_oid
+          AND st.avain = 'perusopetuksen_kieli'
+        LIMIT 1) AS opetuskieli,
+      (SELECT hk.koulutuksen_alkamisvuosi FROM gen.gen_hakutoive ht
+        INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
+        WHERE ht.hakemus_oid = hakemus.hakemus_oid
+        ORDER BY ht.hakutoivenumero
+        LIMIT 1) AS hakukohde_vuosi,
+      (SELECT hk.koulutuksen_alkamiskausiuri FROM gen.gen_hakutoive ht
+        INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
+        WHERE ht.hakemus_oid = hakemus.hakemus_oid
+        ORDER BY ht.hakutoivenumero
+        LIMIT 1) AS hakukohde_kausi,
+      haku.koulutuksen_alkamisvuosi    AS haku_vuosi,
+      haku.koulutuksen_alkamiskausiuri AS haku_kausi,
+      (SELECT t.koulutuksen_alkamisvuosi FROM gen.gen_hakutoive ht
+        INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
+        INNER JOIN gen.gen_toteutus  t  ON hk.toteutus_oid   = t.toteutus_oid
+        WHERE ht.hakemus_oid = hakemus.hakemus_oid
+        ORDER BY ht.hakutoivenumero
+        LIMIT 1) AS toteutus_vuosi,
+      (SELECT t.koulutuksen_alkamiskausiuri FROM gen.gen_hakutoive ht
+        INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
+        INNER JOIN gen.gen_toteutus  t  ON hk.toteutus_oid   = t.toteutus_oid
+        WHERE ht.hakemus_oid = hakemus.hakemus_oid
+        ORDER BY ht.hakutoivenumero
+        LIMIT 1) AS toteutus_kausi,
+      toinenaste_yhteishaku_hakemus_data.huoltaja1_etunimi,
+      toinenaste_yhteishaku_hakemus_data.huoltaja1_sukunimi,
+      toinenaste_yhteishaku_hakemus_data.huoltaja1_matkapuhelin,
+      toinenaste_yhteishaku_hakemus_data.huoltaja1_email,
+      toinenaste_yhteishaku_hakemus_data.huoltaja2_etunimi,
+      toinenaste_yhteishaku_hakemus_data.huoltaja2_sukunimi,
+      toinenaste_yhteishaku_hakemus_data.huoltaja2_matkapuhelin,
+      toinenaste_yhteishaku_hakemus_data.huoltaja2_email,
+      toinenaste_yhteishaku_hakemus_data.hakukohteet,
+      toinenaste_yhteishaku_hakemus_data.kiinnostunut_urheilijan_ammatillisesta_koulutuksesta,
+      toinenaste_yhteishaku_hakemus_data.urh_laji,
+      toinenaste_yhteishaku_hakemus_data.urh_seura,
+      toinenaste_yhteishaku_hakemus_data.urh_liitto,
+      toinenaste_yhteishaku_hakemus_data.urh_sivulaji,
+      toinenaste_yhteishaku_hakemus_data.urh_keskiarvo,
+      toinenaste_yhteishaku_hakemus_data.urh_tamakausi,
+      toinenaste_yhteishaku_hakemus_data.urh_peruskoulu,
+      toinenaste_yhteishaku_hakemus_data.urh_viimekausi,
+      toinenaste_yhteishaku_hakemus_data.urh_toissakausi,
+      toinenaste_yhteishaku_hakemus_data.urh_valmentaja_puh,
+      toinenaste_yhteishaku_hakemus_data.urh_valmentaja_nimi,
+      toinenaste_yhteishaku_hakemus_data.urh_valmentaja_email,
+      toinenaste_yhteishaku_hakemus_data.urh_valmennusryhma_maajoukkue,
+      toinenaste_yhteishaku_hakemus_data.urh_valmennusryhma_piirijoukkue,
+      toinenaste_yhteishaku_hakemus_data.urh_valmennusryhma_seurajoukkue,
+      toinenaste_yhteishaku_hakemus_data.urh_amm_laji,
+      toinenaste_yhteishaku_hakemus_data.urh_amm_seura,
+      toinenaste_yhteishaku_hakemus_data.urh__amm_liitto,
+      toinenaste_yhteishaku_hakemus_data.urh_amm_sivulaji,
+      toinenaste_yhteishaku_hakemus_data.urh_amm_keskiarvo,
+      toinenaste_yhteishaku_hakemus_data.urh_amm_tamakausi,
+      toinenaste_yhteishaku_hakemus_data.urh_amm_peruskoulu,
+      toinenaste_yhteishaku_hakemus_data.urh_amm_viimekausi,
+      toinenaste_yhteishaku_hakemus_data.urh_amm_toissakausi,
+      toinenaste_yhteishaku_hakemus_data.urh_amm_valmentaja_puh,
+      toinenaste_yhteishaku_hakemus_data.urh_amm_valmentaja_nimi,
+      toinenaste_yhteishaku_hakemus_data.urh_amm_valmentaja_email,
+      toinenaste_yhteishaku_hakemus_data.urh_amm_valmennusryhma_maajoukkue,
+      toinenaste_yhteishaku_hakemus_data.urh_amm_valmennusryhma_piirijoukkue,
+      toinenaste_yhteishaku_hakemus_data.urh_amm_valmennusryhma_seurajoukkue
+    FROM gen.gen_henkilo hlo
+    INNER JOIN gen.gen_hakemus hakemus ON hakemus.henkilo_oid = hlo.henkilo_oid
+    INNER JOIN gen.gen_haku    haku    ON hakemus.haku_oid    = haku.haku_oid
+    LEFT JOIN gen.gen_hakemus_toinenaste_yhteishaku toinenaste_yhteishaku_hakemus_data ON toinenaste_yhteishaku_hakemus_data.hakemus_oid = hakemus.hakemus_oid
+    WHERE haku.haku_oid = $hakuOid
+    AND length(hakemus.hakemus_oid) = #$ataruOidLength
+    AND haku.kohdejoukko_koodiuri LIKE 'haunkohdejoukko_11%'
+    AND EXISTS (
+      SELECT 1 FROM gen.gen_hakutoive ht
+      INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
+      WHERE ht.hakemus_oid = hakemus.hakemus_oid
+      #$hakuFilterSql
+      #$stateSql
+    )
+    """.as[HakijaRow]
 
     LOG.debug(s"selectHakijatQuery: ${query.statements.head}")
     db.run(query, "selectHakijat")
@@ -281,5 +177,22 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
 
     LOG.debug(s"selectKoodistotQuery: ${query.statements.head}")
     db.run(query, "selectHakijatKoodistot")
+  }
+
+  private def hakuFilterSqlFragment(
+    hakukohdeOid: Option[String],
+    organisaatioOid: Option[String]
+  ): String =
+    hakukohdeOid
+      .map(hk => s" AND ht.hakukohde_oid = '$hk'")
+      .orElse(organisaatioOid.map(org => s" AND hk.jarjestyspaikka_oid = '$org'"))
+      .getOrElse("")
+
+  private def stateSqlFragment(v: Valintarajaus): String = v match {
+    case Valintarajaus.HAKENEET   => ""
+    case Valintarajaus.HYVAKSYTYT =>
+      " AND ht.valintatieto IN ('HYVAKSYTTY', 'HARKINNANVARAISESTI_HYVAKSYTTY', 'VARASIJALTA_HYVAKSYTTY')"
+    case Valintarajaus.VASTAANOTTANEET =>
+      " AND ht.vastaanottotieto = 'VASTAANOTTANUT_SITOVASTI'"
   }
 }
