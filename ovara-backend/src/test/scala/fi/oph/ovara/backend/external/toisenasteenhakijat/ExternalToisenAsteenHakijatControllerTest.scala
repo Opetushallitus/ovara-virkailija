@@ -58,7 +58,8 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
   private def get(
     hakuOid: String = HAKU_OID,
     hakukohdeOid: Option[String] = Some(HAKUKOHDE_OID),
-    organisaatioOid: Option[String] = None
+    organisaatioOid: Option[String] = None,
+    valintarajaus: Option[String] = Some("HAKENEET")
   )(mutator: MockHttpServletRequestBuilder => MockHttpServletRequestBuilder = identity): ResultActions = {
     var req = MockMvcRequestBuilders
       .get("/api/external/toisenasteenhakijat")
@@ -66,6 +67,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       .accept(MediaType.APPLICATION_JSON)
     hakukohdeOid.foreach(v => req = req.param("hakukohdeOid", v))
     organisaatioOid.foreach(v => req = req.param("organisaatioOid", v))
+    valintarajaus.foreach(v => req = req.param("valintarajaus", v))
     mvc.perform(mutator(req))
   }
 
@@ -131,6 +133,46 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
   }
 
   @Test
+  def returns400WhenValintarajausMissing(): Unit = {
+    get(valintarajaus = None)()
+      .andExpect(status.isBadRequest)
+  }
+
+  @Test
+  def returns400WhenValintarajausInvalid(): Unit = {
+    get(valintarajaus = Some("BOGUS"))()
+      .andExpect(status.isBadRequest)
+      .andExpect(
+        content.json(
+          """{"status": 400, "message": "virhe.validointi", "details": ["valintarajaus.invalid"] }"""
+        )
+      )
+  }
+
+  @Test
+  def returns400WhenValintarajausLowercase(): Unit = {
+    get(valintarajaus = Some("hyvaksytyt"))()
+      .andExpect(status.isBadRequest)
+      .andExpect(
+        content.json(
+          """{"status": 400, "message": "virhe.validointi", "details": ["valintarajaus.invalid"] }"""
+        )
+      )
+  }
+
+  @Test
+  def hyvaksytytFiltersOutHylattyHakija(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(valintatieto = Some("HYLATTY"))
+
+    get(valintarajaus = Some("HYVAKSYTYT"))()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
+  }
+
+  @Test
   def returns500WhenDatabaseError(): Unit = {
     get()()
       .andExpect(status.isInternalServerError)
@@ -190,9 +232,9 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].opetuspiste").value(ORGANISAATIO_OID))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].oppilaitos").value(OPPILAITOS))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].koulutus.koodiarvo").value("621702"))
-      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].valinta").value(VALINTATIETO))
-      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].vastaanotto").value(VASTAANOTTOTIETO))
-      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].lasnaolo").value(ILMOITTAUTUMISEN_TILA))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].valinta").value(VALINTA_CODE))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].vastaanotto").value(VASTAANOTTO_CODE))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].lasnaolo").value(LASNAOLO_CODE))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].terveys").value(TERVEYS))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].aiempiperuminen").value(AIEMPI_PERUMINEN))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].kaksoistutkinto").value(KAKSOISTUTKINTO))
@@ -257,6 +299,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
           .get("/api/external/toisenasteenhakijat/excel")
           .param("hakuOid", HAKU_OID)
           .param("hakukohdeOid", HAKUKOHDE_OID)
+          .param("valintarajaus", "HAKENEET")
       )
       .andExpect(status.isForbidden)
   }
@@ -268,6 +311,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
         MockMvcRequestBuilders
           .get("/api/external/toisenasteenhakijat/excel")
           .param("hakuOid", HAKU_OID)
+          .param("valintarajaus", "HAKENEET")
       )
       .andExpect(status.isBadRequest)
       .andExpect(
@@ -292,6 +336,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
           .get("/api/external/toisenasteenhakijat/excel")
           .param("hakuOid", HAKU_OID)
           .param("hakukohdeOid", HAKUKOHDE_OID)
+          .param("valintarajaus", "HAKENEET")
       )
       .andExpect(status.isOk)
       .andExpect(
@@ -334,9 +379,9 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       assert(dataRow.getCell(47).getStringCellValue == "1") // hakujno
       assert(dataRow.getCell(49).getStringCellValue == ORGANISAATIO_OID)
       assert(dataRow.getCell(52).getStringCellValue == HAKUKOHDE_OID)
-      assert(dataRow.getCell(56).getStringCellValue == VALINTATIETO)
-      assert(dataRow.getCell(57).getStringCellValue == VASTAANOTTOTIETO)
-      assert(dataRow.getCell(58).getStringCellValue == ILMOITTAUTUMISEN_TILA)
+      assert(dataRow.getCell(56).getStringCellValue == VALINTA_CODE)
+      assert(dataRow.getCell(57).getStringCellValue == VASTAANOTTO_CODE)
+      assert(dataRow.getCell(58).getStringCellValue == LASNAOLO_CODE)
       assert(dataRow.getCell(59).getStringCellValue == "X")     // terveys = true
       assert(dataRow.getCell(60).getStringCellValue == "")      // aiempiperuminen = false
       assert(dataRow.getCell(61).getStringCellValue == "X")     // kaksoistutkinto = true
@@ -407,6 +452,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
           .get("/api/external/toisenasteenhakijat/excel")
           .param("hakuOid", HAKU_OID)
           .param("organisaatioOid", ORGANISAATIO_OID)
+          .param("valintarajaus", "HAKENEET")
           .header("User-Agent", "ovara-integration-test/1.0")
       )
       .andExpect(status.isOk)
