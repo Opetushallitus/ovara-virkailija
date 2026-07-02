@@ -12,10 +12,13 @@ class ExternalToisenAsteenHakijatService(repository: ExternalToisenAsteenHakijat
   def getHakijat(
     hakuOid: String,
     hakukohdeOid: Option[String],
-    organisaatioOid: Option[String]
+    organisaatioOid: Option[String],
+    valintarajaus: Valintarajaus = Valintarajaus.HAKENEET,
+    scope: KayttooikeusScope = KayttooikeusScope.paakayttaja
   ): Either[String, Seq[ToisenAsteenHakija]] = {
     Try {
-      val hakijaRows = repository.selectHakijat(hakuOid, hakukohdeOid, organisaatioOid)
+      val hakijaRows =
+        repository.selectHakijat(hakuOid, hakukohdeOid, organisaatioOid, valintarajaus)
       if (hakijaRows.isEmpty) {
         Nil
       } else {
@@ -28,10 +31,13 @@ class ExternalToisenAsteenHakijatService(repository: ExternalToisenAsteenHakijat
           else repository.selectKoodistot(koodiUrit).map(k => k.versioituUri -> k).toMap
 
         val hakutoiveetByHakemus = hakutoiveRows.groupBy(_.hakemusOid)
-        hakijaRows.map { row =>
-          val toiveet = hakutoiveetByHakemus
+        hakijaRows.flatMap { row =>
+          val matchingRows = hakutoiveetByHakemus
             .getOrElse(row.hakemusOid, Seq.empty)
-            .map(
+            .filter(matchesFilters(_, hakukohdeOid, organisaatioOid, valintarajaus, scope))
+          if (matchingRows.isEmpty) None
+          else {
+            val toiveet = matchingRows.map(
               _.asHakutoive(
                 koodistot,
                 row.urheilijaKysymyksetLukio,
@@ -40,7 +46,8 @@ class ExternalToisenAsteenHakijatService(repository: ExternalToisenAsteenHakijat
                 row.hakukohteetTiedot
               )
             )
-          row.asHakija(toiveet)
+            Some(row.asHakija(toiveet))
+          }
         }
       }
     }.toEither.left
@@ -49,4 +56,27 @@ class ExternalToisenAsteenHakijatService(repository: ExternalToisenAsteenHakijat
         "virhe.tietokanta"
       }
   }
+
+  private def matchesFilters(
+    row: HakijaHakutoiveRow,
+    hakukohdeOid: Option[String],
+    organisaatioOid: Option[String], // Rajapinnan parametri
+    valintarajaus: Valintarajaus,
+    scope: KayttooikeusScope // Käyttäjän oikeudet
+  ): Boolean = {
+    val hakukohdeMatch = hakukohdeOid.forall(_ == row.hakukohdeOid)
+    val orgMatch       = organisaatioOid.forall(o => row.jarjestyspaikkaOid.contains(o))
+    val allowedMatch   = scope.isPaakayttaja || row.jarjestyspaikkaOid.exists(scope.allowedOrgOids.contains)
+    val stateMatch     = valintarajaus match {
+      case Valintarajaus.HAKENEET   => true
+      case Valintarajaus.HYVAKSYTYT =>
+        row.valintatieto.exists(HyvaksytytValintatiedot.contains)
+      case Valintarajaus.VASTAANOTTANEET =>
+        row.vastaanottotieto.contains("VASTAANOTTANUT_SITOVASTI")
+    }
+    hakukohdeMatch && orgMatch && allowedMatch && stateMatch
+  }
+
+  private val HyvaksytytValintatiedot: Set[String] =
+    Set("HYVAKSYTTY", "HARKINNANVARAISESTI_HYVAKSYTTY", "VARASIJALTA_HYVAKSYTTY")
 }
