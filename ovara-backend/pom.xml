@@ -30,6 +30,7 @@
         <scala.version>3.5.0</scala.version>
         <java.cas.version>1.2.4-SNAPSHOT</java.cas.version>
         <scalatest.version>3.2.19</scalatest.version>
+        <aws-advanced-jdbc-wrapper.version>3.3.0</aws-advanced-jdbc-wrapper.version>
         <flyway.version>11.11.1</flyway.version>
         <slick.version>3.6.1</slick.version>
         <spring-context.version>6.2.18</spring-context.version>
@@ -184,6 +185,11 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.jdbc</groupId>
+            <artifactId>aws-advanced-jdbc-wrapper</artifactId>
+            <version>${aws-advanced-jdbc-wrapper.version}</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
