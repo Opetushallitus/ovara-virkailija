@@ -43,7 +43,10 @@ case class KKSitovastiVastaanottanut(
   hakukohdeNimi: Kielistetty,
   vastaanottoAjankohta: Option[LocalDate],
   hakuOid: String,
-  koulutusasteet: List[String]
+  koulutusasteet: List[String],
+  haunNimi: Kielistetty,
+  oppilaitosOid: String,
+  oppilaitosNimi: Kielistetty
 )
 
 case class YosHenkilo(
