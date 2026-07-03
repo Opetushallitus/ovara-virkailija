@@ -59,7 +59,7 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
           hk.koulutusasteet,
           haku.nimi_fi, haku.nimi_sv, haku.nimi_en,
           org.organisaatio_oid,
-          org.nimi_fi, org.nimi_sv
+          org.nimi_fi, org.nimi_sv, org.nimi_en
         FROM gen.gen_valintarekisteri vr 
         INNER JOIN gen.gen_hakukohde hk ON vr.hakukohde_oid = hk.hakukohde_oid
         INNER JOIN gen.gen_haku haku on haku.haku_oid = hk.haku_oid
