@@ -10,11 +10,7 @@ import fi.oph.ovara.backend.raportointi.dto.{
   buildKkPaatettavatOpiskeluoikeudetParamsForExcel,
   KkPaatettavatOpiskeluoikeudetParams
 }
-import fi.oph.ovara.backend.repository.{
-  KkPaatettavatOpiskeluoikeudetRepository,
-  KorkeakouluKoulutuksetToteutuksetHakukohteetRepository,
-  ReadOnlyDatabase
-}
+import fi.oph.ovara.backend.repository.{KkPaatettavatOpiskeluoikeudetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, CommonExcelParams, ExcelWriter}
 import fi.oph.ovara.backend.yos.YosPredicate
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
