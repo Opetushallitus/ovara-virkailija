@@ -32,11 +32,18 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
     oppijanumero: Option[String],
     opiskeluoikeudenTila: Option[String]
   ): SqlStreamingAction[Vector[KKPaatettavaOpiskeluoikeusEntity], KKPaatettavaOpiskeluoikeusEntity, Effect] = {
-    val oppijanumeroQueryPart = oppijanumero.filterNot(_.isBlank).map(o => s"AND oppijanumero = '$o'").getOrElse("")
+    val oppijanumeroQueryPart = oppijanumero.filterNot(_.isBlank).map(o => s"AND oo.henkilo_oid = '$o'").getOrElse("")
     val opiskeluOikeudenTilaQueryPart =
-      opiskeluoikeudenTila.filterNot(_.isBlank).map(t => s"AND virta_opiskeluoikeuden_tila = '$t'").getOrElse("")
+      opiskeluoikeudenTila
+        .filterNot(_.isBlank)
+        .map(t =>
+          if (t.equals("paatettavissa"))
+            "AND oo.virta_opiskeluoikeuden_tila in ('1', '2', '4')"
+          else if (t.equals("paatetty")) "AND oo.virta_opiskeluoikeuden_tila = '7'"
+        )
+        .getOrElse("")
     val query = sql"""
-        SELECT oo.henkilo_oid AS opiskelijaAvain, oo.virta_tunniste AS opiskeluoikeusAvain, oo.nimi_fi, oo.nimi_sv, oo.nimi_en, oo.virta_tila_nimi_fi AS opiskeluoikeudenViimeisinTila, oo.koulutusaste, oo.koulutus_koodi AS koulutusKoodi, linkitetty.koulutusaste AS linkitettyKoulutusAste
+        SELECT oo.henkilo_oid AS opiskelijaAvain, oo.virta_tunniste AS opiskeluoikeusAvain, oo.nimi_fi, oo.nimi_sv, oo.nimi_en, oo.virta_opiskeluoikeuden_tila AS opiskeluoikeudenViimeisinTila, oo.koulutusaste, oo.koulutus_koodi AS koulutusKoodi, linkitetty.koulutusaste AS linkitettyKoulutusAste
         FROM gen.gen_opiskeluoikeus_kk oo
         LEFT JOIN gen.gen_opiskeluoikeus_kk linkitetty on linkitetty.virta_tunniste = oo.liittyva_opiskeluoikeus_avain
         WHERE oo.yos IS TRUE AND oo.organisaatio_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(organisaatioOids)})
