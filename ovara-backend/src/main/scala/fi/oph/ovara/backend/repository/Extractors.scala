@@ -190,8 +190,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       koulutusasteet = extractArray(r.nextStringOption()),
       haunNimi = Map(Fi -> r.nextString(), Sv -> r.nextString(), En -> r.nextString()),
       oppilaitosOid = r.nextString(),
-      // FIXME: englanniksi ei tällä hetkellä tule organisaation nimeä ovaraan
-      oppilaitosNimi = Map(Fi -> r.nextString(), Sv -> r.nextString(), En -> "")
+      oppilaitosNimi = Map(Fi -> r.nextString(), Sv -> r.nextString(), En -> r.nextString())
     )
   )
 
