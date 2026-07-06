@@ -4,12 +4,23 @@ import fi.oph.ovara.backend.domain.Kielistetty
 
 case class KkPaatettavatOpiskeluoikeudetParams(
   oppilaitos: String,
-  sukunimi: Option[String],
-  etunimet: Option[String],
-  hetu: Option[String],
-  oppijanumero: Option[String],
-  opiskeluoikeudenTila: Option[String]
-)
+  sukunimi: Option[String] = None,
+  etunimet: Option[String] = None,
+  hetu: Option[String] = None,
+  oppijanumero: Option[String] = None,
+  opiskeluoikeudenTila: Option[String] = None
+) {
+
+  override def toString: String =
+    s"""KKPaatettavatOpiskeluoikeudetParams:
+       |oppilaitos: $oppilaitos
+       |sukunimi: ${sukunimi.getOrElse("")}
+       |etunimet: ${etunimet.getOrElse("")}
+       |hetu: ${hetu.getOrElse("")}
+       |oppijanumero: ${oppijanumero.getOrElse("")}
+       |opiskeluoikeudenTila: ${opiskeluoikeudenTila.getOrElse("")}
+       |""".stripMargin
+}
 
 def buildKkPaatettavatOpiskeluoikeudetAuditParams(
   params: KkPaatettavatOpiskeluoikeudetParams

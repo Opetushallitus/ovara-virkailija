@@ -7,6 +7,7 @@ import fi.oph.ovara.backend.yos.YosConstants.{
   KOULUTUSASTE_YAMK,
   KOULUTUSASTE_YLEMPI_KORKEAKOULU_TUTKINTO
 }
+import fi.oph.ovara.backend.yos.YosTestUtils.{OPISKELUOIKEUS, VASTAANOTTO}
 import org.junit.jupiter.api.Assertions.{assertFalse, assertTrue}
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.{Test, TestInstance}
@@ -14,29 +15,6 @@ import org.junit.jupiter.api.{Test, TestInstance}
 @Test
 @TestInstance(Lifecycle.PER_CLASS)
 class YosPredicateTest {
-
-  def OPISKELUOIKEUS: KKPaatettavaOpiskeluoikeusEntity = KKPaatettavaOpiskeluoikeusEntity(
-    opiskelijaAvain = "",
-    opiskeluoikeusAvain = "",
-    opiskeluoikeudenNimi = Map(Fi -> "Sateentekijän tutkinto"),
-    opiskeluoikeudenViimeisinTila = "2",
-    koulutusaste = Some(YosConstants.KOULUTUSASTE_AMK),
-    koulutusKoodi = Some("14"),
-    linkitettyKoulutusAste = None
-  )
-
-  def VASTAANOTTO: KKSitovastiVastaanottanut = KKSitovastiVastaanottanut(
-    oppijanumero = "opiskelija-avain",
-    hakemusOid = "",
-    hakukohdeOid = "",
-    hakukohdeNimi = Map(Fi -> "Sadetanssijan korkeakoulutus"),
-    vastaanottoAjankohta = None,
-    hakuOid = "",
-    koulutusasteet = List(YosConstants.KOULUTUSASTE_AMK),
-    haunNimi = Map(Fi -> "Korkeakoulujen kevään toinen yhteishaku 2026"),
-    oppilaitosOid = "",
-    oppilaitosNimi = Map(Fi -> "Ratamon korkeakoulu")
-  )
 
   @Test
   def opiskeluOikeusKuuluuYosinPiiriinKoulutusAsteenMukaan(): Unit = {
