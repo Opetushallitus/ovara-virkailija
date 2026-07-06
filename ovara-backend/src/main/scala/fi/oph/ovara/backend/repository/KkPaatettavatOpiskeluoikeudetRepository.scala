@@ -33,13 +33,14 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
     opiskeluoikeudenTila: Option[String]
   ): SqlStreamingAction[Vector[KKPaatettavaOpiskeluoikeusEntity], KKPaatettavaOpiskeluoikeusEntity, Effect] = {
     val oppijanumeroQueryPart = oppijanumero.filterNot(_.isBlank).map(o => s"AND oo.henkilo_oid = '$o'").getOrElse("")
-    val opiskeluOikeudenTilaQueryPart =
+    val opiskeluOikeudenTilaQueryPart: String =
       opiskeluoikeudenTila
         .filterNot(_.isBlank)
         .map(t =>
           if (t.equals("paatettavissa"))
             "AND oo.virta_opiskeluoikeuden_tila in ('1', '2', '4')"
           else if (t.equals("paatetty")) "AND oo.virta_opiskeluoikeuden_tila = '7'"
+          else ""
         )
         .getOrElse("")
     val query = sql"""
@@ -64,7 +65,7 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
           vr.vastaanotto_aikaleima as vastaanottoAjankohta,
           hk.haku_oid AS hakuOid,
           hk.koulutusasteet,
-          haku.nimi_fi, haku.nimi_sv, haku.nimi_en,
+          haku.haku_nimi_fi, haku.haku_nimi_sv, haku.haku_nimi_en,
           org.organisaatio_oid,
           org.nimi_fi, org.nimi_sv, org.nimi_en
         FROM gen.gen_valintarekisteri vr 

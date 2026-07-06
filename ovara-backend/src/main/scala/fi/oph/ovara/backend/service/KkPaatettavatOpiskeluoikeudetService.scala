@@ -12,22 +12,22 @@ import fi.oph.ovara.backend.raportointi.dto.{
 }
 import fi.oph.ovara.backend.repository.{KkPaatettavatOpiskeluoikeudetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, CommonExcelParams, ExcelWriter}
-import fi.oph.ovara.backend.yos.YosPredicate
+import fi.oph.ovara.backend.yos.{YosPredicate, YosService}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.{Component, Service}
+import org.springframework.stereotype.Service
 
 import java.time.{LocalDate, LocalDateTime}
 import scala.util.{Failure, Success, Try}
 
-@Component
 @Service
 class KkPaatettavatOpiskeluoikeudetService(
   kkPaatettavatOpiskeluoikeudetRepository: KkPaatettavatOpiskeluoikeudetRepository,
   userService: UserService,
   commonService: CommonService,
-  lokalisointiService: LokalisointiService
+  lokalisointiService: LokalisointiService,
+  yosService: YosService
 ) {
 
   @Autowired
@@ -48,7 +48,7 @@ class KkPaatettavatOpiskeluoikeudetService(
       List.empty
     )
     Try {
-      val data               = getPaattyvatOpiskeluOikeudet(orgOidsForQuery, params)
+      val data               = yosService.getPaattyvatOpiskeluOikeudet(orgOidsForQuery, params)
       val raporttiParamNames = db
         .run(
           kkPaatettavatOpiskeluoikeudetRepository.organisaatioNameQuery(params.oppilaitos),
@@ -78,84 +78,6 @@ class KkPaatettavatOpiskeluoikeudetService(
         LOG.error("Error generating Excel report", exception)
         Left("virhe.tietokanta")
     }
-  }
-
-  private def getPaattyvatOpiskeluOikeudet(
-    orgOids: List[String],
-    params: KkPaatettavatOpiskeluoikeudetParams
-  ): List[KkPaatettavaOpiskeluoikeus] = {
-    val opiskeluoikeudet = db
-      .run(
-        kkPaatettavatOpiskeluoikeudetRepository
-          .opiskeluoikeudetQuery(orgOids, params.oppijanumero, params.opiskeluoikeudenTila),
-        "opiskeluoikeudetQuery"
-      )
-      .filter(o => o.koulutusaste.isDefined)
-      .toList
-    val henkiloOids              = opiskeluoikeudet.map(o => o.opiskelijaAvain).distinct
-    val sitovastiVastaanottaneet =
-      if (henkiloOids.isEmpty) List.empty
-      else
-        db
-          .run(
-            kkPaatettavatOpiskeluoikeudetRepository.vastaanottaneetQuery(henkiloOids),
-            "sitovastiVastaanottaneetQuery"
-          )
-          .filter(v => v.koulutusasteet.nonEmpty)
-          .toList
-    val yossiinKuuluvat: List[(KKPaatettavaOpiskeluoikeusEntity, KKSitovastiVastaanottanut)] = opiskeluoikeudet
-      .map(o => {
-        sitovastiVastaanottaneet
-          .find(v =>
-            v.oppijanumero.equals(o.opiskelijaAvain)
-              && YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(o, v)
-          )
-          .map(v => (o, v))
-      })
-      .filter(_.isDefined)
-      .map(_.get)
-    val yossiinKuuluvatHenkiloOidit = yossiinKuuluvat.map((o, _) => o.opiskelijaAvain).distinct
-    val yossiinKuuluvatHenkilot     =
-      if (yossiinKuuluvatHenkiloOidit.isEmpty) List.empty
-      else
-        db
-          .run(
-            kkPaatettavatOpiskeluoikeudetRepository.henkilotQuery(yossiinKuuluvatHenkiloOidit, params),
-            "yosHenkilotQuery"
-          )
-          .toList
-    yossiinKuuluvat
-      .map((o, v) =>
-        yossiinKuuluvatHenkilot
-          .find(h => h.oppijanumero.equals(o.opiskelijaAvain))
-          .map(h =>
-            KkPaatettavaOpiskeluoikeus(
-              oppijanumero = v.oppijanumero,
-              hetu = h.hetu,
-              syntymaAika = h.syntymaAika.orNull,
-              sukunimi = h.sukunimi,
-              etunimet = h.etunimet,
-              kutsumanimi = h.kutsumanimi,
-              opiskelijaAvain = o.opiskelijaAvain,
-              opiskeluoikeusAvain = o.opiskeluoikeusAvain,
-              opiskeluoikeudenNimi = o.opiskeluoikeudenNimi,
-              opiskeluoikeudenPaattymispvm = Some(LocalDate.of(2026, 12, 31)),
-              opiskeluoikeudenViimeisinTila = o.opiskeluoikeudenViimeisinTila,
-              hakemusOid = v.hakemusOid,
-              hakuOid = v.hakuOid,
-              hakuNimi = v.haunNimi,
-              hakukohdeOid = v.hakukohdeOid,
-              hakukohdeNimi = v.hakukohdeNimi,
-              oppilaitosOid = v.oppilaitosOid,
-              oppilaitosNimi = v.oppilaitosNimi,
-              vastaanottoAjankohta = v.vastaanottoAjankohta.get,
-              koulutusluokitusKoodit = "12345",
-              uudenOpiskeluoikeudenAlkamispvm = LocalDate.of(2026, 9, 1)
-            )
-          )
-      )
-      .filter(_.isDefined)
-      .map(_.get)
   }
 
 }
