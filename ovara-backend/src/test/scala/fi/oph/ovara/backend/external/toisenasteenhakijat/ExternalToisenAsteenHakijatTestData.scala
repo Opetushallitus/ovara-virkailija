@@ -113,4 +113,13 @@ object ExternalToisenAsteenHakijatTestData {
   val VALINTATULOKSEN_JULKAISULUPA  = true
   val JATETTY                       = OffsetDateTime.parse("2025-08-01T10:00:30+03:00")
   val MUOKATTU                      = OffsetDateTime.parse("2025-08-13T14:52:14+03:00")
+
+  val LAHTOKOULU_OID            = "1.2.246.562.10.00000000000000000900"
+  val LAHTOKOULU_NIMI_FI        = "Kallion peruskoulu"
+  val LAHTOKOULU_NIMI_SV        = "Kallio grundskola"
+  val LAHTOKOULU_LUOKKA         = "9C"
+  val LAHTOKOULU_SUORITUSTYYPPI = "VUOSILUOKKA_9"
+  val LAHTOKOULU_LUOKKATASO     = "9"
+  val LAHTOKOULU_ALKU           = java.time.LocalDate.parse("2024-08-01")
+  val LAHTOKOULU_LOPPU          = java.time.LocalDate.parse("2026-06-01")
 }
