@@ -22,8 +22,10 @@ class ExternalToisenAsteenHakijatService(repository: ExternalToisenAsteenHakijat
       if (hakijaRows.isEmpty) {
         Nil
       } else {
-        val hakemusOids   = hakijaRows.map(_.hakemusOid).toSet
-        val hakutoiveRows = repository.selectHakutoiveet(hakemusOids)
+        val hakemusOids          = hakijaRows.map(_.hakemusOid).toSet
+        val hakutoiveRows        = repository.selectHakutoiveet(hakemusOids)
+        val lahtokoulutByHakemus =
+          repository.selectLahtokoulut(hakemusOids).map(lk => lk.hakemusOid -> lk).toMap
 
         val koodiUrit = hakutoiveRows.flatMap(_.koulutusKoodiurit).toSet
         val koodistot =
@@ -46,7 +48,7 @@ class ExternalToisenAsteenHakijatService(repository: ExternalToisenAsteenHakijat
                 row.hakukohteetTiedot
               )
             )
-            Some(row.asHakija(toiveet))
+            Some(row.asHakija(toiveet, lahtokoulutByHakemus.get(row.hakemusOid)))
           }
         }
       }

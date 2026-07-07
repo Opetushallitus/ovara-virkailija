@@ -7,7 +7,7 @@ import fi.vm.sade.auditlog.Operation
 import jakarta.servlet.http.HttpServletRequest
 import org.junit.jupiter.api.{BeforeEach, Test}
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
+import org.junit.jupiter.params.provider.{CsvSource, ValueSource}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -277,7 +277,9 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       .andExpect(jsonPath("$.hakijat[0].oppivelvollisuusVoimassaAsti").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].lisakysymykset").isEmpty)
       .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemus.pohjakoulutus").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemus.osaaminen.yleinen_kielitutkinto_fi").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].terveys").value(nullValue()))
@@ -298,6 +300,506 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakemuksenJattopaiva").value("2025-08-01T10:00:00+03:00"))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakemuksenMuokkauspaiva").value("2025-08-13T14:52:00+03:00"))
+  }
+
+  @Test
+  def lahtokouluFieldsPopulatedFromActiveRow(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      nimiFi = Some(LAHTOKOULU_NIMI_FI),
+      nimiSv = Some(LAHTOKOULU_NIMI_SV)
+    )
+    insertHenkiloLahtokoulu(
+      luokka = Some(LAHTOKOULU_LUOKKA),
+      oppilaitosOid = Some(LAHTOKOULU_OID),
+      suoritusTyyppi = Some(LAHTOKOULU_SUORITUSTYYPPI),
+      suorituksenAlku = Some(LAHTOKOULU_ALKU),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+
+    get()()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_OID))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(LAHTOKOULU_NIMI_FI))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(LAHTOKOULU_LUOKKA))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(LAHTOKOULU_LUOKKATASO))
+  }
+
+  @Test
+  def lahtokouluPicksLatestSuorituksenAlkuWhenOverlapping(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      nimiFi = Some("Vanha koulu")
+    )
+    val otherOid = "1.2.246.562.10.00000000000000000901"
+    insertOrganisaatio(
+      organisaatioOid = otherOid,
+      nimiFi = Some(LAHTOKOULU_NIMI_FI)
+    )
+    // Earlier-started row — should lose.
+    insertHenkiloLahtokoulu(
+      luokka = Some("8A"),
+      oppilaitosOid = Some(LAHTOKOULU_OID),
+      suoritusTyyppi = Some("VUOSILUOKKA_8"),
+      suorituksenAlku = Some(java.time.LocalDate.parse("2023-08-01")),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+    // Later-started row that still covers hakemus.jatetty — should win.
+    insertHenkiloLahtokoulu(
+      luokka = Some(LAHTOKOULU_LUOKKA),
+      oppilaitosOid = Some(otherOid),
+      suoritusTyyppi = Some(LAHTOKOULU_SUORITUSTYYPPI),
+      suorituksenAlku = Some(LAHTOKOULU_ALKU),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+
+    get()()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(otherOid))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(LAHTOKOULU_NIMI_FI))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(LAHTOKOULU_LUOKKA))
+  }
+
+  @Test
+  def lahtokouluIgnoresRowsOutsideJatettyWindow(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      nimiFi = Some(LAHTOKOULU_NIMI_FI)
+    )
+    // Ended before jatetty.
+    insertHenkiloLahtokoulu(
+      luokka = Some(LAHTOKOULU_LUOKKA),
+      oppilaitosOid = Some(LAHTOKOULU_OID),
+      suoritusTyyppi = Some(LAHTOKOULU_SUORITUSTYYPPI),
+      suorituksenAlku = Some(java.time.LocalDate.parse("2023-08-01")),
+      suorituksenLoppu = Some(java.time.LocalDate.parse("2024-06-01"))
+    )
+
+    get()()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(nullValue()))
+  }
+
+  @Test
+  def luokkatasoPassesThroughForNamedSuoritusTyyppi(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID)
+    insertHenkiloLahtokoulu(
+      oppilaitosOid = Some(LAHTOKOULU_OID),
+      suoritusTyyppi = Some("TELMA"),
+      suorituksenAlku = Some(LAHTOKOULU_ALKU),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+
+    get()()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value("TELMA"))
+  }
+
+  @Test
+  def luokkatasoIsNullForUnknownSuoritusTyyppi(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID)
+    insertHenkiloLahtokoulu(
+      oppilaitosOid = Some(LAHTOKOULU_OID),
+      suoritusTyyppi = Some("JOKUMUU_TYYPPI"),
+      suorituksenAlku = Some(LAHTOKOULU_ALKU),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+
+    get()()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(nullValue()))
+  }
+
+  @Test
+  def lahtokouluIgnoresRowsStartingAfterJatetty(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    // Started after jatetty (which is 2025-08-01) → must be excluded.
+    insertHenkiloLahtokoulu(
+      luokka = Some(LAHTOKOULU_LUOKKA),
+      oppilaitosOid = Some(LAHTOKOULU_OID),
+      suoritusTyyppi = Some(LAHTOKOULU_SUORITUSTYYPPI),
+      suorituksenAlku = Some(java.time.LocalDate.parse("2025-09-01")),
+      suorituksenLoppu = Some(java.time.LocalDate.parse("2026-06-01"))
+    )
+
+    get()()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(nullValue()))
+  }
+
+  @Test
+  def lahtokouluTreatsNullSuorituksenLoppuAsActive(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    // No end date → treat as still active.
+    insertHenkiloLahtokoulu(
+      luokka = Some(LAHTOKOULU_LUOKKA),
+      oppilaitosOid = Some(LAHTOKOULU_OID),
+      suoritusTyyppi = Some(LAHTOKOULU_SUORITUSTYYPPI),
+      suorituksenAlku = Some(LAHTOKOULU_ALKU),
+      suorituksenLoppu = None
+    )
+
+    get()()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_OID))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(LAHTOKOULU_LUOKKA))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(LAHTOKOULU_LUOKKATASO))
+  }
+
+  @Test
+  def lahtokouluIsNullWhenHakemusJatettyIsNull(): Unit = {
+    initSchema()
+    insertHakemus(jatetty = None)
+    insertHakukohde()
+    insertHakutoive()
+    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    insertHenkiloLahtokoulu(
+      luokka = Some(LAHTOKOULU_LUOKKA),
+      oppilaitosOid = Some(LAHTOKOULU_OID),
+      suoritusTyyppi = Some(LAHTOKOULU_SUORITUSTYYPPI),
+      suorituksenAlku = Some(LAHTOKOULU_ALKU),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+
+    get()()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(nullValue()))
+  }
+
+  @Test
+  def lahtokoulunnimiIsNullWhenOrganisaatioRowMissing(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    // Deliberately omit insertOrganisaatio for LAHTOKOULU_OID.
+    insertHenkiloLahtokoulu(
+      luokka = Some(LAHTOKOULU_LUOKKA),
+      oppilaitosOid = Some(LAHTOKOULU_OID),
+      suoritusTyyppi = Some(LAHTOKOULU_SUORITUSTYYPPI),
+      suorituksenAlku = Some(LAHTOKOULU_ALKU),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+
+    get()()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_OID))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(LAHTOKOULU_LUOKKA))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(LAHTOKOULU_LUOKKATASO))
+  }
+
+  @Test
+  def lahtokouluIsIsolatedPerHakija(): Unit = {
+    initSchema()
+    // Hakija A
+    insertHakemus()
+    insertHakutoive()
+    // Hakija B — different henkilo, different hakemus, applies to the same hakukohde.
+    val oppijanumeroB = "1.2.246.562.24.00000000010"
+    val oppilaitosB   = "1.2.246.562.10.00000000000000000901"
+    insertHakemus(oppijanumero = oppijanumeroB, hakemusOid = HAKEMUS_OID_2, insertHaku = false)
+    insertHakutoive(hakemusOid = HAKEMUS_OID_2)
+    insertHakukohde()
+
+    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    insertOrganisaatio(organisaatioOid = oppilaitosB, nimiFi = Some("Toisen koulu"))
+    insertHenkiloLahtokoulu(
+      henkiloOid = OPPIJANUMERO,
+      luokka = Some(LAHTOKOULU_LUOKKA),
+      oppilaitosOid = Some(LAHTOKOULU_OID),
+      suoritusTyyppi = Some("VUOSILUOKKA_9"),
+      suorituksenAlku = Some(LAHTOKOULU_ALKU),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+    insertHenkiloLahtokoulu(
+      henkiloOid = oppijanumeroB,
+      luokka = Some("7B"),
+      oppilaitosOid = Some(oppilaitosB),
+      suoritusTyyppi = Some("VUOSILUOKKA_7"),
+      suorituksenAlku = Some(LAHTOKOULU_ALKU),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+
+    val body    = get()().andExpect(status.isOk).andReturn().getResponse.getContentAsString
+    val mapper  = new com.fasterxml.jackson.databind.ObjectMapper
+    val hakijat = mapper.readTree(body).get("hakijat")
+    assert(hakijat.size == 2, s"expected 2 hakijat, got: $body")
+    val byOppijanumero = (0 until hakijat.size)
+      .map(hakijat.get)
+      .map(h => h.get("oppijanumero").asText -> h)
+      .toMap
+    val hA = byOppijanumero(OPPIJANUMERO).get("hakemus")
+    assert(hA.get("lahtokoulu").asText == LAHTOKOULU_OID)
+    assert(hA.get("luokka").asText == LAHTOKOULU_LUOKKA)
+    assert(hA.get("luokkataso").asText == "9")
+    val hB = byOppijanumero(oppijanumeroB).get("hakemus")
+    assert(hB.get("lahtokoulu").asText == oppilaitosB)
+    assert(hB.get("luokka").asText == "7B")
+    assert(hB.get("luokkataso").asText == "7")
+  }
+
+  @Test
+  def excelWritesLahtokouluCells(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertToteutusJaKoulutus()
+    insertHakemusToinenAsteYhteishaku()
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      nimiFi = Some(LAHTOKOULU_NIMI_FI)
+    )
+    insertHenkiloLahtokoulu(
+      luokka = Some(LAHTOKOULU_LUOKKA),
+      oppilaitosOid = Some(LAHTOKOULU_OID),
+      suoritusTyyppi = Some(LAHTOKOULU_SUORITUSTYYPPI),
+      suorituksenAlku = Some(LAHTOKOULU_ALKU),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+
+    val result = mvc
+      .perform(
+        MockMvcRequestBuilders
+          .get("/api/external/toisenasteenhakijat/excel")
+          .param("hakuOid", HAKU_OID)
+          .param("hakukohdeOid", HAKUKOHDE_OID)
+          .param("valintarajaus", "HAKENEET")
+      )
+      .andExpect(status.isOk)
+      .andReturn()
+
+    val bytes    = result.getResponse.getContentAsByteArray
+    val workbook = new XSSFWorkbook(new ByteArrayInputStream(bytes))
+    try {
+      val sheet     = workbook.getSheetAt(0)
+      val headerRow = sheet.getRow(0)
+      assert(headerRow.getCell(34).getStringCellValue == "Lahtokoulu")
+      assert(headerRow.getCell(35).getStringCellValue == "Lahtokoulunnimi")
+      assert(headerRow.getCell(36).getStringCellValue == "Luokka")
+      assert(headerRow.getCell(37).getStringCellValue == "Luokkataso")
+
+      val dataRow = sheet.getRow(1)
+      assert(dataRow.getCell(34).getStringCellValue == LAHTOKOULU_OID)
+      assert(dataRow.getCell(35).getStringCellValue == LAHTOKOULU_NIMI_FI)
+      assert(dataRow.getCell(36).getStringCellValue == LAHTOKOULU_LUOKKA)
+      assert(dataRow.getCell(37).getStringCellValue == LAHTOKOULU_LUOKKATASO)
+    } finally workbook.close()
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "VUOSILUOKKA_7, 7",
+      "VUOSILUOKKA_8, 8",
+      "VUOSILUOKKA_9, 9",
+      "AIKUISTEN_PERUSOPETUS, AIKUISTEN_PERUSOPETUS",
+      "PERUSOPETUKSEEN_VALMISTAVA_OPETUS, PERUSOPETUKSEEN_VALMISTAVA_OPETUS",
+      "TELMA, TELMA",
+      "TUVA, TUVA",
+      "VAPAA_SIVISTYSTYO, VAPAA_SIVISTYSTYO"
+    )
+  )
+  def suoritusTyyppiMapsToExpectedLuokkataso(input: String, expected: String): Unit = {
+    assert(LahtokouluRow.suoritusTyyppiToLuokkataso(input).contains(expected))
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = Array("JOKUMUU", "vuosiluokka_9", "VUOSILUOKKA_10", "", " "))
+  def suoritusTyyppiReturnsNoneForUnknown(input: String): Unit = {
+    assert(LahtokouluRow.suoritusTyyppiToLuokkataso(input).isEmpty)
+  }
+
+  @Test
+  def lahtokoulunnimiFallsBackToSvWhenFiMissing(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      nimiFi = None,
+      nimiSv = Some(LAHTOKOULU_NIMI_SV)
+    )
+    insertHenkiloLahtokoulu(
+      oppilaitosOid = Some(LAHTOKOULU_OID),
+      suoritusTyyppi = Some(LAHTOKOULU_SUORITUSTYYPPI),
+      suorituksenAlku = Some(LAHTOKOULU_ALKU),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+
+    get()()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(LAHTOKOULU_NIMI_SV))
+  }
+
+  // ---- alias resolution (gen_henkilo master/linked henkilo_oid) ----
+
+  private def seedActiveLahtokoulu(henkiloOid: String): Unit =
+    insertHenkiloLahtokoulu(
+      henkiloOid = henkiloOid,
+      luokka = Some(LAHTOKOULU_LUOKKA),
+      oppilaitosOid = Some(LAHTOKOULU_OID),
+      suoritusTyyppi = Some(LAHTOKOULU_SUORITUSTYYPPI),
+      suorituksenAlku = Some(LAHTOKOULU_ALKU),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+
+  private def expectLahtokouluPopulated(actions: ResultActions): Unit = {
+    actions
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_OID))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(LAHTOKOULU_LUOKKA))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(LAHTOKOULU_LUOKKATASO))
+  }
+
+  @Test
+  def lahtokouluResolvesWhenHakemusUsesPrimaryLahtokouluUsesAlias(): Unit = {
+    initSchema()
+    val aliasA = "1.2.246.562.24.90000000001"
+    insertHenkilo() // (OPPIJANUMERO, OPPIJANUMERO, …)
+    insertHenkiloAlias(OPPIJANUMERO, aliasA)
+    insertHakemus(insertHenkilo = false) // hakemus.henkilo_oid = OPPIJANUMERO
+    insertHakukohde()
+    insertHakutoive()
+    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    seedActiveLahtokoulu(henkiloOid = aliasA)
+
+    expectLahtokouluPopulated(get()())
+  }
+
+  @Test
+  def lahtokouluResolvesWhenHakemusUsesAliasLahtokouluUsesPrimary(): Unit = {
+    initSchema()
+    val aliasA = "1.2.246.562.24.90000000002"
+    insertHenkilo() // (OPPIJANUMERO, OPPIJANUMERO, …)
+    insertHenkiloAlias(OPPIJANUMERO, aliasA)
+    // hakemus.henkilo_oid = aliasA — the `oppijanumero` param on insertHakemus becomes gen_hakemus.henkilo_oid.
+    insertHakemus(oppijanumero = aliasA, insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    seedActiveLahtokoulu(henkiloOid = OPPIJANUMERO)
+
+    expectLahtokouluPopulated(get()())
+  }
+
+  @Test
+  def lahtokouluResolvesAcrossTwoAliasesOfSamePerson(): Unit = {
+    initSchema()
+    val aliasA = "1.2.246.562.24.90000000003"
+    val aliasB = "1.2.246.562.24.90000000004"
+    insertHenkilo()
+    insertHenkiloAlias(OPPIJANUMERO, aliasA)
+    insertHenkiloAlias(OPPIJANUMERO, aliasB)
+    insertHakemus(oppijanumero = aliasA, insertHenkilo = false) // hakemus under alias A
+    insertHakukohde()
+    insertHakutoive()
+    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    seedActiveLahtokoulu(henkiloOid = aliasB) // lahtokoulu under alias B
+
+    expectLahtokouluPopulated(get()())
+  }
+
+  @Test
+  def lahtokouluPicksLatestWinnerAcrossAliases(): Unit = {
+    initSchema()
+    val aliasB   = "1.2.246.562.24.90000000005"
+    val otherOid = "1.2.246.562.10.00000000000000000902"
+    insertHenkilo()
+    insertHenkiloAlias(OPPIJANUMERO, aliasB)
+    insertHakemus(insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+    insertOrganisaatio(organisaatioOid = otherOid, nimiFi = Some("Aiempi koulu"))
+    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    // Earlier row filed under primary OID.
+    insertHenkiloLahtokoulu(
+      henkiloOid = OPPIJANUMERO,
+      luokka = Some("8A"),
+      oppilaitosOid = Some(otherOid),
+      suoritusTyyppi = Some("VUOSILUOKKA_8"),
+      suorituksenAlku = Some(java.time.LocalDate.parse("2023-08-01")),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+    // Later row filed under alias B — this should win.
+    seedActiveLahtokoulu(henkiloOid = aliasB)
+
+    expectLahtokouluPopulated(get()())
+  }
+
+  @Test
+  def lahtokouluDoesNotLeakAcrossPersons(): Unit = {
+    initSchema()
+    val personY = "1.2.246.562.24.90000000006"
+    insertHenkilo()                       // person X's primary self-link
+    insertHenkilo(oppijanumero = personY) // separate person Y
+    insertHakemus(insertHenkilo = false)  // hakemus for person X
+    insertHakukohde()
+    insertHakutoive()
+    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    // Lahtokoulu belongs to person Y — must NOT surface on person X's hakemus.
+    seedActiveLahtokoulu(henkiloOid = personY)
+
+    get()()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(nullValue()))
+  }
+
+  @Test
+  def lahtokouluResolvesWhenPersonHasAliasButOnlySelfLinkedRow(): Unit = {
+    initSchema()
+    val aliasA = "1.2.246.562.24.90000000007"
+    insertHenkilo()
+    insertHenkiloAlias(OPPIJANUMERO, aliasA) // alias exists but no lahtokoulu under it
+    insertHakemus(insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    seedActiveLahtokoulu(henkiloOid = OPPIJANUMERO)
+
+    expectLahtokouluPopulated(get()())
   }
 
   @Test
