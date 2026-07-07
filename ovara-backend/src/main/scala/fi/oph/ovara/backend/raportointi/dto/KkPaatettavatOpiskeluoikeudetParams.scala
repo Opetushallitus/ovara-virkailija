@@ -16,7 +16,6 @@ case class KkPaatettavatOpiskeluoikeudetParams(
        |oppilaitos: $oppilaitos
        |sukunimi: ${sukunimi.getOrElse("")}
        |etunimet: ${etunimet.getOrElse("")}
-       |hetu: ${hetu.getOrElse("")}
        |oppijanumero: ${oppijanumero.getOrElse("")}
        |opiskeluoikeudenTila: ${opiskeluoikeudenTila.getOrElse("")}
        |""".stripMargin
