@@ -87,6 +87,16 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       .andExpect(content.string(""))
   }
 
+  @Test
+  @WithMockUser(username = "hakeneet-user", roles = Array("APP_OVARA-VIRKAILIJA_HAKENEET"))
+  def returns200ForHakeneetRole(): Unit = {
+    initSchema()
+
+    get()()
+      .andExpect(status.isOk)
+      .andExpect(content.json("""{"hakijat": []}"""))
+  }
+
   @ParameterizedTest
   @ValueSource(strings = Array("not-oid", "1.2", "1.2.246", "1.2.246.1", "1.2.247.1.1"))
   def returns400WhenHakuOidNotOid(hakuOid: String): Unit = {
@@ -302,6 +312,30 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
           .param("valintarajaus", "HAKENEET")
       )
       .andExpect(status.isForbidden)
+  }
+
+  @Test
+  @WithMockUser(username = "hakeneet-user", roles = Array("APP_OVARA-VIRKAILIJA_HAKENEET"))
+  def excelReturns200ForHakeneetRole(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertToteutusJaKoulutus()
+    insertHakemusToinenAsteYhteishaku()
+
+    mvc
+      .perform(
+        MockMvcRequestBuilders
+          .get("/api/external/toisenasteenhakijat/excel")
+          .param("hakuOid", HAKU_OID)
+          .param("hakukohdeOid", HAKUKOHDE_OID)
+          .param("valintarajaus", "HAKENEET")
+      )
+      .andExpect(status.isOk)
+      .andExpect(
+        content.contentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+      )
   }
 
   @Test
