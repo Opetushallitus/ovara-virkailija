@@ -87,7 +87,10 @@ case class HakijaRow(
   urheilijaKysymyksetLukio: Option[UrheilijanLisakysymykset],
   urheilijaKysymyksetAmm: Option[UrheilijanLisakysymykset]
 ) {
-  def asHakija(hakutoiveet: Seq[HakijaHakutoive]): ToisenAsteenHakija =
+  def asHakija(
+    hakutoiveet: Seq[HakijaHakutoive],
+    lahtokoulu: Option[LahtokouluRow]
+  ): ToisenAsteenHakija =
     ToisenAsteenHakija(
       oppijanumero = oppijanumero,
       sahkoposti = sahkoposti,
@@ -117,9 +120,39 @@ case class HakijaRow(
         kausi = kausi,
         hakemuksenJattopaiva = jatetty,
         hakemuksenMuokkauspaiva = muokattu,
+        lahtokoulu = lahtokoulu.flatMap(_.oppilaitosOid),
+        lahtokoulunnimi = lahtokoulu.flatMap(_.oppilaitosNimi),
+        luokka = lahtokoulu.flatMap(_.luokka),
+        luokkataso = lahtokoulu.flatMap(_.suoritusTyyppi).flatMap(LahtokouluRow.suoritusTyyppiToLuokkataso),
         julkaisulupa = valintatuloksenJulkaisulupa
       )
     )
+}
+
+case class LahtokouluRow(
+  hakemusOid: String,
+  oppilaitosOid: Option[String],
+  oppilaitosNimi: Option[String],
+  luokka: Option[String],
+  suoritusTyyppi: Option[String]
+)
+
+object LahtokouluRow {
+  private val passthroughSuoritusTyyppi: Set[String] = Set(
+    "AIKUISTEN_PERUSOPETUS",
+    "PERUSOPETUKSEEN_VALMISTAVA_OPETUS",
+    "TELMA",
+    "TUVA",
+    "VAPAA_SIVISTYSTYO"
+  )
+
+  def suoritusTyyppiToLuokkataso(s: String): Option[String] = s match {
+    case "VUOSILUOKKA_7"                   => Some("7")
+    case "VUOSILUOKKA_8"                   => Some("8")
+    case "VUOSILUOKKA_9"                   => Some("9")
+    case v if passthroughSuoritusTyyppi(v) => Some(v)
+    case _                                 => None
+  }
 }
 
 case class HakijaHakutoiveRow(

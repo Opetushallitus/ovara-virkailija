@@ -142,6 +142,16 @@ class HakijatExtractors extends Extractors with GenericOvaraJsonFormats {
     )
   }
 
+  implicit val getLahtokouluRow: GetResult[LahtokouluRow] = GetResult { r =>
+    LahtokouluRow(
+      hakemusOid = r.nextString(),
+      oppilaitosOid = r.nextStringOption(),
+      oppilaitosNimi = r.nextStringOption(),
+      luokka = r.nextStringOption(),
+      suoritusTyyppi = r.nextStringOption()
+    )
+  }
+
   implicit val getHakijaHakutoiveRow: GetResult[HakijaHakutoiveRow] = GetResult { r =>
     HakijaHakutoiveRow(
       hakemusOid = r.nextString(),

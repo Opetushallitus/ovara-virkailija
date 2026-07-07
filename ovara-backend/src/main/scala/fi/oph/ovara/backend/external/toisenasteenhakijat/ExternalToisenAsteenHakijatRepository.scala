@@ -162,6 +162,41 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
     db.run(query, "selectHakijatHakutoiveet")
   }
 
+  def selectLahtokoulut(hakemusOids: Iterable[String]): Seq[LahtokouluRow] = {
+    if (hakemusOids.isEmpty) return Seq.empty
+    // A person may hold multiple gen_henkilo rows sharing the same oppijanumero (master) but
+    // different henkilo_oid (linked aliases). The hakemus's declared henkilo_oid and the
+    // lahtokoulu row's henkilo_oid may be different aliases of the same person, so both must
+    // be resolved through gen_henkilo.oppijanumero before matching.
+    val query = sql"""
+    SELECT hakemus.hakemus_oid,
+      lk.oppilaitos_oid,
+      COALESCE(org.nimi_fi, org.nimi_sv) AS lahtokoulunnimi,
+      lk.luokka,
+      lk.suoritus_tyyppi
+    FROM gen.gen_hakemus hakemus
+    INNER JOIN gen.gen_henkilo hlo_hak   ON hlo_hak.henkilo_oid   = hakemus.henkilo_oid
+    INNER JOIN gen.gen_henkilo hlo_alias ON hlo_alias.oppijanumero = hlo_hak.oppijanumero
+    INNER JOIN gen.gen_henkilo_lahtokoulu lk
+      ON lk.henkilo_oid = hlo_alias.henkilo_oid
+     AND lk.suorituksen_alku <= hakemus.jatetty
+     AND (lk.suorituksen_loppu IS NULL OR hakemus.jatetty <= lk.suorituksen_loppu)
+    LEFT JOIN gen.gen_organisaatio org ON org.organisaatio_oid = lk.oppilaitos_oid
+    WHERE hakemus.hakemus_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(hakemusOids)})
+      AND lk.suorituksen_alku = (
+        SELECT MAX(lk2.suorituksen_alku)
+        FROM gen.gen_henkilo_lahtokoulu lk2
+        INNER JOIN gen.gen_henkilo hlo_alias2 ON hlo_alias2.henkilo_oid = lk2.henkilo_oid
+        WHERE hlo_alias2.oppijanumero = hlo_hak.oppijanumero
+          AND lk2.suorituksen_alku <= hakemus.jatetty
+          AND (lk2.suorituksen_loppu IS NULL OR hakemus.jatetty <= lk2.suorituksen_loppu)
+      )
+    """.as[LahtokouluRow]
+
+    LOG.debug(s"selectLahtokoulutQuery: ${query.statements.head}")
+    db.run(query, "selectHakijatLahtokoulut")
+  }
+
   def selectKoodistot(koodiUrit: Set[String]): Seq[KoodistoArvo] = {
     val query = sql"""
     SELECT versioitu_koodiuri,
