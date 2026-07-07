@@ -22,6 +22,14 @@ trait ExternalToisenAsteenHakijatTestUtils {
     )
   }
 
+  /** Insert an additional gen_henkilo row that links `henkiloOid` to the same master `oppijanumero`. */
+  def insertHenkiloAlias(oppijanumero: String, henkiloOid: String): Unit = {
+    db.run(
+      sqlu"""INSERT INTO gen.gen_henkilo VALUES ($oppijanumero, $henkiloOid, NULL)""",
+      "Insert test henkilö alias"
+    )
+  }
+
   def insertHaku(
     hakuOid: String = HAKU_OID,
     kohdejoukkoKoodiuri: String = "haunkohdejoukko_11#1",
@@ -206,11 +214,41 @@ trait ExternalToisenAsteenHakijatTestUtils {
 
   def insertOrganisaatio(
     organisaatioOid: String = ORGANISAATIO_OID,
-    oppilaitosnumero: Option[String] = Some(OPPILAITOSNUMERO)
+    oppilaitosnumero: Option[String] = Some(OPPILAITOSNUMERO),
+    nimiFi: Option[String] = None,
+    nimiSv: Option[String] = None
   ): Unit = {
     db.run(
-      sqlu"""INSERT INTO gen.gen_organisaatio VALUES($organisaatioOid, $oppilaitosnumero)""",
+      sqlu"""INSERT INTO gen.gen_organisaatio VALUES($organisaatioOid, $oppilaitosnumero, $nimiFi, $nimiSv)""",
       "Insert test organisaatio"
+    )
+  }
+
+  def insertHenkiloLahtokoulu(
+    henkiloOid: String = OPPIJANUMERO,
+    tila: Option[String] = Some("KESKEN"),
+    luokka: Option[String] = None,
+    oppilaitosOid: Option[String] = None,
+    suoritusTyyppi: Option[String] = None,
+    arvosanaPuuttuu: Option[Boolean] = Some(false),
+    suorituksenAlku: Option[java.time.LocalDate] = None,
+    suorituksenLoppu: Option[java.time.LocalDate] = None,
+    valmistumisvuosi: Option[Int] = None
+  ): Unit = {
+    val alkuStr  = suorituksenAlku.map(_.toString)
+    val loppuStr = suorituksenLoppu.map(_.toString)
+    db.run(
+      sqlu"""INSERT INTO gen.gen_henkilo_lahtokoulu VALUES(
+          $henkiloOid,
+          $tila,
+          $luokka,
+          $oppilaitosOid,
+          $suoritusTyyppi,
+          $arvosanaPuuttuu,
+          $alkuStr,
+          $loppuStr,
+          $valmistumisvuosi)""",
+      "Insert test henkilo_lahtokoulu"
     )
   }
 
@@ -295,8 +333,8 @@ trait ExternalToisenAsteenHakijatTestUtils {
           );
 
           CREATE TABLE gen.gen_henkilo (
-              oppijanumero text NOT NULL PRIMARY KEY,
-              henkilo_oid  text,
+              oppijanumero text NOT NULL,
+              henkilo_oid  text NOT NULL PRIMARY KEY,
               aidinkieli   text
           );
 
@@ -386,7 +424,21 @@ trait ExternalToisenAsteenHakijatTestUtils {
 
           CREATE TABLE gen.gen_organisaatio(
               organisaatio_oid text NOT NULL PRIMARY KEY,
-              oppilaitosnumero text
+              oppilaitosnumero text,
+              nimi_fi text,
+              nimi_sv text
+          );
+
+          CREATE TABLE gen.gen_henkilo_lahtokoulu(
+              henkilo_oid text NOT NULL,
+              tila text,
+              luokka text,
+              oppilaitos_oid text,
+              suoritus_tyyppi text,
+              arvosana_puuttuu boolean,
+              suorituksen_alku date,
+              suorituksen_loppu date,
+              valmistumisvuosi integer
           );
 
           CREATE TABLE gen.gen_koulutus(
