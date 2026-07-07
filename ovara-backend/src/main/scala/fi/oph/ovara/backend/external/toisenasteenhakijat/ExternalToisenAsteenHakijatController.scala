@@ -48,9 +48,24 @@ class ExternalToisenAsteenHakijatController(
     "valintarajaus"   -> valintarajaus
   )
 
+  // OPH_PAAKAYTTAJA and users with the dedicated HAKENEET role both qualify for the endpoint.
+  private def isAuthorized: Boolean = {
+    val authorities = userService.getAuthorities
+    authorities.contains(fi.oph.ovara.backend.utils.Constants.OPH_PAAKAYTTAJA_AUTHORITY) ||
+    authorities.contains(fi.oph.ovara.backend.utils.Constants.HAKENEET_AUTHORITY)
+  }
+
+  private def requireAuthorized[T](f: => T): T =
+    if (isAuthorized) f
+    else throw org.springframework.web.server.ResponseStatusException(HttpStatus.FORBIDDEN)
+
   private def resolveKayttooikeusScope: KayttooikeusScope = {
-    val kayttooikeusOids = AuthoritiesUtil.getKayttooikeusOids(userService.getAuthorities)
-    if (AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOids)) KayttooikeusScope.paakayttaja
+    val authorities      = userService.getAuthorities
+    val kayttooikeusOids = AuthoritiesUtil.getKayttooikeusOids(authorities)
+    if (
+      AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOids) ||
+      authorities.contains(fi.oph.ovara.backend.utils.Constants.HAKENEET_AUTHORITY)
+    ) KayttooikeusScope.paakayttaja
     else KayttooikeusScope.limited(kayttooikeusOids.toSet)
   }
 
@@ -82,7 +97,7 @@ class ExternalToisenAsteenHakijatController(
     @RequestParam("valintarajaus", required = true) valintarajaus: String,
     request: HttpServletRequest
   ): HakijatResponse =
-    withPaakayttajaRole {
+    requireAuthorized {
       val hakukohde    = Option(hakukohdeOid).filter(_.nonEmpty)
       val organisaatio = Option(organisaatioOid).filter(_.nonEmpty)
       val parsedRajaus = Valintarajaus.parse(valintarajaus)
@@ -146,8 +161,7 @@ class ExternalToisenAsteenHakijatController(
     val organisaatio = Option(organisaatioOid).filter(_.nonEmpty)
     val parsedRajaus = Valintarajaus.parse(valintarajaus)
 
-    val authorities = userService.getAuthorities
-    if (!authorities.contains(fi.oph.ovara.backend.utils.Constants.OPH_PAAKAYTTAJA_AUTHORITY)) {
+    if (!isAuthorized) {
       response.setStatus(HttpStatus.FORBIDDEN.value())
       return
     }
