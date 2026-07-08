@@ -47,10 +47,7 @@ class ExternalToisenAsteenHakijatServiceTest
   }
 
   it should "return hakija matched by hakukohdeOid" in {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertToteutusJaKoulutus()
     insertOpetuskieli()
     insertOrganisaatio()
@@ -116,10 +113,7 @@ class ExternalToisenAsteenHakijatServiceTest
   }
 
   it should "leave terveys/aiempiperuminen/kaksoistutkinto None when hakukohdeOid is not in hakukohteet array" in {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertHakemusToinenAsteYhteishaku(
       hakukohteetJson = Some(
         s"""[{"oid":"$HAKUKOHDE_OID_2","terveys":true,"aiempiPeruminen":true,"kiinnostunutKaksoistutkinnosta":true}]"""
@@ -135,10 +129,7 @@ class ExternalToisenAsteenHakijatServiceTest
   }
 
   it should "leave terveys/aiempiperuminen/kaksoistutkinto None when hakukohteet column is null" in {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertHakemusToinenAsteYhteishaku(hakukohteetJson = None)
 
     val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
@@ -150,10 +141,7 @@ class ExternalToisenAsteenHakijatServiceTest
   }
 
   it should "return hakija matched by organisaatioOid" in {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
 
     val response = service.getHakijat(HAKU_OID, None, Some(ORGANISAATIO_OID))
 
@@ -162,10 +150,7 @@ class ExternalToisenAsteenHakijatServiceTest
   }
 
   it should "return None / empty for fields that have no source yet" in {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
 
     val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
@@ -360,10 +345,7 @@ class ExternalToisenAsteenHakijatServiceTest
   }
 
   it should "filter by hakuOid" in {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
 
     val response = service.getHakijat(HAKU_OID_2, Some(HAKUKOHDE_OID), None)
 
@@ -642,10 +624,7 @@ class ExternalToisenAsteenHakijatServiceTest
   }
 
   it should "paakayttaja scope returns all hakutoiveet" in {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
 
     val response = service.getHakijat(
       HAKU_OID,
@@ -659,10 +638,7 @@ class ExternalToisenAsteenHakijatServiceTest
   }
 
   it should "limited scope with matching org keeps the hakutoive" in {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
 
     val response = service.getHakijat(
       HAKU_OID,
@@ -676,10 +652,7 @@ class ExternalToisenAsteenHakijatServiceTest
   }
 
   it should "limited scope with unrelated org drops the hakija" in {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
 
     val response = service.getHakijat(
       HAKU_OID,
@@ -693,10 +666,7 @@ class ExternalToisenAsteenHakijatServiceTest
   }
 
   it should "limited scope with empty org set drops all hakijas" in {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
 
     val response = service.getHakijat(
       HAKU_OID,
