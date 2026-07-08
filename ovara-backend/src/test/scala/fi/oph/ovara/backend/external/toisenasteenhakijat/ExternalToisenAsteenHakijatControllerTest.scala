@@ -17,7 +17,7 @@ import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.{WithAnonymousUser, WithMockUser}
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.{MockMvc, ResultActions}
-import org.springframework.test.web.servlet.request.{MockHttpServletRequestBuilder, MockMvcRequestBuilders}
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.{content, header, jsonPath, status}
 import org.hamcrest.Matchers.*
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -60,7 +60,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     hakukohdeOid: Option[String] = Some(HAKUKOHDE_OID),
     organisaatioOid: Option[String] = None,
     valintarajaus: Option[String] = Some("HAKENEET")
-  )(mutator: MockHttpServletRequestBuilder => MockHttpServletRequestBuilder = identity): ResultActions = {
+  ): ResultActions = {
     var req = MockMvcRequestBuilders
       .get("/api/external/toisenasteenhakijat")
       .param("hakuOid", hakuOid)
@@ -68,13 +68,13 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     hakukohdeOid.foreach(v => req = req.param("hakukohdeOid", v))
     organisaatioOid.foreach(v => req = req.param("organisaatioOid", v))
     valintarajaus.foreach(v => req = req.param("valintarajaus", v))
-    mvc.perform(mutator(req))
+    mvc.perform(req)
   }
 
   @Test
   @WithAnonymousUser
   def returns401WhenNoUser(): Unit = {
-    get()()
+    get()
       .andExpect(status.isUnauthorized)
       .andExpect(content.string(""))
   }
@@ -82,7 +82,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
   @Test
   @WithMockUser(username = "testuser", roles = Array("USER"))
   def returns403WhenUserMissingRole(): Unit = {
-    get()()
+    get()
       .andExpect(status.isForbidden)
       .andExpect(content.string(""))
   }
@@ -92,7 +92,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
   def returns200ForHakeneetRole(): Unit = {
     initSchema()
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(content.json("""{"hakijat": []}"""))
   }
@@ -100,7 +100,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
   @ParameterizedTest
   @ValueSource(strings = Array("not-oid", "1.2", "1.2.246", "1.2.246.1", "1.2.247.1.1"))
   def returns400WhenHakuOidNotOid(hakuOid: String): Unit = {
-    get(hakuOid = hakuOid)()
+    get(hakuOid = hakuOid)
       .andExpect(status.isBadRequest)
       .andExpect(
         content.json(
@@ -111,7 +111,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
   @Test
   def returns400WhenHakukohdeOidNotOid(): Unit = {
-    get(hakukohdeOid = Some("not-oid"))()
+    get(hakukohdeOid = Some("not-oid"))
       .andExpect(status.isBadRequest)
       .andExpect(
         content.json(
@@ -122,7 +122,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
   @Test
   def returns400WhenOrganisaatioOidNotOrganisaatioOid(): Unit = {
-    get(hakukohdeOid = None, organisaatioOid = Some("1.2.246.562.20.1"))()
+    get(hakukohdeOid = None, organisaatioOid = Some("1.2.246.562.20.1"))
       .andExpect(status.isBadRequest)
       .andExpect(
         content.json(
@@ -133,7 +133,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
   @Test
   def returns400WhenNeitherHakukohdeNorOrganisaatioProvided(): Unit = {
-    get(hakukohdeOid = None, organisaatioOid = None)()
+    get(hakukohdeOid = None, organisaatioOid = None)
       .andExpect(status.isBadRequest)
       .andExpect(
         content.json(
@@ -144,13 +144,13 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
   @Test
   def returns400WhenValintarajausMissing(): Unit = {
-    get(valintarajaus = None)()
+    get(valintarajaus = None)
       .andExpect(status.isBadRequest)
   }
 
   @Test
   def returns400WhenValintarajausInvalid(): Unit = {
-    get(valintarajaus = Some("BOGUS"))()
+    get(valintarajaus = Some("BOGUS"))
       .andExpect(status.isBadRequest)
       .andExpect(
         content.json(
@@ -161,7 +161,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
   @Test
   def returns400WhenValintarajausLowercase(): Unit = {
-    get(valintarajaus = Some("hyvaksytyt"))()
+    get(valintarajaus = Some("hyvaksytyt"))
       .andExpect(status.isBadRequest)
       .andExpect(
         content.json(
@@ -177,14 +177,14 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertHakukohde()
     insertHakutoive(valintatieto = Some("HYLATTY"))
 
-    get(valintarajaus = Some("HYVAKSYTYT"))()
+    get(valintarajaus = Some("HYVAKSYTYT"))
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
   }
 
   @Test
   def returns500WhenDatabaseError(): Unit = {
-    get()()
+    get()
       .andExpect(status.isInternalServerError)
       .andExpect(content.json("\"virhe.tietokanta\""))
   }
@@ -193,23 +193,20 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
   def returnsEmptyListWhenNoHakijatMatch(): Unit = {
     initSchema()
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(content.json("""{"hakijat": []}"""))
   }
 
   @Test
   def returnsHakijaFilteredByHakukohdeOid(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertToteutusJaKoulutus()
     insertOpetuskieli()
     insertOrganisaatio()
     insertHakemusToinenAsteYhteishaku()
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
       .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO))
@@ -252,12 +249,9 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
   @Test
   def returnsHakijaFilteredByOrganisaatioOid(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
 
-    get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID))()
+    get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID))
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
       .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO))
@@ -265,12 +259,9 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
   @Test
   def fieldsWithoutDataSourceAreNullOrEmpty(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].muupuhelin").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].oikeusMaksuttomaanKoulutukseenVoimassaAsti").value(nullValue()))
@@ -295,7 +286,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertHakukohde()
     insertHakutoive()
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakemuksenJattopaiva").value("2025-08-01T10:00:00+03:00"))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakemuksenMuokkauspaiva").value("2025-08-13T14:52:00+03:00"))
@@ -303,10 +294,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
   @Test
   def lahtokouluFieldsPopulatedFromActiveRow(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertOrganisaatio(
       organisaatioOid = LAHTOKOULU_OID,
       nimiFi = Some(LAHTOKOULU_NIMI_FI),
@@ -320,7 +308,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
     )
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_OID))
       .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(LAHTOKOULU_NIMI_FI))
@@ -330,10 +318,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
   @Test
   def lahtokouluPicksLatestSuorituksenAlkuWhenOverlapping(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertOrganisaatio(
       organisaatioOid = LAHTOKOULU_OID,
       nimiFi = Some("Vanha koulu")
@@ -360,7 +345,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
     )
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(otherOid))
       .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(LAHTOKOULU_NIMI_FI))
@@ -369,10 +354,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
   @Test
   def lahtokouluIgnoresRowsOutsideJatettyWindow(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertOrganisaatio(
       organisaatioOid = LAHTOKOULU_OID,
       nimiFi = Some(LAHTOKOULU_NIMI_FI)
@@ -386,20 +368,12 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       suorituksenLoppu = Some(java.time.LocalDate.parse("2024-06-01"))
     )
 
-    get()()
-      .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(nullValue()))
+    expectAllLahtokouluFieldsNull(get())
   }
 
   @Test
   def luokkatasoPassesThroughForNamedSuoritusTyyppi(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID)
     insertHenkiloLahtokoulu(
       oppilaitosOid = Some(LAHTOKOULU_OID),
@@ -408,17 +382,14 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
     )
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value("TELMA"))
   }
 
   @Test
   def luokkatasoIsNullForUnknownSuoritusTyyppi(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID)
     insertHenkiloLahtokoulu(
       oppilaitosOid = Some(LAHTOKOULU_OID),
@@ -427,17 +398,14 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
     )
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(nullValue()))
   }
 
   @Test
   def lahtokouluIgnoresRowsStartingAfterJatetty(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
     // Started after jatetty (which is 2025-08-01) → must be excluded.
     insertHenkiloLahtokoulu(
@@ -448,20 +416,12 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       suorituksenLoppu = Some(java.time.LocalDate.parse("2026-06-01"))
     )
 
-    get()()
-      .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(nullValue()))
+    expectAllLahtokouluFieldsNull(get())
   }
 
   @Test
   def lahtokouluTreatsNullSuorituksenLoppuAsActive(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
     // No end date → treat as still active.
     insertHenkiloLahtokoulu(
@@ -472,7 +432,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       suorituksenLoppu = None
     )
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_OID))
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(LAHTOKOULU_LUOKKA))
@@ -494,20 +454,12 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
     )
 
-    get()()
-      .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(nullValue()))
+    expectAllLahtokouluFieldsNull(get())
   }
 
   @Test
   def lahtokoulunnimiIsNullWhenOrganisaatioRowMissing(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     // Deliberately omit insertOrganisaatio for LAHTOKOULU_OID.
     insertHenkiloLahtokoulu(
       luokka = Some(LAHTOKOULU_LUOKKA),
@@ -517,7 +469,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
     )
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_OID))
       .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(nullValue()))
@@ -557,7 +509,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
     )
 
-    val body    = get()().andExpect(status.isOk).andReturn().getResponse.getContentAsString
+    val body    = get().andExpect(status.isOk).andReturn().getResponse.getContentAsString
     val mapper  = new com.fasterxml.jackson.databind.ObjectMapper
     val hakijat = mapper.readTree(body).get("hakijat")
     assert(hakijat.size == 2, s"expected 2 hakijat, got: $body")
@@ -577,10 +529,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
   @Test
   def excelWritesLahtokouluCells(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertToteutusJaKoulutus()
     insertHakemusToinenAsteYhteishaku()
     insertOrganisaatio(
@@ -649,10 +598,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
   @Test
   def lahtokoulunnimiFallsBackToSvWhenFiMissing(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertOrganisaatio(
       organisaatioOid = LAHTOKOULU_OID,
       nimiFi = None,
@@ -665,7 +611,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
     )
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(LAHTOKOULU_NIMI_SV))
   }
@@ -690,6 +636,15 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(LAHTOKOULU_LUOKKATASO))
   }
 
+  private def expectAllLahtokouluFieldsNull(actions: ResultActions): Unit = {
+    actions
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(nullValue()))
+  }
+
   @Test
   def lahtokouluResolvesWhenHakemusUsesPrimaryLahtokouluUsesAlias(): Unit = {
     initSchema()
@@ -702,7 +657,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
     seedActiveLahtokoulu(henkiloOid = aliasA)
 
-    expectLahtokouluPopulated(get()())
+    expectLahtokouluPopulated(get())
   }
 
   @Test
@@ -718,7 +673,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
     seedActiveLahtokoulu(henkiloOid = OPPIJANUMERO)
 
-    expectLahtokouluPopulated(get()())
+    expectLahtokouluPopulated(get())
   }
 
   @Test
@@ -735,7 +690,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
     seedActiveLahtokoulu(henkiloOid = aliasB) // lahtokoulu under alias B
 
-    expectLahtokouluPopulated(get()())
+    expectLahtokouluPopulated(get())
   }
 
   @Test
@@ -762,7 +717,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     // Later row filed under alias B — this should win.
     seedActiveLahtokoulu(henkiloOid = aliasB)
 
-    expectLahtokouluPopulated(get()())
+    expectLahtokouluPopulated(get())
   }
 
   @Test
@@ -778,12 +733,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     // Lahtokoulu belongs to person Y — must NOT surface on person X's hakemus.
     seedActiveLahtokoulu(henkiloOid = personY)
 
-    get()()
-      .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(nullValue()))
+    expectAllLahtokouluFieldsNull(get())
   }
 
   @Test
@@ -798,45 +748,36 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
     seedActiveLahtokoulu(henkiloOid = OPPIJANUMERO)
 
-    expectLahtokouluPopulated(get()())
+    expectLahtokouluPopulated(get())
   }
 
   // ---- Pohjakoulutus + Todistusvuosi (gen_supa_tieto) ----
 
   @Test
   def pohjakoulutusIsPopulatedFromSupaTieto(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertPohjakoulutus(arvo = Some("1"))
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemus.pohjakoulutus").value("1"))
   }
 
   @Test
   def todistusvuosiIsPopulatedFromSupaTieto(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertTodistusvuosi(arvo = Some("2025"))
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemus.todistusvuosi").value("2025"))
   }
 
   @Test
   def pohjakoulutusAndTodistusvuosiAreNullWhenAbsent(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemus.pohjakoulutus").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemus.todistusvuosi").value(nullValue()))
@@ -844,36 +785,27 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
   @Test
   def pohjakoulutusStripsJsonQuotes(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertPohjakoulutus(arvo = Some("\"3\""))
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemus.pohjakoulutus").value("3"))
   }
 
   @Test
   def todistusvuosiStripsJsonQuotes(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertTodistusvuosi(arvo = Some("\"2024\""))
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemus.todistusvuosi").value("2024"))
   }
 
   @Test
   def excelWritesPohjakoulutusAndTodistusvuosiCells(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertToteutusJaKoulutus()
     insertHakemusToinenAsteYhteishaku()
     insertPohjakoulutus(arvo = Some("1"))
@@ -904,6 +836,153 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     } finally workbook.close()
   }
 
+  // ---- kansalaisuudet JSON extraction edges ----
+
+  @Test
+  def kansalaisuudetEmptyArrayYieldsEmptyList(): Unit = {
+    initSchema()
+    insertHakemus(kansalaisuusJson = Some("[]"))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet", hasSize[Any](0)))
+  }
+
+  @Test
+  def kansalaisuudetMultipleEntries(): Unit = {
+    initSchema()
+    insertHakemus(kansalaisuusJson = Some("[\"246\",\"752\"]"))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet", hasSize[Any](2)))
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet[0]").value("246"))
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet[1]").value("752"))
+  }
+
+  // ---- parseHakukohteet malformed JSON ----
+
+  @Test
+  def hakukohteetJsonMalformedYieldsNullPerHakutoiveFlags(): Unit = {
+    seedMinimalHakija()
+    insertHakemusToinenAsteYhteishaku(hakukohteetJson = Some("not-json"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].terveys").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].aiempiperuminen").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].kaksoistutkinto").value(nullValue()))
+  }
+
+  // ---- missing gen_hakemus_toinenaste_yhteishaku row ----
+
+  @Test
+  def hakijaWithoutToinenAsteYhteishakuRowNullsOutHuoltajatAndUrheilija(): Unit = {
+    seedMinimalHakija()
+    // Deliberately omit insertHakemusToinenAsteYhteishaku()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet[0]").value("246"))
+      .andExpect(jsonPath("$.hakijat[0].huoltaja1").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].huoltaja2").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].urheilijanLisakysymykset").value(nullValue()))
+  }
+
+  // ---- aidinkieli / opetuskieli normalization edges ----
+
+  @ParameterizedTest
+  @CsvSource(
+    value = Array(
+      "'\"en\"', EN",
+      "'FI', FI",
+      "'  sv  ', SV",
+      "'', null",
+      "'\"\"', null"
+    ),
+    nullValues = Array("null")
+  )
+  def opetuskieliNormalizationEdges(arvo: String, expected: String): Unit = {
+    seedMinimalHakija()
+    insertOpetuskieli(arvo = Some(arvo))
+    val actions = get().andExpect(status.isOk)
+    if (expected == null)
+      actions.andExpect(jsonPath("$.hakijat[0].opetuskieli").value(nullValue()))
+    else
+      actions.andExpect(jsonPath("$.hakijat[0].opetuskieli").value(expected))
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    value = Array(
+      "'\"en\"', EN",
+      "'FI', FI",
+      "'  sv  ', SV",
+      "'', null",
+      "'\"\"', null"
+    ),
+    nullValues = Array("null")
+  )
+  def aidinkieliNormalizationEdges(arvo: String, expected: String): Unit = {
+    initSchema()
+    insertHakemus(insertHenkilo = false)
+    insertHenkilo(aidinkieli = Some(arvo))
+    insertHakukohde()
+    insertHakutoive()
+    val actions = get().andExpect(status.isOk)
+    if (expected == null)
+      actions.andExpect(jsonPath("$.hakijat[0].aidinkieli").value(nullValue()))
+    else
+      actions.andExpect(jsonPath("$.hakijat[0].aidinkieli").value(expected))
+  }
+
+  // ---- multi-hakutoive hakija with lahtokoulu ----
+
+  @Test
+  def lahtokouluAttachesOnceWhenHakijaHasMultipleHakutoiveet(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 1)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2)
+    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    insertHenkiloLahtokoulu(
+      luokka = Some(LAHTOKOULU_LUOKKA),
+      oppilaitosOid = Some(LAHTOKOULU_OID),
+      suoritusTyyppi = Some(LAHTOKOULU_SUORITUSTYYPPI),
+      suorituksenAlku = Some(LAHTOKOULU_ALKU),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+
+    // Filter by organisaatioOid rather than hakukohdeOid so both hakutoiveet (same jarjestyspaikka) surface.
+    get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet", hasSize[Any](2)))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_OID))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(LAHTOKOULU_LUOKKA))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(LAHTOKOULU_LUOKKATASO))
+  }
+
+  // ---- empty koodistot early-return branch ----
+
+  @Test
+  def hakijaWithoutKoulutusKoodiuriProducesNullKoulutus(): Unit = {
+    seedMinimalHakija()
+    // Deliberately omit insertToteutusJaKoulutus() → no koodiUrit → koodistot short-circuits to Map.empty.
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].koulutus").value(nullValue()))
+  }
+
   @Test
   @WithMockUser(username = "testuser", roles = Array("USER"))
   def excelReturns403WhenUserMissingRole(): Unit = {
@@ -921,10 +1000,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
   @Test
   @WithMockUser(username = "hakeneet-user", roles = Array("APP_OVARA-VIRKAILIJA_HAKENEET"))
   def excelReturns200ForHakeneetRole(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertToteutusJaKoulutus()
     insertHakemusToinenAsteYhteishaku()
 
@@ -961,10 +1037,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
   @Test
   def excelHasHeadersInExpectedOrderAndDataRow(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertToteutusJaKoulutus()
     insertHakemusToinenAsteYhteishaku()
 
@@ -1028,13 +1101,232 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
   }
 
   @Test
+  def excelHasFullColumnCoverageForPopulatedHakija(): Unit = {
+    // Seed every populatable data source so every column that CAN have a value does.
+    seedMinimalHakija()
+    insertToteutusJaKoulutus()
+    insertOpetuskieli()
+    insertOrganisaatio() // hakukohde's organisaatio_oid → cell 48 (Oppilaitos)
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      nimiFi = Some(LAHTOKOULU_NIMI_FI)
+    )
+    insertHakemusToinenAsteYhteishaku()
+    insertPohjakoulutus(arvo = Some("2"))
+    insertTodistusvuosi(arvo = Some("2025"))
+    insertHenkiloLahtokoulu(
+      luokka = Some(LAHTOKOULU_LUOKKA),
+      oppilaitosOid = Some(LAHTOKOULU_OID),
+      suoritusTyyppi = Some(LAHTOKOULU_SUORITUSTYYPPI),
+      suorituksenAlku = Some(LAHTOKOULU_ALKU),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+
+    val result = mvc
+      .perform(
+        MockMvcRequestBuilders
+          .get("/api/external/toisenasteenhakijat/excel")
+          .param("hakuOid", HAKU_OID)
+          .param("hakukohdeOid", HAKUKOHDE_OID)
+          .param("valintarajaus", "HAKENEET")
+      )
+      .andExpect(status.isOk)
+      .andReturn()
+
+    val workbook = new XSSFWorkbook(new ByteArrayInputStream(result.getResponse.getContentAsByteArray))
+    try {
+      val sheet   = workbook.getSheetAt(0)
+      val header  = sheet.getRow(0)
+      val dataRow = sheet.getRow(1)
+
+      // Header row: all 80 columns compared elementwise.
+      val expectedHeaders = Seq(
+        "Hetu",
+        "Oppijanumero",
+        "Sukunimi",
+        "Etunimet",
+        "Kutsumanimi",
+        "Lahiosoite",
+        "Postinumero",
+        "Postitoimipaikka",
+        "Maa",
+        "Kansalaisuudet",
+        "Matkapuhelin",
+        "Muupuhelin",
+        "Sahkoposti",
+        "Kotikunta",
+        "Sukupuoli",
+        "Aidinkieli",
+        "Opetuskieli",
+        "Huoltaja 1 etunimi",
+        "Huoltaja 1 sukunimi",
+        "Huoltaja 1 puh",
+        "Huoltaja 1 email",
+        "Huoltaja 2 etunimi",
+        "Huoltaja 2 sukunimi",
+        "Huoltaja 2 puh",
+        "Huoltaja 2 email",
+        "Koulutusmarkkinointilupa",
+        "Kiinnostunut oppisopimuskoulutuksesta",
+        "Oppivelvollisuus voimassa asti",
+        "Oikeus maksuttomaan koulutukseen voimassa asti",
+        "Vuosi",
+        "Kausi",
+        "Hakemusnumero",
+        "Hakemus jätetty",
+        "Hakemusta viimeksi muokattu",
+        "Lahtokoulu",
+        "Lahtokoulunnimi",
+        "Luokka",
+        "Luokkataso",
+        "Pohjakoulutus",
+        "Todistusvuosi",
+        "Julkaisulupa",
+        "Yhteisetaineet",
+        "Lukiontasapisteet",
+        "Yleinenkoulumenestys",
+        "Lisapistekoulutus",
+        "Painotettavataineet",
+        "Keskiarvo valintalaskennasta",
+        "Hakujno",
+        "Oppilaitos",
+        "Opetuspiste",
+        "Opetuspisteennimi",
+        "Koulutus",
+        "HakukohdeOid",
+        "Harkinnanvaraisuuden peruste",
+        "Urheilijan ammatillinen koulutus",
+        "Yhteispisteet",
+        "Valinta",
+        "Vastaanotto",
+        "Lasnaolo",
+        "Terveys",
+        "Aiempiperuminen",
+        "Kaksoistutkinto",
+        "Urheilija-peruskoulu",
+        "Urheilija-keskiarvo",
+        "Urheilija-tamakausi",
+        "Urheilija.viimekausi",
+        "Urheilija-toissakausi",
+        "Urheilija-sivulaji",
+        "Urheilija-valmennusryhma-seurajoukkue",
+        "Urheilija-valmennusryhma-piirijoukkue",
+        "Urheilija-valmennusryhma-maajoukkue",
+        "Urheilija-valmentaja-nimi",
+        "Urheilija-valmentaja-email",
+        "Urheilija-valmentaja-puh",
+        "Urheilija-laji",
+        "Urheilija-liitto",
+        "Urheilija-seura",
+        "Sähköisen asioinnin lupa"
+      )
+      expectedHeaders.zipWithIndex.foreach { case (name, idx) =>
+        assert(
+          header.getCell(idx).getStringCellValue == name,
+          s"header cell $idx expected [$name] but was [${header.getCell(idx).getStringCellValue}]"
+        )
+      }
+
+      // Data row: cells that carry values in this scenario. Urheilija fields (62–76) stay empty
+      // because the hakukohde is not urheilija-related; other unpopulated fields default to "" or "0".
+      val expectedCells = Map(
+        0  -> HETU,
+        1  -> OPPIJANUMERO,
+        2  -> SUKUNIMI,
+        3  -> ETUNIMET,
+        4  -> KUTSUMANIMI,
+        5  -> LAHIOSOITE,
+        6  -> POSTINUMERO,
+        7  -> HELSINKI,
+        8  -> SUOMI_KOODI,
+        9  -> "246",
+        10 -> MATKAPUHELIN,
+        11 -> "",
+        12 -> EMAIL,
+        13 -> KOTIKUNTA,
+        14 -> SUKUPUOLI.toString,
+        15 -> AIDINKIELI,
+        16 -> OPETUSKIELI,
+        17 -> HUOLTAJA1.etunimi,
+        18 -> HUOLTAJA1.sukunimi,
+        19 -> HUOLTAJA1.puhelinnumero,
+        20 -> HUOLTAJA1.sahkoposti,
+        21 -> HUOLTAJA2.etunimi,
+        22 -> HUOLTAJA2.sukunimi,
+        23 -> HUOLTAJA2.puhelinnumero,
+        24 -> HUOLTAJA2.sahkoposti,
+        25 -> "X",
+        26 -> "",
+        27 -> "",
+        28 -> "",
+        29 -> VUOSI,
+        30 -> KAUSI,
+        31 -> HAKEMUS_OID,
+        32 -> JATETTY.toString,
+        33 -> MUOKATTU.toString,
+        34 -> LAHTOKOULU_OID,
+        35 -> LAHTOKOULU_NIMI_FI,
+        36 -> LAHTOKOULU_LUOKKA,
+        37 -> LAHTOKOULU_LUOKKATASO,
+        38 -> "2",
+        39 -> "2025",
+        40 -> "X",
+        41 -> "0",
+        42 -> "0",
+        43 -> "0",
+        44 -> "",
+        45 -> "0",
+        46 -> "",
+        47 -> "1",
+        48 -> OPPILAITOS,
+        49 -> ORGANISAATIO_OID,
+        50 -> "",
+        51 -> "Kulttuurituottaja",
+        52 -> HAKUKOHDE_OID,
+        53 -> "",
+        54 -> "",
+        55 -> "0",
+        56 -> VALINTA_CODE,
+        57 -> VASTAANOTTO_CODE,
+        58 -> LASNAOLO_CODE,
+        59 -> "X",
+        60 -> "",
+        61 -> "X",
+        // 62-76: urheilija cells all empty (non-urheilija hakukohde).
+        62 -> "",
+        63 -> "",
+        64 -> "",
+        65 -> "",
+        66 -> "",
+        67 -> "",
+        68 -> "",
+        69 -> "",
+        70 -> "",
+        71 -> "",
+        72 -> "",
+        73 -> "",
+        74 -> "",
+        75 -> "",
+        76 -> "",
+        77 -> "Kyllä"
+      )
+      expectedCells.foreach { case (idx, value) =>
+        assert(
+          dataRow.getCell(idx).getStringCellValue == value,
+          s"cell $idx expected [$value] but was [${dataRow.getCell(idx).getStringCellValue}]"
+        )
+      }
+    } finally workbook.close()
+  }
+
+  @Test
   def excludesShortHakemusOid(): Unit = {
     initSchema()
     insertHakemus(hakemusOid = "1.2.246.562.11.3511892")
     insertHakukohde()
     insertHakutoive(hakemusOid = "1.2.246.562.11.3511892")
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(content.json("""{"hakijat": []}"""))
   }
@@ -1048,19 +1340,16 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertHakukohde()
     insertHakutoive()
 
-    get()()
+    get()
       .andExpect(status.isOk)
       .andExpect(content.json("""{"hakijat": []}"""))
   }
 
   @Test
   def jsonEndpointEmitsAuditLogEntryOnSuccess(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
 
-    get(organisaatioOid = None)().andExpect(status.isOk)
+    get(organisaatioOid = None).andExpect(status.isOk)
 
     val calls = recordedAuditCalls
     assert(calls.size == 1, s"expected exactly one audit entry, got $calls")
@@ -1078,10 +1367,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
   @Test
   def excelEndpointEmitsAuditLogEntryOnSuccess(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
     insertToteutusJaKoulutus()
 
     mvc
@@ -1119,12 +1405,9 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     roles = Array("APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA_1.2.246.562.10.00000000001")
   )
   def auditEntryCarriesTheCallersPrincipalName(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive()
+    seedMinimalHakija()
 
-    get(organisaatioOid = None)().andExpect(status.isOk)
+    get(organisaatioOid = None).andExpect(status.isOk)
 
     assert(
       recordedAuditCalls.head.principalName.contains("another-user"),
@@ -1135,20 +1418,20 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
   @Test
   @WithMockUser(username = "testuser", roles = Array("USER"))
   def forbiddenRequestEmitsNoAuditEntry(): Unit = {
-    get()().andExpect(status.isForbidden)
+    get().andExpect(status.isForbidden)
     assert(recordedAuditCalls.isEmpty, s"expected no audit entry, got $recordedAuditCalls")
   }
 
   @Test
   def validationErrorEmitsNoAuditEntry(): Unit = {
-    get(hakukohdeOid = None, organisaatioOid = None)().andExpect(status.isBadRequest)
+    get(hakukohdeOid = None, organisaatioOid = None).andExpect(status.isBadRequest)
     assert(recordedAuditCalls.isEmpty, s"expected no audit entry, got $recordedAuditCalls")
   }
 
   @Test
   def auditEntryRecordedEvenWhenDbQueryFails(): Unit = {
     // No initSchema call → gen.* tables don't exist → service returns Left("virhe.tietokanta")
-    get()().andExpect(status.isInternalServerError)
+    get().andExpect(status.isInternalServerError)
 
     val calls = recordedAuditCalls
     assert(calls.size == 1, s"audit must fire before the DB query; got $calls")
