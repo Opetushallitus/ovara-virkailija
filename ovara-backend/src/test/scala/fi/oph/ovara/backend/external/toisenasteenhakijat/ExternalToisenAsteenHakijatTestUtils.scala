@@ -12,6 +12,14 @@ trait ExternalToisenAsteenHakijatTestUtils {
 
   val db: ReadOnlyDatabase
 
+  /** Minimal fixture: init schema + a hakija with default hakemus/hakukohde/hakutoive. */
+  def seedMinimalHakija(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+  }
+
   def insertHenkilo(
     oppijanumero: String = OPPIJANUMERO,
     aidinkieli: Option[String] = Some(AIDINKIELI_RAW)
