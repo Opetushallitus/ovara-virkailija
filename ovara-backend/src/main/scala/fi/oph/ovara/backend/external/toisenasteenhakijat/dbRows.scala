@@ -80,6 +80,7 @@ case class HakijaRow(
   opetuskieli: Option[String],
   pohjakoulutus: Option[String],
   todistusvuosi: Option[String],
+  lisapistekoulutus: Option[String],
   vuosi: Option[Int],
   kausi: Option[String],
   huoltaja1: Option[Huoltaja],
@@ -128,6 +129,7 @@ case class HakijaRow(
         luokkataso = lahtokoulu.flatMap(_.suoritusTyyppi).flatMap(LahtokouluRow.suoritusTyyppiToLuokkataso),
         pohjakoulutus = pohjakoulutus,
         todistusvuosi = todistusvuosi,
+        lisapistekoulutus = lisapistekoulutus,
         julkaisulupa = valintatuloksenJulkaisulupa
       )
     )
