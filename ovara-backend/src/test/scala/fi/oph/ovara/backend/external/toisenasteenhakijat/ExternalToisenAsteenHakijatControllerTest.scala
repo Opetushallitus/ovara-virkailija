@@ -939,6 +939,209 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     } finally workbook.close()
   }
 
+  // ---- Yhteispisteet (gen_valintarekisteri) ----
+
+  @Test
+  def yhteispisteetIsPopulatedWhenSingleRowExists(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(pisteet = Some(BigDecimal("82.5")))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].yhteispisteet").value(82.5))
+  }
+
+  @Test
+  def yhteispisteetTiebreaksVarallaByVarasijanNumero(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-a",
+      valinnanTila = Some("VARALLA"),
+      varasijanNumero = Some(5),
+      pisteet = Some(BigDecimal("90"))
+    )
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-b",
+      valinnanTila = Some("VARALLA"),
+      varasijanNumero = Some(1),
+      pisteet = Some(BigDecimal("50"))
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].yhteispisteet").value(50))
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+    strings = Array(
+      "HYVAKSYTTY",
+      "HARKINNANVARAISESTI_HYVAKSYTTY",
+      "VARASIJALTA_HYVAKSYTTY",
+      "PERUUTETTU",
+      "PERUNUT",
+      "PERUUNTUNUT",
+      "HYLATTY",
+      "KESKEN"
+    )
+  )
+  def yhteispisteetTiebreaksNonVarallaStatesByPrioriteetti(state: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-a",
+      valinnanTila = Some(state),
+      prioriteetti = Some(2),
+      pisteet = Some(BigDecimal("90"))
+    )
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-b",
+      valinnanTila = Some(state),
+      prioriteetti = Some(1),
+      pisteet = Some(BigDecimal("60"))
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].yhteispisteet").value(60))
+  }
+
+  @Test
+  def yhteispisteetVarallaWithNullVarasijanNumeroLosesToNumbered(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-a",
+      valinnanTila = Some("VARALLA"),
+      varasijanNumero = None,
+      pisteet = Some(BigDecimal("90"))
+    )
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-b",
+      valinnanTila = Some("VARALLA"),
+      varasijanNumero = Some(5),
+      pisteet = Some(BigDecimal("50"))
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].yhteispisteet").value(50))
+  }
+
+  @Test
+  def yhteispisteetNonVarallaWithNullPrioriteettiLosesToNumbered(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-a",
+      valinnanTila = Some("HYVAKSYTTY"),
+      prioriteetti = None,
+      pisteet = Some(BigDecimal("90"))
+    )
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-b",
+      valinnanTila = Some("HYVAKSYTTY"),
+      prioriteetti = Some(5),
+      pisteet = Some(BigDecimal("50"))
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].yhteispisteet").value(50))
+  }
+
+  @Test
+  def yhteispisteetExcludesJulkaistavissaFalse(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(julkaistavissa = Some(false), pisteet = Some(BigDecimal("77")))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].yhteispisteet").value(nullValue()))
+  }
+
+  @Test
+  def yhteispisteetIsNullWhenNoRows(): Unit = {
+    seedMinimalHakija()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].yhteispisteet").value(nullValue()))
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+    strings = Array(
+      "HYVAKSYTTY",
+      "HARKINNANVARAISESTI_HYVAKSYTTY",
+      "VARASIJALTA_HYVAKSYTTY",
+      "VARALLA",
+      "PERUUTETTU",
+      "PERUNUT",
+      "PERUUNTUNUT",
+      "HYLATTY",
+      "KESKEN"
+    )
+  )
+  def yhteispisteetSurvivesEveryValinnanTilaWhenAlone(state: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    seedMinimalHakija()
+    insertValintarekisteri(valinnanTila = Some(state), pisteet = Some(BigDecimal("42")))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].yhteispisteet").value(42))
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "HYVAKSYTTY,                     HARKINNANVARAISESTI_HYVAKSYTTY",
+      "HARKINNANVARAISESTI_HYVAKSYTTY, VARASIJALTA_HYVAKSYTTY",
+      "VARASIJALTA_HYVAKSYTTY,         VARALLA",
+      "VARALLA,                        PERUUTETTU",
+      "PERUUTETTU,                     PERUNUT",
+      "PERUNUT,                        PERUUNTUNUT",
+      "PERUUNTUNUT,                    HYLATTY",
+      "HYLATTY,                        KESKEN"
+    )
+  )
+  def yhteispisteetPrefersHigherPriorityStateOverLower(winner: String, loser: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-winner",
+      valinnanTila = Some(winner),
+      pisteet = Some(BigDecimal("80"))
+    )
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-loser",
+      valinnanTila = Some(loser),
+      pisteet = Some(BigDecimal("99"))
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].yhteispisteet").value(80))
+  }
+
+  @Test
+  def excelWritesYhteispisteetCell(): Unit = {
+    seedMinimalHakija()
+    insertToteutusJaKoulutus()
+    insertHakemusToinenAsteYhteishaku()
+    insertValintarekisteri(pisteet = Some(BigDecimal("77.5")))
+
+    val bytes    = getExcel().andExpect(status.isOk).andReturn().getResponse.getContentAsByteArray
+    val workbook = new XSSFWorkbook(new ByteArrayInputStream(bytes))
+    try {
+      val sheet     = workbook.getSheetAt(0)
+      val headerRow = sheet.getRow(0)
+      assert(headerRow.getCell(55).getStringCellValue == "Yhteispisteet")
+
+      val dataRow = sheet.getRow(1)
+      assert(dataRow.getCell(55).getStringCellValue == "77.5")
+    } finally workbook.close()
+  }
+
   // ---- kansalaisuudet JSON extraction edges ----
 
   @Test
@@ -1282,6 +1485,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertPohjakoulutus(arvo = Some("2"))
     insertTodistusvuosi(arvo = Some("2025"))
     insertLisakoulutus(avain = "LISAKOULUTUS_TUVA")
+    insertValintarekisteri(pisteet = Some(BigDecimal("82.5")))
     insertHenkiloLahtokoulu(
       luokka = Some(LAHTOKOULU_LUOKKA),
       oppilaitosOid = Some(LAHTOKOULU_OID),
@@ -1443,7 +1647,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
         52 -> HAKUKOHDE_OID,
         53 -> "",
         54 -> "",
-        55 -> "0",
+        55 -> "82.5",
         56 -> VALINTA_CODE,
         57 -> VASTAANOTTO_CODE,
         58 -> LASNAOLO_CODE,
