@@ -280,7 +280,6 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemus.pohjakoulutus").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemus.osaaminen.yleinen_kielitutkinto_fi").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].terveys").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].urheilijanLisakysymykset").value(nullValue()))
@@ -800,6 +799,109 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     seedActiveLahtokoulu(henkiloOid = OPPIJANUMERO)
 
     expectLahtokouluPopulated(get()())
+  }
+
+  // ---- Pohjakoulutus + Todistusvuosi (gen_supa_tieto) ----
+
+  @Test
+  def pohjakoulutusIsPopulatedFromSupaTieto(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertPohjakoulutus(arvo = Some("1"))
+
+    get()()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.pohjakoulutus").value("1"))
+  }
+
+  @Test
+  def todistusvuosiIsPopulatedFromSupaTieto(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertTodistusvuosi(arvo = Some("2025"))
+
+    get()()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.todistusvuosi").value("2025"))
+  }
+
+  @Test
+  def pohjakoulutusAndTodistusvuosiAreNullWhenAbsent(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+
+    get()()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.pohjakoulutus").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.todistusvuosi").value(nullValue()))
+  }
+
+  @Test
+  def pohjakoulutusStripsJsonQuotes(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertPohjakoulutus(arvo = Some("\"3\""))
+
+    get()()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.pohjakoulutus").value("3"))
+  }
+
+  @Test
+  def todistusvuosiStripsJsonQuotes(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertTodistusvuosi(arvo = Some("\"2024\""))
+
+    get()()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.todistusvuosi").value("2024"))
+  }
+
+  @Test
+  def excelWritesPohjakoulutusAndTodistusvuosiCells(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertToteutusJaKoulutus()
+    insertHakemusToinenAsteYhteishaku()
+    insertPohjakoulutus(arvo = Some("1"))
+    insertTodistusvuosi(arvo = Some("2025"))
+
+    val result = mvc
+      .perform(
+        MockMvcRequestBuilders
+          .get("/api/external/toisenasteenhakijat/excel")
+          .param("hakuOid", HAKU_OID)
+          .param("hakukohdeOid", HAKUKOHDE_OID)
+          .param("valintarajaus", "HAKENEET")
+      )
+      .andExpect(status.isOk)
+      .andReturn()
+
+    val bytes    = result.getResponse.getContentAsByteArray
+    val workbook = new XSSFWorkbook(new ByteArrayInputStream(bytes))
+    try {
+      val sheet     = workbook.getSheetAt(0)
+      val headerRow = sheet.getRow(0)
+      assert(headerRow.getCell(38).getStringCellValue == "Pohjakoulutus")
+      assert(headerRow.getCell(39).getStringCellValue == "Todistusvuosi")
+
+      val dataRow = sheet.getRow(1)
+      assert(dataRow.getCell(38).getStringCellValue == "1")
+      assert(dataRow.getCell(39).getStringCellValue == "2025")
+    } finally workbook.close()
   }
 
   @Test
