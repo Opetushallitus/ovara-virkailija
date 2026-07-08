@@ -71,6 +71,23 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     mvc.perform(req)
   }
 
+  private def getExcel(
+    hakuOid: String = HAKU_OID,
+    hakukohdeOid: Option[String] = Some(HAKUKOHDE_OID),
+    organisaatioOid: Option[String] = None,
+    valintarajaus: Option[String] = Some("HAKENEET"),
+    headers: Map[String, String] = Map.empty
+  ): ResultActions = {
+    var req = MockMvcRequestBuilders
+      .get("/api/external/toisenasteenhakijat/excel")
+      .param("hakuOid", hakuOid)
+    hakukohdeOid.foreach(v => req = req.param("hakukohdeOid", v))
+    organisaatioOid.foreach(v => req = req.param("organisaatioOid", v))
+    valintarajaus.foreach(v => req = req.param("valintarajaus", v))
+    headers.foreach { case (k, v) => req = req.header(k, v) }
+    mvc.perform(req)
+  }
+
   @Test
   @WithAnonymousUser
   def returns401WhenNoUser(): Unit = {
@@ -544,18 +561,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
     )
 
-    val result = mvc
-      .perform(
-        MockMvcRequestBuilders
-          .get("/api/external/toisenasteenhakijat/excel")
-          .param("hakuOid", HAKU_OID)
-          .param("hakukohdeOid", HAKUKOHDE_OID)
-          .param("valintarajaus", "HAKENEET")
-      )
-      .andExpect(status.isOk)
-      .andReturn()
-
-    val bytes    = result.getResponse.getContentAsByteArray
+    val bytes    = getExcel().andExpect(status.isOk).andReturn().getResponse.getContentAsByteArray
     val workbook = new XSSFWorkbook(new ByteArrayInputStream(bytes))
     try {
       val sheet     = workbook.getSheetAt(0)
@@ -811,18 +817,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertPohjakoulutus(arvo = Some("1"))
     insertTodistusvuosi(arvo = Some("2025"))
 
-    val result = mvc
-      .perform(
-        MockMvcRequestBuilders
-          .get("/api/external/toisenasteenhakijat/excel")
-          .param("hakuOid", HAKU_OID)
-          .param("hakukohdeOid", HAKUKOHDE_OID)
-          .param("valintarajaus", "HAKENEET")
-      )
-      .andExpect(status.isOk)
-      .andReturn()
-
-    val bytes    = result.getResponse.getContentAsByteArray
+    val bytes    = getExcel().andExpect(status.isOk).andReturn().getResponse.getContentAsByteArray
     val workbook = new XSSFWorkbook(new ByteArrayInputStream(bytes))
     try {
       val sheet     = workbook.getSheetAt(0)
@@ -985,17 +980,50 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
   @Test
   @WithMockUser(username = "testuser", roles = Array("USER"))
-  def excelReturns403WhenUserMissingRole(): Unit = {
-    mvc
-      .perform(
-        MockMvcRequestBuilders
-          .get("/api/external/toisenasteenhakijat/excel")
-          .param("hakuOid", HAKU_OID)
-          .param("hakukohdeOid", HAKUKOHDE_OID)
-          .param("valintarajaus", "HAKENEET")
-      )
-      .andExpect(status.isForbidden)
+  def excelReturns403WhenUserMissingRole(): Unit =
+    getExcel().andExpect(status.isForbidden)
+
+  // 401 anonymous is proved by the JSON returns401WhenNoUser test — the Spring Security
+  // filter chain fires before the controller, so it's not endpoint-specific.
+
+  @ParameterizedTest
+  @CsvSource(
+    value = Array(
+      "not-oid                             | 1.2.246.562.20.00000000000000000012 | null              | HAKENEET  | hakuOid.invalid.oid",
+      "1.2.246.562.29.00000000000000000100 | not-oid                             | null              | HAKENEET  | hakukohdeOid.invalid.oid",
+      "1.2.246.562.29.00000000000000000100 | null                                | 1.2.246.562.20.1  | HAKENEET  | organisaatioOid.invalid.org",
+      "1.2.246.562.29.00000000000000000100 | null                                | null              | HAKENEET  | hakukohdeOid_or_organisaatioOid.required",
+      "1.2.246.562.29.00000000000000000100 | 1.2.246.562.20.00000000000000000012 | null              | BOGUS     | valintarajaus.invalid",
+      "1.2.246.562.29.00000000000000000100 | 1.2.246.562.20.00000000000000000012 | null              | hyvaksytyt| valintarajaus.invalid"
+    ),
+    delimiter = '|',
+    nullValues = Array("null")
+  )
+  def excelReturns400OnValidationFailure(
+    hakuOid: String,
+    hakukohdeOid: String,
+    organisaatioOid: String,
+    valintarajaus: String,
+    expectedDetail: String
+  ): Unit = {
+    getExcel(
+      hakuOid = hakuOid,
+      hakukohdeOid = Option(hakukohdeOid),
+      organisaatioOid = Option(organisaatioOid),
+      valintarajaus = Option(valintarajaus)
+    )
+      .andExpect(status.isBadRequest)
+      .andExpect(content.contentType("application/json"))
+      .andExpect(jsonPath("$.message").value("virhe.validointi"))
+      .andExpect(jsonPath("$.details[0]").value(expectedDetail))
   }
+
+  @Test
+  def excelReturns500WhenServiceFails(): Unit =
+    // No initSchema → gen.* tables missing → service returns Left("virhe.tietokanta")
+    getExcel()
+      .andExpect(status.isInternalServerError)
+      .andExpect(content.json("\"virhe.tietokanta\""))
 
   @Test
   @WithMockUser(username = "hakeneet-user", roles = Array("APP_OVARA-VIRKAILIJA_HAKENEET"))
@@ -1004,35 +1032,75 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertToteutusJaKoulutus()
     insertHakemusToinenAsteYhteishaku()
 
-    mvc
-      .perform(
-        MockMvcRequestBuilders
-          .get("/api/external/toisenasteenhakijat/excel")
-          .param("hakuOid", HAKU_OID)
-          .param("hakukohdeOid", HAKUKOHDE_OID)
-          .param("valintarajaus", "HAKENEET")
-      )
+    getExcel()
       .andExpect(status.isOk)
-      .andExpect(
-        content.contentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-      )
+      .andExpect(content.contentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
   }
 
   @Test
-  def excelReturns400WhenNeitherHakukohdeNorOrganisaatioProvided(): Unit = {
-    mvc
-      .perform(
-        MockMvcRequestBuilders
-          .get("/api/external/toisenasteenhakijat/excel")
-          .param("hakuOid", HAKU_OID)
-          .param("valintarajaus", "HAKENEET")
-      )
+  def excelReturns400WhenNeitherHakukohdeNorOrganisaatioProvided(): Unit =
+    getExcel(hakukohdeOid = None, organisaatioOid = None)
       .andExpect(status.isBadRequest)
       .andExpect(
         content.json(
           """{"status": 400, "message": "virhe.validointi", "details": ["hakukohdeOid_or_organisaatioOid.required"] }"""
         )
       )
+
+  @Test
+  def excelEmitsOneRowPerHakutoive(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 1)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2)
+
+    val bytes = getExcel(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID))
+      .andExpect(status.isOk)
+      .andReturn()
+      .getResponse
+      .getContentAsByteArray
+    val workbook = new XSSFWorkbook(new ByteArrayInputStream(bytes))
+    try {
+      val sheet = workbook.getSheetAt(0)
+      assert(
+        sheet.getLastRowNum == 2,
+        s"expected header + 2 data rows; last row index = ${sheet.getLastRowNum}"
+      )
+      val row1 = sheet.getRow(1)
+      val row2 = sheet.getRow(2)
+      // Same hakija-level fields on both rows
+      assert(row1.getCell(1).getStringCellValue == OPPIJANUMERO)
+      assert(row2.getCell(1).getStringCellValue == OPPIJANUMERO)
+      assert(row1.getCell(31).getStringCellValue == HAKEMUS_OID)
+      assert(row2.getCell(31).getStringCellValue == HAKEMUS_OID)
+      // Per-hakutoive fields differ
+      assert(row1.getCell(47).getStringCellValue == "1") // Hakujno
+      assert(row2.getCell(47).getStringCellValue == "2")
+      assert(row1.getCell(52).getStringCellValue == HAKUKOHDE_OID)
+      assert(row2.getCell(52).getStringCellValue == HAKUKOHDE_OID_2)
+    } finally workbook.close()
+  }
+
+  @Test
+  def excelExportsHeaderOnlySheetWhenNoHakijatMatch(): Unit = {
+    initSchema()
+    val bytes = getExcel()
+      .andExpect(status.isOk)
+      .andExpect(content.contentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+      .andReturn()
+      .getResponse
+      .getContentAsByteArray
+    val workbook = new XSSFWorkbook(new ByteArrayInputStream(bytes))
+    try {
+      val sheet = workbook.getSheetAt(0)
+      assert(
+        sheet.getLastRowNum == 0,
+        s"expected header-only sheet; last row index = ${sheet.getLastRowNum}"
+      )
+      assert(sheet.getRow(0).getCell(0).getStringCellValue == "Hetu")
+    } finally workbook.close()
   }
 
   @Test
@@ -1041,18 +1109,9 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertToteutusJaKoulutus()
     insertHakemusToinenAsteYhteishaku()
 
-    val result = mvc
-      .perform(
-        MockMvcRequestBuilders
-          .get("/api/external/toisenasteenhakijat/excel")
-          .param("hakuOid", HAKU_OID)
-          .param("hakukohdeOid", HAKUKOHDE_OID)
-          .param("valintarajaus", "HAKENEET")
-      )
+    val result = getExcel()
       .andExpect(status.isOk)
-      .andExpect(
-        content.contentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-      )
+      .andExpect(content.contentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
       .andExpect(header.string("Content-Disposition", startsWith("attachment; filename=toisenasteenhakijat-")))
       .andReturn()
 
@@ -1122,17 +1181,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
     )
 
-    val result = mvc
-      .perform(
-        MockMvcRequestBuilders
-          .get("/api/external/toisenasteenhakijat/excel")
-          .param("hakuOid", HAKU_OID)
-          .param("hakukohdeOid", HAKUKOHDE_OID)
-          .param("valintarajaus", "HAKENEET")
-      )
-      .andExpect(status.isOk)
-      .andReturn()
-
+    val result   = getExcel().andExpect(status.isOk).andReturn()
     val workbook = new XSSFWorkbook(new ByteArrayInputStream(result.getResponse.getContentAsByteArray))
     try {
       val sheet   = workbook.getSheetAt(0)
@@ -1370,16 +1419,11 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     seedMinimalHakija()
     insertToteutusJaKoulutus()
 
-    mvc
-      .perform(
-        MockMvcRequestBuilders
-          .get("/api/external/toisenasteenhakijat/excel")
-          .param("hakuOid", HAKU_OID)
-          .param("organisaatioOid", ORGANISAATIO_OID)
-          .param("valintarajaus", "HAKENEET")
-          .header("User-Agent", "ovara-integration-test/1.0")
-      )
-      .andExpect(status.isOk)
+    getExcel(
+      hakukohdeOid = None,
+      organisaatioOid = Some(ORGANISAATIO_OID),
+      headers = Map("User-Agent" -> "ovara-integration-test/1.0")
+    ).andExpect(status.isOk)
 
     val calls = recordedAuditCalls
     assert(calls.size == 1, s"expected exactly one audit entry, got $calls")
