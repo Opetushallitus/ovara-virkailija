@@ -172,7 +172,8 @@ case class HakijaHakutoiveRow(
   koulutusKoodiurit: Seq[String],
   valintatieto: Option[String],
   vastaanottotieto: Option[String],
-  ilmoittautumisenTila: Option[String]
+  ilmoittautumisenTila: Option[String],
+  pisteet: Option[BigDecimal]
 ) {
   def asHakutoive(
     koodistot: Map[String, KoodistoArvo],
@@ -207,7 +208,8 @@ case class HakijaHakutoiveRow(
       kaksoistutkinto = hakukohdeTiedot.flatMap(_.kiinnostunutKaksoistutkinnosta),
       valinta = valintatieto.flatMap(valintaTilaMapping.get),
       vastaanotto = vastaanottotieto.map(vastaanotonTilaMapping.get).getOrElse(Some("1")),
-      lasnaolo = ilmoittautumisenTila.flatMap(ilmoittautumisenTilaMapping.get)
+      lasnaolo = ilmoittautumisenTila.flatMap(ilmoittautumisenTilaMapping.get),
+      yhteispisteet = pisteet
     )
   }
 

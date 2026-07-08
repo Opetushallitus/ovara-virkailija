@@ -141,6 +141,30 @@ trait ExternalToisenAsteenHakijatTestUtils {
     arvo: Option[String] = Some("true")
   ): Unit = insertSupaTieto(hakemusOid, avain, arvo)
 
+  def insertValintarekisteri(
+    hakemusOid: String = HAKEMUS_OID,
+    hakukohdeOid: String = HAKUKOHDE_OID,
+    valintatapajonoId: String = "vtj-1",
+    valinnanTila: Option[String] = Some("HYVAKSYTTY"),
+    julkaistavissa: Option[Boolean] = Some(true),
+    varasijanNumero: Option[Int] = None,
+    prioriteetti: Option[Int] = None,
+    pisteet: Option[BigDecimal] = None
+  ): Unit = {
+    db.run(
+      sqlu"""INSERT INTO gen.gen_valintarekisteri (
+          hakukohde_oid, valintatapajono_id, hakemus_oid,
+          valinnan_tila, julkaistavissa,
+          varasijan_numero, prioriteetti, pisteet
+        ) VALUES (
+          $hakukohdeOid, $valintatapajonoId, $hakemusOid,
+          $valinnanTila, $julkaistavissa,
+          $varasijanNumero, $prioriteetti, ${pisteet.map(_.doubleValue)}
+        )""",
+      "Insert test valintarekisteri"
+    )
+  }
+
   def insertHakukohde(
     hakukohdeOid: String = HAKUKOHDE_OID,
     toteutusOid: String = TOTEUTUS_OID,
@@ -484,6 +508,41 @@ trait ExternalToisenAsteenHakijatTestUtils {
               nimi_fi text,
               nimi_sv text,
               nimi_en text
+          );
+
+          CREATE TABLE gen.gen_valintarekisteri(
+              hakukohde_oid text,
+              valintatapajono_id text,
+              hakemus_oid text,
+              henkilo_oid text,
+              valinnan_tila text,
+              ehdollisesti_hyvaksyttavissa boolean,
+              ehdollisen_hyvaksymisen_ehto_fi text,
+              ehdollisen_hyvaksymisen_ehto_sv text,
+              ehdollisen_hyvaksymisen_ehto_en text,
+              valinnantila_kuvaus_fi text,
+              valinnantila_kuvaus_sv text,
+              valinnantila_kuvaus_en text,
+              julkaistavissa boolean,
+              hyvaksyperuuntunut boolean,
+              valintatiedon_pvm date,
+              hyvaksytty_harkinnanvaraisesti boolean,
+              jonosija integer,
+              varasijan_numero integer,
+              onko_muuttunut_viime_sijoittelussa boolean,
+              prioriteetti integer,
+              pisteet double,
+              siirtynyt_toisesta_valintatapajonosta boolean,
+              sijoitteluajo_id text,
+              hyvaksyttyjajulkaistu timestamp with time zone,
+              maksun_tila text,
+              ilmoitus_ilmoittaja text,
+              selite text,
+              ilmoituksen_tila text,
+              vastaanotto_ilmoittaja text,
+              vastaanotto_selite text,
+              vastaanotto_tila text,
+              vastaanotto_aikaleima timestamp with time zone
           );
           """
     db.run(query, "Init Hakijat test schema")
