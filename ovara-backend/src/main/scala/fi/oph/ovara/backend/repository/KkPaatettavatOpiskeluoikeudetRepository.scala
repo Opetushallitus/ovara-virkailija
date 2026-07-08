@@ -73,6 +73,7 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
         INNER JOIN gen.gen_haku haku on haku.haku_oid = hk.haku_oid
         INNER JOIN gen.gen_organisaatio org on org.organisaatio_oid = hk.jarjestyspaikka_oid
         WHERE hk.yos IS TRUE
+        AND vr.ehdollisesti_hyvaksyttavissa IS FALSE
         AND vr.vastaanotto_tila = 'VASTAANOTTANUT_SITOVASTI' 
         AND vr.henkilo_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(henkiloOids)})
     """.as[KKSitovastiVastaanottanut]
