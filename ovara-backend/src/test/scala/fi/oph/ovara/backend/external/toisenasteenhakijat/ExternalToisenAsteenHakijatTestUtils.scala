@@ -121,6 +121,12 @@ trait ExternalToisenAsteenHakijatTestUtils {
     arvo: Option[String] = Some(OPETUSKIELI_RAW)
   ): Unit = insertSupaTieto(hakemusOid, "perusopetuksen_kieli", arvo)
 
+  def insertPohjakoulutus(hakemusOid: String = HAKEMUS_OID, arvo: Option[String]): Unit =
+    insertSupaTieto(hakemusOid, "POHJAKOULUTUS", arvo)
+
+  def insertTodistusvuosi(hakemusOid: String = HAKEMUS_OID, arvo: Option[String]): Unit =
+    insertSupaTieto(hakemusOid, "PK_PAATTOTODISTUSVUOSI", arvo)
+
   def insertHakukohde(
     hakukohdeOid: String = HAKUKOHDE_OID,
     toteutusOid: String = TOTEUTUS_OID,

@@ -52,6 +52,14 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
         WHERE st.hakemus_oid = hakemus.hakemus_oid
           AND st.avain = 'perusopetuksen_kieli'
         LIMIT 1) AS opetuskieli,
+      (SELECT st.arvo FROM gen.gen_supa_tieto st
+        WHERE st.hakemus_oid = hakemus.hakemus_oid
+          AND st.avain = 'POHJAKOULUTUS'
+        LIMIT 1) AS pohjakoulutus,
+      (SELECT st.arvo FROM gen.gen_supa_tieto st
+        WHERE st.hakemus_oid = hakemus.hakemus_oid
+          AND st.avain = 'PK_PAATTOTODISTUSVUOSI'
+        LIMIT 1) AS todistusvuosi,
       (SELECT hk.koulutuksen_alkamisvuosi FROM gen.gen_hakutoive ht
         INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
         WHERE ht.hakemus_oid = hakemus.hakemus_oid
