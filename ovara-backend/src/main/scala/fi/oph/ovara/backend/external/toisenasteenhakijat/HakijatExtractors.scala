@@ -36,6 +36,8 @@ class HakijatExtractors extends Extractors with GenericOvaraJsonFormats {
     val muokattu                     = getOffsetDateTime(r)
     val aidinkieli                   = normalizeKieliCode(r.nextStringOption())
     val opetuskieli                  = normalizeKieliCode(r.nextStringOption())
+    val pohjakoulutus                = stripJsonQuotes(r.nextStringOption())
+    val todistusvuosi                = stripJsonQuotes(r.nextStringOption())
     val hakukohdeVuosi               = r.nextIntOption()
     val hakukohdeKausi               = r.nextStringOption()
     val hakuVuosi                    = r.nextIntOption()
@@ -131,6 +133,8 @@ class HakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       muokattu = muokattu,
       aidinkieli = aidinkieli,
       opetuskieli = opetuskieli,
+      pohjakoulutus = pohjakoulutus,
+      todistusvuosi = todistusvuosi,
       vuosi = vuosi,
       kausi = kausi,
       huoltaja1 = huoltaja1,
@@ -181,6 +185,11 @@ class HakijatExtractors extends Extractors with GenericOvaraJsonFormats {
   private def normalizeKieliCode(opt: Option[String]): Option[String] =
     opt
       .map(_.trim.stripPrefix("\"").stripSuffix("\"").toUpperCase)
+      .filter(_.nonEmpty)
+
+  private def stripJsonQuotes(opt: Option[String]): Option[String] =
+    opt
+      .map(_.trim.stripPrefix("\"").stripSuffix("\""))
       .filter(_.nonEmpty)
 
   private val KausiPattern = """kausi_([sk])(?:#\d+)?""".r
