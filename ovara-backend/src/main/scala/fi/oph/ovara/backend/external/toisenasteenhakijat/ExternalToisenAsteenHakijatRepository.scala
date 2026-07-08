@@ -60,6 +60,34 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
         WHERE st.hakemus_oid = hakemus.hakemus_oid
           AND st.avain = 'PK_PAATTOTODISTUSVUOSI'
         LIMIT 1) AS todistusvuosi,
+      (SELECT st.avain FROM gen.gen_supa_tieto st
+        WHERE st.hakemus_oid = hakemus.hakemus_oid
+          AND st.arvo IN ('true', '"true"')
+          AND st.avain IN (
+            'LISAKOULUTUS_KYMPPI',
+            'LISAKOULUTUS_VAMMAISTEN',
+            'LISAKOULUTUS_TALOUS',
+            'LISAKOULUTUS_AMMATTISTARTTI',
+            'LISAKOULUTUS_KANSANOPISTO',
+            'LISAKOULUTUS_MAAHANMUUTTO',
+            'LISAKOULUTUS_MAAHANMUUTTO_LUKIO',
+            'LISAKOULUTUS_VALMA',
+            'LISAKOULUTUS_OPISTOVUOSI',
+            'LISAKOULUTUS_TUVA'
+          )
+        ORDER BY CASE st.avain
+          WHEN 'LISAKOULUTUS_KYMPPI'             THEN 1
+          WHEN 'LISAKOULUTUS_VAMMAISTEN'         THEN 2
+          WHEN 'LISAKOULUTUS_TALOUS'             THEN 3
+          WHEN 'LISAKOULUTUS_AMMATTISTARTTI'     THEN 4
+          WHEN 'LISAKOULUTUS_KANSANOPISTO'       THEN 5
+          WHEN 'LISAKOULUTUS_MAAHANMUUTTO'       THEN 6
+          WHEN 'LISAKOULUTUS_MAAHANMUUTTO_LUKIO' THEN 7
+          WHEN 'LISAKOULUTUS_VALMA'              THEN 8
+          WHEN 'LISAKOULUTUS_OPISTOVUOSI'        THEN 9
+          WHEN 'LISAKOULUTUS_TUVA'               THEN 10
+        END
+        LIMIT 1) AS lisapistekoulutus,
       (SELECT hk.koulutuksen_alkamisvuosi FROM gen.gen_hakutoive ht
         INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
         WHERE ht.hakemus_oid = hakemus.hakemus_oid

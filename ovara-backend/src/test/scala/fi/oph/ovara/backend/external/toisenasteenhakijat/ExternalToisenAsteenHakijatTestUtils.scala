@@ -135,6 +135,12 @@ trait ExternalToisenAsteenHakijatTestUtils {
   def insertTodistusvuosi(hakemusOid: String = HAKEMUS_OID, arvo: Option[String]): Unit =
     insertSupaTieto(hakemusOid, "PK_PAATTOTODISTUSVUOSI", arvo)
 
+  def insertLisakoulutus(
+    hakemusOid: String = HAKEMUS_OID,
+    avain: String,
+    arvo: Option[String] = Some("true")
+  ): Unit = insertSupaTieto(hakemusOid, avain, arvo)
+
   def insertHakukohde(
     hakukohdeOid: String = HAKUKOHDE_OID,
     toteutusOid: String = TOTEUTUS_OID,

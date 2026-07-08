@@ -831,6 +831,114 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     } finally workbook.close()
   }
 
+  // ---- Lisapistekoulutus (gen_supa_tieto, priority-picked LISAKOULUTUS_* key) ----
+
+  @Test
+  def lisapistekoulutusIsPopulatedWhenSingleKeyIsTrue(): Unit = {
+    seedMinimalHakija()
+    insertLisakoulutus(avain = "LISAKOULUTUS_TUVA")
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lisapistekoulutus").value("LISAKOULUTUS_TUVA"))
+  }
+
+  @Test
+  def lisapistekoulutusPicksFirstByPriorityWhenMultipleAreTrue(): Unit = {
+    seedMinimalHakija()
+    insertLisakoulutus(avain = "LISAKOULUTUS_TUVA")
+    insertLisakoulutus(avain = "LISAKOULUTUS_KYMPPI")
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lisapistekoulutus").value("LISAKOULUTUS_KYMPPI"))
+  }
+
+  @Test
+  def lisapistekoulutusIgnoresRowsWithArvoFalse(): Unit = {
+    seedMinimalHakija()
+    insertLisakoulutus(avain = "LISAKOULUTUS_KYMPPI", arvo = Some("false"))
+    insertLisakoulutus(avain = "LISAKOULUTUS_TUVA")
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lisapistekoulutus").value("LISAKOULUTUS_TUVA"))
+  }
+
+  @Test
+  def lisapistekoulutusIsNullWhenAllRowsFalse(): Unit = {
+    seedMinimalHakija()
+    insertLisakoulutus(avain = "LISAKOULUTUS_KYMPPI", arvo = Some("false"))
+    insertLisakoulutus(avain = "LISAKOULUTUS_TUVA", arvo = Some("false"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lisapistekoulutus").value(nullValue()))
+  }
+
+  @Test
+  def lisapistekoulutusIsNullWhenAbsent(): Unit = {
+    seedMinimalHakija()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lisapistekoulutus").value(nullValue()))
+  }
+
+  @Test
+  def lisapistekoulutusAcceptsJsonQuotedTrue(): Unit = {
+    seedMinimalHakija()
+    insertLisakoulutus(avain = "LISAKOULUTUS_VALMA", arvo = Some("\"true\""))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lisapistekoulutus").value("LISAKOULUTUS_VALMA"))
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+    strings = Array(
+      "LISAKOULUTUS_KYMPPI",
+      "LISAKOULUTUS_VAMMAISTEN",
+      "LISAKOULUTUS_TALOUS",
+      "LISAKOULUTUS_AMMATTISTARTTI",
+      "LISAKOULUTUS_KANSANOPISTO",
+      "LISAKOULUTUS_MAAHANMUUTTO",
+      "LISAKOULUTUS_MAAHANMUUTTO_LUKIO",
+      "LISAKOULUTUS_VALMA",
+      "LISAKOULUTUS_OPISTOVUOSI",
+      "LISAKOULUTUS_TUVA"
+    )
+  )
+  def lisapistekoulutusMapsEveryKnownKey(avain: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    seedMinimalHakija()
+    insertLisakoulutus(avain = avain)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lisapistekoulutus").value(avain))
+  }
+
+  @Test
+  def excelWritesLisapistekoulutusCell(): Unit = {
+    seedMinimalHakija()
+    insertToteutusJaKoulutus()
+    insertHakemusToinenAsteYhteishaku()
+    insertLisakoulutus(avain = "LISAKOULUTUS_VAMMAISTEN")
+
+    val bytes    = getExcel().andExpect(status.isOk).andReturn().getResponse.getContentAsByteArray
+    val workbook = new XSSFWorkbook(new ByteArrayInputStream(bytes))
+    try {
+      val sheet     = workbook.getSheetAt(0)
+      val headerRow = sheet.getRow(0)
+      assert(headerRow.getCell(44).getStringCellValue == "Lisapistekoulutus")
+
+      val dataRow = sheet.getRow(1)
+      assert(dataRow.getCell(44).getStringCellValue == "LISAKOULUTUS_VAMMAISTEN")
+    } finally workbook.close()
+  }
+
   // ---- kansalaisuudet JSON extraction edges ----
 
   @Test
@@ -1173,6 +1281,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertHakemusToinenAsteYhteishaku()
     insertPohjakoulutus(arvo = Some("2"))
     insertTodistusvuosi(arvo = Some("2025"))
+    insertLisakoulutus(avain = "LISAKOULUTUS_TUVA")
     insertHenkiloLahtokoulu(
       luokka = Some(LAHTOKOULU_LUOKKA),
       oppilaitosOid = Some(LAHTOKOULU_OID),
@@ -1323,7 +1432,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
         41 -> "0",
         42 -> "0",
         43 -> "0",
-        44 -> "",
+        44 -> "LISAKOULUTUS_TUVA",
         45 -> "0",
         46 -> "",
         47 -> "1",
