@@ -38,6 +38,7 @@ class HakijatExtractors extends Extractors with GenericOvaraJsonFormats {
     val opetuskieli                  = normalizeKieliCode(r.nextStringOption())
     val pohjakoulutus                = stripJsonQuotes(r.nextStringOption())
     val todistusvuosi                = stripJsonQuotes(r.nextStringOption())
+    val lisapistekoulutus            = r.nextStringOption()
     val hakukohdeVuosi               = r.nextIntOption()
     val hakukohdeKausi               = r.nextStringOption()
     val hakuVuosi                    = r.nextIntOption()
@@ -135,6 +136,7 @@ class HakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       opetuskieli = opetuskieli,
       pohjakoulutus = pohjakoulutus,
       todistusvuosi = todistusvuosi,
+      lisapistekoulutus = lisapistekoulutus,
       vuosi = vuosi,
       kausi = kausi,
       huoltaja1 = huoltaja1,
