@@ -99,7 +99,6 @@ object ExternalToisenAsteenHakijatTestData {
     s"""[{"oid":"$HAKUKOHDE_OID","terveys":$TERVEYS,"aiempiPeruminen":$AIEMPI_PERUMINEN,"kiinnostunutKaksoistutkinnosta":$KAKSOISTUTKINTO}]"""
 
   val LINJA_URHEILIJA_LUKIO_JSON    = """{"linja":"lukiopainotukset_0105"}"""
-  val LINJA_TAVALLINEN_JSON         = """{"linja":"jokumuu"}"""
   val ETUNIMET                      = "Matti Ilmari"
   val KUTSUMANIMI                   = "Matti"
   val SUKUNIMI                      = "Meikäläinen"
