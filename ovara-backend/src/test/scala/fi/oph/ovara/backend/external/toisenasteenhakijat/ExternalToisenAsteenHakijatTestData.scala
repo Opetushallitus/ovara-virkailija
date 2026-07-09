@@ -114,6 +114,7 @@ object ExternalToisenAsteenHakijatTestData {
   val MUOKATTU                      = OffsetDateTime.parse("2025-08-13T14:52:14+03:00")
 
   val LAHTOKOULU_OID            = "1.2.246.562.10.00000000000000000900"
+  val LAHTOKOULU_KOODI          = "01234"
   val LAHTOKOULU_NIMI_FI        = "Kallion peruskoulu"
   val LAHTOKOULU_NIMI_SV        = "Kallio grundskola"
   val LAHTOKOULU_LUOKKA         = "9C"
