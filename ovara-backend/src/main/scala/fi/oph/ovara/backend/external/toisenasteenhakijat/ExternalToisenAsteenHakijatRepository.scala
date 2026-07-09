@@ -228,7 +228,7 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
     // be resolved through gen_henkilo.oppijanumero before matching.
     val query = sql"""
     SELECT hakemus.hakemus_oid,
-      lk.oppilaitos_oid,
+      org.oppilaitosnumero AS lahtokoulu,
       COALESCE(org.nimi_fi, org.nimi_sv) AS lahtokoulunnimi,
       lk.luokka,
       lk.suoritus_tyyppi
