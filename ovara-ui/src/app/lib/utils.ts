@@ -111,7 +111,7 @@ export const getRaporttiListByUserRights = (userRoles?: Array<string>) => {
   }
 
   if (hasOvaraHakeneetRole(userRoles)) {
-    raportit.push(...[TIEDONSIIRTO_RAPORTIT]);
+    raportit.push(...TIEDONSIIRTO_RAPORTIT);
   }
 
   return raportit;
