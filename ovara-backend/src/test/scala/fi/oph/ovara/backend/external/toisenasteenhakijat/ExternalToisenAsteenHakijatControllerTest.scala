@@ -314,6 +314,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     seedMinimalHakija()
     insertOrganisaatio(
       organisaatioOid = LAHTOKOULU_OID,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
       nimiFi = Some(LAHTOKOULU_NIMI_FI),
       nimiSv = Some(LAHTOKOULU_NIMI_SV)
     )
@@ -327,7 +328,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_OID))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_KOODI))
       .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(LAHTOKOULU_NIMI_FI))
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(LAHTOKOULU_LUOKKA))
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(LAHTOKOULU_LUOKKATASO))
@@ -338,11 +339,13 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     seedMinimalHakija()
     insertOrganisaatio(
       organisaatioOid = LAHTOKOULU_OID,
+      oppilaitosnumero = Some("09999"),
       nimiFi = Some("Vanha koulu")
     )
     val otherOid = "1.2.246.562.10.00000000000000000901"
     insertOrganisaatio(
       organisaatioOid = otherOid,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
       nimiFi = Some(LAHTOKOULU_NIMI_FI)
     )
     // Earlier-started row — should lose.
@@ -364,7 +367,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(otherOid))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_KOODI))
       .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(LAHTOKOULU_NIMI_FI))
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(LAHTOKOULU_LUOKKA))
   }
@@ -423,7 +426,11 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
   @Test
   def lahtokouluIgnoresRowsStartingAfterJatetty(): Unit = {
     seedMinimalHakija()
-    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
+      nimiFi = Some(LAHTOKOULU_NIMI_FI)
+    )
     // Started after jatetty (which is 2025-08-01) → must be excluded.
     insertHenkiloLahtokoulu(
       luokka = Some(LAHTOKOULU_LUOKKA),
@@ -439,7 +446,11 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
   @Test
   def lahtokouluTreatsNullSuorituksenLoppuAsActive(): Unit = {
     seedMinimalHakija()
-    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
+      nimiFi = Some(LAHTOKOULU_NIMI_FI)
+    )
     // No end date → treat as still active.
     insertHenkiloLahtokoulu(
       luokka = Some(LAHTOKOULU_LUOKKA),
@@ -451,7 +462,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_OID))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_KOODI))
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(LAHTOKOULU_LUOKKA))
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(LAHTOKOULU_LUOKKATASO))
   }
@@ -462,7 +473,11 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertHakemus(jatetty = None)
     insertHakukohde()
     insertHakutoive()
-    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
+      nimiFi = Some(LAHTOKOULU_NIMI_FI)
+    )
     insertHenkiloLahtokoulu(
       luokka = Some(LAHTOKOULU_LUOKKA),
       oppilaitosOid = Some(LAHTOKOULU_OID),
@@ -475,9 +490,10 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
   }
 
   @Test
-  def lahtokoulunnimiIsNullWhenOrganisaatioRowMissing(): Unit = {
+  def lahtokouluAndNimiAreNullWhenOrganisaatioRowMissing(): Unit = {
     seedMinimalHakija()
-    // Deliberately omit insertOrganisaatio for LAHTOKOULU_OID.
+    // Deliberately omit insertOrganisaatio for LAHTOKOULU_OID — LEFT JOIN yields nulls
+    // for both oppilaitosnumero (→ lahtokoulu) and nimi_fi/sv (→ lahtokoulunnimi).
     insertHenkiloLahtokoulu(
       luokka = Some(LAHTOKOULU_LUOKKA),
       oppilaitosOid = Some(LAHTOKOULU_OID),
@@ -488,7 +504,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_OID))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulunnimi").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(LAHTOKOULU_LUOKKA))
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(LAHTOKOULU_LUOKKATASO))
@@ -507,8 +523,17 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertHakutoive(hakemusOid = HAKEMUS_OID_2)
     insertHakukohde()
 
-    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
-    insertOrganisaatio(organisaatioOid = oppilaitosB, nimiFi = Some("Toisen koulu"))
+    val oppilaitoskoodiB = "05678"
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
+      nimiFi = Some(LAHTOKOULU_NIMI_FI)
+    )
+    insertOrganisaatio(
+      organisaatioOid = oppilaitosB,
+      oppilaitosnumero = Some(oppilaitoskoodiB),
+      nimiFi = Some("Toisen koulu")
+    )
     insertHenkiloLahtokoulu(
       henkiloOid = OPPIJANUMERO,
       luokka = Some(LAHTOKOULU_LUOKKA),
@@ -535,11 +560,11 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       .map(h => h.get("oppijanumero").asText -> h)
       .toMap
     val hA = byOppijanumero(OPPIJANUMERO).get("hakemus")
-    assert(hA.get("lahtokoulu").asText == LAHTOKOULU_OID)
+    assert(hA.get("lahtokoulu").asText == LAHTOKOULU_KOODI)
     assert(hA.get("luokka").asText == LAHTOKOULU_LUOKKA)
     assert(hA.get("luokkataso").asText == "9")
     val hB = byOppijanumero(oppijanumeroB).get("hakemus")
-    assert(hB.get("lahtokoulu").asText == oppilaitosB)
+    assert(hB.get("lahtokoulu").asText == oppilaitoskoodiB)
     assert(hB.get("luokka").asText == "7B")
     assert(hB.get("luokkataso").asText == "7")
   }
@@ -551,6 +576,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertHakemusToinenAsteYhteishaku()
     insertOrganisaatio(
       organisaatioOid = LAHTOKOULU_OID,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
       nimiFi = Some(LAHTOKOULU_NIMI_FI)
     )
     insertHenkiloLahtokoulu(
@@ -572,7 +598,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       assert(headerRow.getCell(37).getStringCellValue == "Luokkataso")
 
       val dataRow = sheet.getRow(1)
-      assert(dataRow.getCell(34).getStringCellValue == LAHTOKOULU_OID)
+      assert(dataRow.getCell(34).getStringCellValue == LAHTOKOULU_KOODI)
       assert(dataRow.getCell(35).getStringCellValue == LAHTOKOULU_NIMI_FI)
       assert(dataRow.getCell(36).getStringCellValue == LAHTOKOULU_LUOKKA)
       assert(dataRow.getCell(37).getStringCellValue == LAHTOKOULU_LUOKKATASO)
@@ -607,6 +633,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     seedMinimalHakija()
     insertOrganisaatio(
       organisaatioOid = LAHTOKOULU_OID,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
       nimiFi = None,
       nimiSv = Some(LAHTOKOULU_NIMI_SV)
     )
@@ -637,7 +664,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
   private def expectLahtokouluPopulated(actions: ResultActions): Unit = {
     actions
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_OID))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_KOODI))
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(LAHTOKOULU_LUOKKA))
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(LAHTOKOULU_LUOKKATASO))
   }
@@ -660,7 +687,11 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertHakemus(insertHenkilo = false) // hakemus.henkilo_oid = OPPIJANUMERO
     insertHakukohde()
     insertHakutoive()
-    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
+      nimiFi = Some(LAHTOKOULU_NIMI_FI)
+    )
     seedActiveLahtokoulu(henkiloOid = aliasA)
 
     expectLahtokouluPopulated(get())
@@ -676,7 +707,11 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertHakemus(oppijanumero = aliasA, insertHenkilo = false)
     insertHakukohde()
     insertHakutoive()
-    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
+      nimiFi = Some(LAHTOKOULU_NIMI_FI)
+    )
     seedActiveLahtokoulu(henkiloOid = OPPIJANUMERO)
 
     expectLahtokouluPopulated(get())
@@ -693,7 +728,11 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertHakemus(oppijanumero = aliasA, insertHenkilo = false) // hakemus under alias A
     insertHakukohde()
     insertHakutoive()
-    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
+      nimiFi = Some(LAHTOKOULU_NIMI_FI)
+    )
     seedActiveLahtokoulu(henkiloOid = aliasB) // lahtokoulu under alias B
 
     expectLahtokouluPopulated(get())
@@ -710,7 +749,11 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertHakukohde()
     insertHakutoive()
     insertOrganisaatio(organisaatioOid = otherOid, nimiFi = Some("Aiempi koulu"))
-    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
+      nimiFi = Some(LAHTOKOULU_NIMI_FI)
+    )
     // Earlier row filed under primary OID.
     insertHenkiloLahtokoulu(
       henkiloOid = OPPIJANUMERO,
@@ -735,7 +778,11 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertHakemus(insertHenkilo = false)  // hakemus for person X
     insertHakukohde()
     insertHakutoive()
-    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
+      nimiFi = Some(LAHTOKOULU_NIMI_FI)
+    )
     // Lahtokoulu belongs to person Y — must NOT surface on person X's hakemus.
     seedActiveLahtokoulu(henkiloOid = personY)
 
@@ -751,7 +798,11 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertHakemus(insertHenkilo = false)
     insertHakukohde()
     insertHakutoive()
-    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
+      nimiFi = Some(LAHTOKOULU_NIMI_FI)
+    )
     seedActiveLahtokoulu(henkiloOid = OPPIJANUMERO)
 
     expectLahtokouluPopulated(get())
@@ -1257,7 +1308,11 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2)
     insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 1)
     insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2)
-    insertOrganisaatio(organisaatioOid = LAHTOKOULU_OID, nimiFi = Some(LAHTOKOULU_NIMI_FI))
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
+      nimiFi = Some(LAHTOKOULU_NIMI_FI)
+    )
     insertHenkiloLahtokoulu(
       luokka = Some(LAHTOKOULU_LUOKKA),
       oppilaitosOid = Some(LAHTOKOULU_OID),
@@ -1271,7 +1326,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet", hasSize[Any](2)))
-      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_OID))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_KOODI))
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(LAHTOKOULU_LUOKKA))
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokkataso").value(LAHTOKOULU_LUOKKATASO))
   }
@@ -1479,6 +1534,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertOrganisaatio() // hakukohde's organisaatio_oid → cell 48 (Oppilaitos)
     insertOrganisaatio(
       organisaatioOid = LAHTOKOULU_OID,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
       nimiFi = Some(LAHTOKOULU_NIMI_FI)
     )
     insertHakemusToinenAsteYhteishaku()
@@ -1626,7 +1682,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
         31 -> HAKEMUS_OID,
         32 -> JATETTY.toString,
         33 -> MUOKATTU.toString,
-        34 -> LAHTOKOULU_OID,
+        34 -> LAHTOKOULU_KOODI,
         35 -> LAHTOKOULU_NIMI_FI,
         36 -> LAHTOKOULU_LUOKKA,
         37 -> LAHTOKOULU_LUOKKATASO,

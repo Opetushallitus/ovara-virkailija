@@ -123,7 +123,7 @@ case class HakijaRow(
         kausi = kausi,
         hakemuksenJattopaiva = jatetty,
         hakemuksenMuokkauspaiva = muokattu,
-        lahtokoulu = lahtokoulu.flatMap(_.oppilaitosOid),
+        lahtokoulu = lahtokoulu.flatMap(_.oppilaitoskoodi),
         lahtokoulunnimi = lahtokoulu.flatMap(_.oppilaitosNimi),
         luokka = lahtokoulu.flatMap(_.luokka),
         luokkataso = lahtokoulu.flatMap(_.suoritusTyyppi).flatMap(LahtokouluRow.suoritusTyyppiToLuokkataso),
@@ -137,7 +137,7 @@ case class HakijaRow(
 
 case class LahtokouluRow(
   hakemusOid: String,
-  oppilaitosOid: Option[String],
+  oppilaitoskoodi: Option[String],
   oppilaitosNimi: Option[String],
   luokka: Option[String],
   suoritusTyyppi: Option[String]
