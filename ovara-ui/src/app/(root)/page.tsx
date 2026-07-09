@@ -14,7 +14,6 @@ export default function Home() {
   }
   const userRoles = user?.authorities;
   const hasOvaraUserRights = hasOvaraRole(userRoles);
-
   return (
     <MainContainer>
       {hasOvaraUserRights ? (

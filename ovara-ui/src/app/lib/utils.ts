@@ -5,6 +5,7 @@ import {
   KK_YOS_RAPORTTI,
   KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
   OPPILAITOSORGANISAATIOTYYPPI,
+  TIEDONSIIRTO_RAPORTIT,
   TOIMIPISTEORGANISAATIOTYYPPI,
   TOISEN_ASTEEN_RAPORTIT,
 } from './constants';
@@ -87,6 +88,13 @@ export const hasOvaraKkYosRole = (userRoles?: Array<string>) => {
   );
 };
 
+export const hasOvaraHakeneetRole = (userRoles?: Array<string>) => {
+  return (
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_HAKENEET') ||
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA')
+  );
+};
+
 export const getRaporttiListByUserRights = (userRoles?: Array<string>) => {
   const raportit = [];
 
@@ -100,6 +108,10 @@ export const getRaporttiListByUserRights = (userRoles?: Array<string>) => {
 
   if (hasOvaraKkYosRole(userRoles)) {
     raportit.push(...[KK_YOS_RAPORTTI]);
+  }
+
+  if (hasOvaraHakeneetRole(userRoles)) {
+    raportit.push(...[TIEDONSIIRTO_RAPORTIT]);
   }
 
   return raportit;
