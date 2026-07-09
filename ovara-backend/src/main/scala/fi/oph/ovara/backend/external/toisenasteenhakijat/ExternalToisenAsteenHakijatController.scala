@@ -48,11 +48,11 @@ class ExternalToisenAsteenHakijatController(
     "valintarajaus"   -> valintarajaus
   )
 
-  // OPH_PAAKAYTTAJA and users with the dedicated HAKENEET role both qualify for the endpoint.
+  // OPH_PAAKAYTTAJA and users with at least one HAKENEET_<oid> authority both qualify for the endpoint.
   private def isAuthorized: Boolean = {
     val authorities = userService.getAuthorities
     authorities.contains(fi.oph.ovara.backend.utils.Constants.OPH_PAAKAYTTAJA_AUTHORITY) ||
-    authorities.contains(fi.oph.ovara.backend.utils.Constants.HAKENEET_AUTHORITY)
+    authorities.exists(_.startsWith(fi.oph.ovara.backend.utils.Constants.HAKENEET_AUTHORITY_PREFIX))
   }
 
   private def requireAuthorized[T](f: => T): T =
@@ -60,13 +60,17 @@ class ExternalToisenAsteenHakijatController(
     else throw org.springframework.web.server.ResponseStatusException(HttpStatus.FORBIDDEN)
 
   private def resolveKayttooikeusScope: KayttooikeusScope = {
-    val authorities      = userService.getAuthorities
-    val kayttooikeusOids = AuthoritiesUtil.getKayttooikeusOids(authorities)
-    if (
-      AuthoritiesUtil.hasOPHPaakayttajaRights(kayttooikeusOids) ||
-      authorities.contains(fi.oph.ovara.backend.utils.Constants.HAKENEET_AUTHORITY)
-    ) KayttooikeusScope.paakayttaja
-    else KayttooikeusScope.limited(kayttooikeusOids.toSet)
+    val authorities = userService.getAuthorities
+    if (AuthoritiesUtil.hasOPHPaakayttajaRights(AuthoritiesUtil.getKayttooikeusOids(authorities))) {
+      KayttooikeusScope.paakayttaja
+    } else {
+      // HAKENEET is org-scoped: only OIDs suffixed onto HAKENEET_ authorities count for
+      // this endpoint. OIDs granted through 2ASTE / KK / other ovara roles are NOT merged in.
+      val hakeneetOrgOids = AuthoritiesUtil.getKayttooikeusOids(
+        authorities.filter(_.startsWith(fi.oph.ovara.backend.utils.Constants.HAKENEET_AUTHORITY_PREFIX))
+      )
+      KayttooikeusScope.limited(hakeneetOrgOids.toSet)
+    }
   }
 
   @GetMapping(path = Array("toisenasteenhakijat"))
