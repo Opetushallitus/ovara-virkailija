@@ -2,7 +2,6 @@
 
 import {
   Box,
-  Link,
   Table,
   TableBody,
   TableCell,
@@ -10,6 +9,7 @@ import {
   TableRow,
   styled,
 } from '@mui/material';
+import { Link } from 'react-router';
 import { ophColors } from '@/app/theme';
 import { useTranslate } from '@tolgee/react';
 
@@ -85,7 +85,7 @@ export const ListTable = ({ list, ...props }: ListTableProps) => {
             return (
               <TableRow key={key}>
                 <StyledCell>
-                  <Link href={`/${key}`} sx={{ textDecoration: 'none' }}>
+                  <Link to={`/${key}`} style={{ textDecoration: 'none' }}>
                     {t(`raporttilista.${key}`)}
                   </Link>
                 </StyledCell>

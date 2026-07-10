@@ -3,11 +3,9 @@
 import { Tolgee, DevTools } from '@tolgee/web';
 import { TolgeeProvider, BackendFetch, FormatSimple } from '@tolgee/react';
 import { ReactNode, useMemo } from 'react';
-import Loading from '@/app/(root)/loading';
+import Loading from '@/app/loading';
 import type { LanguageCode } from '@/app/lib/types/common';
 import { getConfiguration } from '@/app/lib/configuration/client-configuration';
-
-const REVALIDATE_TIME_SECONDS = 60 * 60 * 2;
 
 export function OvaraTolgeeProvider({
   language,
@@ -25,9 +23,6 @@ export function OvaraTolgeeProvider({
         .use(
           BackendFetch({
             prefix: config.lokalisointiPrefix,
-            next: {
-              revalidate: REVALIDATE_TIME_SECONDS,
-            },
           }),
         )
         .init({

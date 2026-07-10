@@ -1,5 +1,5 @@
 import { parseAsBoolean, useQueryState, UseQueryStateOptions } from 'nuqs';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 
 //https://github.com/47ng/nuqs/discussions/606#discussioncomment-12343199
@@ -9,6 +9,10 @@ export const useQueryStateWithLocalStorage = <T>(
     defaultValue: T;
   },
 ) => {
+  const restoreFromLocalStorage = useRef(
+    typeof window !== 'undefined' && window.location.search === '',
+  );
+
   // queryStateen defaultValue
   const [queryState, setQueryState] = useQueryState<T>(key, options);
 
@@ -24,6 +28,7 @@ export const useQueryStateWithLocalStorage = <T>(
     // queryState on default (tyhjä) ja localStorageStatessa arvo, asetetaan queryState localstorageen
     if (
       queryState === options.defaultValue &&
+      restoreFromLocalStorage.current &&
       localStorageState !== null &&
       localStorageState !== undefined
     ) {

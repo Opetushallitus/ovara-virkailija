@@ -6,7 +6,7 @@ import { Box, Divider } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import { hasOvaraToinenAsteRole, isNullishOrEmpty } from '@/app/lib/utils';
-import { useSearchParams } from 'next/navigation';
+import { useOptimisticSearchParams } from 'nuqs/adapters/react-router/v7';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
 
 import { KoulutuksenAlkaminen } from '@/app/components/form/koulutuksen-alkaminen';
@@ -41,7 +41,8 @@ export default function Hakijat() {
     useCommonSearchParams();
 
   const { run, isLoading } = useDownloadWithErrorBoundary();
-  const queryParamsStr = useSearchParams().toString();
+  const queryParams = useOptimisticSearchParams();
+  const queryParamsStr = queryParams.toString();
 
   const handleDownload = () =>
     run(() => downloadExcel('hakijat', queryParamsStr));

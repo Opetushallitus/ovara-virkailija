@@ -6,7 +6,7 @@ import { FormButtons } from '@/app/components/form/form-buttons';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import { hasOvaraToinenAsteRole, isNullishOrEmpty } from '@/app/lib/utils';
-import { useSearchParams } from 'next/navigation';
+import { useOptimisticSearchParams } from 'nuqs/adapters/react-router/v7';
 
 import { KoulutuksenAlkaminen } from '@/app/components/form/koulutuksen-alkaminen';
 import { Haku } from '@/app/components/form/haku';
@@ -31,7 +31,7 @@ export default function Hakutilasto() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const hasToinenAsteRights = hasOvaraToinenAsteRole(user?.authorities);
-  const queryParams = useSearchParams();
+  const queryParams = useOptimisticSearchParams();
 
   const { selectedAlkamiskaudet, selectedHaut } = useCommonSearchParams();
   const { selectedTulostustapa } = useHakeneetSearchParams();
