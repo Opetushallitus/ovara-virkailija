@@ -4,12 +4,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const readHttpsConfig = () => {
-  const certPath = path.resolve(
-    '../ovara-backend/src/main/resources/localhost-cert.pem',
-  );
-  const keyPath = path.resolve(
-    '../ovara-backend/src/main/resources/localhost-key.pem',
-  );
+  const certPath = path.resolve('certificates/localhost.pem');
+  const keyPath = path.resolve('certificates/localhost-key.pem');
 
   if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
     return undefined;
