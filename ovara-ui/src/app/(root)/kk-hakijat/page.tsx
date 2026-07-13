@@ -1,4 +1,3 @@
-'use client';
 import { OphTypography } from '@opetushallitus/oph-design-system';
 import { FormBox } from '@/app/components/form/form-box';
 import { FormButtons } from '@/app/components/form/form-buttons';

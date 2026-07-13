@@ -1,5 +1,3 @@
-'use client';
-
 import { ReactNode } from 'react';
 import { Stack } from '@mui/material';
 import { useTranslate } from '@tolgee/react';

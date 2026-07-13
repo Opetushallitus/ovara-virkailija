@@ -1,4 +1,3 @@
-'use client';
 import { HomeOutlined as HomeOutlinedIcon } from '@mui/icons-material';
 import { ophColors } from '@/app/theme';
 import { Typography } from '@mui/material';

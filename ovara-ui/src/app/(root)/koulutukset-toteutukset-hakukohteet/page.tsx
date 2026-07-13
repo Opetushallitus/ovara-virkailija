@@ -1,4 +1,3 @@
-'use client';
 import { OphTypography } from '@opetushallitus/oph-design-system';
 import { useTranslate } from '@tolgee/react';
 import { KoulutuksenAlkaminen } from '@/app/components/form/koulutuksen-alkaminen';

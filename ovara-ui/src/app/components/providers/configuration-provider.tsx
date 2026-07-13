@@ -1,5 +1,3 @@
-'use client';
-
 import { createContext, useContext } from 'react';
 import { Configuration } from '@/app/lib/configuration/configuration';
 import { setConfiguration } from '@/app/lib/configuration/client-configuration';
