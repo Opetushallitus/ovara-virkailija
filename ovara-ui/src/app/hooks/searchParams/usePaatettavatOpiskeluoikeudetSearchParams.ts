@@ -1,4 +1,3 @@
-'use client';
 import { useQueryStateWithLocalStorage } from './useQueryStateWithLocalStorage';
 
 export const usePaatettavatOpiskeluoikeudetSearchParams = () => {

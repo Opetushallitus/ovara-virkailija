@@ -1,5 +1,3 @@
-'use client';
-
 import { Tolgee, DevTools } from '@tolgee/web';
 import { TolgeeProvider, BackendFetch, FormatSimple } from '@tolgee/react';
 import { ReactNode, useMemo } from 'react';

@@ -1,4 +1,3 @@
-'use client';
 import { Button, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useTranslate } from '@tolgee/react';

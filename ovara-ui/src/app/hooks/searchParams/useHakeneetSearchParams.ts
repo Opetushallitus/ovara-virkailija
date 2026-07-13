@@ -1,4 +1,3 @@
-'use client';
 import { parseAsArrayOf, parseAsString } from 'nuqs';
 import {
   useBooleanQueryStateWithOptions,

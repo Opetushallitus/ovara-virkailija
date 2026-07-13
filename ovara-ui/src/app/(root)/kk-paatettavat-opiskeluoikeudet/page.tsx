@@ -1,4 +1,3 @@
-'use client';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import { hasOvaraKkYosRole } from '@/app/lib/utils';
