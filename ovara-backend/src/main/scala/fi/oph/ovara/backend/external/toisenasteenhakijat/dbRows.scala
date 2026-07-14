@@ -1,5 +1,6 @@
 package fi.oph.ovara.backend.external.toisenasteenhakijat
 
+import fi.oph.ovara.backend.domain.Kielistetty
 import org.json4s.jackson.JsonMethods
 import org.json4s.JString
 import org.json4s.jvalue2monadic
@@ -167,6 +168,7 @@ case class HakijaHakutoiveRow(
   hakutoivenumero: Int,
   jarjestyspaikkaOid: Option[String],
   oppilaitos: Option[String],
+  opetuspisteennimi: Kielistetty,
   hakukohteenLinjaJson: Option[String],
   jarjestaaUrheilijanAmmkoulutusta: Option[Boolean],
   koulutusKoodiurit: Seq[String],
@@ -199,6 +201,7 @@ case class HakijaHakutoiveRow(
       hakujno = hakutoivenumero,
       oppilaitos = oppilaitos,
       opetuspiste = jarjestyspaikkaOid,
+      opetuspisteennimi = Option(opetuspisteennimi).filter(_.nonEmpty),
       koulutus = koulutusKoodiurit.headOption.flatMap(koodistot.get),
       urheilijanammatillinenkoulutus =
         jarjestaaUrheilijanAmmkoulutusta.map(_ && kiinnostunutAmmatillinen.getOrElse(false)),

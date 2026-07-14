@@ -260,10 +260,11 @@ trait ExternalToisenAsteenHakijatTestUtils {
     organisaatioOid: String = ORGANISAATIO_OID,
     oppilaitosnumero: Option[String] = Some(OPPILAITOSNUMERO),
     nimiFi: Option[String] = None,
-    nimiSv: Option[String] = None
+    nimiSv: Option[String] = None,
+    nimiEn: Option[String] = None
   ): Unit = {
     db.run(
-      sqlu"""INSERT INTO gen.gen_organisaatio VALUES($organisaatioOid, $oppilaitosnumero, $nimiFi, $nimiSv)""",
+      sqlu"""INSERT INTO gen.gen_organisaatio VALUES($organisaatioOid, $oppilaitosnumero, $nimiFi, $nimiSv, $nimiEn)""",
       "Insert test organisaatio"
     )
   }
@@ -470,7 +471,8 @@ trait ExternalToisenAsteenHakijatTestUtils {
               organisaatio_oid text NOT NULL PRIMARY KEY,
               oppilaitosnumero text,
               nimi_fi text,
-              nimi_sv text
+              nimi_sv text,
+              nimi_en text
           );
 
           CREATE TABLE gen.gen_henkilo_lahtokoulu(
