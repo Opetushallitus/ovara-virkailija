@@ -189,6 +189,7 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
       ht.valintatieto,
       ht.vastaanottotieto,
       ht.ilmoittautumisen_tila,
+      ht.harkinnanvaraisuuden_syy,
       (SELECT vr.pisteet FROM gen.gen_valintarekisteri vr
         WHERE vr.hakemus_oid   = ht.hakemus_oid
           AND vr.hakukohde_oid = ht.hakukohde_oid
