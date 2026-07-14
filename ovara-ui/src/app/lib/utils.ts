@@ -87,6 +87,13 @@ export const hasOvaraKkYosRole = (userRoles?: Array<string>) => {
   );
 };
 
+export const hasOvaraHakeneetRole = (userRoles?: Array<string>) => {
+  return (
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_HAKENEET') ||
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA')
+  );
+};
+
 export const getRaporttiListByUserRights = (userRoles?: Array<string>) => {
   const raportit = [];
 
