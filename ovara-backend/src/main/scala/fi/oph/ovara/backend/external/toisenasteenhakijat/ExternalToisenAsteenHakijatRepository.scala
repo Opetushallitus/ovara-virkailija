@@ -211,7 +211,14 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
             WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
             ELSE vr.prioriteetti
           END NULLS LAST
-        LIMIT 1) AS pisteet
+        LIMIT 1) AS pisteet,
+      (SELECT flft.arvo FROM gen.gen_valintalaskenta_jonosija_funktiotulokset flft
+        WHERE flft.hakemus_oid   = ht.hakemus_oid
+          AND flft.hakukohde_oid = ht.hakukohde_oid
+          AND flft.tunniste IN ('keskiarvo_pk', 'keskiarvo_lk', 'painotettu_keskiarvo')
+          AND flft.arvo IS NOT NULL
+          AND flft.arvo <> ''
+        LIMIT 1) AS keskiarvo_valintalaskennasta
     FROM gen.gen_hakutoive ht
     LEFT JOIN gen.gen_hakukohde    hk                 ON ht.hakukohde_oid       = hk.hakukohde_oid
     LEFT JOIN gen.gen_organisaatio org                ON hk.organisaatio_oid    = org.organisaatio_oid
