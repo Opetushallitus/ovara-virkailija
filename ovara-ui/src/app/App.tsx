@@ -19,6 +19,7 @@ import KkKoulutuksetToteutuksetHakukohteet from '@/app/(root)/kk-koulutukset-tot
 import KkPaatettavatOpiskeluoikeudet from '@/app/(root)/kk-paatettavat-opiskeluoikeudet/page';
 import KoulutuksetToteutuksetHakukohteet from '@/app/(root)/koulutukset-toteutukset-hakukohteet/page';
 import NotFound from '@/app/not-found';
+import ToisenasteenHakijatTiedonsiirto from '@/app/(root)/tiedonsiirto/toisenasteen-hakijat/page';
 
 export default function App() {
   return (
@@ -56,6 +57,10 @@ export default function App() {
                           <Route
                             path="koulutukset-toteutukset-hakukohteet"
                             element={<KoulutuksetToteutuksetHakukohteet />}
+                          />
+                          <Route
+                            path="tiedonsiirto/toisenasteen-hakijat"
+                            element={<ToisenasteenHakijatTiedonsiirto />}
                           />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
