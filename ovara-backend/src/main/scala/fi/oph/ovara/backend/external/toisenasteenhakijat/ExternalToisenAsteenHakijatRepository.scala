@@ -180,6 +180,9 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
       ht.hakutoivenumero,
       hk.jarjestyspaikka_oid,
       org.oppilaitosnumero,
+      org_jarjestyspaikka.nimi_fi,
+      org_jarjestyspaikka.nimi_sv,
+      org_jarjestyspaikka.nimi_en,
       hk.hakukohteen_linja,
       hk.jarjestaa_urheilijan_ammkoulutusta,
       k.koulutukset_koodiuri,
@@ -209,10 +212,11 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
           END NULLS LAST
         LIMIT 1) AS pisteet
     FROM gen.gen_hakutoive ht
-    LEFT JOIN gen.gen_hakukohde   hk  ON ht.hakukohde_oid    = hk.hakukohde_oid
-    LEFT JOIN gen.gen_organisaatio org ON hk.organisaatio_oid = org.organisaatio_oid
-    LEFT JOIN gen.gen_toteutus    t   ON hk.toteutus_oid     = t.toteutus_oid
-    LEFT JOIN gen.gen_koulutus    k   ON t.koulutus_oid      = k.koulutus_oid
+    LEFT JOIN gen.gen_hakukohde    hk                 ON ht.hakukohde_oid       = hk.hakukohde_oid
+    LEFT JOIN gen.gen_organisaatio org                ON hk.organisaatio_oid    = org.organisaatio_oid
+    LEFT JOIN gen.gen_organisaatio org_jarjestyspaikka ON hk.jarjestyspaikka_oid = org_jarjestyspaikka.organisaatio_oid
+    LEFT JOIN gen.gen_toteutus     t                  ON hk.toteutus_oid        = t.toteutus_oid
+    LEFT JOIN gen.gen_koulutus     k                  ON t.koulutus_oid         = k.koulutus_oid
     WHERE ht.hakemus_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(hakemusOids)})
     """.as[HakijaHakutoiveRow]
 

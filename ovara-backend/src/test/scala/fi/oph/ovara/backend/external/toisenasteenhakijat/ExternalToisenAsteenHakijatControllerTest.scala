@@ -1625,7 +1625,9 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     seedMinimalHakija()
     insertToteutusJaKoulutus()
     insertOpetuskieli()
-    insertOrganisaatio() // hakukohde's organisaatio_oid → cell 48 (Oppilaitos)
+    insertOrganisaatio(nimiFi =
+      Some(OPETUSPISTE_NIMI_FI)
+    ) // ORGANISAATIO_OID; also joined via jarjestyspaikka_oid → cells 48 + 50
     insertOrganisaatio(
       organisaatioOid = LAHTOKOULU_OID,
       oppilaitosnumero = Some(LAHTOKOULU_KOODI),
@@ -1792,7 +1794,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
         47 -> "1",
         48 -> OPPILAITOS,
         49 -> ORGANISAATIO_OID,
-        50 -> "",
+        50 -> OPETUSPISTE_NIMI_FI,
         51 -> "Kulttuurituottaja",
         52 -> HAKUKOHDE_OID,
         53 -> "",
@@ -1829,6 +1831,53 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
         )
       }
     } finally workbook.close()
+  }
+
+  @Test
+  def opetuspisteennimiPopulatedFromJarjestyspaikkaOid(): Unit = {
+    // Distinct jarjestyspaikka_oid vs organisaatio_oid, distinct nimi values on each org.
+    // Proves the opetuspisteennimi join uses jarjestyspaikka_oid, not organisaatio_oid.
+    initSchema()
+    insertHakemus()
+    insertHakukohde(jarjestyspaikkaOid = JARJESTYSPAIKKA_OID)
+    insertHakutoive()
+    insertOrganisaatio(nimiFi = Some("Wrong nimi from organisaatio_oid row"))
+    insertOrganisaatio(
+      organisaatioOid = JARJESTYSPAIKKA_OID,
+      oppilaitosnumero = None,
+      nimiFi = Some(OPETUSPISTE_NIMI_FI),
+      nimiSv = Some(OPETUSPISTE_NIMI_SV),
+      nimiEn = Some(OPETUSPISTE_NIMI_EN)
+    )
+
+    get(organisaatioOid = Some(JARJESTYSPAIKKA_OID), hakukohdeOid = None)
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].opetuspiste").value(JARJESTYSPAIKKA_OID))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].opetuspisteennimi.fi").value(OPETUSPISTE_NIMI_FI))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].opetuspisteennimi.sv").value(OPETUSPISTE_NIMI_SV))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].opetuspisteennimi.en").value(OPETUSPISTE_NIMI_EN))
+  }
+
+  @Test
+  def opetuspisteennimiEmptyWhenAllNimiNull(): Unit = {
+    seedMinimalHakija()
+    insertOrganisaatio() // ORGANISAATIO_OID row with nimi_fi/sv/en all None (defaults)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].opetuspisteennimi").value(nullValue()))
+  }
+
+  @Test
+  def opetuspisteennimiPartialWhenSomeNimiNull(): Unit = {
+    seedMinimalHakija()
+    insertOrganisaatio(nimiFi = Some(OPETUSPISTE_NIMI_FI)) // sv + en null
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].opetuspisteennimi.fi").value(OPETUSPISTE_NIMI_FI))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].opetuspisteennimi.sv").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].opetuspisteennimi.en").doesNotExist())
   }
 
   @Test
