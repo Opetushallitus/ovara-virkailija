@@ -202,7 +202,8 @@ case class HakijaHakutoiveRow(
   vastaanottotieto: Option[String],
   ilmoittautumisenTila: Option[String],
   harkinnanvaraisuudenSyy: Option[String],
-  pisteet: Option[BigDecimal]
+  pisteet: Option[BigDecimal],
+  keskiarvoValintalaskennasta: Option[String]
 ) {
   def asHakutoive(
     koodistot: Map[String, KoodistoArvo],
@@ -240,7 +241,8 @@ case class HakijaHakutoiveRow(
       vastaanotto = vastaanottotieto.map(vastaanotonTilaMapping.get).getOrElse(Some("1")),
       lasnaolo = ilmoittautumisenTila.flatMap(ilmoittautumisenTilaMapping.get),
       harkinnanvaraisuusperuste = harkinnanvaraisuudenSyy.map(convertHarkinnanvaraisuudenSyy).filter(_.nonEmpty),
-      yhteispisteet = pisteet
+      yhteispisteet = pisteet,
+      keskiarvo = keskiarvoValintalaskennasta
     )
   }
 
