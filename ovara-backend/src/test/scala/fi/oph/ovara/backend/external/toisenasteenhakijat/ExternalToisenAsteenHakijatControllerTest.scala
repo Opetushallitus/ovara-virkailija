@@ -1641,6 +1641,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     insertTodistusvuosi(arvo = Some("2025"))
     insertLisakoulutus(avain = "LISAKOULUTUS_TUVA")
     insertValintarekisteri(pisteet = Some(BigDecimal("82.5")))
+    insertValintalaskentaFunktiotulos(tunniste = "keskiarvo_pk", arvo = Some("8.75")) // → cell 46
     insertHenkiloLahtokoulu(
       luokka = Some(LAHTOKOULU_LUOKKA),
       oppilaitosOid = Some(LAHTOKOULU_OID),
@@ -1793,7 +1794,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
         43 -> "0",
         44 -> "LISAKOULUTUS_TUVA",
         45 -> "0",
-        46 -> "",
+        46 -> "8.75",
         47 -> "1",
         48 -> OPPILAITOS,
         49 -> ORGANISAATIO_OID,
@@ -1942,6 +1943,79 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
     get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].harkinnanvaraisuusperuste").value("999"))
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = Array("keskiarvo_pk", "keskiarvo_lk", "painotettu_keskiarvo"))
+  def keskiarvoPopulatedFromValintalaskentaFunktiotulokset(tunniste: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    seedMinimalHakija()
+    insertValintalaskentaFunktiotulos(tunniste = tunniste, arvo = Some("8.75"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].keskiarvo").value("8.75"))
+  }
+
+  @Test
+  def keskiarvoNullWhenFunktiotuloksetIsEmpty(): Unit = {
+    seedMinimalHakija()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].keskiarvo").value(nullValue()))
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    value = Array(
+      "keskiarvo_pk | ''",
+      "keskiarvo_lk | null"
+    ),
+    delimiter = '|',
+    nullValues = Array("null"),
+    quoteCharacter = '\''
+  )
+  def keskiarvoNullWhenArvoIsEmptyOrNull(tunniste: String, arvo: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    seedMinimalHakija()
+    insertValintalaskentaFunktiotulos(tunniste = tunniste, arvo = Option(arvo))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].keskiarvo").value(nullValue()))
+  }
+
+  @Test
+  def keskiarvoIgnoresIrrelevantTunniste(): Unit = {
+    seedMinimalHakija()
+    insertValintalaskentaFunktiotulos(tunniste = "some_other_tunniste", arvo = Some("9.5"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].keskiarvo").value(nullValue()))
+  }
+
+  @Test
+  def keskiarvoPerHakutoiveDiffersOnSameHakemus(): Unit = {
+    seedMinimalHakija()
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2)
+    insertValintalaskentaFunktiotulos(
+      hakukohdeOid = HAKUKOHDE_OID,
+      tunniste = "keskiarvo_pk",
+      arvo = Some("7.20")
+    )
+    insertValintalaskentaFunktiotulos(
+      hakukohdeOid = HAKUKOHDE_OID_2,
+      tunniste = "painotettu_keskiarvo",
+      arvo = Some("9.10")
+    )
+
+    get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].keskiarvo").value("7.20"))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[1].keskiarvo").value("9.10"))
   }
 
   @Test
