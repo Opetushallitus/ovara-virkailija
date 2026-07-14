@@ -37,6 +37,11 @@ object ExternalToisenAsteenHakijatTestData {
   val OPPILAITOSNUMERO            = "00123"
   val OPPILAITOS                  = "00123"
 
+  val JARJESTYSPAIKKA_OID = "1.2.246.562.10.00000000000000000488"
+  val OPETUSPISTE_NIMI_FI = "Kallion opetuspiste"
+  val OPETUSPISTE_NIMI_SV = "Kallio undervisningsplats"
+  val OPETUSPISTE_NIMI_EN = "Kallio teaching site"
+
   val HUOLTAJA1 = Huoltaja(
     etunimi = "Maija",
     sukunimi = "Huoltaja",
