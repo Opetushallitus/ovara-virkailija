@@ -4,9 +4,13 @@ import fi.oph.ovara.backend.domain.Kielistetty
 import org.json4s.jackson.JsonMethods
 import org.json4s.JString
 import org.json4s.jvalue2monadic
+import org.slf4j.{Logger, LoggerFactory}
 
 import java.time.OffsetDateTime
 import scala.util.Try
+
+private val LOG: Logger =
+  LoggerFactory.getLogger("fi.oph.ovara.backend.external.toisenasteenhakijat.HarkinnanvaraisuudenSyy")
 
 private val urheilijaLukioLinjaCodes: Set[String] =
   Set("lukiolinjaterityinenkoulutustehtava_0105", "lukiopainotukset_0105")
@@ -42,6 +46,28 @@ private val ilmoittautumisenTilaMapping: Map[String, String] = Map(
   "LASNA"                 -> "7",
   "POISSA"                -> "8"
 )
+
+private val harkinnanvaraisuudenSyyMapping: Map[String, String] = Map(
+  "ATARU_OPPIMISVAIKEUDET"                   -> "1",
+  "ATARU_SOSIAALISET_SYYT"                   -> "2",
+  "ATARU_KOULUTODISTUSTEN_VERTAILUVAIKEUDET" -> "3",
+  "ATARU_ULKOMAILLA_OPISKELTU"               -> "3",
+  "SURE_EI_PAATTOTODISTUSTA"                 -> "4",
+  "ATARU_EI_PAATTOTODISTUSTA"                -> "4",
+  "ATARU_RIITTAMATON_TUTKINTOKIELEN_TAITO"   -> "5",
+  "SURE_YKS_MAT_AI"                          -> "6",
+  "ATARU_YKS_MAT_AI"                         -> "6",
+  "EI_HARKINNANVARAINEN"                     -> "",
+  "EI_HARKINNANVARAINEN_HAKUKOHDE"           -> ""
+)
+
+private def convertHarkinnanvaraisuudenSyy(syy: String): String =
+  harkinnanvaraisuudenSyyMapping.getOrElse(
+    syy, {
+      LOG.warn(s"No mapping found for harkinnanvaraisuuden_syy: $syy")
+      "999"
+    }
+  )
 
 /**
  * Per-hakukohde info attached to the toinen aste yhteishaku hakemus row.
@@ -175,6 +201,7 @@ case class HakijaHakutoiveRow(
   valintatieto: Option[String],
   vastaanottotieto: Option[String],
   ilmoittautumisenTila: Option[String],
+  harkinnanvaraisuudenSyy: Option[String],
   pisteet: Option[BigDecimal]
 ) {
   def asHakutoive(
@@ -212,6 +239,7 @@ case class HakijaHakutoiveRow(
       valinta = valintatieto.flatMap(valintaTilaMapping.get),
       vastaanotto = vastaanottotieto.map(vastaanotonTilaMapping.get).getOrElse(Some("1")),
       lasnaolo = ilmoittautumisenTila.flatMap(ilmoittautumisenTilaMapping.get),
+      harkinnanvaraisuusperuste = harkinnanvaraisuudenSyy.map(convertHarkinnanvaraisuudenSyy).filter(_.nonEmpty),
       yhteispisteet = pisteet
     )
   }

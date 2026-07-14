@@ -303,7 +303,8 @@ trait ExternalToisenAsteenHakijatTestUtils {
     hakutoivenumero: Int = 1,
     valintatieto: Option[String] = Some(VALINTATIETO),
     vastaanottotieto: Option[String] = Some(VASTAANOTTOTIETO),
-    ilmoittautumisenTila: Option[String] = Some(ILMOITTAUTUMISEN_TILA)
+    ilmoittautumisenTila: Option[String] = Some(ILMOITTAUTUMISEN_TILA),
+    harkinnanvaraisuudenSyy: Option[String] = None
   ): Unit = {
     db.run(
       sqlu"""INSERT INTO gen.gen_hakutoive VALUES(
@@ -312,7 +313,8 @@ trait ExternalToisenAsteenHakijatTestUtils {
           $hakutoivenumero,
           $valintatieto,
           $vastaanottotieto,
-          $ilmoittautumisenTila)""",
+          $ilmoittautumisenTila,
+          $harkinnanvaraisuudenSyy)""",
       "Insert test hakutoive"
     )
   }
@@ -406,7 +408,8 @@ trait ExternalToisenAsteenHakijatTestUtils {
               hakutoivenumero bigint,
               valintatieto text,
               vastaanottotieto text,
-              ilmoittautumisen_tila text
+              ilmoittautumisen_tila text,
+              harkinnanvaraisuuden_syy text
           );
 
           CREATE TABLE gen.gen_hakukohde(

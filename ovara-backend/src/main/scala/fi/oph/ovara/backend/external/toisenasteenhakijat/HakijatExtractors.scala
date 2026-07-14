@@ -172,6 +172,7 @@ class HakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       valintatieto = r.nextStringOption(),
       vastaanottotieto = r.nextStringOption(),
       ilmoittautumisenTila = r.nextStringOption(),
+      harkinnanvaraisuudenSyy = r.nextStringOption(),
       pisteet = r.nextBigDecimalOption()
     )
   }

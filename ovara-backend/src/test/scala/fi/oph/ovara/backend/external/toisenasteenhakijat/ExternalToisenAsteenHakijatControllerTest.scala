@@ -1622,7 +1622,10 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
   @Test
   def excelHasFullColumnCoverageForPopulatedHakija(): Unit = {
     // Seed every populatable data source so every column that CAN have a value does.
-    seedMinimalHakija()
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(harkinnanvaraisuudenSyy = Some("ATARU_OPPIMISVAIKEUDET")) // → cell 53 = "1"
     insertToteutusJaKoulutus()
     insertOpetuskieli()
     insertOrganisaatio(nimiFi =
@@ -1797,7 +1800,7 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
         50 -> OPETUSPISTE_NIMI_FI,
         51 -> "Kulttuurituottaja",
         52 -> HAKUKOHDE_OID,
-        53 -> "",
+        53 -> "1",
         54 -> "",
         55 -> "82.5",
         56 -> VALINTA_CODE,
@@ -1878,6 +1881,67 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].opetuspisteennimi.fi").value(OPETUSPISTE_NIMI_FI))
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].opetuspisteennimi.sv").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].opetuspisteennimi.en").doesNotExist())
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "ATARU_OPPIMISVAIKEUDET,                    1",
+      "ATARU_SOSIAALISET_SYYT,                    2",
+      "ATARU_KOULUTODISTUSTEN_VERTAILUVAIKEUDET,  3",
+      "ATARU_ULKOMAILLA_OPISKELTU,                3",
+      "SURE_EI_PAATTOTODISTUSTA,                  4",
+      "ATARU_EI_PAATTOTODISTUSTA,                 4",
+      "ATARU_RIITTAMATON_TUTKINTOKIELEN_TAITO,    5",
+      "SURE_YKS_MAT_AI,                           6",
+      "ATARU_YKS_MAT_AI,                          6"
+    )
+  )
+  def harkinnanvaraisuusperusteMapsKnownCodes(syy: String, expected: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(harkinnanvaraisuudenSyy = Some(syy))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].harkinnanvaraisuusperuste").value(expected))
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = Array("EI_HARKINNANVARAINEN", "EI_HARKINNANVARAINEN_HAKUKOHDE"))
+  def harkinnanvaraisuusperusteNullForEiHarkinnanvarainen(syy: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(harkinnanvaraisuudenSyy = Some(syy))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].harkinnanvaraisuusperuste").value(nullValue()))
+  }
+
+  @Test
+  def harkinnanvaraisuusperusteNullWhenColumnNull(): Unit = {
+    seedMinimalHakija() // insertHakutoive default harkinnanvaraisuudenSyy = None
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].harkinnanvaraisuusperuste").value(nullValue()))
+  }
+
+  @Test
+  def harkinnanvaraisuusperusteUnknownMapsTo999(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(harkinnanvaraisuudenSyy = Some("NEW_CODE_XYZ"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.hakutoiveet[0].harkinnanvaraisuusperuste").value("999"))
   }
 
   @Test
