@@ -141,6 +141,22 @@ trait ExternalToisenAsteenHakijatTestUtils {
     arvo: Option[String] = Some("true")
   ): Unit = insertSupaTieto(hakemusOid, avain, arvo)
 
+  def insertValintalaskentaFunktiotulos(
+    hakemusOid: String = HAKEMUS_OID,
+    hakukohdeOid: String = HAKUKOHDE_OID,
+    tunniste: String,
+    arvo: Option[String]
+  ): Unit = {
+    db.run(
+      sqlu"""INSERT INTO gen.gen_valintalaskenta_jonosija_funktiotulokset (
+          hakemus_oid, hakukohde_oid, tunniste, arvo
+        ) VALUES (
+          $hakemusOid, $hakukohdeOid, $tunniste, $arvo
+        )""",
+      "Insert test valintalaskenta_jonosija_funktiotulokset"
+    )
+  }
+
   def insertValintarekisteri(
     hakemusOid: String = HAKEMUS_OID,
     hakukohdeOid: String = HAKUKOHDE_OID,
@@ -513,6 +529,22 @@ trait ExternalToisenAsteenHakijatTestUtils {
               nimi_fi text,
               nimi_sv text,
               nimi_en text
+          );
+
+          CREATE TABLE gen.gen_valintalaskenta_jonosija_funktiotulokset(
+              valinnanvaihe_id text,
+              valintatapajono_oid text,
+              valintatapajono_nimi text,
+              hakemus_oid text,
+              hakukohde_oid text,
+              hakija_oid text,
+              arvo text,
+              tunniste text,
+              nimi_fi text,
+              nimi_sv text,
+              nimi_en text,
+              omaopintopolku boolean,
+              dw_metadata_dw_stored_at timestamp with time zone
           );
 
           CREATE TABLE gen.gen_valintarekisteri(
