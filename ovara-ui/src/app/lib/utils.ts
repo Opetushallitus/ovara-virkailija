@@ -5,6 +5,7 @@ import {
   KK_YOS_RAPORTTI,
   KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
   OPPILAITOSORGANISAATIOTYYPPI,
+  TIEDONSIIRTO_RAPORTIT,
   TOIMIPISTEORGANISAATIOTYYPPI,
   TOISEN_ASTEEN_RAPORTIT,
 } from './constants';
@@ -107,6 +108,10 @@ export const getRaporttiListByUserRights = (userRoles?: Array<string>) => {
 
   if (hasOvaraKkYosRole(userRoles)) {
     raportit.push(...[KK_YOS_RAPORTTI]);
+  }
+
+  if (hasOvaraHakeneetRole(userRoles)) {
+    raportit.push(...TIEDONSIIRTO_RAPORTIT);
   }
 
   return raportit;
