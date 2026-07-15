@@ -14,6 +14,7 @@ case class KkPaatettavaOpiskeluoikeus(
   opiskeluoikeudenViimeisinTila: String,
   opiskelijaAvain: String,
   opiskeluoikeusAvain: String,
+  naytettyHakijalle: Boolean,
   hakemusOid: String,
   hakukohdeNimi: Kielistetty,
   hakukohdeOid: String,
