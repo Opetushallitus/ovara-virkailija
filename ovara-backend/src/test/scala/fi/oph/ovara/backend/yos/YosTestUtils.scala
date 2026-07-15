@@ -28,7 +28,8 @@ object YosTestUtils {
     koulutusasteet = List(YosConstants.KOULUTUSASTE_AMK),
     haunNimi = Map(Fi -> "Korkeakoulujen kevään toinen yhteishaku 2026"),
     oppilaitosOid = ORG_OID,
-    oppilaitosNimi = Map(Fi -> "Ratamon korkeakoulu")
+    oppilaitosNimi = Map(Fi -> "Ratamon korkeakoulu"),
+    koulutusKoodiArvot = Some("koulutus_31010")
   )
 
   def HENKILO: YosHenkilo = YosHenkilo(
