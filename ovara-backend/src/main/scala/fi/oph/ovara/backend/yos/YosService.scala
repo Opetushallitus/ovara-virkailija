@@ -1,7 +1,17 @@
 package fi.oph.ovara.backend.yos
 
-import fi.oph.ovara.backend.domain.{Fi, KKPaatettavaOpiskeluoikeusEntity, KKSitovastiVastaanottanut, KkPaatettavaOpiskeluoikeus, YosHenkilo, YosValintarekisteriTiedot}
-import fi.oph.ovara.backend.raportointi.dto.{KkPaatettavatOpiskeluoikeudetParams, buildKkPaatettavatOpiskeluoikeudetParamsForExcel}
+import fi.oph.ovara.backend.domain.{
+  Fi,
+  KKPaatettavaOpiskeluoikeusEntity,
+  KKSitovastiVastaanottanut,
+  KkPaatettavaOpiskeluoikeus,
+  YosHenkilo,
+  YosValintarekisteriTiedot
+}
+import fi.oph.ovara.backend.raportointi.dto.{
+  buildKkPaatettavatOpiskeluoikeudetParamsForExcel,
+  KkPaatettavatOpiskeluoikeudetParams
+}
 import fi.oph.ovara.backend.repository.{KkPaatettavatOpiskeluoikeudetRepository, ReadOnlyDatabase}
 import fi.oph.ovara.backend.utils.{AuthoritiesUtil, CommonExcelParams, ExcelWriter}
 import fi.oph.ovara.backend.yos.YosPredicate
@@ -39,14 +49,19 @@ class YosService(
       .filter(_.isDefined)
       .map(_.get)
     val yossiinKuuluvatHenkilot = getYossinPiiriinKuuluvatHenkilot(yossiinKuuluvat, params)
-    val yosValintarekisteriTiedot: Map[String, List[YosValintarekisteriTiedot]] = getYosValintarekisteriTiedot(yossiinKuuluvatHenkilot)
+    val yosValintarekisteriTiedot: Map[String, List[YosValintarekisteriTiedot]] = getYosValintarekisteriTiedot(
+      yossiinKuuluvatHenkilot
+    )
     yossiinKuuluvat
       .map((o, v) =>
         yossiinKuuluvatHenkilot
           .find(h => h.oppijanumero.equals(o.opiskelijaAvain))
           .map(h => {
-            val matchingValintaRekisteriTieto = yosValintarekisteriTiedot.getOrElse(h.oppijanumero, List.empty)
-              .find(tiedot => tiedot.hakemusOid.equals(v.hakemusOid) && tiedot.naytettyPaatettavaOikeus.equals(o.opiskeluoikeusAvain))
+            val matchingValintaRekisteriTieto = yosValintarekisteriTiedot
+              .getOrElse(h.oppijanumero, List.empty)
+              .find(tiedot =>
+                tiedot.hakemusOid.equals(v.hakemusOid) && tiedot.naytettyPaatettavaOikeus.equals(o.opiskeluoikeusAvain)
+              )
             KkPaatettavaOpiskeluoikeus(
               oppijanumero = v.oppijanumero,
               hetu = h.hetu,
@@ -57,10 +72,12 @@ class YosService(
               opiskelijaAvain = o.opiskelijaAvain,
               opiskeluoikeusAvain = o.opiskeluoikeusAvain,
               opiskeluoikeudenNimi = o.opiskeluoikeudenNimi,
-              opiskeluoikeudenPaattymispvm = matchingValintaRekisteriTieto.flatMap(_.paateltyAloitusPvm)
+              opiskeluoikeudenPaattymispvm = matchingValintaRekisteriTieto
+                .flatMap(_.paateltyAloitusPvm)
                 .map(aloitusPvm => aloitusPvm.minusDays(1)),
               opiskeluoikeudenViimeisinTila = o.opiskeluoikeudenViimeisinTila,
-              naytettyHakijalle = matchingValintaRekisteriTieto.exists(tieto => tieto.naytettyPaatettavaOikeus.equals(o.opiskeluoikeusAvain)),
+              naytettyHakijalle = matchingValintaRekisteriTieto
+                .exists(tieto => tieto.naytettyPaatettavaOikeus.equals(o.opiskeluoikeusAvain)),
               hakemusOid = v.hakemusOid,
               hakuOid = v.hakuOid,
               hakuNimi = v.haunNimi,
@@ -134,7 +151,9 @@ class YosService(
     yossiinKuuluvatHenkilot
   }
 
-  private def getYosValintarekisteriTiedot(yosHenkilot: List[YosHenkilo]): Map[String, List[YosValintarekisteriTiedot]] = {
+  private def getYosValintarekisteriTiedot(
+    yosHenkilot: List[YosHenkilo]
+  ): Map[String, List[YosValintarekisteriTiedot]] = {
     if (yosHenkilot.isEmpty) {
       Map.empty
     } else {
