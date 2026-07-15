@@ -125,6 +125,22 @@ trait ExternalKKHakijatTestUtils {
     )
   }
 
+  def insertValintarekisteri(
+    hakemusOid: String = HAKEMUS_OID,
+    hakukohdeOid: String = HAKUKOHDE_OID,
+    valintatapajonoId: String = "vtj-1",
+    maksunTila: Option[String]
+  ): Unit = {
+    db.run(
+      sqlu"""INSERT INTO gen.gen_valintarekisteri (
+          hakukohde_oid, valintatapajono_id, hakemus_oid, maksun_tila
+        ) VALUES (
+          $hakukohdeOid, $valintatapajonoId, $hakemusOid, $maksunTila
+        )""",
+      "Insert test kk-valintarekisteri"
+    )
+  }
+
   def insertHakutoive(
     hakemusOid: String = HAKEMUS_OID,
     hakukohdeOid: String = HAKUKOHDE_OID,
@@ -215,6 +231,13 @@ trait ExternalKKHakijatTestUtils {
               koulutus_oid text,
               koulutuksen_alkamisvuosi integer,
               koulutuksen_alkamiskausiuri text
+          );
+
+          CREATE TABLE gen.gen_valintarekisteri(
+              hakukohde_oid text,
+              valintatapajono_id text,
+              hakemus_oid text,
+              maksun_tila text
           );
           """
     db.run(query, "Init KK Hakijat test schema")

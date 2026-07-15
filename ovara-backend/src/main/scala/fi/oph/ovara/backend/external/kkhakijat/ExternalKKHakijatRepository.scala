@@ -12,7 +12,7 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
 
   private val ataruOidLength = 35
 
-  def selectHakijat(
+  def selectKKHakijat(
     hakuOid: String,
     hakukohdeOid: Option[String],
     organisaatioOid: Option[String],
@@ -99,7 +99,13 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
       hk.jarjestyspaikka_oid,
       ht.valintatieto,
       ht.vastaanottotieto,
-      ht.ilmoittautumisen_tila
+      ht.ilmoittautumisen_tila,
+      (SELECT vr.maksun_tila FROM gen.gen_valintarekisteri vr
+        WHERE vr.hakemus_oid   = ht.hakemus_oid
+          AND vr.hakukohde_oid = ht.hakukohde_oid
+          AND vr.maksun_tila IS NOT NULL
+          AND vr.maksun_tila <> ''
+        LIMIT 1) AS lukuvuosimaksu
     FROM gen.gen_hakutoive ht
     LEFT JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
     WHERE ht.hakemus_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(hakemusOids)})

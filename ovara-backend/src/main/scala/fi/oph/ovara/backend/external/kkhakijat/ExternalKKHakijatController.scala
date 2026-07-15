@@ -21,7 +21,7 @@ import scala.jdk.CollectionConverters.*
 @RequestMapping(path = Array("api/external"))
 class ExternalKKHakijatController(
   val userService: UserService,
-  hakijatService: ExternalKKHakijatService,
+  kkHakijatService: ExternalKKHakijatService,
   mapper: ObjectMapper,
   val auditLog: AuditLog = AuditLogObj
 ) extends ControllerUtils {
@@ -106,8 +106,8 @@ class ExternalKKHakijatController(
         auditParams("json", hakuOid, hakukohde, organisaatio, valintarajaus)
       )
       handleRequest {
-        hakijatService
-          .getHakijat(hakuOid, hakukohde, organisaatio, parsedRajaus.get, resolveKayttooikeusScope)
+        kkHakijatService
+          .getKKHakijat(hakuOid, hakukohde, organisaatio, parsedRajaus.get, resolveKayttooikeusScope)
           .map(KKHakijatResponse.apply)
       }
     }
@@ -180,7 +180,7 @@ class ExternalKKHakijatController(
       auditParams("excel", hakuOid, hakukohde, organisaatio, valintarajaus)
     )
 
-    hakijatService.getHakijat(hakuOid, hakukohde, organisaatio, parsedRajaus.get, resolveKayttooikeusScope) match {
+    kkHakijatService.getKKHakijat(hakuOid, hakukohde, organisaatio, parsedRajaus.get, resolveKayttooikeusScope) match {
       case Left(errorKey) =>
         LOG.error(s"Excel-raportin haku epäonnistui: $errorKey")
         response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())

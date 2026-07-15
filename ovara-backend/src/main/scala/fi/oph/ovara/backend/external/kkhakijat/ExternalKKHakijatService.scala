@@ -13,7 +13,7 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository) {
   private val AikaleimaFormatter: DateTimeFormatter =
     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
 
-  def getHakijat(
+  def getKKHakijat(
     hakuOid: String,
     hakukohdeOid: Option[String],
     organisaatioOid: Option[String],
@@ -21,22 +21,22 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository) {
     scope: KayttooikeusScope = KayttooikeusScope.paakayttaja
   ): Either[String, Seq[KKHakija]] = {
     Try {
-      val hakijaRows = repository.selectHakijat(hakuOid, hakukohdeOid, organisaatioOid, valintarajaus)
-      if (hakijaRows.isEmpty) {
+      val kkHakijaRows = repository.selectKKHakijat(hakuOid, hakukohdeOid, organisaatioOid, valintarajaus)
+      if (kkHakijaRows.isEmpty) {
         Nil
       } else {
-        val hakemusOids     = hakijaRows.map(_.hakemusOid).toSet
+        val hakemusOids     = kkHakijaRows.map(_.hakemusOid).toSet
         val hakemusRows     = repository.selectHakemukset(hakemusOids)
         val hakemuksetByOid = hakemusRows.groupBy(_.hakemusOid)
 
-        hakijaRows.flatMap { row =>
+        kkHakijaRows.flatMap { row =>
           val matchingRows = hakemuksetByOid
             .getOrElse(row.hakemusOid, Seq.empty)
             .filter(matchesFilters(_, hakukohdeOid, organisaatioOid, valintarajaus, scope))
           if (matchingRows.isEmpty) None
           else {
             val hakemukset = matchingRows.map(
-              _.asHakemus(
+              _.asKKHakemus(
                 hakuOid = row.hakuOid,
                 hakuVuosi = row.vuosi.getOrElse(0),
                 hakuKausi = row.kausi.getOrElse(""),
