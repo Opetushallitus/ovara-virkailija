@@ -290,6 +290,53 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(nullValue()))
   }
 
+  // ---- Lukuvuosimaksu ----
+
+  @ParameterizedTest
+  @ValueSource(strings = Array("MAKSETTU", "MAKSAMATTA", "VAPAUTETTU"))
+  def lukuvuosimaksuPopulatedFromValintarekisteri(tila: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    seedMinimalHakija()
+    insertValintarekisteri(maksunTila = Some(tila))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").value(tila))
+  }
+
+  @Test
+  def lukuvuosimaksuNullWhenValintarekisteriEmpty(): Unit = {
+    seedMinimalHakija()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").value(nullValue()))
+  }
+
+  @Test
+  def lukuvuosimaksuNullWhenMaksunTilaIsNull(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(maksunTila = None)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").value(nullValue()))
+  }
+
+  @Test
+  def lukuvuosimaksuPerHakemusHakukohdeDiffers(): Unit = {
+    seedMinimalHakija()
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2)
+    insertValintarekisteri(hakukohdeOid = HAKUKOHDE_OID, maksunTila = Some("MAKSETTU"))
+    insertValintarekisteri(hakukohdeOid = HAKUKOHDE_OID_2, valintatapajonoId = "vtj-2", maksunTila = Some("VAPAUTETTU"))
+
+    get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").value("MAKSETTU"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[1].lukuvuosimaksu").value("VAPAUTETTU"))
+  }
+
   // ---- Excel ----
 
   @Test
@@ -362,6 +409,7 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
   @Test
   def excelHasFullColumnCoverageForPopulatedHakija(): Unit = {
     seedMinimalHakija()
+    insertValintarekisteri(maksunTila = Some("MAKSETTU"))
 
     val result   = getExcel().andExpect(status.isOk).andReturn()
     val workbook = new XSSFWorkbook(new ByteArrayInputStream(result.getResponse.getContentAsByteArray))
@@ -381,6 +429,7 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
         10 -> "246",
         11 -> MATKAPUHELIN,
         13 -> EMAIL,
+        14 -> "MAKSETTU",
         15 -> KOTIKUNTA,
         16 -> SUKUPUOLI.toString,
         17 -> AIDINKIELI,
@@ -405,8 +454,8 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
           s"cell $idx expected [$value] but was [${dataRow.getCell(idx).getStringCellValue}]"
         )
       }
-      // deferred fields: cells 1, 12, 14, 18, 19, 22, 32, 34, 36, 37, 39, 40, 45-59 stay ""
-      Seq(1, 12, 14, 18, 19, 22, 32, 34, 36, 37, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
+      // deferred fields: cells 1, 12, 18, 19, 22, 32, 34, 36, 37, 39, 40, 45-59 stay ""
+      Seq(1, 12, 18, 19, 22, 32, 34, 36, 37, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
         .foreach { idx =>
           assert(
             dataRow.getCell(idx).getStringCellValue == "",
