@@ -19,6 +19,7 @@ case class KKHakijaRow(
   kansalaisuudet: Seq[String],
   kotikunta: Option[String],
   sukupuoli: Option[Int],
+  asiointikieli: Option[Int],
   koulutusmarkkinointilupa: Option[Boolean],
   valintatuloksenJulkaisulupa: Option[Boolean],
   jatetty: Option[OffsetDateTime],
@@ -41,7 +42,11 @@ case class KKHakijaRow(
       kotikunta = kotikunta.getOrElse(""),
       sukupuoli = sukupuoli.map(_.toString).getOrElse(""),
       aidinkieli = aidinkieli.getOrElse(""),
-      asiointikieli = "",
+      asiointikieli = asiointikieli match {
+        case None    => ""
+        case Some(0) => "9"
+        case Some(n) => n.toString
+      },
       kansalaisuudet = if (kansalaisuudet.isEmpty) None else Some(kansalaisuudet.toList),
       matkapuhelin = Option(puhelin).filter(_.nonEmpty),
       sahkoposti = Option(sahkoposti).filter(_.nonEmpty),

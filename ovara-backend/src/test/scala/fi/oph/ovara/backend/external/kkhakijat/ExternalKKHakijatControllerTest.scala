@@ -9,7 +9,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.{BeforeEach, Test}
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
+import org.junit.jupiter.params.provider.{CsvSource, ValueSource}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.{SpringBootTest, TestConfiguration}
@@ -337,6 +337,38 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       .andExpect(jsonPath("$.hakijat[0].hakemukset[1].lukuvuosimaksu").value("VAPAUTETTU"))
   }
 
+  // ---- Asiointikieli ----
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "1, 1",
+      "2, 2",
+      "3, 3",
+      "0, 9"
+    )
+  )
+  def asiointikieliMapsKnownCodes(input: Int, expected: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    initSchema()
+    insertHakemus(asiointikieli = Some(input))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].asiointikieli").value(expected))
+  }
+
+  @Test
+  def asiointikieliEmptyWhenNull(): Unit = {
+    seedMinimalHakija() // insertHakemus default asiointikieli = None
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].asiointikieli").value(""))
+  }
+
   // ---- Excel ----
 
   @Test
@@ -408,7 +440,10 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
 
   @Test
   def excelHasFullColumnCoverageForPopulatedHakija(): Unit = {
-    seedMinimalHakija()
+    initSchema()
+    insertHakemus(asiointikieli = Some(1)) // → cell 18 = "1"
+    insertHakukohde()
+    insertHakutoive()
     insertValintarekisteri(maksunTila = Some("MAKSETTU"))
 
     val result   = getExcel().andExpect(status.isOk).andReturn()
@@ -433,6 +468,7 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
         15 -> KOTIKUNTA,
         16 -> SUKUPUOLI.toString,
         17 -> AIDINKIELI,
+        18 -> "1",
         20 -> "X",
         24 -> HAKU_OID,
         25 -> VUOSI.toString,
@@ -454,8 +490,8 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
           s"cell $idx expected [$value] but was [${dataRow.getCell(idx).getStringCellValue}]"
         )
       }
-      // deferred fields: cells 1, 12, 18, 19, 22, 32, 34, 36, 37, 39, 40, 45-59 stay ""
-      Seq(1, 12, 18, 19, 22, 32, 34, 36, 37, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
+      // deferred fields: cells 1, 12, 19, 22, 32, 34, 36, 37, 39, 40, 45-59 stay ""
+      Seq(1, 12, 19, 22, 32, 34, 36, 37, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
         .foreach { idx =>
           assert(
             dataRow.getCell(idx).getStringCellValue == "",
