@@ -114,11 +114,11 @@ case class KKHakija(
   onYlioppilas: Boolean = false,
   yoSuoritusVuosi: Option[String] = None,
   turvakielto: Boolean = false,
-  hakemukset: Seq[KKHakemus] = Nil,
+  hakemukset: Seq[KKHakutoive] = Nil,
   ensikertalainen: Option[Boolean] = None
 )
 
-case class KKHakemus(
+case class KKHakutoive(
   haku: String,
   hakuVuosi: Int,
   hakuKausi: String,

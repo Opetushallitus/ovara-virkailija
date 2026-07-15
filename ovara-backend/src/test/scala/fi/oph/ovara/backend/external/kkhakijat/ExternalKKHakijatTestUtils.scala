@@ -161,13 +161,18 @@ trait ExternalKKHakijatTestUtils {
     hakemusOid: String = HAKEMUS_OID,
     hakukohdeOid: String = HAKUKOHDE_OID,
     valintatapajonoId: String = "vtj-1",
-    maksunTila: Option[String]
+    maksunTila: Option[String] = None,
+    valinnanTila: Option[String] = None,
+    hyvaksyttyjajulkaistu: Option[java.time.OffsetDateTime] = None
   ): Unit = {
+    val hyvaksyttyStr = hyvaksyttyjajulkaistu.map(_.format(SECONDS_TZ_FORMATTER))
     db.run(
       sqlu"""INSERT INTO gen.gen_valintarekisteri (
-          hakukohde_oid, valintatapajono_id, hakemus_oid, maksun_tila
+          hakukohde_oid, valintatapajono_id, hakemus_oid, maksun_tila,
+          valinnan_tila, hyvaksyttyjajulkaistu
         ) VALUES (
-          $hakukohdeOid, $valintatapajonoId, $hakemusOid, $maksunTila
+          $hakukohdeOid, $valintatapajonoId, $hakemusOid, $maksunTila,
+          $valinnanTila, $hyvaksyttyStr
         )""",
       "Insert test kk-valintarekisteri"
     )
@@ -301,7 +306,9 @@ trait ExternalKKHakijatTestUtils {
               hakukohde_oid text,
               valintatapajono_id text,
               hakemus_oid text,
-              maksun_tila text
+              maksun_tila text,
+              valinnan_tila text,
+              hyvaksyttyjajulkaistu timestamp with time zone
           );
 
           CREATE TABLE gen.gen_ylioppilas(

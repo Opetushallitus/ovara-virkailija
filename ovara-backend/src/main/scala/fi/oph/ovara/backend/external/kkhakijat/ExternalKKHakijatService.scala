@@ -35,14 +35,15 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository) {
             .filter(matchesFilters(_, hakukohdeOid, organisaatioOid, valintarajaus, scope))
           if (matchingRows.isEmpty) None
           else {
-            val hakemukset = matchingRows.map(
-              _.asKKHakemus(
+            val hakemukset = matchingRows.map(mRow =>
+              mRow.asKKHakemus(
                 hakuOid = row.hakuOid,
                 hakuVuosi = row.vuosi.getOrElse(0),
                 hakuKausi = row.kausi.getOrElse(""),
                 hakemusnumero = row.hakemusOid,
                 hakemusJattoAikaleima = row.jatetty.map(_.format(AikaleimaFormatter)),
                 hakemusViimeinenMuokkausAikaleima = row.muokattu.map(_.format(AikaleimaFormatter)),
+                valinnanAikaleima = mRow.valinnanAikaleima.map(_.format(AikaleimaFormatter)),
                 julkaisulupa = row.valintatuloksenJulkaisulupa
               )
             )

@@ -173,7 +173,7 @@ case class KKHakemusResponse(
 )
 
 object KKHakemusResponse {
-  def apply(h: KKHakemus): KKHakemusResponse =
+  def apply(h: KKHakutoive): KKHakemusResponse =
     KKHakemusResponse(
       haku = h.haku,
       hakuVuosi = h.hakuVuosi,
