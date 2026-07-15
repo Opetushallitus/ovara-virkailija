@@ -151,6 +151,7 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
   @Test
   def returnsHakijaFilteredByHakukohdeOid(): Unit = {
     seedMinimalHakija()
+    insertValintarekisteri(valinnanTila = Some(VALINTATIETO))
 
     get()
       .andExpect(status.isOk)
@@ -268,10 +269,8 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
   )
   def valinnanTilaParsesKnownStates(state: String): Unit = {
     db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive(valintatieto = Some(state))
+    seedMinimalHakija()
+    insertValintarekisteri(valinnanTila = Some(state))
 
     get()
       .andExpect(status.isOk)
@@ -280,10 +279,8 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
 
   @Test
   def valinnanTilaIsNullForUnknownValue(): Unit = {
-    initSchema()
-    insertHakemus()
-    insertHakukohde()
-    insertHakutoive(valintatieto = Some("SOMETHING_ELSE"))
+    seedMinimalHakija()
+    insertValintarekisteri(valinnanTila = Some("SOMETHING_ELSE"))
 
     get()
       .andExpect(status.isOk)
@@ -396,6 +393,78 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").value("TKID-A"))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[1].hakukohdeKkId").value("TKID-B"))
+  }
+
+  // ---- ValinnanAikaleima ----
+
+  private val TS_HYVAKSYTTY = java.time.OffsetDateTime.parse("2025-10-01T12:00:00+03:00")
+  private val TS_VARALLA    = java.time.OffsetDateTime.parse("2025-10-02T12:00:00+03:00")
+
+  @Test
+  def valinnanAikaleimaPopulatedFromValintarekisteri(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valinnanTila = Some("HYVAKSYTTY"),
+      hyvaksyttyjajulkaistu = Some(TS_HYVAKSYTTY)
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value("2025-10-01T12:00:00+03:00"))
+  }
+
+  @Test
+  def valinnanAikaleimaNullWhenTimestampIsNull(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"), hyvaksyttyjajulkaistu = None)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value(nullValue()))
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "HYVAKSYTTY,                     HARKINNANVARAISESTI_HYVAKSYTTY",
+      "HARKINNANVARAISESTI_HYVAKSYTTY, VARASIJALTA_HYVAKSYTTY",
+      "VARASIJALTA_HYVAKSYTTY,         VARALLA",
+      "VARALLA,                        PERUUTETTU",
+      "PERUUTETTU,                     PERUNUT",
+      "PERUNUT,                        PERUUNTUNUT",
+      "PERUUNTUNUT,                    HYLATTY",
+      "HYLATTY,                        KESKEN"
+    )
+  )
+  def valinnanTilaPrefersHigherPriorityStateOverLower(winner: String, loser: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    seedMinimalHakija()
+    insertValintarekisteri(valintatapajonoId = "vtj-winner", valinnanTila = Some(winner))
+    insertValintarekisteri(valintatapajonoId = "vtj-loser", valinnanTila = Some(loser))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(winner))
+  }
+
+  @Test
+  def valinnanTilaAndAikaleimaFromSamePriorityRow(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-winner",
+      valinnanTila = Some("HYVAKSYTTY"),
+      hyvaksyttyjajulkaistu = Some(TS_HYVAKSYTTY)
+    )
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-loser",
+      valinnanTila = Some("VARALLA"),
+      hyvaksyttyjajulkaistu = Some(TS_VARALLA)
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value("2025-10-01T12:00:00+03:00"))
   }
 
   // ---- Asiointikieli ----
@@ -631,7 +700,11 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
     insertHakemus(asiointikieli = Some(1)) // → cell 18 = "1"
     insertHakukohde()
     insertHakutoive()
-    insertValintarekisteri(maksunTila = Some("MAKSETTU"))
+    insertValintarekisteri(
+      maksunTila = Some("MAKSETTU"),
+      valinnanTila = Some(VALINTATIETO),
+      hyvaksyttyjajulkaistu = Some(TS_HYVAKSYTTY)
+    ) // → cell 14 = "MAKSETTU", cell 35 = VALINTATIETO, cell 36 = TS_HYVAKSYTTY
     insertYlioppilas(onYlioppilas = true, valmistumisVuosi = Some(2024)) // → cell 21 = "X", cell 22 = "2024"
     insertSupaTieto(avain = "ensikertalainen", arvo = Some("true"))      // → cell 23 = "X"
     insertToteutus()
@@ -675,6 +748,7 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
         32 -> "TKID-1",
         33 -> "1",
         35 -> VALINTATIETO,
+        36 -> "2025-10-01T12:00:00+03:00",
         41 -> VASTAANOTTOTIETO,
         42 -> ILMOITTAUTUMISEN_TILA,
         44 -> "X"
@@ -685,8 +759,8 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
           s"cell $idx expected [$value] but was [${dataRow.getCell(idx).getStringCellValue}]"
         )
       }
-      // deferred fields: cells 1, 12, 19, 34, 36, 37, 39, 40, 45-59 stay ""
-      Seq(1, 12, 19, 34, 36, 37, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
+      // deferred fields: cells 1, 12, 19, 34, 37, 39, 40, 45-59 stay ""
+      Seq(1, 12, 19, 34, 37, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
         .foreach { idx =>
           assert(
             dataRow.getCell(idx).getStringCellValue == "",
