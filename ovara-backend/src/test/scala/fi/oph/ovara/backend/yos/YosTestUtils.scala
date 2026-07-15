@@ -1,15 +1,21 @@
 package fi.oph.ovara.backend.yos
 
-import fi.oph.ovara.backend.domain.{Fi, KKPaatettavaOpiskeluoikeusEntity, KKSitovastiVastaanottanut, YosHenkilo, YosValintarekisteriTiedot}
+import fi.oph.ovara.backend.domain.{
+  Fi,
+  KKPaatettavaOpiskeluoikeusEntity,
+  KKSitovastiVastaanottanut,
+  YosHenkilo,
+  YosValintarekisteriTiedot
+}
 
 import java.time.LocalDate
 
 object YosTestUtils {
 
-  def ORG_OID = "1.2.246.562.10.91392558028"
-  def OPPIJA_OID = "1.2.246.562.24.55412038042"
-  def HAKUKOHDE_OID = "1.2.246.562.20.00000000000000039609"
-  def HAKEMUS_OID = "1.2.246.562.11.00000000000002021955"
+  def ORG_OID               = "1.2.246.562.10.91392558028"
+  def OPPIJA_OID            = "1.2.246.562.24.55412038042"
+  def HAKUKOHDE_OID         = "1.2.246.562.20.00000000000000039609"
+  def HAKEMUS_OID           = "1.2.246.562.11.00000000000002021955"
   def OPISKELU_OIKEUS_AVAIN = "virran-oikeus-avain"
 
   def OPISKELUOIKEUS: KKPaatettavaOpiskeluoikeusEntity = KKPaatettavaOpiskeluoikeusEntity(

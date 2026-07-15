@@ -1,6 +1,11 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.domain.{KKPaatettavaOpiskeluoikeusEntity, KKSitovastiVastaanottanut, YosHenkilo, YosValintarekisteriTiedot}
+import fi.oph.ovara.backend.domain.{
+  KKPaatettavaOpiskeluoikeusEntity,
+  KKSitovastiVastaanottanut,
+  YosHenkilo,
+  YosValintarekisteriTiedot
+}
 import fi.oph.ovara.backend.raportointi.dto.KkPaatettavatOpiskeluoikeudetParams
 import fi.oph.ovara.backend.utils.{ParametriKaannos, RepositoryUtils}
 import org.slf4j.{Logger, LoggerFactory}
