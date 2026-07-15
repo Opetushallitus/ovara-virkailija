@@ -47,6 +47,18 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
       hakemus.jatetty,
       hakemus.muokattu,
       hlo.aidinkieli,
+      COALESCE(
+        (SELECT true FROM gen.gen_ylioppilas yo
+          INNER JOIN gen.gen_henkilo hlo_alias ON hlo_alias.henkilo_oid = yo.henkilo_oid
+          WHERE hlo_alias.oppijanumero = hlo.oppijanumero
+            AND yo.on_ylioppilas = true
+          LIMIT 1),
+        false) AS on_ylioppilas,
+      (SELECT yo.valmistumis_vuosi FROM gen.gen_ylioppilas yo
+        INNER JOIN gen.gen_henkilo hlo_alias ON hlo_alias.henkilo_oid = yo.henkilo_oid
+        WHERE hlo_alias.oppijanumero = hlo.oppijanumero
+          AND yo.valmistumis_vuosi IS NOT NULL
+        LIMIT 1) AS yo_valmistumis_vuosi,
       (SELECT hk.koulutuksen_alkamisvuosi FROM gen.gen_hakutoive ht
         INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
         WHERE ht.hakemus_oid = hakemus.hakemus_oid
