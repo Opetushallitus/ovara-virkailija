@@ -369,6 +369,81 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       .andExpect(jsonPath("$.hakijat[0].asiointikieli").value(""))
   }
 
+  // ---- Ylioppilas ----
+
+  @Test
+  def onYlioppilasTrueWhenRowSaysTrue(): Unit = {
+    seedMinimalHakija()
+    insertYlioppilas(onYlioppilas = true)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].onYlioppilas").value(true))
+  }
+
+  @Test
+  def onYlioppilasFalseWhenNoRowExists(): Unit = {
+    seedMinimalHakija()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].onYlioppilas").value(false))
+  }
+
+  @Test
+  def onYlioppilasFalseWhenRowSaysFalse(): Unit = {
+    seedMinimalHakija()
+    insertYlioppilas(onYlioppilas = false)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].onYlioppilas").value(false))
+  }
+
+  @Test
+  def yoSuoritusVuosiPopulatedFromRow(): Unit = {
+    seedMinimalHakija()
+    insertYlioppilas(onYlioppilas = true, valmistumisVuosi = Some(2024))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].yoSuoritusVuosi").value("2024"))
+  }
+
+  @Test
+  def yoSuoritusVuosiNullWhenNoRow(): Unit = {
+    seedMinimalHakija()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].yoSuoritusVuosi").value(nullValue()))
+  }
+
+  @Test
+  def yoSuoritusVuosiNullWhenValmistumisVuosiIsNull(): Unit = {
+    seedMinimalHakija()
+    insertYlioppilas(onYlioppilas = true, valmistumisVuosi = None)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].yoSuoritusVuosi").value(nullValue()))
+  }
+
+  @Test
+  def ylioppilasResolvedThroughHenkiloAlias(): Unit = {
+    val aliasHenkiloOid = "1.2.246.562.24.99999"
+    seedMinimalHakija()
+    insertHenkiloAlias(oppijanumero = OPPIJANUMERO, henkiloOid = aliasHenkiloOid)
+    // Attach the ylioppilas row to the ALIAS, not the primary henkilo. Proves the
+    // query resolves through gen_henkilo.oppijanumero — a naive henkilo_oid join fails here.
+    insertYlioppilas(henkiloOid = aliasHenkiloOid, onYlioppilas = true, valmistumisVuosi = Some(2024))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].onYlioppilas").value(true))
+      .andExpect(jsonPath("$.hakijat[0].yoSuoritusVuosi").value("2024"))
+  }
+
   // ---- Excel ----
 
   @Test
@@ -445,6 +520,7 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
     insertHakukohde()
     insertHakutoive()
     insertValintarekisteri(maksunTila = Some("MAKSETTU"))
+    insertYlioppilas(onYlioppilas = true, valmistumisVuosi = Some(2024)) // → cell 21 = "X", cell 22 = "2024"
 
     val result   = getExcel().andExpect(status.isOk).andReturn()
     val workbook = new XSSFWorkbook(new ByteArrayInputStream(result.getResponse.getContentAsByteArray))
@@ -470,6 +546,8 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
         17 -> AIDINKIELI,
         18 -> "1",
         20 -> "X",
+        21 -> "X",
+        22 -> "2024",
         24 -> HAKU_OID,
         25 -> VUOSI.toString,
         26 -> KAUSI,
@@ -490,16 +568,15 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
           s"cell $idx expected [$value] but was [${dataRow.getCell(idx).getStringCellValue}]"
         )
       }
-      // deferred fields: cells 1, 12, 19, 22, 32, 34, 36, 37, 39, 40, 45-59 stay ""
-      Seq(1, 12, 19, 22, 32, 34, 36, 37, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
+      // deferred fields: cells 1, 12, 19, 32, 34, 36, 37, 39, 40, 45-59 stay ""
+      Seq(1, 12, 19, 32, 34, 36, 37, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
         .foreach { idx =>
           assert(
             dataRow.getCell(idx).getStringCellValue == "",
             s"deferred cell $idx expected empty but was [${dataRow.getCell(idx).getStringCellValue}]"
           )
         }
-      // onYlioppilas + ensikertalainen: cell 21 = "" (onYlioppilas defaults false), cell 23 = "" (ensikertalainen None)
-      assert(dataRow.getCell(21).getStringCellValue == "")
+      // ensikertalainen: cell 23 = "" (ensikertalainen None)
       assert(dataRow.getCell(23).getStringCellValue == "")
     } finally workbook.close()
   }
