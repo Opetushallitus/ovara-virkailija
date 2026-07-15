@@ -57,3 +57,11 @@ case class YosHenkilo(
   syntymaAika: Option[LocalDate],
   oppijanumero: String
 )
+
+case class YosValintarekisteriTiedot(
+  henkiloOid: String,
+  hakukohdeOid: String,
+  hakemusOid: String,
+  paateltyAloitusPvm: Option[LocalDate],
+  naytettyPaatettavaOikeus: String
+)
