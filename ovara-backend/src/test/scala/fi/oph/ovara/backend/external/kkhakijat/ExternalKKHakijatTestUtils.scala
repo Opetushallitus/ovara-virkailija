@@ -173,6 +173,32 @@ trait ExternalKKHakijatTestUtils {
     )
   }
 
+  def insertToteutus(
+    toteutusOid: String = TOTEUTUS_OID,
+    koulutusOid: String = KOULUTUS_OID,
+    koulutuksenAlkamisvuosi: Option[Int] = None,
+    koulutuksenAlkamiskausiuri: Option[String] = None
+  ): Unit = {
+    db.run(
+      sqlu"""INSERT INTO gen.gen_toteutus VALUES(
+          $toteutusOid,
+          $koulutusOid,
+          $koulutuksenAlkamisvuosi,
+          $koulutuksenAlkamiskausiuri)""",
+      "Insert test kk-toteutus"
+    )
+  }
+
+  def insertKoulutus(
+    koulutusOid: String = KOULUTUS_OID,
+    ulkoinenTunniste: Option[String] = None
+  ): Unit = {
+    db.run(
+      sqlu"""INSERT INTO gen.gen_koulutus VALUES($koulutusOid, $ulkoinenTunniste)""",
+      "Insert test kk-koulutus"
+    )
+  }
+
   def insertHakutoive(
     hakemusOid: String = HAKEMUS_OID,
     hakukohdeOid: String = HAKUKOHDE_OID,
@@ -264,6 +290,11 @@ trait ExternalKKHakijatTestUtils {
               koulutus_oid text,
               koulutuksen_alkamisvuosi integer,
               koulutuksen_alkamiskausiuri text
+          );
+
+          CREATE TABLE gen.gen_koulutus(
+              koulutus_oid text NOT NULL PRIMARY KEY,
+              ulkoinen_tunniste text
           );
 
           CREATE TABLE gen.gen_valintarekisteri(

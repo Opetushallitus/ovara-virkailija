@@ -123,9 +123,12 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
           AND vr.hakukohde_oid = ht.hakukohde_oid
           AND vr.maksun_tila IS NOT NULL
           AND vr.maksun_tila <> ''
-        LIMIT 1) AS lukuvuosimaksu
+        LIMIT 1) AS lukuvuosimaksu,
+      k.ulkoinen_tunniste AS hakukohde_kk_id
     FROM gen.gen_hakutoive ht
     LEFT JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
+    LEFT JOIN gen.gen_toteutus  t  ON hk.toteutus_oid  = t.toteutus_oid
+    LEFT JOIN gen.gen_koulutus  k  ON t.koulutus_oid   = k.koulutus_oid
     WHERE ht.hakemus_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(hakemusOids)})
     """.as[KKHakemusRow]
 
