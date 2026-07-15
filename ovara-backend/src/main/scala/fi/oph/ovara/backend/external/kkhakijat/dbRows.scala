@@ -31,7 +31,7 @@ case class KKHakijaRow(
   vuosi: Option[Int],
   kausi: Option[String]
 ) {
-  def asHakija(hakemukset: Seq[KKHakemus]): KKHakija =
+  def asHakija(hakemukset: Seq[KKHakutoive]): KKHakija =
     KKHakija(
       hetu = hetu.getOrElse(""),
       oppijanumero = oppijanumero,
@@ -71,7 +71,9 @@ case class KKHakemusRow(
   vastaanottotieto: Option[String],
   ilmoittautumisenTila: Option[String],
   lukuvuosimaksu: Option[String],
-  hakukohdeKkId: Option[String]
+  hakukohdeKkId: Option[String],
+  valinnanTila: Option[String],
+  valinnanAikaleima: Option[OffsetDateTime]
 ) {
   def asKKHakemus(
     hakuOid: String,
@@ -80,9 +82,10 @@ case class KKHakemusRow(
     hakemusnumero: String,
     hakemusJattoAikaleima: Option[String],
     hakemusViimeinenMuokkausAikaleima: Option[String],
+    valinnanAikaleima: Option[String],
     julkaisulupa: Option[Boolean]
-  ): KKHakemus =
-    KKHakemus(
+  ): KKHakutoive =
+    KKHakutoive(
       haku = hakuOid,
       hakuVuosi = hakuVuosi,
       hakuKausi = hakuKausi,
@@ -91,8 +94,9 @@ case class KKHakemusRow(
       hakukohde = hakukohdeOid,
       hakemusViimeinenMuokkausAikaleima = hakemusViimeinenMuokkausAikaleima,
       hakemusJattoAikaleima = hakemusJattoAikaleima,
+      valinnanAikaleima = valinnanAikaleima,
       hakutoivePrioriteetti = Some(hakutoivenumero),
-      valinnanTila = valintatieto.flatMap(Valintatila.parse),
+      valinnanTila = valinnanTila.flatMap(Valintatila.parse),
       vastaanottotieto = vastaanottotieto.flatMap(Vastaanottotila.parse),
       ilmoittautumiset = ilmoittautumisenTila.flatMap(Lasnaolo.parse).toSeq,
       julkaisulupa = julkaisulupa,

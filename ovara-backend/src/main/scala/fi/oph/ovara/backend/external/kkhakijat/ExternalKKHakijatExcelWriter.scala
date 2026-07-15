@@ -107,7 +107,7 @@ object ExternalKKHakijatExcelWriter {
     }
   }
 
-  private def rowValues(h: KKHakija, hm: KKHakemus): Seq[String] = Seq(
+  private def rowValues(h: KKHakija, hm: KKHakutoive): Seq[String] = Seq(
     h.hetu,                                                    // 0
     optStr(h.syntymaaika),                                     // 1
     h.oppijanumero,                                            // 2
