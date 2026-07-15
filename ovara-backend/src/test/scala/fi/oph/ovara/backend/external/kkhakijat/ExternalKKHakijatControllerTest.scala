@@ -444,6 +444,57 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       .andExpect(jsonPath("$.hakijat[0].yoSuoritusVuosi").value("2024"))
   }
 
+  // ---- Ensikertalainen ----
+
+  @Test
+  def ensikertalainenTrueWhenSupaTietoTrueRowExists(): Unit = {
+    seedMinimalHakija()
+    insertSupaTieto(avain = "ensikertalainen", arvo = Some("true"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(true))
+  }
+
+  @Test
+  def ensikertalainenTrueWhenSupaTietoQuotedTrueRowExists(): Unit = {
+    seedMinimalHakija()
+    insertSupaTieto(avain = "ensikertalainen", arvo = Some("\"true\""))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(true))
+  }
+
+  @Test
+  def ensikertalainenNullWhenNoRowExists(): Unit = {
+    seedMinimalHakija()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(nullValue()))
+  }
+
+  @Test
+  def ensikertalainenNullWhenArvoIsFalse(): Unit = {
+    seedMinimalHakija()
+    insertSupaTieto(avain = "ensikertalainen", arvo = Some("false"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(nullValue()))
+  }
+
+  @Test
+  def ensikertalainenIgnoresIrrelevantAvain(): Unit = {
+    seedMinimalHakija()
+    insertSupaTieto(avain = "some_other_key", arvo = Some("true"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(nullValue()))
+  }
+
   // ---- Excel ----
 
   @Test
@@ -521,6 +572,7 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
     insertHakutoive()
     insertValintarekisteri(maksunTila = Some("MAKSETTU"))
     insertYlioppilas(onYlioppilas = true, valmistumisVuosi = Some(2024)) // → cell 21 = "X", cell 22 = "2024"
+    insertSupaTieto(avain = "ensikertalainen", arvo = Some("true"))      // → cell 23 = "X"
 
     val result   = getExcel().andExpect(status.isOk).andReturn()
     val workbook = new XSSFWorkbook(new ByteArrayInputStream(result.getResponse.getContentAsByteArray))
@@ -548,6 +600,7 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
         20 -> "X",
         21 -> "X",
         22 -> "2024",
+        23 -> "X",
         24 -> HAKU_OID,
         25 -> VUOSI.toString,
         26 -> KAUSI,
@@ -576,8 +629,6 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
             s"deferred cell $idx expected empty but was [${dataRow.getCell(idx).getStringCellValue}]"
           )
         }
-      // ensikertalainen: cell 23 = "" (ensikertalainen None)
-      assert(dataRow.getCell(23).getStringCellValue == "")
     } finally workbook.close()
   }
 

@@ -38,6 +38,17 @@ trait ExternalKKHakijatTestUtils {
     )
   }
 
+  def insertSupaTieto(
+    hakemusOid: String = HAKEMUS_OID,
+    avain: String,
+    arvo: Option[String]
+  ): Unit = {
+    db.run(
+      sqlu"""INSERT INTO gen.gen_supa_tieto VALUES($hakemusOid, $avain, $arvo)""",
+      "Insert test kk-supa_tieto"
+    )
+  }
+
   def insertYlioppilas(
     henkiloOid: String = OPPIJANUMERO,
     onYlioppilas: Boolean = true,
@@ -266,6 +277,12 @@ trait ExternalKKHakijatTestUtils {
               henkilo_oid text,
               on_ylioppilas boolean,
               valmistumis_vuosi integer
+          );
+
+          CREATE TABLE gen.gen_supa_tieto (
+              hakemus_oid text NOT NULL,
+              avain       text NOT NULL,
+              arvo        text
           );
           """
     db.run(query, "Init KK Hakijat test schema")
