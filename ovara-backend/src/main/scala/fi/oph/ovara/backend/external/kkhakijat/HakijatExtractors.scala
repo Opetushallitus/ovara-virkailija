@@ -89,7 +89,8 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       lukuvuosimaksu = r.nextStringOption(),
       hakukohdeKkId = r.nextStringOption(),
       valinnanTila = r.nextStringOption(),
-      valinnanAikaleima = getOffsetDateTime(r)
+      valinnanAikaleima = getOffsetDateTime(r),
+      pisteet = r.nextBigDecimalOption()
     )
   }
 

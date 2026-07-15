@@ -467,6 +467,105 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value("2025-10-01T12:00:00+03:00"))
   }
 
+  // ---- Pisteet ----
+
+  @Test
+  def pisteetPopulatedFromValintarekisteri(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valinnanTila = Some("HYVAKSYTTY"),
+      pisteet = Some(BigDecimal("82.5"))
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(82.5))
+  }
+
+  @Test
+  def pisteetNullWhenNoValintarekisteriRow(): Unit = {
+    seedMinimalHakija()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(nullValue()))
+  }
+
+  @Test
+  def pisteetIgnoresUnpublishedRows(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valinnanTila = Some("HYVAKSYTTY"),
+      julkaistavissa = Some(false),
+      pisteet = Some(BigDecimal("80"))
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(nullValue()))
+  }
+
+  @Test
+  def pisteetPrefersHigherPriorityState(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-winner",
+      valinnanTila = Some("HYVAKSYTTY"),
+      pisteet = Some(BigDecimal("80"))
+    )
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-loser",
+      valinnanTila = Some("VARALLA"),
+      pisteet = Some(BigDecimal("99"))
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(80))
+  }
+
+  @Test
+  def pisteetSecondaryTiebreakByPrioriteetti(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-winner",
+      valinnanTila = Some("HYVAKSYTTY"),
+      prioriteetti = Some(1),
+      pisteet = Some(BigDecimal("88"))
+    )
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-loser",
+      valinnanTila = Some("HYVAKSYTTY"),
+      prioriteetti = Some(2),
+      pisteet = Some(BigDecimal("99"))
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(88))
+  }
+
+  @Test
+  def pisteetSecondaryTiebreakByVarasijanNumeroForVaralla(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-winner",
+      valinnanTila = Some("VARALLA"),
+      varasijanNumero = Some(1),
+      pisteet = Some(BigDecimal("70"))
+    )
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-loser",
+      valinnanTila = Some("VARALLA"),
+      varasijanNumero = Some(2),
+      pisteet = Some(BigDecimal("90"))
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(70))
+  }
+
   // ---- Asiointikieli ----
 
   @ParameterizedTest
@@ -703,8 +802,9 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
     insertValintarekisteri(
       maksunTila = Some("MAKSETTU"),
       valinnanTila = Some(VALINTATIETO),
-      hyvaksyttyjajulkaistu = Some(TS_HYVAKSYTTY)
-    ) // → cell 14 = "MAKSETTU", cell 35 = VALINTATIETO, cell 36 = TS_HYVAKSYTTY
+      hyvaksyttyjajulkaistu = Some(TS_HYVAKSYTTY),
+      pisteet = Some(BigDecimal("82.5"))
+    ) // → cell 14 = "MAKSETTU", cell 35 = VALINTATIETO, cell 36 = TS_HYVAKSYTTY, cell 37 = "82.5"
     insertYlioppilas(onYlioppilas = true, valmistumisVuosi = Some(2024)) // → cell 21 = "X", cell 22 = "2024"
     insertSupaTieto(avain = "ensikertalainen", arvo = Some("true"))      // → cell 23 = "X"
     insertToteutus()
@@ -749,6 +849,7 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
         33 -> "1",
         35 -> VALINTATIETO,
         36 -> "2025-10-01T12:00:00+03:00",
+        37 -> "82.5",
         41 -> VASTAANOTTOTIETO,
         42 -> ILMOITTAUTUMISEN_TILA,
         44 -> "X"
@@ -759,8 +860,8 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
           s"cell $idx expected [$value] but was [${dataRow.getCell(idx).getStringCellValue}]"
         )
       }
-      // deferred fields: cells 1, 12, 19, 34, 37, 39, 40, 45-59 stay ""
-      Seq(1, 12, 19, 34, 37, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
+      // deferred fields: cells 1, 12, 19, 34, 39, 40, 45-59 stay ""
+      Seq(1, 12, 19, 34, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
         .foreach { idx =>
           assert(
             dataRow.getCell(idx).getStringCellValue == "",
