@@ -73,7 +73,8 @@ case class KKHakemusRow(
   lukuvuosimaksu: Option[String],
   hakukohdeKkId: Option[String],
   valinnanTila: Option[String],
-  valinnanAikaleima: Option[OffsetDateTime]
+  valinnanAikaleima: Option[OffsetDateTime],
+  pisteet: Option[BigDecimal]
 ) {
   def asKKHakemus(
     hakuOid: String,
@@ -101,6 +102,7 @@ case class KKHakemusRow(
       ilmoittautumiset = ilmoittautumisenTila.flatMap(Lasnaolo.parse).toSeq,
       julkaisulupa = julkaisulupa,
       lukuvuosimaksu = lukuvuosimaksu,
-      hakukohdeKkId = hakukohdeKkId
+      hakukohdeKkId = hakukohdeKkId,
+      pisteet = pisteet
     )
 }
