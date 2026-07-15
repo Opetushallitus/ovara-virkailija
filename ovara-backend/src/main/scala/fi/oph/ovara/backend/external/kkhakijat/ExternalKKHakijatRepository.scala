@@ -41,6 +41,7 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
       hakemus.kansalaisuus,
       hakemus.kotikunta,
       hakemus.sukupuoli,
+      hakemus.asiointikieli,
       hakemus.koulutusmarkkinointilupa,
       hakemus.valintatuloksen_julkaisulupa,
       hakemus.jatetty,
