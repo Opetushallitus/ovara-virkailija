@@ -59,6 +59,11 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
         WHERE hlo_alias.oppijanumero = hlo.oppijanumero
           AND yo.valmistumis_vuosi IS NOT NULL
         LIMIT 1) AS yo_valmistumis_vuosi,
+      (SELECT true FROM gen.gen_supa_tieto st
+        WHERE st.hakemus_oid = hakemus.hakemus_oid
+          AND st.avain = 'ensikertalainen'
+          AND st.arvo IN ('true', '"true"')
+        LIMIT 1) AS ensikertalainen,
       (SELECT hk.koulutuksen_alkamisvuosi FROM gen.gen_hakutoive ht
         INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
         WHERE ht.hakemus_oid = hakemus.hakemus_oid

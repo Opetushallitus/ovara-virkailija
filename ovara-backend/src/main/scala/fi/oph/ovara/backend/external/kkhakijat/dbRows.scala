@@ -27,6 +27,7 @@ case class KKHakijaRow(
   aidinkieli: Option[String],
   onYlioppilas: Boolean,
   yoValmistumisVuosi: Option[Int],
+  ensikertalainen: Option[Boolean],
   vuosi: Option[Int],
   kausi: Option[String]
 ) {
@@ -55,6 +56,7 @@ case class KKHakijaRow(
       koulutusmarkkinointilupa = koulutusmarkkinointilupa,
       onYlioppilas = onYlioppilas,
       yoSuoritusVuosi = yoValmistumisVuosi.map(_.toString),
+      ensikertalainen = ensikertalainen,
       hakemukset = hakemukset
     )
 }
