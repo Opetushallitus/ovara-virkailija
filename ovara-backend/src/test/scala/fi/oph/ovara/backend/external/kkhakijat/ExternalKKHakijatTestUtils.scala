@@ -30,6 +30,25 @@ trait ExternalKKHakijatTestUtils {
     )
   }
 
+  /** Insert an additional gen_henkilo row that links `henkiloOid` to the same master `oppijanumero`. */
+  def insertHenkiloAlias(oppijanumero: String, henkiloOid: String): Unit = {
+    db.run(
+      sqlu"""INSERT INTO gen.gen_henkilo VALUES ($oppijanumero, $henkiloOid, NULL)""",
+      "Insert test kk-henkilö alias"
+    )
+  }
+
+  def insertYlioppilas(
+    henkiloOid: String = OPPIJANUMERO,
+    onYlioppilas: Boolean = true,
+    valmistumisVuosi: Option[Int] = None
+  ): Unit = {
+    db.run(
+      sqlu"""INSERT INTO gen.gen_ylioppilas VALUES ($henkiloOid, $onYlioppilas, $valmistumisVuosi)""",
+      "Insert test kk-ylioppilas"
+    )
+  }
+
   def insertHaku(
     hakuOid: String = HAKU_OID,
     kohdejoukkoKoodiuri: String = "haunkohdejoukko_12#1",
@@ -241,6 +260,12 @@ trait ExternalKKHakijatTestUtils {
               valintatapajono_id text,
               hakemus_oid text,
               maksun_tila text
+          );
+
+          CREATE TABLE gen.gen_ylioppilas(
+              henkilo_oid text,
+              on_ylioppilas boolean,
+              valmistumis_vuosi integer
           );
           """
     db.run(query, "Init KK Hakijat test schema")

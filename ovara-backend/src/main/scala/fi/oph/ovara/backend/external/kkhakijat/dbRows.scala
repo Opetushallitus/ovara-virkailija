@@ -25,6 +25,8 @@ case class KKHakijaRow(
   jatetty: Option[OffsetDateTime],
   muokattu: Option[OffsetDateTime],
   aidinkieli: Option[String],
+  onYlioppilas: Boolean,
+  yoValmistumisVuosi: Option[Int],
   vuosi: Option[Int],
   kausi: Option[String]
 ) {
@@ -51,6 +53,8 @@ case class KKHakijaRow(
       matkapuhelin = Option(puhelin).filter(_.nonEmpty),
       sahkoposti = Option(sahkoposti).filter(_.nonEmpty),
       koulutusmarkkinointilupa = koulutusmarkkinointilupa,
+      onYlioppilas = onYlioppilas,
+      yoSuoritusVuosi = yoValmistumisVuosi.map(_.toString),
       hakemukset = hakemukset
     )
 }
