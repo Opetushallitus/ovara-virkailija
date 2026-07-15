@@ -2012,6 +2012,7 @@ object ExcelWriter {
         cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.opiskeluoikeudenViimeisinTila)
         cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.opiskelijaAvain)
         cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.opiskeluoikeusAvain)
+        cellIndex = writeOptionBooleanToCell(dataRow, bodyTextCellStyle, cellIndex, item.naytettyHakijalle)
         cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.hakemusOid)
         cellIndex = writeKielistettyToCell(dataRow, bodyTextCellStyle, cellIndex, item.hakukohdeNimi, asiointikieli)
         cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.hakukohdeOid)

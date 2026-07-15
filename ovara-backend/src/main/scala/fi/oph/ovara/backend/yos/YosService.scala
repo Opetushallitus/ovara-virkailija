@@ -60,6 +60,7 @@ class YosService(
               opiskeluoikeudenPaattymispvm = matchingValintaRekisteriTieto.flatMap(_.paateltyAloitusPvm)
                 .map(aloitusPvm => aloitusPvm.minusDays(1)),
               opiskeluoikeudenViimeisinTila = o.opiskeluoikeudenViimeisinTila,
+              naytettyHakijalle = matchingValintaRekisteriTieto.exists(tieto => tieto.naytettyPaatettavaOikeus.equals(o.opiskeluoikeusAvain)),
               hakemusOid = v.hakemusOid,
               hakuOid = v.hakuOid,
               hakuNimi = v.haunNimi,
