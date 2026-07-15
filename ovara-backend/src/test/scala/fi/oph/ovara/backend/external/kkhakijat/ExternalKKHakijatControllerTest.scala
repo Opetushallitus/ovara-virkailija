@@ -337,6 +337,67 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       .andExpect(jsonPath("$.hakijat[0].hakemukset[1].lukuvuosimaksu").value("VAPAUTETTU"))
   }
 
+  // ---- HakukohdeKkId ----
+
+  @Test
+  def hakukohdeKkIdPopulatedFromKoulutus(): Unit = {
+    seedMinimalHakija()
+    insertToteutus()
+    insertKoulutus(ulkoinenTunniste = Some("TKID-1"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").value("TKID-1"))
+  }
+
+  @Test
+  def hakukohdeKkIdNullWhenKoulutusRowMissing(): Unit = {
+    seedMinimalHakija()
+    insertToteutus() // no matching gen_koulutus row
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").value(nullValue()))
+  }
+
+  @Test
+  def hakukohdeKkIdNullWhenToteutusRowMissing(): Unit = {
+    seedMinimalHakija() // no toteutus row; hakukohde.toteutus_oid dangles
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").value(nullValue()))
+  }
+
+  @Test
+  def hakukohdeKkIdNullWhenUlkoinenTunnisteIsNull(): Unit = {
+    seedMinimalHakija()
+    insertToteutus()
+    insertKoulutus(ulkoinenTunniste = None)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").value(nullValue()))
+  }
+
+  @Test
+  def hakukohdeKkIdPerHakemusDiffers(): Unit = {
+    val toteutusOid2 = "1.2.246.562.17.99999999999999999999"
+    val koulutusOid2 = "1.2.246.562.13.99999999999999999999"
+    seedMinimalHakija()
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2, toteutusOid = toteutusOid2)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2)
+    insertToteutus(toteutusOid = TOTEUTUS_OID, koulutusOid = KOULUTUS_OID)
+    insertToteutus(toteutusOid = toteutusOid2, koulutusOid = koulutusOid2)
+    insertKoulutus(koulutusOid = KOULUTUS_OID, ulkoinenTunniste = Some("TKID-A"))
+    insertKoulutus(koulutusOid = koulutusOid2, ulkoinenTunniste = Some("TKID-B"))
+
+    get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").value("TKID-A"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[1].hakukohdeKkId").value("TKID-B"))
+  }
+
   // ---- Asiointikieli ----
 
   @ParameterizedTest
@@ -573,6 +634,8 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
     insertValintarekisteri(maksunTila = Some("MAKSETTU"))
     insertYlioppilas(onYlioppilas = true, valmistumisVuosi = Some(2024)) // → cell 21 = "X", cell 22 = "2024"
     insertSupaTieto(avain = "ensikertalainen", arvo = Some("true"))      // → cell 23 = "X"
+    insertToteutus()
+    insertKoulutus(ulkoinenTunniste = Some("TKID-1")) // → cell 32 = "TKID-1"
 
     val result   = getExcel().andExpect(status.isOk).andReturn()
     val workbook = new XSSFWorkbook(new ByteArrayInputStream(result.getResponse.getContentAsByteArray))
@@ -609,6 +672,7 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
         29 -> MUOKATTU_STR,
         30 -> ORGANISAATIO_OID,
         31 -> HAKUKOHDE_OID,
+        32 -> "TKID-1",
         33 -> "1",
         35 -> VALINTATIETO,
         41 -> VASTAANOTTOTIETO,
@@ -621,8 +685,8 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
           s"cell $idx expected [$value] but was [${dataRow.getCell(idx).getStringCellValue}]"
         )
       }
-      // deferred fields: cells 1, 12, 19, 32, 34, 36, 37, 39, 40, 45-59 stay ""
-      Seq(1, 12, 19, 32, 34, 36, 37, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
+      // deferred fields: cells 1, 12, 19, 34, 36, 37, 39, 40, 45-59 stay ""
+      Seq(1, 12, 19, 34, 36, 37, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
         .foreach { idx =>
           assert(
             dataRow.getCell(idx).getStringCellValue == "",
