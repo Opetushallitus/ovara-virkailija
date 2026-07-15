@@ -204,6 +204,16 @@ trait Extractors extends GenericOvaraJsonFormats {
       oppijanumero = r.nextString()
     )
   )
+  
+  implicit val getValintarekisteriYosResult: GetResult[YosValintarekisteriTiedot] = GetResult(r =>
+    YosValintarekisteriTiedot(
+      henkiloOid = r.nextString(), 
+      hakukohdeOid = r.nextString(), 
+      hakemusOid = r.nextString(), 
+      paateltyAloitusPvm = extractDateOption(r.nextDateOption()), 
+      naytettyPaatettavaOikeus = r.nextString()
+    )
+  )
 
   implicit val getToisenAsteenHakijaResult: GetResult[ToisenAsteenHakija] = GetResult(r =>
     ToisenAsteenHakija(
