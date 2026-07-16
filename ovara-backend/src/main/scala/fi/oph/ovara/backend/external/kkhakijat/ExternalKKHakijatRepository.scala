@@ -180,7 +180,95 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
             ELSE vr.prioriteetti
           END NULLS LAST
-        LIMIT 1) AS pisteet
+        LIMIT 1) AS pisteet,
+      (SELECT vr.ehdollisesti_hyvaksyttavissa FROM gen.gen_valintarekisteri vr
+        WHERE vr.hakemus_oid   = ht.hakemus_oid
+          AND vr.hakukohde_oid = ht.hakukohde_oid
+          AND vr.julkaistavissa = true
+        ORDER BY
+          CASE vr.valinnan_tila
+            WHEN 'HYVAKSYTTY'                     THEN 1
+            WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
+            WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
+            WHEN 'VARALLA'                        THEN 4
+            WHEN 'PERUUTETTU'                     THEN 5
+            WHEN 'PERUNUT'                        THEN 6
+            WHEN 'PERUUNTUNUT'                    THEN 7
+            WHEN 'HYLATTY'                        THEN 8
+            WHEN 'KESKEN'                         THEN 9
+            ELSE 10
+          END,
+          CASE
+            WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
+            ELSE vr.prioriteetti
+          END NULLS LAST
+        LIMIT 1) AS ehdollisesti_hyvaksyttavissa,
+      (SELECT vr.ehdollisen_hyvaksymisen_ehto_fi FROM gen.gen_valintarekisteri vr
+        WHERE vr.hakemus_oid   = ht.hakemus_oid
+          AND vr.hakukohde_oid = ht.hakukohde_oid
+          AND vr.julkaistavissa = true
+        ORDER BY
+          CASE vr.valinnan_tila
+            WHEN 'HYVAKSYTTY'                     THEN 1
+            WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
+            WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
+            WHEN 'VARALLA'                        THEN 4
+            WHEN 'PERUUTETTU'                     THEN 5
+            WHEN 'PERUNUT'                        THEN 6
+            WHEN 'PERUUNTUNUT'                    THEN 7
+            WHEN 'HYLATTY'                        THEN 8
+            WHEN 'KESKEN'                         THEN 9
+            ELSE 10
+          END,
+          CASE
+            WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
+            ELSE vr.prioriteetti
+          END NULLS LAST
+        LIMIT 1) AS ehto_fi,
+      (SELECT vr.ehdollisen_hyvaksymisen_ehto_sv FROM gen.gen_valintarekisteri vr
+        WHERE vr.hakemus_oid   = ht.hakemus_oid
+          AND vr.hakukohde_oid = ht.hakukohde_oid
+          AND vr.julkaistavissa = true
+        ORDER BY
+          CASE vr.valinnan_tila
+            WHEN 'HYVAKSYTTY'                     THEN 1
+            WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
+            WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
+            WHEN 'VARALLA'                        THEN 4
+            WHEN 'PERUUTETTU'                     THEN 5
+            WHEN 'PERUNUT'                        THEN 6
+            WHEN 'PERUUNTUNUT'                    THEN 7
+            WHEN 'HYLATTY'                        THEN 8
+            WHEN 'KESKEN'                         THEN 9
+            ELSE 10
+          END,
+          CASE
+            WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
+            ELSE vr.prioriteetti
+          END NULLS LAST
+        LIMIT 1) AS ehto_sv,
+      (SELECT vr.ehdollisen_hyvaksymisen_ehto_en FROM gen.gen_valintarekisteri vr
+        WHERE vr.hakemus_oid   = ht.hakemus_oid
+          AND vr.hakukohde_oid = ht.hakukohde_oid
+          AND vr.julkaistavissa = true
+        ORDER BY
+          CASE vr.valinnan_tila
+            WHEN 'HYVAKSYTTY'                     THEN 1
+            WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
+            WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
+            WHEN 'VARALLA'                        THEN 4
+            WHEN 'PERUUTETTU'                     THEN 5
+            WHEN 'PERUNUT'                        THEN 6
+            WHEN 'PERUUNTUNUT'                    THEN 7
+            WHEN 'HYLATTY'                        THEN 8
+            WHEN 'KESKEN'                         THEN 9
+            ELSE 10
+          END,
+          CASE
+            WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
+            ELSE vr.prioriteetti
+          END NULLS LAST
+        LIMIT 1) AS ehto_en
     FROM gen.gen_hakutoive ht
     LEFT JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
     LEFT JOIN gen.gen_toteutus  t  ON hk.toteutus_oid  = t.toteutus_oid

@@ -566,6 +566,91 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(70))
   }
 
+  // ---- HyvaksymisenEhto ----
+
+  @Test
+  def hyvaksymisenEhtoPopulatedFromValintarekisteri(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valinnanTila = Some("HYVAKSYTTY"),
+      ehdollistiHyvaksyttavissa = Some(true),
+      ehdollistiHyvaksyttavissaEhtoFi = Some("Ehto FI"),
+      ehdollistiHyvaksyttavissaEhtoSv = Some("Ehto SV"),
+      ehdollistiHyvaksyttavissaEhtoEn = Some("Ehto EN")
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehdollisestiHyvaksyttavissa").value(true))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoFI").value("Ehto FI"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoSV").value("Ehto SV"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoEN").value("Ehto EN"))
+  }
+
+  @Test
+  def hyvaksymisenEhtoNullWhenNoValintarekisteriRow(): Unit = {
+    seedMinimalHakija()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").value(nullValue()))
+  }
+
+  @Test
+  def hyvaksymisenEhtoNullWhenAllRowsUnpublished(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valinnanTila = Some("HYVAKSYTTY"),
+      julkaistavissa = Some(false),
+      ehdollistiHyvaksyttavissa = Some(true),
+      ehdollistiHyvaksyttavissaEhtoFi = Some("Ehto FI")
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").value(nullValue()))
+  }
+
+  @Test
+  def hyvaksymisenEhtoAllRawFieldsNullProducesEmptyEhto(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valinnanTila = Some("HYVAKSYTTY"),
+      ehdollistiHyvaksyttavissa = Some(false)
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehdollisestiHyvaksyttavissa").value(false))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoFI").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoSV").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoEN").value(nullValue()))
+  }
+
+  @Test
+  def hyvaksymisenEhtoFromSamePriorityRowAsPisteet(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-winner",
+      valinnanTila = Some("HYVAKSYTTY"),
+      pisteet = Some(BigDecimal("90")),
+      ehdollistiHyvaksyttavissa = Some(true),
+      ehdollistiHyvaksyttavissaEhtoFi = Some("winner-fi")
+    )
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-loser",
+      valinnanTila = Some("VARALLA"),
+      pisteet = Some(BigDecimal("99")),
+      ehdollistiHyvaksyttavissa = Some(false),
+      ehdollistiHyvaksyttavissaEhtoFi = Some("loser-fi")
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoFI").value("winner-fi"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(90))
+  }
+
   // ---- Asiointikieli ----
 
   @ParameterizedTest
@@ -803,8 +888,12 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       maksunTila = Some("MAKSETTU"),
       valinnanTila = Some(VALINTATIETO),
       hyvaksyttyjajulkaistu = Some(TS_HYVAKSYTTY),
-      pisteet = Some(BigDecimal("82.5"))
-    ) // → cell 14 = "MAKSETTU", cell 35 = VALINTATIETO, cell 36 = TS_HYVAKSYTTY, cell 37 = "82.5"
+      pisteet = Some(BigDecimal("82.5")),
+      ehdollistiHyvaksyttavissa = Some(true),
+      ehdollistiHyvaksyttavissaEhtoFi = Some("Ehto FI"),
+      ehdollistiHyvaksyttavissaEhtoSv = Some("Ehto SV"),
+      ehdollistiHyvaksyttavissaEhtoEn = Some("Ehto EN")
+    ) // → cell 14 = "MAKSETTU", cell 35 = VALINTATIETO, cell 36 = TS_HYVAKSYTTY, cell 37 = "82.5", cell 38 = HyvaksymisenEhto(...)
     insertYlioppilas(onYlioppilas = true, valmistumisVuosi = Some(2024)) // → cell 21 = "X", cell 22 = "2024"
     insertSupaTieto(avain = "ensikertalainen", arvo = Some("true"))      // → cell 23 = "X"
     insertToteutus()
@@ -850,6 +939,7 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
         35 -> VALINTATIETO,
         36 -> "2025-10-01T12:00:00+03:00",
         37 -> "82.5",
+        38 -> "HyvaksymisenEhto(X,,Ehto FI,Ehto SV,Ehto EN)",
         41 -> VASTAANOTTOTIETO,
         42 -> ILMOITTAUTUMISEN_TILA,
         44 -> "X"
@@ -868,6 +958,18 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
             s"deferred cell $idx expected empty but was [${dataRow.getCell(idx).getStringCellValue}]"
           )
         }
+    } finally workbook.close()
+  }
+
+  @Test
+  def excelCell38RendersEmptyEhtoTupleWhenNoValintarekisteriRow(): Unit = {
+    seedMinimalHakija() // no valintarekisteri seeded → hyvaksymisenEhto is None
+
+    val bytes    = getExcel().andExpect(status.isOk).andReturn().getResponse.getContentAsByteArray
+    val workbook = new XSSFWorkbook(new ByteArrayInputStream(bytes))
+    try {
+      val cell38 = workbook.getSheetAt(0).getRow(1).getCell(38).getStringCellValue
+      assert(cell38 == "HyvaksymisenEhto(,,,,)", s"cell 38 expected [HyvaksymisenEhto(,,,,)] but was [$cell38]")
     } finally workbook.close()
   }
 

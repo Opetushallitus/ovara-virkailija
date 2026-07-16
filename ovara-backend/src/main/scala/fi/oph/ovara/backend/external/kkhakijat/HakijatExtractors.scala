@@ -90,7 +90,11 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       hakukohdeKkId = r.nextStringOption(),
       valinnanTila = r.nextStringOption(),
       valinnanAikaleima = getOffsetDateTime(r),
-      pisteet = r.nextBigDecimalOption()
+      pisteet = r.nextBigDecimalOption(),
+      ehdollistiHyvaksyttavissa = r.nextBooleanOption(),
+      ehtoFI = r.nextStringOption(),
+      ehtoSV = r.nextStringOption(),
+      ehtoEN = r.nextStringOption()
     )
   }
 
