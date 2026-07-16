@@ -25,13 +25,11 @@ case class KKHakijaRow(
   jatetty: Option[OffsetDateTime],
   muokattu: Option[OffsetDateTime],
   aidinkieli: Option[String],
-  onYlioppilas: Boolean,
-  yoValmistumisVuosi: Option[Int],
   ensikertalainen: Option[Boolean],
   vuosi: Option[Int],
   kausi: Option[String]
 ) {
-  def asHakija(hakemukset: Seq[KKHakutoive]): KKHakija =
+  def asHakija(hakemukset: Seq[KKHakutoive], ylioppilas: Option[YlioppilasRow]): KKHakija =
     KKHakija(
       hetu = hetu.getOrElse(""),
       oppijanumero = oppijanumero,
@@ -54,12 +52,18 @@ case class KKHakijaRow(
       matkapuhelin = Option(puhelin).filter(_.nonEmpty),
       sahkoposti = Option(sahkoposti).filter(_.nonEmpty),
       koulutusmarkkinointilupa = koulutusmarkkinointilupa,
-      onYlioppilas = onYlioppilas,
-      yoSuoritusVuosi = yoValmistumisVuosi.map(_.toString),
+      onYlioppilas = ylioppilas.flatMap(_.onYlioppilas).getOrElse(false),
+      yoSuoritusVuosi = ylioppilas.flatMap(_.valmistumisVuosi).map(_.toString),
       ensikertalainen = ensikertalainen,
       hakemukset = hakemukset
     )
 }
+
+case class YlioppilasRow(
+  hakemusOid: String,
+  onYlioppilas: Option[Boolean],
+  valmistumisVuosi: Option[Int]
+)
 
 case class KKHakemusRow(
   hakemusOid: String,

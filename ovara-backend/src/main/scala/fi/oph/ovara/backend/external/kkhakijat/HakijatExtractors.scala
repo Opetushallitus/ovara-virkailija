@@ -29,8 +29,6 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
     val jatetty                     = getOffsetDateTime(r)
     val muokattu                    = getOffsetDateTime(r)
     val aidinkieli                  = normalizeKieliCode(r.nextStringOption())
-    val onYlioppilas                = r.nextBoolean()
-    val yoValmistumisVuosi          = r.nextIntOption()
     val ensikertalainen             = r.nextBooleanOption()
     val hakukohdeVuosi              = r.nextIntOption()
     val hakukohdeKausi              = r.nextStringOption()
@@ -68,8 +66,6 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       jatetty = jatetty,
       muokattu = muokattu,
       aidinkieli = aidinkieli,
-      onYlioppilas = onYlioppilas,
-      yoValmistumisVuosi = yoValmistumisVuosi,
       ensikertalainen = ensikertalainen,
       vuosi = vuosi,
       kausi = normalizeKausi(rawKausi)
@@ -95,6 +91,14 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       ehtoFI = r.nextStringOption(),
       ehtoSV = r.nextStringOption(),
       ehtoEN = r.nextStringOption()
+    )
+  }
+
+  implicit val getYlioppilasRow: GetResult[YlioppilasRow] = GetResult { r =>
+    YlioppilasRow(
+      hakemusOid = r.nextString(),
+      onYlioppilas = r.nextBooleanOption(),
+      valmistumisVuosi = r.nextIntOption()
     )
   }
 
