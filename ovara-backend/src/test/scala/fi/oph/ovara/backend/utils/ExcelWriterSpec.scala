@@ -6822,6 +6822,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
       "raportti.opiskeluoikeudenViimeisinTila",
       "raportti.opiskelijaAvain",
       "raportti.opiskeluoikeusAvain",
+      "raportti.naytettyHakijalle",
       "raportti.hakemusOid",
       "raportti.hakukohdeNimi",
       "Hakukohteen oid SV",
@@ -6847,6 +6848,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         "Loma",
         "opiskelija-avain-1",
         "opiskeluoikeus-avain-1",
+        "raportti.ei",
         "1.2.246.562.11.00000000000000000001",
         "Meteorolog, Orkanforskningslinjen",
         "1.2.246.562.20.00000000000000000002",
@@ -6861,7 +6863,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
 
     val sheet = wb.getSheetAt(0)
     assert(sheet.getRow(0).getCell(0).getStringCellValue == expectedTitles.head)
-    assert(sheet.getRow(0).getCell(11).getStringCellValue == expectedTitles.last)
+    assert(sheet.getRow(0).getCell(12).getStringCellValue == expectedTitles.last)
     validateHeaders(sheet, 1, expectedHeaders)
     validateRow(sheet, 2, expectedRow)
   }
