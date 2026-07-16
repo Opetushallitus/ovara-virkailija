@@ -1967,7 +1967,7 @@ object ExcelWriter {
       )
       paatettavaTitleCell.setCellStyle(headingCellStyle)
 
-      val vastaanotettuTitleCell = titleRow.createCell(11)
+      val vastaanotettuTitleCell = titleRow.createCell(12)
       vastaanotettuTitleCell.setCellValue(
         translations.getOrElse("raportti.vastaanotettu-opiskelupaikka", "raportti.vastaanotettu-opiskelupaikka")
       )
@@ -1979,15 +1979,15 @@ object ExcelWriter {
           currentRowIndex,
           currentRowIndex,
           0,
-          10
+          11
         )
       )
       sheet.addMergedRegion(
         new CellRangeAddress(
           currentRowIndex,
           currentRowIndex,
-          11,
-          19
+          12,
+          20
         )
       )
 
@@ -2012,13 +2012,15 @@ object ExcelWriter {
         cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.opiskeluoikeudenViimeisinTila)
         cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.opiskelijaAvain)
         cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.opiskeluoikeusAvain)
+        cellIndex =
+          writeOptionBooleanToCell(dataRow, bodyTextCellStyle, cellIndex, Some(item.naytettyHakijalle), translations)
         cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.hakemusOid)
         cellIndex = writeKielistettyToCell(dataRow, bodyTextCellStyle, cellIndex, item.hakukohdeNimi, asiointikieli)
         cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.hakukohdeOid)
         cellIndex = writeKielistettyToCell(dataRow, bodyTextCellStyle, cellIndex, item.oppilaitosNimi, asiointikieli)
         cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.oppilaitosOid)
         cellIndex =
-          writeOptionLocalDateToCell(dataRow, bodyTextCellStyle, cellIndex, Some(item.uudenOpiskeluoikeudenAlkamispvm))
+          writeOptionLocalDateToCell(dataRow, bodyTextCellStyle, cellIndex, item.uudenOpiskeluoikeudenAlkamispvm)
         cellIndex = writeOptionLocalDateToCell(dataRow, bodyTextCellStyle, cellIndex, Some(item.vastaanottoAjankohta))
         cellIndex = writeKielistettyToCell(dataRow, bodyTextCellStyle, cellIndex, item.hakuNimi, asiointikieli)
         cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.hakuOid)
