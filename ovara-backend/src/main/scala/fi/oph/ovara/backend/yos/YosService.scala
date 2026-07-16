@@ -5,7 +5,8 @@ import fi.oph.ovara.backend.domain.{
   KKPaatettavaOpiskeluoikeusEntity,
   KKSitovastiVastaanottanut,
   KkPaatettavaOpiskeluoikeus,
-  YosHenkilo
+  YosHenkilo,
+  YosValintarekisteriTiedot
 }
 import fi.oph.ovara.backend.raportointi.dto.{
   buildKkPaatettavatOpiskeluoikeudetParamsForExcel,
@@ -48,11 +49,19 @@ class YosService(
       .filter(_.isDefined)
       .map(_.get)
     val yossiinKuuluvatHenkilot = getYossinPiiriinKuuluvatHenkilot(yossiinKuuluvat, params)
+    val yosValintarekisteriTiedot: Map[String, List[YosValintarekisteriTiedot]] = getYosValintarekisteriTiedot(
+      yossiinKuuluvatHenkilot
+    )
     yossiinKuuluvat
       .map((o, v) =>
         yossiinKuuluvatHenkilot
           .find(h => h.oppijanumero.equals(o.opiskelijaAvain))
-          .map(h =>
+          .map(h => {
+            val matchingValintaRekisteriTieto = yosValintarekisteriTiedot
+              .getOrElse(h.oppijanumero, List.empty)
+              .find(tiedot =>
+                tiedot.hakemusOid.equals(v.hakemusOid) && tiedot.naytettyPaatettavaOikeus.equals(o.opiskeluoikeusAvain)
+              )
             KkPaatettavaOpiskeluoikeus(
               oppijanumero = v.oppijanumero,
               hetu = h.hetu,
@@ -63,8 +72,12 @@ class YosService(
               opiskelijaAvain = o.opiskelijaAvain,
               opiskeluoikeusAvain = o.opiskeluoikeusAvain,
               opiskeluoikeudenNimi = o.opiskeluoikeudenNimi,
-              opiskeluoikeudenPaattymispvm = Some(LocalDate.of(2026, 12, 31)),
+              opiskeluoikeudenPaattymispvm = matchingValintaRekisteriTieto
+                .flatMap(_.paateltyAloitusPvm)
+                .map(aloitusPvm => aloitusPvm.minusDays(1)),
               opiskeluoikeudenViimeisinTila = o.opiskeluoikeudenViimeisinTila,
+              naytettyHakijalle = matchingValintaRekisteriTieto
+                .exists(tieto => tieto.naytettyPaatettavaOikeus.equals(o.opiskeluoikeusAvain)),
               hakemusOid = v.hakemusOid,
               hakuOid = v.hakuOid,
               hakuNimi = v.haunNimi,
@@ -73,10 +86,10 @@ class YosService(
               oppilaitosOid = v.oppilaitosOid,
               oppilaitosNimi = v.oppilaitosNimi,
               vastaanottoAjankohta = v.vastaanottoAjankohta.get,
-              koulutusluokitusKoodit = "12345",
-              uudenOpiskeluoikeudenAlkamispvm = LocalDate.of(2026, 9, 1)
+              koulutusluokitusKoodit = v.koulutusKoodiArvot.orNull,
+              uudenOpiskeluoikeudenAlkamispvm = matchingValintaRekisteriTieto.flatMap(_.paateltyAloitusPvm)
             )
-          )
+          })
       )
       .filter(_.isDefined)
       .map(_.get)
@@ -136,5 +149,21 @@ class YosService(
       s"Löytyi ${yossiinKuuluvatHenkiloOidit.size} kpl henkiloa, joille löytyi ${yossiinKuuluvatHenkilot.size} kpl henkilöä parametreilla $params"
     )
     yossiinKuuluvatHenkilot
+  }
+
+  private def getYosValintarekisteriTiedot(
+    yosHenkilot: List[YosHenkilo]
+  ): Map[String, List[YosValintarekisteriTiedot]] = {
+    if (yosHenkilot.isEmpty) {
+      Map.empty
+    } else {
+      db
+        .run(
+          kkPaatettavatOpiskeluoikeudetRepository.valintarekisteriYosQuery(yosHenkilot.map(_.oppijanumero)),
+          "valintarekisteriYosQuery"
+        )
+        .toList
+        .groupBy(_.henkiloOid)
+    }
   }
 }

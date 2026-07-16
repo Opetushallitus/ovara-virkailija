@@ -14,12 +14,13 @@ case class KkPaatettavaOpiskeluoikeus(
   opiskeluoikeudenViimeisinTila: String,
   opiskelijaAvain: String,
   opiskeluoikeusAvain: String,
+  naytettyHakijalle: Boolean,
   hakemusOid: String,
   hakukohdeNimi: Kielistetty,
   hakukohdeOid: String,
   oppilaitosNimi: Kielistetty,
   oppilaitosOid: String,
-  uudenOpiskeluoikeudenAlkamispvm: LocalDate,
+  uudenOpiskeluoikeudenAlkamispvm: Option[LocalDate],
   vastaanottoAjankohta: LocalDate,
   hakuNimi: Kielistetty,
   hakuOid: String,
@@ -46,7 +47,8 @@ case class KKSitovastiVastaanottanut(
   koulutusasteet: List[String],
   haunNimi: Kielistetty,
   oppilaitosOid: String,
-  oppilaitosNimi: Kielistetty
+  oppilaitosNimi: Kielistetty,
+  koulutusKoodiArvot: Option[String]
 )
 
 case class YosHenkilo(
@@ -56,4 +58,12 @@ case class YosHenkilo(
   hetu: Option[String],
   syntymaAika: Option[LocalDate],
   oppijanumero: String
+)
+
+case class YosValintarekisteriTiedot(
+  henkiloOid: String,
+  hakukohdeOid: String,
+  hakemusOid: String,
+  paateltyAloitusPvm: Option[LocalDate],
+  naytettyPaatettavaOikeus: String
 )

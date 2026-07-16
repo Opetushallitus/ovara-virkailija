@@ -1,6 +1,11 @@
 package fi.oph.ovara.backend.repository
 
-import fi.oph.ovara.backend.domain.{KKPaatettavaOpiskeluoikeusEntity, KKSitovastiVastaanottanut, YosHenkilo}
+import fi.oph.ovara.backend.domain.{
+  KKPaatettavaOpiskeluoikeusEntity,
+  KKSitovastiVastaanottanut,
+  YosHenkilo,
+  YosValintarekisteriTiedot
+}
 import fi.oph.ovara.backend.raportointi.dto.KkPaatettavatOpiskeluoikeudetParams
 import fi.oph.ovara.backend.utils.{ParametriKaannos, RepositoryUtils}
 import org.slf4j.{Logger, LoggerFactory}
@@ -67,11 +72,17 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
           hk.koulutusasteet,
           haku.haku_nimi_fi, haku.haku_nimi_sv, haku.haku_nimi_en,
           org.organisaatio_oid,
-          org.nimi_fi, org.nimi_sv, org.nimi_en
+          org.nimi_fi, org.nimi_sv, org.nimi_en,
+          koulutus_koodi_arvot
         FROM gen.gen_valintarekisteri vr 
         INNER JOIN gen.gen_hakukohde hk ON vr.hakukohde_oid = hk.hakukohde_oid
         INNER JOIN gen.gen_haku haku on haku.haku_oid = hk.haku_oid
         INNER JOIN gen.gen_organisaatio org on org.organisaatio_oid = hk.jarjestyspaikka_oid
+        LEFT JOIN gen.gen_toteutus tot on tot.toteutus_oid = hk.toteutus_oid
+        LEFT JOIN gen.gen_koulutus koul on koul.koulutus_oid = tot.koulutus_oid
+        LEFT JOIN LATERAL jsonb_array_elements_text(koul.koulutukset_koodiuri) as koodiurit ON TRUE
+        LEFT JOIN LATERAL (SELECT koodi.koodiarvo FROM gen.gen_koodi koodi
+			    WHERE koodi.versioitu_koodiuri IN (koodiurit)) as koulutus_koodi_arvot ON TRUE
         WHERE hk.yos IS TRUE
         AND vr.ehdollisesti_hyvaksyttavissa IS FALSE
         AND vr.vastaanotto_tila = 'VASTAANOTTANUT_SITOVASTI' 
@@ -100,6 +111,18 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
           #$sukunimiQueryPart #$etunimetQueryPart #$hetuQueryPart
       """.as[YosHenkilo]
     LOG.debug(s"yosHenkilotQuery: ${query.statements.head}")
+    query
+  }
+
+  def valintarekisteriYosQuery(
+    henkiloOids: List[String]
+  ): SqlStreamingAction[Vector[YosValintarekisteriTiedot], YosValintarekisteriTiedot, Effect] = {
+    val query = sql"""
+        SELECT y.henkilo_oid, y.hakukohde_oid, y.hakemus_oid, y.paatelty_aloituspvm, y.virta_opiskeluikeus_id
+        FROM gen.gen_valintarekisteri_yos y
+        WHERE y.henkilo_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(henkiloOids)})
+         """.as[YosValintarekisteriTiedot]
+    LOG.debug(s"valintarekisteriYosQuery: ${query.statements.head}")
     query
   }
 }

@@ -1,16 +1,26 @@
 package fi.oph.ovara.backend.yos
 
-import fi.oph.ovara.backend.domain.{Fi, KKPaatettavaOpiskeluoikeusEntity, KKSitovastiVastaanottanut, YosHenkilo}
+import fi.oph.ovara.backend.domain.{
+  Fi,
+  KKPaatettavaOpiskeluoikeusEntity,
+  KKSitovastiVastaanottanut,
+  YosHenkilo,
+  YosValintarekisteriTiedot
+}
 
 import java.time.LocalDate
 
 object YosTestUtils {
 
-  def ORG_OID = "1.2.246.562.10.91392558028"
+  def ORG_OID               = "1.2.246.562.10.91392558028"
+  def OPPIJA_OID            = "1.2.246.562.24.55412038042"
+  def HAKUKOHDE_OID         = "1.2.246.562.20.00000000000000039609"
+  def HAKEMUS_OID           = "1.2.246.562.11.00000000000002021955"
+  def OPISKELU_OIKEUS_AVAIN = "virran-oikeus-avain"
 
   def OPISKELUOIKEUS: KKPaatettavaOpiskeluoikeusEntity = KKPaatettavaOpiskeluoikeusEntity(
-    opiskelijaAvain = "1.2.246.562.24.55412038042",
-    opiskeluoikeusAvain = "virran-oikeus-avain",
+    opiskelijaAvain = OPPIJA_OID,
+    opiskeluoikeusAvain = OPISKELU_OIKEUS_AVAIN,
     opiskeluoikeudenNimi = Map(Fi -> "Sateentekijän tutkinto"),
     opiskeluoikeudenViimeisinTila = "2",
     koulutusaste = Some(YosConstants.KOULUTUSASTE_AMK),
@@ -19,16 +29,17 @@ object YosTestUtils {
   )
 
   def VASTAANOTTO: KKSitovastiVastaanottanut = KKSitovastiVastaanottanut(
-    oppijanumero = "1.2.246.562.24.55412038042",
-    hakemusOid = "1.2.246.562.11.00000000000002021955",
-    hakukohdeOid = "1.2.246.562.20.00000000000000039609",
+    oppijanumero = OPPIJA_OID,
+    hakemusOid = HAKEMUS_OID,
+    hakukohdeOid = HAKUKOHDE_OID,
     hakukohdeNimi = Map(Fi -> "Sadetanssijan korkeakoulutus"),
     vastaanottoAjankohta = Some(LocalDate.now()),
     hakuOid = "1.2.246.562.29.00000000000000036122",
     koulutusasteet = List(YosConstants.KOULUTUSASTE_AMK),
     haunNimi = Map(Fi -> "Korkeakoulujen kevään toinen yhteishaku 2026"),
     oppilaitosOid = ORG_OID,
-    oppilaitosNimi = Map(Fi -> "Ratamon korkeakoulu")
+    oppilaitosNimi = Map(Fi -> "Ratamon korkeakoulu"),
+    koulutusKoodiArvot = Some("koulutus_31010")
   )
 
   def HENKILO: YosHenkilo = YosHenkilo(
@@ -37,6 +48,14 @@ object YosTestUtils {
     kutsumanimi = "Ruhtinas",
     hetu = None,
     syntymaAika = Some(LocalDate.of(2000, 1, 1)),
-    oppijanumero = "1.2.246.562.24.55412038042"
+    oppijanumero = OPPIJA_OID
+  )
+
+  def YOS_VALINTAREKISTERI: YosValintarekisteriTiedot = YosValintarekisteriTiedot(
+    henkiloOid = OPPIJA_OID,
+    hakukohdeOid = HAKUKOHDE_OID,
+    hakemusOid = HAKEMUS_OID,
+    paateltyAloitusPvm = Some(LocalDate.of(2026, 7, 15)),
+    naytettyPaatettavaOikeus = OPISKELU_OIKEUS_AVAIN
   )
 }
