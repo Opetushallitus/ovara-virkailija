@@ -167,18 +167,30 @@ trait ExternalKKHakijatTestUtils {
     julkaistavissa: Option[Boolean] = Some(true),
     varasijanNumero: Option[Int] = None,
     prioriteetti: Option[Int] = None,
-    pisteet: Option[BigDecimal] = None
+    pisteet: Option[BigDecimal] = None,
+    ehdollistiHyvaksyttavissa: Option[Boolean] = None,
+    ehdollistiHyvaksyttavissaEhtoFi: Option[String] = None,
+    ehdollistiHyvaksyttavissaEhtoSv: Option[String] = None,
+    ehdollistiHyvaksyttavissaEhtoEn: Option[String] = None
   ): Unit = {
     val hyvaksyttyStr = hyvaksyttyjajulkaistu.map(_.format(SECONDS_TZ_FORMATTER))
     db.run(
       sqlu"""INSERT INTO gen.gen_valintarekisteri (
           hakukohde_oid, valintatapajono_id, hakemus_oid, maksun_tila,
           valinnan_tila, hyvaksyttyjajulkaistu,
-          julkaistavissa, varasijan_numero, prioriteetti, pisteet
+          julkaistavissa, varasijan_numero, prioriteetti, pisteet,
+          ehdollisesti_hyvaksyttavissa,
+          ehdollisen_hyvaksymisen_ehto_fi,
+          ehdollisen_hyvaksymisen_ehto_sv,
+          ehdollisen_hyvaksymisen_ehto_en
         ) VALUES (
           $hakukohdeOid, $valintatapajonoId, $hakemusOid, $maksunTila,
           $valinnanTila, $hyvaksyttyStr,
-          $julkaistavissa, $varasijanNumero, $prioriteetti, ${pisteet.map(_.doubleValue)}
+          $julkaistavissa, $varasijanNumero, $prioriteetti, ${pisteet.map(_.doubleValue)},
+          $ehdollistiHyvaksyttavissa,
+          $ehdollistiHyvaksyttavissaEhtoFi,
+          $ehdollistiHyvaksyttavissaEhtoSv,
+          $ehdollistiHyvaksyttavissaEhtoEn
         )""",
       "Insert test kk-valintarekisteri"
     )
@@ -318,7 +330,11 @@ trait ExternalKKHakijatTestUtils {
               julkaistavissa boolean,
               varasijan_numero integer,
               prioriteetti integer,
-              pisteet double precision
+              pisteet double precision,
+              ehdollisesti_hyvaksyttavissa boolean,
+              ehdollisen_hyvaksymisen_ehto_fi text,
+              ehdollisen_hyvaksymisen_ehto_sv text,
+              ehdollisen_hyvaksymisen_ehto_en text
           );
 
           CREATE TABLE gen.gen_ylioppilas(
