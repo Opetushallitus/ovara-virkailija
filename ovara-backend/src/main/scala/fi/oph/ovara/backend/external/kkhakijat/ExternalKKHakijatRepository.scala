@@ -47,18 +47,6 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
       hakemus.jatetty,
       hakemus.muokattu,
       hlo.aidinkieli,
-      COALESCE(
-        (SELECT true FROM gen.gen_ylioppilas yo
-          INNER JOIN gen.gen_henkilo hlo_alias ON hlo_alias.henkilo_oid = yo.henkilo_oid
-          WHERE hlo_alias.oppijanumero = hlo.oppijanumero
-            AND yo.on_ylioppilas = true
-          LIMIT 1),
-        false) AS on_ylioppilas,
-      (SELECT yo.valmistumis_vuosi FROM gen.gen_ylioppilas yo
-        INNER JOIN gen.gen_henkilo hlo_alias ON hlo_alias.henkilo_oid = yo.henkilo_oid
-        WHERE hlo_alias.oppijanumero = hlo.oppijanumero
-          AND yo.valmistumis_vuosi IS NOT NULL
-        LIMIT 1) AS yo_valmistumis_vuosi,
       (SELECT true FROM gen.gen_supa_tieto st
         WHERE st.hakemus_oid = hakemus.hakemus_oid
           AND st.avain = 'ensikertalainen'
@@ -278,6 +266,28 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
 
     LOG.debug(s"selectKKHakemuksetQuery: ${query.statements.head}")
     db.run(query, "selectKKHakemukset")
+  }
+
+  def selectYlioppilaat(hakemusOids: Set[String]): Seq[YlioppilasRow] = {
+    if (hakemusOids.isEmpty) return Seq.empty
+    // A person may hold multiple gen_henkilo rows sharing the same oppijanumero (master)
+    // but different henkilo_oid (linked aliases). Ylioppilas data may be attached to any
+    // alias, so we resolve through gen_henkilo.oppijanumero before matching. GROUP BY +
+    // BOOL_OR/MAX collapses the fan-out across aliases into one row per hakemus.
+    val query = sql"""
+    SELECT hakemus.hakemus_oid,
+      BOOL_OR(yo.on_ylioppilas)  AS on_ylioppilas,
+      MAX(yo.valmistumis_vuosi)  AS valmistumis_vuosi
+    FROM gen.gen_hakemus hakemus
+    INNER JOIN gen.gen_henkilo hlo_hak   ON hlo_hak.henkilo_oid    = hakemus.henkilo_oid
+    INNER JOIN gen.gen_henkilo hlo_alias ON hlo_alias.oppijanumero = hlo_hak.oppijanumero
+    INNER JOIN gen.gen_ylioppilas yo     ON yo.henkilo_oid = hlo_alias.henkilo_oid
+    WHERE hakemus.hakemus_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(hakemusOids)})
+    GROUP BY hakemus.hakemus_oid
+    """.as[YlioppilasRow]
+
+    LOG.debug(s"selectKKYlioppilaatQuery: ${query.statements.head}")
+    db.run(query, "selectKKYlioppilaat")
   }
 
   private def hakuFilterSqlFragment(
