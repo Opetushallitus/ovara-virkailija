@@ -6848,7 +6848,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         "Loma",
         "opiskelija-avain-1",
         "opiskeluoikeus-avain-1",
-        "raportti.ei",
+        "Nej",
         "1.2.246.562.11.00000000000000000001",
         "Meteorolog, Orkanforskningslinjen",
         "1.2.246.562.20.00000000000000000002",
