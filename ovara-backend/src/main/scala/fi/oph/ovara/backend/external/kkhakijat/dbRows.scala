@@ -74,7 +74,11 @@ case class KKHakemusRow(
   hakukohdeKkId: Option[String],
   valinnanTila: Option[String],
   valinnanAikaleima: Option[OffsetDateTime],
-  pisteet: Option[BigDecimal]
+  pisteet: Option[BigDecimal],
+  ehdollistiHyvaksyttavissa: Option[Boolean],
+  ehtoFI: Option[String],
+  ehtoSV: Option[String],
+  ehtoEN: Option[String]
 ) {
   def asKKHakemus(
     hakuOid: String,
@@ -103,6 +107,15 @@ case class KKHakemusRow(
       julkaisulupa = julkaisulupa,
       lukuvuosimaksu = lukuvuosimaksu,
       hakukohdeKkId = hakukohdeKkId,
-      pisteet = pisteet
+      pisteet = pisteet,
+      hyvaksymisenEhto = ehdollistiHyvaksyttavissa.map(ehd =>
+        HyvaksymisenEhto(
+          ehdollisestiHyvaksyttavissa = ehd,
+          ehtoKoodi = None,
+          ehtoFI = ehtoFI,
+          ehtoSV = ehtoSV,
+          ehtoEN = ehtoEN
+        )
+      )
     )
 }

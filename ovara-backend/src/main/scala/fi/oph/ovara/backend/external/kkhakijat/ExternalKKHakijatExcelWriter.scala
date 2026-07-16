@@ -146,11 +146,10 @@ object ExternalKKHakijatExcelWriter {
     hm.valinnanTila.map(_.name).getOrElse(""),                 // 35
     optStr(hm.valinnanAikaleima),                              // 36
     hm.pisteet.map(_.toString).getOrElse(""),                  // 37
-    hm.hyvaksymisenEhto match {                                // 38
-      case None    => ""
-      case Some(e) =>
-        s"HyvaksymisenEhto(${onlyXBool(e.ehdollisestiHyvaksyttavissa)},${e.ehtoKoodi.getOrElse("")}," +
-          s"${e.ehtoFI.getOrElse("")},${e.ehtoSV.getOrElse("")},${e.ehtoEN.getOrElse("")})"
+    { // 38: always render the 5-field tuple, defaulting missing values to empty strings
+      val e = hm.hyvaksymisenEhto.getOrElse(HyvaksymisenEhto())
+      s"HyvaksymisenEhto(${onlyXBool(e.ehdollisestiHyvaksyttavissa)},${e.ehtoKoodi.getOrElse("")}," +
+        s"${e.ehtoFI.getOrElse("")},${e.ehtoSV.getOrElse("")},${e.ehtoEN.getOrElse("")})"
     },
     optStr(hm.valintatapajononTyyppi),             // 39
     optStr(hm.valintatapajononNimi),               // 40
