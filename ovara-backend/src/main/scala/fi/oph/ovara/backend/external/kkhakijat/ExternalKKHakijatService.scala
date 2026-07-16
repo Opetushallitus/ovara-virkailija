@@ -25,8 +25,10 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository) {
       if (kkHakijaRows.isEmpty) {
         Nil
       } else {
-        val hakemusOids     = kkHakijaRows.map(_.hakemusOid).toSet
-        val hakemusRows     = repository.selectHakemukset(hakemusOids)
+        val hakemusOids          = kkHakijaRows.map(_.hakemusOid).toSet
+        val hakemusRows          = repository.selectHakemukset(hakemusOids)
+        val ylioppilaatByHakemus =
+          repository.selectYlioppilaat(hakemusOids).map(y => y.hakemusOid -> y).toMap
         val hakemuksetByOid = hakemusRows.groupBy(_.hakemusOid)
 
         kkHakijaRows.flatMap { row =>
@@ -47,7 +49,7 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository) {
                 julkaisulupa = row.valintatuloksenJulkaisulupa
               )
             )
-            Some(row.asHakija(hakemukset))
+            Some(row.asHakija(hakemukset, ylioppilaatByHakemus.get(row.hakemusOid)))
           }
         }
       }
