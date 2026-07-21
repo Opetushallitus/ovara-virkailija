@@ -38,7 +38,7 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
       hakemus.sukunimi,
       hakemus.hetu,
       hakemus.asuinmaa,
-      hakemus.kansalaisuus,
+      hlo.kaikki_kansalaisuudet,
       hakemus.kotikunta,
       hakemus.sukupuoli,
       hakemus.asiointikieli,
@@ -48,6 +48,8 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
       hakemus.muokattu,
       hlo.aidinkieli,
       hlo.syntymaaika,
+      hlo.kansalaisuus,
+      hlo.turvakielto,
       (SELECT true FROM gen.gen_supa_tieto st
         WHERE st.hakemus_oid = hakemus.hakemus_oid
           AND st.avain = 'ensikertalainen'

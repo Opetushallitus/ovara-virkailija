@@ -26,6 +26,8 @@ case class KKHakijaRow(
   muokattu: Option[OffsetDateTime],
   aidinkieli: Option[String],
   syntymaaika: Option[LocalDate],
+  kansalaisuus: Option[String],
+  turvakielto: Option[Boolean],
   ensikertalainen: Option[Boolean],
   vuosi: Option[Int],
   kausi: Option[String]
@@ -50,7 +52,9 @@ case class KKHakijaRow(
         case Some(0) => "9"
         case Some(n) => n.toString
       },
+      kansalaisuus = kansalaisuus,
       kansalaisuudet = if (kansalaisuudet.isEmpty) None else Some(kansalaisuudet.toList),
+      turvakielto = turvakielto.getOrElse(false),
       matkapuhelin = Option(puhelin).filter(_.nonEmpty),
       sahkoposti = Option(sahkoposti).filter(_.nonEmpty),
       koulutusmarkkinointilupa = koulutusmarkkinointilupa,
