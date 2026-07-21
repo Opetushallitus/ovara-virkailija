@@ -683,6 +683,30 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       .andExpect(jsonPath("$.hakijat[0].asiointikieli").value(""))
   }
 
+  // ---- Syntymäaika ----
+
+  @Test
+  def syntymaaikaPopulatedFromHenkilo(): Unit = {
+    initSchema()
+    insertHenkilo(syntymaaika = Some(SYNTYMAAIKA))
+    insertHakemus(insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].syntymaaika").value(SYNTYMAAIKA_STR))
+  }
+
+  @Test
+  def syntymaaikaNullWhenColumnNull(): Unit = {
+    seedMinimalHakija() // insertHenkilo default syntymaaika = None
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].syntymaaika").value(nullValue()))
+  }
+
   // ---- Ylioppilas ----
 
   @Test
@@ -881,7 +905,8 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
   @Test
   def excelHasFullColumnCoverageForPopulatedHakija(): Unit = {
     initSchema()
-    insertHakemus(asiointikieli = Some(1)) // → cell 18 = "1"
+    insertHenkilo(syntymaaika = Some(SYNTYMAAIKA))                // → cell 1 = SYNTYMAAIKA_STR
+    insertHakemus(insertHenkilo = false, asiointikieli = Some(1)) // → cell 18 = "1"
     insertHakukohde()
     insertHakutoive()
     insertValintarekisteri(
@@ -906,6 +931,7 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       val dataRow       = sheet.getRow(1)
       val expectedCells = Map(
         0  -> HETU,
+        1  -> SYNTYMAAIKA_STR,
         2  -> OPPIJANUMERO,
         3  -> SUKUNIMI,
         4  -> ETUNIMET,
@@ -950,8 +976,8 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
           s"cell $idx expected [$value] but was [${dataRow.getCell(idx).getStringCellValue}]"
         )
       }
-      // deferred fields: cells 1, 12, 19, 34, 39, 40, 45-59 stay ""
-      Seq(1, 12, 19, 34, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
+      // deferred fields: cells 12, 19, 34, 39, 40, 45-59 stay ""
+      Seq(12, 19, 34, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
         .foreach { idx =>
           assert(
             dataRow.getCell(idx).getStringCellValue == "",

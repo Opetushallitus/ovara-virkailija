@@ -25,6 +25,9 @@ object ExternalKKHakijatTestData {
   val AIDINKIELI_RAW = "fi"
   val AIDINKIELI     = "FI"
 
+  val SYNTYMAAIKA     = java.time.LocalDate.parse("2005-04-15")
+  val SYNTYMAAIKA_STR = "2005-04-15"
+
   val KOULUTUKSEN_ALKAMISVUOSI    = 2026
   val VUOSI                       = 2026
   val KOULUTUKSEN_ALKAMISKAUSIURI = "kausi_s#1"
