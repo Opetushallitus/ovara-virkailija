@@ -23,11 +23,17 @@ trait ExternalKKHakijatTestUtils {
   def insertHenkilo(
     oppijanumero: String = OPPIJANUMERO,
     aidinkieli: Option[String] = Some(AIDINKIELI_RAW),
-    syntymaaika: Option[java.time.LocalDate] = None
+    syntymaaika: Option[java.time.LocalDate] = None,
+    kaikkiKansalaisuudet: Option[String] = Some(KANSALAISUUS_JSON),
+    kansalaisuus: Option[String] = Some(SUOMI_KOODI),
+    turvakielto: Option[Boolean] = Some(false)
   ): Unit = {
     val syntymaaikaStr = syntymaaika.map(_.toString)
     db.run(
-      sqlu"""INSERT INTO gen.gen_henkilo VALUES ($oppijanumero, $oppijanumero, $aidinkieli, $syntymaaikaStr)""",
+      sqlu"""INSERT INTO gen.gen_henkilo VALUES (
+          $oppijanumero, $oppijanumero, $aidinkieli, $syntymaaikaStr,
+          $kaikkiKansalaisuudet, $kansalaisuus, $turvakielto
+        )""",
       "Insert test kk-henkilö"
     )
   }
@@ -35,7 +41,7 @@ trait ExternalKKHakijatTestUtils {
   /** Insert an additional gen_henkilo row that links `henkiloOid` to the same master `oppijanumero`. */
   def insertHenkiloAlias(oppijanumero: String, henkiloOid: String): Unit = {
     db.run(
-      sqlu"""INSERT INTO gen.gen_henkilo VALUES ($oppijanumero, $henkiloOid, NULL, NULL)""",
+      sqlu"""INSERT INTO gen.gen_henkilo VALUES ($oppijanumero, $henkiloOid, NULL, NULL, NULL, NULL, NULL)""",
       "Insert test kk-henkilö alias"
     )
   }
@@ -276,10 +282,13 @@ trait ExternalKKHakijatTestUtils {
           );
 
           CREATE TABLE gen.gen_henkilo (
-              oppijanumero text NOT NULL,
-              henkilo_oid  text NOT NULL PRIMARY KEY,
-              aidinkieli   text,
-              syntymaaika  date
+              oppijanumero          text NOT NULL,
+              henkilo_oid           text NOT NULL PRIMARY KEY,
+              aidinkieli            text,
+              syntymaaika           date,
+              kaikki_kansalaisuudet jsonb,
+              kansalaisuus          text,
+              turvakielto           boolean
           );
 
           CREATE TABLE gen.gen_haku (
