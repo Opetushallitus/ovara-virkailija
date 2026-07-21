@@ -32,6 +32,8 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
     val muokattu                    = getOffsetDateTime(r)
     val aidinkieli                  = normalizeKieliCode(r.nextStringOption())
     val syntymaaika                 = r.nextStringOption().flatMap(s => Try(java.time.LocalDate.parse(s)).toOption)
+    val kansalaisuus                = r.nextStringOption()
+    val turvakielto                 = r.nextBooleanOption()
     val ensikertalainen             = r.nextBooleanOption()
     val hakukohdeVuosi              = r.nextIntOption()
     val hakukohdeKausi              = r.nextStringOption()
@@ -70,6 +72,8 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       muokattu = muokattu,
       aidinkieli = aidinkieli,
       syntymaaika = syntymaaika,
+      kansalaisuus = kansalaisuus,
+      turvakielto = turvakielto,
       ensikertalainen = ensikertalainen,
       vuosi = vuosi,
       kausi = normalizeKausi(rawKausi)

@@ -707,6 +707,85 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       .andExpect(jsonPath("$.hakijat[0].syntymaaika").value(nullValue()))
   }
 
+  // ---- Kansalaisuus / kansalaisuudet / turvakielto (gen_henkilo-sourced) ----
+
+  @Test
+  def kansalaisuusPopulatedFromHenkilo(): Unit = {
+    seedMinimalHakija() // insertHenkilo default kansalaisuus = Some("246")
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuus").value(SUOMI_KOODI))
+  }
+
+  @Test
+  def kansalaisuusNullWhenColumnNull(): Unit = {
+    initSchema()
+    insertHenkilo(kansalaisuus = None)
+    insertHakemus(insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuus").value(nullValue()))
+  }
+
+  @Test
+  def kansalaisuudetSourcedFromHenkilo(): Unit = {
+    initSchema()
+    insertHenkilo(kaikkiKansalaisuudet = Some("""["246", "643"]"""))
+    insertHakemus(insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet", hasSize[Any](2)))
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet[0]").value("246"))
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet[1]").value("643"))
+  }
+
+  @Test
+  def kansalaisuudetIgnoresHakemusColumn(): Unit = {
+    initSchema()
+    insertHenkilo(kaikkiKansalaisuudet = Some("""["246"]"""))
+    insertHakemus(insertHenkilo = false, kansalaisuusJson = Some("""["999"]"""))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet[0]").value("246"))
+  }
+
+  @Test
+  def turvakieltoTrueWhenColumnTrue(): Unit = {
+    initSchema()
+    insertHenkilo(turvakielto = Some(true))
+    insertHakemus(insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].turvakielto").value(true))
+  }
+
+  @Test
+  def turvakieltoDefaultsFalseWhenNull(): Unit = {
+    initSchema()
+    insertHenkilo(turvakielto = None)
+    insertHakemus(insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].turvakielto").value(false))
+  }
+
   // ---- Ylioppilas ----
 
   @Test
