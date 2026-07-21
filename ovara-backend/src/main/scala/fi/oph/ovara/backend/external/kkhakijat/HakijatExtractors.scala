@@ -94,6 +94,11 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       ilmoittautumisenTila = r.nextStringOption(),
       lukuvuosimaksu = r.nextStringOption(),
       hakukohdeKkId = r.nextStringOption(),
+      koulutusOid = r.nextStringOption(),
+      koulutusKoodit = extractArray(r.nextStringOption()).flatMap(parseKoulutusKoodi),
+      johtaaTutkintoon = r.nextBooleanOption(),
+      toteutusAlkamisvuosi = r.nextIntOption(),
+      toteutusAlkamiskausi = normalizeKausi(r.nextStringOption()),
       valinnanTila = r.nextStringOption(),
       valinnanAikaleima = getOffsetDateTime(r),
       pisteet = r.nextBigDecimalOption(),
@@ -121,6 +126,14 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
 
   private def normalizeKausi(opt: Option[String]): Option[String] =
     opt.collect { case KausiPattern(arvo) => arvo.toUpperCase }
+
+  private val KoulutusKoodiPattern = """koulutus_(\d+)(?:#\d+)?""".r
+
+  private def parseKoulutusKoodi(raw: String): Option[String] =
+    raw match {
+      case KoulutusKoodiPattern(digits) => Some(digits)
+      case _                            => None
+    }
 
   private def pickVuosiKausiAtomically(
     candidates: (Option[Int], Option[String])*

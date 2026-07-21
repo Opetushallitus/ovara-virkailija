@@ -186,7 +186,7 @@ object ExternalKKHakijatExcelWriter {
     ks.lift(idx) match {
       case None    => ""
       case Some(k) =>
-        s"(${k.komoOid},${k.koulutusKoodi.getOrElse("")},${k.kkKoulutusId.getOrElse("")}," +
+        s"Koulutus(${k.komoOid},${k.koulutusKoodi.getOrElse("")},${k.kkKoulutusId.getOrElse("")}," +
           s"${k.koulutuksenAlkamisvuosi.map(_.toString).getOrElse("")}," +
           s"${k.koulutuksenAlkamiskausi.getOrElse("")}," +
           s"${k.johtaaTutkintoon.map(_.toString).getOrElse("")})"
