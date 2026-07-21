@@ -83,6 +83,11 @@ case class KKHakemusRow(
   ilmoittautumisenTila: Option[String],
   lukuvuosimaksu: Option[String],
   hakukohdeKkId: Option[String],
+  koulutusOid: Option[String],
+  koulutusKoodit: Seq[String],
+  johtaaTutkintoon: Option[Boolean],
+  toteutusAlkamisvuosi: Option[Int],
+  toteutusAlkamiskausi: Option[String],
   valinnanTila: Option[String],
   valinnanAikaleima: Option[OffsetDateTime],
   pisteet: Option[BigDecimal],
@@ -129,6 +134,20 @@ case class KKHakemusRow(
           ehtoSV = ehtoSV,
           ehtoEN = ehtoEN
         )
-      )
+      ),
+      hakukohteenKoulutukset = koulutusOid.toSeq.flatMap { oid =>
+        val koodit: Seq[Option[String]] =
+          if (koulutusKoodit.isEmpty) Seq(None) else koulutusKoodit.map(Some(_))
+        koodit.map(koodi =>
+          KkHakukohteenkoulutus(
+            komoOid = oid,
+            koulutusKoodi = koodi,
+            kkKoulutusId = hakukohdeKkId,
+            koulutuksenAlkamisvuosi = toteutusAlkamisvuosi,
+            koulutuksenAlkamiskausi = toteutusAlkamiskausi,
+            johtaaTutkintoon = johtaaTutkintoon
+          )
+        )
+      }
     )
 }
