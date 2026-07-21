@@ -117,6 +117,11 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
           AND vr.maksun_tila <> ''
         LIMIT 1) AS lukuvuosimaksu,
       k.ulkoinen_tunniste AS hakukohde_kk_id,
+      k.koulutus_oid,
+      k.koulutukset_koodiuri,
+      k.johtaa_tutkintoon,
+      t.koulutuksen_alkamisvuosi AS koulutus_alkamisvuosi,
+      t.koulutuksen_alkamiskausiuri AS koulutus_alkamiskausi_uri,
       (SELECT vr.valinnan_tila FROM gen.gen_valintarekisteri vr
         WHERE vr.hakemus_oid   = ht.hakemus_oid
           AND vr.hakukohde_oid = ht.hakukohde_oid
