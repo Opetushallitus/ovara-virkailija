@@ -46,6 +46,7 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository) {
                 hakemusJattoAikaleima = row.jatetty.map(_.format(AikaleimaFormatter)),
                 hakemusViimeinenMuokkausAikaleima = row.muokattu.map(_.format(AikaleimaFormatter)),
                 valinnanAikaleima = mRow.valinnanAikaleima.map(_.format(AikaleimaFormatter)),
+                pohjakoulutus = row.pohjakoulutus,
                 julkaisulupa = row.valintatuloksenJulkaisulupa
               )
             )
