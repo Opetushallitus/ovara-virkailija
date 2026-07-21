@@ -224,10 +224,14 @@ trait ExternalKKHakijatTestUtils {
 
   def insertKoulutus(
     koulutusOid: String = KOULUTUS_OID,
-    ulkoinenTunniste: Option[String] = None
+    ulkoinenTunniste: Option[String] = None,
+    koulutuksetKoodiuri: Option[String] = None,
+    johtaaTutkintoon: Option[Boolean] = None
   ): Unit = {
     db.run(
-      sqlu"""INSERT INTO gen.gen_koulutus VALUES($koulutusOid, $ulkoinenTunniste)""",
+      sqlu"""INSERT INTO gen.gen_koulutus VALUES(
+          $koulutusOid, $ulkoinenTunniste, $koulutuksetKoodiuri, $johtaaTutkintoon
+        )""",
       "Insert test kk-koulutus"
     )
   }
@@ -332,7 +336,9 @@ trait ExternalKKHakijatTestUtils {
 
           CREATE TABLE gen.gen_koulutus(
               koulutus_oid text NOT NULL PRIMARY KEY,
-              ulkoinen_tunniste text
+              ulkoinen_tunniste text,
+              koulutukset_koodiuri jsonb,
+              johtaa_tutkintoon boolean
           );
 
           CREATE TABLE gen.gen_valintarekisteri(

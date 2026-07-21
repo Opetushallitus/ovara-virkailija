@@ -689,6 +689,103 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pohjakoulutus").isEmpty)
   }
 
+  // ---- HakukohteenKoulutukset ----
+
+  @Test
+  def hakukohteenKoulutuksetSingleKoodi(): Unit = {
+    seedMinimalHakija()
+    insertToteutus(koulutuksenAlkamisvuosi = Some(2026), koulutuksenAlkamiskausiuri = Some("kausi_s#1"))
+    insertKoulutus(
+      ulkoinenTunniste = Some("672301"),
+      koulutuksetKoodiuri = Some("""["koulutus_331101#12"]"""),
+      johtaaTutkintoon = Some(true)
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].komoOid").value(KOULUTUS_OID))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutusKoodi").value("331101"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].kkKoulutusId").value("672301"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutuksenAlkamisvuosi").value(2026))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutuksenAlkamiskausi").value("S"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].johtaaTutkintoon").value(true))
+  }
+
+  @Test
+  def hakukohteenKoulutuksetMultipleKoodit(): Unit = {
+    seedMinimalHakija()
+    insertToteutus(koulutuksenAlkamisvuosi = Some(2026), koulutuksenAlkamiskausiuri = Some("kausi_s#1"))
+    insertKoulutus(
+      ulkoinenTunniste = Some("672301"),
+      koulutuksetKoodiuri = Some("""["koulutus_331101#12", "koulutus_671101#5"]"""),
+      johtaaTutkintoon = Some(true)
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset", hasSize[Any](2)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutusKoodi").value("331101"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[1].koulutusKoodi").value("671101"))
+      // Shared sub-fields
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].komoOid").value(KOULUTUS_OID))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[1].komoOid").value(KOULUTUS_OID))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].kkKoulutusId").value("672301"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[1].kkKoulutusId").value("672301"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutuksenAlkamisvuosi").value(2026))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[1].koulutuksenAlkamisvuosi").value(2026))
+  }
+
+  @Test
+  def hakukohteenKoulutuksetEmptyWhenNoKoulutusRow(): Unit = {
+    seedMinimalHakija() // no toteutus / koulutus rows
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset").isEmpty)
+  }
+
+  @Test
+  def hakukohteenKoulutuksetOneTupleWithoutKoodiWhenKoodiuriEmpty(): Unit = {
+    seedMinimalHakija()
+    insertToteutus(koulutuksenAlkamisvuosi = Some(2026), koulutuksenAlkamiskausiuri = Some("kausi_s#1"))
+    insertKoulutus(
+      ulkoinenTunniste = Some("672301"),
+      koulutuksetKoodiuri = None,
+      johtaaTutkintoon = Some(true)
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].komoOid").value(KOULUTUS_OID))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutusKoodi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].kkKoulutusId").value("672301"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutuksenAlkamisvuosi").value(2026))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutuksenAlkamiskausi").value("S"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].johtaaTutkintoon").value(true))
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "kausi_s#1, S",
+      "kausi_k#2, K"
+    )
+  )
+  def hakukohteenKoulutuksetKausiParsesToUppercaseLetter(kausiUri: String, expected: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    seedMinimalHakija()
+    insertToteutus(koulutuksenAlkamiskausiuri = Some(kausiUri))
+    insertKoulutus(koulutuksetKoodiuri = Some("""["koulutus_331101#12"]"""))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(
+        jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutuksenAlkamiskausi").value(expected)
+      )
+  }
+
   // ---- Asiointikieli ----
 
   @ParameterizedTest
@@ -1042,8 +1139,12 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
     ) // → cell 14 = "MAKSETTU", cell 35 = VALINTATIETO, cell 36 = TS_HYVAKSYTTY, cell 37 = "82.5", cell 38 = HyvaksymisenEhto(...)
     insertYlioppilas(onYlioppilas = true, valmistumisVuosi = Some(2024)) // → cell 21 = "X", cell 22 = "2024"
     insertSupaTieto(avain = "ensikertalainen", arvo = Some("true"))      // → cell 23 = "X"
-    insertToteutus()
-    insertKoulutus(ulkoinenTunniste = Some("TKID-1")) // → cell 32 = "TKID-1"
+    insertToteutus(koulutuksenAlkamisvuosi = Some(2026), koulutuksenAlkamiskausiuri = Some("kausi_s#1"))
+    insertKoulutus(
+      ulkoinenTunniste = Some("TKID-1"),
+      koulutuksetKoodiuri = Some("""["koulutus_331101#12"]"""),
+      johtaaTutkintoon = Some(true)
+    ) // → cell 32 = "TKID-1", cell 48 = Koulutus(...)
 
     val result   = getExcel().andExpect(status.isOk).andReturn()
     val workbook = new XSSFWorkbook(new ByteArrayInputStream(result.getResponse.getContentAsByteArray))
@@ -1090,7 +1191,8 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
         41 -> VASTAANOTTOTIETO,
         42 -> ILMOITTAUTUMISEN_TILA,
         43 -> "pohjakoulutus_yo,pohjakoulutus_kk",
-        44 -> "X"
+        44 -> "X",
+        48 -> s"Koulutus($KOULUTUS_OID,331101,TKID-1,2026,S,true)"
       )
       expectedCells.foreach { case (idx, value) =>
         assert(
@@ -1099,13 +1201,38 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
         )
       }
       // deferred fields: cells 12, 19, 34, 39, 40, 45-59 stay ""
-      Seq(12, 19, 34, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
+      Seq(12, 19, 34, 39, 40, 45, 46, 47, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
         .foreach { idx =>
           assert(
             dataRow.getCell(idx).getStringCellValue == "",
             s"deferred cell $idx expected empty but was [${dataRow.getCell(idx).getStringCellValue}]"
           )
         }
+    } finally workbook.close()
+  }
+
+  @Test
+  def excelHasMultipleKoulutuksesInCells48And49(): Unit = {
+    seedMinimalHakija()
+    insertToteutus(koulutuksenAlkamisvuosi = Some(2026), koulutuksenAlkamiskausiuri = Some("kausi_s#1"))
+    insertKoulutus(
+      ulkoinenTunniste = Some("TKID-1"),
+      koulutuksetKoodiuri = Some("""["koulutus_331101#12", "koulutus_671101#5"]"""),
+      johtaaTutkintoon = Some(true)
+    )
+
+    val bytes    = getExcel().andExpect(status.isOk).andReturn().getResponse.getContentAsByteArray
+    val workbook = new XSSFWorkbook(new ByteArrayInputStream(bytes))
+    try {
+      val dataRow = workbook.getSheetAt(0).getRow(1)
+      assert(dataRow.getCell(48).getStringCellValue == s"Koulutus($KOULUTUS_OID,331101,TKID-1,2026,S,true)")
+      assert(dataRow.getCell(49).getStringCellValue == s"Koulutus($KOULUTUS_OID,671101,TKID-1,2026,S,true)")
+      Seq(50, 51, 52, 53).foreach { idx =>
+        assert(
+          dataRow.getCell(idx).getStringCellValue == "",
+          s"cell $idx expected empty but was [${dataRow.getCell(idx).getStringCellValue}]"
+        )
+      }
     } finally workbook.close()
   }
 
