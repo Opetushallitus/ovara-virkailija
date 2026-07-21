@@ -22,10 +22,12 @@ trait ExternalKKHakijatTestUtils {
 
   def insertHenkilo(
     oppijanumero: String = OPPIJANUMERO,
-    aidinkieli: Option[String] = Some(AIDINKIELI_RAW)
+    aidinkieli: Option[String] = Some(AIDINKIELI_RAW),
+    syntymaaika: Option[java.time.LocalDate] = None
   ): Unit = {
+    val syntymaaikaStr = syntymaaika.map(_.toString)
     db.run(
-      sqlu"""INSERT INTO gen.gen_henkilo VALUES ($oppijanumero, $oppijanumero, $aidinkieli)""",
+      sqlu"""INSERT INTO gen.gen_henkilo VALUES ($oppijanumero, $oppijanumero, $aidinkieli, $syntymaaikaStr)""",
       "Insert test kk-henkilö"
     )
   }
@@ -33,7 +35,7 @@ trait ExternalKKHakijatTestUtils {
   /** Insert an additional gen_henkilo row that links `henkiloOid` to the same master `oppijanumero`. */
   def insertHenkiloAlias(oppijanumero: String, henkiloOid: String): Unit = {
     db.run(
-      sqlu"""INSERT INTO gen.gen_henkilo VALUES ($oppijanumero, $henkiloOid, NULL)""",
+      sqlu"""INSERT INTO gen.gen_henkilo VALUES ($oppijanumero, $henkiloOid, NULL, NULL)""",
       "Insert test kk-henkilö alias"
     )
   }
@@ -276,7 +278,8 @@ trait ExternalKKHakijatTestUtils {
           CREATE TABLE gen.gen_henkilo (
               oppijanumero text NOT NULL,
               henkilo_oid  text NOT NULL PRIMARY KEY,
-              aidinkieli   text
+              aidinkieli   text,
+              syntymaaika  date
           );
 
           CREATE TABLE gen.gen_haku (

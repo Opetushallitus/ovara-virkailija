@@ -47,6 +47,7 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
       hakemus.jatetty,
       hakemus.muokattu,
       hlo.aidinkieli,
+      hlo.syntymaaika,
       (SELECT true FROM gen.gen_supa_tieto st
         WHERE st.hakemus_oid = hakemus.hakemus_oid
           AND st.avain = 'ensikertalainen'
