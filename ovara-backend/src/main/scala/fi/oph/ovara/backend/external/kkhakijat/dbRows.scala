@@ -24,6 +24,7 @@ case class KKHakijaRow(
   valintatuloksenJulkaisulupa: Option[Boolean],
   jatetty: Option[OffsetDateTime],
   muokattu: Option[OffsetDateTime],
+  pohjakoulutus: Seq[String],
   aidinkieli: Option[String],
   syntymaaika: Option[LocalDate],
   kansalaisuus: Option[String],
@@ -98,6 +99,7 @@ case class KKHakemusRow(
     hakemusJattoAikaleima: Option[String],
     hakemusViimeinenMuokkausAikaleima: Option[String],
     valinnanAikaleima: Option[String],
+    pohjakoulutus: Seq[String],
     julkaisulupa: Option[Boolean]
   ): KKHakutoive =
     KKHakutoive(
@@ -114,6 +116,7 @@ case class KKHakemusRow(
       valinnanTila = valinnanTila.flatMap(Valintatila.parse),
       vastaanottotieto = vastaanottotieto.flatMap(Vastaanottotila.parse),
       ilmoittautumiset = ilmoittautumisenTila.flatMap(Lasnaolo.parse).toSeq,
+      pohjakoulutus = pohjakoulutus,
       julkaisulupa = julkaisulupa,
       lukuvuosimaksu = lukuvuosimaksu,
       hakukohdeKkId = hakukohdeKkId,
