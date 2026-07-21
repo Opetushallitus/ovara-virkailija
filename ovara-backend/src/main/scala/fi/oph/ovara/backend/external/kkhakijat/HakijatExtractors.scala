@@ -5,6 +5,8 @@ import fi.oph.ovara.backend.utils.ExtractorUtils.extractArray
 import fi.oph.ovara.backend.utils.GenericOvaraJsonFormats
 import slick.jdbc.GetResult
 
+import scala.util.Try
+
 class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
   implicit val getKKHakijaRow: GetResult[KKHakijaRow] = GetResult { r =>
     val oppijanumero                = r.nextString()
@@ -29,6 +31,7 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
     val jatetty                     = getOffsetDateTime(r)
     val muokattu                    = getOffsetDateTime(r)
     val aidinkieli                  = normalizeKieliCode(r.nextStringOption())
+    val syntymaaika                 = r.nextStringOption().flatMap(s => Try(java.time.LocalDate.parse(s)).toOption)
     val ensikertalainen             = r.nextBooleanOption()
     val hakukohdeVuosi              = r.nextIntOption()
     val hakukohdeKausi              = r.nextStringOption()
@@ -66,6 +69,7 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       jatetty = jatetty,
       muokattu = muokattu,
       aidinkieli = aidinkieli,
+      syntymaaika = syntymaaika,
       ensikertalainen = ensikertalainen,
       vuosi = vuosi,
       kausi = normalizeKausi(rawKausi)

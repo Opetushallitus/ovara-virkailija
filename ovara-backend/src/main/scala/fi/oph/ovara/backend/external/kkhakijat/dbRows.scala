@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.external.kkhakijat
 
-import java.time.OffsetDateTime
+import java.time.{LocalDate, OffsetDateTime}
 
 case class KKHakijaRow(
   oppijanumero: String,
@@ -25,6 +25,7 @@ case class KKHakijaRow(
   jatetty: Option[OffsetDateTime],
   muokattu: Option[OffsetDateTime],
   aidinkieli: Option[String],
+  syntymaaika: Option[LocalDate],
   ensikertalainen: Option[Boolean],
   vuosi: Option[Int],
   kausi: Option[String]
@@ -43,6 +44,7 @@ case class KKHakijaRow(
       kotikunta = kotikunta.getOrElse(""),
       sukupuoli = sukupuoli.map(_.toString).getOrElse(""),
       aidinkieli = aidinkieli.getOrElse(""),
+      syntymaaika = syntymaaika.map(_.toString),
       asiointikieli = asiointikieli match {
         case None    => ""
         case Some(0) => "9"
