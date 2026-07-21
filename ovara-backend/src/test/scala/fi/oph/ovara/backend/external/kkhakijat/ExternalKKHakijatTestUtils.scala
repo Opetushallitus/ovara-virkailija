@@ -108,7 +108,8 @@ trait ExternalKKHakijatTestUtils {
     sahkoinenviestintalupa: Option[Boolean] = Some(SAHKOINENVIESTINTALUPA),
     valintatuloksenJulkaisulupa: Option[Boolean] = Some(VALINTATULOKSEN_JULKAISULUPA),
     jatetty: Option[java.time.OffsetDateTime] = Some(JATETTY),
-    muokattu: Option[java.time.OffsetDateTime] = Some(MUOKATTU)
+    muokattu: Option[java.time.OffsetDateTime] = Some(MUOKATTU),
+    pohjakoulutusKk: Option[String] = None
   ): Unit = {
     if (insertHenkilo) this.insertHenkilo(oppijanumero)
     if (insertHaku) this.insertHaku(hakuOid)
@@ -140,7 +141,8 @@ trait ExternalKKHakijatTestUtils {
           $sahkoinenviestintalupa,
           $valintatuloksenJulkaisulupa,
           $jatettyStr,
-          $muokattuStr)""",
+          $muokattuStr,
+          $pohjakoulutusKk)""",
       "Insert test kk-hakemus"
     )
   }
@@ -278,7 +280,8 @@ trait ExternalKKHakijatTestUtils {
               sahkoinenviestintalupa         boolean,
               valintatuloksen_julkaisulupa   boolean,
               jatetty                        timestamp with time zone,
-              muokattu                       timestamp with time zone
+              muokattu                       timestamp with time zone,
+              pohjakoulutus_kk               jsonb
           );
 
           CREATE TABLE gen.gen_henkilo (

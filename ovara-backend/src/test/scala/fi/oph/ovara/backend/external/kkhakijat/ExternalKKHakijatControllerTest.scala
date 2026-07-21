@@ -651,6 +651,44 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(90))
   }
 
+  // ---- Pohjakoulutus ----
+
+  @Test
+  def pohjakoulutusPopulatedFromHakemus(): Unit = {
+    initSchema()
+    insertHakemus(pohjakoulutusKk = Some("""["pohjakoulutus_yo"]"""))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pohjakoulutus", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pohjakoulutus[0]").value("pohjakoulutus_yo"))
+  }
+
+  @Test
+  def pohjakoulutusMultipleValuesPreserveOrder(): Unit = {
+    initSchema()
+    insertHakemus(pohjakoulutusKk = Some("""["pohjakoulutus_yo", "pohjakoulutus_kk"]"""))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pohjakoulutus", hasSize[Any](2)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pohjakoulutus[0]").value("pohjakoulutus_yo"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pohjakoulutus[1]").value("pohjakoulutus_kk"))
+  }
+
+  @Test
+  def pohjakoulutusEmptyWhenColumnNull(): Unit = {
+    seedMinimalHakija() // insertHakemus default pohjakoulutusKk = None
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pohjakoulutus").isEmpty)
+  }
+
   // ---- Asiointikieli ----
 
   @ParameterizedTest
@@ -984,8 +1022,12 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
   @Test
   def excelHasFullColumnCoverageForPopulatedHakija(): Unit = {
     initSchema()
-    insertHenkilo(syntymaaika = Some(SYNTYMAAIKA))                // → cell 1 = SYNTYMAAIKA_STR
-    insertHakemus(insertHenkilo = false, asiointikieli = Some(1)) // → cell 18 = "1"
+    insertHenkilo(syntymaaika = Some(SYNTYMAAIKA)) // → cell 1 = SYNTYMAAIKA_STR
+    insertHakemus(
+      insertHenkilo = false,
+      asiointikieli = Some(1),
+      pohjakoulutusKk = Some("""["pohjakoulutus_yo", "pohjakoulutus_kk"]""")
+    ) // → cell 18 = "1", cell 43 = "pohjakoulutus_yo,pohjakoulutus_kk"
     insertHakukohde()
     insertHakutoive()
     insertValintarekisteri(
@@ -1047,6 +1089,7 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
         38 -> "HyvaksymisenEhto(X,,Ehto FI,Ehto SV,Ehto EN)",
         41 -> VASTAANOTTOTIETO,
         42 -> ILMOITTAUTUMISEN_TILA,
+        43 -> "pohjakoulutus_yo,pohjakoulutus_kk",
         44 -> "X"
       )
       expectedCells.foreach { case (idx, value) =>
