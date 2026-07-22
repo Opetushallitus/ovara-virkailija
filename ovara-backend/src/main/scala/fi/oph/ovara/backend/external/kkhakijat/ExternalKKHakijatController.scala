@@ -4,7 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import fi.oph.ovara.backend.opiskelijavalintatieto.ValidationError
 import fi.oph.ovara.backend.service.UserService
 import fi.oph.ovara.backend.utils.ParameterValidator.{validateOid, validateOrganisaatioOid}
-import fi.oph.ovara.backend.utils.{ApiException, AuditLog, AuditLogObj, AuditOperation, ControllerUtils}
+import fi.oph.ovara.backend.utils.{
+  ApiException,
+  AuditLog,
+  AuditLogObj,
+  AuditOperation,
+  AuthoritiesUtil,
+  Constants,
+  ControllerUtils
+}
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.{Content, Schema}
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -41,15 +49,30 @@ class ExternalKKHakijatController(
     "valintarajaus"   -> valintarajaus
   )
 
-  // KK first slice: only OPH_PAAKAYTTAJA can access.
-  private def isAuthorized: Boolean =
-    userService.getAuthorities.contains(fi.oph.ovara.backend.utils.Constants.OPH_PAAKAYTTAJA_AUTHORITY)
+  // OPH_PAAKAYTTAJA and users with at least one KK_HAKENEET_<oid> authority both qualify for the endpoint.
+  private def isAuthorized: Boolean = {
+    val authorities = userService.getAuthorities
+    authorities.contains(Constants.OPH_PAAKAYTTAJA_AUTHORITY) ||
+    authorities.exists(_.startsWith(Constants.KK_HAKENEET_AUTHORITY_PREFIX))
+  }
 
   private def requireAuthorized[T](f: => T): T =
     if (isAuthorized) f
     else throw org.springframework.web.server.ResponseStatusException(HttpStatus.FORBIDDEN)
 
-  private def resolveKayttooikeusScope: KayttooikeusScope = KayttooikeusScope.paakayttaja
+  private def resolveKayttooikeusScope: KayttooikeusScope = {
+    val authorities = userService.getAuthorities
+    if (AuthoritiesUtil.hasOPHPaakayttajaRights(AuthoritiesUtil.getKayttooikeusOids(authorities))) {
+      KayttooikeusScope.paakayttaja
+    } else {
+      // KK_HAKENEET is org-scoped: only OIDs suffixed onto KK_HAKENEET_ authorities count for
+      // this endpoint. OIDs granted through 2ASTE / HAKENEET / other ovara roles are NOT merged in.
+      val kkHakeneetOrgOids = AuthoritiesUtil.getKayttooikeusOids(
+        authorities.filter(_.startsWith(Constants.KK_HAKENEET_AUTHORITY_PREFIX))
+      )
+      KayttooikeusScope.limited(kkHakeneetOrgOids.toSet)
+    }
+  }
 
   @GetMapping(path = Array("kkhakijat"))
   @Operation(
