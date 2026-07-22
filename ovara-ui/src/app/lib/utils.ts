@@ -84,6 +84,13 @@ export const hasOvaraHakeneetRole = (userRoles?: Array<string>) => {
   );
 };
 
+export const hasOvaraKkHakeneetRole = (userRoles?: Array<string>) => {
+  return (
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET') ||
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA')
+  );
+};
+
 export const findOrganisaatiotWithOrganisaatiotyyppi = (
   hierarkia: OrganisaatioHierarkia,
   organisaatiotyyppi: string,

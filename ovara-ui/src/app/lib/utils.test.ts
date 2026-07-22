@@ -5,6 +5,7 @@ import {
   getSortedKoulutuksenAlkamisKaudet,
   hasOvaraRole,
   hasOvaraToinenAsteRole,
+  hasOvaraKkHakeneetRole,
   getOppilaitoksetToShow,
   getToimipisteetToShow,
   getHarkinnanvaraisuusTranslation,
@@ -142,6 +143,45 @@ describe('hasOvaraToinenAsteRole', () => {
       'ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA_1.2.246.562.10.00000000001',
     ];
     expect(hasOvaraToinenAsteRole(userRoles)).toBeTruthy();
+  });
+});
+
+describe('hasOvaraKkHakeneetRole', () => {
+  test('should return true if user has ovara-virkailija_kk_hakeneet role in their authorities', () => {
+    const userRoles = [
+      'ROLE_APP_OVARA-VIRKAILIJA',
+      'ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET',
+      'ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.10.81934895871',
+    ];
+    expect(hasOvaraKkHakeneetRole(userRoles)).toBeTruthy();
+  });
+
+  test('should return false for a plain kk role without the kk_hakeneet right', () => {
+    const userRoles = [
+      'ROLE_APP_OVARA-VIRKAILIJA',
+      'ROLE_APP_OVARA-VIRKAILIJA_KK',
+      'ROLE_APP_OVARA-VIRKAILIJA_HAKENEET',
+    ];
+    expect(hasOvaraKkHakeneetRole(userRoles)).toBeFalsy();
+  });
+
+  test('should return false if authorities is empty', () => {
+    const userRoles = [] as Array<string>;
+    expect(hasOvaraKkHakeneetRole(userRoles)).toBeFalsy();
+  });
+
+  test('should return falsy if authorities is undefined', () => {
+    const userRoles = undefined;
+    expect(hasOvaraKkHakeneetRole(userRoles)).toBeFalsy();
+  });
+
+  test('should return true when user has OPH_PAAKAYTTAJA user role', () => {
+    const userRoles = [
+      'ROLE_APP_OVARA-VIRKAILIJA',
+      'ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA',
+      'ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA_1.2.246.562.10.00000000001',
+    ];
+    expect(hasOvaraKkHakeneetRole(userRoles)).toBeTruthy();
   });
 });
 
