@@ -100,7 +100,69 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
   }
 
   def selectHakemukset(hakemusOids: Iterable[String]): Seq[KKHakemusRow] = {
+    // Alikyselyt valitsemaan "merkitseva jono" gen_valintarekisteri-taulusta per (hakemus, hakukohde):
+    //   merkitseva_jono_yleinen: no julkaistavissa filter, state-priority ORDER BY only — used by
+    //                            valinnanTila + valinnanAikaleima.
+    //   merkitseva_jono_julkaistu: filter julkaistavissa=true, state-priority + varasija/prioriteetti
+    //                              tiebreak — used by pisteet + all hyvaksymisenEhto fields + the
+    //                              valintatapajono meta fields.
     val query = sql"""
+    WITH merkitseva_jono_yleinen AS (
+      SELECT hakemus_oid, hakukohde_oid, valinnan_tila, hyvaksyttyjajulkaistu FROM (
+        SELECT vr.hakemus_oid, vr.hakukohde_oid, vr.valinnan_tila, vr.hyvaksyttyjajulkaistu,
+          ROW_NUMBER() OVER (
+            PARTITION BY vr.hakemus_oid, vr.hakukohde_oid
+            ORDER BY CASE vr.valinnan_tila
+              WHEN 'HYVAKSYTTY'                     THEN 1
+              WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
+              WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
+              WHEN 'VARALLA'                        THEN 4
+              WHEN 'PERUUTETTU'                     THEN 5
+              WHEN 'PERUNUT'                        THEN 6
+              WHEN 'PERUUNTUNUT'                    THEN 7
+              WHEN 'HYLATTY'                        THEN 8
+              WHEN 'KESKEN'                         THEN 9
+              ELSE 10
+            END
+          ) AS rn
+        FROM gen.gen_valintarekisteri vr
+        WHERE vr.valinnan_tila IS NOT NULL
+      ) x WHERE rn = 1
+    ),
+    merkitseva_jono_julkaistu AS (
+      SELECT hakemus_oid, hakukohde_oid,
+             pisteet, ehdollisesti_hyvaksyttavissa,
+             ehdollisen_hyvaksymisen_ehto_fi, ehdollisen_hyvaksymisen_ehto_sv,
+             ehdollisen_hyvaksymisen_ehto_en, valintatapajono_id
+      FROM (
+        SELECT vr.hakemus_oid, vr.hakukohde_oid,
+               vr.pisteet, vr.ehdollisesti_hyvaksyttavissa,
+               vr.ehdollisen_hyvaksymisen_ehto_fi, vr.ehdollisen_hyvaksymisen_ehto_sv,
+               vr.ehdollisen_hyvaksymisen_ehto_en, vr.valintatapajono_id,
+          ROW_NUMBER() OVER (
+            PARTITION BY vr.hakemus_oid, vr.hakukohde_oid
+            ORDER BY
+              CASE vr.valinnan_tila
+                WHEN 'HYVAKSYTTY'                     THEN 1
+                WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
+                WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
+                WHEN 'VARALLA'                        THEN 4
+                WHEN 'PERUUTETTU'                     THEN 5
+                WHEN 'PERUNUT'                        THEN 6
+                WHEN 'PERUUNTUNUT'                    THEN 7
+                WHEN 'HYLATTY'                        THEN 8
+                WHEN 'KESKEN'                         THEN 9
+                ELSE 10
+              END,
+              CASE
+                WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
+                ELSE vr.prioriteetti
+              END NULLS LAST
+          ) AS rn
+        FROM gen.gen_valintarekisteri vr
+        WHERE vr.julkaistavissa = true
+      ) x WHERE rn = 1
+    )
     SELECT
       ht.hakemus_oid,
       ht.hakukohde_oid,
@@ -122,202 +184,25 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
       k.johtaa_tutkintoon,
       t.koulutuksen_alkamisvuosi AS koulutus_alkamisvuosi,
       t.koulutuksen_alkamiskausiuri AS koulutus_alkamiskausi_uri,
-      (SELECT vr.valinnan_tila FROM gen.gen_valintarekisteri vr
-        WHERE vr.hakemus_oid   = ht.hakemus_oid
-          AND vr.hakukohde_oid = ht.hakukohde_oid
-          AND vr.valinnan_tila IS NOT NULL
-        ORDER BY CASE vr.valinnan_tila
-          WHEN 'HYVAKSYTTY'                     THEN 1
-          WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
-          WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
-          WHEN 'VARALLA'                        THEN 4
-          WHEN 'PERUUTETTU'                     THEN 5
-          WHEN 'PERUNUT'                        THEN 6
-          WHEN 'PERUUNTUNUT'                    THEN 7
-          WHEN 'HYLATTY'                        THEN 8
-          WHEN 'KESKEN'                         THEN 9
-          ELSE 10
-        END
-        LIMIT 1) AS vr_valinnan_tila,
-      (SELECT vr.hyvaksyttyjajulkaistu FROM gen.gen_valintarekisteri vr
-        WHERE vr.hakemus_oid   = ht.hakemus_oid
-          AND vr.hakukohde_oid = ht.hakukohde_oid
-          AND vr.valinnan_tila IS NOT NULL
-        ORDER BY CASE vr.valinnan_tila
-          WHEN 'HYVAKSYTTY'                     THEN 1
-          WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
-          WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
-          WHEN 'VARALLA'                        THEN 4
-          WHEN 'PERUUTETTU'                     THEN 5
-          WHEN 'PERUNUT'                        THEN 6
-          WHEN 'PERUUNTUNUT'                    THEN 7
-          WHEN 'HYLATTY'                        THEN 8
-          WHEN 'KESKEN'                         THEN 9
-          ELSE 10
-        END
-        LIMIT 1) AS vr_valinnan_aikaleima,
-      (SELECT vr.pisteet FROM gen.gen_valintarekisteri vr
-        WHERE vr.hakemus_oid   = ht.hakemus_oid
-          AND vr.hakukohde_oid = ht.hakukohde_oid
-          AND vr.julkaistavissa = true
-        ORDER BY
-          CASE vr.valinnan_tila
-            WHEN 'HYVAKSYTTY'                     THEN 1
-            WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
-            WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
-            WHEN 'VARALLA'                        THEN 4
-            WHEN 'PERUUTETTU'                     THEN 5
-            WHEN 'PERUNUT'                        THEN 6
-            WHEN 'PERUUNTUNUT'                    THEN 7
-            WHEN 'HYLATTY'                        THEN 8
-            WHEN 'KESKEN'                         THEN 9
-            ELSE 10
-          END,
-          CASE
-            WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
-            ELSE vr.prioriteetti
-          END NULLS LAST
-        LIMIT 1) AS pisteet,
-      (SELECT vr.ehdollisesti_hyvaksyttavissa FROM gen.gen_valintarekisteri vr
-        WHERE vr.hakemus_oid   = ht.hakemus_oid
-          AND vr.hakukohde_oid = ht.hakukohde_oid
-          AND vr.julkaistavissa = true
-        ORDER BY
-          CASE vr.valinnan_tila
-            WHEN 'HYVAKSYTTY'                     THEN 1
-            WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
-            WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
-            WHEN 'VARALLA'                        THEN 4
-            WHEN 'PERUUTETTU'                     THEN 5
-            WHEN 'PERUNUT'                        THEN 6
-            WHEN 'PERUUNTUNUT'                    THEN 7
-            WHEN 'HYLATTY'                        THEN 8
-            WHEN 'KESKEN'                         THEN 9
-            ELSE 10
-          END,
-          CASE
-            WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
-            ELSE vr.prioriteetti
-          END NULLS LAST
-        LIMIT 1) AS ehdollisesti_hyvaksyttavissa,
-      (SELECT vr.ehdollisen_hyvaksymisen_ehto_fi FROM gen.gen_valintarekisteri vr
-        WHERE vr.hakemus_oid   = ht.hakemus_oid
-          AND vr.hakukohde_oid = ht.hakukohde_oid
-          AND vr.julkaistavissa = true
-        ORDER BY
-          CASE vr.valinnan_tila
-            WHEN 'HYVAKSYTTY'                     THEN 1
-            WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
-            WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
-            WHEN 'VARALLA'                        THEN 4
-            WHEN 'PERUUTETTU'                     THEN 5
-            WHEN 'PERUNUT'                        THEN 6
-            WHEN 'PERUUNTUNUT'                    THEN 7
-            WHEN 'HYLATTY'                        THEN 8
-            WHEN 'KESKEN'                         THEN 9
-            ELSE 10
-          END,
-          CASE
-            WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
-            ELSE vr.prioriteetti
-          END NULLS LAST
-        LIMIT 1) AS ehto_fi,
-      (SELECT vr.ehdollisen_hyvaksymisen_ehto_sv FROM gen.gen_valintarekisteri vr
-        WHERE vr.hakemus_oid   = ht.hakemus_oid
-          AND vr.hakukohde_oid = ht.hakukohde_oid
-          AND vr.julkaistavissa = true
-        ORDER BY
-          CASE vr.valinnan_tila
-            WHEN 'HYVAKSYTTY'                     THEN 1
-            WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
-            WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
-            WHEN 'VARALLA'                        THEN 4
-            WHEN 'PERUUTETTU'                     THEN 5
-            WHEN 'PERUNUT'                        THEN 6
-            WHEN 'PERUUNTUNUT'                    THEN 7
-            WHEN 'HYLATTY'                        THEN 8
-            WHEN 'KESKEN'                         THEN 9
-            ELSE 10
-          END,
-          CASE
-            WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
-            ELSE vr.prioriteetti
-          END NULLS LAST
-        LIMIT 1) AS ehto_sv,
-      (SELECT vr.ehdollisen_hyvaksymisen_ehto_en FROM gen.gen_valintarekisteri vr
-        WHERE vr.hakemus_oid   = ht.hakemus_oid
-          AND vr.hakukohde_oid = ht.hakukohde_oid
-          AND vr.julkaistavissa = true
-        ORDER BY
-          CASE vr.valinnan_tila
-            WHEN 'HYVAKSYTTY'                     THEN 1
-            WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
-            WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
-            WHEN 'VARALLA'                        THEN 4
-            WHEN 'PERUUTETTU'                     THEN 5
-            WHEN 'PERUNUT'                        THEN 6
-            WHEN 'PERUUNTUNUT'                    THEN 7
-            WHEN 'HYLATTY'                        THEN 8
-            WHEN 'KESKEN'                         THEN 9
-            ELSE 10
-          END,
-          CASE
-            WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
-            ELSE vr.prioriteetti
-          END NULLS LAST
-        LIMIT 1) AS ehto_en,
-      (SELECT vp.valintatapajono_tyyppi FROM gen.gen_valintarekisteri vr
-        LEFT JOIN gen.gen_valintaperuste_valintatapajono vp
-          ON vp.valintatapajono_id = vr.valintatapajono_id
-        WHERE vr.hakemus_oid   = ht.hakemus_oid
-          AND vr.hakukohde_oid = ht.hakukohde_oid
-          AND vr.julkaistavissa = true
-        ORDER BY
-          CASE vr.valinnan_tila
-            WHEN 'HYVAKSYTTY'                     THEN 1
-            WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
-            WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
-            WHEN 'VARALLA'                        THEN 4
-            WHEN 'PERUUTETTU'                     THEN 5
-            WHEN 'PERUNUT'                        THEN 6
-            WHEN 'PERUUNTUNUT'                    THEN 7
-            WHEN 'HYLATTY'                        THEN 8
-            WHEN 'KESKEN'                         THEN 9
-            ELSE 10
-          END,
-          CASE
-            WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
-            ELSE vr.prioriteetti
-          END NULLS LAST
-        LIMIT 1) AS valintatapajono_tyyppi,
-      (SELECT vp.valintatapajono_nimi FROM gen.gen_valintarekisteri vr
-        LEFT JOIN gen.gen_valintaperuste_valintatapajono vp
-          ON vp.valintatapajono_id = vr.valintatapajono_id
-        WHERE vr.hakemus_oid   = ht.hakemus_oid
-          AND vr.hakukohde_oid = ht.hakukohde_oid
-          AND vr.julkaistavissa = true
-        ORDER BY
-          CASE vr.valinnan_tila
-            WHEN 'HYVAKSYTTY'                     THEN 1
-            WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
-            WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
-            WHEN 'VARALLA'                        THEN 4
-            WHEN 'PERUUTETTU'                     THEN 5
-            WHEN 'PERUNUT'                        THEN 6
-            WHEN 'PERUUNTUNUT'                    THEN 7
-            WHEN 'HYLATTY'                        THEN 8
-            WHEN 'KESKEN'                         THEN 9
-            ELSE 10
-          END,
-          CASE
-            WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
-            ELSE vr.prioriteetti
-          END NULLS LAST
-        LIMIT 1) AS valintatapajono_nimi
+      merk_y.valinnan_tila                   AS vr_valinnan_tila,
+      merk_y.hyvaksyttyjajulkaistu           AS vr_valinnan_aikaleima,
+      merk_julk.pisteet                         AS pisteet,
+      merk_julk.ehdollisesti_hyvaksyttavissa    AS ehdollisesti_hyvaksyttavissa,
+      merk_julk.ehdollisen_hyvaksymisen_ehto_fi AS ehto_fi,
+      merk_julk.ehdollisen_hyvaksymisen_ehto_sv AS ehto_sv,
+      merk_julk.ehdollisen_hyvaksymisen_ehto_en AS ehto_en,
+      vp.valintatapajono_tyyppi          AS valintatapajono_tyyppi,
+      vp.valintatapajono_nimi            AS valintatapajono_nimi
     FROM gen.gen_hakutoive ht
     LEFT JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
     LEFT JOIN gen.gen_toteutus  t  ON hk.toteutus_oid  = t.toteutus_oid
     LEFT JOIN gen.gen_koulutus  k  ON t.koulutus_oid   = k.koulutus_oid
+    LEFT JOIN merkitseva_jono_yleinen merk_y
+      ON merk_y.hakemus_oid = ht.hakemus_oid AND merk_y.hakukohde_oid = ht.hakukohde_oid
+    LEFT JOIN merkitseva_jono_julkaistu merk_julk
+      ON merk_julk.hakemus_oid = ht.hakemus_oid AND merk_julk.hakukohde_oid = ht.hakukohde_oid
+    LEFT JOIN gen.gen_valintaperuste_valintatapajono vp
+      ON vp.valintatapajono_id = merk_julk.valintatapajono_id
     WHERE ht.hakemus_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(hakemusOids)})
     """.as[KKHakemusRow]
 
