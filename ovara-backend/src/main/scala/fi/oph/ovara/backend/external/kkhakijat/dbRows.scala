@@ -120,7 +120,7 @@ case class KKHakemusRow(
       hakemusJattoAikaleima = hakemusJattoAikaleima,
       valinnanAikaleima = valinnanAikaleima,
       hakutoivePrioriteetti = Some(hakutoivenumero),
-      valinnanTila = valinnanTila.flatMap(Valintatila.parse),
+      valinnanTila = valinnanTila.flatMap(Valintatila.parse).orElse(Some(Valintatila.KESKEN)),
       vastaanottotieto = vastaanottotieto.flatMap(Vastaanottotila.parse),
       ilmoittautumiset = ilmoittautumisenTila.flatMap(Lasnaolo.parse).toSeq,
       pohjakoulutus = pohjakoulutus,
