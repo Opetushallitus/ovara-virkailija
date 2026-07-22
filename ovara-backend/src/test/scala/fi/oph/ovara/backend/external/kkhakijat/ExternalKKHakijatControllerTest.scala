@@ -105,11 +105,11 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
 
   @Test
   @WithMockUser(
-    username = "hakeneet-user",
+    username = "toinen-asteen-hakeneet-user",
     roles = Array("APP_OVARA-VIRKAILIJA_HAKENEET_1.2.246.562.10.00000000001")
   )
-  def returns403ForHakeneetRoleFirstSlice(): Unit = {
-    // First slice: only OPH_PAAKAYTTAJA — HAKENEET (2Aste authority) has no access here.
+  def returns403ForToisenAsteenHakeneetRole(): Unit = {
+    // The 2Aste HAKENEET_ right must NOT grant access to the KK endpoint — only KK_HAKENEET_ does.
     get().andExpect(status.isForbidden)
   }
 
@@ -120,6 +120,113 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
     get()
       .andExpect(status.isOk)
       .andExpect(content.json("""{"hakijat": []}"""))
+  }
+
+  @Test
+  @WithMockUser(
+    username = "kk-hakeneet-user",
+    roles = Array("APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.10.00000000001")
+  )
+  def returns200ForKkHakeneetRole(): Unit = {
+    initSchema()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(content.json("""{"hakijat": []}"""))
+  }
+
+  @Test
+  @WithMockUser(
+    username = "kk-hakeneet-org-a-user",
+    roles = Array("APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.10.00000000000000000586")
+  )
+  def kkHakeneetUserSeesOnlyHakijatFromOwnOrg(): Unit = {
+    // orgA = ORGANISAATIO_OID = "1.2.246.562.10.00000000000000000586" — user's KK_HAKENEET-suffixed org.
+    // orgB is a different jarjestyspaikka — the user must NOT see hakijat from there.
+    val orgB          = ORGANISAATIO_OID_2
+    val hakukohdeOidB = HAKUKOHDE_OID_2
+    val oppijanumeroB = "1.2.246.562.24.00000000020"
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertHakemus(oppijanumero = oppijanumeroB, hakemusOid = HAKEMUS_OID_2, insertHaku = false)
+    insertHakukohde(hakukohdeOid = hakukohdeOidB, jarjestyspaikkaOid = orgB, organisaatioOid = Some(orgB))
+    insertHakutoive(hakemusOid = HAKEMUS_OID_2, hakukohdeOid = hakukohdeOidB)
+
+    // Query orgA only — the scope must hide orgB's hakija.
+    get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO))
+  }
+
+  @Test
+  @WithMockUser(
+    username = "kk-mixed-authorities-user",
+    roles = Array(
+      "APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.10.00000000000000000586",
+      "APP_OVARA-VIRKAILIJA_2ASTE_1.2.246.562.10.00000000000000000587"
+    )
+  )
+  def kkHakeneetUserIgnoresOidsFromOtherOvaraAuthorities(): Unit = {
+    // User has KK_HAKENEET_<orgA> and 2ASTE_<orgB>. Only orgA counts as scope for this endpoint —
+    // the OID granted through the 2ASTE role must NOT widen access to orgB.
+    val orgB          = ORGANISAATIO_OID_2
+    val hakukohdeOidB = HAKUKOHDE_OID_2
+    val oppijanumeroB = "1.2.246.562.24.00000000020"
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertHakemus(oppijanumero = oppijanumeroB, hakemusOid = HAKEMUS_OID_2, insertHaku = false)
+    insertHakukohde(hakukohdeOid = hakukohdeOidB, jarjestyspaikkaOid = orgB, organisaatioOid = Some(orgB))
+    insertHakutoive(hakemusOid = HAKEMUS_OID_2, hakukohdeOid = hakukohdeOidB)
+
+    get(hakukohdeOid = None, organisaatioOid = Some(orgB))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
+  }
+
+  @Test
+  @WithMockUser(
+    username = "kk-hakeneet-no-oid-user",
+    // KK_HAKENEET_ prefix matches, but the trailing token has no digits → getKayttooikeusOids yields empty.
+    roles = Array("APP_OVARA-VIRKAILIJA_KK_HAKENEET_")
+  )
+  def kkHakeneetUserWithNoOidYieldsEmptyResults(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
+  }
+
+  @Test
+  @WithMockUser(
+    username = "paakayttaja-plus-kk-hakeneet",
+    roles = Array(
+      "APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA_1.2.246.562.10.00000000001",
+      "APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.10.00000000000000000586"
+    )
+  )
+  def paakayttajaAndKkHakeneetTogetherGetPaakayttajaScope(): Unit = {
+    // Hakija applies at orgB, which is NOT in the KK_HAKENEET-suffixed OID set — paakayttaja wins,
+    // so the hakija must still surface.
+    val orgB          = ORGANISAATIO_OID_2
+    val hakukohdeOidB = HAKUKOHDE_OID_2
+    initSchema()
+    insertHakemus()
+    insertHakukohde(hakukohdeOid = hakukohdeOidB, jarjestyspaikkaOid = orgB, organisaatioOid = Some(orgB))
+    insertHakutoive(hakukohdeOid = hakukohdeOidB)
+
+    get(hakukohdeOid = None, organisaatioOid = Some(orgB))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO))
   }
 
   // ---- Validation ----
