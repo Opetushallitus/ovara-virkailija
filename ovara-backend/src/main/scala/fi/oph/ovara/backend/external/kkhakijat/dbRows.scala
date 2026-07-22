@@ -94,7 +94,9 @@ case class KKHakemusRow(
   ehdollistiHyvaksyttavissa: Option[Boolean],
   ehtoFI: Option[String],
   ehtoSV: Option[String],
-  ehtoEN: Option[String]
+  ehtoEN: Option[String],
+  valintatapajononTyyppi: Option[String],
+  valintatapajononNimi: Option[String]
 ) {
   def asKKHakemus(
     hakuOid: String,
@@ -135,6 +137,8 @@ case class KKHakemusRow(
           ehtoEN = ehtoEN
         )
       ),
+      valintatapajononTyyppi = valintatapajononTyyppi,
+      valintatapajononNimi = valintatapajononNimi,
       hakukohteenKoulutukset = koulutusOid.toSeq.flatMap { oid =>
         val koodit: Seq[Option[String]] =
           if (koulutusKoodit.isEmpty) Seq(None) else koulutusKoodit.map(Some(_))
