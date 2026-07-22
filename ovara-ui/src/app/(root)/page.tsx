@@ -5,6 +5,7 @@ import { ListTable } from '../components/table/table';
 import {
   KK_RAPORTIT,
   TIEDONSIIRTO_RAPORTIT,
+  TIEDONSIIRTO_KK_RAPORTIT,
   TOISEN_ASTEEN_RAPORTIT,
 } from '@/app/lib/constants';
 import { useAuthorizedUser } from '../components/providers/authorized-user-provider';
@@ -13,6 +14,7 @@ import {
   hasOvaraToinenAsteRole,
   hasOvaraKkRole,
   hasOvaraHakeneetRole,
+  hasOvaraKkHakeneetRole,
 } from '../lib/utils';
 import { FullSpinner } from '@/app/components/full-spinner';
 
@@ -27,11 +29,13 @@ export default function Home() {
   const hasToinenAsteRights = hasOvaraToinenAsteRole(userRoles);
   const hasKkRights = hasOvaraKkRole(userRoles);
   const hasHakeneetRights = hasOvaraHakeneetRole(userRoles);
+  const hasKkHakeneetRights = hasOvaraKkHakeneetRole(userRoles);
 
   const raportit: Array<string> = [];
   if (hasToinenAsteRights) raportit.push(...TOISEN_ASTEEN_RAPORTIT);
   if (hasKkRights) raportit.push(...KK_RAPORTIT);
   if (hasHakeneetRights) raportit.push(...TIEDONSIIRTO_RAPORTIT);
+  if (hasKkHakeneetRights) raportit.push(...TIEDONSIIRTO_KK_RAPORTIT);
 
   return (
     <MainContainer>
