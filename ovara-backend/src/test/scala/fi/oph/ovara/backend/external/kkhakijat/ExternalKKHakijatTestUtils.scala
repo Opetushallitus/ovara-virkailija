@@ -168,13 +168,13 @@ trait ExternalKKHakijatTestUtils {
   }
 
   def insertValintaperusteValintatapajono(
-    valintatapajonoOid: String = "vtj-1",
+    valintatapajonoId: String = "vtj-1",
     valintatapajonoTyyppi: Option[String] = None,
     valintatapajonoNimi: Option[String] = None
   ): Unit = {
     db.run(
       sqlu"""INSERT INTO gen.gen_valintaperuste_valintatapajono VALUES(
-          $valintatapajonoOid, $valintatapajonoTyyppi, $valintatapajonoNimi
+          $valintatapajonoId, $valintatapajonoTyyppi, $valintatapajonoNimi
         )""",
       "Insert test kk-valintaperuste_valintatapajono"
     )
@@ -355,7 +355,7 @@ trait ExternalKKHakijatTestUtils {
           );
 
           CREATE TABLE gen.gen_valintaperuste_valintatapajono(
-              valintatapajono_oid text NOT NULL PRIMARY KEY,
+              valintatapajono_id text NOT NULL PRIMARY KEY,
               valintatapajono_tyyppi text,
               valintatapajono_nimi text
           );
