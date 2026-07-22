@@ -524,6 +524,38 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(80))
   }
 
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "HYVAKSYTTY,                     HARKINNANVARAISESTI_HYVAKSYTTY",
+      "HARKINNANVARAISESTI_HYVAKSYTTY, VARASIJALTA_HYVAKSYTTY",
+      "VARASIJALTA_HYVAKSYTTY,         VARALLA",
+      "VARALLA,                        PERUUTETTU",
+      "PERUUTETTU,                     PERUNUT",
+      "PERUNUT,                        PERUUNTUNUT",
+      "PERUUNTUNUT,                    HYLATTY",
+      "HYLATTY,                        KESKEN"
+    )
+  )
+  def pisteetPrefersHigherPriorityStateOverLower(winner: String, loser: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-winner",
+      valinnanTila = Some(winner),
+      pisteet = Some(BigDecimal("80"))
+    )
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-loser",
+      valinnanTila = Some(loser),
+      pisteet = Some(BigDecimal("99"))
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(80))
+  }
+
   @Test
   def pisteetSecondaryTiebreakByPrioriteetti(): Unit = {
     seedMinimalHakija()
@@ -719,12 +751,12 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       pisteet = Some(BigDecimal("99"))
     )
     insertValintaperusteValintatapajono(
-      valintatapajonoOid = "vtj-winner",
+      valintatapajonoId = "vtj-winner",
       valintatapajonoTyyppi = Some("WINNER-TYYPPI"),
       valintatapajonoNimi = Some("Winner")
     )
     insertValintaperusteValintatapajono(
-      valintatapajonoOid = "vtj-loser",
+      valintatapajonoId = "vtj-loser",
       valintatapajonoTyyppi = Some("LOSER-TYYPPI"),
       valintatapajonoNimi = Some("Loser")
     )
