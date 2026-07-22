@@ -5,6 +5,7 @@ import {
   KK_YOS_RAPORTTI,
   KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
   OPPILAITOSORGANISAATIOTYYPPI,
+  TIEDONSIIRTO_KK_RAPORTIT,
   TIEDONSIIRTO_RAPORTIT,
   TOIMIPISTEORGANISAATIOTYYPPI,
   TOISEN_ASTEEN_RAPORTIT,
@@ -95,6 +96,13 @@ export const hasOvaraHakeneetRole = (userRoles?: Array<string>) => {
   );
 };
 
+export const hasOvaraKkHakeneetRole = (userRoles?: Array<string>) => {
+  return (
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET') ||
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA')
+  );
+};
+
 export const getRaporttiListByUserRights = (userRoles?: Array<string>) => {
   const raportit = [];
 
@@ -112,6 +120,10 @@ export const getRaporttiListByUserRights = (userRoles?: Array<string>) => {
 
   if (hasOvaraHakeneetRole(userRoles)) {
     raportit.push(...TIEDONSIIRTO_RAPORTIT);
+  }
+
+  if (hasOvaraKkHakeneetRole(userRoles)) {
+    raportit.push(...TIEDONSIIRTO_KK_RAPORTIT);
   }
 
   return raportit;
