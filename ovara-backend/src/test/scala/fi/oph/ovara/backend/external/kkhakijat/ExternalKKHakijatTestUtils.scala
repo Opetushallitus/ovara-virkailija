@@ -167,6 +167,19 @@ trait ExternalKKHakijatTestUtils {
     )
   }
 
+  def insertValintaperusteValintatapajono(
+    valintatapajonoOid: String = "vtj-1",
+    valintatapajonoTyyppi: Option[String] = None,
+    valintatapajonoNimi: Option[String] = None
+  ): Unit = {
+    db.run(
+      sqlu"""INSERT INTO gen.gen_valintaperuste_valintatapajono VALUES(
+          $valintatapajonoOid, $valintatapajonoTyyppi, $valintatapajonoNimi
+        )""",
+      "Insert test kk-valintaperuste_valintatapajono"
+    )
+  }
+
   def insertValintarekisteri(
     hakemusOid: String = HAKEMUS_OID,
     hakukohdeOid: String = HAKUKOHDE_OID,
@@ -339,6 +352,12 @@ trait ExternalKKHakijatTestUtils {
               ulkoinen_tunniste text,
               koulutukset_koodiuri jsonb,
               johtaa_tutkintoon boolean
+          );
+
+          CREATE TABLE gen.gen_valintaperuste_valintatapajono(
+              valintatapajono_oid text NOT NULL PRIMARY KEY,
+              valintatapajono_tyyppi text,
+              valintatapajono_nimi text
           );
 
           CREATE TABLE gen.gen_valintarekisteri(

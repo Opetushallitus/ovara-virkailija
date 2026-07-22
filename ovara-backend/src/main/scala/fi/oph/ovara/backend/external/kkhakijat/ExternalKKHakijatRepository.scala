@@ -265,7 +265,55 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
             ELSE vr.prioriteetti
           END NULLS LAST
-        LIMIT 1) AS ehto_en
+        LIMIT 1) AS ehto_en,
+      (SELECT vp.valintatapajono_tyyppi FROM gen.gen_valintarekisteri vr
+        LEFT JOIN gen.gen_valintaperuste_valintatapajono vp
+          ON vp.valintatapajono_id = vr.valintatapajono_id
+        WHERE vr.hakemus_oid   = ht.hakemus_oid
+          AND vr.hakukohde_oid = ht.hakukohde_oid
+          AND vr.julkaistavissa = true
+        ORDER BY
+          CASE vr.valinnan_tila
+            WHEN 'HYVAKSYTTY'                     THEN 1
+            WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
+            WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
+            WHEN 'VARALLA'                        THEN 4
+            WHEN 'PERUUTETTU'                     THEN 5
+            WHEN 'PERUNUT'                        THEN 6
+            WHEN 'PERUUNTUNUT'                    THEN 7
+            WHEN 'HYLATTY'                        THEN 8
+            WHEN 'KESKEN'                         THEN 9
+            ELSE 10
+          END,
+          CASE
+            WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
+            ELSE vr.prioriteetti
+          END NULLS LAST
+        LIMIT 1) AS valintatapajono_tyyppi,
+      (SELECT vp.valintatapajono_nimi FROM gen.gen_valintarekisteri vr
+        LEFT JOIN gen.gen_valintaperuste_valintatapajono vp
+          ON vp.valintatapajono_id = vr.valintatapajono_id
+        WHERE vr.hakemus_oid   = ht.hakemus_oid
+          AND vr.hakukohde_oid = ht.hakukohde_oid
+          AND vr.julkaistavissa = true
+        ORDER BY
+          CASE vr.valinnan_tila
+            WHEN 'HYVAKSYTTY'                     THEN 1
+            WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
+            WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
+            WHEN 'VARALLA'                        THEN 4
+            WHEN 'PERUUTETTU'                     THEN 5
+            WHEN 'PERUNUT'                        THEN 6
+            WHEN 'PERUUNTUNUT'                    THEN 7
+            WHEN 'HYLATTY'                        THEN 8
+            WHEN 'KESKEN'                         THEN 9
+            ELSE 10
+          END,
+          CASE
+            WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
+            ELSE vr.prioriteetti
+          END NULLS LAST
+        LIMIT 1) AS valintatapajono_nimi
     FROM gen.gen_hakutoive ht
     LEFT JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
     LEFT JOIN gen.gen_toteutus  t  ON hk.toteutus_oid  = t.toteutus_oid
