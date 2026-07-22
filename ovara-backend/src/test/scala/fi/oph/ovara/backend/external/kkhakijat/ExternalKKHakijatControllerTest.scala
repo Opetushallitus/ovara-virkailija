@@ -213,6 +213,7 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].avoinVayla").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("KESKEN"))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").value(nullValue()))
@@ -278,13 +279,22 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
   }
 
   @Test
-  def valinnanTilaIsNullForUnknownValue(): Unit = {
+  def valinnanTilaDefaultsToKeskenForUnknownValue(): Unit = {
     seedMinimalHakija()
     insertValintarekisteri(valinnanTila = Some("SOMETHING_ELSE"))
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("KESKEN"))
+  }
+
+  @Test
+  def valinnanTilaDefaultsToKeskenWhenNoVrRow(): Unit = {
+    seedMinimalHakija()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("KESKEN"))
   }
 
   // ---- Lukuvuosimaksu ----
