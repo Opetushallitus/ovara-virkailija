@@ -651,6 +651,91 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(90))
   }
 
+  // ---- Valintatapajono meta ----
+
+  @Test
+  def valintatapajonoTyyppiAndNimiPopulated(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"))
+    insertValintaperusteValintatapajono(
+      valintatapajonoTyyppi = Some("YHTEISPISTEET"),
+      valintatapajonoNimi = Some("Yhteispistejono")
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").value("YHTEISPISTEET"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("Yhteispistejono"))
+  }
+
+  @Test
+  def valintatapajonoMetaNullWhenNoVrRow(): Unit = {
+    seedMinimalHakija()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value(nullValue()))
+  }
+
+  @Test
+  def valintatapajonoMetaNullWhenLookupRowMissing(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"))
+    // NO insertValintaperusteValintatapajono call → LEFT JOIN misses → both fields null
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value(nullValue()))
+  }
+
+  @Test
+  def valintatapajonoTyyppiNullWhenColumnNull(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"))
+    insertValintaperusteValintatapajono(
+      valintatapajonoTyyppi = None,
+      valintatapajonoNimi = Some("Nimi")
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("Nimi"))
+  }
+
+  @Test
+  def valintatapajonoFromSamePriorityRowAsPisteet(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-winner",
+      valinnanTila = Some("HYVAKSYTTY"),
+      pisteet = Some(BigDecimal("90"))
+    )
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-loser",
+      valinnanTila = Some("VARALLA"),
+      pisteet = Some(BigDecimal("99"))
+    )
+    insertValintaperusteValintatapajono(
+      valintatapajonoOid = "vtj-winner",
+      valintatapajonoTyyppi = Some("WINNER-TYYPPI"),
+      valintatapajonoNimi = Some("Winner")
+    )
+    insertValintaperusteValintatapajono(
+      valintatapajonoOid = "vtj-loser",
+      valintatapajonoTyyppi = Some("LOSER-TYYPPI"),
+      valintatapajonoNimi = Some("Loser")
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").value("WINNER-TYYPPI"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("Winner"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(90))
+  }
+
   // ---- Pohjakoulutus ----
 
   @Test
@@ -1145,6 +1230,10 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
       koulutuksetKoodiuri = Some("""["koulutus_331101#12"]"""),
       johtaaTutkintoon = Some(true)
     ) // → cell 32 = "TKID-1", cell 48 = Koulutus(...)
+    insertValintaperusteValintatapajono(
+      valintatapajonoTyyppi = Some("YHTEISPISTEET"),
+      valintatapajonoNimi = Some("Yhteispistejono")
+    ) // → cell 39 = "YHTEISPISTEET", cell 40 = "Yhteispistejono"
 
     val result   = getExcel().andExpect(status.isOk).andReturn()
     val workbook = new XSSFWorkbook(new ByteArrayInputStream(result.getResponse.getContentAsByteArray))
@@ -1188,6 +1277,8 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
         36 -> "2025-10-01T12:00:00+03:00",
         37 -> "82.5",
         38 -> "HyvaksymisenEhto(X,,Ehto FI,Ehto SV,Ehto EN)",
+        39 -> "YHTEISPISTEET",
+        40 -> "Yhteispistejono",
         41 -> VASTAANOTTOTIETO,
         42 -> ILMOITTAUTUMISEN_TILA,
         43 -> "pohjakoulutus_yo,pohjakoulutus_kk",
@@ -1200,8 +1291,8 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
           s"cell $idx expected [$value] but was [${dataRow.getCell(idx).getStringCellValue}]"
         )
       }
-      // deferred fields: cells 12, 19, 34, 39, 40, 45-59 stay ""
-      Seq(12, 19, 34, 39, 40, 45, 46, 47, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
+      // deferred fields: cells 12, 19, 34, 45-59 (minus 48) stay ""
+      Seq(12, 19, 34, 45, 46, 47, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
         .foreach { idx =>
           assert(
             dataRow.getCell(idx).getStringCellValue == "",
