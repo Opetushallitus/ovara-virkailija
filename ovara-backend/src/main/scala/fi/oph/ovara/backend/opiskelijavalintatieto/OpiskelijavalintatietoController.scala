@@ -1,23 +1,16 @@
 package fi.oph.ovara.backend.opiskelijavalintatieto
 
 import fi.oph.ovara.backend.service.UserService
+import fi.oph.ovara.backend.utils.*
 import fi.oph.ovara.backend.utils.ParameterValidator.{validateOid, validateOidList}
-import fi.oph.ovara.backend.utils.{ApiException, ControllerUtils}
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.{Content, Schema}
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.{HttpStatus, MediaType}
-import org.springframework.web.bind.annotation.{
-  GetMapping,
-  PostMapping,
-  RequestBody,
-  RequestMapping,
-  RequestParam,
-  RestController
-}
-import org.springframework.web.server.ResponseStatusException
+import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.*
 
 import scala.jdk.CollectionConverters.*
 import scala.jdk.OptionConverters.RichOption
@@ -26,7 +19,8 @@ import scala.jdk.OptionConverters.RichOption
 @RequestMapping(path = Array("api"))
 class OpiskelijavalintatietoController @Autowired() (
   val userService: UserService,
-  opiskelijavalintatietoService: OpiskelijavalintatietoService
+  opiskelijavalintatietoService: OpiskelijavalintatietoService,
+  val auditLog: AuditLog = AuditLogObj
 ) extends ControllerUtils {
   val LOG: Logger = LoggerFactory.getLogger(classOf[OpiskelijavalintatietoController])
 
@@ -52,18 +46,24 @@ class OpiskelijavalintatietoController @Autowired() (
     )
   )
   def opiskelijavalintatiedot(
-    @RequestParam("ovara_oppijanumero", required = true) oppijanumero: String
-  ): OpiskelijavalintatietoResponse = withPaakayttajaRole {
-    validate {
-      validateOid(Some(oppijanumero), "ovara_oppijanumero")
-    }
+    @RequestParam("ovara_oppijanumero", required = true) oppijanumero: String,
+    request: HttpServletRequest
+  ): OpiskelijavalintatietoResponse =
+    withPaakayttajaRole {
+      auditLog.logWithParams(request, AuditOperation.Opiskelijavalintatiedot, Map("oppijanumero" -> oppijanumero))
 
-    handleRequest {
-      opiskelijavalintatietoService
-        .get(List(oppijanumero))
-        .map(_.headOption.map(OpiskelijavalintatietoResponse(_)).toJava.orElse(null))
+      validate {
+        validateOid(Some(oppijanumero), "ovara_oppijanumero")
+      }
+
+      LOG.info(s"Haetaan opiskelijavalintatiedot oppijanumerolla: $oppijanumero")
+
+      handleRequest {
+        opiskelijavalintatietoService
+          .get(List(oppijanumero))
+          .map(_.headOption.map(OpiskelijavalintatietoResponse(_)).toJava.orElse(null))
+      }
     }
-  }
 
   @PostMapping(path = Array("opiskelijavalintatiedot"))
   @Operation(
@@ -86,13 +86,18 @@ class OpiskelijavalintatietoController @Autowired() (
     )
   )
   def opiskelijavalintatiedot(
-    @RequestBody oppijanumerot: java.util.Collection[String]
+    @RequestBody oppijanumerot: java.util.Collection[String],
+    request: HttpServletRequest
   ): java.util.List[OpiskelijavalintatietoResponse] =
     withPaakayttajaRole {
+      auditLog.logWithParams(request, AuditOperation.Opiskelijavalintatiedot, Map("oppijanumerot" -> oppijanumerot))
+
       val numeroList = getListParamAsScalaList(oppijanumerot)
       validate {
         validateOidList(numeroList, "oppijanumerot")
       }
+
+      LOG.info(s"Haetaan opiskelijavalintatiedot oppijanumeroilla: $oppijanumerot")
 
       handleRequest {
         opiskelijavalintatietoService
@@ -100,17 +105,4 @@ class OpiskelijavalintatietoController @Autowired() (
           .map(_.map(OpiskelijavalintatietoResponse.apply).asJava)
       }
     }
-
-  private def handleRequest[T](block: => Either[String, T]): T = {
-    block match {
-      case Right(null) =>
-        throw ResponseStatusException(HttpStatus.NOT_FOUND)
-      case Right(result) =>
-        result
-      case Left(errorMessage) =>
-        // odottamattomista virheistä vain virheviesti
-        throw ApiException(errorMessage)
-    }
-  }
-
 }
