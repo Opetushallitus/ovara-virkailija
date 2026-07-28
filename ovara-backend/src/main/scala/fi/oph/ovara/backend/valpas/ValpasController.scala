@@ -3,16 +3,14 @@ package fi.oph.ovara.backend.valpas
 import fi.oph.ovara.backend.opiskelijavalintatieto.ValidationError
 import fi.oph.ovara.backend.service.UserService
 import fi.oph.ovara.backend.utils.ParameterValidator.{validateOid, validateOidList}
-import fi.oph.ovara.backend.utils.{ApiException, AuditLog, AuditLogObj, AuditOperation, ControllerUtils}
+import fi.oph.ovara.backend.utils.{AuditLog, AuditLogObj, AuditOperation, ControllerUtils}
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.{Content, Schema}
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.ResponseStatusException
 
 import scala.jdk.CollectionConverters.*
 
@@ -108,16 +106,4 @@ class ValpasController(
         }
       }
     }
-
-  private def handleRequest[T](block: => Either[String, T]): T = {
-    block match {
-      case Right(null) =>
-        throw ResponseStatusException(HttpStatus.NOT_FOUND)
-      case Right(result) =>
-        result
-      case Left(errorMessage) =>
-        // odottamattomista virheistä vain virheviesti
-        throw ApiException(errorMessage)
-    }
-  }
 }

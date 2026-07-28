@@ -36,6 +36,18 @@ trait ControllerUtils {
     }
   }
 
+  def handleRequest[T](block: => Either[String, T]): T = {
+    block match {
+      case Right(null) =>
+        throw ResponseStatusException(HttpStatus.NOT_FOUND)
+      case Right(result) =>
+        result
+      case Left(errorMessage) =>
+        // odottamattomista virheistä vain virheviesti
+        throw ApiException(errorMessage)
+    }
+  }
+
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ExceptionHandler(Array(classOf[ValidationException]))
   def validationException(ex: ValidationException): ValidationError = {

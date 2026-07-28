@@ -1,17 +1,16 @@
 package fi.oph.ovara.backend.opiskelijavalintatieto
 
 import fi.oph.ovara.backend.service.UserService
-import fi.oph.ovara.backend.utils.ParameterValidator.{validateOid, validateOidList}
 import fi.oph.ovara.backend.utils.*
+import fi.oph.ovara.backend.utils.ParameterValidator.{validateOid, validateOidList}
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.{Content, Schema}
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.{HttpStatus, MediaType}
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.ResponseStatusException
 
 import scala.jdk.CollectionConverters.*
 import scala.jdk.OptionConverters.RichOption
@@ -106,16 +105,4 @@ class OpiskelijavalintatietoController @Autowired() (
           .map(_.map(OpiskelijavalintatietoResponse.apply).asJava)
       }
     }
-
-  private def handleRequest[T](block: => Either[String, T]): T = {
-    block match {
-      case Right(null) =>
-        throw ResponseStatusException(HttpStatus.NOT_FOUND)
-      case Right(result) =>
-        result
-      case Left(errorMessage) =>
-        // odottamattomista virheistä vain virheviesti
-        throw ApiException(errorMessage)
-    }
-  }
 }
