@@ -1,22 +1,27 @@
 package fi.oph.ovara.backend.opiskelijavalintatieto
 
 import fi.oph.ovara.backend.repository.ReadOnlyDatabase
+import fi.oph.ovara.backend.utils.AuditLog
+import fi.vm.sade.auditlog.Operation
+import jakarta.servlet.http.HttpServletRequest
 import org.junit.jupiter.api.{Nested, Test}
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.{SpringBootTest, TestConfiguration}
+import org.springframework.context.annotation.{Bean, Import, Primary}
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.{WithAnonymousUser, WithMockUser}
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.web.servlet.{MockMvc, ResultActions}
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.{content, status}
+import org.springframework.test.web.servlet.{MockMvc, ResultActions}
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles(Array("test"))
+@Import(Array(classOf[OpiskelijavalintatietoControllerTest.MockAuditLogConfig]))
 @WithMockUser(username = "testuser", roles = Array("APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA_1.2.246.562.10.00000000001"))
 class OpiskelijavalintatietoControllerTest extends OpiskelijavalintatietoTestUtils {
   @Autowired
@@ -223,4 +228,19 @@ class OpiskelijavalintatietoControllerTest extends OpiskelijavalintatietoTestUti
       |    } ]
       |  } ]
       |}""".stripMargin
+}
+
+object OpiskelijavalintatietoControllerTest {
+  @TestConfiguration
+  class MockAuditLogConfig {
+    @Bean
+    @Primary
+    def mockAuditLog(): AuditLog = new AuditLog(fi.oph.ovara.backend.utils.AuditLogger) {
+      override def logWithParams(
+        request: HttpServletRequest,
+        operation: Operation,
+        params: Map[String, Any]
+      ): Unit = {}
+    }
+  }
 }
