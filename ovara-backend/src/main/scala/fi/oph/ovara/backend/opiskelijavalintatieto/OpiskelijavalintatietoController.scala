@@ -58,7 +58,7 @@ class OpiskelijavalintatietoController @Autowired() (
 
       LOG.info(s"Haetaan opiskelijavalintatiedot oppijanumerolla: $oppijanumero")
 
-      handleRequest {
+      handleApiRequest {
         opiskelijavalintatietoService
           .get(List(oppijanumero))
           .map(_.headOption.map(OpiskelijavalintatietoResponse(_)).toJava.orElse(null))
@@ -99,7 +99,7 @@ class OpiskelijavalintatietoController @Autowired() (
 
       LOG.info(s"Haetaan opiskelijavalintatiedot oppijanumeroilla: $oppijanumerot")
 
-      handleRequest {
+      handleApiRequest {
         opiskelijavalintatietoService
           .get(numeroList)
           .map(_.map(OpiskelijavalintatietoResponse.apply).asJava)

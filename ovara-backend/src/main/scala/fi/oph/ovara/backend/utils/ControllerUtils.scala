@@ -36,7 +36,7 @@ trait ControllerUtils {
     }
   }
 
-  def handleRequest[T](block: => Either[String, T]): T = {
+  def handleApiRequest[T](block: => Either[String, T]): T = {
     block match {
       case Right(null) =>
         throw ResponseStatusException(HttpStatus.NOT_FOUND)
