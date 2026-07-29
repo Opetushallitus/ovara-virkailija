@@ -58,7 +58,7 @@ class ValpasController(
 
       LOG.info(s"Haetaan valpas-tiedot parametreillä: $params")
 
-      handleRequest {
+      handleApiRequest {
         valpasService.getValpasTiedot(List(oppijanumero), vainAktiiviset).map {
           _.map(h => HakemusResponse(h, virkailijaUrl)).asJava
         }
@@ -100,7 +100,7 @@ class ValpasController(
 
       LOG.info(s"Haetaan valpas-tiedot parametreillä: $params")
 
-      handleRequest {
+      handleApiRequest {
         valpasService.getValpasTiedot(numeroList, vainAktiiviset).map {
           _.map(h => HakemusResponse(h, virkailijaUrl)).asJava
         }
