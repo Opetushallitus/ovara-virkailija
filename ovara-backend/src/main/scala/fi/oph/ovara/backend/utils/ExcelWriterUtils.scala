@@ -37,6 +37,13 @@ object ExcelWriterUtils {
     cellIndex + 1
   }
 
+  def writeStrListToCell(row: XSSFRow, cellStyle: XSSFCellStyle, cellIndex: Int, list: List[String]): Int = {
+    val cell = createCell(row, cellStyle, cellIndex)
+    val str  = list.mkString(", ")
+    cell.setCellValue(str)
+    cellIndex + 1
+  }
+
   def writeOptionStrToCell(row: XSSFRow, cellStyle: XSSFCellStyle, cellIndex: Int, maybeStr: Option[String]): Int = {
     val cell  = createCell(row, cellStyle, cellIndex)
     val value = maybeStr match {
