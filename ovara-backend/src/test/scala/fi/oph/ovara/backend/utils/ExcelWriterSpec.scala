@@ -6776,7 +6776,7 @@ class ExcelWriterSpec extends AnyFlatSpec {
         oppilaitosOid = "1.2.246.562.10.00000000000000000001",
         uudenOpiskeluoikeudenAlkamispvm = Some(LocalDate.of(2026, 9, 1)),
         vastaanottoAjankohta = LocalDate.of(2026, 8, 15),
-        koulutusluokitusKoodit = "12345",
+        koulutusluokitusKoodit = List("12345"),
         hakuOid = "1.2.246.562.20.00000000000000000001",
         hakuNimi = Map(Sv -> "Separat ansökan i Orkaninstitut 2026")
       )

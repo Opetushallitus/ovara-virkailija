@@ -24,7 +24,7 @@ case class KkPaatettavaOpiskeluoikeus(
   vastaanottoAjankohta: LocalDate,
   hakuNimi: Kielistetty,
   hakuOid: String,
-  koulutusluokitusKoodit: String
+  koulutusluokitusKoodit: List[String]
 )
 
 case class KKPaatettavaOpiskeluoikeusEntity(
@@ -48,7 +48,7 @@ case class KKSitovastiVastaanottanut(
   haunNimi: Kielistetty,
   oppilaitosOid: String,
   oppilaitosNimi: Kielistetty,
-  koulutusKoodiArvot: Option[String]
+  koulutusKoodiArvot: List[String]
 )
 
 case class YosHenkilo(
