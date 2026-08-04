@@ -9,7 +9,8 @@ import { downloadExcel } from '@/app/components/form/utils';
 import { MainContainer } from '@/app/components/main-container';
 import { FormBox } from '@/app/components/form/form-box';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
-import { OphInput, OphTypography } from '@opetushallitus/oph-design-system';
+import { OphTypography } from '@opetushallitus/oph-design-system';
+import { DebouncedOphInput } from '@/app/components/form/DebouncedOphInput';
 import { Box, Divider } from '@mui/material';
 import { OppilaitosSelect } from '@/app/components/form/organisaatiovalikot';
 import { FormButtons } from '@/app/components/form/form-buttons';
@@ -60,10 +61,10 @@ export default function KkPaatettavatOpiskeluoikeudet() {
               sx={{ flex: 1, minWidth: 0, pb: 2 }}
               label={t('raportti.sukunimi')}
               renderInput={({ labelId }) => (
-                <OphInput
+                <DebouncedOphInput
                   fullWidth
                   value={sukunimi}
-                  onChange={(e) => setSukunimi(e.target.value)}
+                  onValueChange={setSukunimi}
                   inputProps={{
                     'aria-labelledby': labelId,
                   }}
@@ -83,10 +84,10 @@ export default function KkPaatettavatOpiskeluoikeudet() {
               }}
               label={t('raportti.etunimet')}
               renderInput={({ labelId }) => (
-                <OphInput
+                <DebouncedOphInput
                   fullWidth
                   value={etunimi}
-                  onChange={(e) => setEtunimi(e.target.value)}
+                  onValueChange={setEtunimi}
                   inputProps={{
                     'aria-labelledby': labelId,
                   }}
@@ -97,12 +98,12 @@ export default function KkPaatettavatOpiskeluoikeudet() {
           <OvaraTextInput
             label={t('raportti.hetu')}
             value={hetu}
-            onChange={(e) => setHetu(e.target.value)}
+            onValueChange={setHetu}
           />
           <OvaraTextInput
             label={t('raportti.oppijanumero')}
             value={oppijanumero}
-            onChange={(e) => setOppijanumero(e.target.value)}
+            onValueChange={setOppijanumero}
           />
           <Divider />
           <OpiskeluoikeudenTila />
