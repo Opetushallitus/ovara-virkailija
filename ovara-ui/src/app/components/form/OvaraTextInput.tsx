@@ -1,12 +1,12 @@
 import { OvaraFormControl } from '@/app/components/form/ovara-form-control';
-import { OphInput } from '@opetushallitus/oph-design-system';
+import { DebouncedOphInput } from '@/app/components/form/DebouncedOphInput';
 
 type OvaraTextInputProps = {
   label: string;
   helperText?: string;
   errorMessages?: string[];
   inline?: boolean;
-} & React.ComponentProps<typeof OphInput>;
+} & React.ComponentProps<typeof DebouncedOphInput>;
 
 export const OvaraTextInput = ({
   label,
@@ -20,7 +20,7 @@ export const OvaraTextInput = ({
       label={label}
       helperText={helperText}
       errorMessages={errorMessages}
-      renderInput={() => <OphInput fullWidth {...props} />}
+      renderInput={() => <DebouncedOphInput fullWidth {...props} />}
     />
   );
 };
