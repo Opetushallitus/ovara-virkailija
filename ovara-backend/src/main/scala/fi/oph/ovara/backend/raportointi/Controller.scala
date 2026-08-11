@@ -80,7 +80,7 @@ class Controller(
   hakeneetHyvaksytytVastaanottaneetService: HakeneetHyvaksytytVastaanottaneetService,
   kkHakeneetHyvaksytytVastaanottaneetService: KkHakeneetHyvaksytytVastaanottaneetService,
   val userService: UserService,
-  val auditLog: AuditLog = AuditLogObj
+  override val auditLog: AuditLog = AuditLogObj
 ) extends ControllerUtils {
   val LOG: Logger = LoggerFactory.getLogger(classOf[Controller])
 
