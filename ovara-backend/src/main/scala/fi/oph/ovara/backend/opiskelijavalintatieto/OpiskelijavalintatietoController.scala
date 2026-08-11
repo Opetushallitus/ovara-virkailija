@@ -20,8 +20,8 @@ import scala.jdk.OptionConverters.RichOption
 class OpiskelijavalintatietoController @Autowired() (
   val userService: UserService,
   opiskelijavalintatietoService: OpiskelijavalintatietoService,
-  val auditLog: AuditLog = AuditLogObj
-) extends ControllerUtils {
+  auditLog: AuditLog
+) extends ControllerUtils(auditLog) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[OpiskelijavalintatietoController])
 
   @GetMapping(path = Array("opiskelijavalintatiedot"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
@@ -50,19 +50,21 @@ class OpiskelijavalintatietoController @Autowired() (
     request: HttpServletRequest
   ): OpiskelijavalintatietoResponse =
     withPaakayttajaRole {
-      auditLog.logWithParams(request, AuditOperation.Opiskelijavalintatiedot, Map("oppijanumero" -> oppijanumero))
-
       validate {
         validateOid(Some(oppijanumero), "ovara_oppijanumero")
       }
 
       LOG.info(s"Haetaan opiskelijavalintatiedot oppijanumerolla: $oppijanumero")
 
-      handleApiRequest {
-        opiskelijavalintatietoService
-          .get(List(oppijanumero))
-          .map(_.headOption.map(OpiskelijavalintatietoResponse(_)).toJava.orElse(null))
-      }
+      handleApiRequest(
+        request,
+        AuditOperation.Opiskelijavalintatiedot,
+        Map("oppijanumero" -> oppijanumero), {
+          opiskelijavalintatietoService
+            .get(List(oppijanumero))
+            .map(_.headOption.map(OpiskelijavalintatietoResponse(_)).toJava.orElse(null))
+        }
+      )
     }
 
   @PostMapping(path = Array("opiskelijavalintatiedot"))
@@ -90,8 +92,6 @@ class OpiskelijavalintatietoController @Autowired() (
     request: HttpServletRequest
   ): java.util.List[OpiskelijavalintatietoResponse] =
     withPaakayttajaRole {
-      auditLog.logWithParams(request, AuditOperation.Opiskelijavalintatiedot, Map("oppijanumerot" -> oppijanumerot))
-
       val numeroList = getListParamAsScalaList(oppijanumerot)
       validate {
         validateOidList(numeroList, "oppijanumerot")
@@ -99,10 +99,14 @@ class OpiskelijavalintatietoController @Autowired() (
 
       LOG.info(s"Haetaan opiskelijavalintatiedot oppijanumeroilla: $oppijanumerot")
 
-      handleApiRequest {
-        opiskelijavalintatietoService
-          .get(numeroList)
-          .map(_.map(OpiskelijavalintatietoResponse.apply).asJava)
-      }
+      handleApiRequest(
+        request,
+        AuditOperation.Opiskelijavalintatiedot,
+        Map("oppijanumerot" -> oppijanumerot), {
+          opiskelijavalintatietoService
+            .get(numeroList)
+            .map(_.map(OpiskelijavalintatietoResponse.apply).asJava)
+        }
+      )
     }
 }

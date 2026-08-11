@@ -3,7 +3,7 @@ package fi.oph.ovara.backend.valpas
 import fi.oph.ovara.backend.opiskelijavalintatieto.ValidationError
 import fi.oph.ovara.backend.service.UserService
 import fi.oph.ovara.backend.utils.ParameterValidator.{validateOid, validateOidList}
-import fi.oph.ovara.backend.utils.{AuditLog, AuditLogObj, AuditOperation, ControllerUtils}
+import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation, ControllerUtils}
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.{Content, Schema}
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -19,9 +19,9 @@ import scala.jdk.CollectionConverters.*
 class ValpasController(
   val userService: UserService,
   valpasService: ValpasService,
-  @Value("${opintopolku.virkailija.url}") virkailijaUrl: String,
-  val auditLog: AuditLog = AuditLogObj
-) extends ControllerUtils {
+  auditLog: AuditLog,
+  @Value("${opintopolku.virkailija.url}") virkailijaUrl: String
+) extends ControllerUtils(auditLog) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[ValpasController])
 
   @GetMapping(path = Array("valpas"))
@@ -49,20 +49,22 @@ class ValpasController(
     request: HttpServletRequest
   ): java.util.List[HakemusResponse] =
     withPaakayttajaRole {
-      val params = Map("oppijanumero" -> oppijanumero, "vainAktiiviset" -> vainAktiiviset)
-      auditLog.logWithParams(request, AuditOperation.Valpastiedot, params)
-
       validate {
         validateOid(Some(oppijanumero), "ovara_oppijanumero")
       }
 
+      val params = Map("oppijanumero" -> oppijanumero, "vainAktiiviset" -> vainAktiiviset)
       LOG.info(s"Haetaan valpas-tiedot parametreillä: $params")
 
-      handleApiRequest {
-        valpasService.getValpasTiedot(List(oppijanumero), vainAktiiviset).map {
-          _.map(h => HakemusResponse(h, virkailijaUrl)).asJava
+      handleApiRequest(
+        request,
+        AuditOperation.Valpastiedot,
+        params, {
+          valpasService.getValpasTiedot(List(oppijanumero), vainAktiiviset).map {
+            _.map(h => HakemusResponse(h, virkailijaUrl)).asJava
+          }
         }
-      }
+      )
     }
 
   @PostMapping(path = Array("valpas"))
@@ -90,20 +92,22 @@ class ValpasController(
     request: HttpServletRequest
   ): java.util.List[HakemusResponse] =
     withPaakayttajaRole {
-      val params = Map("oppijanumerot" -> oppijanumerot, "vainAktiiviset" -> vainAktiiviset)
-      auditLog.logWithParams(request, AuditOperation.Valpastiedot, params)
-
       val numeroList = getListParamAsScalaList(oppijanumerot)
       validate {
         validateOidList(numeroList, "ovara_oppijanumero")
       }
 
+      val params = Map("oppijanumerot" -> oppijanumerot, "vainAktiiviset" -> vainAktiiviset)
       LOG.info(s"Haetaan valpas-tiedot parametreillä: $params")
 
-      handleApiRequest {
-        valpasService.getValpasTiedot(numeroList, vainAktiiviset).map {
-          _.map(h => HakemusResponse(h, virkailijaUrl)).asJava
+      handleApiRequest(
+        request,
+        AuditOperation.Valpastiedot,
+        params, {
+          valpasService.getValpasTiedot(numeroList, vainAktiiviset).map {
+            _.map(h => HakemusResponse(h, virkailijaUrl)).asJava
+          }
         }
-      }
+      )
     }
 }
