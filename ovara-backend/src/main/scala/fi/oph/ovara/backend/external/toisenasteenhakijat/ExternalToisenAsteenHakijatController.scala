@@ -30,7 +30,7 @@ class ExternalToisenAsteenHakijatController(
   val userService: UserService,
   hakijatService: ExternalToisenAsteenHakijatService,
   mapper: ObjectMapper,
-  val auditLog: AuditLog = AuditLogObj
+  override val auditLog: AuditLog = AuditLogObj
 ) extends ControllerUtils {
   val LOG: Logger = LoggerFactory.getLogger(classOf[ExternalToisenAsteenHakijatController])
 
