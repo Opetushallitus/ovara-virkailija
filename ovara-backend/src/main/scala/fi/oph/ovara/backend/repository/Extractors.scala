@@ -175,7 +175,8 @@ trait Extractors extends GenericOvaraJsonFormats {
       opiskeluoikeudenViimeisinTila = r.nextString(),
       koulutusaste = r.nextStringOption(),
       koulutusKoodi = r.nextStringOption(),
-      linkitettyKoulutusAste = r.nextStringOption()
+      linkitettyKoulutusAste = r.nextStringOption(),
+      myontaja = r.nextString()
     )
   )
 
