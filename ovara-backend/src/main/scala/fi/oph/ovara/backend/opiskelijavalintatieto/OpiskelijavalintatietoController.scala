@@ -20,7 +20,8 @@ import scala.jdk.OptionConverters.RichOption
 class OpiskelijavalintatietoController @Autowired() (
   val userService: UserService,
   opiskelijavalintatietoService: OpiskelijavalintatietoService,
-) extends ControllerUtils {
+  auditLog: AuditLog
+) extends ControllerUtils(auditLog) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[OpiskelijavalintatietoController])
 
   @GetMapping(path = Array("opiskelijavalintatiedot"), produces = Array(MediaType.APPLICATION_JSON_VALUE))

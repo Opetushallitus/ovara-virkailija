@@ -3,7 +3,7 @@ package fi.oph.ovara.backend.valpas
 import fi.oph.ovara.backend.opiskelijavalintatieto.ValidationError
 import fi.oph.ovara.backend.service.UserService
 import fi.oph.ovara.backend.utils.ParameterValidator.{validateOid, validateOidList}
-import fi.oph.ovara.backend.utils.{AuditOperation, ControllerUtils}
+import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation, ControllerUtils}
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.{Content, Schema}
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -19,8 +19,9 @@ import scala.jdk.CollectionConverters.*
 class ValpasController(
   val userService: UserService,
   valpasService: ValpasService,
+  auditLog: AuditLog,
   @Value("${opintopolku.virkailija.url}") virkailijaUrl: String
-) extends ControllerUtils {
+) extends ControllerUtils(auditLog) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[ValpasController])
 
   @GetMapping(path = Array("valpas"))

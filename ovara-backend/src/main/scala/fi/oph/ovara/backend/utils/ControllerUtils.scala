@@ -12,9 +12,8 @@ import org.springframework.web.server.ResponseStatusException
 import java.util
 import scala.jdk.CollectionConverters.*
 
-trait ControllerUtils {
+trait ControllerUtils(auditLog: AuditLog) {
   def userService: UserService
-  val auditLog: AuditLog = AuditLogObj
 
   def getListParamAsScalaList(listParam: util.Collection[String]): List[String] = {
     if (listParam == null) List() else listParam.asScala.toList
