@@ -18,29 +18,35 @@ class YosPredicateTest {
 
   @Test
   def opiskeluOikeusKuuluuYosinPiiriinKoulutusAsteenMukaan(): Unit = {
-    assertTrue(YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(OPISKELUOIKEUS, VASTAANOTTO))
+    assertTrue(
+      YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(OPISKELUOIKEUS, VASTAANOTTO, List(OPISKELUOIKEUS))
+    )
     assertTrue(
       YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
         OPISKELUOIKEUS,
-        VASTAANOTTO.copy(koulutusasteet = List(KOULUTUSASTE_YAMK))
+        VASTAANOTTO.copy(koulutusasteet = List(KOULUTUSASTE_YAMK)),
+        List(OPISKELUOIKEUS)
       )
     )
     assertTrue(
       YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
         OPISKELUOIKEUS.copy(koulutusaste = Some(KOULUTUSASTE_YAMK)),
-        VASTAANOTTO.copy(koulutusasteet = List(KOULUTUSASTE_AMK, KOULUTUSASTE_YAMK))
+        VASTAANOTTO.copy(koulutusasteet = List(KOULUTUSASTE_AMK, KOULUTUSASTE_YAMK)),
+        List(OPISKELUOIKEUS)
       )
     )
     assertTrue(
       YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
         OPISKELUOIKEUS.copy(koulutusaste = Some(KOULUTUSASTE_YLEMPI_KORKEAKOULU_TUTKINTO)),
-        VASTAANOTTO.copy(koulutusasteet = List(KOULUTUSASTE_AMK, KOULUTUSASTE_YAMK))
+        VASTAANOTTO.copy(koulutusasteet = List(KOULUTUSASTE_AMK, KOULUTUSASTE_YAMK)),
+        List(OPISKELUOIKEUS)
       )
     )
     assertTrue(
       YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
         OPISKELUOIKEUS.copy(koulutusaste = Some(KOULUTUSASTE_ALEMPI_KORKEAKOULU_TUTKINTO)),
-        VASTAANOTTO
+        VASTAANOTTO,
+        List(OPISKELUOIKEUS)
       )
     )
   }
@@ -50,32 +56,45 @@ class YosPredicateTest {
     assertFalse(
       YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
         OPISKELUOIKEUS.copy(koulutusaste = Some(KOULUTUSASTE_YAMK)),
-        VASTAANOTTO
+        VASTAANOTTO,
+        List(OPISKELUOIKEUS)
       )
     )
     assertFalse(
       YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
         OPISKELUOIKEUS.copy(koulutusaste = Some(KOULUTUSASTE_YLEMPI_KORKEAKOULU_TUTKINTO)),
-        VASTAANOTTO
+        VASTAANOTTO,
+        List(OPISKELUOIKEUS)
       )
     )
     assertFalse(
-      YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(OPISKELUOIKEUS.copy(koulutusaste = None), VASTAANOTTO)
+      YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
+        OPISKELUOIKEUS.copy(koulutusaste = None),
+        VASTAANOTTO,
+        List(OPISKELUOIKEUS)
+      )
     )
     assertFalse(
       YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
         OPISKELUOIKEUS,
-        VASTAANOTTO.copy(koulutusasteet = List.empty)
+        VASTAANOTTO.copy(koulutusasteet = List.empty),
+        List(OPISKELUOIKEUS)
       )
     )
   }
 
   @Test
   def opiskeluoikeusKuuluuYosinPiiriinLinkitetynOpiskeluOikeudenKautta(): Unit = {
+    val linkitetty = OPISKELUOIKEUS.copy(
+      koulutusaste = Some(KOULUTUSASTE_AMK),
+      linkitettyOpiskeluoikeus = Some(OPISKELUOIKEUS.opiskeluoikeusAvain),
+      opiskeluoikeusAvain = "alempi"
+    )
     assertTrue(
       YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
         OPISKELUOIKEUS.copy(koulutusaste = Some(KOULUTUSASTE_YAMK), linkitettyKoulutusAste = Some(KOULUTUSASTE_AMK)),
-        VASTAANOTTO
+        VASTAANOTTO,
+        List(OPISKELUOIKEUS)
       )
     )
     assertTrue(
@@ -84,7 +103,24 @@ class YosPredicateTest {
           koulutusaste = Some(KOULUTUSASTE_YLEMPI_KORKEAKOULU_TUTKINTO),
           linkitettyKoulutusAste = Some(KOULUTUSASTE_ALEMPI_KORKEAKOULU_TUTKINTO)
         ),
-        VASTAANOTTO
+        VASTAANOTTO,
+        List(OPISKELUOIKEUS)
+      )
+    )
+  }
+
+  @Test
+  def opiskeluoikeusKuuluuYosinPiiriinLinkitetynOpiskeluOikeudenKauttaVainAlemmallaLinkki(): Unit = {
+    val linkitetty = OPISKELUOIKEUS.copy(
+      koulutusaste = Some(KOULUTUSASTE_AMK),
+      linkitettyOpiskeluoikeus = Some(OPISKELUOIKEUS.opiskeluoikeusAvain),
+      opiskeluoikeusAvain = "alempi"
+    )
+    assertTrue(
+      YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
+        OPISKELUOIKEUS.copy(koulutusaste = Some(KOULUTUSASTE_YAMK)),
+        VASTAANOTTO,
+        List(OPISKELUOIKEUS, linkitetty)
       )
     )
   }
@@ -95,42 +131,48 @@ class YosPredicateTest {
       YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
         OPISKELUOIKEUS
           .copy(koulutusaste = Some(KOULUTUSASTE_YLEMPI_KORKEAKOULU_TUTKINTO), koulutusKoodi = Some("772101")),
-        VASTAANOTTO
+        VASTAANOTTO,
+        List(OPISKELUOIKEUS)
       )
     )
     assertTrue(
       YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
         OPISKELUOIKEUS
           .copy(koulutusaste = Some(KOULUTUSASTE_YLEMPI_KORKEAKOULU_TUTKINTO), koulutusKoodi = Some("772100")),
-        VASTAANOTTO
+        VASTAANOTTO,
+        List(OPISKELUOIKEUS)
       )
     )
     assertTrue(
       YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
         OPISKELUOIKEUS
           .copy(koulutusaste = Some(KOULUTUSASTE_YLEMPI_KORKEAKOULU_TUTKINTO), koulutusKoodi = Some("772301")),
-        VASTAANOTTO
+        VASTAANOTTO,
+        List(OPISKELUOIKEUS)
       )
     )
     assertTrue(
       YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
         OPISKELUOIKEUS
           .copy(koulutusaste = Some(KOULUTUSASTE_YLEMPI_KORKEAKOULU_TUTKINTO), koulutusKoodi = Some("772300")),
-        VASTAANOTTO
+        VASTAANOTTO,
+        List(OPISKELUOIKEUS)
       )
     )
     assertTrue(
       YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
         OPISKELUOIKEUS
           .copy(koulutusaste = Some(KOULUTUSASTE_YLEMPI_KORKEAKOULU_TUTKINTO), koulutusKoodi = Some("772201")),
-        VASTAANOTTO
+        VASTAANOTTO,
+        List(OPISKELUOIKEUS)
       )
     )
     assertTrue(
       YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
         OPISKELUOIKEUS
           .copy(koulutusaste = Some(KOULUTUSASTE_YLEMPI_KORKEAKOULU_TUTKINTO), koulutusKoodi = Some("772200")),
-        VASTAANOTTO
+        VASTAANOTTO,
+        List(OPISKELUOIKEUS)
       )
     )
   }

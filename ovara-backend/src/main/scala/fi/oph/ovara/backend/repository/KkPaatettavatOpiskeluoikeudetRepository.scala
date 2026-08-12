@@ -49,7 +49,13 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
         )
         .getOrElse("")
     val query = sql"""
-        SELECT oo.henkilo_oid AS opiskelijaAvain, oo.virta_tunniste AS opiskeluoikeusAvain, oo.nimi_fi, oo.nimi_sv, oo.nimi_en, oo.virta_opiskeluoikeuden_tila AS opiskeluoikeudenViimeisinTila, oo.koulutusaste, oo.koulutus_koodi AS koulutusKoodi, linkitetty.koulutusaste AS linkitettyKoulutusAste
+        SELECT oo.henkilo_oid AS opiskelijaAvain,
+          oo.virta_tunniste AS opiskeluoikeusAvain,
+          oo.nimi_fi, oo.nimi_sv, oo.nimi_en,
+          oo.virta_opiskeluoikeuden_tila AS opiskeluoikeudenViimeisinTila,
+          oo.koulutusaste, oo.koulutus_koodi AS koulutusKoodi,
+          linkitetty.koulutusaste AS linkitettyKoulutusAste,
+          linkitetty.virta_tunniste AS linkitettyOpiskeluoikeus
         FROM gen.gen_opiskeluoikeus_kk oo
         LEFT JOIN gen.gen_opiskeluoikeus_kk linkitetty on linkitetty.virta_tunniste = oo.liittyva_opiskeluoikeus_avain
         WHERE oo.yos IS TRUE AND oo.organisaatio_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(organisaatioOids)})

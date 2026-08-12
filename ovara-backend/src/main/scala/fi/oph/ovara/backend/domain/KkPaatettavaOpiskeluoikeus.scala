@@ -34,7 +34,8 @@ case class KKPaatettavaOpiskeluoikeusEntity(
   opiskeluoikeudenViimeisinTila: String,
   koulutusaste: Option[String],
   koulutusKoodi: Option[String],
-  linkitettyKoulutusAste: Option[String]
+  linkitettyKoulutusAste: Option[String],
+  linkitettyOpiskeluoikeus: Option[String]
 )
 
 case class KKSitovastiVastaanottanut(

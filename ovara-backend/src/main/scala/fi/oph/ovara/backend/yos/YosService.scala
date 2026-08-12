@@ -42,7 +42,7 @@ class YosService(
         sitovastiVastaanottaneet
           .find(v =>
             v.oppijanumero.equals(o.opiskelijaAvain)
-              && YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(o, v)
+              && YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(o, v, opiskeluoikeudet)
           )
           .map(v => (o, v))
       })

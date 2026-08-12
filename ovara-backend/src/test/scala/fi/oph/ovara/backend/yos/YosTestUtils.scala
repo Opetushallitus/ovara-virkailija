@@ -25,7 +25,8 @@ object YosTestUtils {
     opiskeluoikeudenViimeisinTila = "2",
     koulutusaste = Some(YosConstants.KOULUTUSASTE_AMK),
     koulutusKoodi = Some("14"),
-    linkitettyKoulutusAste = None
+    linkitettyKoulutusAste = None,
+    linkitettyOpiskeluoikeus = None
   )
 
   def VASTAANOTTO: KKSitovastiVastaanottanut = KKSitovastiVastaanottanut(

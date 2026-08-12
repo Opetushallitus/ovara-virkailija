@@ -16,9 +16,10 @@ import fi.oph.ovara.backend.yos.YosKoulutusAsteLuokka.{
 object YosPredicate {
   def onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
     oikeus: KKPaatettavaOpiskeluoikeusEntity,
-    vastaanotto: KKSitovastiVastaanottanut
+    vastaanotto: KKSitovastiVastaanottanut,
+    kaikkiOikeudet: List[KKPaatettavaOpiskeluoikeusEntity]
   ): Boolean = {
-    val oikeudenAste       = getKoulutusAsteOpiskeluOikeudelle(oikeus)
+    val oikeudenAste       = getKoulutusAsteOpiskeluOikeudelle(oikeus, kaikkiOikeudet)
     val vastaanottanutAste = getKoulutusAsteHakutoiveelle(vastaanotto)
     kuuluukoOpiskeluOikeusYosinPiiriinKoulutusAsteenMukaan(vastaanottanutAste, oikeudenAste)
   }
@@ -51,12 +52,20 @@ object YosPredicate {
     }
   }
 
-  private def getKoulutusAsteOpiskeluOikeudelle(oikeus: KKPaatettavaOpiskeluoikeusEntity): YosKoulutusAsteLuokka = {
+  private def getKoulutusAsteOpiskeluOikeudelle(
+    oikeus: KKPaatettavaOpiskeluoikeusEntity,
+    kaikkiOikeudet: List[KKPaatettavaOpiskeluoikeusEntity]
+  ): YosKoulutusAsteLuokka = {
     if (LAAKETIETEEN_LISENSIAATIT_KOULUTUSKOODIT.contains(oikeus.koulutusKoodi.getOrElse(""))) {
       ALEMMAT_ASTEET
     } else {
-      val containsAlempi: Boolean = oikeus.koulutusaste.exists(k => KOULUTUSASTE_ALEMMAT.contains(k))
+      val containsAlempi: Boolean = oikeus.koulutusaste.exists(KOULUTUSASTE_ALEMMAT.contains(_))
         || oikeus.linkitettyKoulutusAste.exists(k => KOULUTUSASTE_ALEMMAT.contains(k))
+        || kaikkiOikeudet.exists(o =>
+          o.linkitettyOpiskeluoikeus.nonEmpty && oikeus.opiskeluoikeusAvain.equals(
+            o.linkitettyOpiskeluoikeus.get
+          ) && o.koulutusaste.exists(KOULUTUSASTE_ALEMMAT.contains(_))
+        )
       val containsYlempi: Boolean = oikeus.koulutusaste.exists(k => KOULUTUSASTE_YLEMMAT.contains(k))
 
       (containsAlempi, containsYlempi) match {
