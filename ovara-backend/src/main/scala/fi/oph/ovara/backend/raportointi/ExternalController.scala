@@ -142,7 +142,8 @@ class ExternalController(
           KkPaatettavatOpiskeluoikeudet,
           buildKkPaatettavatOpiskeluoikeudetAuditParams(params)
         )
-        buildKkPaatettavatOpiskeluoikeudetResponse(data, ZonedDateTime.now())
+        val asiointikieli = userService.getEnrichedUserDetails.asiointikieli.getOrElse("fi")
+        buildKkPaatettavatOpiskeluoikeudetResponse(data, ZonedDateTime.now(), asiointikieli)
       }
     }
   }

@@ -1,8 +1,7 @@
 package fi.oph.ovara.backend.raportointi.dto
 
 import fi.oph.ovara.backend.utils.Constants.DATE_FORMATTER_FOR_EXCEL
-import fi.oph.ovara.backend.domain.KkPaatettavaOpiskeluoikeus
-import fi.oph.ovara.backend.opiskelijavalintatieto.KielistettyResponse
+import fi.oph.ovara.backend.domain.{Kieli, Kielistetty, KkPaatettavaOpiskeluoikeus}
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode
 
@@ -50,7 +49,7 @@ case class VirtaTiedot(
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
   @BeanProperty opiskeluoikeusAvain: String,
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-  @BeanProperty nimi: KielistettyResponse,
+  @BeanProperty nimi: String,
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
   @BeanProperty paattymisPaivamaara: Optional[String],
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
@@ -63,15 +62,15 @@ case class VastaanottoTiedot(
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
   @BeanProperty hakuOid: String,
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-  @BeanProperty hakuNimi: KielistettyResponse,
+  @BeanProperty hakuNimi: String,
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
   @BeanProperty hakukohdeOid: String,
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-  @BeanProperty hakukohdeNimi: KielistettyResponse,
+  @BeanProperty hakukohdeNimi: String,
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
   @BeanProperty oppilaitosOid: String,
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-  @BeanProperty oppilaitosNimi: KielistettyResponse,
+  @BeanProperty oppilaitosNimi: String,
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
   @BeanProperty koulutusKoodit: java.util.List[String],
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
@@ -82,9 +81,13 @@ case class VastaanottoTiedot(
   @BeanProperty naytettyHakijalle: Boolean
 )
 
+private def getKielistettyValue(asiointikieli: String, kielistetty: Kielistetty): String =
+  kielistetty.getOrElse(Kieli.withName(asiointikieli), "")
+
 def buildKkPaatettavatOpiskeluoikeudetResponse(
   data: List[KkPaatettavaOpiskeluoikeus],
-  muodostusAikaleima: ZonedDateTime
+  muodostusAikaleima: ZonedDateTime,
+  asiointikieli: String
 ): KkPaatettavatOpiskeluoikeudetResponse = {
   val opiskeluoikeudetByOppijanumero = data.groupBy(_.oppijanumero)
 
@@ -94,18 +97,18 @@ def buildKkPaatettavatOpiskeluoikeudetResponse(
         virtaTiedot = VirtaTiedot(
           opiskelijaAvain = item.opiskelijaAvain,
           opiskeluoikeusAvain = item.opiskeluoikeusAvain,
-          nimi = KielistettyResponse(item.opiskeluoikeudenNimi),
+          nimi = getKielistettyValue(asiointikieli, item.opiskeluoikeudenNimi),
           paattymisPaivamaara = item.opiskeluoikeudenPaattymispvm.map(_.format(DATE_FORMATTER_FOR_EXCEL)).toJava,
           tila = item.opiskeluoikeudenViimeisinTila
         ),
         vastaanottoTiedot = VastaanottoTiedot(
           hakemusOid = item.hakemusOid,
           hakuOid = item.hakuOid,
-          hakuNimi = KielistettyResponse(item.hakuNimi),
+          hakuNimi = getKielistettyValue(asiointikieli, item.hakuNimi),
           hakukohdeOid = item.hakukohdeOid,
-          hakukohdeNimi = KielistettyResponse(item.hakukohdeNimi),
+          hakukohdeNimi = getKielistettyValue(asiointikieli, item.hakukohdeNimi),
           oppilaitosOid = item.oppilaitosOid,
-          oppilaitosNimi = KielistettyResponse(item.oppilaitosNimi),
+          oppilaitosNimi = getKielistettyValue(asiointikieli, item.oppilaitosNimi),
           koulutusKoodit = item.koulutusluokitusKoodit.asJava,
           opiskeluoikeusAlkamisaika =
             item.uudenOpiskeluoikeudenAlkamispvm.map(_.format(DATE_FORMATTER_FOR_EXCEL)).toJava,
