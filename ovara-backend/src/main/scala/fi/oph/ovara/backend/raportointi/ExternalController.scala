@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.{Operation, Parameter}
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.{Logger, LoggerFactory}
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.{HttpStatus, MediaType}
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
 import org.springframework.web.server.ResponseStatusException
@@ -28,7 +29,8 @@ import java.time.ZonedDateTime
 class ExternalController(
   val userService: UserService,
   kkPaatettavatOpiskeluoikeudetService: KkPaatettavatOpiskeluoikeudetService,
-  val auditLog: AuditLog = AuditLogObj
+  val auditLog: AuditLog = AuditLogObj,
+  @Value("${yos-json-rajapinta-enabled:false}") yosJsonRajapintaEnabled: Boolean = true
 ) extends ControllerUtils {
   val LOG: Logger = LoggerFactory.getLogger(classOf[ExternalController])
 
@@ -78,7 +80,12 @@ class ExternalController(
       ),
       new ApiResponse(
         responseCode = "404",
-        description = "Organisaatiota ei löydy",
+        description = "Organisaatiota ei löytynyt",
+        content = Array(new Content())
+      ),
+      new ApiResponse(
+        responseCode = "404",
+        description = "Rajapinta ei ole käytössä",
         content = Array(new Content())
       ),
       new ApiResponse(
@@ -103,6 +110,10 @@ class ExternalController(
     @RequestParam("ovara_opiskeluoikeuden_tila", required = false) opiskeluoikeudenTila: String,
     request: HttpServletRequest
   ): KkPaatettavatOpiskeluoikeudetResponse = {
+    if (!yosJsonRajapintaEnabled) {
+      throw ResponseStatusException(HttpStatus.NOT_FOUND, "Rajapinta ei ole käytössä")
+    }
+
     if (!hasYosOrPaakayttajaRole) {
       throw ResponseStatusException(HttpStatus.FORBIDDEN)
     }

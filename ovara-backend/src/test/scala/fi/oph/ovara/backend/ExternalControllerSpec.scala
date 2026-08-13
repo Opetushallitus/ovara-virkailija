@@ -52,4 +52,41 @@ class ExternalControllerSpec extends AnyFlatSpec with Matchers {
     exception.getStatusCode shouldEqual HttpStatus.NOT_FOUND
     verify(mockKkPaatettavatOpiskeluoikeudetService, never()).getData(any())
   }
+
+  "kkPaatettavatOpiskeluoikeudet" should "return 404 when rajapinta is disabled" in {
+    val mockKkPaatettavatOpiskeluoikeudetService = mock(classOf[KkPaatettavatOpiskeluoikeudetService])
+    val mockUserService                          = mock(classOf[UserService])
+    val mockRequest                              = mock(classOf[HttpServletRequest])
+    val mockAudit                                = mock(classOf[Audit])
+    val mockLogger                               = mock(classOf[Logger])
+    val mockUser                                 = mock(classOf[User])
+
+    val mockAuditLog = new AuditLog(mockLogger) {
+      override val audit                                      = mockAudit
+      override def getUser(request: HttpServletRequest): User = mockUser
+    }
+
+    val controller = new ExternalController(
+      mockUserService,
+      mockKkPaatettavatOpiskeluoikeudetService,
+      mockAuditLog,
+      yosJsonRajapintaEnabled = false
+    )
+
+    val exception = intercept[ResponseStatusException] {
+      controller.kkPaatettavatOpiskeluoikeudet(
+        "1.2.246.562.10.278170642010",
+        null,
+        null,
+        null,
+        null,
+        null,
+        mockRequest
+      )
+    }
+
+    exception.getStatusCode shouldEqual HttpStatus.NOT_FOUND
+    verify(mockUserService, never()).getAuthorities
+    verify(mockKkPaatettavatOpiskeluoikeudetService, never()).getData(any())
+  }
 }
