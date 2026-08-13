@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import fi.oph.ovara.backend.opiskelijavalintatieto.ValidationError
 import fi.oph.ovara.backend.service.UserService
 import fi.oph.ovara.backend.utils.Constants.OPH_PAAKAYTTAJA_AUTHORITY
-import jakarta.servlet.http.HttpServletResponse
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.{ExceptionHandler, ResponseStatus}
 import org.springframework.web.server.ResponseStatusException
@@ -12,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException
 import java.util
 import scala.jdk.CollectionConverters.*
 
-trait ControllerUtils {
+trait ControllerUtils(auditLog: AuditLog) {
   def userService: UserService
 
   def getListParamAsScalaList(listParam: util.Collection[String]): List[String] = {
@@ -33,6 +33,24 @@ trait ControllerUtils {
     val errors = f
     if (errors.nonEmpty) {
       throw ValidationException(errors.toList)
+    }
+  }
+
+  def handleApiRequest[T](
+    request: HttpServletRequest,
+    auditOperation: AuditOperation,
+    params: Map[String, Any],
+    block: => Either[String, T]
+  ): T = {
+    block match {
+      case Right(null) =>
+        throw ResponseStatusException(HttpStatus.NOT_FOUND)
+      case Right(result) =>
+        auditLog.logWithParams(request, auditOperation, params)
+        result
+      case Left(errorMessage) =>
+        // odottamattomista virheistä vain virheviesti
+        throw ApiException(errorMessage)
     }
   }
 

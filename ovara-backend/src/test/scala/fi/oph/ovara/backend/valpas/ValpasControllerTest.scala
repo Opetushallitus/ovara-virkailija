@@ -1,13 +1,17 @@
 package fi.oph.ovara.backend.valpas
 
 import fi.oph.ovara.backend.repository.ReadOnlyDatabase
+import fi.oph.ovara.backend.utils.AuditLog
 import fi.oph.ovara.backend.valpas.ValpasFactory.*
+import fi.vm.sade.auditlog.Operation
+import jakarta.servlet.http.HttpServletRequest
 import org.junit.jupiter.api.{BeforeEach, Nested, Test}
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.{SpringBootTest, TestConfiguration}
+import org.springframework.context.annotation.{Bean, Primary}
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.{WithAnonymousUser, WithMockUser}
 import org.springframework.test.context.ActiveProfiles
@@ -291,4 +295,19 @@ class ValpasControllerTest extends ValpasTestUtils {
        |    "pisteet" : 23.7,
        |    "varasijanumero" : 4
        |}""".stripMargin
+}
+
+object ValpasControllerTest {
+  @TestConfiguration
+  class MockAuditLogConfig {
+    @Bean
+    @Primary
+    def mockAuditLog(): AuditLog = new AuditLog(fi.oph.ovara.backend.utils.AuditLogger) {
+      override def logWithParams(
+        request: HttpServletRequest,
+        operation: Operation,
+        params: Map[String, Any]
+      ): Unit = {}
+    }
+  }
 }
