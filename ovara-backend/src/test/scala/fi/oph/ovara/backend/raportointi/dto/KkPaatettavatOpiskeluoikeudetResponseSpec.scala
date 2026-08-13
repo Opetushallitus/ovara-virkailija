@@ -38,7 +38,7 @@ class KkPaatettavatOpiskeluoikeudetResponseSpec extends AnyFlatSpec with Matcher
   )
 
   "buildKkPaatettavatOpiskeluoikeudetResponse" should "map all fields of KkPaatettavaOpiskeluoikeudet to the response" in {
-    val response = buildKkPaatettavatOpiskeluoikeudetResponse(List(opiskeluoikeus), muodostusAikaleima)
+    val response = buildKkPaatettavatOpiskeluoikeudetResponse(List(opiskeluoikeus), muodostusAikaleima, "fi")
 
     response.muodostusAikaleima shouldEqual muodostusAikaleima
     response.henkilot.size shouldEqual 1
@@ -57,26 +57,43 @@ class KkPaatettavatOpiskeluoikeudetResponseSpec extends AnyFlatSpec with Matcher
     val virtaTiedot = tiedot.virtaTiedot
     virtaTiedot.opiskelijaAvain shouldEqual opiskeluoikeus.opiskelijaAvain
     virtaTiedot.opiskeluoikeusAvain shouldEqual opiskeluoikeus.opiskeluoikeusAvain
-    virtaTiedot.nimi.fi.toScala shouldEqual Some("Tähtitiede")
-    virtaTiedot.nimi.sv.toScala shouldEqual Some("Astronomi")
+    virtaTiedot.nimi shouldEqual "Tähtitiede"
     virtaTiedot.paattymisPaivamaara.toScala shouldEqual Some("31.12.2026")
     virtaTiedot.tila shouldEqual opiskeluoikeus.opiskeluoikeudenViimeisinTila
 
     val vastaanottoTiedot = tiedot.vastaanottoTiedot
     vastaanottoTiedot.hakemusOid shouldEqual opiskeluoikeus.hakemusOid
     vastaanottoTiedot.hakuOid shouldEqual opiskeluoikeus.hakuOid
-    vastaanottoTiedot.hakuNimi.fi.toScala shouldEqual Some("Erillishaku")
-    vastaanottoTiedot.hakuNimi.sv.toScala shouldEqual Some("Separat ansökan")
+    vastaanottoTiedot.hakuNimi shouldEqual "Erillishaku"
     vastaanottoTiedot.hakukohdeOid shouldEqual opiskeluoikeus.hakukohdeOid
-    vastaanottoTiedot.hakukohdeNimi.fi.toScala shouldEqual Some("Meteorologi")
-    vastaanottoTiedot.hakukohdeNimi.sv.toScala shouldEqual Some("Meteorolog")
+    vastaanottoTiedot.hakukohdeNimi shouldEqual "Meteorologi"
     vastaanottoTiedot.oppilaitosOid shouldEqual opiskeluoikeus.oppilaitosOid
-    vastaanottoTiedot.oppilaitosNimi.fi.toScala shouldEqual Some("Yliopisto")
-    vastaanottoTiedot.oppilaitosNimi.sv.toScala shouldEqual Some("Universitet")
+    vastaanottoTiedot.oppilaitosNimi shouldEqual "Yliopisto"
     vastaanottoTiedot.koulutusKoodit.asScala.toList shouldEqual opiskeluoikeus.koulutusluokitusKoodit
     vastaanottoTiedot.opiskeluoikeusAlkamisaika.toScala shouldEqual Some("1.9.2026")
     vastaanottoTiedot.paikanVastaanottoaika shouldEqual "15.8.2026"
     vastaanottoTiedot.naytettyHakijalle shouldEqual true
+  }
+
+  it should "pick the kielistetty value matching asiointikieli" in {
+    val response = buildKkPaatettavatOpiskeluoikeudetResponse(List(opiskeluoikeus), muodostusAikaleima, "sv")
+    val tiedot   = response.henkilot.asScala.head.paatettavatOpiskeluoikeudet.asScala.head
+
+    tiedot.virtaTiedot.nimi shouldEqual "Astronomi"
+    tiedot.vastaanottoTiedot.hakuNimi shouldEqual "Separat ansökan"
+    tiedot.vastaanottoTiedot.hakukohdeNimi shouldEqual "Meteorolog"
+    tiedot.vastaanottoTiedot.oppilaitosNimi shouldEqual "Universitet"
+  }
+
+  it should "return \"-\" when the kielistetty value is missing for asiointikieli" in {
+    val opiskeluoikeusWithoutSv = opiskeluoikeus.copy(
+      opiskeluoikeudenNimi = Map(Fi -> "Tähtitiede")
+    )
+
+    val response = buildKkPaatettavatOpiskeluoikeudetResponse(List(opiskeluoikeusWithoutSv), muodostusAikaleima, "sv")
+    val tiedot   = response.henkilot.asScala.head.paatettavatOpiskeluoikeudet.asScala.head
+
+    tiedot.virtaTiedot.nimi shouldEqual ""
   }
 
   it should "map optional fields to empty when absent" in {
@@ -87,9 +104,10 @@ class KkPaatettavatOpiskeluoikeudetResponseSpec extends AnyFlatSpec with Matcher
       naytettyHakijalle = false
     )
 
-    val response = buildKkPaatettavatOpiskeluoikeudetResponse(List(opiskeluoikeusWithoutOptionals), muodostusAikaleima)
-    val henkilo  = response.henkilot.asScala.head
-    val tiedot   = henkilo.paatettavatOpiskeluoikeudet.asScala.head
+    val response =
+      buildKkPaatettavatOpiskeluoikeudetResponse(List(opiskeluoikeusWithoutOptionals), muodostusAikaleima, "fi")
+    val henkilo = response.henkilot.asScala.head
+    val tiedot  = henkilo.paatettavatOpiskeluoikeudet.asScala.head
 
     henkilo.henkilotunnus.toScala shouldEqual None
     tiedot.virtaTiedot.paattymisPaivamaara.toScala shouldEqual None
@@ -106,7 +124,8 @@ class KkPaatettavatOpiskeluoikeudetResponseSpec extends AnyFlatSpec with Matcher
 
     val response = buildKkPaatettavatOpiskeluoikeudetResponse(
       List(opiskeluoikeus, toinenOpiskeluoikeus),
-      muodostusAikaleima
+      muodostusAikaleima,
+      "fi"
     )
 
     response.henkilot.size shouldEqual 1
