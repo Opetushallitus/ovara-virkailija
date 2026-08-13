@@ -21,7 +21,7 @@ import org.springframework.http.{HttpStatus, MediaType}
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
 import org.springframework.web.server.ResponseStatusException
 
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 @RestController
 @RequestMapping(path = Array("api/external"))
@@ -131,7 +131,7 @@ class ExternalController(
           KkPaatettavatOpiskeluoikeudet,
           buildKkPaatettavatOpiskeluoikeudetAuditParams(params)
         )
-        buildKkPaatettavatOpiskeluoikeudetResponse(data, LocalDateTime.now())
+        buildKkPaatettavatOpiskeluoikeudetResponse(data, ZonedDateTime.now())
       }
     }
   }
