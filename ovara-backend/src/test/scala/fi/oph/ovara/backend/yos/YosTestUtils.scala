@@ -17,6 +17,7 @@ object YosTestUtils {
   def HAKUKOHDE_OID         = "1.2.246.562.20.00000000000000039609"
   def HAKEMUS_OID           = "1.2.246.562.11.00000000000002021955"
   def OPISKELU_OIKEUS_AVAIN = "virran-oikeus-avain"
+  def MYONTAJA              = "10122"
 
   def OPISKELUOIKEUS: KKPaatettavaOpiskeluoikeusEntity = KKPaatettavaOpiskeluoikeusEntity(
     opiskelijaAvain = OPPIJA_OID,
@@ -26,7 +27,7 @@ object YosTestUtils {
     koulutusaste = Some(YosConstants.KOULUTUSASTE_AMK),
     koulutusKoodi = Some("14"),
     linkitettyKoulutusAste = None,
-    myontaja = "10122"
+    myontaja = MYONTAJA
   )
 
   def VASTAANOTTO: KKSitovastiVastaanottanut = KKSitovastiVastaanottanut(
@@ -57,6 +58,6 @@ object YosTestUtils {
     hakukohdeOid = HAKUKOHDE_OID,
     hakemusOid = HAKEMUS_OID,
     paateltyAloitusPvm = Some(LocalDate.of(2026, 7, 15)),
-    naytettyPaatettavaOikeus = OPISKELU_OIKEUS_AVAIN
+    naytettyPaatettavaOikeus = s"${MYONTAJA}_$OPISKELU_OIKEUS_AVAIN"
   )
 }
