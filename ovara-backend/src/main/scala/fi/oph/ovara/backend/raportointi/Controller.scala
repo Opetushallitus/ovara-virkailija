@@ -844,7 +844,7 @@ class Controller(
             Left("virhe.validointi")
 
           case Right(validParams) =>
-            kkPaatettavatOpiskeluoikeudetService.get(validParams)
+            kkPaatettavatOpiskeluoikeudetService.getExcelData(validParams)
         }
       }
     } else {
