@@ -87,7 +87,7 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
         INNER JOIN gen.gen_organisaatio org on org.organisaatio_oid = hk.jarjestyspaikka_oid
         LEFT JOIN gen.gen_toteutus tot on tot.toteutus_oid = hk.toteutus_oid
         LEFT JOIN gen.gen_koulutus koul on koul.koulutus_oid = tot.koulutus_oid
-        LEFT JOIN LATERAL (SELECT array_agg(koodi.koodiarvo) AS arvot
+        LEFT JOIN LATERAL (SELECT json_agg(koodi.koodiarvo) AS arvot
           FROM jsonb_array_elements_text(koul.koulutukset_koodiuri) AS ku
           JOIN gen.gen_koodi koodi ON koodi.versioitu_koodiuri = ku.value) AS koulutus_koodi_arvot ON TRUE
         WHERE hk.yos IS TRUE
