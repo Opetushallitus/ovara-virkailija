@@ -49,7 +49,14 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
         )
         .getOrElse("")
     val query = sql"""
-        SELECT oo.henkilo_oid AS opiskelijaAvain, oo.virta_tunniste AS opiskeluoikeusAvain, oo.nimi_fi, oo.nimi_sv, oo.nimi_en, oo.virta_opiskeluoikeuden_tila AS opiskeluoikeudenViimeisinTila, oo.koulutusaste, oo.koulutus_koodi AS koulutusKoodi, linkitetty.koulutusaste AS linkitettyKoulutusAste
+        SELECT oo.henkilo_oid AS opiskelijaAvain, 
+          oo.virta_tunniste AS opiskeluoikeusAvain, 
+          oo.nimi_fi, oo.nimi_sv, oo.nimi_en, 
+          oo.virta_opiskeluoikeuden_tila AS opiskeluoikeudenViimeisinTila, 
+          oo.koulutusaste, 
+          oo.koulutus_koodi AS koulutusKoodi, 
+          linkitetty.koulutusaste AS linkitettyKoulutusAste,
+          oo.myontaja
         FROM gen.gen_opiskeluoikeus_kk oo
         LEFT JOIN gen.gen_opiskeluoikeus_kk linkitetty on linkitetty.virta_tunniste = oo.liittyva_opiskeluoikeus_avain
         WHERE oo.yos IS TRUE AND oo.organisaatio_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(organisaatioOids)})
@@ -73,16 +80,16 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
           haku.haku_nimi_fi, haku.haku_nimi_sv, haku.haku_nimi_en,
           org.organisaatio_oid,
           org.nimi_fi, org.nimi_sv, org.nimi_en,
-          koulutus_koodi_arvot
+          koulutus_koodi_arvot.arvot
         FROM gen.gen_valintarekisteri vr 
         INNER JOIN gen.gen_hakukohde hk ON vr.hakukohde_oid = hk.hakukohde_oid
         INNER JOIN gen.gen_haku haku on haku.haku_oid = hk.haku_oid
         INNER JOIN gen.gen_organisaatio org on org.organisaatio_oid = hk.jarjestyspaikka_oid
         LEFT JOIN gen.gen_toteutus tot on tot.toteutus_oid = hk.toteutus_oid
         LEFT JOIN gen.gen_koulutus koul on koul.koulutus_oid = tot.koulutus_oid
-        LEFT JOIN LATERAL jsonb_array_elements_text(koul.koulutukset_koodiuri) as koodiurit ON TRUE
-        LEFT JOIN LATERAL (SELECT koodi.koodiarvo FROM gen.gen_koodi koodi
-			    WHERE koodi.versioitu_koodiuri IN (koodiurit)) as koulutus_koodi_arvot ON TRUE
+        LEFT JOIN LATERAL (SELECT array_agg(koodi.koodiarvo) AS arvot
+          FROM jsonb_array_elements_text(koul.koulutukset_koodiuri) AS ku
+          JOIN gen.gen_koodi koodi ON koodi.versioitu_koodiuri = ku.value) AS koulutus_koodi_arvot ON TRUE
         WHERE hk.yos IS TRUE
         AND vr.ehdollisesti_hyvaksyttavissa IS FALSE
         AND vr.vastaanotto_tila = 'VASTAANOTTANUT_SITOVASTI' 
