@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend
 
-import fi.oph.ovara.backend.raportointi.ExternalController
+import fi.oph.ovara.backend.raportointi.KkPaatettavatOpiskeluoikeudetController
 import fi.oph.ovara.backend.service.{KkPaatettavatOpiskeluoikeudetService, UserService}
 import fi.oph.ovara.backend.utils.AuditLog
 import fi.vm.sade.auditlog.*
@@ -12,7 +12,7 @@ import org.scalatest.matchers.should.Matchers
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 
-class ExternalControllerSpec extends AnyFlatSpec with Matchers {
+class KkPaatettavatOpiskeluoikeudetControllerSpec extends AnyFlatSpec with Matchers {
 
   "kkPaatettavatOpiskeluoikeudet" should "return 404 when organisaatio is not found" in {
     val mockKkPaatettavatOpiskeluoikeudetService = mock(classOf[KkPaatettavatOpiskeluoikeudetService])
@@ -27,7 +27,7 @@ class ExternalControllerSpec extends AnyFlatSpec with Matchers {
       override def getUser(request: HttpServletRequest): User = mockUser
     }
 
-    val controller = new ExternalController(
+    val controller = new KkPaatettavatOpiskeluoikeudetController(
       mockUserService,
       mockKkPaatettavatOpiskeluoikeudetService,
       mockAuditLog
@@ -38,7 +38,7 @@ class ExternalControllerSpec extends AnyFlatSpec with Matchers {
     when(mockKkPaatettavatOpiskeluoikeudetService.organisaatioExists(any())).thenReturn(false)
 
     val exception = intercept[ResponseStatusException] {
-      controller.kkPaatettavatOpiskeluoikeudet(
+      controller.kkPaatettavatOpiskeluoikeudetJson(
         "1.2.246.562.10.278170642010",
         null,
         null,
@@ -66,7 +66,7 @@ class ExternalControllerSpec extends AnyFlatSpec with Matchers {
       override def getUser(request: HttpServletRequest): User = mockUser
     }
 
-    val controller = new ExternalController(
+    val controller = new KkPaatettavatOpiskeluoikeudetController(
       mockUserService,
       mockKkPaatettavatOpiskeluoikeudetService,
       mockAuditLog,
@@ -74,7 +74,7 @@ class ExternalControllerSpec extends AnyFlatSpec with Matchers {
     )
 
     val exception = intercept[ResponseStatusException] {
-      controller.kkPaatettavatOpiskeluoikeudet(
+      controller.kkPaatettavatOpiskeluoikeudetJson(
         "1.2.246.562.10.278170642010",
         null,
         null,

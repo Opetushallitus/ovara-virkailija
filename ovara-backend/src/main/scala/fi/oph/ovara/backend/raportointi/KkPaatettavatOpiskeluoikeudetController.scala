@@ -1,5 +1,7 @@
 package fi.oph.ovara.backend.raportointi
 
+import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import fi.oph.ovara.backend.opiskelijavalintatieto.ValidationError
 import fi.oph.ovara.backend.raportointi.dto.{
   buildKkPaatettavatOpiskeluoikeudetAuditParams,
@@ -15,7 +17,7 @@ import fi.oph.ovara.backend.utils.{ApiException, AuditLog, AuditLogObj, Controll
 import io.swagger.v3.oas.annotations.media.{Content, Schema}
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.{Operation, Parameter}
-import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.{HttpStatus, MediaType}
@@ -25,14 +27,19 @@ import org.springframework.web.server.ResponseStatusException
 import java.time.ZonedDateTime
 
 @RestController
-@RequestMapping(path = Array("api/external"))
-class ExternalController(
+@RequestMapping(path = Array("api/kk-paatettavat-opiskeluoikeudet"))
+class KkPaatettavatOpiskeluoikeudetController(
   val userService: UserService,
   kkPaatettavatOpiskeluoikeudetService: KkPaatettavatOpiskeluoikeudetService,
   val auditLog: AuditLog = AuditLogObj,
   @Value("${yos-json-rajapinta-enabled:false}") yosJsonRajapintaEnabled: Boolean = true
 ) extends ControllerUtils {
-  val LOG: Logger = LoggerFactory.getLogger(classOf[ExternalController])
+  val LOG: Logger = LoggerFactory.getLogger(classOf[KkPaatettavatOpiskeluoikeudetController])
+
+  private val mapper = new ObjectMapper()
+  mapper.registerModule(DefaultScalaModule)
+  mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+  mapper.configure(SerializationFeature.INDENT_OUTPUT, true)
 
   private def hasYosOrPaakayttajaRole: Boolean = {
     val authorities = userService.getAuthorities
@@ -49,12 +56,58 @@ class ExternalController(
     }
   }
 
-  @GetMapping(path = Array("kk-paatettavat-opiskeluoikeudet"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
+  @GetMapping(path = Array("excel"))
+  def kkPaatettavatOpiskeluoikeudetExcel(
+    @RequestParam("ovara_oppilaitos", required = true) oppilaitos: String,
+    @RequestParam("ovara_sukunimi", required = false) sukunimi: String,
+    @RequestParam("ovara_etunimi", required = false) etunimet: String,
+    @RequestParam("ovara_hetu", required = false) hetu: String,
+    @RequestParam("ovara_oppijanumero", required = false) oppijanumero: String,
+    @RequestParam("ovara_opiskeluoikeuden_tila", required = false) opiskeluoikeudenTila: String,
+    request: HttpServletRequest,
+    response: HttpServletResponse
+  ): Unit = {
+    val params = KkPaatettavatOpiskeluoikeudetParams(
+      oppilaitos = oppilaitos,
+      sukunimi = Option(sukunimi),
+      etunimet = Option(etunimet),
+      hetu = Option(hetu),
+      oppijanumero = Option(oppijanumero),
+      opiskeluoikeudenTila = Option(opiskeluoikeudenTila)
+    )
+
+    if (hasYosOrPaakayttajaRole) {
+      val validationResult = validateKkPaatettavatOpiskeluoikeudetParams(params)
+
+      handleExcelRequest(
+        validationErrors = validationResult.left.getOrElse(Nil),
+        response = response,
+        request = request,
+        id = "kk-paatettavat-opiskeluoikeudet",
+        raporttiParams =
+          validationResult.toOption.map(buildKkPaatettavatOpiskeluoikeudetAuditParams).getOrElse(Map.empty),
+        auditOperation = KkPaatettavatOpiskeluoikeudet,
+        mapper = mapper,
+        auditLog = auditLog
+      ) {
+        validationResult match {
+          case Left(_) =>
+            Left("virhe.validointi")
+
+          case Right(validParams) =>
+            kkPaatettavatOpiskeluoikeudetService.getExcelData(validParams)
+        }
+      }
+    } else {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN)
+    }
+  }
+
+  @GetMapping(path = Array("json"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
   @Operation(
     summary = "Palauttaa päätettävät opiskeluoikeudet JSON-muodossa.",
     description = "Palauttaa samat päätettävät opiskeluoikeudet kuin Excel-muotoinen raportti " +
-      "(/api/kk-paatettavat-opiskeluoikeudet), mutta JSON-muodossa. Tarkoitettu ulkopuolisten " +
-      "järjestelmien käyttöön.",
+      "(/api/kk-paatettavat-opiskeluoikeudet/excel), mutta JSON-muodossa.",
     responses = Array(
       new ApiResponse(
         responseCode = "200",
@@ -95,7 +148,7 @@ class ExternalController(
       )
     )
   )
-  def kkPaatettavatOpiskeluoikeudet(
+  def kkPaatettavatOpiskeluoikeudetJson(
     @Parameter(description = "Oppilaitoksen organisaatio-oid", required = true)
     @RequestParam("ovara_oppilaitos", required = true) oppilaitos: String,
     @Parameter(description = "Sukunimi")

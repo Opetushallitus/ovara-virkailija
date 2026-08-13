@@ -9,9 +9,7 @@ import fi.oph.ovara.backend.raportointi.dto.{
   buildKkHakeneetHyvaksytytVastaanottaneetAuditParams,
   buildKkHakijatAuditParams,
   buildKkKoulutuksetToteutuksetHakukohteetAuditParams,
-  buildKkPaatettavatOpiskeluoikeudetAuditParams,
   buildKoulutuksetToteutuksetHakukohteetAuditParams,
-  KkPaatettavatOpiskeluoikeudetParams,
   RawHakeneetHyvaksytytVastaanottaneetParams,
   RawHakijatParams,
   RawKkHakeneetHyvaksytytVastaanottaneetParams,
@@ -24,7 +22,6 @@ import fi.oph.ovara.backend.service.{
   HakeneetHyvaksytytVastaanottaneetService,
   KkHakeneetHyvaksytytVastaanottaneetService,
   KkHakijatService,
-  KkPaatettavatOpiskeluoikeudetService,
   KorkeakouluKoulutuksetToteutuksetHakukohteetService,
   KoulutuksetToteutuksetHakukohteetService,
   ToisenAsteenHakijatService,
@@ -34,12 +31,10 @@ import fi.oph.ovara.backend.utils.AuditOperation.{
   HakeneetHyvaksytytVastaanottaneet,
   KkHakeneetHyvaksytytVastaanottaneet,
   KkHakijat,
-  KkPaatettavatOpiskeluoikeudet,
   KorkeakouluKoulutuksetToteutuksetHakukohteet,
   KoulutuksetToteutuksetHakukohteet,
   ToisenAsteenHakijat
 }
-import fi.oph.ovara.backend.utils.Constants.OPH_PAAKAYTTAJA_AUTHORITY
 import fi.oph.ovara.backend.utils.ParameterValidator.{
   validateAlphanumeric,
   validateAlphanumericList,
@@ -48,25 +43,21 @@ import fi.oph.ovara.backend.utils.ParameterValidator.{
   validateKkHakeneetHyvaksytytVastaanottaneetParams,
   validateKkHakijatParams,
   validateKkKoulutuksetToteutuksetHakukohteetParams,
-  validateKkPaatettavatOpiskeluoikeudetParams,
   validateKoulutuksetToteutuksetHakukohteetParams,
   validateNumericList,
   validateOidList,
   validateOrganisaatioOid,
   validateOrganisaatioOidList
 }
-import fi.oph.ovara.backend.utils.{AuditLog, AuditLogObj, AuditOperation, ControllerUtils}
+import fi.oph.ovara.backend.utils.{AuditLog, AuditLogObj, ControllerUtils}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.{HttpHeaders, MediaType, ResponseEntity}
+import org.springframework.http.{MediaType, ResponseEntity}
 import org.springframework.security.web.csrf.CsrfToken
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
 import org.springframework.web.servlet.view.RedirectView
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import scala.jdk.CollectionConverters.*
 
 case class ErrorResponse(
@@ -85,7 +76,6 @@ class Controller(
   kkHakijatService: KkHakijatService,
   hakeneetHyvaksytytVastaanottaneetService: HakeneetHyvaksytytVastaanottaneetService,
   kkHakeneetHyvaksytytVastaanottaneetService: KkHakeneetHyvaksytytVastaanottaneetService,
-  kkPaatettavatOpiskeluoikeudetService: KkPaatettavatOpiskeluoikeudetService,
   val userService: UserService,
   val auditLog: AuditLog = AuditLogObj
 ) extends ControllerUtils {
@@ -346,61 +336,6 @@ class Controller(
 
   // RAPORTIT
 
-  private def handleExcelRequest(
-    validationErrors: List[String],
-    response: HttpServletResponse,
-    request: HttpServletRequest,
-    id: String,
-    raporttiParams: Map[String, Any],
-    auditOperation: AuditOperation,
-    mapper: ObjectMapper
-  )(block: => Either[String, XSSFWorkbook]): Unit = {
-    if (validationErrors.nonEmpty) {
-      LOG.warn(s"Excel parameter validation failed: ${validationErrors.mkString(", ")}")
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
-      response.setContentType("application/json")
-      val errorJson = mapper.writeValueAsString(
-        Map(
-          "status"  -> HttpServletResponse.SC_BAD_REQUEST,
-          "message" -> "virhe.validointi",
-          "details" -> validationErrors.asJava
-        )
-      )
-      response.getWriter.write(errorJson)
-    } else {
-      try {
-        block match {
-          case Right(wb) =>
-            auditLog.logWithParams(request, auditOperation, raporttiParams)
-            LOG.info(s"Sending Excel report: $id")
-            val dateTimeStr = LocalDateTime.now().withNano(0).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-            val out         = response.getOutputStream
-            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-            response.setHeader(
-              HttpHeaders.CONTENT_DISPOSITION,
-              s"attachment; filename=$id-$dateTimeStr.xlsx"
-            )
-            response.setHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Content-Disposition")
-            wb.write(out)
-            out.close()
-            wb.close()
-
-          case Left(errorKey) =>
-            LOG.error(s"Excel report generation failed ($id): $errorKey")
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
-            response.setContentType("application/json")
-            response.getWriter.write(mapper.writeValueAsString(errorKey))
-        }
-      } catch {
-        case e: Exception =>
-          LOG.error(s"Unexpected error while generating Excel ($id): ${e.getMessage}", e)
-          response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
-          response.setContentType("application/json")
-          response.getWriter.write(mapper.writeValueAsString("unexpected.error"))
-      }
-    }
-  }
-
   @GetMapping(path = Array("koulutukset-toteutukset-hakukohteet"))
   def koulutukset_toteutukset_hakukohteet(
     @RequestParam("ovara_haut") haut: java.util.Collection[String],
@@ -435,7 +370,8 @@ class Controller(
       raporttiParams =
         validationResult.toOption.map(buildKoulutuksetToteutuksetHakukohteetAuditParams).getOrElse(Map.empty),
       auditOperation = KoulutuksetToteutuksetHakukohteet,
-      mapper = mapper
+      mapper = mapper,
+      auditLog = auditLog
     ) {
       validationResult match {
         case Left(_) =>
@@ -492,7 +428,8 @@ class Controller(
       raporttiParams =
         validationResult.toOption.map(buildKkKoulutuksetToteutuksetHakukohteetAuditParams).getOrElse(Map.empty),
       auditOperation = KorkeakouluKoulutuksetToteutuksetHakukohteet,
-      mapper = mapper
+      mapper = mapper,
+      auditLog = auditLog
     ) {
       validationResult match {
         case Left(_) =>
@@ -559,7 +496,8 @@ class Controller(
       id = "hakijat",
       raporttiParams = validationResult.toOption.map(buildHakijatAuditParams).getOrElse(Map.empty),
       auditOperation = ToisenAsteenHakijat,
-      mapper = mapper
+      mapper = mapper,
+      auditLog = auditLog
     ) {
       validationResult match {
         case Left(_) =>
@@ -627,7 +565,8 @@ class Controller(
       id = "kk-hakijat",
       raporttiParams = validationResult.toOption.map(buildKkHakijatAuditParams).getOrElse(Map.empty),
       auditOperation = KkHakijat,
-      mapper = mapper
+      mapper = mapper,
+      auditLog = auditLog
     ) {
       validationResult match {
         case Left(_) =>
@@ -700,7 +639,8 @@ class Controller(
       raporttiParams =
         validationResult.toOption.map(buildHakeneetHyvaksytytVastaanottaneetAuditParams).getOrElse(Map.empty),
       auditOperation = HakeneetHyvaksytytVastaanottaneet,
-      mapper = mapper
+      mapper = mapper,
+      auditLog = auditLog
     ) {
       validationResult match {
         case Left(_) =>
@@ -774,7 +714,8 @@ class Controller(
       raporttiParams =
         validationResult.toOption.map(buildKkHakeneetHyvaksytytVastaanottaneetAuditParams).getOrElse(Map.empty),
       auditOperation = KkHakeneetHyvaksytytVastaanottaneet,
-      mapper = mapper
+      mapper = mapper,
+      auditLog = auditLog
     ) {
       validationResult match {
         case Left(_) =>
@@ -801,54 +742,4 @@ class Controller(
     }
   }
 
-  @GetMapping(path = Array("kk-paatettavat-opiskeluoikeudet"))
-  def kk_paatettavat_opiskeluoikeudet(
-    @RequestParam("ovara_oppilaitos", required = true) oppilaitos: String,
-    @RequestParam("ovara_sukunimi", required = false) sukunimi: String,
-    @RequestParam("ovara_etunimi", required = false) etunimet: String,
-    @RequestParam("ovara_hetu", required = false) hetu: String,
-    @RequestParam("ovara_oppijanumero", required = false) oppijanumero: String,
-    @RequestParam("ovara_opiskeluoikeuden_tila", required = false) opiskeluoikeudenTila: String,
-    request: HttpServletRequest,
-    response: HttpServletResponse
-  ): Unit = {
-    val params = KkPaatettavatOpiskeluoikeudetParams(
-      oppilaitos = oppilaitos,
-      sukunimi = Option(sukunimi),
-      etunimet = Option(etunimet),
-      hetu = Option(hetu),
-      oppijanumero = Option(oppijanumero),
-      opiskeluoikeudenTila = Option(opiskeluoikeudenTila)
-    )
-
-    val authorities              = userService.getAuthorities
-    val isOphPaakayttaja         = authorities.contains(OPH_PAAKAYTTAJA_AUTHORITY)
-    val hasYosAuthority: Boolean =
-      authorities.exists(_.startsWith("ROLE_APP_OVARA-VIRKAILIJA_KK_YOS"))
-
-    if (hasYosAuthority || isOphPaakayttaja) {
-      val validationResult = validateKkPaatettavatOpiskeluoikeudetParams(params)
-
-      handleExcelRequest(
-        validationErrors = validationResult.left.getOrElse(Nil),
-        response = response,
-        request = request,
-        id = "kk-paatettavat-opiskeluoikeudet",
-        raporttiParams =
-          validationResult.toOption.map(buildKkPaatettavatOpiskeluoikeudetAuditParams).getOrElse(Map.empty),
-        auditOperation = KkPaatettavatOpiskeluoikeudet,
-        mapper = mapper
-      ) {
-        validationResult match {
-          case Left(_) =>
-            Left("virhe.validointi")
-
-          case Right(validParams) =>
-            kkPaatettavatOpiskeluoikeudetService.getExcelData(validParams)
-        }
-      }
-    } else {
-      response.sendError(HttpServletResponse.SC_FORBIDDEN)
-    }
-  }
 }

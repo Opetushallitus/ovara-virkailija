@@ -23,5 +23,5 @@ ovara_backend.uses-ssl-proxy
 
 logback.access=true
 
-# Korkeakoulujen päätettävät opiskeluoikeudet -JSON-rajapinta (api/external/kk-paatettavat-opiskeluoikeudet)
+# Korkeakoulujen päätettävät opiskeluoikeudet -JSON-rajapinta (api/kk-paatettavat-opiskeluoikeudet/json)
 yos-json-rajapinta-enabled={{ovara_backend_yos_json_rajapinta_enabled | default('false')}}
