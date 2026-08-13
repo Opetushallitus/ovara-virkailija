@@ -34,8 +34,11 @@ case class KKPaatettavaOpiskeluoikeusEntity(
   opiskeluoikeudenViimeisinTila: String,
   koulutusaste: Option[String],
   koulutusKoodi: Option[String],
-  linkitettyKoulutusAste: Option[String]
-)
+  linkitettyKoulutusAste: Option[String],
+  myontaja: String
+) {
+  def yksiloivaTunniste = s"${this.myontaja}_${this.opiskeluoikeusAvain}"
+}
 
 case class KKSitovastiVastaanottanut(
   oppijanumero: String,
@@ -65,5 +68,10 @@ case class YosValintarekisteriTiedot(
   hakukohdeOid: String,
   hakemusOid: String,
   paateltyAloitusPvm: Option[LocalDate],
+  /**
+   * naytettyPaatettavaOikeus on tunniste, jota käytetään muissa palveluissa.
+   * Tunniste koostuu opiskeluoikeuden myöntäjästä ja virta tunnisteesta.
+   * Tunniste on muotoa $myontaja_$virtatunniste
+   */
   naytettyPaatettavaOikeus: String
 )

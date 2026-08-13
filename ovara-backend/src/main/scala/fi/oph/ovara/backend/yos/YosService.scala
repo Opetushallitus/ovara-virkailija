@@ -60,7 +60,8 @@ class YosService(
             val matchingValintaRekisteriTieto = yosValintarekisteriTiedot
               .getOrElse(h.oppijanumero, List.empty)
               .find(tiedot =>
-                tiedot.hakemusOid.equals(v.hakemusOid) && tiedot.naytettyPaatettavaOikeus.equals(o.opiskeluoikeusAvain)
+                tiedot.hakemusOid.equals(v.hakemusOid) && tiedot.naytettyPaatettavaOikeus
+                  .equals(o.yksiloivaTunniste)
               )
             KkPaatettavaOpiskeluoikeus(
               oppijanumero = v.oppijanumero,
@@ -77,7 +78,7 @@ class YosService(
                 .map(aloitusPvm => aloitusPvm.minusDays(1)),
               opiskeluoikeudenViimeisinTila = o.opiskeluoikeudenViimeisinTila,
               naytettyHakijalle = matchingValintaRekisteriTieto
-                .exists(tieto => tieto.naytettyPaatettavaOikeus.equals(o.opiskeluoikeusAvain)),
+                .exists(tieto => tieto.naytettyPaatettavaOikeus.equals(o.yksiloivaTunniste)),
               hakemusOid = v.hakemusOid,
               hakuOid = v.hakuOid,
               hakuNimi = v.haunNimi,
