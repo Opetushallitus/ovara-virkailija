@@ -39,7 +39,7 @@
         <json4s.version>4.1.0-M8</json4s.version>
         <apache.poi.version>5.4.0</apache.poi.version>
         <slf4j.version>2.0.17</slf4j.version>
-        <auditlogger.version>9.2.5-SNAPSHOT</auditlogger.version>
+        <auditlogger.version>9.2.7-SNAPSHOT</auditlogger.version>
 
     </properties>
     <dependencyManagement>
@@ -340,26 +340,6 @@
                 <enabled>true</enabled>
                 <updatePolicy>daily</updatePolicy>
                 <checksumPolicy>warn</checksumPolicy>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>oph-sade-artifactory-snapshots</id>
-            <url>https://artifactory.opintopolku.fi/artifactory/oph-sade-snapshot-local</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>oph-sade-artifactory-releases</id>
-            <url>https://artifactory.opintopolku.fi/artifactory/oph-sade-release-local</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
             </snapshots>
         </repository>
     </repositories>
