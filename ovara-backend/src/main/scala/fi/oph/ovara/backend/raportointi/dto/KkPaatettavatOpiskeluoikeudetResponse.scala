@@ -77,7 +77,9 @@ case class VastaanottoTiedot(
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
   @BeanProperty opiskeluoikeusAlkamisaika: Optional[String],
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-  @BeanProperty paikanVastaanottoaika: String
+  @BeanProperty paikanVastaanottoaika: String,
+  @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
+  @BeanProperty naytettyHakijalle: Boolean
 )
 
 def buildKkPaatettavatOpiskeluoikeudetResponse(
@@ -107,7 +109,8 @@ def buildKkPaatettavatOpiskeluoikeudetResponse(
           koulutusKoodit = item.koulutusluokitusKoodit.asJava,
           opiskeluoikeusAlkamisaika =
             item.uudenOpiskeluoikeudenAlkamispvm.map(_.format(DATE_FORMATTER_FOR_EXCEL)).toJava,
-          paikanVastaanottoaika = item.vastaanottoAjankohta.format(DATE_FORMATTER_FOR_EXCEL)
+          paikanVastaanottoaika = item.vastaanottoAjankohta.format(DATE_FORMATTER_FOR_EXCEL),
+          naytettyHakijalle = item.naytettyHakijalle
         )
       )
     }
