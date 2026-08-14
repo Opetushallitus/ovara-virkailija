@@ -18,7 +18,7 @@ class ExternalToisenAsteenHakijatService(repository: ExternalToisenAsteenHakijat
   ): Either[String, Seq[ToisenAsteenHakija]] = {
     Try {
       val hakijaRows =
-        repository.selectHakijat(hakuOid, hakukohdeOid, organisaatioOid, valintarajaus)
+        repository.selectHakijat(hakuOid, hakukohdeOid, organisaatioOid, valintarajaus, scope)
       if (hakijaRows.isEmpty) {
         Nil
       } else {
@@ -26,6 +26,8 @@ class ExternalToisenAsteenHakijatService(repository: ExternalToisenAsteenHakijat
         val hakutoiveRows        = repository.selectHakutoiveet(hakemusOids)
         val lahtokoulutByHakemus =
           repository.selectLahtokoulut(hakemusOids).map(lk => lk.hakemusOid -> lk).toMap
+        val yhteishakuTiedotByHakemus =
+          repository.selectToisenAsteenYhteishakuTiedot(hakemusOids).map(y => y.hakemusOid -> y).toMap
 
         val koodiUrit = hakutoiveRows.flatMap(_.koulutusKoodiurit).toSet
         val koodistot =
@@ -34,21 +36,31 @@ class ExternalToisenAsteenHakijatService(repository: ExternalToisenAsteenHakijat
 
         val hakutoiveetByHakemus = hakutoiveRows.groupBy(_.hakemusOid)
         hakijaRows.flatMap { row =>
-          val matchingRows = hakutoiveetByHakemus
-            .getOrElse(row.hakemusOid, Seq.empty)
-            .filter(matchesFilters(_, hakukohdeOid, organisaatioOid, valintarajaus, scope))
+          val kaikkiToiveet = hakutoiveetByHakemus.getOrElse(row.hakemusOid, Seq.empty)
+          val matchingRows  =
+            kaikkiToiveet.filter(matchesFilters(_, hakukohdeOid, organisaatioOid, valintarajaus, scope))
           if (matchingRows.isEmpty) None
           else {
-            val toiveet = matchingRows.map(
+            val yhteishakuTiedot = yhteishakuTiedotByHakemus.get(row.hakemusOid)
+            val toiveet          = matchingRows.map(
               _.asHakutoive(
                 koodistot,
-                row.urheilijaKysymyksetLukio,
-                row.urheilijaKysymyksetAmm,
-                row.kiinnostunutAmmatillinen,
-                row.hakukohteetTiedot
+                yhteishakuTiedot.flatMap(_.urheilijaKysymyksetLukio),
+                yhteishakuTiedot.flatMap(_.urheilijaKysymyksetAmm),
+                yhteishakuTiedot.flatMap(_.kiinnostunutAmmatillinen),
+                yhteishakuTiedot.map(_.hakukohteetTiedot).getOrElse(Map.empty)
               )
             )
-            Some(row.asHakija(toiveet, lahtokoulutByHakemus.get(row.hakemusOid)))
+            Some(
+              row.asHakija(
+                toiveet,
+                lahtokoulutByHakemus.get(row.hakemusOid),
+                // Todo: vuosi ja kausi poimitaan haulta? Kts. Suoritusrekisterin nykytoteutus.
+                vuosiKausiEhdokas(kaikkiToiveet)(_.hakukohdePresent, _.hakukohdeVuosi, _.hakukohdeKausi),
+                vuosiKausiEhdokas(kaikkiToiveet)(_.toteutusPresent, _.toteutusVuosi, _.toteutusKausi),
+                yhteishakuTiedot
+              )
+            )
           }
         }
       }
@@ -58,6 +70,26 @@ class ExternalToisenAsteenHakijatService(repository: ExternalToisenAsteenHakijat
         "virhe.tietokanta"
       }
   }
+
+  /**
+   * Hakemustason vuosi/kausi-ehdokas: pienin hakutoivenumero niistä hakutoiveista joilla lähderivi
+   *  on olemassa. Vastaa poistettujen alikyselyiden `INNER JOIN ... ORDER BY hakutoivenumero LIMIT 1`
+   *  -semantiikkaa: rivin puuttuminen ohittaa hakutoiveen, mutta olemassaolevan rivin NULL-arvo ei.
+   *  hakukohdeOid toissijaisena järjestysperusteena, koska hakutoivenumero ei ole yksikäsitteinen.
+   */
+  private def vuosiKausiEhdokas(
+    toiveet: Seq[HakijaHakutoiveRow]
+  )(
+    present: HakijaHakutoiveRow => Boolean,
+    vuosi: HakijaHakutoiveRow => Option[Int],
+    kausi: HakijaHakutoiveRow => Option[String]
+  ): (Option[Int], Option[String]) =
+    toiveet
+      .filter(present)
+      .sortBy(r => (r.hakutoivenumero, r.hakukohdeOid))
+      .headOption
+      .map(r => (vuosi(r), kausi(r)))
+      .getOrElse((None, None))
 
   private def matchesFilters(
     row: HakijaHakutoiveRow,
