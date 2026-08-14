@@ -39,19 +39,44 @@ class HakijatExtractors extends Extractors with GenericOvaraJsonFormats {
     val pohjakoulutus                = stripJsonQuotes(r.nextStringOption())
     val todistusvuosi                = stripJsonQuotes(r.nextStringOption())
     val lisapistekoulutus            = r.nextStringOption()
-    val hakukohdeVuosi               = r.nextIntOption()
-    val hakukohdeKausi               = r.nextStringOption()
     val hakuVuosi                    = r.nextIntOption()
     val hakuKausi                    = r.nextStringOption()
-    val toteutusVuosi                = r.nextIntOption()
-    val toteutusKausi                = r.nextStringOption()
 
-    val (vuosi, rawKausi) = pickVuosiKausiAtomically(
-      (hakukohdeVuosi, hakukohdeKausi),
-      (hakuVuosi, hakuKausi),
-      (toteutusVuosi, toteutusKausi)
+    HakijaRow(
+      oppijanumero = oppijanumero,
+      hakemusOid = hakemusOid,
+      sahkoposti = sahkoposti,
+      puhelin = puhelin,
+      lahiosoite = lahiosoite,
+      postinumero = postinumero,
+      postitoimipaikka = postitoimipaikka,
+      hakuOid = hakuOid,
+      etunimet = etunimet,
+      kutsumanimi = kutsumanimi,
+      sukunimi = sukunimi,
+      hetu = hetu,
+      asuinmaa = asuinmaa,
+      kansalaisuudet = kansalaisuudet,
+      kotikunta = kotikunta,
+      sukupuoli = sukupuoli,
+      koulutusmarkkinointilupa = koulutusmarkkinointilupa,
+      kiinnostunutOppisopimuksesta = kiinnostunutOppisopimuksesta,
+      sahkoinenviestintalupa = sahkoinenviestintalupa,
+      valintatuloksenJulkaisulupa = valintatuloksenJulkaisulupa,
+      jatetty = jatetty,
+      muokattu = muokattu,
+      aidinkieli = aidinkieli,
+      opetuskieli = opetuskieli,
+      pohjakoulutus = pohjakoulutus,
+      todistusvuosi = todistusvuosi,
+      lisapistekoulutus = lisapistekoulutus,
+      hakuVuosi = hakuVuosi,
+      hakuKausi = hakuKausi
     )
-    val kausi = normalizeKausi(rawKausi)
+  }
+
+  implicit val getToisenAsteenYhteishakuRow: GetResult[ToisenAsteenYhteishakuRow] = GetResult { r =>
+    val hakemusOid = r.nextString()
 
     val huoltaja1 = buildHuoltaja(
       etunimi = r.nextStringOption(),
@@ -109,36 +134,8 @@ class HakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       seurajoukkue = r.nextStringOption()
     )
 
-    HakijaRow(
-      oppijanumero = oppijanumero,
+    ToisenAsteenYhteishakuRow(
       hakemusOid = hakemusOid,
-      sahkoposti = sahkoposti,
-      puhelin = puhelin,
-      lahiosoite = lahiosoite,
-      postinumero = postinumero,
-      postitoimipaikka = postitoimipaikka,
-      hakuOid = hakuOid,
-      etunimet = etunimet,
-      kutsumanimi = kutsumanimi,
-      sukunimi = sukunimi,
-      hetu = hetu,
-      asuinmaa = asuinmaa,
-      kansalaisuudet = kansalaisuudet,
-      kotikunta = kotikunta,
-      sukupuoli = sukupuoli,
-      koulutusmarkkinointilupa = koulutusmarkkinointilupa,
-      kiinnostunutOppisopimuksesta = kiinnostunutOppisopimuksesta,
-      sahkoinenviestintalupa = sahkoinenviestintalupa,
-      valintatuloksenJulkaisulupa = valintatuloksenJulkaisulupa,
-      jatetty = jatetty,
-      muokattu = muokattu,
-      aidinkieli = aidinkieli,
-      opetuskieli = opetuskieli,
-      pohjakoulutus = pohjakoulutus,
-      todistusvuosi = todistusvuosi,
-      lisapistekoulutus = lisapistekoulutus,
-      vuosi = vuosi,
-      kausi = kausi,
       huoltaja1 = huoltaja1,
       huoltaja2 = huoltaja2,
       hakukohteetTiedot = hakukohteetTiedot,
@@ -174,7 +171,13 @@ class HakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       ilmoittautumisenTila = r.nextStringOption(),
       harkinnanvaraisuudenSyy = r.nextStringOption(),
       pisteet = r.nextBigDecimalOption(),
-      keskiarvoValintalaskennasta = r.nextStringOption()
+      keskiarvoValintalaskennasta = r.nextStringOption(),
+      hakukohdePresent = r.nextStringOption().isDefined,
+      hakukohdeVuosi = r.nextIntOption(),
+      hakukohdeKausi = r.nextStringOption(),
+      toteutusPresent = r.nextStringOption().isDefined,
+      toteutusVuosi = r.nextIntOption(),
+      toteutusKausi = r.nextStringOption()
     )
   }
 
@@ -197,11 +200,6 @@ class HakijatExtractors extends Extractors with GenericOvaraJsonFormats {
     opt
       .map(_.trim.stripPrefix("\"").stripSuffix("\""))
       .filter(_.nonEmpty)
-
-  private val KausiPattern = """kausi_([sk])(?:#\d+)?""".r
-
-  private def normalizeKausi(opt: Option[String]): Option[String] =
-    opt.collect { case KausiPattern(arvo) => arvo.toUpperCase }
 
   /** Parse the jsonb `hakukohteet` array into a Map keyed by `oid`. Malformed JSON → empty Map. */
   private def parseHakukohteet(jsonOpt: Option[String]): Map[String, HakemusHakukohde] = {
@@ -227,18 +225,6 @@ class HakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       .map(h => h.oid -> h)
       .toMap
   }
-
-  /**
-   * Pick the first (vuosi, kausi) tuple where BOTH values are non-null.
-   *  Returns (None, None) if no tuple qualifies. Atomic per source table —
-   *  callers pass one tuple per source in priority order.
-   */
-  private def pickVuosiKausiAtomically(
-    candidates: (Option[Int], Option[String])*
-  ): (Option[Int], Option[String]) =
-    candidates
-      .find { case (v, k) => v.isDefined && k.isDefined }
-      .getOrElse((None, None))
 
   private def buildHuoltaja(
     etunimi: Option[String],
