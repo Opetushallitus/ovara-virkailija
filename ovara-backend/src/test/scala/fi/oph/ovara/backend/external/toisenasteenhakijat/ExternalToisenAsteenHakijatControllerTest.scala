@@ -466,6 +466,47 @@ class ExternalToisenAsteenHakijatControllerTest extends ExternalToisenAsteenHaki
       .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(LAHTOKOULU_LUOKKA))
   }
 
+  // Määrittelee UUDEN käyttäytymisen, ei vanhan: `suorituksen_alku = (SELECT MAX(...))` palautti
+  // kaikki samalla alkupäivällä olevat rivit, ja service kutisti ne mielivaltaisesti .toMapilla.
+  // ROW_NUMBER valitsee yhden, ja tasatilanne ratkaistaan oppilaitos_oid:lla -> sama tulos
+  // riippumatta rivien lisäysjärjestyksestä tai kannan palautusjärjestyksestä.
+  @Test
+  def lahtokouluPicksDeterministicallyWhenTwoRowsShareSuorituksenAlku(): Unit = {
+    seedMinimalHakija()
+    val pienempiOid = "1.2.246.562.10.00000000000000000901"
+    val suurempiOid = "1.2.246.562.10.00000000000000000902"
+    insertOrganisaatio(
+      organisaatioOid = suurempiOid,
+      oppilaitosnumero = Some("09999"),
+      nimiFi = Some("Suurempi oid")
+    )
+    insertOrganisaatio(
+      organisaatioOid = pienempiOid,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
+      nimiFi = Some(LAHTOKOULU_NIMI_FI)
+    )
+    // Lisätään suurempi oid ensin, jotta lisäysjärjestys ei ole se mikä testin läpäisee.
+    insertHenkiloLahtokoulu(
+      luokka = Some("9Z"),
+      oppilaitosOid = Some(suurempiOid),
+      suoritusTyyppi = Some(LAHTOKOULU_SUORITUSTYYPPI),
+      suorituksenAlku = Some(LAHTOKOULU_ALKU),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+    insertHenkiloLahtokoulu(
+      luokka = Some(LAHTOKOULU_LUOKKA),
+      oppilaitosOid = Some(pienempiOid),
+      suoritusTyyppi = Some(LAHTOKOULU_SUORITUSTYYPPI),
+      suorituksenAlku = Some(LAHTOKOULU_ALKU),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lahtokoulu").value(LAHTOKOULU_KOODI))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.luokka").value(LAHTOKOULU_LUOKKA))
+  }
+
   @Test
   def lahtokouluIgnoresRowsOutsideJatettyWindow(): Unit = {
     seedMinimalHakija()

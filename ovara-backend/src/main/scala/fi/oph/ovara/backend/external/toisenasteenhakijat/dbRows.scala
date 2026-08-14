@@ -61,6 +61,23 @@ private val harkinnanvaraisuudenSyyMapping: Map[String, String] = Map(
   "EI_HARKINNANVARAINEN_HAKUKOHDE"           -> ""
 )
 
+private val KausiPattern = """kausi_([sk])(?:#\d+)?""".r
+
+private def normalizeKausi(opt: Option[String]): Option[String] =
+  opt.collect { case KausiPattern(arvo) => arvo.toUpperCase }
+
+/**
+ * Pick the first (vuosi, kausi) tuple where BOTH values are non-null.
+ *  Returns (None, None) if no tuple qualifies. Atomic per source table --
+ *  callers pass one tuple per source in priority order.
+ */
+private def pickVuosiKausiAtomically(
+  candidates: (Option[Int], Option[String])*
+): (Option[Int], Option[String]) =
+  candidates
+    .find { case (v, k) => v.isDefined && k.isDefined }
+    .getOrElse((None, None))
+
 private def convertHarkinnanvaraisuudenSyy(syy: String): String =
   harkinnanvaraisuudenSyyMapping.getOrElse(
     syy, {
@@ -108,19 +125,29 @@ case class HakijaRow(
   pohjakoulutus: Option[String],
   todistusvuosi: Option[String],
   lisapistekoulutus: Option[String],
-  vuosi: Option[Int],
-  kausi: Option[String],
-  huoltaja1: Option[Huoltaja],
-  huoltaja2: Option[Huoltaja],
-  hakukohteetTiedot: Map[String, HakemusHakukohde],
-  kiinnostunutAmmatillinen: Option[Boolean],
-  urheilijaKysymyksetLukio: Option[UrheilijanLisakysymykset],
-  urheilijaKysymyksetAmm: Option[UrheilijanLisakysymykset]
+  hakuVuosi: Option[Int],
+  hakuKausi: Option[String]
 ) {
+
+  /**
+   * `hakukohdeVuosiKausi` ja `toteutusVuosiKausi` johdetaan hakemuksen KAIKISTA hakutoiveista
+   *  (ks. ExternalToisenAsteenHakijatService), ei suodatetuista -- aiemmat SQL-alikyselyt näkivät
+   *  koko hakutoivejoukon. Prioriteetti: hakukohde -> haku -> toteutus.
+   */
   def asHakija(
     hakutoiveet: Seq[HakijaHakutoive],
-    lahtokoulu: Option[LahtokouluRow]
-  ): ToisenAsteenHakija =
+    lahtokoulu: Option[LahtokouluRow],
+    hakukohdeVuosiKausi: (Option[Int], Option[String]),
+    toteutusVuosiKausi: (Option[Int], Option[String]),
+    yhteishakuTiedot: Option[ToisenAsteenYhteishakuRow]
+  ): ToisenAsteenHakija = {
+    val (vuosi, rawKausi) = pickVuosiKausiAtomically(
+      hakukohdeVuosiKausi,
+      (hakuVuosi, hakuKausi),
+      toteutusVuosiKausi
+    )
+    val kausi = normalizeKausi(rawKausi)
+
     ToisenAsteenHakija(
       oppijanumero = oppijanumero,
       sahkoposti = sahkoposti,
@@ -141,8 +168,8 @@ case class HakijaRow(
       koulutusmarkkinointilupa = koulutusmarkkinointilupa,
       kiinnostunutoppisopimuksesta = kiinnostunutOppisopimuksesta,
       sahkoisenAsioinninLupa = sahkoinenviestintalupa,
-      huoltaja1 = huoltaja1,
-      huoltaja2 = huoltaja2,
+      huoltaja1 = yhteishakuTiedot.flatMap(_.huoltaja1),
+      huoltaja2 = yhteishakuTiedot.flatMap(_.huoltaja2),
       hakemus = HakijaHakemus(
         hakemusnumero = hakemusOid,
         hakutoiveet = hakutoiveet,
@@ -160,7 +187,19 @@ case class HakijaRow(
         julkaisulupa = valintatuloksenJulkaisulupa
       )
     )
+  }
 }
+
+/** gen_hakemus_toinenaste_yhteishaku, haettuna omana kyselynään. Ks. repositoryn kommentti. */
+case class ToisenAsteenYhteishakuRow(
+  hakemusOid: String,
+  huoltaja1: Option[Huoltaja],
+  huoltaja2: Option[Huoltaja],
+  hakukohteetTiedot: Map[String, HakemusHakukohde],
+  kiinnostunutAmmatillinen: Option[Boolean],
+  urheilijaKysymyksetLukio: Option[UrheilijanLisakysymykset],
+  urheilijaKysymyksetAmm: Option[UrheilijanLisakysymykset]
+)
 
 case class LahtokouluRow(
   hakemusOid: String,
@@ -203,7 +242,15 @@ case class HakijaHakutoiveRow(
   ilmoittautumisenTila: Option[String],
   harkinnanvaraisuudenSyy: Option[String],
   pisteet: Option[BigDecimal],
-  keskiarvoValintalaskennasta: Option[String]
+  keskiarvoValintalaskennasta: Option[String],
+  // Hakemustason vuosi/kausi-ehdokkaat. *Present kertoo onko hakukohde-/toteutusrivi olemassa;
+  // arvot voivat olla NULL vaikka rivi on. Ks. HakijaRow.asHakija.
+  hakukohdePresent: Boolean,
+  hakukohdeVuosi: Option[Int],
+  hakukohdeKausi: Option[String],
+  toteutusPresent: Boolean,
+  toteutusVuosi: Option[Int],
+  toteutusKausi: Option[String]
 ) {
   def asHakutoive(
     koodistot: Map[String, KoodistoArvo],

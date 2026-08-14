@@ -864,6 +864,189 @@ class ExternalToisenAsteenHakijatServiceTest
     assert(response.toOption.get.isEmpty)
   }
 
+  // ---- vuosi/kausi across MULTIPLE hakutoiveet ----
+  // Every other vuosi/kausi test above uses a single hakutoive, so none of them pin down which
+  // hakutoive the value is taken from. These do.
+
+  it should "take vuosi/kausi from the hakutoive with the lowest hakutoivenumero" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(
+      hakukohdeOid = HAKUKOHDE_OID,
+      koulutuksenAlkamisvuosi = Some(2030),
+      koulutuksenAlkamiskausiuri = Some("kausi_k#1")
+    )
+    insertHakukohde(
+      hakukohdeOid = HAKUKOHDE_OID_2,
+      koulutuksenAlkamisvuosi = Some(2031),
+      koulutuksenAlkamiskausiuri = Some("kausi_s#1")
+    )
+    // Insert the higher hakutoivenumero first so insertion order cannot be what makes this pass.
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 1)
+
+    val hakija = getOnlyHakija(service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None))
+
+    assert(hakija.hakemus.vuosi.contains("2030"))
+    assert(hakija.hakemus.kausi.contains("K"))
+  }
+
+  it should "skip a hakutoive whose hakukohde row is missing when picking vuosi/kausi" in {
+    initSchema()
+    insertHakemus()
+    // hakutoive 1 points at a hakukohde that has no gen_hakukohde row at all.
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 1)
+    insertHakukohde(
+      hakukohdeOid = HAKUKOHDE_OID,
+      koulutuksenAlkamisvuosi = Some(2032),
+      koulutuksenAlkamiskausiuri = Some("kausi_s#1")
+    )
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 2)
+
+    val hakija = getOnlyHakija(service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None))
+
+    assert(hakija.hakemus.vuosi.contains("2032"), "should fall through to hakutoive 2's hakukohde")
+    assert(hakija.hakemus.kausi.contains("S"))
+  }
+
+  it should "take the toteutus fallback from a different hakutoive than the hakukohde candidate" in {
+    initSchema()
+    insertHakemus()
+    // hakutoive 1: hakukohde exists but has no vuosi/kausi, and its toteutus row is missing.
+    insertHakukohde(
+      hakukohdeOid = HAKUKOHDE_OID,
+      toteutusOid = "1.2.246.562.17.00000000000000000999",
+      koulutuksenAlkamisvuosi = None,
+      koulutuksenAlkamiskausiuri = None
+    )
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 1)
+    // hakutoive 2: hakukohde also has no vuosi/kausi, but its toteutus does.
+    insertHakukohde(
+      hakukohdeOid = HAKUKOHDE_OID_2,
+      toteutusOid = TOTEUTUS_OID,
+      koulutuksenAlkamisvuosi = None,
+      koulutuksenAlkamiskausiuri = None
+    )
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2)
+    insertToteutusJaKoulutus(
+      koulutuksenAlkamisvuosi = Some(2033),
+      koulutuksenAlkamiskausiuri = Some("kausi_k#1")
+    )
+
+    val hakija = getOnlyHakija(service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None))
+
+    assert(hakija.hakemus.vuosi.contains("2033"), "toteutus candidate comes from hakutoive 2")
+    assert(hakija.hakemus.kausi.contains("K"))
+  }
+
+  it should "take vuosi/kausi from hakutoive 1 even when the queried hakukohde is hakutoive 2" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(
+      hakukohdeOid = HAKUKOHDE_OID_2,
+      koulutuksenAlkamisvuosi = Some(2034),
+      koulutuksenAlkamiskausiuri = Some("kausi_k#1")
+    )
+    insertHakukohde(
+      hakukohdeOid = HAKUKOHDE_OID,
+      koulutuksenAlkamisvuosi = Some(2035),
+      koulutuksenAlkamiskausiuri = Some("kausi_s#1")
+    )
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 1)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 2)
+
+    // Querying hakukohde 2 must not change which hakutoive vuosi/kausi is derived from:
+    // the value belongs to the hakemus, not to the filtered hakutoive.
+    val hakija = getOnlyHakija(service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None))
+
+    assert(hakija.hakemus.hakutoiveet.size == 1, "only the queried hakutoive is returned")
+    assert(hakija.hakemus.hakutoiveet.head.hakukohdeOid == HAKUKOHDE_OID)
+    assert(hakija.hakemus.vuosi.contains("2034"), "vuosi still comes from hakutoive 1")
+    assert(hakija.hakemus.kausi.contains("K"))
+  }
+
+  // ---- structural guards for the narrowing query ----
+
+  it should "return one hakija per matching hakemus when a henkilo has two hakemus in the same haku" in {
+    initSchema()
+    insertHakemus(hakemusOid = HAKEMUS_OID)
+    insertHakemus(hakemusOid = HAKEMUS_OID_2, insertHenkilo = false, insertHaku = false)
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID)
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2)
+    // Only HAKEMUS_OID has a hakutoive to the queried hakukohde.
+    insertHakutoive(hakemusOid = HAKEMUS_OID, hakukohdeOid = HAKUKOHDE_OID)
+    insertHakutoive(hakemusOid = HAKEMUS_OID_2, hakukohdeOid = HAKUKOHDE_OID_2)
+    insertPohjakoulutus(hakemusOid = HAKEMUS_OID, arvo = Some("\"1\""))
+    insertPohjakoulutus(hakemusOid = HAKEMUS_OID_2, arvo = Some("\"9\""))
+
+    val hakija = getOnlyHakija(service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None))
+
+    assert(hakija.hakemus.hakemusnumero == HAKEMUS_OID)
+    assert(hakija.hakemus.pohjakoulutus.contains("1"), "must not pick up the other hakemus's supa row")
+  }
+
+  // Positional-integrity guard. Both GetResult extractors read strictly by position, so a mismatch
+  // between a SELECT list and its extractor is a silent column shift rather than a compile error --
+  // and NULLs are what make it silent, since nextStringOption() on the wrong column just yields None.
+  // Every column below is non-NULL and distinctly typed so a shift surfaces as a type error instead.
+  // The tail columns of selectHakutoiveet (harkinnanvaraisuus, pisteet, keskiarvo) matter most:
+  // they are what an off-by-one in that query's SELECT list corrupts first.
+  it should "populate every field of a fully-populated hakija (column-order guard)" in {
+    initSchema()
+    insertHenkilo()
+    insertHaku(koulutuksenAlkamisvuosi = Some(2040), koulutuksenAlkamiskausiuri = Some("kausi_k#1"))
+    insertHakemus(insertHenkilo = false, insertHaku = false)
+    insertHakukohde()
+    insertHakutoive(harkinnanvaraisuudenSyy = Some("ATARU_OPPIMISVAIKEUDET"))
+    insertToteutusJaKoulutus(
+      koulutuksenAlkamisvuosi = Some(2041),
+      koulutuksenAlkamiskausiuri = Some("kausi_s#1")
+    )
+    insertOrganisaatio()
+    insertHakemusToinenAsteYhteishaku()
+    insertOpetuskieli()
+    insertPohjakoulutus(arvo = Some("\"1\""))
+    insertTodistusvuosi(arvo = Some("\"2025\""))
+    insertLisakoulutus(avain = "LISAKOULUTUS_TUVA")
+    insertValintarekisteri(pisteet = Some(BigDecimal("7.75")))
+    insertValintalaskentaFunktiotulos(tunniste = "keskiarvo_pk", arvo = Some("8.25"))
+
+    val hakija = getOnlyHakija(service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None))
+
+    // gen_hakemus / gen_henkilo block
+    assert(hakija.oppijanumero == OPPIJANUMERO)
+    assert(hakija.aidinkieli.contains(AIDINKIELI))
+    assert(hakija.huoltaja1.contains(HUOLTAJA1))
+    assert(hakija.huoltaja2.contains(HUOLTAJA2))
+    // gen_supa_tieto block
+    assert(hakija.opetuskieli.contains(OPETUSKIELI))
+    assert(hakija.hakemus.pohjakoulutus.contains("1"))
+    assert(hakija.hakemus.todistusvuosi.contains("2025"))
+    assert(hakija.hakemus.lisapistekoulutus.contains("LISAKOULUTUS_TUVA"))
+    // vuosi/kausi: hakukohde wins over both haku (2040) and toteutus (2041)
+    assert(hakija.hakemus.vuosi.contains(VUOSI))
+    assert(hakija.hakemus.kausi.contains(KAUSI))
+    // tail of selectHakutoiveet -- the columns an off-by-one corrupts first
+    val hakutoive = hakija.hakemus.hakutoiveet.head
+    assert(hakutoive.harkinnanvaraisuusperuste.contains("1"))
+    assert(hakutoive.yhteispisteet.contains(BigDecimal("7.75")))
+    assert(hakutoive.keskiarvo.contains("8.25"))
+    assert(hakutoive.lasnaolo.contains(LASNAOLO_CODE))
+    assert(hakutoive.valinta.contains(VALINTA_CODE))
+    assert(hakutoive.vastaanotto.contains(VASTAANOTTO_CODE))
+  }
+
+  it should "return empty when hakukohdeOid and organisaatioOid point at different organisaatiot" in {
+    initSchema()
+    insertHakemus()
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID, jarjestyspaikkaOid = ORGANISAATIO_OID)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID)
+
+    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), Some(ORGANISAATIO_OID_2))
+
+    assert(response.toOption.get.isEmpty)
+  }
+
   private def resetDb(): Unit = {
     db.run(sqlu"""DROP ALL OBJECTS""", "Drop everything")
     initSchema()
