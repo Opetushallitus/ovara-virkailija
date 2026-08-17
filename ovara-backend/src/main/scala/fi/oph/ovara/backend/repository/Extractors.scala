@@ -9,6 +9,7 @@ import fi.oph.ovara.backend.utils.ExtractorUtils.{
   extractKielistetty,
   extractKielistettyList,
   extractKoulutuksenAlkamisaika,
+  extractKoulutusKoodit,
   extractMap,
   extractOpintojenlaajuus,
   extractValintatapajonot
@@ -192,7 +193,7 @@ trait Extractors extends GenericOvaraJsonFormats {
       haunNimi = Map(Fi -> r.nextString(), Sv -> r.nextString(), En -> r.nextString()),
       oppilaitosOid = r.nextString(),
       oppilaitosNimi = Map(Fi -> r.nextString(), Sv -> r.nextString(), En -> r.nextString()),
-      koulutusKoodit = r.nextStringOption().map(read[List[KoulutusKoodi]]).getOrElse(List())
+      koulutusKoodit = extractKoulutusKoodit(r.nextStringOption())
     )
   )
 
