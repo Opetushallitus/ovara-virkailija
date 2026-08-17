@@ -4,6 +4,7 @@ import fi.oph.ovara.backend.domain.{
   Fi,
   KKPaatettavaOpiskeluoikeusEntity,
   KKSitovastiVastaanottanut,
+  KoulutusKoodi,
   YosHenkilo,
   YosValintarekisteriTiedot
 }
@@ -41,7 +42,7 @@ object YosTestUtils {
     haunNimi = Map(Fi -> "Korkeakoulujen kevään toinen yhteishaku 2026"),
     oppilaitosOid = ORG_OID,
     oppilaitosNimi = Map(Fi -> "Ratamon korkeakoulu"),
-    koulutusKoodiArvot = List("koulutus_31010")
+    koulutusKoodit = List(KoulutusKoodi(koodiArvo = "31010", koodiUri = "koulutus_31010#1"))
   )
 
   def HENKILO: YosHenkilo = YosHenkilo(

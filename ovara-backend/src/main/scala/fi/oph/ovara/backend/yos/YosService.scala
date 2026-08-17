@@ -87,7 +87,7 @@ class YosService(
               oppilaitosOid = v.oppilaitosOid,
               oppilaitosNimi = v.oppilaitosNimi,
               vastaanottoAjankohta = v.vastaanottoAjankohta.get,
-              koulutusluokitusKoodit = v.koulutusKoodiArvot,
+              koulutusluokitusKoodit = v.koulutusKoodit,
               uudenOpiskeluoikeudenAlkamispvm = matchingValintaRekisteriTieto.flatMap(_.paateltyAloitusPvm)
             )
           })
