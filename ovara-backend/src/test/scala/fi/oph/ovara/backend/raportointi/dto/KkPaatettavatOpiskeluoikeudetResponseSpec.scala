@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.raportointi.dto
 
-import fi.oph.ovara.backend.domain.{Fi, KkPaatettavaOpiskeluoikeus, Sv}
+import fi.oph.ovara.backend.domain.{Fi, KkPaatettavaOpiskeluoikeus, KoulutusKoodi, Sv}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -32,7 +32,10 @@ class KkPaatettavatOpiskeluoikeudetResponseSpec extends AnyFlatSpec with Matcher
     oppilaitosOid = "1.2.246.562.10.00000000000000000001",
     uudenOpiskeluoikeudenAlkamispvm = Some(LocalDate.of(2026, 9, 1)),
     vastaanottoAjankohta = LocalDate.of(2026, 8, 15),
-    koulutusluokitusKoodit = List("12345", "67890"),
+    koulutusluokitusKoodit = List(
+      KoulutusKoodi(koodiArvo = "12345", koodiUri = "koulutus_12345#1"),
+      KoulutusKoodi(koodiArvo = "67890", koodiUri = "koulutus_67890#3")
+    ),
     hakuOid = "1.2.246.562.20.00000000000000000001",
     hakuNimi = Map(Fi -> "Erillishaku", Sv -> "Separat ansökan")
   )
@@ -53,6 +56,7 @@ class KkPaatettavatOpiskeluoikeudetResponseSpec extends AnyFlatSpec with Matcher
     henkilo.paatettavatOpiskeluoikeudet.size shouldEqual 1
 
     val tiedot = henkilo.paatettavatOpiskeluoikeudet.asScala.head
+    tiedot.naytettyHakijalle shouldEqual true
 
     val virtaTiedot = tiedot.virtaTiedot
     virtaTiedot.opiskelijaAvain shouldEqual opiskeluoikeus.opiskelijaAvain
@@ -69,10 +73,15 @@ class KkPaatettavatOpiskeluoikeudetResponseSpec extends AnyFlatSpec with Matcher
     vastaanottoTiedot.hakukohdeNimi shouldEqual "Meteorologi"
     vastaanottoTiedot.oppilaitosOid shouldEqual opiskeluoikeus.oppilaitosOid
     vastaanottoTiedot.oppilaitosNimi shouldEqual "Yliopisto"
-    vastaanottoTiedot.koulutusKoodit.asScala.toList shouldEqual opiskeluoikeus.koulutusluokitusKoodit
+    vastaanottoTiedot.koulutusKoodit.asScala.map(_.koodiArvo) shouldEqual opiskeluoikeus.koulutusluokitusKoodit.map(
+      _.koodiArvo
+    )
+    vastaanottoTiedot.koulutusKoodit.asScala.map(_.koodiUri) shouldEqual opiskeluoikeus.koulutusluokitusKoodit.map(
+      _.koodiUri
+    )
     vastaanottoTiedot.opiskeluoikeusAlkamisaika.toScala shouldEqual Some("1.9.2026")
     vastaanottoTiedot.paikanVastaanottoaika shouldEqual "15.8.2026"
-    vastaanottoTiedot.naytettyHakijalle shouldEqual true
+
   }
 
   it should "pick the kielistetty value matching asiointikieli" in {
@@ -110,9 +119,9 @@ class KkPaatettavatOpiskeluoikeudetResponseSpec extends AnyFlatSpec with Matcher
     val tiedot  = henkilo.paatettavatOpiskeluoikeudet.asScala.head
 
     henkilo.henkilotunnus.toScala shouldEqual None
+    tiedot.naytettyHakijalle shouldEqual false
     tiedot.virtaTiedot.paattymisPaivamaara.toScala shouldEqual None
     tiedot.vastaanottoTiedot.opiskeluoikeusAlkamisaika.toScala shouldEqual None
-    tiedot.vastaanottoTiedot.naytettyHakijalle shouldEqual false
   }
 
   it should "group multiple opiskeluoikeudet under the same henkilo by oppijanumero" in {
