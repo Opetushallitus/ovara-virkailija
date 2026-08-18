@@ -110,6 +110,14 @@ object AuditOperation {
     val name = "TOISEN-ASTEEN-HAKIJAT"
   }
 
+  case object ExternalToisenAsteenHakijat extends AuditOperation {
+    val name = "EXTERNAL-TOISEN-ASTEEN-HAKIJAT"
+  }
+
+  case object ExternalKKHakijat extends AuditOperation {
+    val name = "EXTERNAL-KK-HAKIJAT"
+  }
+
   case object KkHakijat extends AuditOperation {
     val name = "KK-HAKIJAT"
   }
@@ -124,6 +132,14 @@ object AuditOperation {
 
   case object KkPaatettavatOpiskeluoikeudet extends AuditOperation {
     val name = "KK-PAATETTAVAT-OPISKELUOIKEUDET"
+  }
+
+  case object Opiskelijavalintatiedot extends AuditOperation {
+    val name = "OPISKELIJAVALINTATIEDOT"
+  }
+
+  case object Valpastiedot extends AuditOperation {
+    val name = "VALPAS-TIEDOT"
   }
 }
 

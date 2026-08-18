@@ -3,22 +3,14 @@ package fi.oph.ovara.backend.valpas
 import fi.oph.ovara.backend.opiskelijavalintatieto.ValidationError
 import fi.oph.ovara.backend.service.UserService
 import fi.oph.ovara.backend.utils.ParameterValidator.{validateOid, validateOidList}
-import fi.oph.ovara.backend.utils.{ApiException, ControllerUtils}
+import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation, ControllerUtils}
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.{Content, Schema}
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.{
-  GetMapping,
-  PostMapping,
-  RequestBody,
-  RequestMapping,
-  RequestParam,
-  RestController
-}
-import org.springframework.web.server.ResponseStatusException
+import org.springframework.web.bind.annotation.*
 
 import scala.jdk.CollectionConverters.*
 
@@ -27,8 +19,9 @@ import scala.jdk.CollectionConverters.*
 class ValpasController(
   val userService: UserService,
   valpasService: ValpasService,
+  auditLog: AuditLog,
   @Value("${opintopolku.virkailija.url}") virkailijaUrl: String
-) extends ControllerUtils {
+) extends ControllerUtils(auditLog) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[ValpasController])
 
   @GetMapping(path = Array("valpas"))
@@ -52,18 +45,26 @@ class ValpasController(
   )
   def singleValpas(
     @RequestParam("ovara_oppijanumero", required = true) oppijanumero: String,
-    @RequestParam("ovara_vain_aktiiviset", defaultValue = "false") vainAktiiviset: Boolean
+    @RequestParam("ovara_vain_aktiiviset", defaultValue = "false") vainAktiiviset: Boolean,
+    request: HttpServletRequest
   ): java.util.List[HakemusResponse] =
     withPaakayttajaRole {
       validate {
         validateOid(Some(oppijanumero), "ovara_oppijanumero")
       }
 
-      handleRequest {
-        valpasService.getValpasTiedot(List(oppijanumero), vainAktiiviset).map {
-          _.map(h => HakemusResponse(h, virkailijaUrl)).asJava
+      val params = Map("oppijanumero" -> oppijanumero, "vainAktiiviset" -> vainAktiiviset)
+      LOG.info(s"Haetaan valpas-tiedot parametreillä: $params")
+
+      handleApiRequest(
+        request,
+        AuditOperation.Valpastiedot,
+        params, {
+          valpasService.getValpasTiedot(List(oppijanumero), vainAktiiviset).map {
+            _.map(h => HakemusResponse(h, virkailijaUrl)).asJava
+          }
         }
-      }
+      )
     }
 
   @PostMapping(path = Array("valpas"))
@@ -87,7 +88,8 @@ class ValpasController(
   )
   def manyValpas(
     @RequestBody oppijanumerot: java.util.Collection[String],
-    @RequestParam("ovara_vain_aktiiviset", defaultValue = "false") vainAktiiviset: Boolean
+    @RequestParam("ovara_vain_aktiiviset", defaultValue = "false") vainAktiiviset: Boolean,
+    request: HttpServletRequest
   ): java.util.List[HakemusResponse] =
     withPaakayttajaRole {
       val numeroList = getListParamAsScalaList(oppijanumerot)
@@ -95,22 +97,17 @@ class ValpasController(
         validateOidList(numeroList, "ovara_oppijanumero")
       }
 
-      handleRequest {
-        valpasService.getValpasTiedot(numeroList, vainAktiiviset).map {
-          _.map(h => HakemusResponse(h, virkailijaUrl)).asJava
-        }
-      }
-    }
+      val params = Map("oppijanumerot" -> oppijanumerot, "vainAktiiviset" -> vainAktiiviset)
+      LOG.info(s"Haetaan valpas-tiedot parametreillä: $params")
 
-  private def handleRequest[T](block: => Either[String, T]): T = {
-    block match {
-      case Right(null) =>
-        throw ResponseStatusException(HttpStatus.NOT_FOUND)
-      case Right(result) =>
-        result
-      case Left(errorMessage) =>
-        // odottamattomista virheistä vain virheviesti
-        throw ApiException(errorMessage)
+      handleApiRequest(
+        request,
+        AuditOperation.Valpastiedot,
+        params, {
+          valpasService.getValpasTiedot(numeroList, vainAktiiviset).map {
+            _.map(h => HakemusResponse(h, virkailijaUrl)).asJava
+          }
+        }
+      )
     }
-  }
 }

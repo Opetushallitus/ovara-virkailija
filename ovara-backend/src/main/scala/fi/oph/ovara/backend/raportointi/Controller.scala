@@ -55,7 +55,7 @@ import fi.oph.ovara.backend.utils.ParameterValidator.{
   validateOrganisaatioOid,
   validateOrganisaatioOidList
 }
-import fi.oph.ovara.backend.utils.{AuditLog, AuditLogObj, AuditOperation, ControllerUtils}
+import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation, ControllerUtils}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
@@ -87,8 +87,8 @@ class Controller(
   kkHakeneetHyvaksytytVastaanottaneetService: KkHakeneetHyvaksytytVastaanottaneetService,
   kkPaatettavatOpiskeluoikeudetService: KkPaatettavatOpiskeluoikeudetService,
   val userService: UserService,
-  val auditLog: AuditLog = AuditLogObj
-) extends ControllerUtils {
+  auditLog: AuditLog
+) extends ControllerUtils(auditLog) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[Controller])
 
   @Value("${ovara.ui.url}")
