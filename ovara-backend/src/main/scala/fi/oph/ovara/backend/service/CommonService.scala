@@ -446,6 +446,28 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     }
   }
 
+  //Todo: korvataan tämä gen-skeemaan pohjautuvalla ratkaisulla external-rajapintoja varten.
+  // Tämä toteutus on väliaikainen.
+  /**
+   * Laajentaa annetut organisaatio-oidit sisältämään myös niiden lapsiorganisaatiot,
+   *  organisaatiotasosta riippumatta. Toisin kuin `getAllowedOrgOidsFromOrgSelection`,
+   *  tämä ei vaadi tietoa siitä onko oid koulutustoimija, oppilaitos vai toimipiste --
+   *  kaikki kolme hierarkiahakua ajetaan ja tulokset yhdistetään (vrt. ei-pääkäyttäjän
+   *  haara `getAllowedOrgsFromOrgSelection`-metodissa).
+   */
+  def getOrganisaatioidenJaLastenOidit(organisaatioOids: List[String]): List[String] = {
+    if (organisaatioOids.isEmpty) {
+      List()
+    } else {
+      val hierarkiat =
+        getToimipistehierarkiat(organisaatioOids) ++
+          getOppilaitoshierarkiat(organisaatioOids) ++
+          getKoulutustoimijahierarkia(organisaatioOids)
+
+      (organisaatioOids ++ hierarkiat.flatMap(OrganisaatioUtils.getDescendantOids)).distinct
+    }
+  }
+
   def getAllowedOrgOidsFromOrgSelection(
     kayttooikeusOrganisaatioOids: List[String],
     oppilaitosOids: List[String],

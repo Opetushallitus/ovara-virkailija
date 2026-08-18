@@ -15,15 +15,15 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
   def selectKKHakijat(
     hakuOid: String,
     hakukohdeOid: Option[String],
-    organisaatioOid: Option[String],
+    organisaatioOids: Seq[String],
     valintarajaus: Valintarajaus
   ): Seq[KKHakijaRow] = {
-    // Controller-level validation guarantees at least one of these is set.
-    if (hakukohdeOid.isEmpty && organisaatioOid.isEmpty) {
+    // Rajaus käytännössä pakollinen joko hakukohdeOidilla tai organisaatioOidilla
+    if (hakukohdeOid.isEmpty && organisaatioOids.isEmpty) {
       Seq.empty
     } else {
-      val stateSql = stateSqlFragment(valintarajaus)
-      val hakuFilterSql = hakuFilterSqlFragment(hakukohdeOid, organisaatioOid)
+      val stateSql      = stateSqlFragment(valintarajaus)
+      val hakuFilterSql = hakuFilterSqlFragment(hakukohdeOid, organisaatioOids)
 
       val query = sql"""
           SELECT hlo.oppijanumero,
@@ -246,12 +246,14 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
 
   private def hakuFilterSqlFragment(
     hakukohdeOid: Option[String],
-    organisaatioOid: Option[String]
+    organisaatioOids: Seq[String]
   ): String =
-    hakukohdeOid
-      .map(hk => s" AND ht.hakukohde_oid = '$hk'")
-      .orElse(organisaatioOid.map(org => s" AND hk.jarjestyspaikka_oid = '$org'"))
-      .getOrElse("")
+    Seq(
+      hakukohdeOid.map(hk => s" AND ht.hakukohde_oid = '$hk'"),
+      Option.when(organisaatioOids.nonEmpty)(
+        s" AND hk.jarjestyspaikka_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(organisaatioOids)})"
+      )
+    ).flatten.mkString
 
   private def stateSqlFragment(v: Valintarajaus): String = v match {
     case Valintarajaus.HAKENEET   => ""

@@ -1,5 +1,6 @@
 package fi.oph.ovara.backend.external.kkhakijat
 
+import fi.oph.ovara.backend.service.CommonService
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.Service
 
@@ -7,7 +8,7 @@ import java.time.format.DateTimeFormatter
 import scala.util.Try
 
 @Service
-class ExternalKKHakijatService(repository: ExternalKKHakijatRepository) {
+class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonService: CommonService) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[ExternalKKHakijatService])
 
   private val AikaleimaFormatter: DateTimeFormatter =
@@ -21,7 +22,17 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository) {
     scope: KayttooikeusScope = KayttooikeusScope.paakayttaja
   ): Either[String, Seq[KKHakija]] = {
     Try {
-      val kkHakijaRows = repository.selectKKHakijat(hakuOid, hakukohdeOid, organisaatioOid, valintarajaus)
+      // Sekä rajapinnan organisaatioOid (rajaava parametri) että käyttäjän oikeudet vertaillaan hakukohteen
+      // jarjestyspaikka_oidia vasten, joka on tyypillisesti toimipiste. Molemmat on siis
+      // laajennettava lapsiorganisaatioihin, jotta koulutustoimija- tai oppilaitostason
+      // valinta ja oikeus osuvat alempana oleviin järjestyspaikkoihin.
+      val organisaatioOids =
+        organisaatioOid.map(oid => commonService.getOrganisaatioidenJaLastenOidit(List(oid))).getOrElse(Nil)
+      val expandedScope =
+        if (scope.isPaakayttaja) scope
+        else KayttooikeusScope.limited(commonService.getOrganisaatioidenJaLastenOidit(scope.allowedOrgOids.toList).toSet)
+
+      val kkHakijaRows = repository.selectKKHakijat(hakuOid, hakukohdeOid, organisaatioOids, valintarajaus)
       if (kkHakijaRows.isEmpty) {
         Nil
       } else {
@@ -34,7 +45,7 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository) {
         kkHakijaRows.flatMap { row =>
           val matchingRows = hakemuksetByOid
             .getOrElse(row.hakemusOid, Seq.empty)
-            .filter(matchesFilters(_, hakukohdeOid, organisaatioOid, valintarajaus, scope))
+            .filter(matchesFilters(_, hakukohdeOid, organisaatioOids, valintarajaus, expandedScope))
           if (matchingRows.isEmpty) None
           else {
             val hakemukset = matchingRows.map(mRow =>
@@ -64,12 +75,12 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository) {
   private def matchesFilters(
     row: KKHakemusRow,
     hakukohdeOid: Option[String],
-    organisaatioOid: Option[String],
+    organisaatioOids: Seq[String], // Rajapinnan parametri lapsiorganisaatioineen
     valintarajaus: Valintarajaus,
-    scope: KayttooikeusScope
+    scope: KayttooikeusScope // Käyttäjän oikeudet lapsiorganisaatioineen
   ): Boolean = {
     val hakukohdeMatch = hakukohdeOid.forall(_ == row.hakukohdeOid)
-    val orgMatch       = organisaatioOid.forall(o => row.jarjestyspaikkaOid.contains(o))
+    val orgMatch       = organisaatioOids.isEmpty || row.jarjestyspaikkaOid.exists(organisaatioOids.contains)
     val allowedMatch   = scope.isPaakayttaja || row.jarjestyspaikkaOid.exists(scope.allowedOrgOids.contains)
     val stateMatch     = valintarajaus match {
       case Valintarajaus.HAKENEET   => true
