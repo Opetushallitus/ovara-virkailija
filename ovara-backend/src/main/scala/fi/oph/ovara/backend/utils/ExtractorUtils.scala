@@ -40,6 +40,10 @@ object ExtractorUtils extends GenericOvaraJsonFormats {
     json.map(read[List[String]]).getOrElse(List())
   }
 
+  def extractKoulutusKoodit(json: Option[String]): List[KoulutusKoodi] = {
+    json.map(read[List[KoulutusKoodi]]).getOrElse(List())
+  }
+
   def extractMap(json: Option[String]): Map[String, String] =
     json.map(read[Map[String, String]]).getOrElse(Map())
 

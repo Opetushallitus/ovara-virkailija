@@ -35,49 +35,62 @@ class KkPaatettavatOpiskeluoikeudetService(
 
   val LOG: Logger = LoggerFactory.getLogger(classOf[KkPaatettavatOpiskeluoikeudetService])
 
-  def get(params: KkPaatettavatOpiskeluoikeudetParams): Either[String, XSSFWorkbook] = {
+  def organisaatioExists(oppilaitos: String): Boolean = {
+    db.run(
+      kkPaatettavatOpiskeluoikeudetRepository.organisaatioNameQuery(oppilaitos),
+      "organisaatioNameQuery"
+    ).nonEmpty
+  }
+
+  def getData(params: KkPaatettavatOpiskeluoikeudetParams): Either[String, List[KkPaatettavaOpiskeluoikeus]] = {
     val user                      = userService.getEnrichedUserDetails
-    val asiointikieli             = user.asiointikieli.getOrElse("fi")
-    val authorities               = user.authorities
-    val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(authorities)
-    val translations              = lokalisointiService.getOvaraTranslations(asiointikieli)
+    val kayttooikeusOrganisaatiot = AuthoritiesUtil.getKayttooikeusOids(user.authorities)
 
     val orgOidsForQuery = commonService.getAllowedOrgOidsFromOrgSelection(
       kayttooikeusOrganisaatioOids = kayttooikeusOrganisaatiot,
       oppilaitosOids = List(params.oppilaitos),
       List.empty
     )
-    Try {
-      val data               = yosService.getPaattyvatOpiskeluOikeudet(orgOidsForQuery, params)
-      val raporttiParamNames = db
-        .run(
-          kkPaatettavatOpiskeluoikeudetRepository.organisaatioNameQuery(params.oppilaitos),
-          "hakuParamNamesQuery"
-        )
-        .map(param => param.parametri -> param.nimi)
-        .toMap
 
-      val raporttiParams = buildKkPaatettavatOpiskeluoikeudetParamsForExcel(
-        KkPaatettavatOpiskeluoikeudetParams(
-          params.oppilaitos,
-          params.sukunimi,
-          params.etunimet,
-          params.hetu,
-          params.oppijanumero,
-          params.opiskeluoikeudenTila
-        ),
-        raporttiParamNames
-      )
-      ExcelWriter.writeKorkeakouluPaatettavatOpiskeluoikeudetRaportti(
-        data,
-        CommonExcelParams(asiointikieli, translations, raporttiParams, LocalDateTime.now())
-      )
+    Try {
+      yosService.getPaattyvatOpiskeluOikeudet(orgOidsForQuery, params)
     } match {
-      case Success(excelFile) => Right(excelFile)
+      case Success(data)      => Right(data)
       case Failure(exception) =>
-        LOG.error("Error generating Excel report", exception)
+        LOG.error("Error fetching päätettävät opiskeluoikeudet data", exception)
         Left("virhe.tietokanta")
     }
   }
 
+  def getExcelData(params: KkPaatettavatOpiskeluoikeudetParams): Either[String, XSSFWorkbook] = {
+    val user          = userService.getEnrichedUserDetails
+    val asiointikieli = user.asiointikieli.getOrElse("fi")
+    val translations  = lokalisointiService.getOvaraTranslations(asiointikieli)
+
+    getData(params).flatMap { data =>
+      Try {
+        val raporttiParamNames = db
+          .run(
+            kkPaatettavatOpiskeluoikeudetRepository.organisaatioNameQuery(params.oppilaitos),
+            "hakuParamNamesQuery"
+          )
+          .map(param => param.parametri -> param.nimi)
+          .toMap
+
+        val raporttiParams = buildKkPaatettavatOpiskeluoikeudetParamsForExcel(
+          params,
+          raporttiParamNames
+        )
+        ExcelWriter.writeKorkeakouluPaatettavatOpiskeluoikeudetRaportti(
+          data,
+          CommonExcelParams(asiointikieli, translations, raporttiParams, LocalDateTime.now())
+        )
+      } match {
+        case Success(excelFile) => Right(excelFile)
+        case Failure(exception) =>
+          LOG.error("Error generating Excel report", exception)
+          Left("virhe.tietokanta")
+      }
+    }
+  }
 }

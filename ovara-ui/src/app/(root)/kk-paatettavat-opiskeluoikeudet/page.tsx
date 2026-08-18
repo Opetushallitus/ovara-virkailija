@@ -45,7 +45,9 @@ export default function KkPaatettavatOpiskeluoikeudet() {
   const queryParamsStr = queryParams.toString();
 
   const handleDownload = () =>
-    run(() => downloadExcel('kk-paatettavat-opiskeluoikeudet', queryParamsStr));
+    run(() =>
+      downloadExcel('kk-paatettavat-opiskeluoikeudet/excel', queryParamsStr),
+    );
 
   return (
     <MainContainer>
