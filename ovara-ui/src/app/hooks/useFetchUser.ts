@@ -1,4 +1,3 @@
-'use client';
 import { useEffect, useState } from 'react';
 import { doApiFetch } from '@/app/lib/ovara-backend/api';
 import { User } from '@/app/lib/types/common';

@@ -1,11 +1,10 @@
-'use client';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import { hasOvaraKkYosRole } from '@/app/lib/utils';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
 import { isEmpty } from 'remeda';
 import { useDownloadWithErrorBoundary } from '@/app/hooks/useDownloadWithErrorBoundary';
-import { useSearchParams } from 'next/navigation';
+import { useOptimisticSearchParams } from 'nuqs/adapters/react-router/v7';
 import { downloadExcel } from '@/app/components/form/utils';
 import { MainContainer } from '@/app/components/main-container';
 import { FormBox } from '@/app/components/form/form-box';
@@ -42,7 +41,8 @@ export default function KkPaatettavatOpiskeluoikeudet() {
   const isDisabled = [selectedOppilaitos || []].every(isEmpty);
   const { run, isLoading } = useDownloadWithErrorBoundary();
 
-  const queryParamsStr = useSearchParams().toString();
+  const queryParams = useOptimisticSearchParams();
+  const queryParamsStr = queryParams.toString();
 
   const handleDownload = () =>
     run(() => downloadExcel('kk-paatettavat-opiskeluoikeudet', queryParamsStr));
@@ -63,8 +63,8 @@ export default function KkPaatettavatOpiskeluoikeudet() {
               renderInput={({ labelId }) => (
                 <DebouncedOphInput
                   fullWidth
-                  value={sukunimi}
-                  onValueChange={setSukunimi}
+                  value={sukunimi ?? ''}
+                  onChange={(e) => setSukunimi(e.target.value)}
                   inputProps={{
                     'aria-labelledby': labelId,
                   }}
@@ -86,8 +86,8 @@ export default function KkPaatettavatOpiskeluoikeudet() {
               renderInput={({ labelId }) => (
                 <DebouncedOphInput
                   fullWidth
-                  value={etunimi}
-                  onValueChange={setEtunimi}
+                  value={etunimi ?? ''}
+                  onChange={(e) => setEtunimi(e.target.value)}
                   inputProps={{
                     'aria-labelledby': labelId,
                   }}
@@ -97,13 +97,13 @@ export default function KkPaatettavatOpiskeluoikeudet() {
           </Box>
           <OvaraTextInput
             label={t('raportti.hetu')}
-            value={hetu}
-            onValueChange={setHetu}
+            value={hetu ?? ''}
+            onChange={(e) => setHetu(e.target.value)}
           />
           <OvaraTextInput
             label={t('raportti.oppijanumero')}
-            value={oppijanumero}
-            onValueChange={setOppijanumero}
+            value={oppijanumero ?? ''}
+            onChange={(e) => setOppijanumero(e.target.value)}
           />
           <Divider />
           <OpiskeluoikeudenTila />

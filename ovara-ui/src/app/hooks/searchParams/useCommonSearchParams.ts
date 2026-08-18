@@ -1,4 +1,3 @@
-'use client';
 import { parseAsArrayOf, parseAsString, useQueryState } from 'nuqs';
 import { useQueryStateWithLocalStorage } from '@/app/hooks/searchParams/useQueryStateWithLocalStorage';
 import { createNullableBooleanOptions } from './paramUtil';

@@ -1,5 +1,3 @@
-'use client';
-
 import { MainContainer } from '../components/main-container';
 import { ListTable } from '../components/table/table';
 import { useAuthorizedUser } from '../components/providers/authorized-user-provider';

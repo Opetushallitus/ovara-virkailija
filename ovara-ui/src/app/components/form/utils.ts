@@ -92,6 +92,9 @@ export const downloadExcel = async (
     { queryParams: `?${queryParamsStr}` },
     'no-store',
   );
+  if (!response) {
+    throw new Error('Fetching Excel failed');
+  }
 
   const contentDisposition = response.headers.get('content-disposition');
   if (!contentDisposition) {

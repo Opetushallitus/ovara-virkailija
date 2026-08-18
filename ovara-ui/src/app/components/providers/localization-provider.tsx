@@ -1,5 +1,3 @@
-'use client';
-
 import { ReactNode, useEffect } from 'react';
 import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import type { LanguageCode } from '@/app/lib/types/common';

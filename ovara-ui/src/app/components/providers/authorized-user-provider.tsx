@@ -1,4 +1,3 @@
-'use client';
 import React, { useContext, createContext, ReactNode } from 'react';
 import { useFetchUser } from '@/app/hooks/useFetchUser';
 import { User } from '@/app/lib/types/common';

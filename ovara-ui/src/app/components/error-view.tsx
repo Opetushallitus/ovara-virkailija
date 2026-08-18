@@ -1,5 +1,3 @@
-'use client';
-
 import { FetchError, PermissionError } from '@/app/lib/common';
 import {
   DefaultParamType,
