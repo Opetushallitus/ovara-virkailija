@@ -1,7 +1,9 @@
 package fi.oph.ovara.backend.external.kkhakijat
 
+import fi.oph.ovara.backend.external.OrganisaatioHierarkiaStub
 import fi.oph.ovara.backend.external.kkhakijat.ExternalKKHakijatTestData.*
 import fi.oph.ovara.backend.repository.ReadOnlyDatabase
+import fi.oph.ovara.backend.service.CommonService
 import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation}
 import fi.vm.sade.auditlog.Operation
 import jakarta.servlet.http.HttpServletRequest
@@ -17,6 +19,7 @@ import org.springframework.context.annotation.{Bean, Import, Primary}
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.{WithAnonymousUser, WithMockUser}
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.bean.`override`.mockito.MockitoBean
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.{content, header, jsonPath, status}
 import org.springframework.test.web.servlet.{MockMvc, ResultActions}
@@ -33,7 +36,7 @@ import scala.jdk.CollectionConverters.*
   username = "testuser",
   roles = Array("APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA_1.2.246.562.10.00000000001")
 )
-class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
+class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils with OrganisaatioHierarkiaStub {
 
   @Autowired
   private val mvc: MockMvc = null
@@ -41,9 +44,18 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils {
   @Autowired
   override val db: ReadOnlyDatabase = null
 
+  // Organisaatiohierarkia luetaan pub-skeemasta, jota näiden testien H2-kanta ei sisällä
+  // (initSchema luo vain gen-taulut). Ks. OrganisaatioHierarkiaStub.
+  @MockitoBean
+  override val commonService: CommonService = null
+
   @BeforeEach
   def clearDb(): Unit =
     db.run(sqlu"""DROP ALL OBJECTS""", "Drop everything")
+
+  @BeforeEach
+  def stubOrganisaatiohierarkia(): Unit =
+    stubOrganisaatioHierarkiaAsIdentity()
 
   @BeforeEach
   def clearAuditRecord(): Unit =

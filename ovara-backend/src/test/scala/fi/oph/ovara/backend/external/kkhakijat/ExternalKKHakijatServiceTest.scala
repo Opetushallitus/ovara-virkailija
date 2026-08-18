@@ -1,12 +1,15 @@
 package fi.oph.ovara.backend.external.kkhakijat
 
+import fi.oph.ovara.backend.external.OrganisaatioHierarkiaStub
 import fi.oph.ovara.backend.external.kkhakijat.ExternalKKHakijatTestData.*
 import fi.oph.ovara.backend.repository.ReadOnlyDatabase
+import fi.oph.ovara.backend.service.CommonService
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.bean.`override`.mockito.MockitoBean
 import org.springframework.test.context.{ActiveProfiles, TestContextManager}
 import slick.jdbc.H2Profile.api.*
 
@@ -16,7 +19,8 @@ class ExternalKKHakijatServiceTest
     extends AnyFlatSpec
     with Matchers
     with BeforeAndAfterEach
-    with ExternalKKHakijatTestUtils {
+    with ExternalKKHakijatTestUtils
+    with OrganisaatioHierarkiaStub {
 
   @Autowired
   override val db: ReadOnlyDatabase = null
@@ -24,10 +28,16 @@ class ExternalKKHakijatServiceTest
   @Autowired
   private val service: ExternalKKHakijatService = null
 
+  // Organisaatiohierarkia luetaan pub-skeemasta, jota näiden testien H2-kanta ei sisällä
+  // (initSchema luo vain gen-taulut). Ks. OrganisaatioHierarkiaStub.
+  @MockitoBean
+  override val commonService: CommonService = null
+
   new TestContextManager(this.getClass).prepareTestInstance(this)
 
   override def beforeEach(): Unit = {
     db.run(sqlu"""DROP ALL OBJECTS""", "Drop everything")
+    stubOrganisaatioHierarkiaAsIdentity()
   }
 
   "getKKHakijat" should "paakayttaja scope returns all hakutoiveet" in {
@@ -81,6 +91,55 @@ class ExternalKKHakijatServiceTest
       None,
       Valintarajaus.HAKENEET,
       KayttooikeusScope.limited(Set.empty)
+    )
+
+    assert(response.toOption.get.isEmpty)
+  }
+
+  it should "match organisaatioOid against the descendants of the selected organisaatio" in {
+    // Hakukohteen järjestyspaikka on ORGANISAATIO_OID, joka on KOULUTUSTOIMIJA_OID:n lapsi.
+    seedMinimalHakija()
+    withOrganisaatioHierarkia(Map(KOULUTUSTOIMIJA_OID -> List(ORGANISAATIO_OID)))
+
+    val response = service.getKKHakijat(HAKU_OID, None, Some(KOULUTUSTOIMIJA_OID))
+
+    assert(getOnlyHakija(response).oppijanumero == OPPIJANUMERO)
+  }
+
+  it should "not widen the organisaatioOid rajaus to organisaatiot outside the hierarkia" in {
+    seedMinimalHakija()
+    withOrganisaatioHierarkia(Map(KOULUTUSTOIMIJA_OID -> List(ORGANISAATIO_OID_2)))
+
+    val response = service.getKKHakijat(HAKU_OID, None, Some(KOULUTUSTOIMIJA_OID))
+
+    assert(response.toOption.get.isEmpty)
+  }
+
+  it should "limited scope on koulutustoimija level keeps a hakutoive järjestetty by a lapsiorganisaatio" in {
+    seedMinimalHakija()
+    withOrganisaatioHierarkia(Map(KOULUTUSTOIMIJA_OID -> List(ORGANISAATIO_OID)))
+
+    val response = service.getKKHakijat(
+      HAKU_OID,
+      Some(HAKUKOHDE_OID),
+      None,
+      Valintarajaus.HAKENEET,
+      KayttooikeusScope.limited(Set(KOULUTUSTOIMIJA_OID))
+    )
+
+    assert(response.toOption.get.size == 1)
+  }
+
+  it should "limited scope on koulutustoimija level still drops hakutoiveet outside its hierarkia" in {
+    seedMinimalHakija()
+    withOrganisaatioHierarkia(Map(KOULUTUSTOIMIJA_OID -> List(ORGANISAATIO_OID_2)))
+
+    val response = service.getKKHakijat(
+      HAKU_OID,
+      Some(HAKUKOHDE_OID),
+      None,
+      Valintarajaus.HAKENEET,
+      KayttooikeusScope.limited(Set(KOULUTUSTOIMIJA_OID))
     )
 
     assert(response.toOption.get.isEmpty)

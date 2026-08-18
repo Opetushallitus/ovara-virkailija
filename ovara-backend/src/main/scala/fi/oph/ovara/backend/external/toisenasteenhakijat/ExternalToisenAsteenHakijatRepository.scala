@@ -15,21 +15,18 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
   def selectHakijat(
     hakuOid: String,
     hakukohdeOid: Option[String],
-    organisaatioOid: Option[String],
+    organisaatioOids: Seq[String],
     valintarajaus: Valintarajaus,
     scope: KayttooikeusScope
   ): Seq[HakijaRow] = {
-    // Controller-level validation guarantees at least one of these is set.
-    if (hakukohdeOid.isEmpty && organisaatioOid.isEmpty) {
+    // Rajaus käytännössä pakollinen joko hakukohdeOidilla tai organisaatioOidilla
+    if (hakukohdeOid.isEmpty && organisaatioOids.isEmpty) {
       Seq.empty
     } else {
 
-      val stateSql = stateSqlFragment(valintarajaus)
-      val hakuFilterSql = hakuFilterSqlFragment(hakukohdeOid, organisaatioOid)
-      //Todo, tämä rajaus oikeuksilla on vielä puutteellinen: sallitut organisaatiot (joita tarkastellaan
-      // hakukohteiden järjestyspaikkaOideja vasten) on laajennettava sisältämään
-      // myös lapsiorganisaatiot. Tämä vaatii lapsiorganisaatiotietojen lisäämisen esimerkiksi
-      // gen_organisaatio-tauluun tai muun ratkaisun.
+      val tilaFiltteriSql      = stateSqlFragment(valintarajaus)
+      val hakurajausFiltteriSql = hakuFilterSqlFragment(hakukohdeOid, organisaatioOids)
+      // Sallitut organisaatiot on laajennettu lapsiorganisaatioihin jo palvelukerroksessa.
       val kayttooikeusSql = sallitutOrganisaatiotKayttooikeusFragment(scope)
 
       val query = sql"""
@@ -108,8 +105,8 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
         SELECT 1 FROM gen.gen_hakutoive ht
         INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
         WHERE ht.hakemus_oid = hakemus.hakemus_oid
-        #$hakuFilterSql
-        #$stateSql
+        #$hakurajausFiltteriSql
+        #$tilaFiltteriSql
         #$kayttooikeusSql
       )
       """.as[HakijaRow]
@@ -314,11 +311,13 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
    */
   private def hakuFilterSqlFragment(
     hakukohdeOid: Option[String],
-    organisaatioOid: Option[String]
+    organisaatioOids: Seq[String]
   ): String =
     Seq(
       hakukohdeOid.map(hk => s" AND ht.hakukohde_oid = '$hk'"),
-      organisaatioOid.map(org => s" AND hk.jarjestyspaikka_oid = '$org'")
+      Option.when(organisaatioOids.nonEmpty)(
+        s" AND hk.jarjestyspaikka_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(organisaatioOids)})"
+      )
     ).flatten.mkString
 
   /**
