@@ -13,7 +13,7 @@ import { OrganisaatioSingle } from '@/app/components/form/organisaatio-single';
 import { ValintarajausSelect } from '@/app/components/form/valintarajaus-select';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
-import { hasOvaraHakeneetRole } from '@/app/lib/utils';
+import { buildTiedonsiirtoParams, hasOvaraHakeneetRole } from '@/app/lib/utils';
 import { useToisenasteenHakijatSearchParams } from '@/app/hooks/searchParams/useToisenasteenHakijatSearchParams';
 import { useDownloadWithErrorBoundary } from '@/app/hooks/useDownloadWithErrorBoundary';
 import { downloadExcel } from '@/app/components/form/utils';
@@ -36,29 +36,35 @@ export default function ToisenasteenHakijatTiedonsiirto() {
     emptyAllToisenasteenHakijatParams,
   } = useToisenasteenHakijatSearchParams();
 
-  const hakukohdeSet = !isNullish(selectedHakukohde);
-  const organisaatioSet = !isNullish(selectedOrganisaatio);
-  const hakukohdeOrOrganisaatioSet = hakukohdeSet !== organisaatioSet;
+  // Hakukohdevalikko on rajattu haun ja organisaation mukaan, joten vanha
+  // valinta ei ole enää validi kun kumpikaan niistä vaihtuu.
+  const changeHaku = (value: string | null) => {
+    setSelectedHaku(value);
+    setSelectedHakukohde(null);
+  };
+
+  const changeOrganisaatio = (value: string | null) => {
+    setSelectedOrganisaatio(value);
+    setSelectedHakukohde(null);
+  };
 
   const isDisabled =
     isNullish(selectedHaku) ||
-    !hakukohdeOrOrganisaatioSet ||
+    isNullish(selectedOrganisaatio) ||
     isNullish(selectedValintarajaus);
 
   const handleDownload = () =>
-    run(() => {
-      const params = new URLSearchParams();
-      if (selectedHaku) params.set('hakuOid', selectedHaku);
-      if (selectedHakukohde) params.set('hakukohdeOid', selectedHakukohde);
-      if (selectedOrganisaatio)
-        params.set('organisaatioOid', selectedOrganisaatio);
-      if (selectedValintarajaus)
-        params.set('valintarajaus', selectedValintarajaus);
-      return downloadExcel(
+    run(() =>
+      downloadExcel(
         'external/toisenasteenhakijat/excel',
-        params.toString(),
-      );
-    });
+        buildTiedonsiirtoParams({
+          hakuOid: selectedHaku,
+          hakukohdeOid: selectedHakukohde,
+          organisaatioOid: selectedOrganisaatio,
+          valintarajaus: selectedValintarajaus,
+        }),
+      ),
+    );
 
   return (
     <MainContainer>
@@ -70,19 +76,19 @@ export default function ToisenasteenHakijatTiedonsiirto() {
           <HakuSingle
             haunTyyppi="toinen_aste"
             value={selectedHaku}
-            onChange={setSelectedHaku}
+            onChange={changeHaku}
+            required
+          />
+          <OrganisaatioSingle
+            value={selectedOrganisaatio}
+            onChange={changeOrganisaatio}
             required
           />
           <HakukohdeSingle
             hakuOid={selectedHaku}
+            organisaatioOid={selectedOrganisaatio}
             value={selectedHakukohde}
             onChange={setSelectedHakukohde}
-            disabled={organisaatioSet}
-          />
-          <OrganisaatioSingle
-            value={selectedOrganisaatio}
-            onChange={setSelectedOrganisaatio}
-            disabled={hakukohdeSet}
           />
           <ValintarajausSelect
             value={selectedValintarajaus}

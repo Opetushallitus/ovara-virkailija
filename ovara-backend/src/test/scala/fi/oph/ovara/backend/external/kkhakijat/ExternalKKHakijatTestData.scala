@@ -14,6 +14,9 @@ object ExternalKKHakijatTestData {
   val KOULUTUS_OID       = "1.2.246.562.13.00000000000000000122"
   val ORGANISAATIO_OID   = "1.2.246.562.10.00000000000000000586"
   val ORGANISAATIO_OID_2 = "1.2.246.562.10.00000000000000000587"
+  // Ylemmän tason organisaatio jota ei koskaan aseteta hakukohteen järjestyspaikaksi:
+  // osuu hakijoihin vain jos hierarkialaajennus toimii.
+  val KOULUTUSTOIMIJA_OID = "1.2.246.562.10.00000000000000000588"
 
   val EMAIL        = "kk-oppija@example.test"
   val MATKAPUHELIN = "+358409999999"

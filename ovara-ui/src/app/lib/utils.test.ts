@@ -10,6 +10,9 @@ import {
   getToimipisteetToShow,
   getHarkinnanvaraisuusTranslation,
   getRaporttiListByUserRights,
+  getKaikkiOrganisaatiotToShow,
+  findOrganisaatio,
+  buildTiedonsiirtoParams,
 } from './utils';
 import {
   KK_RAPORTIT,
@@ -686,6 +689,52 @@ describe('getKoulutustoimijatToShow', () => {
   });
 });
 
+describe('getKaikkiOrganisaatiotToShow', () => {
+  test('should return organisaatiot from every taso, koulutustoimijat first', () => {
+    expect(getKaikkiOrganisaatiotToShow(hierarkiat)).toEqual([
+      koulutustoimija1,
+      koulutustoimija2,
+      oppilaitos1_1,
+      oppilaitos1_2,
+      oppilaitos2_1,
+      oppilaitos2_2,
+      oppilaitos2_3,
+      toimipiste1_1,
+      toimipiste2_1_1,
+      toimipiste2_2_1,
+      toimipiste2_2_2,
+      toimipiste2_2_3,
+      toimipiste2_3_1,
+    ]);
+  });
+
+  test('should return empty array when hierarkiat is null', () => {
+    expect(getKaikkiOrganisaatiotToShow(null)).toEqual([]);
+  });
+});
+
+describe('findOrganisaatio', () => {
+  test('should find a koulutustoimija by oid', () => {
+    expect(
+      findOrganisaatio(hierarkiat, koulutustoimija1.organisaatio_oid),
+    ).toBe(koulutustoimija1);
+  });
+
+  test('should find a toimipiste by oid', () => {
+    expect(findOrganisaatio(hierarkiat, TOIMIPISTE1_1_OID)).toBe(toimipiste1_1);
+  });
+
+  test('should return undefined for an unknown oid', () => {
+    expect(
+      findOrganisaatio(hierarkiat, '1.2.246.562.10.99999'),
+    ).toBeUndefined();
+  });
+
+  test('should return undefined when oid is null', () => {
+    expect(findOrganisaatio(hierarkiat, null)).toBeUndefined();
+  });
+});
+
 describe('getOppilaitoksetToShow', () => {
   test('should return all oppilaitokset when koulutustoimija is not selected', () => {
     expect(getOppilaitoksetToShow(hierarkiat, null)).toEqual([
@@ -776,6 +825,54 @@ describe('getHarkinnanvaraisuusTranslation', () => {
         'SURE_KOULUTODISTUSTEN_VERTAILUVAIKEUDET',
         mockT,
       ),
+    ).toEqual('');
+  });
+});
+
+describe('buildTiedonsiirtoParams', () => {
+  const valintarajaus = 'HAKENEET';
+  const hakuOid = '1.2.246.562.29.00000000000000000100';
+  const hakukohdeOid = '1.2.246.562.20.00000000000000000012';
+  const organisaatioOid = '1.2.246.562.10.00000000000000000486';
+
+  test('should send hakukohdeOid and omit organisaatioOid when hakukohde is selected', () => {
+    const params = new URLSearchParams(
+      buildTiedonsiirtoParams({
+        hakuOid,
+        hakukohdeOid,
+        organisaatioOid,
+        valintarajaus,
+      }),
+    );
+
+    expect(params.get('hakukohdeOid')).toEqual(hakukohdeOid);
+    expect(params.get('organisaatioOid')).toBeNull();
+    expect(params.get('hakuOid')).toEqual(hakuOid);
+    expect(params.get('valintarajaus')).toEqual(valintarajaus);
+  });
+
+  test('should send organisaatioOid when no hakukohde is selected', () => {
+    const params = new URLSearchParams(
+      buildTiedonsiirtoParams({
+        hakuOid,
+        hakukohdeOid: null,
+        organisaatioOid,
+        valintarajaus,
+      }),
+    );
+
+    expect(params.get('organisaatioOid')).toEqual(organisaatioOid);
+    expect(params.get('hakukohdeOid')).toBeNull();
+  });
+
+  test('should omit params that have no value', () => {
+    expect(
+      buildTiedonsiirtoParams({
+        hakuOid: null,
+        hakukohdeOid: null,
+        organisaatioOid: null,
+        valintarajaus: null,
+      }),
     ).toEqual('');
   });
 });

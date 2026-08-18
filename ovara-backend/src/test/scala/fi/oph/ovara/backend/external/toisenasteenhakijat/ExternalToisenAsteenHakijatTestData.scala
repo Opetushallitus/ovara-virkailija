@@ -14,7 +14,10 @@ object ExternalToisenAsteenHakijatTestData {
   val KOULUTUS_OID       = "1.2.246.562.13.00000000000000000022"
   val ORGANISAATIO_OID   = "1.2.246.562.10.00000000000000000486"
   val ORGANISAATIO_OID_2 = "1.2.246.562.10.00000000000000000487"
-  val KOULUTUS_KOODIURI  = "koulutus_621702#12"
+  // Ylemmän tason organisaatio jota ei koskaan aseteta hakukohteen järjestyspaikaksi:
+  // osuu hakijoihin vain jos hierarkialaajennus toimii.
+  val KOULUTUSTOIMIJA_OID = "1.2.246.562.10.00000000000000000489"
+  val KOULUTUS_KOODIURI   = "koulutus_621702#12"
 
   val EMAIL        = "oppija@example.test"
   val MATKAPUHELIN = "+358401234567"

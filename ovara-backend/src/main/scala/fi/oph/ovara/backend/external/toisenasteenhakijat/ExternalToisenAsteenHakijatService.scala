@@ -1,12 +1,16 @@
 package fi.oph.ovara.backend.external.toisenasteenhakijat
 
+import fi.oph.ovara.backend.service.CommonService
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.Service
 
 import scala.util.Try
 
 @Service
-class ExternalToisenAsteenHakijatService(repository: ExternalToisenAsteenHakijatRepository) {
+class ExternalToisenAsteenHakijatService(
+  repository: ExternalToisenAsteenHakijatRepository,
+  commonService: CommonService
+) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[ExternalToisenAsteenHakijatService])
 
   def getHakijat(
@@ -17,8 +21,18 @@ class ExternalToisenAsteenHakijatService(repository: ExternalToisenAsteenHakijat
     scope: KayttooikeusScope = KayttooikeusScope.paakayttaja
   ): Either[String, Seq[ToisenAsteenHakija]] = {
     Try {
+      // Sekä rajapinnan organisaatioOid (rajaava parametri) että käyttäjän oikeudet vertaillaan hakukohteen
+      // jarjestyspaikka_oidia vasten, joka on tyypillisesti toimipiste. Molemmat on siis
+      // laajennettava lapsiorganisaatioihin, jotta koulutustoimija- tai oppilaitostason
+      // valinta ja oikeus osuvat alempana oleviin järjestyspaikkoihin.
+      val organisaatioOids =
+        organisaatioOid.map(oid => commonService.getOrganisaatioidenJaLastenOidit(List(oid))).getOrElse(Nil)
+      val expandedScope =
+        if (scope.isPaakayttaja) scope
+        else KayttooikeusScope.limited(commonService.getOrganisaatioidenJaLastenOidit(scope.allowedOrgOids.toList).toSet)
+
       val hakijaRows =
-        repository.selectHakijat(hakuOid, hakukohdeOid, organisaatioOid, valintarajaus, scope)
+        repository.selectHakijat(hakuOid, hakukohdeOid, organisaatioOids, valintarajaus, expandedScope)
       if (hakijaRows.isEmpty) {
         Nil
       } else {
@@ -38,7 +52,7 @@ class ExternalToisenAsteenHakijatService(repository: ExternalToisenAsteenHakijat
         hakijaRows.flatMap { row =>
           val kaikkiToiveet = hakutoiveetByHakemus.getOrElse(row.hakemusOid, Seq.empty)
           val matchingRows  =
-            kaikkiToiveet.filter(matchesFilters(_, hakukohdeOid, organisaatioOid, valintarajaus, scope))
+            kaikkiToiveet.filter(matchesFilters(_, hakukohdeOid, organisaatioOids, valintarajaus, expandedScope))
           if (matchingRows.isEmpty) None
           else {
             val yhteishakuTiedot = yhteishakuTiedotByHakemus.get(row.hakemusOid)
@@ -94,12 +108,12 @@ class ExternalToisenAsteenHakijatService(repository: ExternalToisenAsteenHakijat
   private def matchesFilters(
     row: HakijaHakutoiveRow,
     hakukohdeOid: Option[String],
-    organisaatioOid: Option[String], // Rajapinnan parametri
+    organisaatioOids: Seq[String], // Rajapinnan parametri lapsiorganisaatioineen
     valintarajaus: Valintarajaus,
-    scope: KayttooikeusScope // Käyttäjän oikeudet
+    scope: KayttooikeusScope // Käyttäjän oikeudet lapsiorganisaatioineen
   ): Boolean = {
     val hakukohdeMatch = hakukohdeOid.forall(_ == row.hakukohdeOid)
-    val orgMatch       = organisaatioOid.forall(o => row.jarjestyspaikkaOid.contains(o))
+    val orgMatch       = organisaatioOids.isEmpty || row.jarjestyspaikkaOid.exists(organisaatioOids.contains)
     val allowedMatch   = scope.isPaakayttaja || row.jarjestyspaikkaOid.exists(scope.allowedOrgOids.contains)
     val stateMatch     = valintarajaus match {
       case Valintarajaus.HAKENEET   => true
