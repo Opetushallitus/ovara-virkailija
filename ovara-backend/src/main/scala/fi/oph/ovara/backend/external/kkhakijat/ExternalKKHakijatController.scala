@@ -31,8 +31,8 @@ class ExternalKKHakijatController(
   val userService: UserService,
   kkHakijatService: ExternalKKHakijatService,
   mapper: ObjectMapper,
-  val auditLog: AuditLog = AuditLogObj
-) extends ControllerUtils {
+  auditLog: AuditLog
+) extends ControllerUtils(auditLog) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[ExternalKKHakijatController])
 
   private def auditParams(
