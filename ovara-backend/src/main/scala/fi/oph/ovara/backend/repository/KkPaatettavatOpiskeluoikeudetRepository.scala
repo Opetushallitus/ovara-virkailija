@@ -80,16 +80,19 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
           haku.haku_nimi_fi, haku.haku_nimi_sv, haku.haku_nimi_en,
           org.organisaatio_oid,
           org.nimi_fi, org.nimi_sv, org.nimi_en,
-          koulutus_koodi_arvot.arvot
+          koulutus_koodit.koodit
         FROM gen.gen_valintarekisteri vr 
         INNER JOIN gen.gen_hakukohde hk ON vr.hakukohde_oid = hk.hakukohde_oid
         INNER JOIN gen.gen_haku haku on haku.haku_oid = hk.haku_oid
         INNER JOIN gen.gen_organisaatio org on org.organisaatio_oid = hk.jarjestyspaikka_oid
         LEFT JOIN gen.gen_toteutus tot on tot.toteutus_oid = hk.toteutus_oid
         LEFT JOIN gen.gen_koulutus koul on koul.koulutus_oid = tot.koulutus_oid
-        LEFT JOIN LATERAL (SELECT json_agg(koodi.koodiarvo) AS arvot
+        LEFT JOIN LATERAL (SELECT json_agg(json_build_object(
+              'koodiArvo', koodi.koodiarvo,
+              'koodiUri', koodi.versioitu_koodiuri
+            )) AS koodit
           FROM jsonb_array_elements_text(koul.koulutukset_koodiuri) AS ku
-          JOIN gen.gen_koodi koodi ON koodi.versioitu_koodiuri = ku.value) AS koulutus_koodi_arvot ON TRUE
+          JOIN gen.gen_koodi koodi ON koodi.versioitu_koodiuri = ku.value) AS koulutus_koodit ON TRUE
         WHERE hk.yos IS TRUE
         AND vr.ehdollisesti_hyvaksyttavissa IS FALSE
         AND vr.vastaanotto_tila = 'VASTAANOTTANUT_SITOVASTI' 

@@ -2,6 +2,11 @@ package fi.oph.ovara.backend.domain
 
 import java.time.LocalDate
 
+case class KoulutusKoodi(
+  koodiArvo: String,
+  koodiUri: String
+)
+
 case class KkPaatettavaOpiskeluoikeus(
   sukunimi: String,
   etunimet: String,
@@ -24,7 +29,7 @@ case class KkPaatettavaOpiskeluoikeus(
   vastaanottoAjankohta: LocalDate,
   hakuNimi: Kielistetty,
   hakuOid: String,
-  koulutusluokitusKoodit: List[String]
+  koulutusluokitusKoodit: List[KoulutusKoodi]
 )
 
 case class KKPaatettavaOpiskeluoikeusEntity(
@@ -51,7 +56,7 @@ case class KKSitovastiVastaanottanut(
   haunNimi: Kielistetty,
   oppilaitosOid: String,
   oppilaitosNimi: Kielistetty,
-  koulutusKoodiArvot: List[String]
+  koulutusKoodit: List[KoulutusKoodi]
 )
 
 case class YosHenkilo(

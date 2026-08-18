@@ -2024,7 +2024,8 @@ object ExcelWriter {
         cellIndex = writeOptionLocalDateToCell(dataRow, bodyTextCellStyle, cellIndex, Some(item.vastaanottoAjankohta))
         cellIndex = writeKielistettyToCell(dataRow, bodyTextCellStyle, cellIndex, item.hakuNimi, asiointikieli)
         cellIndex = writeStrToCell(dataRow, bodyTextCellStyle, cellIndex, item.hakuOid)
-        cellIndex = writeStrListToCell(dataRow, bodyTextCellStyle, cellIndex, item.koulutusluokitusKoodit)
+        cellIndex =
+          writeStrListToCell(dataRow, bodyTextCellStyle, cellIndex, item.koulutusluokitusKoodit.map(_.koodiArvo))
         currentRowIndex += 1
       }
 

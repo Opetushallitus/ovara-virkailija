@@ -4,15 +4,21 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import fi.oph.ovara.backend.opiskelijavalintatieto.ValidationError
 import fi.oph.ovara.backend.service.UserService
 import fi.oph.ovara.backend.utils.Constants.OPH_PAAKAYTTAJA_AUTHORITY
-import jakarta.servlet.http.HttpServletResponse
-import org.springframework.http.HttpStatus
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.slf4j.LoggerFactory
+import org.springframework.http.{HttpHeaders, HttpStatus}
 import org.springframework.web.bind.annotation.{ExceptionHandler, ResponseStatus}
 import org.springframework.web.server.ResponseStatusException
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util
 import scala.jdk.CollectionConverters.*
 
 trait ControllerUtils {
+  private val LOG = LoggerFactory.getLogger(classOf[ControllerUtils])
+
   def userService: UserService
 
   def getListParamAsScalaList(listParam: util.Collection[String]): List[String] = {
@@ -52,6 +58,61 @@ trait ControllerUtils {
     ObjectMapper().writeValueAsString(ex.errorMessage)
   }
 
+  def handleExcelRequest(
+    validationErrors: List[String],
+    response: HttpServletResponse,
+    request: HttpServletRequest,
+    id: String,
+    raporttiParams: Map[String, Any],
+    auditOperation: AuditOperation,
+    mapper: ObjectMapper,
+    auditLog: AuditLog
+  )(block: => Either[String, XSSFWorkbook]): Unit = {
+    if (validationErrors.nonEmpty) {
+      LOG.warn(s"Excel parameter validation failed: ${validationErrors.mkString(", ")}")
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
+      response.setContentType("application/json")
+      val errorJson = mapper.writeValueAsString(
+        Map(
+          "status"  -> HttpServletResponse.SC_BAD_REQUEST,
+          "message" -> "virhe.validointi",
+          "details" -> validationErrors.asJava
+        )
+      )
+      response.getWriter.write(errorJson)
+    } else {
+      try {
+        block match {
+          case Right(wb) =>
+            auditLog.logWithParams(request, auditOperation, raporttiParams)
+            LOG.info(s"Sending Excel report: $id")
+            val dateTimeStr = LocalDateTime.now().withNano(0).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+            val out         = response.getOutputStream
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            response.setHeader(
+              HttpHeaders.CONTENT_DISPOSITION,
+              s"attachment; filename=$id-$dateTimeStr.xlsx"
+            )
+            response.setHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Content-Disposition")
+            wb.write(out)
+            out.close()
+            wb.close()
+
+          case Left(errorKey) =>
+            LOG.error(s"Excel report generation failed ($id): $errorKey")
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+            response.setContentType("application/json")
+            response.getWriter.write(mapper.writeValueAsString(errorKey))
+        }
+      } catch {
+        case e: Exception =>
+          LOG.error(s"Unexpected error while generating Excel ($id): ${e.getMessage}", e)
+          response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+          response.setContentType("application/json")
+          response.getWriter.write(mapper.writeValueAsString("unexpected.error"))
+      }
+    }
+  }
 }
 
 case class ValidationException(validationErrors: List[String]) extends RuntimeException

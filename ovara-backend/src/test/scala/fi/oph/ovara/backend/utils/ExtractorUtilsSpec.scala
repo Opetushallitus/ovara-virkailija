@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.utils
 
-import fi.oph.ovara.backend.domain.{En, Fi, Sv, Valintatapajono}
+import fi.oph.ovara.backend.domain.{En, Fi, KoulutusKoodi, Sv, Valintatapajono}
 import org.scalatest.flatspec.AnyFlatSpec
 
 class ExtractorUtilsSpec extends AnyFlatSpec {
@@ -46,6 +46,23 @@ class ExtractorUtilsSpec extends AnyFlatSpec {
   it should "return all elements when none are null" in {
     val json = Some("""[{"fi": "Suomi"}, {"fi": "Ruotsi"}]""")
     assert(ExtractorUtils.extractKielistettyList(json).length == 2)
+  }
+
+  "extractKoulutusKoodit" should "return empty list when input is None" in {
+    assert(ExtractorUtils.extractKoulutusKoodit(None) == List())
+  }
+
+  it should "parse koodiArvo and koodiUri pairs from a JSON array" in {
+    val json = Some(
+      """[{"koodiArvo": "671101", "koodiUri": "koulutus_671101#12"}, {"koodiArvo": "681102", "koodiUri": "koulutus_681102#3"}]"""
+    )
+
+    assert(
+      ExtractorUtils.extractKoulutusKoodit(json) == List(
+        KoulutusKoodi(koodiArvo = "671101", koodiUri = "koulutus_671101#12"),
+        KoulutusKoodi(koodiArvo = "681102", koodiUri = "koulutus_681102#3")
+      )
+    )
   }
 
   "extractCommaSeparatedString" should "return None for an empty list and a comma-separated string for a non-empty list" in {
