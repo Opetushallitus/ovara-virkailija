@@ -49,7 +49,7 @@ import fi.oph.ovara.backend.utils.ParameterValidator.{
   validateOrganisaatioOid,
   validateOrganisaatioOidList
 }
-import fi.oph.ovara.backend.utils.{AuditLog, AuditLogObj, ControllerUtils}
+import fi.oph.ovara.backend.utils.{AuditLog, AuditOperation, ControllerUtils}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
@@ -77,8 +77,8 @@ class Controller(
   hakeneetHyvaksytytVastaanottaneetService: HakeneetHyvaksytytVastaanottaneetService,
   kkHakeneetHyvaksytytVastaanottaneetService: KkHakeneetHyvaksytytVastaanottaneetService,
   val userService: UserService,
-  val auditLog: AuditLog = AuditLogObj
-) extends ControllerUtils {
+  auditLog: AuditLog
+) extends ControllerUtils(auditLog) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[Controller])
 
   @Value("${ovara.ui.url}")

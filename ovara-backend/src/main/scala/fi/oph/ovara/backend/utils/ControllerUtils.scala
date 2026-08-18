@@ -16,7 +16,7 @@ import java.time.format.DateTimeFormatter
 import java.util
 import scala.jdk.CollectionConverters.*
 
-trait ControllerUtils {
+trait ControllerUtils(auditLog: AuditLog) {
   private val LOG = LoggerFactory.getLogger(classOf[ControllerUtils])
 
   def userService: UserService
@@ -39,6 +39,24 @@ trait ControllerUtils {
     val errors = f
     if (errors.nonEmpty) {
       throw ValidationException(errors.toList)
+    }
+  }
+
+  def handleApiRequest[T](
+    request: HttpServletRequest,
+    auditOperation: AuditOperation,
+    params: Map[String, Any],
+    block: => Either[String, T]
+  ): T = {
+    block match {
+      case Right(null) =>
+        throw ResponseStatusException(HttpStatus.NOT_FOUND)
+      case Right(result) =>
+        auditLog.logWithParams(request, auditOperation, params)
+        result
+      case Left(errorMessage) =>
+        // odottamattomista virheistä vain virheviesti
+        throw ApiException(errorMessage)
     }
   }
 

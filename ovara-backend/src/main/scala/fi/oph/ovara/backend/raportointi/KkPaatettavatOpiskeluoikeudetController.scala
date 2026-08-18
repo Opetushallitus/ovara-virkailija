@@ -33,7 +33,7 @@ class KkPaatettavatOpiskeluoikeudetController(
   kkPaatettavatOpiskeluoikeudetService: KkPaatettavatOpiskeluoikeudetService,
   val auditLog: AuditLog = AuditLogObj,
   @Value("${yos-json-rajapinta-enabled:false}") yosJsonRajapintaEnabled: Boolean = true
-) extends ControllerUtils {
+) extends ControllerUtils(auditLog) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[KkPaatettavatOpiskeluoikeudetController])
 
   private val mapper = new ObjectMapper()
