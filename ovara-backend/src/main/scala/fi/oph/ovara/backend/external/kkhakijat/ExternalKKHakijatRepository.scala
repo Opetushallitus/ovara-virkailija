@@ -14,16 +14,16 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
 
   def selectKKHakijat(
     hakuOid: String,
-    hakukohdeOid: Option[String],
+    hakukohdeOids: Seq[String],
     organisaatioOids: Seq[String],
     valintarajaus: Valintarajaus
   ): Seq[KKHakijaRow] = {
-    // Rajaus käytännössä pakollinen joko hakukohdeOidilla tai organisaatioOidilla
-    if (hakukohdeOid.isEmpty && organisaatioOids.isEmpty) {
+    // Rajaus käytännössä pakollinen joko hakukohteilla tai organisaatioOidilla
+    if (hakukohdeOids.isEmpty && organisaatioOids.isEmpty) {
       Seq.empty
     } else {
       val stateSql      = stateSqlFragment(valintarajaus)
-      val hakuFilterSql = hakuFilterSqlFragment(hakukohdeOid, organisaatioOids)
+      val hakuFilterSql = hakuFilterSqlFragment(hakukohdeOids, organisaatioOids)
 
       val query = sql"""
           SELECT hlo.oppijanumero,
@@ -245,11 +245,13 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
   }
 
   private def hakuFilterSqlFragment(
-    hakukohdeOid: Option[String],
+    hakukohdeOids: Seq[String],
     organisaatioOids: Seq[String]
   ): String =
     Seq(
-      hakukohdeOid.map(hk => s" AND ht.hakukohde_oid = '$hk'"),
+      Option.when(hakukohdeOids.nonEmpty)(
+        s" AND ht.hakukohde_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(hakukohdeOids)})"
+      ),
       Option.when(organisaatioOids.nonEmpty)(
         s" AND hk.jarjestyspaikka_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(organisaatioOids)})"
       )
