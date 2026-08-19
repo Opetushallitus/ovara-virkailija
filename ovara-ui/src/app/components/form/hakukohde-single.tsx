@@ -13,20 +13,23 @@ type Hakukohde = {
 type Props = {
   hakuOid: string | null;
   organisaatioOid: string | null;
+  hakukohderyhmaOid?: string | null;
   value: string | null;
   onChange: (value: string | null) => void;
   disabled?: boolean;
 };
 
 /**
- * Single-select variant of `Hakukohde`. Fetches hakukohteet scoped to the
- * given `hakuOid` and `organisaatioOid` (via `useFetchHakukohteetForHaku`) —
- * not the shared `useCommonSearchParams` state. Options are empty until both
- * `hakuOid` and `organisaatioOid` are set.
+ * Single-select variant of `Hakukohde`. Fetches hakukohteet scoped to the given
+ * `hakuOid`, `organisaatioOid` and optional `hakukohderyhmaOid` (via
+ * `useFetchHakukohteetForHaku`) — not the shared `useCommonSearchParams` state.
+ * Options are empty until `hakuOid` plus at least one of `organisaatioOid` /
+ * `hakukohderyhmaOid` is set.
  */
 export const HakukohdeSingle = ({
   hakuOid,
   organisaatioOid,
+  hakukohderyhmaOid = null,
   value,
   onChange,
   disabled,
@@ -35,7 +38,11 @@ export const HakukohdeSingle = ({
   const user = useAuthorizedUser();
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
 
-  const { data } = useFetchHakukohteetForHaku(hakuOid, organisaatioOid);
+  const { data } = useFetchHakukohteetForHaku(
+    hakuOid,
+    organisaatioOid,
+    hakukohderyhmaOid,
+  );
   const hakukohteet: Hakukohde[] = data || [];
 
   const options: SelectOption[] = hakukohteet.map((hk) => ({

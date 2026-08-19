@@ -196,6 +196,23 @@ class CommonRepository extends Extractors {
     query
   }
 
+  /**
+   * Hakukohderyhmään kuuluvat hakukohde-oidit annetussa haussa. Käytetään external-rajapinnoissa,
+   * joiden kyselyt kohdistuvat gen-skeemaan, jossa ei ole hakukohderyhmätietoa lainkaan:
+   * ryhmä laajennetaan hakukohde-oideiksi ennen varsinaista kyselyä.
+   */
+  def selectHakukohderyhmanHakukohdeOids(
+    hakukohderyhmaOid: String,
+    hakuOid: String
+  ): SqlStreamingAction[Vector[String], String, Effect] = {
+    val query = sql"""SELECT DISTINCT hkr_hk.hakukohde_oid
+          FROM pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
+          WHERE hkr_hk.hakukohderyhma_oid = $hakukohderyhmaOid
+          AND hkr_hk.haku_oid = $hakuOid""".as[String]
+    LOG.debug(s"selectHakukohderyhmanHakukohdeOids: ${query.statements.head}")
+    query
+  }
+
   def selectDistinctKoulutusalat1(): SqlStreamingAction[Vector[Koodi], Koodi, Effect] = {
     sql"""SELECT DISTINCT k.kansallinenkoulutusluokitus2016koulutusalataso1 as koodiarvo, k.kansallinenkoulutusluokitus2016koulutusalataso1_nimi as koodinimi
           FROM pub.pub_dim_koodisto_koulutus_alat_ja_asteet k""".as[Koodi]

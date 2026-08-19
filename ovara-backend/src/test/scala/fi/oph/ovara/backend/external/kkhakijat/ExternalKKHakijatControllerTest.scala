@@ -10,6 +10,9 @@ import jakarta.servlet.http.HttpServletRequest
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.{BeforeEach, Test}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.doAnswer
+import org.mockito.invocation.InvocationOnMock
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.{CsvSource, ValueSource}
 import org.springframework.beans.factory.annotation.Autowired
@@ -57,6 +60,15 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils with Or
   def stubOrganisaatiohierarkia(): Unit =
     stubOrganisaatioHierarkiaAsIdentity()
 
+  /**
+   * Hakukohderyhmän laajennus tulee pub-skeemasta, jota testien H2-kanta ei sisällä.
+   * Stubataan doAnswer-muodossa samasta syystä kuin OrganisaatioHierarkiaStubissa.
+   */
+  private def stubHakukohderyhma(hakukohdeOids: List[String]): Unit =
+    doAnswer((_: InvocationOnMock) => hakukohdeOids)
+      .when(commonService)
+      .getHakukohderyhmanHakukohdeOids(any[String](), any[String]())
+
   @BeforeEach
   def clearAuditRecord(): Unit =
     ExternalKKHakijatControllerTest.recordedAuditCalls.clear()
@@ -68,13 +80,15 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils with Or
     hakuOid: String = HAKU_OID,
     hakukohdeOid: Option[String] = Some(HAKUKOHDE_OID),
     organisaatioOid: Option[String] = None,
-    valintarajaus: Option[String] = Some("HAKENEET")
+    valintarajaus: Option[String] = Some("HAKENEET"),
+    hakukohderyhmaOid: Option[String] = None
   ): ResultActions = {
     var req = MockMvcRequestBuilders
       .get("/api/external/kkhakijat")
       .param("hakuOid", hakuOid)
       .accept(MediaType.APPLICATION_JSON)
     hakukohdeOid.foreach(v => req = req.param("hakukohdeOid", v))
+    hakukohderyhmaOid.foreach(v => req = req.param("hakukohderyhmaOid", v))
     organisaatioOid.foreach(v => req = req.param("organisaatioOid", v))
     valintarajaus.foreach(v => req = req.param("valintarajaus", v))
     mvc.perform(req)
@@ -85,12 +99,14 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils with Or
     hakukohdeOid: Option[String] = Some(HAKUKOHDE_OID),
     organisaatioOid: Option[String] = None,
     valintarajaus: Option[String] = Some("HAKENEET"),
-    headers: Map[String, String] = Map.empty
+    headers: Map[String, String] = Map.empty,
+    hakukohderyhmaOid: Option[String] = None
   ): ResultActions = {
     var req = MockMvcRequestBuilders
       .get("/api/external/kkhakijat/excel")
       .param("hakuOid", hakuOid)
     hakukohdeOid.foreach(v => req = req.param("hakukohdeOid", v))
+    hakukohderyhmaOid.foreach(v => req = req.param("hakukohderyhmaOid", v))
     organisaatioOid.foreach(v => req = req.param("organisaatioOid", v))
     valintarajaus.foreach(v => req = req.param("valintarajaus", v))
     headers.foreach { case (k, v) => req = req.header(k, v) }
@@ -252,10 +268,47 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils with Or
   }
 
   @Test
-  def returns400WhenNeitherHakukohdeNorOrganisaatioProvided(): Unit = {
+  def returns400WhenNoRajaavaParametriProvided(): Unit = {
     get(hakukohdeOid = None, organisaatioOid = None)
       .andExpect(status.isBadRequest)
-      .andExpect(jsonPath("$.details", hasItem[Any]("hakukohdeOid_or_organisaatioOid.required")))
+      .andExpect(
+        jsonPath("$.details", hasItem[Any]("hakukohdeOid_or_organisaatioOid_or_hakukohderyhmaOid.required"))
+      )
+  }
+
+  @Test
+  def hakukohderyhmaAloneSatisfiesTheRequiredRajaus(): Unit = {
+    // Ryhmälaajennus tulee pub-skeemasta, jota testien H2-kanta ei sisällä -- stubataan tyhjäksi.
+    // Riittää että validointi läpäisee eikä 400:aa tule.
+    stubHakukohderyhma(List.empty)
+    seedMinimalHakija()
+
+    get(hakukohdeOid = None, organisaatioOid = None, hakukohderyhmaOid = Some(HAKUKOHDERYHMA_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
+  }
+
+  // Viimeinen arvo on hakukohteen oid: hakukohderyhmällä on oma patterninsa, joten
+  // väärän tyypin oid ei mene läpi ryhmärajaimena.
+  @ParameterizedTest
+  @ValueSource(
+    strings = Array("not-oid", "1.2", "1.2.246", "1.2.246.1", "1.2.246.562.20.00000000000000000112")
+  )
+  def returns400WhenHakukohderyhmaOidInvalid(bad: String): Unit = {
+    get(hakukohderyhmaOid = Some(bad))
+      .andExpect(status.isBadRequest)
+      .andExpect(jsonPath("$.details", hasItem[Any]("hakukohderyhmaOid.invalid.oid")))
+  }
+
+  // Vastaavasti hakukohderyhmän oid ei kelpaa hakukohderajaimena.
+  @ParameterizedTest
+  @ValueSource(
+    strings = Array("not-oid", "1.2", "1.2.246", "1.2.246.1", "1.2.246.562.28.00000000000000000012")
+  )
+  def returns400WhenHakukohdeOidInvalid(bad: String): Unit = {
+    get(hakukohdeOid = Some(bad))
+      .andExpect(status.isBadRequest)
+      .andExpect(jsonPath("$.details", hasItem[Any]("hakukohdeOid.invalid.oid")))
   }
 
   @Test
@@ -1302,6 +1355,30 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils with Or
     getExcel()
       .andExpect(status.isOk)
       .andExpect(header.string("Content-Disposition", containsString("kkhakijat-")))
+  }
+
+  @Test
+  def excelAcceptsHakukohderyhmaAsTheOnlyRajaus(): Unit = {
+    stubHakukohderyhma(List(HAKUKOHDE_OID))
+    seedMinimalHakija()
+
+    getExcel(hakukohdeOid = None, organisaatioOid = None, hakukohderyhmaOid = Some(HAKUKOHDERYHMA_OID))
+      .andExpect(status.isOk)
+      .andExpect(header.string("Content-Disposition", containsString("kkhakijat-")))
+  }
+
+  @Test
+  def excelReturns400WhenNoRajaavaParametriProvided(): Unit = {
+    initSchema()
+
+    getExcel(hakukohdeOid = None, organisaatioOid = None)
+      .andExpect(status.isBadRequest)
+      .andExpect(
+        content.json(
+          """{"status": 400, "message": "virhe.validointi",
+             "details": ["hakukohdeOid_or_organisaatioOid_or_hakukohderyhmaOid.required"] }"""
+        )
+      )
   }
 
   @Test

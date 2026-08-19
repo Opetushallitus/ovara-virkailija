@@ -9,12 +9,13 @@ import { FormButtons } from '@/app/components/form/form-buttons';
 import { KoulutuksenAlkaminen } from '@/app/components/form/koulutuksen-alkaminen';
 import { HakuSingle } from '@/app/components/form/haku-single';
 import { HakukohdeSingle } from '@/app/components/form/hakukohde-single';
+import { HakukohderyhmaSingle } from '@/app/components/form/hakukohderyhma-single';
 import { OrganisaatioSingle } from '@/app/components/form/organisaatio-single';
 import { ValintarajausSelect } from '@/app/components/form/valintarajaus-select';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import {
-  buildTiedonsiirtoParams,
+  buildKkHakijatTiedonsiirtoParams,
   hasOvaraKkHakeneetRole,
 } from '@/app/lib/utils';
 import { useKkHakijatTiedonsiirtoSearchParams } from '@/app/hooks/searchParams/useKkHakijatTiedonsiirtoSearchParams';
@@ -32,6 +33,8 @@ export default function KkHakijatTiedonsiirto() {
     setSelectedHaku,
     selectedHakukohde,
     setSelectedHakukohde,
+    selectedHakukohderyhma,
+    setSelectedHakukohderyhma,
     selectedOrganisaatio,
     setSelectedOrganisaatio,
     selectedValintarajaus,
@@ -39,10 +42,12 @@ export default function KkHakijatTiedonsiirto() {
     emptyAllKkHakijatTiedonsiirtoParams,
   } = useKkHakijatTiedonsiirtoSearchParams();
 
-  // Hakukohdevalikko on rajattu haun ja organisaation mukaan, joten vanha
-  // valinta ei ole enää validi kun kumpikaan niistä vaihtuu.
+  // Hakukohdevalikko on rajattu haun, organisaation ja hakukohderyhmän mukaan, joten
+  // vanha valinta ei ole enää validi kun mikään niistä vaihtuu. Hakukohderyhmävalikko
+  // on rajattu vain haun mukaan.
   const changeHaku = (value: string | null) => {
     setSelectedHaku(value);
+    setSelectedHakukohderyhma(null);
     setSelectedHakukohde(null);
   };
 
@@ -51,18 +56,26 @@ export default function KkHakijatTiedonsiirto() {
     setSelectedHakukohde(null);
   };
 
+  const changeHakukohderyhma = (value: string | null) => {
+    setSelectedHakukohderyhma(value);
+    setSelectedHakukohde(null);
+  };
+
+  // Rajaimet leikataan backendissa keskenään, ja hakukohderyhmä riittää yksinään
+  // rajaimeksi -- organisaatio on siis pakollinen vain ilman ryhmävalintaa.
   const isDisabled =
     isNullish(selectedHaku) ||
-    isNullish(selectedOrganisaatio) ||
-    isNullish(selectedValintarajaus);
+    isNullish(selectedValintarajaus) ||
+    (isNullish(selectedOrganisaatio) && isNullish(selectedHakukohderyhma));
 
   const handleDownload = () =>
     run(() =>
       downloadExcel(
         'external/kkhakijat/excel',
-        buildTiedonsiirtoParams({
+        buildKkHakijatTiedonsiirtoParams({
           hakuOid: selectedHaku,
           hakukohdeOid: selectedHakukohde,
+          hakukohderyhmaOid: selectedHakukohderyhma,
           organisaatioOid: selectedOrganisaatio,
           valintarajaus: selectedValintarajaus,
         }),
@@ -85,11 +98,17 @@ export default function KkHakijatTiedonsiirto() {
           <OrganisaatioSingle
             value={selectedOrganisaatio}
             onChange={changeOrganisaatio}
-            required
+            required={isNullish(selectedHakukohderyhma)}
+          />
+          <HakukohderyhmaSingle
+            hakuOid={selectedHaku}
+            value={selectedHakukohderyhma}
+            onChange={changeHakukohderyhma}
           />
           <HakukohdeSingle
             hakuOid={selectedHaku}
             organisaatioOid={selectedOrganisaatio}
+            hakukohderyhmaOid={selectedHakukohderyhma}
             value={selectedHakukohde}
             onChange={setSelectedHakukohde}
           />

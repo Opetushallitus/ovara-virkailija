@@ -29,7 +29,8 @@ class ExternalToisenAsteenHakijatService(
         organisaatioOid.map(oid => commonService.getOrganisaatioidenJaLastenOidit(List(oid))).getOrElse(Nil)
       val expandedScope =
         if (scope.isPaakayttaja) scope
-        else KayttooikeusScope.limited(commonService.getOrganisaatioidenJaLastenOidit(scope.allowedOrgOids.toList).toSet)
+        else
+          KayttooikeusScope.limited(commonService.getOrganisaatioidenJaLastenOidit(scope.allowedOrgOids.toList).toSet)
 
       val hakijaRows =
         repository.selectHakijat(hakuOid, hakukohdeOid, organisaatioOids, valintarajaus, expandedScope)

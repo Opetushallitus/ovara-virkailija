@@ -3,7 +3,7 @@ package fi.oph.ovara.backend.external.toisenasteenhakijat
 import com.fasterxml.jackson.databind.ObjectMapper
 import fi.oph.ovara.backend.opiskelijavalintatieto.ValidationError
 import fi.oph.ovara.backend.service.UserService
-import fi.oph.ovara.backend.utils.ParameterValidator.{validateOid, validateOrganisaatioOid}
+import fi.oph.ovara.backend.utils.ParameterValidator.{validateHakukohdeOid, validateOid, validateOrganisaatioOid}
 import fi.oph.ovara.backend.utils.{
   ApiException,
   AuditLog,
@@ -109,7 +109,7 @@ class ExternalToisenAsteenHakijatController(
       validate {
         List(
           validateOid(Some(hakuOid), "hakuOid"),
-          validateOid(hakukohde, "hakukohdeOid"),
+          validateHakukohdeOid(hakukohde, "hakukohdeOid"),
           validateOrganisaatioOid(organisaatio, "organisaatioOid"),
           Option.when(hakukohde.isEmpty && organisaatio.isEmpty)(
             "hakukohdeOid_or_organisaatioOid.required"
@@ -172,7 +172,7 @@ class ExternalToisenAsteenHakijatController(
 
     val validationErrors = List(
       validateOid(Some(hakuOid), "hakuOid"),
-      validateOid(hakukohde, "hakukohdeOid"),
+      validateHakukohdeOid(hakukohde, "hakukohdeOid"),
       validateOrganisaatioOid(organisaatio, "organisaatioOid"),
       Option.when(hakukohde.isEmpty && organisaatio.isEmpty)("hakukohdeOid_or_organisaatioOid.required"),
       Option.when(parsedRajaus.isEmpty)("valintarajaus.invalid")
