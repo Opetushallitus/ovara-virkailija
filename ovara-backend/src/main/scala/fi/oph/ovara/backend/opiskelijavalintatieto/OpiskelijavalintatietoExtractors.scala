@@ -30,7 +30,8 @@ trait OpiskelijavalintatietoExtractors extends Extractors {
       koulutuksenAlkamisvuosi = r.nextIntOption(),
       valinnanTila = r.nextStringOption(),
       vastaanottoTila = r.nextStringOption(),
-      ilmoituksenTila = r.nextStringOption()
+      ilmoituksenTila = r.nextStringOption(),
+      johtaaTutkintoon = r.nextBooleanOption()
     )
   )
 }

@@ -26,7 +26,8 @@ case class Hakutoive(
   koulutuksenAlkamisvuosi: Option[Int],
   valinnanTila: Option[String],
   vastaanotonTila: Option[String],
-  ilmoittautumisenTila: Option[String]
+  ilmoittautumisenTila: Option[String],
+  johtaaTutkintoon: Option[Boolean]
 )
 
 case class Nimetty(oid: String, nimi: Kielistetty)
@@ -63,7 +64,8 @@ case class HakemusRow(
   koulutuksenAlkamisvuosi: Option[Int],
   valinnanTila: Option[String],
   vastaanottoTila: Option[String],
-  ilmoituksenTila: Option[String]
+  ilmoituksenTila: Option[String],
+  johtaaTutkintoon: Option[Boolean]
 ) {
 
   def asHakutoive: Hakutoive = Hakutoive(
@@ -73,7 +75,8 @@ case class HakemusRow(
     koulutuksenAlkamisvuosi,
     valinnanTila,
     vastaanottoTila,
-    ilmoituksenTila
+    ilmoituksenTila,
+    johtaaTutkintoon
   )
 
   def asHakemus(hakutoiveet: Seq[Hakutoive]): Hakemus = Hakemus(
