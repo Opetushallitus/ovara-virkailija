@@ -19,7 +19,8 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
     hakukohdeOid: Option[String],
     organisaatioOid: Option[String],
     valintarajaus: Valintarajaus = Valintarajaus.HAKENEET,
-    scope: KayttooikeusScope = KayttooikeusScope.paakayttaja
+    scope: KayttooikeusScope = KayttooikeusScope.paakayttaja,
+    hakukohderyhmaOid: Option[String] = None
   ): Either[String, Seq[KKHakija]] = {
     Try {
       // Sekä rajapinnan organisaatioOid (rajaava parametri) että käyttäjän oikeudet vertaillaan hakukohteen
@@ -30,9 +31,19 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
         organisaatioOid.map(oid => commonService.getOrganisaatioidenJaLastenOidit(List(oid))).getOrElse(Nil)
       val expandedScope =
         if (scope.isPaakayttaja) scope
-        else KayttooikeusScope.limited(commonService.getOrganisaatioidenJaLastenOidit(scope.allowedOrgOids.toList).toSet)
+        else
+          KayttooikeusScope.limited(commonService.getOrganisaatioidenJaLastenOidit(scope.allowedOrgOids.toList).toSet)
 
-      val kkHakijaRows = repository.selectKKHakijat(hakuOid, hakukohdeOid, organisaatioOids, valintarajaus)
+      val rajaaHakukohteilla = hakukohdeOid.isDefined || hakukohderyhmaOid.isDefined
+      val hakukohdeRajaus    = resolveHakukohdeRajaus(hakuOid, hakukohdeOid, hakukohderyhmaOid)
+
+      // Jos rajaimia annettiin mutta leikkaus on tyhjä, yksikään hakukohde ei täsmää. Kyselyä ei
+      // saa ajaa: tyhjä hakukohdelista jättäisi voimaan vain organisaatiorajauksen ja laajentaisi
+      // tuloksen koko organisaatioon.
+      val kkHakijaRows =
+        if (rajaaHakukohteilla && hakukohdeRajaus.isEmpty) Seq.empty
+        else repository.selectKKHakijat(hakuOid, hakukohdeRajaus.toSeq, organisaatioOids, valintarajaus)
+
       if (kkHakijaRows.isEmpty) {
         Nil
       } else {
@@ -45,7 +56,7 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
         kkHakijaRows.flatMap { row =>
           val matchingRows = hakemuksetByOid
             .getOrElse(row.hakemusOid, Seq.empty)
-            .filter(matchesFilters(_, hakukohdeOid, organisaatioOids, valintarajaus, expandedScope))
+            .filter(matchesFilters(_, hakukohdeRajaus, organisaatioOids, valintarajaus, expandedScope))
           if (matchingRows.isEmpty) None
           else {
             val hakemukset = matchingRows.map(mRow =>
@@ -72,14 +83,38 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
       }
   }
 
+  /**
+   * Leikkaa hakukohde- ja hakukohderyhmäparametrit yhdeksi joukoksi hakukohde-oideja:
+   * hakukohde JA hakukohderyhmä yhdessä tarkoittavat "tämä hakukohde, jos se kuuluu ryhmään".
+   * Hakukohderyhmä laajennetaan sen hakukohde-oideiksi.
+   *
+   * Tyhjä joukko tarkoittaa joko ettei rajaimia annettu tai ettei leikkaus osu mihinkään --
+   * kutsuja erottaa nämä parametreista (ks. rajaaHakukohteilla).
+   */
+  private def resolveHakukohdeRajaus(
+    hakuOid: String,
+    hakukohdeOid: Option[String],
+    hakukohderyhmaOid: Option[String]
+  ): Set[String] = {
+    val ryhmanHakukohteet =
+      hakukohderyhmaOid.map(ryhma => commonService.getHakukohderyhmanHakukohdeOids(ryhma, hakuOid).toSet)
+
+    List(hakukohdeOid.map(Set(_)), ryhmanHakukohteet).flatten
+      .reduceOption(_ intersect _)
+      .getOrElse(Set.empty)
+  }
+
   private def matchesFilters(
     row: KKHakemusRow,
-    hakukohdeOid: Option[String],
+    hakukohdeOids: Set[String],    // Hakukohde- ja hakukohderyhmäparametreista leikattu
     organisaatioOids: Seq[String], // Rajapinnan parametri lapsiorganisaatioineen
     valintarajaus: Valintarajaus,
     scope: KayttooikeusScope // Käyttäjän oikeudet lapsiorganisaatioineen
   ): Boolean = {
-    val hakukohdeMatch = hakukohdeOid.forall(_ == row.hakukohdeOid)
+    // selectHakemukset hakee kaikki osumien hakemusten hakutoiveet, joten sama rajaus on
+    // toistettava tässä -- muuten ryhmän ulkopuoliset hakutoiveet palaisivat mukaan. Tyhjä joukko
+    // tarkoittaa tässä aina "ei rajausta": tyhjän leikkauksen tapaus on karsittu jo kutsujassa.
+    val hakukohdeMatch = hakukohdeOids.isEmpty || hakukohdeOids.contains(row.hakukohdeOid)
     val orgMatch       = organisaatioOids.isEmpty || row.jarjestyspaikkaOid.exists(organisaatioOids.contains)
     val allowedMatch   = scope.isPaakayttaja || row.jarjestyspaikkaOid.exists(scope.allowedOrgOids.contains)
     val stateMatch     = valintarajaus match {

@@ -24,7 +24,7 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
       Seq.empty
     } else {
 
-      val tilaFiltteriSql      = stateSqlFragment(valintarajaus)
+      val tilaFiltteriSql       = stateSqlFragment(valintarajaus)
       val hakurajausFiltteriSql = hakuFilterSqlFragment(hakukohdeOid, organisaatioOids)
       // Sallitut organisaatiot on laajennettu lapsiorganisaatioihin jo palvelukerroksessa.
       val kayttooikeusSql = sallitutOrganisaatiotKayttooikeusFragment(scope)
