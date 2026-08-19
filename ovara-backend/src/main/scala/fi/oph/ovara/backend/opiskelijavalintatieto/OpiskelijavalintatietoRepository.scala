@@ -40,10 +40,13 @@ class OpiskelijavalintatietoRepository extends OpiskelijavalintatietoExtractors 
                  coalesce(hk.koulutuksen_alkamisvuosi, h.koulutuksen_alkamisvuosi) as koulutuksen_alkamisvuosi,
                  ht.valintatieto,
                  ht.vastaanottotieto,
-                 ht.ilmoittautumisen_tila
+                 ht.ilmoittautumisen_tila,
+                 k.johtaa_tutkintoon
           FROM gen.gen_henkilo hlo
           INNER JOIN gen.gen_hakutoive ht ON ht.henkilo_oid = hlo.henkilo_oid
           LEFT JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
+          LEFT JOIN gen.gen_toteutus t ON t.toteutus_oid = hk.toteutus_oid
+          LEFT JOIN gen.gen_koulutus k ON k.koulutus_oid = t.koulutus_oid
           LEFT JOIN gen.gen_haku h ON hk.haku_oid = h.haku_oid
           LEFT JOIN gen.gen_organisaatio o ON hk.jarjestyspaikka_oid = o.organisaatio_oid
           WHERE hlo.oppijanumero in (#${RepositoryUtils.makeListOfValuesQueryStr(oppijanumerot)})

@@ -10,6 +10,8 @@ trait OpiskelijavalintatietoTestUtils {
   val HAKEMUS_OID      = "1.2.246.562.11.580"
   val HAKU_OID         = "1.2.246.562.29.001"
   val HAKUKOHDE_OID    = "1.2.246.562.20.012"
+  val TOTEUTUS_OID     = "1.2.246.562.17.012"
+  val KOULUTUS_OID     = "1.2.246.562.13.012"
   val ORGANISAATIO_OID = "1.2.246.562.10.486"
 
   def initAndInsert(): Unit = {
@@ -30,8 +32,16 @@ trait OpiskelijavalintatietoTestUtils {
       "Create hakutoive table"
     )
     db.run(
-      sqlu"""CREATE TABLE gen.gen_hakukohde (hakukohde_oid text, haku_oid text, hakukohde_nimi_fi text, hakukohde_nimi_sv text, hakukohde_nimi_en text, jarjestyspaikka_oid text, koulutuksen_alkamiskausiuri text, koulutuksen_alkamisvuosi integer)""",
+      sqlu"""CREATE TABLE gen.gen_hakukohde (hakukohde_oid text, haku_oid text, hakukohde_nimi_fi text, hakukohde_nimi_sv text, hakukohde_nimi_en text, jarjestyspaikka_oid text, koulutuksen_alkamiskausiuri text, koulutuksen_alkamisvuosi integer, toteutus_oid text)""",
       "Create hakukohde table"
+    )
+    db.run(
+      sqlu"""CREATE TABLE gen.gen_toteutus (toteutus_oid text, koulutus_oid text)""",
+      "Create toteutus table"
+    )
+    db.run(
+      sqlu"""CREATE TABLE gen.gen_koulutus (koulutus_oid text, johtaa_tutkintoon boolean)""",
+      "Create toteutus table"
     )
     db.run(
       sqlu"""CREATE TABLE gen.gen_haku (haku_oid text, haku_nimi_fi text, haku_nimi_sv text, haku_nimi_en text, kohdejoukko_koodiuri text, hakutapakoodiuri text, koulutuksen_alkamiskausiuri text, koulutuksen_alkamisvuosi integer)""",
@@ -39,7 +49,7 @@ trait OpiskelijavalintatietoTestUtils {
     )
     db.run(
       sqlu"""CREATE TABLE gen.gen_organisaatio (organisaatio_oid text, nimi_fi text, nimi_sv text)""",
-      "Create hakukohde table"
+      "Create organisaatio table"
     )
   }
 
@@ -56,8 +66,16 @@ trait OpiskelijavalintatietoTestUtils {
       "Insert test haku"
     )
     db.run(
-      sqlu"""INSERT INTO gen.gen_hakukohde VALUES ($HAKUKOHDE_OID, $HAKU_OID, 'Maisterihaku', 'Magisteransökan', 'Master''s Admission', $ORGANISAATIO_OID, 'kausi_s#1', 2022)""",
+      sqlu"""INSERT INTO gen.gen_hakukohde VALUES ($HAKUKOHDE_OID, $HAKU_OID, 'Maisterihaku', 'Magisteransökan', 'Master''s Admission', $ORGANISAATIO_OID, 'kausi_s#1', 2022, $TOTEUTUS_OID)""",
       "Insert test hakukohde"
+    )
+    db.run(
+      sqlu"""INSERT INTO gen.gen_toteutus VALUES ($TOTEUTUS_OID, $KOULUTUS_OID)""",
+      "Insert test toteutus"
+    )
+    db.run(
+      sqlu"""INSERT INTO gen.gen_koulutus VALUES ($KOULUTUS_OID, true)""",
+      "Insert test koulutus"
     )
     db.run(
       sqlu"""INSERT INTO gen.gen_hakutoive VALUES ($HAKEMUS_OID, $HAKUKOHDE_OID, $HAKU_OID, $OPPIJANUMERO, null, null, null)""",

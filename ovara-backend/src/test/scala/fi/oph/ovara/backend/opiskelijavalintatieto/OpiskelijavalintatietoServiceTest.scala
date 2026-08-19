@@ -79,7 +79,7 @@ class OpiskelijavalintatietoServiceTest extends AnyFlatSpec with Matchers with O
     initAndInsert()
     val otherHakukohdeOid = "1.2.246.562.20.901"
     db.run(
-      sqlu"""INSERT INTO gen.gen_hakukohde VALUES ($otherHakukohdeOid, $HAKU_OID, 'Maisterihaku', 'Magisteransökan', 'Master''s Admission', $ORGANISAATIO_OID, null, null)""",
+      sqlu"""INSERT INTO gen.gen_hakukohde VALUES ($otherHakukohdeOid, $HAKU_OID, 'Maisterihaku', 'Magisteransökan', 'Master''s Admission', $ORGANISAATIO_OID, null, null, null)""",
       "Insert hakukohde without alkamiskausi and vuosi"
     )
     db.run(
