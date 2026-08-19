@@ -65,8 +65,8 @@ export default function KkPaatettavatOpiskeluoikeudet() {
               renderInput={({ labelId }) => (
                 <DebouncedOphInput
                   fullWidth
-                  value={sukunimi ?? ''}
-                  onChange={(e) => setSukunimi(e.target.value)}
+                  value={sukunimi}
+                  onValueChange={setSukunimi}
                   inputProps={{
                     'aria-labelledby': labelId,
                   }}
@@ -88,8 +88,8 @@ export default function KkPaatettavatOpiskeluoikeudet() {
               renderInput={({ labelId }) => (
                 <DebouncedOphInput
                   fullWidth
-                  value={etunimi ?? ''}
-                  onChange={(e) => setEtunimi(e.target.value)}
+                  value={etunimi}
+                  onValueChange={setEtunimi}
                   inputProps={{
                     'aria-labelledby': labelId,
                   }}
@@ -99,13 +99,13 @@ export default function KkPaatettavatOpiskeluoikeudet() {
           </Box>
           <OvaraTextInput
             label={t('raportti.hetu')}
-            value={hetu ?? ''}
-            onChange={(e) => setHetu(e.target.value)}
+            value={hetu}
+            onValueChange={setHetu}
           />
           <OvaraTextInput
             label={t('raportti.oppijanumero')}
-            value={oppijanumero ?? ''}
-            onChange={(e) => setOppijanumero(e.target.value)}
+            value={oppijanumero}
+            onValueChange={setOppijanumero}
           />
           <Divider />
           <OpiskeluoikeudenTila />
