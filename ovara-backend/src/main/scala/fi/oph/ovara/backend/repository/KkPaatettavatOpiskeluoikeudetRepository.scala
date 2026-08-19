@@ -58,7 +58,7 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
           linkitetty.koulutusaste AS linkitettyKoulutusAste,
           oo.myontaja
         FROM gen.gen_opiskeluoikeus_kk oo
-        LEFT JOIN gen.gen_opiskeluoikeus_kk linkitetty on linkitetty.virta_tunniste = oo.liittyva_opiskeluoikeus_avain
+        LEFT JOIN gen.gen_opiskeluoikeus_kk linkitetty ON linkitetty.virta_tunniste = oo.liittyva_opiskeluoikeus_avain AND linkitetty.organisaatio_oid = oo.organisaatio_oid
         WHERE oo.yos IS TRUE AND oo.organisaatio_oid IN (#${RepositoryUtils.makeListOfValuesQueryStr(organisaatioOids)})
         #$oppijanumeroQueryPart #$opiskeluOikeudenTilaQueryPart
       """.as[KKPaatettavaOpiskeluoikeusEntity]
