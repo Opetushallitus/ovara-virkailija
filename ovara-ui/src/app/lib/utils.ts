@@ -159,6 +159,34 @@ export const buildTiedonsiirtoParams = ({
   return params.toString();
 };
 
+/**
+ * Rakentaa KK-hakijoiden tiedonsiirtoraportin (external-rajapinta) kyselyparametrit.
+ * Toisin kuin `buildTiedonsiirtoParams`, kaikki valitut rajaimet lähetetään ja backend
+ * leikkaa ne keskenään: hakukohde JA hakukohderyhmä JA organisaatio. Organisaatio ei ole
+ * pakollinen, jos hakukohderyhmä on valittu.
+ */
+export const buildKkHakijatTiedonsiirtoParams = ({
+  hakuOid,
+  hakukohdeOid,
+  hakukohderyhmaOid,
+  organisaatioOid,
+  valintarajaus,
+}: {
+  hakuOid: string | null;
+  hakukohdeOid: string | null;
+  hakukohderyhmaOid: string | null;
+  organisaatioOid: string | null;
+  valintarajaus: string | null;
+}): string => {
+  const params = new URLSearchParams();
+  if (hakuOid) params.set('hakuOid', hakuOid);
+  if (hakukohdeOid) params.set('hakukohdeOid', hakukohdeOid);
+  if (hakukohderyhmaOid) params.set('hakukohderyhmaOid', hakukohderyhmaOid);
+  if (organisaatioOid) params.set('organisaatioOid', organisaatioOid);
+  if (valintarajaus) params.set('valintarajaus', valintarajaus);
+  return params.toString();
+};
+
 export const getKoulutustoimijatToShow = (
   organisaatiot: Array<OrganisaatioHierarkia> | null,
 ) => {

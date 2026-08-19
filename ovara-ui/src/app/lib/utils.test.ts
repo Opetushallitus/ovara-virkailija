@@ -12,6 +12,7 @@ import {
   getKaikkiOrganisaatiotToShow,
   findOrganisaatio,
   buildTiedonsiirtoParams,
+  buildKkHakijatTiedonsiirtoParams,
 } from './utils';
 import {
   KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
@@ -804,6 +805,60 @@ describe('buildTiedonsiirtoParams', () => {
       buildTiedonsiirtoParams({
         hakuOid: null,
         hakukohdeOid: null,
+        organisaatioOid: null,
+        valintarajaus: null,
+      }),
+    ).toEqual('');
+  });
+});
+
+describe('buildKkHakijatTiedonsiirtoParams', () => {
+  const valintarajaus = 'HAKENEET';
+  const hakuOid = '1.2.246.562.29.00000000000000000100';
+  const hakukohdeOid = '1.2.246.562.20.00000000000000000012';
+  const hakukohderyhmaOid = '1.2.246.562.28.00000000000000000012';
+  const organisaatioOid = '1.2.246.562.10.00000000000000000486';
+
+  test('should send every selected rajain, since the backend intersects them', () => {
+    const params = new URLSearchParams(
+      buildKkHakijatTiedonsiirtoParams({
+        hakuOid,
+        hakukohdeOid,
+        hakukohderyhmaOid,
+        organisaatioOid,
+        valintarajaus,
+      }),
+    );
+
+    expect(params.get('hakuOid')).toEqual(hakuOid);
+    expect(params.get('hakukohdeOid')).toEqual(hakukohdeOid);
+    expect(params.get('hakukohderyhmaOid')).toEqual(hakukohderyhmaOid);
+    expect(params.get('organisaatioOid')).toEqual(organisaatioOid);
+    expect(params.get('valintarajaus')).toEqual(valintarajaus);
+  });
+
+  test('should send hakukohderyhmaOid without an organisaatioOid', () => {
+    const params = new URLSearchParams(
+      buildKkHakijatTiedonsiirtoParams({
+        hakuOid,
+        hakukohdeOid: null,
+        hakukohderyhmaOid,
+        organisaatioOid: null,
+        valintarajaus,
+      }),
+    );
+
+    expect(params.get('hakukohderyhmaOid')).toEqual(hakukohderyhmaOid);
+    expect(params.get('organisaatioOid')).toBeNull();
+    expect(params.get('hakukohdeOid')).toBeNull();
+  });
+
+  test('should omit params that have no value', () => {
+    expect(
+      buildKkHakijatTiedonsiirtoParams({
+        hakuOid: null,
+        hakukohdeOid: null,
+        hakukohderyhmaOid: null,
         organisaatioOid: null,
         valintarajaus: null,
       }),
