@@ -50,6 +50,7 @@ class OpiskelijavalintatietoRepository extends OpiskelijavalintatietoExtractors 
           LEFT JOIN gen.gen_haku h ON hk.haku_oid = h.haku_oid
           LEFT JOIN gen.gen_organisaatio o ON hk.jarjestyspaikka_oid = o.organisaatio_oid
           WHERE hlo.oppijanumero in (#${RepositoryUtils.makeListOfValuesQueryStr(oppijanumerot)})
+            AND length(h.haku_oid) != 35
           ORDER BY hlo.oppijanumero, ht.hakemus_oid
          """.as[HakemusRow]
   }
