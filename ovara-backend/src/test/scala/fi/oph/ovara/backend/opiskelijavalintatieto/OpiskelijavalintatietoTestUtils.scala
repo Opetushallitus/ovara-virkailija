@@ -8,7 +8,7 @@ trait OpiskelijavalintatietoTestUtils {
 
   val OPPIJANUMERO     = "1.2.246.562.24.9"
   val HAKEMUS_OID      = "1.2.246.562.11.580"
-  val HAKU_OID         = "1.2.246.562.29.001"
+  val HAKU_OID         = "1.2.246.562.29.00000000000000000001"
   val HAKUKOHDE_OID    = "1.2.246.562.20.012"
   val TOTEUTUS_OID     = "1.2.246.562.17.012"
   val KOULUTUS_OID     = "1.2.246.562.13.012"
