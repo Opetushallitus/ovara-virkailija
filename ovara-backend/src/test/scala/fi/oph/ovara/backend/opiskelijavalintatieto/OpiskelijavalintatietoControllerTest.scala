@@ -194,7 +194,7 @@ class OpiskelijavalintatietoControllerTest extends OpiskelijavalintatietoTestUti
       |  "hakemukset" : [ {
       |    "hakemusOid" : "1.2.246.562.11.580",
       |    "haku" : {
-      |      "oid" : "1.2.246.562.29.001",
+      |      "oid" : "1.2.246.562.29.00000000000000000001",
       |      "nimi" : {
       |        "fi" : "Korkeakoulujen yhteishaku",
       |        "sv" : "Högskolornas gemensamma",
