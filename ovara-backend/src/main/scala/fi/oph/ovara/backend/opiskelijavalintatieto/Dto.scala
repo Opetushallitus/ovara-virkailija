@@ -6,6 +6,7 @@ import fi.oph.ovara.backend.domain.{En, Fi, Kielistetty, Sv}
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode
 
+import java.lang.Boolean as JBoolean
 import java.util.Optional
 import scala.annotation.meta.field
 import scala.beans.BeanProperty
@@ -39,6 +40,7 @@ object OpiskelijavalintatietoResponse {
     )
 }
 
+@Schema(name = "OpiskelijavalintatietoHakemusResponse")
 case class HakemusResponse(
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
   @BeanProperty hakemusOid: String,
@@ -71,6 +73,7 @@ object HakemusResponse {
     )
 }
 
+@Schema(name = "OpiskelijavalintatietoHakutoiveResponse")
 case class HakutoiveResponse(
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
   @BeanProperty hakukohde: NimettyResponse,
@@ -125,7 +128,13 @@ case class HakutoiveResponse(
       "POISSA"
     )
   )
-  @BeanProperty ilmoittautumisenTila: Optional[String]
+  @BeanProperty ilmoittautumisenTila: Optional[String],
+  @(Schema @field)(
+    requiredMode = RequiredMode.NOT_REQUIRED,
+    description = "Johtaako hakukohteen koulutus tutkintoon",
+    example = "true"
+  )
+  @BeanProperty johtaaTutkintoon: Optional[JBoolean]
 )
 object HakutoiveResponse {
   def apply(hakutoive: Hakutoive): HakutoiveResponse =
@@ -136,7 +145,8 @@ object HakutoiveResponse {
       koulutuksenAlkamisvuosi = hakutoive.koulutuksenAlkamisvuosi.map(Integer.valueOf).toJava,
       valinnanTila = hakutoive.valinnanTila.toJava,
       vastaanotonTila = hakutoive.vastaanotonTila.toJava,
-      ilmoittautumisenTila = hakutoive.ilmoittautumisenTila.toJava
+      ilmoittautumisenTila = hakutoive.ilmoittautumisenTila.toJava,
+      johtaaTutkintoon = hakutoive.johtaaTutkintoon.map(JBoolean.valueOf).toJava
     )
 }
 
