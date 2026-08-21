@@ -28,4 +28,16 @@ object AuthoritiesUtil {
     kayttooikeusOids.filter(oid => regex.matches(oid))
   }
 
+  /**
+   * Käyttöoikeus voidaan myöntää organisaatiolle tai hakukohderyhmälle. Organisaatio-oidit
+   * poimitaan samalla patternilla jolla organisaatioOid-parametri validoidaan, jottei
+   * rajapinnan kahdelle puolelle synny eri käsitystä siitä mikä on organisaatio-oid.
+   *
+   * Huomaa ettei tämä ja `filterHakukohderyhmaOids` yhdessä välttämättä kata koko listaa:
+   * `getKayttooikeusOids` voi palauttaa myös muuta (esim. roolista `..._KK_HAKENEET_123`
+   * irtoavan "123"), eikä sellainen ole kummankaan tyypin oikeus.
+   */
+  def filterOrganisaatioOids(kayttooikeusOids: List[String]): List[String] =
+    kayttooikeusOids.filter(ParameterValidator.organisaatioOidPattern.matches)
+
 }

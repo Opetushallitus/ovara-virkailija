@@ -84,17 +84,22 @@ class ExternalKKHakijatController(
     if (isAuthorized) f
     else throw org.springframework.web.server.ResponseStatusException(HttpStatus.FORBIDDEN)
 
-  private def resolveKayttooikeusScope: KayttooikeusScope = {
+  private def resolveKayttooikeusScope: KayttooikeusScopeKK = {
     val authorities = userService.getAuthorities
     if (AuthoritiesUtil.hasOPHPaakayttajaRights(AuthoritiesUtil.getKayttooikeusOids(authorities))) {
-      KayttooikeusScope.paakayttaja
+      KayttooikeusScopeKK.paakayttaja
     } else {
-      // KK_HAKENEET is org-scoped: only OIDs suffixed onto KK_HAKENEET_ authorities count for
-      // this endpoint. OIDs granted through 2ASTE / HAKENEET / other ovara roles are NOT merged in.
-      val kkHakeneetOrgOids = AuthoritiesUtil.getKayttooikeusOids(
+      // Vain KK_HAKENEET_-etuliitteellä myönnetyt oidit kelpaavat tälle rajapinnalle: 2ASTE /
+      // HAKENEET / muiden ovara-roolien kautta saatuja oideja ei yhdistetä mukaan. Käyttöoikeus
+      // voi olla myönnetty organisaatiolle tai hakukohderyhmälle (oid-avaruus 1.2.246.562.28.*),
+      // ja nämä eritellään oid-avaruuden perusteella: organisaatio-oikeutta verrataan
+      // järjestyspaikkaan, ryhmäoikeus laajennetaan palvelussa haun hakukohteiksi.
+      val kkHakeneetOids = AuthoritiesUtil.getKayttooikeusOids(
         authorities.filter(_.startsWith(Constants.KK_HAKENEET_AUTHORITY_PREFIX))
       )
-      KayttooikeusScope.limited(kkHakeneetOrgOids.toSet)
+      val organisaatiotJoihinOikeus   = AuthoritiesUtil.filterOrganisaatioOids(kkHakeneetOids)
+      val hakukohderyhmatJoihinOikeus = AuthoritiesUtil.filterHakukohderyhmaOids(kkHakeneetOids)
+      KayttooikeusScopeKK.limited(organisaatiotJoihinOikeus.toSet, hakukohderyhmatJoihinOikeus.toSet)
     }
   }
 
@@ -104,6 +109,10 @@ class ExternalKKHakijatController(
     description = "Vaatii hakuOid-parametrin sekä vähintään yhden rajaavista parametreista " +
       "hakukohdeOid, hakukohderyhmaOid tai organisaatioOid. Useampi rajaava parametri leikataan " +
       "keskenään: hakukohderyhmaOid laajennetaan ryhmään kuuluviksi hakukohteiksi. " +
+      "Tulos rajataan lisäksi käyttäjän oikeuksiin: organisaatio-oikeus kattaa organisaation " +
+      "(ja sen alaorganisaatioiden) järjestämät hakukohteet, hakukohderyhmäoikeus ryhmään " +
+      "kuuluvat hakukohteet. Jos pyynnössä annetaan organisaatioOid, se on katettava " +
+      "organisaatio-oikeuksilla -- hakukohderyhmäoikeuksia ei tällöin huomioida. " +
       "Palauttaa tyhjän listan, jos hakijoita ei löydy. " +
       "Vain hakemuspalvelun (Ataru) hakemukset korkeakoulujen yhteishausta palautetaan.",
     responses = Array(
@@ -167,7 +176,7 @@ class ExternalKKHakijatController(
   @Operation(
     summary =
       "Palauttaa KK-hakijoiden tiedot Excel-muodossa haun ja hakukohteen, hakukohderyhmän tai organisaation perusteella",
-    description = "Sama hakulogiikka kuin JSON-rajapinnassa. Palauttaa .xlsx-tiedoston.",
+    description = "Sama haku- ja käyttöoikeuslogiikka kuin JSON-rajapinnassa. Palauttaa .xlsx-tiedoston.",
     responses = Array(
       new ApiResponse(responseCode = "200", description = "Hakijoiden tiedot Excel-muodossa."),
       new ApiResponse(

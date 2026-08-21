@@ -66,4 +66,73 @@ class AuthoritiesUtilSpec extends AnyFlatSpec {
       )
     )
   }
+
+  it should "return a hakukohderyhma oid as is" in {
+    val allAuthorities = List("ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.28.00000000000000000012")
+    assert(
+      AuthoritiesUtil.getKayttooikeusOids(allAuthorities) == List("1.2.246.562.28.00000000000000000012")
+    )
+  }
+
+  // Organisaatio, hakukohderyhmä, ja lopuksi joukko oideja jotka eivät ole kumpaakaan:
+  // hakukohde, henkilö ja roolista "..._KK_HAKENEET_123" irronnut rykelmä numeroita.
+  private val mixedOids = List(
+    "1.2.246.562.10.00000000001",
+    "1.2.246.562.28.00000000000000000012",
+    "1.2.246.562.10.00000000000000000586",
+    "1.2.246.562.28.00000000000000000013",
+    "1.2.246.562.20.00000000000000000112",
+    "1.2.246.562.24.00000000019",
+    "123"
+  )
+
+  "filterHakukohderyhmaOids" should "return only hakukohderyhma oids" in {
+    assert(
+      AuthoritiesUtil.filterHakukohderyhmaOids(mixedOids) == List(
+        "1.2.246.562.28.00000000000000000012",
+        "1.2.246.562.28.00000000000000000013"
+      )
+    )
+  }
+
+  "filterOrganisaatioOids" should "return only organisaatio oids" in {
+    assert(
+      AuthoritiesUtil.filterOrganisaatioOids(mixedOids) == List(
+        "1.2.246.562.10.00000000001",
+        "1.2.246.562.10.00000000000000000586"
+      )
+    )
+  }
+
+  // Pattern on sama jolla organisaatioOid-parametri validoidaan. Jos sitä kiristetään,
+  // tämä testi kertoo että myös käyttöoikeuksien tulkinta muuttuu.
+  it should "accept the same organisaatio oid namespaces as validateOrganisaatioOid" in {
+    val kaikkiAvaruudet = List(
+      "1.2.246.562.10.00000000001",
+      "1.2.246.562.99.00000000000000000001",
+      "1.2.246.562.199.00000000000000000001",
+      "1.2.246.562.299.00000000000000000001"
+    )
+    assert(AuthoritiesUtil.filterOrganisaatioOids(kaikkiAvaruudet) == kaikkiAvaruudet)
+    assert(kaikkiAvaruudet.forall(oid => ParameterValidator.validateOrganisaatioOid(Some(oid), "f").isEmpty))
+  }
+
+  it should "be disjoint from filterHakukohderyhmaOids, without necessarily covering the input" in {
+    val organisaatiot   = AuthoritiesUtil.filterOrganisaatioOids(mixedOids)
+    val hakukohderyhmat = AuthoritiesUtil.filterHakukohderyhmaOids(mixedOids)
+    assert(organisaatiot.intersect(hakukohderyhmat).isEmpty)
+    // Tunnistamattomat jäävät kokonaan ulkopuolelle -- eivät siis päädy organisaatio-oikeuksiksi.
+    assert(
+      mixedOids.diff(organisaatiot).diff(hakukohderyhmat) == List(
+        "1.2.246.562.20.00000000000000000112",
+        "1.2.246.562.24.00000000019",
+        "123"
+      )
+    )
+  }
+
+  it should "return an empty list for an empty input" in {
+    assert(AuthoritiesUtil.filterOrganisaatioOids(List()).isEmpty)
+    assert(AuthoritiesUtil.filterHakukohderyhmaOids(List()).isEmpty)
+  }
 }

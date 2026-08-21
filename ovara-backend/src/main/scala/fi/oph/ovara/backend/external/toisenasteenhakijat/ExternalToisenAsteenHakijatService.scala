@@ -17,8 +17,8 @@ class ExternalToisenAsteenHakijatService(
     hakuOid: String,
     hakukohdeOid: Option[String],
     organisaatioOid: Option[String],
-    valintarajaus: Valintarajaus = Valintarajaus.HAKENEET,
-    scope: KayttooikeusScope = KayttooikeusScope.paakayttaja
+    valintarajaus: Valintarajaus,
+    scope: KayttooikeusScope
   ): Either[String, Seq[ToisenAsteenHakija]] = {
     Try {
       // Sekä rajapinnan organisaatioOid (rajaava parametri) että käyttäjän oikeudet vertaillaan hakukohteen
