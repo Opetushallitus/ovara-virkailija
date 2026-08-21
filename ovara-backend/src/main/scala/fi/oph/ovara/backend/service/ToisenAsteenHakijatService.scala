@@ -3,12 +3,13 @@ package fi.oph.ovara.backend.service
 import fi.oph.ovara.backend.domain.ToisenAsteenHakija
 import fi.oph.ovara.backend.raportointi.dto.{buildHakijatParamsForExcel, ValidatedHakijatParams}
 import fi.oph.ovara.backend.repository.{ReadOnlyDatabase, ToisenAsteenHakijatRepository}
-import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
+import fi.oph.ovara.backend.utils.{AuthoritiesUtil, CommonExcelParams, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.{Component, Service}
 
+import java.time.LocalDateTime
 import scala.util.{Failure, Success, Try}
 
 @Component
@@ -115,9 +116,12 @@ class ToisenAsteenHakijatService(
 
       ExcelWriter.writeToisenAsteenHakijatRaportti(
         sortedList,
-        asiointikieli,
-        translations,
-        raporttiParams
+        CommonExcelParams(
+          asiointikieli,
+          translations,
+          raporttiParams,
+          LocalDateTime.now()
+        )
       )
     } match {
       case Success(excelFile) => Right(excelFile)

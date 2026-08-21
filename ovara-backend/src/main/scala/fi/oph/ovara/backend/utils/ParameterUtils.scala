@@ -7,6 +7,11 @@ case class ParametriNimet(
   nimet: List[Kielistetty]
 )
 
+case class ParametriKaannos(
+  parametri: String,
+  nimi: Kielistetty
+)
+
 object ParameterUtils {
 
   def collectBooleanParams(params: List[(String, Option[Boolean])]): List[(String, Boolean)] = {

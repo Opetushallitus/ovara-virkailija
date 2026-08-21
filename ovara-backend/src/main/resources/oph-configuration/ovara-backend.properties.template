@@ -22,3 +22,6 @@ ovara-backend.cas.password={{ovara_backend_cas_password}}
 ovara_backend.uses-ssl-proxy
 
 logback.access=true
+
+# Korkeakoulujen päätettävät opiskeluoikeudet -JSON-rajapinta (api/kk-paatettavat-opiskeluoikeudet/json)
+yos-json-rajapinta-enabled={{ovara_backend_yos_json_rajapinta_enabled | default('false')}}

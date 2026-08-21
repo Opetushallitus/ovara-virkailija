@@ -10,13 +10,14 @@ import fi.oph.ovara.backend.raportointi.dto.{
   ValidatedKkHakeneetHyvaksytytVastaanottaneetParams
 }
 import fi.oph.ovara.backend.repository.{KkHakeneetHyvaksytytVastaanottaneetRepository, ReadOnlyDatabase}
-import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
+import fi.oph.ovara.backend.utils.{AuthoritiesUtil, CommonExcelParams, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.{Component, Service}
 
 import java.text.Collator
+import java.time.LocalDateTime
 import java.util.Locale
 import scala.util.{Failure, Success, Try}
 
@@ -322,15 +323,18 @@ class KkHakeneetHyvaksytytVastaanottaneetService(
       )
 
       ExcelWriter.writeKkHakeneetHyvaksytytVastaanottaneetRaportti(
-        asiointikieli,
-        translations,
         sortedResult.toList,
         sumQueryResult,
         ensikertalaisetSumQueryResult,
         maksuvelvollisetSumQueryResult,
         naytaHakutoiveet,
         tulostustapa,
-        raporttiParams
+        CommonExcelParams(
+          asiointikieli,
+          translations,
+          raporttiParams,
+          LocalDateTime.now()
+        )
       )
     } match {
       case Success(excelFile) => Right(excelFile)

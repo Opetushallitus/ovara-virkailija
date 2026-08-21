@@ -9,11 +9,12 @@ import fi.oph.ovara.backend.utils.ExtractorUtils.{
   extractKielistetty,
   extractKielistettyList,
   extractKoulutuksenAlkamisaika,
+  extractKoulutusKoodit,
   extractMap,
   extractOpintojenlaajuus,
   extractValintatapajonot
 }
-import fi.oph.ovara.backend.utils.{Constants, GenericOvaraJsonFormats, ParametriNimet}
+import fi.oph.ovara.backend.utils.{Constants, GenericOvaraJsonFormats, ParametriKaannos, ParametriNimet}
 import org.json4s.jackson.Serialization.read
 import org.slf4j.{Logger, LoggerFactory}
 import slick.jdbc.*
@@ -109,6 +110,15 @@ trait Extractors extends GenericOvaraJsonFormats {
     )
   }
 
+  implicit val getParametriKaannosResult: GetResult[ParametriKaannos] = {
+    GetResult(r =>
+      ParametriKaannos(
+        parametri = r.nextString(),
+        nimi = extractKielistetty(r.nextStringOption())
+      )
+    )
+  }
+
   implicit val getKorkeakouluKoulutuksetToteutuksetHakukohteetResult
     : GetResult[KorkeakouluKoulutusToteutusHakukohdeResult] = {
     GetResult(r => {
@@ -155,6 +165,56 @@ trait Extractors extends GenericOvaraJsonFormats {
       tila = r.nextString(),
       parent_oids = extractArray(r.nextStringOption()),
       children = r.nextStringOption().map(read[List[OrganisaatioHierarkia]]).getOrElse(List())
+    )
+  )
+
+  implicit val getPaatettavatOpiskeluoikeudetResult: GetResult[KKPaatettavaOpiskeluoikeusEntity] = GetResult(r =>
+    KKPaatettavaOpiskeluoikeusEntity(
+      opiskelijaAvain = r.nextString(),
+      opiskeluoikeusAvain = r.nextString(),
+      opiskeluoikeudenNimi = Map(Fi -> r.nextString(), Sv -> r.nextString(), En -> r.nextString()),
+      opiskeluoikeudenViimeisinTila = r.nextString(),
+      koulutusaste = r.nextStringOption(),
+      koulutusKoodi = r.nextStringOption(),
+      linkitettyKoulutusAste = r.nextStringOption(),
+      myontaja = r.nextString()
+    )
+  )
+
+  implicit val getSitovastiVastaanottaneetResult: GetResult[KKSitovastiVastaanottanut] = GetResult(r =>
+    KKSitovastiVastaanottanut(
+      oppijanumero = r.nextString(),
+      hakemusOid = r.nextString(),
+      hakukohdeOid = r.nextString(),
+      hakukohdeNimi = Map(Fi -> r.nextString(), Sv -> r.nextString(), En -> r.nextString()),
+      vastaanottoAjankohta = extractDateOption(r.nextDateOption()),
+      hakuOid = r.nextString(),
+      koulutusasteet = extractArray(r.nextStringOption()),
+      haunNimi = Map(Fi -> r.nextString(), Sv -> r.nextString(), En -> r.nextString()),
+      oppilaitosOid = r.nextString(),
+      oppilaitosNimi = Map(Fi -> r.nextString(), Sv -> r.nextString(), En -> r.nextString()),
+      koulutusKoodit = extractKoulutusKoodit(r.nextStringOption())
+    )
+  )
+
+  implicit val getYosHenkilotResult: GetResult[YosHenkilo] = GetResult(r =>
+    YosHenkilo(
+      sukunimi = r.nextString(),
+      etunimet = r.nextString(),
+      kutsumanimi = r.nextString(),
+      hetu = r.nextStringOption(),
+      syntymaAika = extractDateOption(r.nextDateOption()),
+      oppijanumero = r.nextString()
+    )
+  )
+
+  implicit val getValintarekisteriYosResult: GetResult[YosValintarekisteriTiedot] = GetResult(r =>
+    YosValintarekisteriTiedot(
+      henkiloOid = r.nextString(),
+      hakukohdeOid = r.nextString(),
+      hakemusOid = r.nextString(),
+      paateltyAloitusPvm = extractDateOption(r.nextDateOption()),
+      naytettyPaatettavaOikeus = r.nextString()
     )
   )
 

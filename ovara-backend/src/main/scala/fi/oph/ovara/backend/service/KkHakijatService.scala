@@ -3,12 +3,13 @@ package fi.oph.ovara.backend.service
 import fi.oph.ovara.backend.domain.{KkHakija, Koodi}
 import fi.oph.ovara.backend.raportointi.dto.{buildKkHakijatParamsForExcel, ValidatedKkHakijatParams}
 import fi.oph.ovara.backend.repository.{CommonRepository, KkHakijatRepository, ReadOnlyDatabase}
-import fi.oph.ovara.backend.utils.{AuthoritiesUtil, ExcelWriter}
+import fi.oph.ovara.backend.utils.{AuthoritiesUtil, CommonExcelParams, ExcelWriter}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.{Component, Service}
 
+import java.time.LocalDateTime
 import scala.util.{Failure, Success, Try}
 
 @Component
@@ -120,13 +121,16 @@ class KkHakijatService(
 
       ExcelWriter.writeKkHakijatRaportti(
         sortedList,
-        asiointikieli,
-        translations,
         Some(naytaYoArvosanat),
         Some(naytaHetu),
         Some(naytaPostiosoite),
         yokokeet,
-        raporttiParams
+        CommonExcelParams(
+          asiointikieli,
+          translations,
+          raporttiParams,
+          LocalDateTime.now()
+        )
       )
     } match {
       case Success(excelFile) => Right(excelFile)
