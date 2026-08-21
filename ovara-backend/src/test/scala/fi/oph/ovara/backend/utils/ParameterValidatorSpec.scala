@@ -308,4 +308,54 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
 
     result shouldBe Right(expected)
   }
+
+  // Nämä patternit ovat käytössä vain external-rajapinnoissa; raportointipuoli validoi
+  // hakukohteet ja hakukohderyhmät yhä yleisellä ophOidPatternilla.
+  "validateHakukohdeOid" should "accept a hakukohde oid" in {
+    ParameterValidator.validateHakukohdeOid(
+      Some("1.2.246.562.20.00000000000000000112"),
+      "hakukohdeOid"
+    ) shouldBe None
+  }
+
+  it should "reject oids of other types" in {
+    List(
+      "1.2.246.562.28.00000000000000000112", // hakukohderyhmä
+      "1.2.246.562.10.00000000000000000586", // organisaatio
+      "1.2.246.562.29.00000000000000000200", // haku
+      "not-oid"
+    ).foreach { oid =>
+      ParameterValidator.validateHakukohdeOid(Some(oid), "hakukohdeOid") shouldBe
+        Some("hakukohdeOid.invalid.oid")
+    }
+  }
+
+  it should "skip validation for missing and empty values" in {
+    ParameterValidator.validateHakukohdeOid(None, "hakukohdeOid") shouldBe None
+    ParameterValidator.validateHakukohdeOid(Some(""), "hakukohdeOid") shouldBe None
+  }
+
+  "validateHakukohderyhmaOid" should "accept a hakukohderyhma oid" in {
+    ParameterValidator.validateHakukohderyhmaOid(
+      Some("1.2.246.562.28.00000000000000000012"),
+      "hakukohderyhmaOid"
+    ) shouldBe None
+  }
+
+  it should "reject oids of other types" in {
+    List(
+      "1.2.246.562.20.00000000000000000112", // hakukohde
+      "1.2.246.562.10.00000000000000000586", // organisaatio
+      "1.2.246.562.29.00000000000000000200", // haku
+      "not-oid"
+    ).foreach { oid =>
+      ParameterValidator.validateHakukohderyhmaOid(Some(oid), "hakukohderyhmaOid") shouldBe
+        Some("hakukohderyhmaOid.invalid.oid")
+    }
+  }
+
+  it should "skip validation for missing and empty values" in {
+    ParameterValidator.validateHakukohderyhmaOid(None, "hakukohderyhmaOid") shouldBe None
+    ParameterValidator.validateHakukohderyhmaOid(Some(""), "hakukohderyhmaOid") shouldBe None
+  }
 }

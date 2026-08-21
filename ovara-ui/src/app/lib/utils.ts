@@ -77,6 +77,20 @@ export const hasOvaraKkRole = (userRoles?: Array<string>) => {
   );
 };
 
+export const hasOvaraHakeneetRole = (userRoles?: Array<string>) => {
+  return (
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_HAKENEET') ||
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA')
+  );
+};
+
+export const hasOvaraKkHakeneetRole = (userRoles?: Array<string>) => {
+  return (
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET') ||
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA')
+  );
+};
+
 export const findOrganisaatiotWithOrganisaatiotyyppi = (
   hierarkia: OrganisaatioHierarkia,
   organisaatiotyyppi: string,
@@ -119,6 +133,58 @@ export const isNullishOrEmpty = <T>(
   list: Array<T> | null | undefined,
 ): boolean => {
   return isNullish(list) || isEmpty(list);
+};
+
+/**
+ * Rakentaa tiedonsiirtoraporttien (external-rajapinta) kyselyparametrit.
+ * Rajapinta ottaa vastaan joko hakukohteen tai organisaation, ei molempia:
+ * jos hakukohde on valittu, lähetetään sen oid, muuten organisaation oid.
+ */
+export const buildTiedonsiirtoParams = ({
+  hakuOid,
+  hakukohdeOid,
+  organisaatioOid,
+  valintarajaus,
+}: {
+  hakuOid: string | null;
+  hakukohdeOid: string | null;
+  organisaatioOid: string | null;
+  valintarajaus: string | null;
+}): string => {
+  const params = new URLSearchParams();
+  if (hakuOid) params.set('hakuOid', hakuOid);
+  if (hakukohdeOid) params.set('hakukohdeOid', hakukohdeOid);
+  else if (organisaatioOid) params.set('organisaatioOid', organisaatioOid);
+  if (valintarajaus) params.set('valintarajaus', valintarajaus);
+  return params.toString();
+};
+
+/**
+ * Rakentaa KK-hakijoiden tiedonsiirtoraportin (external-rajapinta) kyselyparametrit.
+ * Toisin kuin `buildTiedonsiirtoParams`, kaikki valitut rajaimet lähetetään ja backend
+ * leikkaa ne keskenään: hakukohde JA hakukohderyhmä JA organisaatio. Organisaatio ei ole
+ * pakollinen, jos hakukohderyhmä on valittu.
+ */
+export const buildKkHakijatTiedonsiirtoParams = ({
+  hakuOid,
+  hakukohdeOid,
+  hakukohderyhmaOid,
+  organisaatioOid,
+  valintarajaus,
+}: {
+  hakuOid: string | null;
+  hakukohdeOid: string | null;
+  hakukohderyhmaOid: string | null;
+  organisaatioOid: string | null;
+  valintarajaus: string | null;
+}): string => {
+  const params = new URLSearchParams();
+  if (hakuOid) params.set('hakuOid', hakuOid);
+  if (hakukohdeOid) params.set('hakukohdeOid', hakukohdeOid);
+  if (hakukohderyhmaOid) params.set('hakukohderyhmaOid', hakukohderyhmaOid);
+  if (organisaatioOid) params.set('organisaatioOid', organisaatioOid);
+  if (valintarajaus) params.set('valintarajaus', valintarajaus);
+  return params.toString();
 };
 
 export const getKoulutustoimijatToShow = (
@@ -176,6 +242,46 @@ export const getToimipisteetToShow = (
       );
     });
   }
+};
+
+/**
+ * Kaikki organisaatiot joihin käyttäjällä on oikeus, tasoittain järjestettynä
+ * (koulutustoimijat -> oppilaitokset -> toimipisteet). Toisin kuin
+ * `getKoulutustoimijatToShow`, tämä ei jätä pois käyttäjää jonka oikeus on
+ * koulutustoimijaa alemmalla tasolla.
+ */
+export const getKaikkiOrganisaatiotToShow = (
+  organisaatiot: Array<OrganisaatioHierarkia> | null,
+) => {
+  return uniqueBy(
+    [
+      ...getUniqueOrganisaatiotByOrganisaatiotyyppi(
+        organisaatiot,
+        KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
+      ),
+      ...getUniqueOrganisaatiotByOrganisaatiotyyppi(
+        organisaatiot,
+        OPPILAITOSORGANISAATIOTYYPPI,
+      ),
+      ...getUniqueOrganisaatiotByOrganisaatiotyyppi(
+        organisaatiot,
+        TOIMIPISTEORGANISAATIOTYYPPI,
+      ),
+    ],
+    (o) => o.organisaatio_oid,
+  );
+};
+
+export const findOrganisaatio = (
+  organisaatiot: Array<OrganisaatioHierarkia> | null,
+  organisaatioOid: string | null,
+): OrganisaatioHierarkia | undefined => {
+  if (isNullish(organisaatioOid)) {
+    return undefined;
+  }
+  return getKaikkiOrganisaatiotToShow(organisaatiot).find(
+    (o) => o.organisaatio_oid === organisaatioOid,
+  );
 };
 
 export const getHarkinnanvaraisuusTranslation = (

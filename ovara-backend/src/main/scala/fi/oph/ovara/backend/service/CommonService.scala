@@ -446,6 +446,41 @@ class CommonService(commonRepository: CommonRepository, userService: UserService
     }
   }
 
+  // Todo: korvataan tämä gen-skeemaan pohjautuvalla ratkaisulla external-rajapintoja varten.
+  // Tämä toteutus on väliaikainen.
+  /**
+   * Laajentaa annetut organisaatio-oidit sisältämään myös niiden lapsiorganisaatiot,
+   *  organisaatiotasosta riippumatta. Toisin kuin `getAllowedOrgOidsFromOrgSelection`,
+   *  tämä ei vaadi tietoa siitä onko oid koulutustoimija, oppilaitos vai toimipiste --
+   *  kaikki kolme hierarkiahakua ajetaan ja tulokset yhdistetään (vrt. ei-pääkäyttäjän
+   *  haara `getAllowedOrgsFromOrgSelection`-metodissa).
+   */
+  def getOrganisaatioidenJaLastenOidit(organisaatioOids: List[String]): List[String] = {
+    if (organisaatioOids.isEmpty) {
+      List()
+    } else {
+      val hierarkiat =
+        getToimipistehierarkiat(organisaatioOids) ++
+          getOppilaitoshierarkiat(organisaatioOids) ++
+          getKoulutustoimijahierarkia(organisaatioOids)
+
+      (organisaatioOids ++ hierarkiat.flatMap(OrganisaatioUtils.getDescendantOids)).distinct
+    }
+  }
+
+  /**
+   * Laajentaa hakukohderyhmän siihen kuuluviksi hakukohde-oideiksi annetussa haussa.
+   * Tarkoitettu external-rajapinnoille, joiden kyselyt eivät pääse hakukohderyhmätietoon
+   * käsiksi (ryhmätiedot ovat vain pub-skeemassa). Ei rajaa käyttöoikeuksilla -- rivitason
+   * käyttöoikeustarkistus tehdään kutsuvassa palvelussa järjestyspaikan perusteella.
+   */
+  def getHakukohderyhmanHakukohdeOids(hakukohderyhmaOid: String, hakuOid: String): List[String] = {
+    db.run(
+      commonRepository.selectHakukohderyhmanHakukohdeOids(hakukohderyhmaOid, hakuOid),
+      "selectHakukohderyhmanHakukohdeOids"
+    ).toList
+  }
+
   def getAllowedOrgOidsFromOrgSelection(
     kayttooikeusOrganisaatioOids: List[String],
     oppilaitosOids: List[String],

@@ -19,10 +19,12 @@ import scala.util.matching.Regex
 
 object ParameterValidator {
 
-  val ophOidPattern: Regex          = "^1\\.2\\.246\\.562\\.\\d+\\.\\d+$".r
-  val organisaatioOidPattern: Regex = "^1\\.2\\.246\\.562\\.(10|99|199|299)\\.\\d+$".r
-  val alphanumericPattern: Regex    = """^[a-zA-Z0-9_\\-]+$""".r
-  private val numericRegex          = """^\d+$""".r
+  val ophOidPattern: Regex            = "^1\\.2\\.246\\.562\\.\\d+\\.\\d+$".r
+  val organisaatioOidPattern: Regex   = "^1\\.2\\.246\\.562\\.(10|99|199|299)\\.\\d+$".r
+  val hakukohdeOidPattern: Regex      = "^1\\.2\\.246\\.562\\.20\\.\\d+$".r
+  val hakukohderyhmaOidPattern: Regex = "^1\\.2\\.246\\.562\\.28\\.\\d+$".r
+  val alphanumericPattern: Regex      = """^[a-zA-Z0-9_\\-]+$""".r
+  private val numericRegex            = """^\d+$""".r
 
   private val tulostustavat    = Set("hakukohteittain", "oppilaitoksittain")
   private val oidPattern       = """^1\.\d{4}\.\w{1,}$""".r
@@ -80,6 +82,16 @@ object ParameterValidator {
   def validateOrganisaatioOid(opt: Option[String], fieldName: String): Option[String] =
     opt.filter(_.nonEmpty).collect {
       case oid if !organisaatioOidPattern.matches(oid) => s"$fieldName.invalid.org"
+    }
+
+  def validateHakukohdeOid(opt: Option[String], fieldName: String): Option[String] =
+    opt.filter(_.nonEmpty).collect {
+      case oid if !hakukohdeOidPattern.matches(oid) => s"$fieldName.invalid.oid"
+    }
+
+  def validateHakukohderyhmaOid(opt: Option[String], fieldName: String): Option[String] =
+    opt.filter(_.nonEmpty).collect {
+      case oid if !hakukohderyhmaOidPattern.matches(oid) => s"$fieldName.invalid.oid"
     }
 
   def validateBoolean(value: String, fieldName: String): Option[String] = {
