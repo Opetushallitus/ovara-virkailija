@@ -49,7 +49,7 @@ import fi.oph.ovara.backend.utils.ParameterValidator.{
   validateOrganisaatioOid,
   validateOrganisaatioOidList
 }
-import fi.oph.ovara.backend.utils.{AuditLog, AuditLogObj, ControllerUtils}
+import fi.oph.ovara.backend.utils.{AuditLog, ControllerUtils}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Value
