@@ -1,7 +1,24 @@
 import react from '@vitejs/plugin-react';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig, loadEnv, type Plugin } from 'vite';
 import fs from 'node:fs';
 import path from 'node:path';
+
+const trailingSlashRedirectPlugin: Plugin = {
+  name: 'slash-redirect',
+  configureServer(server) {
+    server.middlewares.use((req, res, next) => {
+      if (req.url === '/ovara') {
+        res.writeHead(302, {
+          Location: '/ovara/',
+        });
+        res.end();
+        return;
+      }
+
+      next();
+    });
+  },
+};
 
 const readHttpsConfig = () => {
   const certPath = path.resolve('certificates/localhost.pem');
@@ -25,7 +42,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     base: '/ovara/',
-    plugins: [react()],
+    plugins: [trailingSlashRedirectPlugin, react()],
     build: {
       outDir: '../ovara-backend/src/main/resources/public/ovara',
       emptyOutDir: true,
