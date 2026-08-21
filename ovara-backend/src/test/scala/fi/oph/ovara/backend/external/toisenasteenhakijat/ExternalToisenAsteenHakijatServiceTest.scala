@@ -43,7 +43,7 @@ class ExternalToisenAsteenHakijatServiceTest
   }
 
   "getHakijat" should "return error string when there's a db error" in {
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
     assert(response.isLeft)
     assert(response.left.toOption.get == "virhe.tietokanta")
@@ -52,7 +52,7 @@ class ExternalToisenAsteenHakijatServiceTest
   it should "return empty list when no hakijat match" in {
     initSchema()
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
     assert(response.isRight)
     assert(response.toOption.get.isEmpty)
@@ -65,7 +65,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertOrganisaatio()
     insertHakemusToinenAsteYhteishaku()
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
     val hakija = getOnlyHakija(response)
     assert(hakija.oppijanumero == OPPIJANUMERO)
@@ -116,7 +116,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive(valintatieto = None, vastaanottotieto = None, ilmoittautumisenTila = None)
 
-    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response  = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
     val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
 
     assert(hakutoive.valinta.isEmpty)
@@ -132,7 +132,7 @@ class ExternalToisenAsteenHakijatServiceTest
       )
     )
 
-    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response  = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
     val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
 
     assert(hakutoive.terveys.isEmpty)
@@ -144,7 +144,7 @@ class ExternalToisenAsteenHakijatServiceTest
     seedMinimalHakija()
     insertHakemusToinenAsteYhteishaku(hakukohteetJson = None)
 
-    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response  = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
     val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
 
     assert(hakutoive.terveys.isEmpty)
@@ -155,7 +155,7 @@ class ExternalToisenAsteenHakijatServiceTest
   it should "return hakija matched by organisaatioOid" in {
     seedMinimalHakija()
 
-    val response = service.getHakijat(HAKU_OID, None, Some(ORGANISAATIO_OID))
+    val response = getHakijatAsPaakayttaja(HAKU_OID, None, Some(ORGANISAATIO_OID))
 
     val hakija = getOnlyHakija(response)
     assert(hakija.oppijanumero == OPPIJANUMERO)
@@ -164,7 +164,7 @@ class ExternalToisenAsteenHakijatServiceTest
   it should "return None / empty for fields that have no source yet" in {
     seedMinimalHakija()
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
     val hakija = getOnlyHakija(response)
     assert(hakija.muupuhelin.isEmpty)
@@ -198,7 +198,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive()
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
     val hakija = getOnlyHakija(response)
     assert(hakija.hetu.isEmpty)
@@ -218,7 +218,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde(koulutuksenAlkamiskausiuri = Some("kausi_k#1"))
     insertHakutoive()
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
     val hakija = getOnlyHakija(response)
     assert(hakija.hakemus.kausi.contains("K"))
@@ -230,7 +230,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde(koulutuksenAlkamiskausiuri = None)
     insertHakutoive()
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
     val hakija = getOnlyHakija(response)
     assert(hakija.hakemus.kausi.isEmpty)
@@ -244,7 +244,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde(koulutuksenAlkamisvuosi = None, koulutuksenAlkamiskausiuri = None)
     insertHakutoive()
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
     val hakija = getOnlyHakija(response)
     assert(hakija.hakemus.vuosi.contains("2027"))
@@ -261,7 +261,7 @@ class ExternalToisenAsteenHakijatServiceTest
       koulutuksenAlkamiskausiuri = Some("kausi_s#1")
     )
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
     val hakija = getOnlyHakija(response)
     assert(hakija.hakemus.vuosi.contains("2028"))
@@ -279,7 +279,7 @@ class ExternalToisenAsteenHakijatServiceTest
     )
     insertHakutoive()
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
     val hakija = getOnlyHakija(response)
     assert(
@@ -299,7 +299,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakutoive()
     insertToteutusJaKoulutus()
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
     val hakija = getOnlyHakija(response)
     assert(hakija.hakemus.vuosi.isEmpty)
@@ -312,7 +312,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde(koulutuksenAlkamiskausiuri = Some("kausi_v#1"))
     insertHakutoive()
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
     val hakija = getOnlyHakija(response)
     assert(hakija.hakemus.kausi.isEmpty)
@@ -324,7 +324,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive(hakemusOid = "1.2.246.562.11.3511892")
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
     assert(response.isRight)
     assert(response.toOption.get.isEmpty)
@@ -338,7 +338,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive()
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
     assert(response.isRight)
     assert(response.toOption.get.isEmpty)
@@ -350,7 +350,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2)
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
 
     assert(response.isRight)
     assert(response.toOption.get.isEmpty)
@@ -359,7 +359,7 @@ class ExternalToisenAsteenHakijatServiceTest
   it should "filter by hakuOid" in {
     seedMinimalHakija()
 
-    val response = service.getHakijat(HAKU_OID_2, Some(HAKUKOHDE_OID), None)
+    val response = getHakijatAsPaakayttaja(HAKU_OID_2, Some(HAKUKOHDE_OID), None)
 
     assert(response.isRight)
     assert(response.toOption.get.isEmpty)
@@ -372,7 +372,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakutoive()
     insertHakemusToinenAsteYhteishaku()
 
-    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response  = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
     val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
 
     assert(
@@ -388,7 +388,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakutoive()
     insertHakemusToinenAsteYhteishaku()
 
-    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response  = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
     val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
 
     assert(
@@ -404,7 +404,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakutoive()
     insertHakemusToinenAsteYhteishaku(kiinnostunutUrheilijanAmmatillisestaKoulutuksesta = Some(true))
 
-    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response  = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
     val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
 
     assert(
@@ -420,7 +420,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakutoive()
     insertHakemusToinenAsteYhteishaku(kiinnostunutUrheilijanAmmatillisestaKoulutuksesta = Some(false))
 
-    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response  = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
     val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
 
     assert(hakutoive.urheilijanLisakysymykset.isEmpty)
@@ -436,7 +436,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakutoive()
     insertHakemusToinenAsteYhteishaku(kiinnostunutUrheilijanAmmatillisestaKoulutuksesta = Some(true))
 
-    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response  = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
     val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
 
     assert(
@@ -452,7 +452,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakutoive()
     insertHakemusToinenAsteYhteishaku()
 
-    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response  = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
     val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
 
     assert(hakutoive.urheilijanLisakysymykset.isEmpty)
@@ -465,7 +465,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakutoive()
     insertHakemusToinenAsteYhteishaku(kiinnostunutUrheilijanAmmatillisestaKoulutuksesta = Some(true))
 
-    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response  = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
     val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
 
     assert(hakutoive.urheilijanammatillinenkoulutus.contains(true))
@@ -478,7 +478,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakutoive()
     insertHakemusToinenAsteYhteishaku(kiinnostunutUrheilijanAmmatillisestaKoulutuksesta = Some(false))
 
-    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response  = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
     val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
 
     assert(hakutoive.urheilijanammatillinenkoulutus.contains(false))
@@ -491,7 +491,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakutoive()
     insertHakemusToinenAsteYhteishaku(kiinnostunutUrheilijanAmmatillisestaKoulutuksesta = Some(true))
 
-    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response  = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
     val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
 
     assert(hakutoive.urheilijanammatillinenkoulutus.isEmpty)
@@ -504,7 +504,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakutoive()
     insertHakemusToinenAsteYhteishaku(kiinnostunutUrheilijanAmmatillisestaKoulutuksesta = Some(true))
 
-    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response  = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
     val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
 
     assert(
@@ -523,7 +523,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive(valintatieto = Some("HYVAKSYTTY"))
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
 
     assert(response.toOption.get.size == 1)
   }
@@ -534,7 +534,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive(valintatieto = Some("HARKINNANVARAISESTI_HYVAKSYTTY"))
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
 
     assert(response.toOption.get.size == 1)
   }
@@ -545,7 +545,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive(valintatieto = Some("VARASIJALTA_HYVAKSYTTY"))
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
 
     assert(response.toOption.get.size == 1)
   }
@@ -556,7 +556,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive(valintatieto = Some("HYLATTY"))
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
 
     assert(response.toOption.get.isEmpty)
   }
@@ -567,7 +567,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive(vastaanottotieto = Some("VASTAANOTTANUT_SITOVASTI"))
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.VASTAANOTTANEET)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.VASTAANOTTANEET)
 
     assert(response.toOption.get.size == 1)
   }
@@ -578,7 +578,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive(vastaanottotieto = Some("EHDOLLISESTI_VASTAANOTTANUT"))
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.VASTAANOTTANEET)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.VASTAANOTTANEET)
 
     assert(response.toOption.get.isEmpty)
   }
@@ -589,7 +589,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive(valintatieto = Some("HYLATTY"), vastaanottotieto = None)
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HAKENEET)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HAKENEET)
 
     assert(response.toOption.get.size == 1)
   }
@@ -602,7 +602,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 1)
     insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2)
 
-    val response    = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HAKENEET)
+    val response    = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HAKENEET)
     val hakutoiveet = getOnlyHakija(response).hakemus.hakutoiveet
 
     assert(hakutoiveet.size == 1, s"expected only the matched hakutoive, got $hakutoiveet")
@@ -617,7 +617,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 1, valintatieto = Some("HYVAKSYTTY"))
     insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2, valintatieto = Some("HYVAKSYTTY"))
 
-    val response    = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
+    val response    = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
     val hakutoiveet = getOnlyHakija(response).hakemus.hakutoiveet
 
     assert(hakutoiveet.size == 1)
@@ -630,7 +630,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, valintatieto = Some("HYLATTY"))
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
 
     assert(response.toOption.get.isEmpty)
   }
@@ -696,7 +696,7 @@ class ExternalToisenAsteenHakijatServiceTest
     seedMinimalHakija()
     withOrganisaatioHierarkia(Map(KOULUTUSTOIMIJA_OID -> List(ORGANISAATIO_OID)))
 
-    val response = service.getHakijat(HAKU_OID, None, Some(KOULUTUSTOIMIJA_OID))
+    val response = getHakijatAsPaakayttaja(HAKU_OID, None, Some(KOULUTUSTOIMIJA_OID))
 
     val hakija = getOnlyHakija(response)
     assert(hakija.oppijanumero == OPPIJANUMERO)
@@ -706,7 +706,7 @@ class ExternalToisenAsteenHakijatServiceTest
     seedMinimalHakija()
     withOrganisaatioHierarkia(Map(KOULUTUSTOIMIJA_OID -> List(ORGANISAATIO_OID_2)))
 
-    val response = service.getHakijat(HAKU_OID, None, Some(KOULUTUSTOIMIJA_OID))
+    val response = getHakijatAsPaakayttaja(HAKU_OID, None, Some(KOULUTUSTOIMIJA_OID))
 
     assert(response.toOption.get.isEmpty)
   }
@@ -757,7 +757,7 @@ class ExternalToisenAsteenHakijatServiceTest
       valintatieto = Some("VARASIJALTA_HYVAKSYTTY")
     )
 
-    val response = service.getHakijat(HAKU_OID, None, Some(ORGANISAATIO_OID))
+    val response = getHakijatAsPaakayttaja(HAKU_OID, None, Some(ORGANISAATIO_OID))
     val hakija   = getOnlyHakija(response)
 
     assert(hakija.hakemus.hakutoiveet.forall(_.valinta.contains("1")))
@@ -769,7 +769,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive(valintatieto = Some("PERUUTETTU"))
 
-    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response  = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
     val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
 
     assert(hakutoive.valinta.contains("5"))
@@ -781,7 +781,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive(valintatieto = Some("SOMETHING_ELSE"))
 
-    val response  = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response  = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
     val hakutoive = getOnlyHakija(response).hakemus.hakutoiveet.head
 
     assert(hakutoive.valinta.isEmpty)
@@ -793,7 +793,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive(vastaanottotieto = Some("EHDOLLISESTI_VASTAANOTTANUT"))
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.VASTAANOTTANEET)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.VASTAANOTTANEET)
 
     assert(response.toOption.get.isEmpty)
   }
@@ -815,7 +815,8 @@ class ExternalToisenAsteenHakijatServiceTest
       insertHakemus()
       insertHakukohde()
       insertHakutoive(valintatieto = Some(raw))
-      val hakutoive = getOnlyHakija(service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)).hakemus.hakutoiveet.head
+      val hakutoive =
+        getOnlyHakija(getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)).hakemus.hakutoiveet.head
       assert(hakutoive.valinta == expected, s"$raw should map to $expected but got ${hakutoive.valinta}")
     }
   }
@@ -834,7 +835,8 @@ class ExternalToisenAsteenHakijatServiceTest
       insertHakemus()
       insertHakukohde()
       insertHakutoive(vastaanottotieto = Some(raw))
-      val hakutoive = getOnlyHakija(service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)).hakemus.hakutoiveet.head
+      val hakutoive =
+        getOnlyHakija(getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)).hakemus.hakutoiveet.head
       assert(hakutoive.vastaanotto == expected, s"$raw should map to $expected but got ${hakutoive.vastaanotto}")
     }
   }
@@ -856,7 +858,8 @@ class ExternalToisenAsteenHakijatServiceTest
       insertHakemus()
       insertHakukohde()
       insertHakutoive(ilmoittautumisenTila = Some(raw))
-      val hakutoive = getOnlyHakija(service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None)).hakemus.hakutoiveet.head
+      val hakutoive =
+        getOnlyHakija(getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)).hakemus.hakutoiveet.head
       assert(hakutoive.lasnaolo == expected, s"$raw should map to $expected but got ${hakutoive.lasnaolo}")
     }
   }
@@ -867,7 +870,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive(valintatieto = None)
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.HYVAKSYTYT)
 
     assert(response.toOption.get.isEmpty)
   }
@@ -878,7 +881,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde()
     insertHakutoive(vastaanottotieto = None)
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.VASTAANOTTANEET)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None, Valintarajaus.VASTAANOTTANEET)
 
     assert(response.toOption.get.isEmpty)
   }
@@ -891,7 +894,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 1)
     insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2)
 
-    val response    = service.getHakijat(HAKU_OID, None, Some(ORGANISAATIO_OID))
+    val response    = getHakijatAsPaakayttaja(HAKU_OID, None, Some(ORGANISAATIO_OID))
     val hakutoiveet = getOnlyHakija(response).hakemus.hakutoiveet
 
     assert(hakutoiveet.size == 1, s"expected only org-matched hakutoive, got $hakutoiveet")
@@ -906,7 +909,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 1, valintatieto = Some("HYVAKSYTTY"))
     insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2, valintatieto = Some("HYVAKSYTTY"))
 
-    val response    = service.getHakijat(HAKU_OID, None, Some(ORGANISAATIO_OID), Valintarajaus.HYVAKSYTYT)
+    val response    = getHakijatAsPaakayttaja(HAKU_OID, None, Some(ORGANISAATIO_OID), Valintarajaus.HYVAKSYTYT)
     val hakutoiveet = getOnlyHakija(response).hakemus.hakutoiveet
 
     assert(hakutoiveet.size == 1)
@@ -921,7 +924,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 1, valintatieto = Some("HYLATTY"))
     insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2, valintatieto = Some("HYVAKSYTTY"))
 
-    val response = service.getHakijat(HAKU_OID, None, Some(ORGANISAATIO_OID), Valintarajaus.HYVAKSYTYT)
+    val response = getHakijatAsPaakayttaja(HAKU_OID, None, Some(ORGANISAATIO_OID), Valintarajaus.HYVAKSYTYT)
 
     assert(response.toOption.get.isEmpty)
   }
@@ -947,7 +950,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2)
     insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 1)
 
-    val hakija = getOnlyHakija(service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None))
+    val hakija = getOnlyHakija(getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None))
 
     assert(hakija.hakemus.vuosi.contains("2030"))
     assert(hakija.hakemus.kausi.contains("K"))
@@ -965,7 +968,7 @@ class ExternalToisenAsteenHakijatServiceTest
     )
     insertHakutoive(hakukohdeOid = HAKUKOHDE_OID, hakutoivenumero = 2)
 
-    val hakija = getOnlyHakija(service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None))
+    val hakija = getOnlyHakija(getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None))
 
     assert(hakija.hakemus.vuosi.contains("2032"), "should fall through to hakutoive 2's hakukohde")
     assert(hakija.hakemus.kausi.contains("S"))
@@ -995,7 +998,7 @@ class ExternalToisenAsteenHakijatServiceTest
       koulutuksenAlkamiskausiuri = Some("kausi_k#1")
     )
 
-    val hakija = getOnlyHakija(service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None))
+    val hakija = getOnlyHakija(getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None))
 
     assert(hakija.hakemus.vuosi.contains("2033"), "toteutus candidate comes from hakutoive 2")
     assert(hakija.hakemus.kausi.contains("K"))
@@ -1019,7 +1022,7 @@ class ExternalToisenAsteenHakijatServiceTest
 
     // Querying hakukohde 2 must not change which hakutoive vuosi/kausi is derived from:
     // the value belongs to the hakemus, not to the filtered hakutoive.
-    val hakija = getOnlyHakija(service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None))
+    val hakija = getOnlyHakija(getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None))
 
     assert(hakija.hakemus.hakutoiveet.size == 1, "only the queried hakutoive is returned")
     assert(hakija.hakemus.hakutoiveet.head.hakukohdeOid == HAKUKOHDE_OID)
@@ -1041,7 +1044,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertPohjakoulutus(hakemusOid = HAKEMUS_OID, arvo = Some("\"1\""))
     insertPohjakoulutus(hakemusOid = HAKEMUS_OID_2, arvo = Some("\"9\""))
 
-    val hakija = getOnlyHakija(service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None))
+    val hakija = getOnlyHakija(getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None))
 
     assert(hakija.hakemus.hakemusnumero == HAKEMUS_OID)
     assert(hakija.hakemus.pohjakoulutus.contains("1"), "must not pick up the other hakemus's supa row")
@@ -1073,7 +1076,7 @@ class ExternalToisenAsteenHakijatServiceTest
     insertValintarekisteri(pisteet = Some(BigDecimal("7.75")))
     insertValintalaskentaFunktiotulos(tunniste = "keskiarvo_pk", arvo = Some("8.25"))
 
-    val hakija = getOnlyHakija(service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), None))
+    val hakija = getOnlyHakija(getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None))
 
     // gen_hakemus / gen_henkilo block
     assert(hakija.oppijanumero == OPPIJANUMERO)
@@ -1104,10 +1107,18 @@ class ExternalToisenAsteenHakijatServiceTest
     insertHakukohde(hakukohdeOid = HAKUKOHDE_OID, jarjestyspaikkaOid = ORGANISAATIO_OID)
     insertHakutoive(hakukohdeOid = HAKUKOHDE_OID)
 
-    val response = service.getHakijat(HAKU_OID, Some(HAKUKOHDE_OID), Some(ORGANISAATIO_OID_2))
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), Some(ORGANISAATIO_OID_2))
 
     assert(response.toOption.get.isEmpty)
   }
+
+  private def getHakijatAsPaakayttaja(
+    hakuOid: String,
+    hakukohdeOid: Option[String],
+    organisaatioOid: Option[String],
+    valintarajaus: Valintarajaus = Valintarajaus.HAKENEET
+  ): Either[String, Seq[ToisenAsteenHakija]] =
+    service.getHakijat(hakuOid, hakukohdeOid, organisaatioOid, valintarajaus, KayttooikeusScope.paakayttaja)
 
   private def resetDb(): Unit = {
     db.run(sqlu"""DROP ALL OBJECTS""", "Drop everything")

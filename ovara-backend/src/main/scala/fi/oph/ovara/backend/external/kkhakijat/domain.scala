@@ -13,20 +13,33 @@ object Valintarajaus {
 
 /**
  * Käyttöoikeus scope carried through the request. OPH_PAAKAYTTAJA is unrestricted
- * (`isPaakayttaja = true`, `allowedOrgOids` ignored). Any other caller is limited to
- * `allowedOrgOids` — an empty set means the caller has no rights → empty results.
+ * (`isPaakayttaja = true`, the other fields ignored). Any other caller is limited to the
+ * union of two grants, either of which alone is enough to let a hakutoive through:
+ *   - `allowedOrgOids`: organisaatio-oikeudet, verrataan hakukohteen järjestyspaikkaan.
+ *   - `allowedHakukohderyhmaOids`: hakukohderyhmäoikeudet sellaisina kuin ne on myönnetty.
+ *     Palvelu laajentaa nämä haun hakukohteiksi `allowedHakukohdeOids`-kenttään, koska
+ *     ryhmätieto on vain pub-skeemassa eikä hakijakyselyn ulottuvilla.
+ * Kaikkien tyhjyys tarkoittaa, ettei kutsujalla ole oikeuksia → tyhjä tulos.
  */
-case class KayttooikeusScope(
+case class KayttooikeusScopeKK(
   isPaakayttaja: Boolean,
-  allowedOrgOids: Set[String]
+  allowedOrgOids: Set[String],
+  allowedHakukohderyhmaOids: Set[String] = Set.empty,
+  allowedHakukohdeOidsFromHakukohderyhmat: Set[String] = Set.empty
 )
 
-object KayttooikeusScope {
-  val paakayttaja: KayttooikeusScope =
-    KayttooikeusScope(isPaakayttaja = true, allowedOrgOids = Set.empty)
+object KayttooikeusScopeKK {
+  val paakayttaja: KayttooikeusScopeKK =
+    KayttooikeusScopeKK(isPaakayttaja = true, allowedOrgOids = Set.empty)
 
-  def limited(orgs: Set[String]): KayttooikeusScope =
-    KayttooikeusScope(isPaakayttaja = false, allowedOrgOids = orgs)
+  // Yksi metodi oletusarvolla, ei kahta ylikuormitusta: `limited(Set(...))` olisi
+  // ylikuormitusten kanssa monitulkintainen.
+  def limited(orgs: Set[String], hakukohderyhmat: Set[String] = Set.empty): KayttooikeusScopeKK =
+    KayttooikeusScopeKK(
+      isPaakayttaja = false,
+      allowedOrgOids = orgs,
+      allowedHakukohderyhmaOids = hakukohderyhmat
+    )
 }
 
 // Enum wrappers over the raw DB strings. Scala 3's default `toString` returns the case
