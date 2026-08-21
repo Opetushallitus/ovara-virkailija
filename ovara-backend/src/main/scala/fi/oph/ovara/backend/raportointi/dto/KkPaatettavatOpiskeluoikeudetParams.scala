@@ -25,7 +25,7 @@ def buildKkPaatettavatOpiskeluoikeudetAuditParams(
   params: KkPaatettavatOpiskeluoikeudetParams
 ): Map[String, Any] = {
   Map(
-    "oppilaitos"            -> params.oppilaitos,
+    "oppilaitos"            -> Option(params.oppilaitos),
     "sukunimi"              -> params.sukunimi,
     "etunimet"              -> params.etunimet,
     "hetu"                  -> params.hetu,
