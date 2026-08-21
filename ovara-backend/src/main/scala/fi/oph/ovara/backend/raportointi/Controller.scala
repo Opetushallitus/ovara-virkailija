@@ -335,7 +335,7 @@ class Controller(
   }
 
   // RAPORTIT
-
+  
   @GetMapping(path = Array("koulutukset-toteutukset-hakukohteet"))
   def koulutukset_toteutukset_hakukohteet(
     @RequestParam("ovara_haut") haut: java.util.Collection[String],

@@ -202,6 +202,8 @@ class SecurityConfig {
         requests
           .requestMatchers("/api/healthcheck", "/api/csrf")
           .permitAll()
+          .requestMatchers("/ovara", "/ovara/**")
+          .permitAll()
           .requestMatchers(SWAGGER_WHITELIST*)
           .permitAll()
           .anyRequest()

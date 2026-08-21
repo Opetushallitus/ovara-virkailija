@@ -1,4 +1,3 @@
-'use client';
 import { useQueryStateWithLocalStorage } from './useQueryStateWithLocalStorage';
 
 export const usePaatettavatOpiskeluoikeudetSearchParams = () => {
@@ -49,12 +48,17 @@ export const usePaatettavatOpiskeluoikeudetSearchParams = () => {
   });
 
   const emptyAllPaatettavatOpiskeluoikeudetParams = () => {
-    console.debug('EMPTY ALL OPISKELUOIKEUDEN TILA PARAMS');
-    const keysToClear = ['ovara_opiskeluoikeuden_tila'];
+    const keysToClear = [
+      'ovara_opiskeluoikeuden_tila',
+      'ovara_oppilaitos',
+      'ovara_etunimi',
+      'ovara_sukunimi',
+      'ovara_hetu',
+      'ovara_oppijanumero',
+    ];
 
     keysToClear.forEach((key) => localStorage.removeItem(key));
 
-    setSelectedOppilaitos(null);
     setEtunimi(null);
     setSukunimi(null);
     setHetu(null);

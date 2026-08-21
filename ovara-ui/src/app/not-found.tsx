@@ -1,4 +1,3 @@
-'use client';
 import { Button, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useTranslate } from '@tolgee/react';
@@ -44,7 +43,7 @@ export default function Custom404() {
               <Button
                 variant="contained"
                 aria-label={t('yleinen.palaa-etusivulle')}
-                href="/"
+                href="/ovara"
               >
                 {t('yleinen.palaa-etusivulle')}
               </Button>

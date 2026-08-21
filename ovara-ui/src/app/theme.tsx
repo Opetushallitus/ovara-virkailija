@@ -1,4 +1,3 @@
-'use client';
 import { ComponentRef, ComponentType, forwardRef } from 'react';
 import { ophColors } from '@opetushallitus/oph-design-system';
 import { styled as muiStyled, ThemeOptions } from '@mui/material/styles';

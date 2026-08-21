@@ -1,20 +1,24 @@
 export const DOMAIN =
-  process.env.APP_URL ?? process.env.VIRKAILIJA_URL ?? 'https://localhost:3405';
+  import.meta.env.VITE_APP_URL ?? import.meta.env.VITE_VIRKAILIJA_URL ?? '';
 
-export const OVARA_BACKEND =
-  process.env.OVARA_BACKEND ?? process.env.VIRKAILIJA_URL;
+export const isLocalhost =
+  typeof window !== 'undefined' &&
+  window.location.hostname.includes('localhost');
 
-export const isLocalhost = DOMAIN.includes('localhost');
+export const isDev = import.meta.env.DEV;
 
-export const isDev = process.env.NODE_ENV === 'development';
+export const isProd = import.meta.env.PROD;
 
-export const isProd = process.env.NODE_ENV === 'production';
-
-export const isTesting = process.env.TEST === 'true';
+export const isTesting = import.meta.env.VITE_TEST === 'true';
 
 export const configuration = {
+  // Backend API is always same-origin.
+  // Dev: Vite proxies it to localhost:8443.
+  // Prod: Spring Boot serves it on the same origin.
+  ovaraBackendApiUrl: '/ovara-backend/api',
+
+  // External services
   raamitUrl: `${DOMAIN}/virkailija-raamit/apply-raamit.js`,
-  ovaraBackendApiUrl: `${OVARA_BACKEND}/ovara-backend/api`,
   virkailijaUrl: DOMAIN,
   lokalisointiPrefix: `${DOMAIN}/lokalisointi/tolgee`,
 } as const;

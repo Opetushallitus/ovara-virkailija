@@ -1,11 +1,10 @@
-'use client';
 import { useTranslate } from '@tolgee/react';
 import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import { hasOvaraKkYosRole } from '@/app/lib/utils';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
 import { isEmpty } from 'remeda';
 import { useDownloadWithErrorBoundary } from '@/app/hooks/useDownloadWithErrorBoundary';
-import { useSearchParams } from 'next/navigation';
+import { useOptimisticSearchParams } from 'nuqs/adapters/react-router/v7';
 import { downloadExcel } from '@/app/components/form/utils';
 import { MainContainer } from '@/app/components/main-container';
 import { FormBox } from '@/app/components/form/form-box';
@@ -42,7 +41,8 @@ export default function KkPaatettavatOpiskeluoikeudet() {
   const isDisabled = [selectedOppilaitos || []].every(isEmpty);
   const { run, isLoading } = useDownloadWithErrorBoundary();
 
-  const queryParamsStr = useSearchParams().toString();
+  const queryParams = useOptimisticSearchParams();
+  const queryParamsStr = queryParams.toString();
 
   const handleDownload = () =>
     run(() =>

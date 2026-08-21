@@ -9,7 +9,10 @@ export const useQueryStateWithLocalStorage = <T>(
     defaultValue: T;
   },
 ) => {
-  // queryStateen defaultValue
+  const isQueryParamInURL = new URLSearchParams(window.location.search).has(
+    key,
+  );
+
   const [queryState, setQueryState] = useQueryState<T>(key, options);
 
   // localStoragessa oletuksena null
@@ -18,26 +21,19 @@ export const useQueryStateWithLocalStorage = <T>(
   >(key, queryState);
 
   useEffect(() => {
-    // jos arvo on jo localStoragessa, ei tehdä mitään
-    if (queryState === localStorageState) return;
-
-    // queryState on default (tyhjä) ja localStorageStatessa arvo, asetetaan queryState localstorageen
+    // jos query-parametri ei ole URLissa (=queryStatessa) ja localStorageStatessa arvo, asetetaan localstoragessa oleva arvo URLiin (=queryStateen)
     if (
-      queryState === options.defaultValue &&
+      !isQueryParamInURL &&
       localStorageState !== null &&
-      localStorageState !== undefined
+      localStorageState !== undefined &&
+      // tyhjän arrayn sisältö ei päädy koskaan URLiin nuqsissa vaan parametri vain poistetaan URLista, jolloin pelkkä isQueryParamInURL-tsekkaus ei toimi -> ikiluuppi
+      !(Array.isArray(localStorageState) && localStorageState.length === 0)
     ) {
       setQueryState(localStorageState);
 
       return;
     }
-  }, [
-    queryState,
-    localStorageState,
-    setLocalStorageState,
-    setQueryState,
-    options.defaultValue,
-  ]);
+  }, [isQueryParamInURL, localStorageState, setQueryState]);
 
   type Value = NonNullable<ReturnType<typeof options.parse>>;
 

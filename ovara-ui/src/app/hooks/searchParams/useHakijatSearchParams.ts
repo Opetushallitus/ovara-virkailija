@@ -1,4 +1,3 @@
-'use client';
 import { parseAsArrayOf, parseAsString } from 'nuqs';
 import {
   useBooleanQueryStateWithOptions,
@@ -80,8 +79,8 @@ export const useHakijatSearchParams = () => {
       'ovara_valintatiedot',
       'ovara_kaksoistutkinto',
       'ovara_urheilijatutkinto',
-      'ovara_sora-terveys',
-      'ovara_sora-aiempi',
+      'ovara_sora_terveys',
+      'ovara_sora_aiempi',
       'ovara_nayta-yo-arvosanat',
       'ovara_nayta-hetu',
       'ovara_nayta-postiosoite',

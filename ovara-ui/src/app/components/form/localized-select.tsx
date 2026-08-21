@@ -1,4 +1,3 @@
-'use client';
 import { OphSelect } from '@opetushallitus/oph-design-system';
 import { useTranslate } from '@tolgee/react';
 import { OvaraFormControl } from './ovara-form-control';
