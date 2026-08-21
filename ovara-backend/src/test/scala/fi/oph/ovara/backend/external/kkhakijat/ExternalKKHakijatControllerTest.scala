@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.external.kkhakijat
 
-import fi.oph.ovara.backend.external.OrganisaatioHierarkiaStub
+import fi.oph.ovara.backend.external.{HakukohderyhmaStub, OrganisaatioHierarkiaStub}
 import fi.oph.ovara.backend.external.kkhakijat.ExternalKKHakijatTestData.*
 import fi.oph.ovara.backend.repository.ReadOnlyDatabase
 import fi.oph.ovara.backend.service.CommonService
@@ -11,8 +11,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.{BeforeEach, Test}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.doAnswer
-import org.mockito.invocation.InvocationOnMock
+import org.mockito.Mockito.{never, verify}
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.{CsvSource, ValueSource}
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,7 +38,10 @@ import scala.jdk.CollectionConverters.*
   username = "testuser",
   roles = Array("APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA_1.2.246.562.10.00000000001")
 )
-class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils with OrganisaatioHierarkiaStub {
+class ExternalKKHakijatControllerTest
+    extends ExternalKKHakijatTestUtils
+    with OrganisaatioHierarkiaStub
+    with HakukohderyhmaStub {
 
   @Autowired
   private val mvc: MockMvc = null
@@ -59,15 +61,6 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils with Or
   @BeforeEach
   def stubOrganisaatiohierarkia(): Unit =
     stubOrganisaatioHierarkiaAsIdentity()
-
-  /**
-   * Hakukohderyhmän laajennus tulee pub-skeemasta, jota testien H2-kanta ei sisällä.
-   * Stubataan doAnswer-muodossa samasta syystä kuin OrganisaatioHierarkiaStubissa.
-   */
-  private def stubHakukohderyhma(hakukohdeOids: List[String]): Unit =
-    doAnswer((_: InvocationOnMock) => hakukohdeOids)
-      .when(commonService)
-      .getHakukohderyhmanHakukohdeOids(any[String](), any[String]())
 
   @BeforeEach
   def clearAuditRecord(): Unit =
@@ -231,6 +224,9 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils with Or
     get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
+    // Ilman oideja ei ole myöskään ryhmäoikeuksia laajennettavaksi. Stubbaamaton laajennus
+    // palauttaisi nullin ja päätyisi 500:aan, joten varmistetaan ettei sitä kutsuta lainkaan.
+    verify(commonService, never()).getHakukohderyhmanHakukohdeOids(any[String](), any[String]())
   }
 
   @Test
@@ -255,6 +251,221 @@ class ExternalKKHakijatControllerTest extends ExternalKKHakijatTestUtils with Or
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
       .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO))
+  }
+
+  // ---- Hakukohderyhmäoikeudet ----
+  // KK_HAKENEET voi olla myönnetty hakukohderyhmälle (oid 1.2.246.562.28.*) organisaation
+  // sijaan. seedHakijatInTwoOrgs seedaa kaksi hakijaa: OPPIJANUMERO hakee ORGANISAATIO_OID:n
+  // ja OPPIJANUMERO_B ORGANISAATIO_OID_2:n järjestämään hakukohteeseen.
+
+  @Test
+  @WithMockUser(
+    username = "kk-hakeneet-hakukohderyhma-user",
+    roles = Array("APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.28.00000000000000000012")
+  )
+  def hakukohderyhmaRightAloneGrantsAccessToRyhmanHakukohteet(): Unit = {
+    seedHakijatInTwoOrgs()
+    withHakukohderyhmat(Map(HAKUKOHDERYHMA_OID -> List(HAKUKOHDE_OID_2)))
+
+    // Käyttäjällä ei ole organisaatio-oikeutta kumpaankaan järjestäjään -- pelkkä ryhmäoikeus
+    // riittää ryhmän hakukohteeseen.
+    get(hakukohdeOid = None, hakukohderyhmaOid = Some(HAKUKOHDERYHMA_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO_B))
+  }
+
+  @Test
+  @WithMockUser(
+    username = "kk-hakeneet-hakukohderyhma-user",
+    roles = Array("APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.28.00000000000000000012")
+  )
+  def hakukohderyhmaRightDoesNotGrantAccessToAnotherRyhma(): Unit = {
+    seedHakijatInTwoOrgs()
+    withHakukohderyhmat(
+      Map(
+        HAKUKOHDERYHMA_OID   -> List(HAKUKOHDE_OID_2),
+        HAKUKOHDERYHMA_OID_2 -> List(HAKUKOHDE_OID)
+      )
+    )
+
+    get(hakukohdeOid = None, hakukohderyhmaOid = Some(HAKUKOHDERYHMA_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
+  }
+
+  @Test
+  @WithMockUser(
+    username = "kk-hakeneet-hakukohderyhma-user",
+    roles = Array("APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.28.00000000000000000012")
+  )
+  def hakukohderyhmaRightDoesNotCoverOrganisaatioRajaus(): Unit = {
+    seedHakijatInTwoOrgs()
+
+    // organisaatioOid on katettava organisaatio-oikeuksilla, joten tulos on tyhjä eikä
+    // ryhmälaajennusta edes haeta.
+    get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
+    verify(commonService, never()).getHakukohderyhmanHakukohdeOids(any[String](), any[String]())
+  }
+
+  @Test
+  @WithMockUser(
+    username = "kk-hakeneet-org-and-hakukohderyhma-user",
+    roles = Array(
+      "APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.10.00000000000000000586",
+      "APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.28.00000000000000000012"
+    )
+  )
+  def organisaatioAndHakukohderyhmaRightsAreUnioned(): Unit = {
+    seedHakijatInTwoOrgs()
+    withHakukohderyhmat(Map(HAKUKOHDERYHMA_OID -> List(HAKUKOHDE_OID, HAKUKOHDE_OID_2)))
+
+    // orgA:n hakija osuu organisaatio-oikeudella, orgB:n hakija ryhmäoikeudella.
+    get(hakukohdeOid = None, hakukohderyhmaOid = Some(HAKUKOHDERYHMA_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](2)))
+  }
+
+  @Test
+  @WithMockUser(
+    username = "kk-hakeneet-org-and-hakukohderyhma-user",
+    roles = Array(
+      "APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.10.00000000000000000586",
+      "APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.28.00000000000000000012"
+    )
+  )
+  def organisaatioRajausDropsRowsThatOnlyRyhmaRightWouldAllow(): Unit = {
+    seedHakijatInTwoOrgs()
+    withHakukohderyhmat(Map(HAKUKOHDERYHMA_OID -> List(HAKUKOHDE_OID_2)))
+
+    get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO))
+  }
+
+  @Test
+  @WithMockUser(
+    username = "kk-hakeneet-ryhma-from-other-role-user",
+    roles = Array(
+      "APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.10.00000000000000000586",
+      "APP_OVARA-VIRKAILIJA_2ASTE_1.2.246.562.28.00000000000000000012"
+    )
+  )
+  def hakukohderyhmaFromOtherOvaraRoleGrantsNothing(): Unit = {
+    seedHakijatInTwoOrgs()
+    withHakukohderyhmat(Map(HAKUKOHDERYHMA_OID -> List(HAKUKOHDE_OID_2)))
+
+    // Ryhmäoikeus on myönnetty 2ASTE-roolilla, joten se ei laajenna tämän rajapinnan oikeuksia.
+    get(hakukohdeOid = None, hakukohderyhmaOid = Some(HAKUKOHDERYHMA_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
+  }
+
+  @Test
+  @WithMockUser(
+    username = "paakayttaja-plus-kk-hakeneet-hakukohderyhma",
+    roles = Array(
+      "APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA_1.2.246.562.10.00000000001",
+      "APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.28.00000000000000000012"
+    )
+  )
+  def paakayttajaWithHakukohderyhmaRightGetsPaakayttajaScope(): Unit = {
+    seedHakijatInTwoOrgs()
+
+    // Pääkäyttäjä näkee ryhmän ulkopuoliset hakukohteet, eikä ryhmälaajennusta tarvita.
+    get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO_B))
+    verify(commonService, never()).getHakukohderyhmanHakukohdeOids(any[String](), any[String]())
+  }
+
+  @Test
+  @WithMockUser(
+    username = "kk-hakeneet-hakukohderyhma-user",
+    roles = Array("APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.28.00000000000000000012")
+  )
+  def hakukohderyhmaRightEmitsAuditLogEntry(): Unit = {
+    seedHakijatInTwoOrgs()
+    withHakukohderyhmat(Map(HAKUKOHDERYHMA_OID -> List(HAKUKOHDE_OID_2)))
+
+    get(hakukohdeOid = None, hakukohderyhmaOid = Some(HAKUKOHDERYHMA_OID)).andExpect(status.isOk)
+
+    val calls = recordedAuditCalls
+    assert(calls.size == 1, s"expected exactly one audit entry, got $calls")
+    val call = calls.head
+    assert(call.operation == AuditOperation.ExternalKKHakijat)
+    assert(call.params("hakukohderyhmaOid") == HAKUKOHDERYHMA_OID)
+    assert(call.principalName.contains("kk-hakeneet-hakukohderyhma-user"))
+  }
+
+  @Test
+  @WithMockUser(
+    username = "kk-hakeneet-hakukohderyhma-user",
+    roles = Array("APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.28.00000000000000000012")
+  )
+  def excelHonoursHakukohderyhmaRight(): Unit = {
+    seedHakijatInTwoOrgs()
+    withHakukohderyhmat(Map(HAKUKOHDERYHMA_OID -> List(HAKUKOHDE_OID_2)))
+
+    val bytes = getExcel(hakukohdeOid = None, hakukohderyhmaOid = Some(HAKUKOHDERYHMA_OID))
+      .andExpect(status.isOk)
+      .andReturn()
+      .getResponse
+      .getContentAsByteArray
+    val workbook = new XSSFWorkbook(new ByteArrayInputStream(bytes))
+    try {
+      val sheet      = workbook.getSheetAt(0)
+      val cellValues = (1 to sheet.getLastRowNum)
+        .flatMap(i => Option(sheet.getRow(i)))
+        .flatMap(row => (0 until row.getLastCellNum).map(row.getCell(_)))
+        .flatMap(cell => Option(cell).map(_.toString))
+        .toSet
+      assert(cellValues.contains(OPPIJANUMERO_B), s"expected the ryhmä's hakija in the excel, got $cellValues")
+      assert(!cellValues.contains(OPPIJANUMERO), "hakija outside the ryhmä must not be in the excel")
+    } finally {
+      workbook.close()
+    }
+  }
+
+  @Test
+  @WithMockUser(
+    username = "kk-hakeneet-hakukohde-oid-user",
+    // Oid ei ole organisaatio eikä hakukohderyhmä (tässä hakukohteen oid), joten se ei ole
+    // oikeus mihinkään: pyyntö läpäisee roolitarkistuksen mutta tulos on tyhjä.
+    roles = Array("APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.20.00000000000000000112")
+  )
+  def unrecognisedOidTypeGrantsNothing(): Unit = {
+    seedHakijatInTwoOrgs()
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
+    verify(commonService, never()).getHakukohderyhmanHakukohdeOids(any[String](), any[String]())
+  }
+
+  private val OPPIJANUMERO_B = "1.2.246.562.24.00000000020"
+
+  /**
+   * Kaksi hakijaa eri organisaatioiden järjestämiin hakukohteisiin: OPPIJANUMERO hakee
+   * ORGANISAATIO_OID:n HAKUKOHDE_OID:iin ja OPPIJANUMERO_B ORGANISAATIO_OID_2:n
+   * HAKUKOHDE_OID_2:een.
+   */
+  private def seedHakijatInTwoOrgs(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertHakemus(oppijanumero = OPPIJANUMERO_B, hakemusOid = HAKEMUS_OID_2, insertHaku = false)
+    insertHakukohde(
+      hakukohdeOid = HAKUKOHDE_OID_2,
+      jarjestyspaikkaOid = ORGANISAATIO_OID_2,
+      organisaatioOid = Some(ORGANISAATIO_OID_2)
+    )
+    insertHakutoive(hakemusOid = HAKEMUS_OID_2, hakukohdeOid = HAKUKOHDE_OID_2)
   }
 
   // ---- Validation ----

@@ -18,30 +18,66 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
     hakuOid: String,
     hakukohdeOid: Option[String],
     organisaatioOid: Option[String],
-    valintarajaus: Valintarajaus = Valintarajaus.HAKENEET,
-    scope: KayttooikeusScope = KayttooikeusScope.paakayttaja,
+    valintarajaus: Valintarajaus,
+    scope: KayttooikeusScopeKK,
     hakukohderyhmaOid: Option[String] = None
   ): Either[String, Seq[KKHakija]] = {
     Try {
-      // Sekä rajapinnan organisaatioOid (rajaava parametri) että käyttäjän oikeudet vertaillaan hakukohteen
-      // jarjestyspaikka_oidia vasten, joka on tyypillisesti toimipiste. Molemmat on siis
-      // laajennettava lapsiorganisaatioihin, jotta koulutustoimija- tai oppilaitostason
-      // valinta ja oikeus osuvat alempana oleviin järjestyspaikkoihin.
+      // Sekä rajapinnan organisaatioOid (rajaava parametri) että käyttäjän organisaatio-oikeudet
+      // vertaillaan hakukohteen jarjestyspaikka_oidia vasten, joka on tyypillisesti toimipiste.
+      // Molemmat on siis laajennettava lapsiorganisaatioihin, jotta koulutustoimija- tai
+      // oppilaitostason valinta ja oikeus osuvat alempana oleviin järjestyspaikkoihin.
+      // Hakukohderyhmäoikeudet eivät kulje tätä kautta, vaan ne laajennetaan hakukohde-oideiksi.
       val organisaatioOids =
         organisaatioOid.map(oid => commonService.getOrganisaatioidenJaLastenOidit(List(oid))).getOrElse(Nil)
+
+      // Ryhmäoikeudet huomioidaan vain kun pyynnössä ei ole organisaatioOid-rajainta:
+      // organisaatiorajaus on katettava käyttäjän organisaatio-oikeuksilla.
+      val huomioiRyhmaoikeudet = !scope.isPaakayttaja && organisaatioOid.isEmpty
+      val kayttooikeusryhmat   = if (huomioiRyhmaoikeudet) scope.allowedHakukohderyhmaOids else Set.empty[String]
+
+      // Sama hakukohderyhmä voi esiintyä sekä rajaimena että käyttöoikeutena, joten laajennus
+      // haetaan kannasta kertaalleen per ryhmä.
+      val ryhmanHakukohteet: Map[String, Set[String]] =
+        (hakukohderyhmaOid.toSet ++ kayttooikeusryhmat)
+          .map(ryhma => ryhma -> commonService.getHakukohderyhmanHakukohdeOids(ryhma, hakuOid).toSet)
+          .toMap
+
+      val kayttooikeusHakukohdeOids = kayttooikeusryhmat.flatMap(ryhmanHakukohteet)
+      if (kayttooikeusryhmat.nonEmpty) {
+        LOG.debug(
+          s"Käyttäjän ${kayttooikeusryhmat.size} hakukohderyhmäoikeutta laajeni " +
+            s"${kayttooikeusHakukohdeOids.size} hakukohteeksi haussa $hakuOid"
+        )
+      }
+
+      // copy eikä limited: limited rakentaisi uuden scopen ja pudottaisi ryhmäoikeudet pois.
       val expandedScope =
         if (scope.isPaakayttaja) scope
         else
-          KayttooikeusScope.limited(commonService.getOrganisaatioidenJaLastenOidit(scope.allowedOrgOids.toList).toSet)
+          scope.copy(
+            allowedOrgOids = commonService.getOrganisaatioidenJaLastenOidit(scope.allowedOrgOids.toList).toSet,
+            allowedHakukohdeOidsFromHakukohderyhmat = kayttooikeusHakukohdeOids
+          )
 
       val rajaaHakukohteilla = hakukohdeOid.isDefined || hakukohderyhmaOid.isDefined
-      val hakukohdeRajaus    = resolveHakukohdeRajaus(hakuOid, hakukohdeOid, hakukohderyhmaOid)
+      val hakukohdeRajaus    = resolveHakukohdeRajaus(hakukohdeOid, hakukohderyhmaOid, ryhmanHakukohteet)
 
+      // Käyttäjän oikeuksia ei yhdistetä hakukohdeRajaukseen eikä viedä kyselyyn: kyselyn
+      // hakukohde- ja organisaatiolistat JA:taan keskenään (ks. hakuFilterSqlFragment) ja
+      // rajaaHakukohteilla kertoo nimenomaan pyynnön rajaimista. Rivikohtainen oikeustarkistus
+      // tehdään matchesFiltersissä.
+      //
       // Jos rajaimia annettiin mutta leikkaus on tyhjä, yksikään hakukohde ei täsmää. Kyselyä ei
       // saa ajaa: tyhjä hakukohdelista jättäisi voimaan vain organisaatiorajauksen ja laajentaisi
       // tuloksen koko organisaatioon.
+      val eiOikeuksiaPyynnonRajaimiin =
+        !scope.isPaakayttaja && expandedScope.allowedOrgOids.isEmpty && expandedScope.allowedHakukohdeOidsFromHakukohderyhmat.isEmpty
       val kkHakijaRows =
-        if (rajaaHakukohteilla && hakukohdeRajaus.isEmpty) Seq.empty
+        if (eiOikeuksiaPyynnonRajaimiin) {
+          LOG.info("Käyttäjän oikeudet eivät kata pyynnön rajaimia, palautetaan tyhjä tulos")
+          Seq.empty
+        } else if (rajaaHakukohteilla && hakukohdeRajaus.isEmpty) Seq.empty
         else repository.selectKKHakijat(hakuOid, hakukohdeRajaus.toSeq, organisaatioOids, valintarajaus)
 
       if (kkHakijaRows.isEmpty) {
@@ -86,20 +122,20 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
   /**
    * Leikkaa hakukohde- ja hakukohderyhmäparametrit yhdeksi joukoksi hakukohde-oideja:
    * hakukohde JA hakukohderyhmä yhdessä tarkoittavat "tämä hakukohde, jos se kuuluu ryhmään".
-   * Hakukohderyhmä laajennetaan sen hakukohde-oideiksi.
+   * Hakukohderyhmä laajennetaan sen hakukohde-oideiksi (`ryhmanHakukohteet`, ks. kutsuja).
    *
    * Tyhjä joukko tarkoittaa joko ettei rajaimia annettu tai ettei leikkaus osu mihinkään --
    * kutsuja erottaa nämä parametreista (ks. rajaaHakukohteilla).
    */
   private def resolveHakukohdeRajaus(
-    hakuOid: String,
     hakukohdeOid: Option[String],
-    hakukohderyhmaOid: Option[String]
+    hakukohderyhmaOid: Option[String],
+    ryhmanHakukohteet: Map[String, Set[String]]
   ): Set[String] = {
-    val ryhmanHakukohteet =
-      hakukohderyhmaOid.map(ryhma => commonService.getHakukohderyhmanHakukohdeOids(ryhma, hakuOid).toSet)
+    val rajaavanRyhmanHakukohteet =
+      hakukohderyhmaOid.map(ryhma => ryhmanHakukohteet.getOrElse(ryhma, Set.empty))
 
-    List(hakukohdeOid.map(Set(_)), ryhmanHakukohteet).flatten
+    List(hakukohdeOid.map(Set(_)), rajaavanRyhmanHakukohteet).flatten
       .reduceOption(_ intersect _)
       .getOrElse(Set.empty)
   }
@@ -109,20 +145,27 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
     hakukohdeOids: Set[String],    // Hakukohde- ja hakukohderyhmäparametreista leikattu
     organisaatioOids: Seq[String], // Rajapinnan parametri lapsiorganisaatioineen
     valintarajaus: Valintarajaus,
-    scope: KayttooikeusScope // Käyttäjän oikeudet lapsiorganisaatioineen
+    scope: KayttooikeusScopeKK // Käyttäjän oikeudet: organisaatiot lapsineen ja ryhmien hakukohteet
   ): Boolean = {
     // selectHakemukset hakee kaikki osumien hakemusten hakutoiveet, joten sama rajaus on
-    // toistettava tässä -- muuten ryhmän ulkopuoliset hakutoiveet palaisivat mukaan. Tyhjä joukko
-    // tarkoittaa tässä aina "ei rajausta": tyhjän leikkauksen tapaus on karsittu jo kutsujassa.
+    // toistettava tässä -- muuten ryhmän ulkopuoliset hakutoiveet palaisivat mukaan. Tyhjä
+    // rajausjoukko tarkoittaa tässä aina "ei rajausta": tyhjän leikkauksen tapaus on karsittu jo
+    // kutsujassa. Huomaa että käyttöoikeusjoukoissa (allowedOrgOids, allowedHakukohdeOidsFromHakukohderyhmat)
+    // tyhjyys tarkoittaa päinvastaista: ei oikeuksia, ei osumia.
     val hakukohdeMatch = hakukohdeOids.isEmpty || hakukohdeOids.contains(row.hakukohdeOid)
     val orgMatch       = organisaatioOids.isEmpty || row.jarjestyspaikkaOid.exists(organisaatioOids.contains)
-    val allowedMatch   = scope.isPaakayttaja || row.jarjestyspaikkaOid.exists(scope.allowedOrgOids.contains)
-    val stateMatch     = valintarajaus match {
+    // Organisaatio-oikeus TAI hakukohderyhmäoikeus riittää.
+    val allowedMatch = scope.isPaakayttaja ||
+      row.jarjestyspaikkaOid.exists(scope.allowedOrgOids.contains) ||
+      scope.allowedHakukohdeOidsFromHakukohderyhmat.contains(row.hakukohdeOid)
+    val stateMatch = valintarajaus match {
       case Valintarajaus.HAKENEET   => true
       case Valintarajaus.HYVAKSYTYT =>
         row.valintatieto.exists(HyvaksytytValintatiedot.contains)
       case Valintarajaus.VASTAANOTTANEET =>
-        row.vastaanottotieto.contains("VASTAANOTTANUT_SITOVASTI")
+        row.vastaanottotieto.contains(
+          "VASTAANOTTANUT_SITOVASTI"
+        ) // Todo, otetaanko myös VASTAANOTTANUT_EHDOLLISESTI mukaan?
     }
     hakukohdeMatch && orgMatch && allowedMatch && stateMatch
   }
