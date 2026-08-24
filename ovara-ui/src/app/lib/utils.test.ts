@@ -11,6 +11,7 @@ import {
   getHarkinnanvaraisuusTranslation,
   getRaporttiListByUserRights,
   getKaikkiOrganisaatiotToShow,
+  getOppilaitosOptions,
   findOrganisaatio,
   buildTiedonsiirtoParams,
   buildKkHakijatTiedonsiirtoParams,
@@ -751,6 +752,49 @@ describe('getOppilaitoksetToShow', () => {
     expect(
       getOppilaitoksetToShow(hierarkiat, '1.2.246.562.10.221157551210'),
     ).toEqual([oppilaitos2_1, oppilaitos2_2, oppilaitos2_3]);
+  });
+});
+
+describe('getOppilaitosOptions', () => {
+  test('should return only oppilaitos-level organisaatiot as options', () => {
+    const options = getOppilaitosOptions(hierarkiat, 'fi');
+
+    // Vain '02'-tyypin organisaatiot: ei koulutustoimijoita ('01') eikä
+    // toimipisteitä ('03').
+    expect(options.map((o) => o.value)).toEqual([
+      oppilaitos1_1.organisaatio_oid,
+      oppilaitos1_2.organisaatio_oid,
+      oppilaitos2_1.organisaatio_oid,
+      oppilaitos2_2.organisaatio_oid,
+      oppilaitos2_3.organisaatio_oid,
+    ]);
+  });
+
+  test('should take the label from the requested locale', () => {
+    const oppilaitos = {
+      organisaatio_oid: '1.2.246.562.10.11111111111',
+      organisaatio_nimi: {
+        fi: 'Esimerkin lukio',
+        sv: 'Exempel gymnasium',
+        en: 'Example upper secondary school',
+      },
+      organisaatiotyypit: ['02'],
+      oppilaitostyyppi: 'oppilaitostyyppi_15#1',
+      tila: 'AKTIIVINEN',
+      parent_oids: ['1.2.246.562.10.00000000001'],
+      children: [],
+    };
+
+    expect(getOppilaitosOptions([oppilaitos], 'sv')).toEqual([
+      {
+        value: '1.2.246.562.10.11111111111',
+        label: 'Exempel gymnasium',
+      },
+    ]);
+  });
+
+  test('should return empty array when hierarkiat is null', () => {
+    expect(getOppilaitosOptions(null, 'fi')).toEqual([]);
   });
 });
 
