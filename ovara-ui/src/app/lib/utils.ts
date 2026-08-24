@@ -1,5 +1,5 @@
 import { sort, isEmpty, uniqueBy, isNullish } from 'remeda';
-import { OrganisaatioHierarkia } from './types/common';
+import { LanguageCode, OrganisaatioHierarkia } from './types/common';
 import {
   KK_RAPORTIT,
   KK_YOS_RAPORTTI,
@@ -251,6 +251,21 @@ export const getOppilaitoksetToShow = (
     });
   }
 };
+
+/**
+ * Oppilaitostason organisaatiot valintalistan vaihtoehdoiksi. Järjestys jätetään
+ * ComboBoxille (sortOptions oletuksena true), joka lajittelee nimen mukaan.
+ */
+export const getOppilaitosOptions = (
+  hierarkiat: Array<OrganisaatioHierarkia> | null,
+  locale: LanguageCode,
+): Array<{ value: string; label: string }> =>
+  getOppilaitoksetToShow(hierarkiat, null).map((org) => ({
+    value: org.organisaatio_oid,
+    label: org.organisaatio_nimi[locale]
+      ? `${org.organisaatio_nimi[locale]}`
+      : '',
+  }));
 
 export const getToimipisteetToShow = (
   hierarkiat: Array<OrganisaatioHierarkia> | null,
