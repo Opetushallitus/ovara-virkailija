@@ -24,7 +24,8 @@ class ExternalToisenAsteenHakijatService(
       // Sekä rajapinnan organisaatioOid (rajaava parametri) että käyttäjän oikeudet vertaillaan hakukohteen
       // jarjestyspaikka_oidia vasten, joka on tyypillisesti toimipiste. Molemmat on siis
       // laajennettava lapsiorganisaatioihin, jotta koulutustoimija- tai oppilaitostason
-      // valinta ja oikeus osuvat alempana oleviin järjestyspaikkoihin.
+      // valinta ja oikeus osuvat alempana oleviin järjestyspaikkoihin. Myös toimipistetason
+      // valinta toimii: laajennus pitää annetun oidin mukana vaikka lapsia ei olisi.
       val organisaatioOids =
         organisaatioOid.map(oid => commonService.getOrganisaatioidenJaLastenOidit(List(oid))).getOrElse(Nil)
       val expandedScope =

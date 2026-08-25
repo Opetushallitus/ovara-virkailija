@@ -29,8 +29,10 @@ export default function ToisenasteenHakijatTiedonsiirto() {
     setSelectedHaku,
     selectedHakukohde,
     setSelectedHakukohde,
-    selectedOrganisaatio,
-    setSelectedOrganisaatio,
+    selectedOppilaitos,
+    setSelectedOppilaitos,
+    selectedToimipiste,
+    setSelectedToimipiste,
     selectedValintarajaus,
     setSelectedValintarajaus,
     emptyAllToisenasteenHakijatParams,
@@ -43,15 +45,31 @@ export default function ToisenasteenHakijatTiedonsiirto() {
     setSelectedHakukohde(null);
   };
 
-  const changeOrganisaatio = (value: string | null) => {
-    setSelectedOrganisaatio(value);
+  // Oppilaitos rajaa toimipistevalikon, joten oppilaitoksen vaihtuessa aiempi
+  // toimipiste ei ole enää validi. Toimipisteen valinta sen sijaan jättää
+  // oppilaitoksen ennalleen -- kyse on tarkennuksesta, ei vaihtoehdosta.
+  // Tyhjennys on tehtävä setterin kautta, joka kirjoittaa sekä URL-parametrin
+  // että localStoragen.
+  const changeOppilaitos = (value: string | null) => {
+    setSelectedOppilaitos(value);
+    setSelectedToimipiste(null);
     setSelectedHakukohde(null);
   };
 
+  const changeToimipiste = (value: string | null) => {
+    setSelectedToimipiste(value);
+    setSelectedHakukohde(null);
+  };
+
+  // Tarkin valinta voittaa: toimipiste rajaa oppilaitosta tarkemmin. Kumpi tahansa
+  // yksinään riittää rajaimeksi, joten pelkän toimipisteoikeuden saanut käyttäjä voi
+  // ajaa raportin vaikkei näe yhtään oppilaitosta.
+  const selectedOrganisaatioOid = selectedToimipiste ?? selectedOppilaitos;
+  const orgMissing =
+    isNullish(selectedOppilaitos) && isNullish(selectedToimipiste);
+
   const isDisabled =
-    isNullish(selectedHaku) ||
-    isNullish(selectedOrganisaatio) ||
-    isNullish(selectedValintarajaus);
+    isNullish(selectedHaku) || orgMissing || isNullish(selectedValintarajaus);
 
   const handleDownload = () =>
     run(() =>
@@ -60,7 +78,7 @@ export default function ToisenasteenHakijatTiedonsiirto() {
         buildTiedonsiirtoParams({
           hakuOid: selectedHaku,
           hakukohdeOid: selectedHakukohde,
-          organisaatioOid: selectedOrganisaatio,
+          organisaatioOid: selectedOrganisaatioOid,
           valintarajaus: selectedValintarajaus,
         }),
       ),
@@ -80,13 +98,20 @@ export default function ToisenasteenHakijatTiedonsiirto() {
             required
           />
           <OrganisaatioSingle
-            value={selectedOrganisaatio}
-            onChange={changeOrganisaatio}
-            required
+            value={selectedOppilaitos}
+            onChange={changeOppilaitos}
+            required={orgMissing}
+          />
+          <OrganisaatioSingle
+            taso="toimipiste"
+            rajaavaOppilaitos={selectedOppilaitos}
+            value={selectedToimipiste}
+            onChange={changeToimipiste}
+            required={orgMissing}
           />
           <HakukohdeSingle
             hakuOid={selectedHaku}
-            organisaatioOid={selectedOrganisaatio}
+            organisaatioOid={selectedOrganisaatioOid}
             value={selectedHakukohde}
             onChange={setSelectedHakukohde}
           />

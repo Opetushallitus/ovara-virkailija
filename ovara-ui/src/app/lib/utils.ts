@@ -298,6 +298,34 @@ export const getToimipisteetToShow = (
 };
 
 /**
+ * Toimipistetason organisaatiot valintalistan vaihtoehdoiksi. Vastinpari
+ * `getOppilaitosOptions`-metodille; ks. sen kommentti.
+ *
+ * `selectedOppilaitos` rajaa listan kyseisen oppilaitoksen toimipisteisiin. Ilman
+ * sitä palautetaan kaikki toimipisteet joihin käyttäjällä on oikeus -- se on
+ * tarkoituksellista, jotta pelkän toimipisteoikeuden saanut käyttäjä voi valita
+ * toimipisteen vaikkei näe yhtään oppilaitosta.
+ */
+export const getToimipisteOptions = (
+  hierarkiat: Array<OrganisaatioHierarkia> | null,
+  locale: LanguageCode,
+  selectedOppilaitos: string | null = null,
+): Array<{ value: string; label: string }> =>
+  getToimipisteetToShow(
+    hierarkiat,
+    // Ei valittuja toimipisteitä: yhden valinnan listaa ei haluta laajentaa
+    // rajauksen ulkopuolisilla toimipisteillä.
+    null,
+    isNullish(selectedOppilaitos) ? null : [selectedOppilaitos],
+    null,
+  ).map((org) => ({
+    value: org.organisaatio_oid,
+    label: org.organisaatio_nimi[locale]
+      ? `${org.organisaatio_nimi[locale]}`
+      : '',
+  }));
+
+/**
  * Kaikki organisaatiot joihin käyttäjällä on oikeus, tasoittain järjestettynä
  * (koulutustoimijat -> oppilaitokset -> toimipisteet). Toisin kuin
  * `getKoulutustoimijatToShow`, tämä ei jätä pois käyttäjää jonka oikeus on
