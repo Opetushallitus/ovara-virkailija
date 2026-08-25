@@ -2,26 +2,31 @@ import { ComboBox, SelectOption } from '@/app/components/form/multicombobox';
 import { useFetchOrganisaatiohierarkiat } from '@/app/hooks/useFetchOrganisaatiohierarkiat';
 import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
 import { LanguageCode } from '@/app/lib/types/common';
-import { getOppilaitosOptions } from '@/app/lib/utils';
+import { getOppilaitosOptions, getToimipisteOptions } from '@/app/lib/utils';
 import { useTranslate } from '@tolgee/react';
 import { isNullish } from 'remeda';
 
 type Props = {
   value: string | null;
   onChange: (value: string | null) => void;
+  taso?: 'oppilaitos' | 'toimipiste';
+  /** Rajaa toimipistelistan tämän oppilaitoksen toimipisteisiin. Sivuutetaan kun taso on oppilaitos. */
+  rajaavaOppilaitos?: string | null;
   disabled?: boolean;
   required?: boolean;
 };
 
 /**
- * Yhden organisaation valitsin. Tarjoaa oppilaitostason organisaatiot joihin
- * käyttäjällä on oikeus; oppilaitosta alemmalla tasolla (toimipiste) oikeutensa
- * saanut käyttäjä ei siis näe valittavia organisaatioita. Käyttää jaettua
+ * Yhden organisaation valitsin yhdellä organisaatiotasolla: `taso` valitsee
+ * tarjotaanko oppilaitoksia vai toimipisteitä. Käyttäjä joka on saanut oikeutensa
+ * tarjottua tasoa alempaa ei näe valittavia organisaatioita. Käyttää jaettua
  * organisaatiohierarkiahakua mutta pysyy irrallaan `useCommonSearchParams`-tilasta.
  */
 export const OrganisaatioSingle = ({
   value,
   onChange,
+  taso = 'oppilaitos',
+  rajaavaOppilaitos = null,
   disabled,
   required,
 }: Props) => {
@@ -30,12 +35,16 @@ export const OrganisaatioSingle = ({
   const locale = (user?.asiointikieli as LanguageCode) ?? 'fi';
 
   const { data } = useFetchOrganisaatiohierarkiat();
-  const options: SelectOption[] = getOppilaitosOptions(data ?? null, locale);
+  const options: SelectOption[] =
+    taso === 'toimipiste'
+      ? getToimipisteOptions(data ?? null, locale, rajaavaOppilaitos)
+      : getOppilaitosOptions(data ?? null, locale);
 
   return (
     <ComboBox
-      id="organisaatio-single"
-      label={t('raportti.oppilaitos')}
+      // Sama komponentti voi esiintyä sivulla kahdesti, joten id on tasokohtainen.
+      id={`${taso}-single`}
+      label={t(`raportti.${taso}`)}
       value={disabled ? undefined : (value ?? undefined)}
       options={disabled ? [] : options}
       required={required}

@@ -17,9 +17,15 @@ export const useToisenasteenHakijatSearchParams = () => {
       parseNullableString,
     );
 
-  const [selectedOrganisaatio, setSelectedOrganisaatio] =
+  const [selectedOppilaitos, setSelectedOppilaitos] =
     useQueryStateWithLocalStorage<string | null>(
-      'ovara_ta_organisaatio',
+      'ovara_ta_oppilaitos',
+      parseNullableString,
+    );
+
+  const [selectedToimipiste, setSelectedToimipiste] =
+    useQueryStateWithLocalStorage<string | null>(
+      'ovara_ta_toimipiste',
       parseNullableString,
     );
 
@@ -33,13 +39,15 @@ export const useToisenasteenHakijatSearchParams = () => {
     const keysToClear = [
       'ovara_ta_haku',
       'ovara_ta_hakukohde',
-      'ovara_ta_organisaatio',
+      'ovara_ta_oppilaitos',
+      'ovara_ta_toimipiste',
       'ovara_ta_valintarajaus',
     ];
     keysToClear.forEach((key) => localStorage.removeItem(key));
     setSelectedHaku(null);
     setSelectedHakukohde(null);
-    setSelectedOrganisaatio(null);
+    setSelectedOppilaitos(null);
+    setSelectedToimipiste(null);
     setSelectedValintarajaus(null);
   };
 
@@ -48,8 +56,10 @@ export const useToisenasteenHakijatSearchParams = () => {
     setSelectedHaku,
     selectedHakukohde,
     setSelectedHakukohde,
-    selectedOrganisaatio,
-    setSelectedOrganisaatio,
+    selectedOppilaitos,
+    setSelectedOppilaitos,
+    selectedToimipiste,
+    setSelectedToimipiste,
     selectedValintarajaus,
     setSelectedValintarajaus,
     emptyAllToisenasteenHakijatParams,

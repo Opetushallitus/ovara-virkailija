@@ -12,6 +12,7 @@ import {
   getRaporttiListByUserRights,
   getKaikkiOrganisaatiotToShow,
   getOppilaitosOptions,
+  getToimipisteOptions,
   findOrganisaatio,
   buildTiedonsiirtoParams,
   buildKkHakijatTiedonsiirtoParams,
@@ -795,6 +796,80 @@ describe('getOppilaitosOptions', () => {
 
   test('should return empty array when hierarkiat is null', () => {
     expect(getOppilaitosOptions(null, 'fi')).toEqual([]);
+  });
+});
+
+describe('getToimipisteOptions', () => {
+  test('should return only toimipiste-level organisaatiot as options', () => {
+    const options = getToimipisteOptions(hierarkiat, 'fi');
+
+    // Vain '03'-tyypin organisaatiot: ei koulutustoimijoita ('01') eikä
+    // oppilaitoksia ('02').
+    expect(options.map((o) => o.value)).toEqual([
+      toimipiste1_1.organisaatio_oid,
+      toimipiste2_1_1.organisaatio_oid,
+      toimipiste2_2_1.organisaatio_oid,
+      toimipiste2_2_2.organisaatio_oid,
+      toimipiste2_2_3.organisaatio_oid,
+      toimipiste2_3_1.organisaatio_oid,
+    ]);
+  });
+
+  test('should take the label from the requested locale', () => {
+    const toimipiste = {
+      organisaatio_oid: '1.2.246.562.10.22222222222',
+      organisaatio_nimi: {
+        fi: 'Esimerkin toimipiste',
+        sv: 'Exempel verksamhetsställe',
+        en: 'Example unit',
+      },
+      organisaatiotyypit: ['03'],
+      oppilaitostyyppi: null,
+      tila: 'AKTIIVINEN',
+      parent_oids: ['1.2.246.562.10.00000000001'],
+      children: [],
+    };
+
+    expect(getToimipisteOptions([toimipiste], 'sv')).toEqual([
+      {
+        value: '1.2.246.562.10.22222222222',
+        label: 'Exempel verksamhetsställe',
+      },
+    ]);
+  });
+
+  test('should narrow the options to the toimipisteet of the given oppilaitos', () => {
+    const options = getToimipisteOptions(hierarkiat, 'fi', OPPILAITOS2_2_OID);
+
+    expect(options.map((o) => o.value)).toEqual([
+      toimipiste2_2_1.organisaatio_oid,
+      toimipiste2_2_2.organisaatio_oid,
+      toimipiste2_2_3.organisaatio_oid,
+    ]);
+  });
+
+  // Pelkän toimipisteoikeuden saanut käyttäjä ei näe yhtään oppilaitosta, joten
+  // rajaamaton lista on ainoa polku raporttiin.
+  test('should return all toimipisteet when no oppilaitos narrows the list', () => {
+    const kaikki = [
+      toimipiste1_1.organisaatio_oid,
+      toimipiste2_1_1.organisaatio_oid,
+      toimipiste2_2_1.organisaatio_oid,
+      toimipiste2_2_2.organisaatio_oid,
+      toimipiste2_2_3.organisaatio_oid,
+      toimipiste2_3_1.organisaatio_oid,
+    ];
+
+    expect(
+      getToimipisteOptions(hierarkiat, 'fi', null).map((o) => o.value),
+    ).toEqual(kaikki);
+    expect(getToimipisteOptions(hierarkiat, 'fi').map((o) => o.value)).toEqual(
+      kaikki,
+    );
+  });
+
+  test('should return empty array when hierarkiat is null', () => {
+    expect(getToimipisteOptions(null, 'fi')).toEqual([]);
   });
 });
 
