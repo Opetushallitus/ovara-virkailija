@@ -20,6 +20,58 @@ trait ExternalToisenAsteenHakijatTestUtils {
     insertHakutoive()
   }
 
+  /**
+   * Maksimifixture: kaikki lähteet joihin kysely ylettyy on täytetty. Käytössä kahdessa
+   * testissä: "column-order guard" (kaikki kentät täyttyvät oikeista sarakkeista) ja
+   * "fields the query does not select" (kentät jotka jäävät tyhjiksi silti). Jälkimmäinen
+   * vaatii nimenomaan maksimiseedauksen -- minimifixturella "tyhjä" ei todista mitään.
+   *
+   * Arvoissa on kaksi tarkoituksellista yksityiskohtaa, joita ei pidä "siistiä" pois:
+   *
+   *  1. Haun (2040/kausi_k) ja toteutuksen (2041/kausi_s) alkamisvuosi ja -kausi on annettu
+   *     eri arvoina kuin hakukohteen oletus (KOULUTUKSEN_ALKAMISVUOSI=2026/kausi_s). Vain
+   *     siksi vuosi/kausi-testi todistaa, että hakukohde voittaa nämä molemmat. Jos nämä
+   *     jättää pois, hakukohde voittaa automaattisesti ainoana lähteenä ja väite muuttuu
+   *     tyhjäksi.
+   *  2. Pohjakoulutus ja todistusvuosi seedataan JSON-lainausmerkeissä ("\"1\""), jotta
+   *     `stripJsonQuotes` tulee testatuksi.
+   *
+   * Huom myös: lahtokoulun suoritusaika on annettava, muuten liitosehto
+   * `lk.suorituksen_alku <= hakemus.jatetty` ei täyty ja lahtokoulukentät jäisivät tyhjiksi.
+   */
+  def seedFullyPopulatedHakija(): Unit = {
+    initSchema()
+    insertHenkilo()
+    insertHaku(koulutuksenAlkamisvuosi = Some(2040), koulutuksenAlkamiskausiuri = Some("kausi_k#1"))
+    insertHakemus(insertHenkilo = false, insertHaku = false)
+    insertHakukohde()
+    insertHakutoive(harkinnanvaraisuudenSyy = Some("ATARU_OPPIMISVAIKEUDET"))
+    insertToteutusJaKoulutus(
+      koulutuksenAlkamisvuosi = Some(2041),
+      koulutuksenAlkamiskausiuri = Some("kausi_s#1")
+    )
+    insertOpetuskieli()
+    insertOrganisaatio(nimiFi = Some(OPETUSPISTE_NIMI_FI))
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
+      nimiFi = Some(LAHTOKOULU_NIMI_FI)
+    )
+    insertHakemusToinenAsteYhteishaku()
+    insertPohjakoulutus(arvo = Some("\"1\""))
+    insertTodistusvuosi(arvo = Some("\"2025\""))
+    insertLisakoulutus(avain = "LISAKOULUTUS_TUVA")
+    insertValintarekisteri(pisteet = Some(BigDecimal("7.75")))
+    insertValintalaskentaFunktiotulos(tunniste = "keskiarvo_pk", arvo = Some("8.25"))
+    insertHenkiloLahtokoulu(
+      luokka = Some(LAHTOKOULU_LUOKKA),
+      oppilaitosOid = Some(LAHTOKOULU_OID),
+      suoritusTyyppi = Some(LAHTOKOULU_SUORITUSTYYPPI),
+      suorituksenAlku = Some(LAHTOKOULU_ALKU),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+  }
+
   def insertHenkilo(
     oppijanumero: String = OPPIJANUMERO,
     aidinkieli: Option[String] = Some(AIDINKIELI_RAW)

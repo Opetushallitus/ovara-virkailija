@@ -161,21 +161,66 @@ class ExternalToisenAsteenHakijatServiceTest
     assert(hakija.oppijanumero == OPPIJANUMERO)
   }
 
-  it should "return None / empty for fields that have no source yet" in {
-    seedMinimalHakija()
+  // Kentät joita kysely ei valitse lainkaan: ne jäävät domain-luokkien oletusarvoihin.
+  // Väite tehdään maksimifixturella -- minimifixturella "tyhjä" ei todistaisi mitään, koska
+  // mitään ei ole seedattu. Jos jokin näistä joskus kytketään, tämä testi hajoaa ja pakottaa
+  // päivittämään listan tietoisesti.
+  it should "leave fields the query does not select empty even for a fully-populated hakija" in {
+    seedFullyPopulatedHakija()
 
-    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val response  = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val hakija    = getOnlyHakija(response)
+    val hakemus   = hakija.hakemus
+    val hakutoive = hakemus.hakutoiveet.head
 
-    val hakija = getOnlyHakija(response)
     assert(hakija.muupuhelin.isEmpty)
     assert(hakija.oikeusMaksuttomaanKoulutukseenVoimassaAsti.isEmpty)
     assert(hakija.oppivelvollisuusVoimassaAsti.isEmpty)
     assert(hakija.lisakysymykset.isEmpty)
-    assert(hakija.hakemus.lahtokoulu.isEmpty)
-    assert(hakija.hakemus.luokka.isEmpty)
-    assert(hakija.hakemus.pohjakoulutus.isEmpty)
-    assert(hakija.hakemus.osaaminen.yleinen_kielitutkinto_fi.isEmpty)
-    assert(hakija.hakemus.osaaminen.valtionhallinnon_kielitutkinto_en.isEmpty)
+    assert(hakemus.muukoulutus.isEmpty)
+    // Excel-kirjoittaja renderöi nämä numericOrZerolla, joten tyhjä arvo näkyy "0":na.
+    assert(hakemus.yhteisetaineet.isEmpty)
+    assert(hakemus.lukiontasapisteet.isEmpty)
+    assert(hakemus.yleinenkoulumenestys.isEmpty)
+    assert(hakemus.painotettavataineet.isEmpty)
+    assert(hakemus.osaaminen == Osaaminen())
+    assert(hakutoive.koulutuksenKieli.isEmpty)
+  }
+
+  it should "return None for lahtokoulu fields when there is no gen_henkilo_lahtokoulu row" in {
+    seedMinimalHakija()
+
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
+
+    val hakemus = getOnlyHakija(response).hakemus
+    assert(hakemus.lahtokoulu.isEmpty)
+    assert(hakemus.lahtokoulunnimi.isEmpty)
+    assert(hakemus.luokka.isEmpty)
+    assert(hakemus.luokkataso.isEmpty)
+  }
+
+  it should "populate lahtokoulu fields from an active gen_henkilo_lahtokoulu row" in {
+    seedMinimalHakija()
+    insertOrganisaatio(
+      organisaatioOid = LAHTOKOULU_OID,
+      oppilaitosnumero = Some(LAHTOKOULU_KOODI),
+      nimiFi = Some(LAHTOKOULU_NIMI_FI)
+    )
+    insertHenkiloLahtokoulu(
+      luokka = Some(LAHTOKOULU_LUOKKA),
+      oppilaitosOid = Some(LAHTOKOULU_OID),
+      suoritusTyyppi = Some(LAHTOKOULU_SUORITUSTYYPPI),
+      suorituksenAlku = Some(LAHTOKOULU_ALKU),
+      suorituksenLoppu = Some(LAHTOKOULU_LOPPU)
+    )
+
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
+
+    val hakemus = getOnlyHakija(response).hakemus
+    assert(hakemus.lahtokoulu.contains(LAHTOKOULU_KOODI))
+    assert(hakemus.lahtokoulunnimi.contains(LAHTOKOULU_NIMI_FI))
+    assert(hakemus.luokka.contains(LAHTOKOULU_LUOKKA))
+    assert(hakemus.luokkataso.contains(LAHTOKOULU_LUOKKATASO))
   }
 
   it should "return None for fields whose gen_hakemus columns are NULL" in {
@@ -1057,24 +1102,7 @@ class ExternalToisenAsteenHakijatServiceTest
   // The tail columns of selectHakutoiveet (harkinnanvaraisuus, pisteet, keskiarvo) matter most:
   // they are what an off-by-one in that query's SELECT list corrupts first.
   it should "populate every field of a fully-populated hakija (column-order guard)" in {
-    initSchema()
-    insertHenkilo()
-    insertHaku(koulutuksenAlkamisvuosi = Some(2040), koulutuksenAlkamiskausiuri = Some("kausi_k#1"))
-    insertHakemus(insertHenkilo = false, insertHaku = false)
-    insertHakukohde()
-    insertHakutoive(harkinnanvaraisuudenSyy = Some("ATARU_OPPIMISVAIKEUDET"))
-    insertToteutusJaKoulutus(
-      koulutuksenAlkamisvuosi = Some(2041),
-      koulutuksenAlkamiskausiuri = Some("kausi_s#1")
-    )
-    insertOrganisaatio()
-    insertHakemusToinenAsteYhteishaku()
-    insertOpetuskieli()
-    insertPohjakoulutus(arvo = Some("\"1\""))
-    insertTodistusvuosi(arvo = Some("\"2025\""))
-    insertLisakoulutus(avain = "LISAKOULUTUS_TUVA")
-    insertValintarekisteri(pisteet = Some(BigDecimal("7.75")))
-    insertValintalaskentaFunktiotulos(tunniste = "keskiarvo_pk", arvo = Some("8.25"))
+    seedFullyPopulatedHakija()
 
     val hakija = getOnlyHakija(getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None))
 
