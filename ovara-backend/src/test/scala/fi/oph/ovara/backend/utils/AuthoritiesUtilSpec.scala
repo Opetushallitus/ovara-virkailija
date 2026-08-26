@@ -76,6 +76,25 @@ class AuthoritiesUtilSpec extends AnyFlatSpec {
 
   // Organisaatio, hakukohderyhmä, ja lopuksi joukko oideja jotka eivät ole kumpaakaan:
   // hakukohde, henkilö ja roolista "..._KK_HAKENEET_123" irronnut rykelmä numeroita.
+  // Huom: metodi saa pelkän oid-listan eikä näe millä roolilla oid on myönnetty. Siksi
+  // kutsuja päättää mitkä oidit se syöttää -- external-rajapinnat syöttävät vain oman
+  // oikeusperheensä oidit, sisäiset raportit kaikki.
+  "hasOPHPaakayttajaRights" should "return true when the OPH organisaatio oid is present" in {
+    assert(
+      AuthoritiesUtil.hasOPHPaakayttajaRights(
+        List("1.2.246.562.10.00000000000000000586", "1.2.246.562.10.00000000001")
+      )
+    )
+  }
+
+  it should "return false for other organisaatio oids" in {
+    assert(!AuthoritiesUtil.hasOPHPaakayttajaRights(List("1.2.246.562.10.00000000000000000586")))
+  }
+
+  it should "return false for an empty list" in {
+    assert(!AuthoritiesUtil.hasOPHPaakayttajaRights(List()))
+  }
+
   private val mixedOids = List(
     "1.2.246.562.10.00000000001",
     "1.2.246.562.28.00000000000000000012",
