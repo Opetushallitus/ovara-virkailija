@@ -4,7 +4,9 @@ import fi.oph.ovara.backend.repository.ReadOnlyDatabase
 import fi.oph.ovara.backend.utils.RepositoryUtils
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.Repository
+import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api.actionBasedSQLInterpolation
+import slick.sql.SqlStreamingAction
 
 @Repository
 class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends HakijatExtractors {
@@ -19,17 +21,32 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
     valintarajaus: Valintarajaus,
     scope: KayttooikeusScope
   ): Seq[HakijaRow] = {
+    // Tyhjä oikeusjoukko: tulos on tyhjä joka tapauksessa, joten kyselyä ei kannata ajaa. Kyselyn
+    // rajaus (ks. sallitutOrganisaatiotKayttooikeusFragment) jää silti paikalleen varmistuksena.
+    val eiOikeuksia = !scope.isPaakayttaja && scope.allowedOrgOids.isEmpty
     // Rajaus käytännössä pakollinen joko hakukohdeOidilla tai organisaatioOidilla
-    if (hakukohdeOid.isEmpty && organisaatioOids.isEmpty) {
+    if ((hakukohdeOid.isEmpty && organisaatioOids.isEmpty) || eiOikeuksia) {
       Seq.empty
     } else {
+      val query = selectHakijatQuery(hakuOid, hakukohdeOid, organisaatioOids, valintarajaus, scope)
+      LOG.debug(s"selectHakijatQuery: ${query.statements.head}")
+      db.run(query, "selectHakijat")
+    }
+  }
 
-      val tilaFiltteriSql       = stateSqlFragment(valintarajaus)
-      val hakurajausFiltteriSql = hakuFilterSqlFragment(hakukohdeOid, organisaatioOids)
-      // Sallitut organisaatiot on laajennettu lapsiorganisaatioihin jo palvelukerroksessa.
-      val kayttooikeusSql = sallitutOrganisaatiotKayttooikeusFragment(scope)
+  private[toisenasteenhakijat] def selectHakijatQuery(
+    hakuOid: String,
+    hakukohdeOid: Option[String],
+    organisaatioOids: Seq[String],
+    valintarajaus: Valintarajaus,
+    scope: KayttooikeusScope
+  ): SqlStreamingAction[Vector[HakijaRow], HakijaRow, Effect] = {
+    val tilaFiltteriSql       = stateSqlFragment(valintarajaus)
+    val hakurajausFiltteriSql = hakuFilterSqlFragment(hakukohdeOid, organisaatioOids)
+    // Sallitut organisaatiot on laajennettu lapsiorganisaatioihin jo palvelukerroksessa.
+    val kayttooikeusSql = sallitutOrganisaatiotKayttooikeusFragment(scope)
 
-      val query = sql"""
+    val query = sql"""
       SELECT hlo.oppijanumero,
         hakemus.hakemus_oid,
         hakemus.sahkoposti,
@@ -111,9 +128,7 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
       )
       """.as[HakijaRow]
 
-      LOG.debug(s"selectHakijatQuery: ${query.statements.head}")
-      db.run(query, "selectHakijat")
-    }
+    query
   }
 
   /**
@@ -326,9 +341,9 @@ class ExternalToisenAsteenHakijatRepository(db: ReadOnlyDatabase) extends Hakija
    *  Tyhjä oikeusjoukko tarkoittaa ettei yhtään hakijaa palauteta (vrt. `allowedMatch`), joten
    *  emitoidaan ehto joka ei täsmää -- tyhjä `IN ()` olisi syntaksivirhe.
    */
-  private def sallitutOrganisaatiotKayttooikeusFragment(scope: KayttooikeusScope): String =
+  private[toisenasteenhakijat] def sallitutOrganisaatiotKayttooikeusFragment(scope: KayttooikeusScope): String =
     if (scope.isPaakayttaja) ""
-    else if (scope.allowedOrgOids.isEmpty) " AND 1 = 0"
+    else if (scope.allowedOrgOids.isEmpty) " AND FALSE"
     else
       s" AND hk.jarjestyspaikka_oid IN (${RepositoryUtils.makeListOfValuesQueryStr(scope.allowedOrgOids)})"
 
