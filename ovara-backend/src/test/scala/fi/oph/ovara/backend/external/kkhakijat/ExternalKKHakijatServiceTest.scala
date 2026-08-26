@@ -472,6 +472,9 @@ class ExternalKKHakijatServiceTest
     val hakemukset = getOnlyHakija(response).hakemukset
     assert(hakemukset.size == 1, s"expected only the org-matched hakutoive, got $hakemukset")
     assert(hakemukset.head.hakukohde == HAKUKOHDE_OID)
+    // Pelkkä rivimäärä ei erottaisi tätä suppressoinnin poistamisesta, koska HAKUKOHDE_OID_2
+    // karsiutuu jo organisaatioparametrilla. Ryhmälaajennuksen kutsumattomuus erottaa.
+    verify(commonService, never()).getHakukohderyhmanHakukohdeOids(any[String](), any[String]())
   }
 
   // Ryhmän jäsenyys on hakukohtaista: toisen haun laajennus ei saa kelpuuttaa tätä hakua.

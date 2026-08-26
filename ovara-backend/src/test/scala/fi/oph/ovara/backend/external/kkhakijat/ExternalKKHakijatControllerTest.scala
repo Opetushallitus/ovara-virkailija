@@ -378,6 +378,9 @@ class ExternalKKHakijatControllerTest
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
       .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO))
+    // Pelkkä rivimäärä ei erottaisi tätä suppressoinnin poistamisesta, koska orgB:n rivi
+    // karsiutuu jo organisaatioparametrilla. Ryhmälaajennuksen kutsumattomuus erottaa.
+    verify(commonService, never()).getHakukohderyhmanHakukohdeOids(any[String](), any[String]())
   }
 
   @Test

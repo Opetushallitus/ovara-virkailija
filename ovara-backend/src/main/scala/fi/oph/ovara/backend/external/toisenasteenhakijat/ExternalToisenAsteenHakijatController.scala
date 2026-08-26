@@ -83,7 +83,9 @@ class ExternalToisenAsteenHakijatController(
     if (isOphPaakayttaja(authorities)) {
       KayttooikeusScope.paakayttaja
     } else {
-      KayttooikeusScope.limited(omatKayttooikeusOidit(authorities).toSet)
+      // Vain organisaatio-oidit kelpaavat toisen asteen rajapinnassa.
+      val organisaatiotJoihinOikeus = AuthoritiesUtil.filterOrganisaatioOids(omatKayttooikeusOidit(authorities))
+      KayttooikeusScope.limited(organisaatiotJoihinOikeus.toSet)
     }
   }
 

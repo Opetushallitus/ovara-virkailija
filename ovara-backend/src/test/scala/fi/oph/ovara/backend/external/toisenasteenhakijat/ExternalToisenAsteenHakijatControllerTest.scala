@@ -148,12 +148,35 @@ class ExternalToisenAsteenHakijatControllerTest
     insertHakukohde(hakukohdeOid = hakukohdeOidB, jarjestyspaikkaOid = orgB, organisaatioOid = Some(orgB))
     insertHakutoive(hakemusOid = HAKEMUS_OID_2, hakukohdeOid = hakukohdeOidB)
 
-    // Filter by hakuOid only — no organisaatioOid override — so the scope decides who's visible.
-    // (Endpoint contract still requires one of hakukohde/organisaatio, so we pass organisaatioOid = orgA.)
-    get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID))
+    // Rajataan orgB:n hakukohteella, jotta rajaava parametri ei itse sulje orgB:tä pois:
+    // ainoa syy tyhjään tulokseen on käyttöoikeusrajaus.
+    get(hakukohdeOid = Some(hakukohdeOidB), organisaatioOid = None)
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
+
+    // Oman organisaation hakukohde näkyy normaalisti.
+    get(hakukohdeOid = Some(HAKUKOHDE_OID), organisaatioOid = None)
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
       .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO))
+  }
+
+  @Test
+  @WithMockUser(
+    username = "hakeneet-hakukohderyhma-oid-user",
+    // Oid ei ole organisaatio vaan hakukohderyhmä. Tällä rajapinnalla ryhmäoikeuksia ei ole,
+    // joten oikeus ei kata mitään -- eikä oidia pidä viedä organisaatiorajaukseen.
+    roles = Array("APP_OVARA-VIRKAILIJA_HAKENEET_1.2.246.562.28.00000000000000000012")
+  )
+  def nonOrganisaatioOidGrantsNothing(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
   }
 
   @Test
