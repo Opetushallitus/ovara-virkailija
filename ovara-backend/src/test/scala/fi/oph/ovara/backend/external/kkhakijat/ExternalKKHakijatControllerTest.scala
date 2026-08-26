@@ -211,6 +211,40 @@ class ExternalKKHakijatControllerTest
 
   @Test
   @WithMockUser(
+    username = "kk-oph-oid-via-other-role-user",
+    roles = Array(
+      "APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.10.00000000000000000586",
+      "APP_OVARA-VIRKAILIJA_2ASTE_1.2.246.562.10.00000000001"
+    )
+  )
+  def ophOidOnAnotherOvaraRoleDoesNotGrantPaakayttajaScope(): Unit = {
+    // OPH-organisaation oid on myönnetty 2ASTE-roolilla, ei KK_HAKENEET-roolilla. Se ei tee
+    // käyttäjästä pääkäyttäjää tälle rajapinnalle: oikeus on yhä vain orgA:han.
+    val orgB          = ORGANISAATIO_OID_2
+    val hakukohdeOidB = HAKUKOHDE_OID_2
+    val oppijanumeroB = "1.2.246.562.24.00000000020"
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertHakemus(oppijanumero = oppijanumeroB, hakemusOid = HAKEMUS_OID_2, insertHaku = false)
+    insertHakukohde(hakukohdeOid = hakukohdeOidB, jarjestyspaikkaOid = orgB, organisaatioOid = Some(orgB))
+    insertHakutoive(hakemusOid = HAKEMUS_OID_2, hakukohdeOid = hakukohdeOidB)
+
+    // Pääkäyttäjänä orgB:n hakija näkyisi; rajatulla oikeudella ei.
+    get(hakukohdeOid = None, organisaatioOid = Some(orgB))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
+
+    // Oma organisaatio toimii silti -- käyttäjä ei ole lukittu ulos.
+    get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO))
+  }
+
+  @Test
+  @WithMockUser(
     username = "kk-hakeneet-no-oid-user",
     // KK_HAKENEET_ prefix matches, but the trailing token has no digits → getKayttooikeusOids yields empty.
     roles = Array("APP_OVARA-VIRKAILIJA_KK_HAKENEET_")

@@ -73,10 +73,29 @@ class ExternalKKHakijatController(
     Option.when(parsedRajaus.isEmpty)("valintarajaus.invalid")
   ).flatten
 
+  /**
+   * Vain KK_HAKENEET_-etuliitteellä myönnetyt oidit kelpaavat tälle rajapinnalle: 2ASTE /
+   * HAKENEET / muiden ovara-roolien kautta saatuja oideja ei yhdistetä mukaan.
+   */
+  private def omatKayttooikeusOidit(authorities: List[String]): List[String] =
+    AuthoritiesUtil.getKayttooikeusOids(
+      authorities.filter(_.startsWith(Constants.KK_HAKENEET_AUTHORITY_PREFIX))
+    )
+
+  /**
+   * Pääkäyttäjyys tunnistetaan vain tämän rajapinnan omista oikeuksista: joko varsinaisesta
+   * OPH_PAAKAYTTAJA-oikeudesta, tai KK_HAKENEET-oikeudesta joka on myönnetty OPH-organisaatiolle.
+   * Muun ovara-roolin (2ASTE, KK, HAKENEET, ...) kautta saatu OPH-oid ei laajenna näkymää --
+   * toisin kuin sisäisissä raporteissa, ks. CommonService.
+   */
+  private def isOphPaakayttaja(authorities: List[String]): Boolean =
+    authorities.contains(Constants.OPH_PAAKAYTTAJA_AUTHORITY) ||
+      AuthoritiesUtil.hasOPHPaakayttajaRights(omatKayttooikeusOidit(authorities))
+
   // OPH_PAAKAYTTAJA and users with at least one KK_HAKENEET_<oid> authority both qualify for the endpoint.
   private def isAuthorized: Boolean = {
     val authorities = userService.getAuthorities
-    authorities.contains(Constants.OPH_PAAKAYTTAJA_AUTHORITY) ||
+    isOphPaakayttaja(authorities) ||
     authorities.exists(_.startsWith(Constants.KK_HAKENEET_AUTHORITY_PREFIX))
   }
 
@@ -86,17 +105,13 @@ class ExternalKKHakijatController(
 
   private def resolveKayttooikeusScope: KayttooikeusScopeKK = {
     val authorities = userService.getAuthorities
-    if (AuthoritiesUtil.hasOPHPaakayttajaRights(AuthoritiesUtil.getKayttooikeusOids(authorities))) {
+    if (isOphPaakayttaja(authorities)) {
       KayttooikeusScopeKK.paakayttaja
     } else {
-      // Vain KK_HAKENEET_-etuliitteellä myönnetyt oidit kelpaavat tälle rajapinnalle: 2ASTE /
-      // HAKENEET / muiden ovara-roolien kautta saatuja oideja ei yhdistetä mukaan. Käyttöoikeus
-      // voi olla myönnetty organisaatiolle tai hakukohderyhmälle (oid-avaruus 1.2.246.562.28.*),
-      // ja nämä eritellään oid-avaruuden perusteella: organisaatio-oikeutta verrataan
-      // järjestyspaikkaan, ryhmäoikeus laajennetaan palvelussa haun hakukohteiksi.
-      val kkHakeneetOids = AuthoritiesUtil.getKayttooikeusOids(
-        authorities.filter(_.startsWith(Constants.KK_HAKENEET_AUTHORITY_PREFIX))
-      )
+      // Käyttöoikeus voi olla myönnetty organisaatiolle tai hakukohderyhmälle (oid-avaruus
+      // 1.2.246.562.28.*), ja nämä eritellään oid-avaruuden perusteella: organisaatio-oikeutta
+      // verrataan järjestyspaikkaan, ryhmäoikeus laajennetaan palvelussa haun hakukohteiksi.
+      val kkHakeneetOids              = omatKayttooikeusOidit(authorities)
       val organisaatiotJoihinOikeus   = AuthoritiesUtil.filterOrganisaatioOids(kkHakeneetOids)
       val hakukohderyhmatJoihinOikeus = AuthoritiesUtil.filterHakukohderyhmaOids(kkHakeneetOids)
       KayttooikeusScopeKK.limited(organisaatiotJoihinOikeus.toSet, hakukohderyhmatJoihinOikeus.toSet)

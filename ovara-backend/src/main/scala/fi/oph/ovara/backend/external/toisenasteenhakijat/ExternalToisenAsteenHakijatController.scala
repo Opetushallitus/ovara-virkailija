@@ -48,10 +48,29 @@ class ExternalToisenAsteenHakijatController(
     "valintarajaus"   -> valintarajaus
   )
 
+  /**
+   * Vain HAKENEET_-etuliitteellä myönnetyt oidit kelpaavat tälle rajapinnalle: 2ASTE / KK /
+   * KK_HAKENEET / muiden ovara-roolien kautta saatuja oideja ei yhdistetä mukaan.
+   */
+  private def omatKayttooikeusOidit(authorities: List[String]): List[String] =
+    AuthoritiesUtil.getKayttooikeusOids(
+      authorities.filter(_.startsWith(fi.oph.ovara.backend.utils.Constants.HAKENEET_AUTHORITY_PREFIX))
+    )
+
+  /**
+   * Pääkäyttäjyys tunnistetaan vain tämän rajapinnan omista oikeuksista: joko varsinaisesta
+   * OPH_PAAKAYTTAJA-oikeudesta, tai HAKENEET-oikeudesta joka on myönnetty OPH-organisaatiolle.
+   * Muun ovara-roolin (2ASTE, KK, ...) kautta saatu OPH-oid ei laajenna näkymää -- toisin kuin
+   * sisäisissä raporteissa, ks. CommonService.
+   */
+  private def isOphPaakayttaja(authorities: List[String]): Boolean =
+    authorities.contains(fi.oph.ovara.backend.utils.Constants.OPH_PAAKAYTTAJA_AUTHORITY) ||
+      AuthoritiesUtil.hasOPHPaakayttajaRights(omatKayttooikeusOidit(authorities))
+
   // OPH_PAAKAYTTAJA and users with at least one HAKENEET_<oid> authority both qualify for the endpoint.
   private def isAuthorized: Boolean = {
     val authorities = userService.getAuthorities
-    authorities.contains(fi.oph.ovara.backend.utils.Constants.OPH_PAAKAYTTAJA_AUTHORITY) ||
+    isOphPaakayttaja(authorities) ||
     authorities.exists(_.startsWith(fi.oph.ovara.backend.utils.Constants.HAKENEET_AUTHORITY_PREFIX))
   }
 
@@ -61,15 +80,10 @@ class ExternalToisenAsteenHakijatController(
 
   private def resolveKayttooikeusScope: KayttooikeusScope = {
     val authorities = userService.getAuthorities
-    if (AuthoritiesUtil.hasOPHPaakayttajaRights(AuthoritiesUtil.getKayttooikeusOids(authorities))) {
+    if (isOphPaakayttaja(authorities)) {
       KayttooikeusScope.paakayttaja
     } else {
-      // HAKENEET is org-scoped: only OIDs suffixed onto HAKENEET_ authorities count for
-      // this endpoint. OIDs granted through 2ASTE / KK / other ovara roles are NOT merged in.
-      val hakeneetOrgOids = AuthoritiesUtil.getKayttooikeusOids(
-        authorities.filter(_.startsWith(fi.oph.ovara.backend.utils.Constants.HAKENEET_AUTHORITY_PREFIX))
-      )
-      KayttooikeusScope.limited(hakeneetOrgOids.toSet)
+      KayttooikeusScope.limited(omatKayttooikeusOidit(authorities).toSet)
     }
   }
 
