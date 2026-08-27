@@ -120,7 +120,12 @@ class ExternalToisenAsteenHakijatControllerTest
   }
 
   @Test
-  @WithMockUser(username = "hakeneet-user", roles = Array("APP_OVARA-VIRKAILIJA_HAKENEET_1.2.246.562.10.00000000001"))
+  // Tavallinen organisaatio, ei OPH-organisaatio: muuten tämä testaisi pääkäyttäjän päästämistä
+  // sisään (ks. hakeneetRoleOnOphOrganisaatioGrantsPaakayttajaScope) eikä roolin omaa pääsyä.
+  @WithMockUser(
+    username = "hakeneet-user",
+    roles = Array("APP_OVARA-VIRKAILIJA_HAKENEET_1.2.246.562.10.00000000000000000486")
+  )
   def returns200ForHakeneetRole(): Unit = {
     initSchema()
 
@@ -233,6 +238,39 @@ class ExternalToisenAsteenHakijatControllerTest
       .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
 
     // Oma organisaatio toimii silti -- käyttäjä ei ole lukittu ulos.
+    get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO))
+  }
+
+  @Test
+  @WithMockUser(
+    username = "hakeneet-oph-user",
+    roles = Array("APP_OVARA-VIRKAILIJA_HAKENEET_1.2.246.562.10.00000000001")
+  )
+  def hakeneetRoleOnOphOrganisaatioGrantsPaakayttajaScope(): Unit = {
+    // Edellisen testin peilikuva: OPH-organisaation oid HAKENEET-roolilla eli tämän rajapinnan
+    // omalla oikeudella tekee käyttäjästä pääkäyttäjän. Käyttäjällä ei ole erillistä
+    // OPH_PAAKAYTTAJA-oikeutta, joten tämä pinnaa nimenomaan oid-pohjaisen tunnistuksen.
+    val orgB          = ORGANISAATIO_OID_2
+    val hakukohdeOidB = HAKUKOHDE_OID_2
+    val oppijanumeroB = "1.2.246.562.24.00000000010"
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertHakemus(oppijanumero = oppijanumeroB, hakemusOid = HAKEMUS_OID_2, insertHaku = false)
+    insertHakukohde(hakukohdeOid = hakukohdeOidB, jarjestyspaikkaOid = orgB, organisaatioOid = Some(orgB))
+    insertHakutoive(hakemusOid = HAKEMUS_OID_2, hakukohdeOid = hakukohdeOidB)
+
+    // Rajatulla oikeudella orgB olisi tyhjä; pääkäyttäjänä hakija näkyy.
+    get(hakukohdeOid = None, organisaatioOid = Some(orgB))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(oppijanumeroB))
+
+    // Myös orgA näkyy, eli näkymä ei ole vaihtunut orgB:hen vaan on rajaamaton.
     get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID))
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
@@ -1599,7 +1637,12 @@ class ExternalToisenAsteenHakijatControllerTest
       .andExpect(content.json("\"virhe.tietokanta\""))
 
   @Test
-  @WithMockUser(username = "hakeneet-user", roles = Array("APP_OVARA-VIRKAILIJA_HAKENEET_1.2.246.562.10.00000000001"))
+  // Tavallinen organisaatio, ei OPH-organisaatio: rajatun oikeuden excel-polku oli aiemmin
+  // kattamatta, koska tämä käyttäjä oli tosiasiassa pääkäyttäjä.
+  @WithMockUser(
+    username = "hakeneet-user",
+    roles = Array("APP_OVARA-VIRKAILIJA_HAKENEET_1.2.246.562.10.00000000000000000486")
+  )
   def excelReturns200ForHakeneetRole(): Unit = {
     seedMinimalHakija()
     insertToteutusJaKoulutus()
