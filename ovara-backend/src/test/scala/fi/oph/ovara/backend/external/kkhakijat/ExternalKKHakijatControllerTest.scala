@@ -144,9 +144,11 @@ class ExternalKKHakijatControllerTest
   }
 
   @Test
+  // Tavallinen organisaatio, ei OPH-organisaatio: muuten tämä testaisi pääkäyttäjän päästämistä
+  // sisään (ks. kkHakeneetRoleOnOphOrganisaatioGrantsPaakayttajaScope) eikä roolin omaa pääsyä.
   @WithMockUser(
     username = "kk-hakeneet-user",
-    roles = Array("APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.10.00000000001")
+    roles = Array("APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.10.00000000000000000586")
   )
   def returns200ForKkHakeneetRole(): Unit = {
     initSchema()
@@ -237,6 +239,39 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
 
     // Oma organisaatio toimii silti -- käyttäjä ei ole lukittu ulos.
+    get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO))
+  }
+
+  @Test
+  @WithMockUser(
+    username = "kk-hakeneet-oph-user",
+    roles = Array("APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.10.00000000001")
+  )
+  def kkHakeneetRoleOnOphOrganisaatioGrantsPaakayttajaScope(): Unit = {
+    // Edellisen testin peilikuva: OPH-organisaation oid KK_HAKENEET-roolilla eli tämän rajapinnan
+    // omalla oikeudella tekee käyttäjästä pääkäyttäjän. Käyttäjällä ei ole erillistä
+    // OPH_PAAKAYTTAJA-oikeutta, joten tämä pinnaa nimenomaan oid-pohjaisen tunnistuksen.
+    val orgB          = ORGANISAATIO_OID_2
+    val hakukohdeOidB = HAKUKOHDE_OID_2
+    val oppijanumeroB = "1.2.246.562.24.00000000020"
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertHakemus(oppijanumero = oppijanumeroB, hakemusOid = HAKEMUS_OID_2, insertHaku = false)
+    insertHakukohde(hakukohdeOid = hakukohdeOidB, jarjestyspaikkaOid = orgB, organisaatioOid = Some(orgB))
+    insertHakutoive(hakemusOid = HAKEMUS_OID_2, hakukohdeOid = hakukohdeOidB)
+
+    // Rajatulla oikeudella orgB olisi tyhjä; pääkäyttäjänä hakija näkyy.
+    get(hakukohdeOid = None, organisaatioOid = Some(orgB))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(oppijanumeroB))
+
+    // Myös orgA näkyy, eli näkymä ei ole vaihtunut orgB:hen vaan on rajaamaton.
     get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID))
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
