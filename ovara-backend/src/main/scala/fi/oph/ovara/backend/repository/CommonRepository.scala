@@ -176,6 +176,11 @@ class CommonRepository extends Extractors {
     val hakukohderyhmaQueryStr: String = {
       if (isOphPaakayttaja)
         ""
+      // Jos ei organisaatio- eikä hakukohderyhmäoikeuksia: yhtään ryhmää ei saa palauttaa. Ilman tätä
+      // makeHakukohderyhmaQueryWithKayttooikeudet palauttaisi tyhjän merkkijonon, jolloin kysely
+      // jäisi kokonaan rajaamatta (ks. RepositoryUtils:184) ja käyttäjä näkisi kaikki ryhmät.
+      else if (kayttooikeusOrgOids.isEmpty && kayttooikeusHakukohderyhmaOids.isEmpty)
+        "AND FALSE"
       else
         RepositoryUtils.makeHakukohderyhmaQueryWithKayttooikeudet(
           kayttooikeusOrgOids,
