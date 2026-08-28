@@ -64,6 +64,25 @@ export const hasOphPaaKayttajaRole = (userRoles?: Array<string>) => {
   return userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA');
 };
 
+const OPH_ORGANISAATIO_OID = '1.2.246.562.10.00000000001';
+
+/**
+ * Oikeus KK-hakijarajapinnan kaikkiin tietoihin (rekisterinpitäjä). Vastaa backendin
+ * KayttooikeusScopeKK.saaKaikkiTiedot-ehtoa: varsinainen OPH_PAAKAYTTAJA-oikeus tai
+ * OPH-organisaatiolle myönnetty KK_HAKENEET-oikeus. Kun erillinen "kaikki KK-hakijat"
+ * -oikeus lisätään, se lisätään tähän -- samoin kuin backendin puolella.
+ *
+ * Huom: muut rooliapurit tarkistavat suffiksittomat roolit, mutta pääkäyttäjyys nojaa
+ * nimenomaan OPH-oidilla myönnettyyn oikeuteen, joten tässä tarvitaan oid-suffiksi.
+ */
+export const hasKkHakijatKaikkiTiedotRight = (userRoles?: Array<string>) =>
+  Boolean(
+    hasOphPaaKayttajaRole(userRoles) ||
+      userRoles?.includes(
+        `ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET_${OPH_ORGANISAATIO_OID}`,
+      ),
+  );
+
 export const hasOvaraRole = (userRoles?: Array<string>) => {
   return userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA');
 };
@@ -209,12 +228,14 @@ export const buildKkHakijatTiedonsiirtoParams = ({
   hakukohderyhmaOid,
   organisaatioOid,
   valintarajaus,
+  oppijanumero,
 }: {
   hakuOid: string | null;
   hakukohdeOid: string | null;
   hakukohderyhmaOid: string | null;
   organisaatioOid: string | null;
   valintarajaus: string | null;
+  oppijanumero: string | null;
 }): string => {
   const params = new URLSearchParams();
   if (hakuOid) params.set('hakuOid', hakuOid);
@@ -222,6 +243,10 @@ export const buildKkHakijatTiedonsiirtoParams = ({
   if (hakukohderyhmaOid) params.set('hakukohderyhmaOid', hakukohderyhmaOid);
   if (organisaatioOid) params.set('organisaatioOid', organisaatioOid);
   if (valintarajaus) params.set('valintarajaus', valintarajaus);
+  // Vapaa tekstikenttä: trimmataan, jottei pelkistä välilyönneistä koostuva arvo lähde
+  // rajaimeksi ja tuota backendista 400:aa.
+  const trimmedOppijanumero = oppijanumero?.trim();
+  if (trimmedOppijanumero) params.set('oppijanumero', trimmedOppijanumero);
   return params.toString();
 };
 

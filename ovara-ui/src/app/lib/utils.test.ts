@@ -16,6 +16,7 @@ import {
   findOrganisaatio,
   buildTiedonsiirtoParams,
   buildKkHakijatTiedonsiirtoParams,
+  hasKkHakijatKaikkiTiedotRight,
 } from './utils';
 import {
   KK_RAPORTIT,
@@ -1004,6 +1005,8 @@ describe('buildKkHakijatTiedonsiirtoParams', () => {
   const hakukohderyhmaOid = '1.2.246.562.28.00000000000000000012';
   const organisaatioOid = '1.2.246.562.10.00000000000000000486';
 
+  const oppijanumero = '1.2.246.562.24.00000000019';
+
   test('should send every selected rajain, since the backend intersects them', () => {
     const params = new URLSearchParams(
       buildKkHakijatTiedonsiirtoParams({
@@ -1012,6 +1015,7 @@ describe('buildKkHakijatTiedonsiirtoParams', () => {
         hakukohderyhmaOid,
         organisaatioOid,
         valintarajaus,
+        oppijanumero: null,
       }),
     );
 
@@ -1030,6 +1034,7 @@ describe('buildKkHakijatTiedonsiirtoParams', () => {
         hakukohderyhmaOid,
         organisaatioOid: null,
         valintarajaus,
+        oppijanumero: null,
       }),
     );
 
@@ -1046,7 +1051,107 @@ describe('buildKkHakijatTiedonsiirtoParams', () => {
         hakukohderyhmaOid: null,
         organisaatioOid: null,
         valintarajaus: null,
+        oppijanumero: null,
       }),
     ).toEqual('');
+  });
+
+  test('should send oppijanumero as the only rajain', () => {
+    const params = new URLSearchParams(
+      buildKkHakijatTiedonsiirtoParams({
+        hakuOid: null,
+        hakukohdeOid: null,
+        hakukohderyhmaOid: null,
+        organisaatioOid: null,
+        valintarajaus: null,
+        oppijanumero,
+      }),
+    );
+
+    expect(params.get('oppijanumero')).toEqual(oppijanumero);
+    expect(params.get('hakuOid')).toBeNull();
+    expect(params.get('valintarajaus')).toBeNull();
+  });
+
+  // Oppijanumero ei sulje muita rajaimia pois: backend soveltaa ne edelleen tarkennuksena.
+  test('should send oppijanumero alongside the other rajaimet', () => {
+    const params = new URLSearchParams(
+      buildKkHakijatTiedonsiirtoParams({
+        hakuOid,
+        hakukohdeOid: null,
+        hakukohderyhmaOid: null,
+        organisaatioOid,
+        valintarajaus,
+        oppijanumero,
+      }),
+    );
+
+    expect(params.get('oppijanumero')).toEqual(oppijanumero);
+    expect(params.get('hakuOid')).toEqual(hakuOid);
+    expect(params.get('organisaatioOid')).toEqual(organisaatioOid);
+  });
+
+  test('should trim oppijanumero and omit a blank value', () => {
+    const withPadding = new URLSearchParams(
+      buildKkHakijatTiedonsiirtoParams({
+        hakuOid: null,
+        hakukohdeOid: null,
+        hakukohderyhmaOid: null,
+        organisaatioOid: null,
+        valintarajaus: null,
+        oppijanumero: `  ${oppijanumero}  `,
+      }),
+    );
+    expect(withPadding.get('oppijanumero')).toEqual(oppijanumero);
+
+    expect(
+      buildKkHakijatTiedonsiirtoParams({
+        hakuOid: null,
+        hakukohdeOid: null,
+        hakukohderyhmaOid: null,
+        organisaatioOid: null,
+        valintarajaus: null,
+        oppijanumero: '   ',
+      }),
+    ).toEqual('');
+  });
+});
+
+describe('hasKkHakijatKaikkiTiedotRight', () => {
+  const OPH_OID = '1.2.246.562.10.00000000001';
+
+  test('should grant the right to an OPH paakayttaja', () => {
+    expect(
+      hasKkHakijatKaikkiTiedotRight([
+        'ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA',
+      ]),
+    ).toBe(true);
+  });
+
+  test('should grant the right when KK_HAKENEET is granted on the OPH organisaatio', () => {
+    expect(
+      hasKkHakijatKaikkiTiedotRight([
+        `ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET_${OPH_OID}`,
+      ]),
+    ).toBe(true);
+  });
+
+  // Suffiksiton rooli ei kerro mille organisaatiolle oikeus on myönnetty.
+  test('should not grant the right for a bare KK_HAKENEET role', () => {
+    expect(
+      hasKkHakijatKaikkiTiedotRight(['ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET']),
+    ).toBe(false);
+  });
+
+  test('should not grant the right for KK_HAKENEET on some other organisaatio', () => {
+    expect(
+      hasKkHakijatKaikkiTiedotRight([
+        'ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.10.00000000000000000586',
+      ]),
+    ).toBe(false);
+  });
+
+  test('should not grant the right when authorities are missing', () => {
+    expect(hasKkHakijatKaikkiTiedotRight(undefined)).toBe(false);
   });
 });

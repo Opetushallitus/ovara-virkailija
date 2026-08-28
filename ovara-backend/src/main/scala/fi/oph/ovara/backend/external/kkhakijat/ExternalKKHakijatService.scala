@@ -15,12 +15,13 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
 
   def getKKHakijat(
-    hakuOid: String,
+    hakuOid: Option[String],
     hakukohdeOid: Option[String],
     organisaatioOid: Option[String],
     valintarajaus: Valintarajaus,
     scope: KayttooikeusScopeKK,
-    hakukohderyhmaOid: Option[String] = None
+    hakukohderyhmaOid: Option[String] = None,
+    oppijanumero: Option[String] = None
   ): Either[String, Seq[KKHakija]] = {
     Try {
       // Sekä rajapinnan organisaatioOid (rajaava parametri) että käyttäjän organisaatio-oikeudet
@@ -37,11 +38,15 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
       val kayttooikeusryhmat   = if (huomioiRyhmaoikeudet) scope.allowedHakukohderyhmaOids else Set.empty[String]
 
       // Sama hakukohderyhmä voi esiintyä sekä rajaimena että käyttöoikeutena, joten laajennus
-      // haetaan kannasta kertaalleen per ryhmä.
+      // haetaan kannasta kertaalleen per ryhmä. Laajennus tapahtuu haun sisällä, joten se on
+      // mahdollista vain kun hakuOid tiedetään: oppijanumerohaussa hakua ei tarvitse antaa, ja
+      // validointi estää hakukohderyhmaOidin ilman hakuOidia.
       val ryhmanHakukohteet: Map[String, Set[String]] =
-        (hakukohderyhmaOid.toSet ++ kayttooikeusryhmat)
-          .map(ryhma => ryhma -> commonService.getHakukohderyhmanHakukohdeOids(ryhma, hakuOid).toSet)
-          .toMap
+        hakuOid.fold(Map.empty[String, Set[String]]) { haku =>
+          (hakukohderyhmaOid.toSet ++ kayttooikeusryhmat)
+            .map(ryhma => ryhma -> commonService.getHakukohderyhmanHakukohdeOids(ryhma, haku).toSet)
+            .toMap
+        }
 
       val kayttooikeusHakukohdeOids = kayttooikeusryhmat.flatMap(ryhmanHakukohteet)
       if (kayttooikeusryhmat.nonEmpty) {
@@ -71,14 +76,17 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
       // Jos rajaimia annettiin mutta leikkaus on tyhjä, yksikään hakukohde ei täsmää. Kyselyä ei
       // saa ajaa: tyhjä hakukohdelista jättäisi voimaan vain organisaatiorajauksen ja laajentaisi
       // tuloksen koko organisaatioon.
+      // saaKaikkiTiedot eikä isPaakayttaja: täyden oikeuden käyttäjällä ei välttämättäole organisaatio-
+      // eikä ryhmäoikeuksia, joten hän näyttäisi muuten oikeudettomalta ja saisi tyhjän tuloksen.
       val eiOikeuksiaPyynnonRajaimiin =
-        !scope.isPaakayttaja && expandedScope.allowedOrgOids.isEmpty && expandedScope.allowedHakukohdeOidsFromHakukohderyhmat.isEmpty
+        !scope.saaKaikkiTiedot && expandedScope.allowedOrgOids.isEmpty && expandedScope.allowedHakukohdeOidsFromHakukohderyhmat.isEmpty
       val kkHakijaRows =
         if (eiOikeuksiaPyynnonRajaimiin) {
           LOG.info("Käyttäjän oikeudet eivät kata pyynnön rajaimia, palautetaan tyhjä tulos")
           Seq.empty
         } else if (rajaaHakukohteilla && hakukohdeRajaus.isEmpty) Seq.empty
-        else repository.selectKKHakijat(hakuOid, hakukohdeRajaus.toSeq, organisaatioOids, valintarajaus)
+        else
+          repository.selectKKHakijat(hakuOid, hakukohdeRajaus.toSeq, organisaatioOids, valintarajaus, oppijanumero)
 
       if (kkHakijaRows.isEmpty) {
         Nil
@@ -155,7 +163,7 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
     val hakukohdeMatch = hakukohdeOids.isEmpty || hakukohdeOids.contains(row.hakukohdeOid)
     val orgMatch       = organisaatioOids.isEmpty || row.jarjestyspaikkaOid.exists(organisaatioOids.contains)
     // Organisaatio-oikeus TAI hakukohderyhmäoikeus riittää.
-    val allowedMatch = scope.isPaakayttaja ||
+    val allowedMatch = scope.saaKaikkiTiedot ||
       row.jarjestyspaikkaOid.exists(scope.allowedOrgOids.contains) ||
       scope.allowedHakukohdeOidsFromHakukohderyhmat.contains(row.hakukohdeOid)
     val stateMatch = valintarajaus match {

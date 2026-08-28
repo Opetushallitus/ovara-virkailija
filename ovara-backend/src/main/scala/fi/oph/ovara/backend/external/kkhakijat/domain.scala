@@ -26,7 +26,18 @@ case class KayttooikeusScopeKK(
   allowedOrgOids: Set[String],
   allowedHakukohderyhmaOids: Set[String] = Set.empty,
   allowedHakukohdeOidsFromHakukohderyhmat: Set[String] = Set.empty
-)
+) {
+
+  /**
+   * Oikeus kaikkiin tämän rajapinnan tietoihin ilman organisaatio- tai ryhmärajausta. Tällä
+   * oikeudella saa myös hakea yksittäisen henkilön tiedot oppijanumerolla.
+   *
+   * Nyt vain rekisterinpitäjällä eli OPH-pääkäyttäjällä. Kun erillinen "kaikki KK-hakijat"
+   * -oikeus aikanaan lisätään, se lisätään tähän uutena disjunktina -- ei kutsupaikkoihin, joita
+   * on useita (kontrollerin oppijanumero-tarkistus ja palvelun rivitason `allowedMatch`).
+   */
+  def saaKaikkiTiedot: Boolean = isPaakayttaja
+}
 
 object KayttooikeusScopeKK {
   val paakayttaja: KayttooikeusScopeKK =

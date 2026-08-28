@@ -70,38 +70,46 @@ class ExternalKKHakijatControllerTest
     ExternalKKHakijatControllerTest.recordedAuditCalls.asScala.toList
 
   private def get(
-    hakuOid: String = HAKU_OID,
+    hakuOid: Option[String] = Some(HAKU_OID),
     hakukohdeOid: Option[String] = Some(HAKUKOHDE_OID),
     organisaatioOid: Option[String] = None,
     valintarajaus: Option[String] = Some("HAKENEET"),
-    hakukohderyhmaOid: Option[String] = None
+    hakukohderyhmaOid: Option[String] = None,
+    oppijanumero: Option[String] = None
   ): ResultActions = {
     var req = MockMvcRequestBuilders
       .get("/api/external/kkhakijat")
-      .param("hakuOid", hakuOid)
       .accept(MediaType.APPLICATION_JSON)
+    hakuOid.foreach(v => req = req.param("hakuOid", v))
     hakukohdeOid.foreach(v => req = req.param("hakukohdeOid", v))
     hakukohderyhmaOid.foreach(v => req = req.param("hakukohderyhmaOid", v))
     organisaatioOid.foreach(v => req = req.param("organisaatioOid", v))
     valintarajaus.foreach(v => req = req.param("valintarajaus", v))
+    oppijanumero.foreach(v => req = req.param("oppijanumero", v))
     mvc.perform(req)
   }
 
+  /** Oppijanumerohaku: pelkkä oppijanumero, ei hakua eikä muita rajaimia. */
+  private def getByOppijanumero(oppijanumero: String): ResultActions =
+    get(hakuOid = None, hakukohdeOid = None, valintarajaus = None, oppijanumero = Some(oppijanumero))
+
   private def getExcel(
-    hakuOid: String = HAKU_OID,
+    hakuOid: Option[String] = Some(HAKU_OID),
     hakukohdeOid: Option[String] = Some(HAKUKOHDE_OID),
     organisaatioOid: Option[String] = None,
     valintarajaus: Option[String] = Some("HAKENEET"),
     headers: Map[String, String] = Map.empty,
-    hakukohderyhmaOid: Option[String] = None
+    hakukohderyhmaOid: Option[String] = None,
+    oppijanumero: Option[String] = None
   ): ResultActions = {
     var req = MockMvcRequestBuilders
       .get("/api/external/kkhakijat/excel")
-      .param("hakuOid", hakuOid)
+    hakuOid.foreach(v => req = req.param("hakuOid", v))
     hakukohdeOid.foreach(v => req = req.param("hakukohdeOid", v))
     hakukohderyhmaOid.foreach(v => req = req.param("hakukohderyhmaOid", v))
     organisaatioOid.foreach(v => req = req.param("organisaatioOid", v))
     valintarajaus.foreach(v => req = req.param("valintarajaus", v))
+    oppijanumero.foreach(v => req = req.param("oppijanumero", v))
     headers.foreach { case (k, v) => req = req.header(k, v) }
     mvc.perform(req)
   }
@@ -540,12 +548,230 @@ class ExternalKKHakijatControllerTest
     insertHakutoive(hakemusOid = HAKEMUS_OID_2, hakukohdeOid = HAKUKOHDE_OID_2)
   }
 
+  // ---- Oppijanumerohaku ----
+
+  private val TOINEN_HAKU_OID     = "1.2.246.562.29.00000000000000000201"
+  private val ALIAS_HENKILO_OID   = "1.2.246.562.24.00000000099"
+  private val TOINEN_OPPIJANUMERO = "1.2.246.562.24.00000000097"
+  private val HAKEMUS_OID_3       = "1.2.246.562.11.00000000000004511894"
+
+  /**
+   * Sama henkilö kahdessa haussa. Toinen haku on oleellinen: se on ainoa tapa osoittaa, ettei
+   * kysely enää rajaa hakuun -- yhdellä haulla testi menisi läpi myös vanhalla pakollisella
+   * hakuOidilla.
+   */
+  private def seedHakijaKahdessaHaussa(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertHakemus(hakemusOid = HAKEMUS_OID_2, hakuOid = TOINEN_HAKU_OID, insertHenkilo = false)
+    insertHakukohde(
+      hakukohdeOid = HAKUKOHDE_OID_2,
+      jarjestyspaikkaOid = ORGANISAATIO_OID_2,
+      organisaatioOid = Some(ORGANISAATIO_OID_2)
+    )
+    insertHakutoive(hakemusOid = HAKEMUS_OID_2, hakukohdeOid = HAKUKOHDE_OID_2)
+    // Toinen, eri henkilö samassa haussa: ilman tätä oppijanumerorajauksen poistaminen ei näkyisi
+    // näissä testeissä lainkaan, koska kannassa olisi vain yksi henkilö.
+    insertHakemus(oppijanumero = TOINEN_OPPIJANUMERO, hakemusOid = HAKEMUS_OID_3, insertHaku = false)
+    insertHakutoive(hakemusOid = HAKEMUS_OID_3)
+  }
+
+  /**
+   * Master-rivi (henkilo_oid == oppijanumero) hakemuksineen, ja alias-rivi jolla on oma
+   * henkilo_oid ja oma hakemus. Kummallakin oidilla haettuna pitää palautua molemmat.
+   */
+  private def seedHakijaAliaksella(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertHenkiloAlias(OPPIJANUMERO, ALIAS_HENKILO_OID)
+    insertHakemus(
+      oppijanumero = ALIAS_HENKILO_OID,
+      hakemusOid = HAKEMUS_OID_2,
+      insertHenkilo = false,
+      insertHaku = false
+    )
+    insertHakutoive(hakemusOid = HAKEMUS_OID_2)
+  }
+
+  @Test
+  def oppijanumeroReturnsHakijaFromEveryHaku(): Unit = {
+    seedHakijaKahdessaHaussa()
+
+    // Yksi hakija-alkio per hakemus, joten kaksi hakua -> kaksi alkiota samalla oppijanumerolla.
+    getByOppijanumero(OPPIJANUMERO)
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](2)))
+      .andExpect(jsonPath("$.hakijat[*].oppijanumero", everyItem(equalTo[Any](OPPIJANUMERO))))
+      .andExpect(
+        jsonPath("$.hakijat[*].hakemukset[*].hakukohde", containsInAnyOrder[Any](HAKUKOHDE_OID, HAKUKOHDE_OID_2))
+      )
+  }
+
+  @Test
+  def oppijanumeroWithHakuOidLimitsToThatHaku(): Unit = {
+    seedHakijaKahdessaHaussa()
+
+    get(hakuOid = Some(TOINEN_HAKU_OID), hakukohdeOid = None, valintarajaus = None, oppijanumero = Some(OPPIJANUMERO))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohde").value(HAKUKOHDE_OID_2))
+  }
+
+  @Test
+  def oppijanumeroWithOrganisaatioOidLimitsToThatJarjestyspaikka(): Unit = {
+    seedHakijaKahdessaHaussa()
+
+    get(
+      hakuOid = None,
+      hakukohdeOid = None,
+      organisaatioOid = Some(ORGANISAATIO_OID_2),
+      valintarajaus = None,
+      oppijanumero = Some(OPPIJANUMERO)
+    )
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohde").value(HAKUKOHDE_OID_2))
+  }
+
+  @Test
+  def unknownOppijanumeroReturnsEmptyList(): Unit = {
+    seedHakijaKahdessaHaussa()
+
+    getByOppijanumero("1.2.246.562.24.00000000098")
+      .andExpect(status.isOk)
+      .andExpect(content.json("""{"hakijat": []}"""))
+  }
+
+  @Test
+  def oppijanumeroFindsHakemuksetOfEveryAlias(): Unit = {
+    seedHakijaAliaksella()
+
+    // Molempien aliasten hakemukset, ja kumpikin raportoi masterin oppijanumeron.
+    getByOppijanumero(OPPIJANUMERO)
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](2)))
+      .andExpect(jsonPath("$.hakijat[*].oppijanumero", everyItem(equalTo[Any](OPPIJANUMERO))))
+  }
+
+  // Tämä testi erottaa alias-ratkaisun pelkästä hlo.oppijanumero = <oid> -yhtäsuuruudesta.
+  @Test
+  def aliasHenkiloOidFindsSamePersonAsOppijanumero(): Unit = {
+    seedHakijaAliaksella()
+
+    getByOppijanumero(ALIAS_HENKILO_OID)
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](2)))
+      .andExpect(jsonPath("$.hakijat[*].oppijanumero", everyItem(equalTo[Any](OPPIJANUMERO))))
+  }
+
+  // Alias jolla ei ole omia hakemuksia: masterin hakemukset pitää silti löytyä sen oidilla.
+  @Test
+  def aliasWithoutOwnHakemuksetStillFindsMastersHakemukset(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertHenkiloAlias(OPPIJANUMERO, ALIAS_HENKILO_OID)
+
+    getByOppijanumero(ALIAS_HENKILO_OID)
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset", hasSize[Any](1)))
+  }
+
+  /**
+   * Oppijanumerohaku vaatii oikeuden kaikkiin rajapinnan tietoihin. Molemmat puolet varmistetaan,
+   * jottei tarkistus ole liian laaja: sama käyttäjä pääsee yhä normaaliin hakuun.
+   */
+  @Test
+  @WithMockUser(
+    username = "kk-hakeneet-org-a-user",
+    roles = Array("APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.10.00000000000000000586")
+  )
+  def limitedUserGets403ForOppijanumeroSearch(): Unit = {
+    seedMinimalHakija()
+
+    getByOppijanumero(OPPIJANUMERO)
+      .andExpect(status.isForbidden)
+
+    get(organisaatioOid = Some(ORGANISAATIO_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+  }
+
+  @Test
+  @WithMockUser(
+    username = "kk-hakeneet-org-a-user",
+    roles = Array("APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.10.00000000000000000586")
+  )
+  def limitedUserGets403ForOppijanumeroExcel(): Unit = {
+    seedMinimalHakija()
+
+    getExcel(hakuOid = None, hakukohdeOid = None, valintarajaus = None, oppijanumero = Some(OPPIJANUMERO))
+      .andExpect(status.isForbidden)
+  }
+
+  @Test
+  def oppijanumeroSearchIsAudited(): Unit = {
+    seedMinimalHakija()
+
+    getByOppijanumero(OPPIJANUMERO).andExpect(status.isOk)
+
+    val call = recordedAuditCalls.head
+    assert(call.params("oppijanumero") == OPPIJANUMERO, s"oppijanumero missing from audit params: ${call.params}")
+  }
+
+  @Test
+  def oppijanumeroReturns400WhenNotAHenkiloOid(): Unit = {
+    initSchema()
+
+    // Organisaation oid on kelvollinen oph-oid mutta väärä nimiavaruus.
+    getByOppijanumero(ORGANISAATIO_OID)
+      .andExpect(status.isBadRequest)
+      .andExpect(jsonPath("$.details", hasItem[Any]("oppijanumero.invalid.oid")))
+  }
+
+  @Test
+  def returns400WhenNeitherHakuOidNorOppijanumeroProvided(): Unit = {
+    get(hakuOid = None)
+      .andExpect(status.isBadRequest)
+      .andExpect(jsonPath("$.details", hasItem[Any]("hakuOid.required")))
+  }
+
+  // Ryhmä laajennetaan hakukohteiksi haun sisällä, joten ilman hakua se ei ole ratkaistavissa.
+  @Test
+  def returns400WhenHakukohderyhmaGivenWithoutHakuOid(): Unit = {
+    get(
+      hakuOid = None,
+      hakukohdeOid = None,
+      hakukohderyhmaOid = Some(HAKUKOHDERYHMA_OID),
+      oppijanumero = Some(OPPIJANUMERO)
+    )
+      .andExpect(status.isBadRequest)
+      .andExpect(jsonPath("$.details", hasItem[Any]("hakuOid.required.with.hakukohderyhmaOid")))
+  }
+
+  @Test
+  def excelSupportsOppijanumero(): Unit = {
+    seedMinimalHakija()
+
+    getExcel(hakuOid = None, hakukohdeOid = None, valintarajaus = None, oppijanumero = Some(OPPIJANUMERO))
+      .andExpect(status.isOk)
+      .andExpect(content.contentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+  }
+
   // ---- Validation ----
 
   @ParameterizedTest
   @ValueSource(strings = Array("not-oid", "1.2", "1.2.246", "1.2.246.1"))
   def returns400WhenHakuOidInvalid(bad: String): Unit = {
-    get(hakuOid = bad)
+    get(hakuOid = Some(bad))
       .andExpect(status.isBadRequest)
       .andExpect(jsonPath("$.details", hasItem[Any]("hakuOid.invalid.oid")))
   }

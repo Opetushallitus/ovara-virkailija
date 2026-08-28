@@ -13,17 +13,23 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
   private val ataruOidLength = 35
 
   def selectKKHakijat(
-    hakuOid: String,
+    hakuOid: Option[String],
     hakukohdeOids: Seq[String],
     organisaatioOids: Seq[String],
-    valintarajaus: Valintarajaus
+    valintarajaus: Valintarajaus,
+    oppijanumero: Option[String] = None
   ): Seq[KKHakijaRow] = {
-    // Rajaus käytännössä pakollinen joko hakukohteilla tai organisaatioOidilla
-    if (hakukohdeOids.isEmpty && organisaatioOids.isEmpty) {
+    // Rajaus käytännössä pakollinen joko hakukohteilla, organisaatioOidilla tai oppijanumerolla
+    if (hakukohdeOids.isEmpty && organisaatioOids.isEmpty && oppijanumero.isEmpty) {
       Seq.empty
     } else {
       val stateSql      = stateSqlFragment(valintarajaus)
       val hakuFilterSql = hakuFilterSqlFragment(hakukohdeOids, organisaatioOids)
+
+      // hakuOid on ehdollinen (oppijanumerohaussa sitä ei tarvita).
+      // Turvallisuus nojaa kontrollerin oid-validointiin (ParameterValidator).
+      val hakuSql         = hakuOid.map(oid => s" AND haku.haku_oid = '$oid'").getOrElse("")
+      val oppijanumeroSql = oppijanumeroSqlFragment(oppijanumero)
 
       val query = sql"""
           SELECT hlo.oppijanumero,
@@ -84,9 +90,10 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
           FROM gen.gen_henkilo hlo
           INNER JOIN gen.gen_hakemus hakemus ON hakemus.henkilo_oid = hlo.henkilo_oid
           INNER JOIN gen.gen_haku    haku    ON hakemus.haku_oid    = haku.haku_oid
-          WHERE haku.haku_oid = $hakuOid
-          AND length(hakemus.hakemus_oid) = #$ataruOidLength
+          WHERE length(hakemus.hakemus_oid) = #$ataruOidLength
           AND haku.kohdejoukko_koodiuri LIKE 'haunkohdejoukko_12%'
+          #$hakuSql
+          #$oppijanumeroSql
           AND EXISTS (
             SELECT 1 FROM gen.gen_hakutoive ht
             INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
@@ -243,6 +250,27 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
       db.run(query, "selectKKYlioppilaat")
     }
   }
+
+  /**
+   * Parametriksi kelpaa mikä tahansa henkilön oideista: joko oppijanumero (master) tai minkä
+   * tahansa siihen linkitetyn aliaksen henkilo_oid. Annettu oid ratkaistaan siksi ensin
+   * masteriksi, ja vasta sillä rajataan -- näin kaikki aliakset ja niille kirjatut hakemukset
+   * tulevat mukaan riippumatta siitä, minkä oidin kutsuja antoi. Samalla henkilöllä voi olla
+   * useita gen_henkilo-rivejä samalla oppijanumerolla mutta eri henkilo_oidilla, ks. myös
+   * selectYlioppilaat.
+   *
+   * IN (SELECT ...) eikä liitos: liitos gen_henkiloon monistaisi rivit aliasten määrällä ja
+   * vaatisi DISTINCTin. Molemmat disjunktit: henkilo_oid-osuma kattaa aliaksen, oppijanumero-osuma
+   * masterin myös siinä tapauksessa ettei masterin omaa riviä löydy henkilo_oidina.
+   */
+  private def oppijanumeroSqlFragment(oppijanumero: Option[String]): String =
+    oppijanumero
+      .map(oid => s"""
+          AND hlo.oppijanumero IN (
+            SELECT hlo_pyydetty.oppijanumero FROM gen.gen_henkilo hlo_pyydetty
+            WHERE hlo_pyydetty.henkilo_oid = '$oid' OR hlo_pyydetty.oppijanumero = '$oid'
+          )""")
+      .getOrElse("")
 
   private def hakuFilterSqlFragment(
     hakukohdeOids: Seq[String],
