@@ -6,6 +6,7 @@ import fi.oph.ovara.backend.service.UserService
 import fi.oph.ovara.backend.utils.ParameterValidator.{
   validateHakukohdeOid,
   validateHakukohderyhmaOid,
+  validateHenkiloOid,
   validateOid,
   validateOrganisaatioOid
 }
@@ -42,35 +43,50 @@ class ExternalKKHakijatController(
 
   private def auditParams(
     format: String,
-    hakuOid: String,
+    hakuOid: Option[String],
     hakukohdeOid: Option[String],
     hakukohderyhmaOid: Option[String],
     organisaatioOid: Option[String],
-    valintarajaus: String
+    valintarajaus: Option[String],
+    oppijanumero: Option[String]
   ): Map[String, Any] = Map(
     "format"            -> format,
-    "hakuOid"           -> hakuOid,
+    "hakuOid"           -> hakuOid.getOrElse(""),
     "hakukohdeOid"      -> hakukohdeOid.getOrElse(""),
     "hakukohderyhmaOid" -> hakukohderyhmaOid.getOrElse(""),
     "organisaatioOid"   -> organisaatioOid.getOrElse(""),
-    "valintarajaus"     -> valintarajaus
+    "valintarajaus"     -> valintarajaus.getOrElse(""),
+    "oppijanumero"      -> oppijanumero.getOrElse("")
   )
 
+  /**
+   * Oppijanumerohaku ei tarvitse hakuOidia eikä muita rajaimia, joten niiden pakollisuus riippuu
+   * siitä onko oppijanumero annettu. Annettuina ne rajaavat edelleen normaalisti.
+   */
   private def validationErrors(
-    hakuOid: String,
+    hakuOid: Option[String],
     hakukohdeOid: Option[String],
     hakukohderyhmaOid: Option[String],
     organisaatioOid: Option[String],
-    parsedRajaus: Option[Valintarajaus]
+    valintarajaus: Option[String],
+    parsedRajaus: Option[Valintarajaus],
+    oppijanumero: Option[String]
   ): List[String] = List(
-    validateOid(Some(hakuOid), "hakuOid"),
+    validateOid(hakuOid, "hakuOid"),
     validateHakukohdeOid(hakukohdeOid, "hakukohdeOid"),
     validateHakukohderyhmaOid(hakukohderyhmaOid, "hakukohderyhmaOid"),
     validateOrganisaatioOid(organisaatioOid, "organisaatioOid"),
-    Option.when(hakukohdeOid.isEmpty && hakukohderyhmaOid.isEmpty && organisaatioOid.isEmpty)(
+    validateHenkiloOid(oppijanumero, "oppijanumero"),
+    Option.when(hakuOid.isEmpty && oppijanumero.isEmpty)("hakuOid.required"),
+    // Ryhmä laajennetaan hakukohteiksi haun sisällä, joten sitä ei voi antaa ilman hakua.
+    Option.when(hakukohderyhmaOid.isDefined && hakuOid.isEmpty)("hakuOid.required.with.hakukohderyhmaOid"),
+    Option.when(
+      oppijanumero.isEmpty && hakukohdeOid.isEmpty && hakukohderyhmaOid.isEmpty && organisaatioOid.isEmpty
+    )(
       "hakukohdeOid_or_organisaatioOid_or_hakukohderyhmaOid.required"
     ),
-    Option.when(parsedRajaus.isEmpty)("valintarajaus.invalid")
+    Option.when(valintarajaus.isEmpty && oppijanumero.isEmpty)("valintarajaus.invalid"),
+    Option.when(valintarajaus.isDefined && parsedRajaus.isEmpty)("valintarajaus.invalid")
   ).flatten
 
   /**
@@ -103,6 +119,28 @@ class ExternalKKHakijatController(
     if (isAuthorized) f
     else throw org.springframework.web.server.ResponseStatusException(HttpStatus.FORBIDDEN)
 
+  /**
+   * Oppijanumerohaku edellyttää oikeutta kaikkiin tämän rajapinnan tietoihin: haku ei ole
+   * organisaatio- eikä ryhmärajattu ja sen pitää pystyä palauttamaan kaikki haetun henkilön
+   * hakukohteet, joten rajatulle käyttäjälle sitä ei sallita. Tyhjä tulos
+   * ei kelpaa vastaukseksi, koska se ei erottuisi henkilöstä jolla ei ole hakemuksia.
+   *
+   * Tarkistus tehdään ennen validointia, jottei rajapinta kerro oikeudettomalle kutsujalle
+   * parametrien kelvollisuudesta.
+   */
+  private def hasOppijanumeroOikeus: Boolean = resolveKayttooikeusScope.saaKaikkiTiedot
+
+  private def requireOppijanumeroOikeus(oppijanumero: Option[String]): Unit =
+    if (oppijanumero.isDefined && !hasOppijanumeroOikeus)
+      throw org.springframework.web.server.ResponseStatusException(HttpStatus.FORBIDDEN)
+
+  /**
+   * Oppijanumerohaussa valintarajaus on vapaaehtoinen ja tarkoittaa oletuksena "kaikki tiedot",
+   * eli HAKENEET, joka ei suodata valintatiedon perusteella.
+   */
+  private def valintarajausTaiOletus(rajaus: Option[String]): Valintarajaus =
+    rajaus.flatMap(Valintarajaus.parse).getOrElse(Valintarajaus.HAKENEET)
+
   private def resolveKayttooikeusScope: KayttooikeusScopeKK = {
     val authorities = userService.getAuthorities
     if (isOphPaakayttaja(authorities)) {
@@ -124,6 +162,13 @@ class ExternalKKHakijatController(
     description = "Vaatii hakuOid-parametrin sekä vähintään yhden rajaavista parametreista " +
       "hakukohdeOid, hakukohderyhmaOid tai organisaatioOid. Useampi rajaava parametri leikataan " +
       "keskenään: hakukohderyhmaOid laajennetaan ryhmään kuuluviksi hakukohteiksi. " +
+      "Vaihtoehtoisesti voi antaa oppijanumero-parametrin, jolla palautetaan yhden henkilön " +
+      "kaikki tiedot kaikista hauista. Tällöin muita parametreja ei tarvita, mutta annettuina ne " +
+      "rajaavat tulosta edelleen (esim. oppijanumero + hakuOid = henkilön tiedot tuossa haussa) " +
+      "ja valintarajaus on oletuksena HAKENEET. Parametriksi kelpaa oppijanumero tai mikä tahansa " +
+      "siihen linkitetty henkilö-oid: kaikki henkilön aliakset ja niiden hakemukset palautuvat " +
+      "riippumatta siitä, minkä oidin antaa. Oppijanumerohaku vaatii oikeuden kaikkiin tämän " +
+      "rajapinnan tietoihin (rekisterinpitäjä); muuten vastaus on 403. " +
       "Tulos rajataan lisäksi käyttäjän oikeuksiin: organisaatio-oikeus kattaa organisaation " +
       "(ja sen alaorganisaatioiden) järjestämät hakukohteet, hakukohderyhmäoikeus ryhmään " +
       "kuuluvat hakukohteet. Jos pyynnössä annetaan organisaatioOid, se on katettava " +
@@ -146,42 +191,56 @@ class ExternalKKHakijatController(
     )
   )
   def getHakijat(
-    @RequestParam("hakuOid", required = true) hakuOid: String,
+    @RequestParam(value = "hakuOid", required = false) hakuOid: String,
     @RequestParam(value = "hakukohdeOid", required = false) hakukohdeOid: String,
     @RequestParam(value = "hakukohderyhmaOid", required = false) hakukohderyhmaOid: String,
     @RequestParam(value = "organisaatioOid", required = false) organisaatioOid: String,
-    @RequestParam("valintarajaus", required = true) valintarajaus: String,
+    @RequestParam(value = "valintarajaus", required = false) valintarajaus: String,
+    @RequestParam(value = "oppijanumero", required = false) oppijanumero: String,
     request: HttpServletRequest
   ): KKHakijatResponse =
     requireAuthorized {
+      val haku           = Option(hakuOid).filter(_.nonEmpty)
       val hakukohde      = Option(hakukohdeOid).filter(_.nonEmpty)
       val hakukohderyhma = Option(hakukohderyhmaOid).filter(_.nonEmpty)
       val organisaatio   = Option(organisaatioOid).filter(_.nonEmpty)
-      val parsedRajaus   = Valintarajaus.parse(valintarajaus)
+      val rajaus         = Option(valintarajaus).filter(_.nonEmpty)
+      val oppija         = Option(oppijanumero).filter(_.nonEmpty)
+
+      requireOppijanumeroOikeus(oppija)
 
       validate {
-        validationErrors(hakuOid, hakukohde, hakukohderyhma, organisaatio, parsedRajaus)
+        validationErrors(
+          haku,
+          hakukohde,
+          hakukohderyhma,
+          organisaatio,
+          rajaus,
+          rajaus.flatMap(Valintarajaus.parse),
+          oppija
+        )
       }
 
       LOG.info(
         s"Haetaan KK-hakijat. HakuOid: $hakuOid, HakukohdeOid: $hakukohdeOid, " +
           s"HakukohderyhmaOid: $hakukohderyhmaOid, OrganisaatioOid: $organisaatioOid, " +
-          s"Valintarajaus: $valintarajaus"
+          s"Valintarajaus: $valintarajaus, oppijanumerohaku: ${oppija.isDefined}"
       )
       auditLog.logWithParams(
         request,
         AuditOperation.ExternalKKHakijat,
-        auditParams("json", hakuOid, hakukohde, hakukohderyhma, organisaatio, valintarajaus)
+        auditParams("json", haku, hakukohde, hakukohderyhma, organisaatio, rajaus, oppija)
       )
       handleRequest {
         kkHakijatService
           .getKKHakijat(
-            hakuOid,
+            haku,
             hakukohde,
             organisaatio,
-            parsedRajaus.get,
+            valintarajausTaiOletus(rajaus),
             resolveKayttooikeusScope,
-            hakukohderyhma
+            hakukohderyhma,
+            oppija
           )
           .map(KKHakijatResponse.apply)
       }
@@ -208,25 +267,30 @@ class ExternalKKHakijatController(
     )
   )
   def getHakijatExcel(
-    @RequestParam("hakuOid", required = true) hakuOid: String,
+    @RequestParam(value = "hakuOid", required = false) hakuOid: String,
     @RequestParam(value = "hakukohdeOid", required = false) hakukohdeOid: String,
     @RequestParam(value = "hakukohderyhmaOid", required = false) hakukohderyhmaOid: String,
     @RequestParam(value = "organisaatioOid", required = false) organisaatioOid: String,
-    @RequestParam("valintarajaus", required = true) valintarajaus: String,
+    @RequestParam(value = "valintarajaus", required = false) valintarajaus: String,
+    @RequestParam(value = "oppijanumero", required = false) oppijanumero: String,
     request: HttpServletRequest,
     response: HttpServletResponse
   ): Unit = {
+    val haku           = Option(hakuOid).filter(_.nonEmpty)
     val hakukohde      = Option(hakukohdeOid).filter(_.nonEmpty)
     val hakukohderyhma = Option(hakukohderyhmaOid).filter(_.nonEmpty)
     val organisaatio   = Option(organisaatioOid).filter(_.nonEmpty)
-    val parsedRajaus   = Valintarajaus.parse(valintarajaus)
+    val rajaus         = Option(valintarajaus).filter(_.nonEmpty)
+    val oppija         = Option(oppijanumero).filter(_.nonEmpty)
+    val parsedRajaus   = rajaus.flatMap(Valintarajaus.parse)
 
-    if (!isAuthorized) {
+    if (!isAuthorized || (oppija.isDefined && !hasOppijanumeroOikeus)) {
       response.setStatus(HttpStatus.FORBIDDEN.value())
       return
     }
 
-    val errors = validationErrors(hakuOid, hakukohde, hakukohderyhma, organisaatio, parsedRajaus)
+    val errors =
+      validationErrors(haku, hakukohde, hakukohderyhma, organisaatio, rajaus, parsedRajaus, oppija)
 
     if (errors.nonEmpty) {
       response.setStatus(HttpStatus.BAD_REQUEST.value())
@@ -245,21 +309,22 @@ class ExternalKKHakijatController(
     LOG.info(
       s"Haetaan KK-hakijat Excel-muodossa. HakuOid: $hakuOid, HakukohdeOid: $hakukohdeOid, " +
         s"HakukohderyhmaOid: $hakukohderyhmaOid, OrganisaatioOid: $organisaatioOid, " +
-        s"Valintarajaus: $valintarajaus"
+        s"Valintarajaus: $valintarajaus, oppijanumerohaku: ${oppija.isDefined}"
     )
     auditLog.logWithParams(
       request,
       AuditOperation.ExternalKKHakijat,
-      auditParams("excel", hakuOid, hakukohde, hakukohderyhma, organisaatio, valintarajaus)
+      auditParams("excel", haku, hakukohde, hakukohderyhma, organisaatio, rajaus, oppija)
     )
 
     kkHakijatService.getKKHakijat(
-      hakuOid,
+      haku,
       hakukohde,
       organisaatio,
-      parsedRajaus.get,
+      valintarajausTaiOletus(rajaus),
       resolveKayttooikeusScope,
-      hakukohderyhma
+      hakukohderyhma,
+      oppija
     ) match {
       case Left(errorKey) =>
         LOG.error(s"Excel-raportin haku epäonnistui: $errorKey")

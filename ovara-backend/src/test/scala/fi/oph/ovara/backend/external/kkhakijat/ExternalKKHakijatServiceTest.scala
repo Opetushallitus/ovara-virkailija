@@ -51,7 +51,7 @@ class ExternalKKHakijatServiceTest
     seedMinimalHakija()
 
     val response = service.getKKHakijat(
-      HAKU_OID,
+      Some(HAKU_OID),
       Some(HAKUKOHDE_OID),
       None,
       Valintarajaus.HAKENEET,
@@ -65,7 +65,7 @@ class ExternalKKHakijatServiceTest
     seedMinimalHakija()
 
     val response = service.getKKHakijat(
-      HAKU_OID,
+      Some(HAKU_OID),
       Some(HAKUKOHDE_OID),
       None,
       Valintarajaus.HAKENEET,
@@ -79,7 +79,7 @@ class ExternalKKHakijatServiceTest
     seedMinimalHakija()
 
     val response = service.getKKHakijat(
-      HAKU_OID,
+      Some(HAKU_OID),
       Some(HAKUKOHDE_OID),
       None,
       Valintarajaus.HAKENEET,
@@ -93,7 +93,7 @@ class ExternalKKHakijatServiceTest
     seedMinimalHakija()
 
     val response = service.getKKHakijat(
-      HAKU_OID,
+      Some(HAKU_OID),
       Some(HAKUKOHDE_OID),
       None,
       Valintarajaus.HAKENEET,
@@ -127,7 +127,7 @@ class ExternalKKHakijatServiceTest
     withOrganisaatioHierarkia(Map(KOULUTUSTOIMIJA_OID -> List(ORGANISAATIO_OID)))
 
     val response = service.getKKHakijat(
-      HAKU_OID,
+      Some(HAKU_OID),
       Some(HAKUKOHDE_OID),
       None,
       Valintarajaus.HAKENEET,
@@ -142,7 +142,7 @@ class ExternalKKHakijatServiceTest
     withOrganisaatioHierarkia(Map(KOULUTUSTOIMIJA_OID -> List(ORGANISAATIO_OID_2)))
 
     val response = service.getKKHakijat(
-      HAKU_OID,
+      Some(HAKU_OID),
       Some(HAKUKOHDE_OID),
       None,
       Valintarajaus.HAKENEET,
@@ -266,7 +266,7 @@ class ExternalKKHakijatServiceTest
     stubHakukohderyhma(List(HAKUKOHDE_OID, HAKUKOHDE_OID_2))
 
     val response = service.getKKHakijat(
-      HAKU_OID,
+      Some(HAKU_OID),
       None,
       None,
       Valintarajaus.HAKENEET,
@@ -289,7 +289,7 @@ class ExternalKKHakijatServiceTest
     withHakukohderyhmat(Map(HAKUKOHDERYHMA_OID -> List(HAKUKOHDE_OID)))
 
     val response = service.getKKHakijat(
-      HAKU_OID,
+      Some(HAKU_OID),
       None,
       None,
       Valintarajaus.HAKENEET,
@@ -307,7 +307,7 @@ class ExternalKKHakijatServiceTest
     withHakukohderyhmat(Map(HAKUKOHDERYHMA_OID -> List(HAKUKOHDE_OID)))
 
     val response = service.getKKHakijat(
-      HAKU_OID,
+      Some(HAKU_OID),
       Some(HAKUKOHDE_OID),
       None,
       Valintarajaus.HAKENEET,
@@ -322,7 +322,7 @@ class ExternalKKHakijatServiceTest
     withHakukohderyhmat(Map(HAKUKOHDERYHMA_OID -> List(HAKUKOHDE_OID_2)))
 
     val response = service.getKKHakijat(
-      HAKU_OID,
+      Some(HAKU_OID),
       Some(HAKUKOHDE_OID),
       None,
       Valintarajaus.HAKENEET,
@@ -342,7 +342,7 @@ class ExternalKKHakijatServiceTest
     )
 
     val response = service.getKKHakijat(
-      HAKU_OID,
+      Some(HAKU_OID),
       None,
       None,
       Valintarajaus.HAKENEET,
@@ -363,7 +363,7 @@ class ExternalKKHakijatServiceTest
     )
 
     val response = service.getKKHakijat(
-      HAKU_OID,
+      Some(HAKU_OID),
       None,
       None,
       Valintarajaus.HAKENEET,
@@ -388,7 +388,7 @@ class ExternalKKHakijatServiceTest
     )
 
     val response = service.getKKHakijat(
-      HAKU_OID,
+      Some(HAKU_OID),
       None,
       None,
       Valintarajaus.HAKENEET,
@@ -413,7 +413,7 @@ class ExternalKKHakijatServiceTest
     // molempien oikeusryhmien on silti näyttävä.
     val hakemukset = List(HAKUKOHDE_OID, HAKUKOHDE_OID_2).flatMap { hakukohdeOid =>
       val response = service.getKKHakijat(
-        HAKU_OID,
+        Some(HAKU_OID),
         Some(hakukohdeOid),
         None,
         Valintarajaus.HAKENEET,
@@ -430,7 +430,7 @@ class ExternalKKHakijatServiceTest
     withHakukohderyhmat(Map(HAKUKOHDERYHMA_OID -> List(HAKUKOHDE_OID, HAKUKOHDE_OID_2)))
 
     val response = service.getKKHakijat(
-      HAKU_OID,
+      Some(HAKU_OID),
       Some(HAKUKOHDE_OID),
       None,
       Valintarajaus.HAKENEET,
@@ -446,7 +446,7 @@ class ExternalKKHakijatServiceTest
     withHakukohderyhmat(Map(HAKUKOHDERYHMA_OID -> List(HAKUKOHDE_OID)))
 
     val response = service.getKKHakijat(
-      HAKU_OID,
+      Some(HAKU_OID),
       None,
       Some(ORGANISAATIO_OID),
       Valintarajaus.HAKENEET,
@@ -462,7 +462,7 @@ class ExternalKKHakijatServiceTest
     withHakukohderyhmat(Map(HAKUKOHDERYHMA_OID -> List(HAKUKOHDE_OID_2)))
 
     val response = service.getKKHakijat(
-      HAKU_OID,
+      Some(HAKU_OID),
       None,
       Some(ORGANISAATIO_OID),
       Valintarajaus.HAKENEET,
@@ -483,7 +483,7 @@ class ExternalKKHakijatServiceTest
     withHakukohderyhmatPerHaku(Map((HAKUKOHDERYHMA_OID, "1.2.246.562.29.00000000000000000999") -> List(HAKUKOHDE_OID)))
 
     val response = service.getKKHakijat(
-      HAKU_OID,
+      Some(HAKU_OID),
       Some(HAKUKOHDE_OID),
       None,
       Valintarajaus.HAKENEET,
@@ -497,7 +497,7 @@ class ExternalKKHakijatServiceTest
     seedHakijaWithTwoHakutoiveet()
 
     val response = service.getKKHakijat(
-      HAKU_OID,
+      Some(HAKU_OID),
       Some(HAKUKOHDE_OID),
       None,
       Valintarajaus.HAKENEET,
@@ -534,7 +534,7 @@ class ExternalKKHakijatServiceTest
     hakukohderyhmaOid: Option[String] = None
   ): Either[String, Seq[KKHakija]] =
     service.getKKHakijat(
-      hakuOid,
+      Some(hakuOid),
       hakukohdeOid,
       organisaatioOid,
       valintarajaus,

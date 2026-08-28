@@ -1,5 +1,6 @@
 'use client';
 import { OphTypography } from '@opetushallitus/oph-design-system';
+import { Divider } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { isNullish } from 'remeda';
 
@@ -14,8 +15,10 @@ import { OrganisaatioSingle } from '@/app/components/form/organisaatio-single';
 import { ValintarajausSelect } from '@/app/components/form/valintarajaus-select';
 import { SpinnerModal } from '@/app/components/form/spinner-modal';
 import { useAuthorizedUser } from '@/app/components/providers/authorized-user-provider';
+import { OvaraTextInput } from '@/app/components/form/OvaraTextInput';
 import {
   buildKkHakijatTiedonsiirtoParams,
+  hasKkHakijatKaikkiTiedotRight,
   hasOvaraKkHakeneetRole,
 } from '@/app/lib/utils';
 import { useKkHakijatTiedonsiirtoSearchParams } from '@/app/hooks/searchParams/useKkHakijatTiedonsiirtoSearchParams';
@@ -26,6 +29,9 @@ export default function KkHakijatTiedonsiirto() {
   const { t } = useTranslate();
   const user = useAuthorizedUser();
   const hasAccess = hasOvaraKkHakeneetRole(user?.authorities);
+  // Oppijanumerohaku on rekisterinpitäjän toiminto: backend palauttaa muille 403, joten
+  // kenttää ei näytetä lainkaan ilman oikeutta.
+  const hasKaikkiTiedot = hasKkHakijatKaikkiTiedotRight(user?.authorities);
   const { run, isLoading } = useDownloadWithErrorBoundary();
 
   const {
@@ -39,6 +45,8 @@ export default function KkHakijatTiedonsiirto() {
     setSelectedOrganisaatio,
     selectedValintarajaus,
     setSelectedValintarajaus,
+    selectedOppijanumero,
+    setSelectedOppijanumero,
     emptyAllKkHakijatTiedonsiirtoParams,
   } = useKkHakijatTiedonsiirtoSearchParams();
 
@@ -61,12 +69,18 @@ export default function KkHakijatTiedonsiirto() {
     setSelectedHakukohde(null);
   };
 
+  // Oppijanumero riittää yksinään rajaimeksi, jolloin haku, organisaatio ja valintarajaus
+  // eivät ole pakollisia. Annettuina ne rajaavat tulosta edelleen.
+  const oppijanumeroGiven =
+    !isNullish(selectedOppijanumero) && selectedOppijanumero.trim() !== '';
+
   // Rajaimet leikataan backendissa keskenään, ja hakukohderyhmä riittää yksinään
   // rajaimeksi -- organisaatio on siis pakollinen vain ilman ryhmävalintaa.
   const isDisabled =
-    isNullish(selectedHaku) ||
-    isNullish(selectedValintarajaus) ||
-    (isNullish(selectedOrganisaatio) && isNullish(selectedHakukohderyhma));
+    !oppijanumeroGiven &&
+    (isNullish(selectedHaku) ||
+      isNullish(selectedValintarajaus) ||
+      (isNullish(selectedOrganisaatio) && isNullish(selectedHakukohderyhma)));
 
   const handleDownload = () =>
     run(() =>
@@ -78,6 +92,7 @@ export default function KkHakijatTiedonsiirto() {
           hakukohderyhmaOid: selectedHakukohderyhma,
           organisaatioOid: selectedOrganisaatio,
           valintarajaus: selectedValintarajaus,
+          oppijanumero: selectedOppijanumero,
         }),
       ),
     );
@@ -88,17 +103,27 @@ export default function KkHakijatTiedonsiirto() {
         <FormBox>
           {isLoading && <SpinnerModal open={isLoading} />}
           <OphTypography>{t('yleinen.pakolliset-kentat')}</OphTypography>
+          {hasKaikkiTiedot && (
+            <>
+              <OvaraTextInput
+                label={t('raportti.oppijanumero')}
+                value={selectedOppijanumero}
+                onValueChange={setSelectedOppijanumero}
+              />
+              <Divider />
+            </>
+          )}
           <KoulutuksenAlkaminen />
           <HakuSingle
             haunTyyppi="korkeakoulu"
             value={selectedHaku}
             onChange={changeHaku}
-            required
+            required={!oppijanumeroGiven}
           />
           <OrganisaatioSingle
             value={selectedOrganisaatio}
             onChange={changeOrganisaatio}
-            required={isNullish(selectedHakukohderyhma)}
+            required={!oppijanumeroGiven && isNullish(selectedHakukohderyhma)}
           />
           <HakukohderyhmaSingle
             hakuOid={selectedHaku}
@@ -115,7 +140,7 @@ export default function KkHakijatTiedonsiirto() {
           <ValintarajausSelect
             value={selectedValintarajaus}
             onChange={setSelectedValintarajaus}
-            required
+            required={!oppijanumeroGiven}
           />
           <FormButtons
             disabled={isDisabled}

@@ -35,6 +35,12 @@ export const useKkHakijatTiedonsiirtoSearchParams = () => {
       parseNullableString,
     );
 
+  const [selectedOppijanumero, setSelectedOppijanumero] =
+    useQueryStateWithLocalStorage<string | null>(
+      'ovara_kkts_oppijanumero',
+      parseNullableString,
+    );
+
   const emptyAllKkHakijatTiedonsiirtoParams = () => {
     const keysToClear = [
       'ovara_kkts_haku',
@@ -42,6 +48,7 @@ export const useKkHakijatTiedonsiirtoSearchParams = () => {
       'ovara_kkts_hakukohderyhma',
       'ovara_kkts_organisaatio',
       'ovara_kkts_valintarajaus',
+      'ovara_kkts_oppijanumero',
     ];
     keysToClear.forEach((key) => localStorage.removeItem(key));
     setSelectedHaku(null);
@@ -49,6 +56,7 @@ export const useKkHakijatTiedonsiirtoSearchParams = () => {
     setSelectedHakukohderyhma(null);
     setSelectedOrganisaatio(null);
     setSelectedValintarajaus(null);
+    setSelectedOppijanumero(null);
   };
 
   return {
@@ -62,6 +70,8 @@ export const useKkHakijatTiedonsiirtoSearchParams = () => {
     setSelectedOrganisaatio,
     selectedValintarajaus,
     setSelectedValintarajaus,
+    selectedOppijanumero,
+    setSelectedOppijanumero,
     emptyAllKkHakijatTiedonsiirtoParams,
   };
 };
