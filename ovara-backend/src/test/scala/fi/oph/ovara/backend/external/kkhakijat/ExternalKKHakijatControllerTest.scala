@@ -550,10 +550,14 @@ class ExternalKKHakijatControllerTest
 
   // ---- Oppijanumerohaku ----
 
-  private val TOINEN_HAKU_OID     = "1.2.246.562.29.00000000000000000201"
-  private val ALIAS_HENKILO_OID   = "1.2.246.562.24.00000000099"
-  private val TOINEN_OPPIJANUMERO = "1.2.246.562.24.00000000097"
-  private val HAKEMUS_OID_3       = "1.2.246.562.11.00000000000004511894"
+  private val TOINEN_HAKU_OID          = "1.2.246.562.29.00000000000000000201"
+  private val ALIAS_HENKILO_OID        = "1.2.246.562.24.00000000099"
+  private val TOINEN_OPPIJANUMERO      = "1.2.246.562.24.00000000097"
+  private val TOINEN_ALIAS_HENKILO_OID = "1.2.246.562.24.00000000096"
+  private val ALIAS_HENKILO_OID_2      = "1.2.246.562.24.00000000095"
+  private val HAKEMUS_OID_3            = "1.2.246.562.11.00000000000004511894"
+  private val HAKEMUS_OID_4            = "1.2.246.562.11.00000000000004511895"
+  private val HAKEMUS_OID_5            = "1.2.246.562.11.00000000000004511896"
 
   /**
    * Sama henkilö kahdessa haussa. Toinen haku on oleellinen: se on ainoa tapa osoittaa, ettei
@@ -581,6 +585,10 @@ class ExternalKKHakijatControllerTest
   /**
    * Master-rivi (henkilo_oid == oppijanumero) hakemuksineen, ja alias-rivi jolla on oma
    * henkilo_oid ja oma hakemus. Kummallakin oidilla haettuna pitää palautua molemmat.
+   *
+   * Mukana on myös toinen, täysin linkittämätön henkilö omine aliaksineen. Ilman sitä kanta
+   * sisältäisi vain yhden henkilön, jolloin alias-testien hasSize-väitteet kertoisivat vain että
+   * rivejä tulee tarpeeksi -- liian laaja alikysely menisi läpi huomaamatta.
    */
   private def seedHakijaAliaksella(): Unit = {
     initSchema()
@@ -595,6 +603,43 @@ class ExternalKKHakijatControllerTest
       insertHaku = false
     )
     insertHakutoive(hakemusOid = HAKEMUS_OID_2)
+    seedToinenHenkiloAliaksella()
+  }
+
+  /**
+   * Saman henkilön toinen alias, jonka hakemus on eri haussa ja eri hakukohteeseen kuin masterin
+   * ja ensimmäisen aliaksen hakemukset. Erottaa alias-ratkaisun hakurajauksesta: kun hakuOidia ei
+   * anneta, aliaksia yhdistää oppijanumero eikä yhteinen haku.
+   */
+  private def insertToinenAliasToisessaHaussa(): Unit = {
+    insertHenkiloAlias(OPPIJANUMERO, ALIAS_HENKILO_OID_2)
+    insertHakukohde(
+      hakukohdeOid = HAKUKOHDE_OID_2,
+      jarjestyspaikkaOid = ORGANISAATIO_OID_2,
+      organisaatioOid = Some(ORGANISAATIO_OID_2)
+    )
+    // insertHaku = true (oletus) luo TOINEN_HAKU_OID:n gen_haku-rivin.
+    insertHakemus(
+      oppijanumero = ALIAS_HENKILO_OID_2,
+      hakemusOid = HAKEMUS_OID_5,
+      hakuOid = TOINEN_HAKU_OID,
+      insertHenkilo = false
+    )
+    insertHakutoive(hakemusOid = HAKEMUS_OID_5, hakukohdeOid = HAKUKOHDE_OID_2)
+  }
+
+  /** Toinen henkilö aliaksineen: ei saa koskaan palautua ensimmäisen oideilla haettaessa. */
+  private def seedToinenHenkiloAliaksella(): Unit = {
+    insertHakemus(oppijanumero = TOINEN_OPPIJANUMERO, hakemusOid = HAKEMUS_OID_3, insertHaku = false)
+    insertHenkiloAlias(TOINEN_OPPIJANUMERO, TOINEN_ALIAS_HENKILO_OID)
+    insertHakemus(
+      oppijanumero = TOINEN_ALIAS_HENKILO_OID,
+      hakemusOid = HAKEMUS_OID_4,
+      insertHenkilo = false,
+      insertHaku = false
+    )
+    insertHakutoive(hakemusOid = HAKEMUS_OID_3)
+    insertHakutoive(hakemusOid = HAKEMUS_OID_4)
   }
 
   @Test
@@ -651,12 +696,33 @@ class ExternalKKHakijatControllerTest
   @Test
   def oppijanumeroFindsHakemuksetOfEveryAlias(): Unit = {
     seedHakijaAliaksella()
+    insertToinenAliasToisessaHaussa()
 
-    // Molempien aliasten hakemukset, ja kumpikin raportoi masterin oppijanumeron.
+    // Kolme hakemusta: masterin, ensimmäisen aliaksen (sama haku) ja toisen aliaksen (eri haku).
+    // Kaikki raportoivat masterin oppijanumeron. Hakemusnumerot ja haut varmistetaan erikseen,
+    // jottei pelkkä lukumäärä voi täsmätä väärillä riveillä.
     getByOppijanumero(OPPIJANUMERO)
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat", hasSize[Any](2)))
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](3)))
       .andExpect(jsonPath("$.hakijat[*].oppijanumero", everyItem(equalTo[Any](OPPIJANUMERO))))
+      .andExpect(
+        jsonPath(
+          "$.hakijat[*].hakemukset[*].hakemusnumero",
+          containsInAnyOrder[Any](HAKEMUS_OID, HAKEMUS_OID_2, HAKEMUS_OID_5)
+        )
+      )
+      .andExpect(
+        jsonPath(
+          "$.hakijat[*].hakemukset[*].haku",
+          containsInAnyOrder[Any](HAKU_OID, HAKU_OID, TOINEN_HAKU_OID)
+        )
+      )
+      .andExpect(
+        jsonPath(
+          "$.hakijat[*].hakemukset[*].hakukohde",
+          containsInAnyOrder[Any](HAKUKOHDE_OID, HAKUKOHDE_OID, HAKUKOHDE_OID_2)
+        )
+      )
   }
 
   // Tämä testi erottaa alias-ratkaisun pelkästä hlo.oppijanumero = <oid> -yhtäsuuruudesta.
@@ -678,11 +744,27 @@ class ExternalKKHakijatControllerTest
     insertHakukohde()
     insertHakutoive()
     insertHenkiloAlias(OPPIJANUMERO, ALIAS_HENKILO_OID)
+    seedToinenHenkiloAliaksella()
 
     getByOppijanumero(ALIAS_HENKILO_OID)
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO))
       .andExpect(jsonPath("$.hakijat[0].hakemukset", hasSize[Any](1)))
+  }
+
+  /**
+   * Alias-ratkaisu ratkaisee annetun oidin masteriksi ja rajaa sillä. Tämä varmistaa ettei
+   * tulosjoukko laajene liikaa: toinen henkilö omine aliaksineen ei saa vuotaa mukaan.
+   */
+  @Test
+  def aliasSearchDoesNotLeakOtherHenkilot(): Unit = {
+    seedHakijaAliaksella()
+
+    getByOppijanumero(ALIAS_HENKILO_OID)
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](2)))
+      .andExpect(jsonPath("$.hakijat[*].oppijanumero", everyItem(not(equalTo[Any](TOINEN_OPPIJANUMERO)))))
   }
 
   /**
