@@ -56,6 +56,7 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
           oo.koulutusaste,
           oo.koulutus_koodi AS koulutusKoodi,
           linkitetty.koulutusaste AS linkitettyKoulutusAste,
+          linkitetty.virta_opiskeluoikeuden_tila AS linkitetynOpiskeluoikeudenTila,
           oo.myontaja
         FROM gen.gen_opiskeluoikeus_kk oo
         LEFT JOIN gen.gen_opiskeluoikeus_kk linkitetty ON linkitetty.virta_tunniste = oo.liittyva_opiskeluoikeus_avain AND linkitetty.organisaatio_oid = oo.organisaatio_oid

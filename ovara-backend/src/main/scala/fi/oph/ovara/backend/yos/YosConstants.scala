@@ -22,4 +22,6 @@ object YosConstants {
    */
   def LAAKETIETEEN_LISENSIAATIT_KOULUTUSKOODIT: Seq[String] =
     Seq("772101", "772100", "772301", "772300", "772201", "772200")
+
+  def VIRTATILA_VALMISTUNUT: String = "3"
 }

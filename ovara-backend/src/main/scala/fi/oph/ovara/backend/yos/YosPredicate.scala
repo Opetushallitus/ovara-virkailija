@@ -4,7 +4,8 @@ import fi.oph.ovara.backend.domain.{KKPaatettavaOpiskeluoikeusEntity, KKSitovast
 import fi.oph.ovara.backend.yos.YosConstants.{
   KOULUTUSASTE_ALEMMAT,
   KOULUTUSASTE_YLEMMAT,
-  LAAKETIETEEN_LISENSIAATIT_KOULUTUSKOODIT
+  LAAKETIETEEN_LISENSIAATIT_KOULUTUSKOODIT,
+  VIRTATILA_VALMISTUNUT
 }
 import fi.oph.ovara.backend.yos.YosKoulutusAsteLuokka.{
   ALEMMAT_ASTEET,
@@ -56,7 +57,8 @@ object YosPredicate {
       ALEMMAT_ASTEET
     } else {
       val containsAlempi: Boolean = oikeus.koulutusaste.exists(k => KOULUTUSASTE_ALEMMAT.contains(k))
-        || oikeus.linkitettyKoulutusAste.exists(k => KOULUTUSASTE_ALEMMAT.contains(k))
+        || (oikeus.linkitettyKoulutusAste.exists(k => KOULUTUSASTE_ALEMMAT.contains(k))
+          && !oikeus.linkitetynKoulutuksenTila.contains(VIRTATILA_VALMISTUNUT))
       val containsYlempi: Boolean = oikeus.koulutusaste.exists(k => KOULUTUSASTE_YLEMMAT.contains(k))
 
       (containsAlempi, containsYlempi) match {
