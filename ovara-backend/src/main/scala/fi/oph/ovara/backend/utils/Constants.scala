@@ -65,6 +65,10 @@ object Constants {
   val HAKENEET_AUTHORITY_PREFIX    = "ROLE_APP_OVARA-VIRKAILIJA_HAKENEET_"
   val KK_HAKENEET_AUTHORITY_PREFIX = "ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET_"
 
+  // Oikeus kaikkiin KK-hakijarajapinnan tietoihin. Tarvitaan jotta oppijanumerohaku olisi mielekäs,
+  // mutta sallii myös muiden parametrien käytön.
+  val OILI_AUTHORITY_PREFIX = "ROLE_APP_OVARA-VIRKAILIJA_OILI"
+
   val KOULUTUSTOIMIJARAPORTTI = "koulutustoimijaraportti"
   val OPPILAITOSRAPORTTI      = "oppilaitosraportti"
   val TOIMIPISTERAPORTTI      = "toimipisteraportti"

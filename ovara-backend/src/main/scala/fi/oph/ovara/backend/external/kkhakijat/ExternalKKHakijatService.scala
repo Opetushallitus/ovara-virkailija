@@ -34,7 +34,10 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
 
       // Ryhmäoikeudet huomioidaan vain kun pyynnössä ei ole organisaatioOid-rajainta:
       // organisaatiorajaus on katettava käyttäjän organisaatio-oikeuksilla.
-      val huomioiRyhmaoikeudet = !scope.isPaakayttaja && organisaatioOid.isEmpty
+      // saaKaikkiTiedot ja isPaakayttaja: täyden oikeuden käyttäjän kohdalla omien
+      // ryhmäoikeuksien laajentaminen olisi turhaa työtä, koska rivitason allowedMatch
+      // päästää rivit läpi joka tapauksessa.
+      val huomioiRyhmaoikeudet = !scope.saaKaikkiTiedot && organisaatioOid.isEmpty
       val kayttooikeusryhmat   = if (huomioiRyhmaoikeudet) scope.allowedHakukohderyhmaOids else Set.empty[String]
 
       // Sama hakukohderyhmä voi esiintyä sekä rajaimena että käyttöoikeutena, joten laajennus
@@ -58,7 +61,7 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
 
       // copy eikä limited: limited rakentaisi uuden scopen ja pudottaisi ryhmäoikeudet pois.
       val expandedScope =
-        if (scope.isPaakayttaja) scope
+        if (scope.saaKaikkiTiedot) scope
         else
           scope.copy(
             allowedOrgOids = commonService.getOrganisaatioidenJaLastenOidit(scope.allowedOrgOids.toList).toSet,
@@ -76,7 +79,7 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
       // Jos rajaimia annettiin mutta leikkaus on tyhjä, yksikään hakukohde ei täsmää. Kyselyä ei
       // saa ajaa: tyhjä hakukohdelista jättäisi voimaan vain organisaatiorajauksen ja laajentaisi
       // tuloksen koko organisaatioon.
-      // saaKaikkiTiedot eikä isPaakayttaja: täyden oikeuden käyttäjällä ei välttämättäole organisaatio-
+      // saaKaikkiTiedot ja isPaakayttaja: täyden oikeuden käyttäjällä ei välttämättä ole organisaatio-
       // eikä ryhmäoikeuksia, joten hän näyttäisi muuten oikeudettomalta ja saisi tyhjän tuloksen.
       val eiOikeuksiaPyynnonRajaimiin =
         !scope.saaKaikkiTiedot && expandedScope.allowedOrgOids.isEmpty && expandedScope.allowedHakukohdeOidsFromHakukohderyhmat.isEmpty

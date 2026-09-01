@@ -108,10 +108,20 @@ class ExternalKKHakijatController(
     authorities.contains(Constants.OPH_PAAKAYTTAJA_AUTHORITY) ||
       AuthoritiesUtil.hasOPHPaakayttajaRights(omatKayttooikeusOidit(authorities))
 
-  // OPH_PAAKAYTTAJA and users with at least one KK_HAKENEET_<oid> authority both qualify for the endpoint.
+  /**
+   * Erillinen "kaikki KK-hakijat" -oikeus (OILI). Ei organisaatio- eikä ryhmärajausta.
+   * Prefiksivertailu, koska oikeus voi tulla sekä suffiksittomana että organisaatiolle
+   * myönnettynä -- kumpikin muoto tarkoittaa tässä samaa täyttä oikeutta.
+   */
+  private def hasKaikkiTiedotOikeus(authorities: List[String]): Boolean =
+    authorities.exists(_.startsWith(Constants.OILI_AUTHORITY_PREFIX))
+
+  // OPH_PAAKAYTTAJA, OILI-oikeus ja vähintään yksi KK_HAKENEET_<oid> -oikeus
+  // kaikki kelpuuttavat kutsujan tälle rajapinnalle.
   private def isAuthorized: Boolean = {
     val authorities = userService.getAuthorities
     isOphPaakayttaja(authorities) ||
+    hasKaikkiTiedotOikeus(authorities) ||
     authorities.exists(_.startsWith(Constants.KK_HAKENEET_AUTHORITY_PREFIX))
   }
 
@@ -145,6 +155,8 @@ class ExternalKKHakijatController(
     val authorities = userService.getAuthorities
     if (isOphPaakayttaja(authorities)) {
       KayttooikeusScopeKK.paakayttaja
+    } else if (hasKaikkiTiedotOikeus(authorities)) {
+      KayttooikeusScopeKK.kaikkiTiedot
     } else {
       // Käyttöoikeus voi olla myönnetty organisaatiolle tai hakukohderyhmälle (oid-avaruus
       // 1.2.246.562.28.*), ja nämä eritellään oid-avaruuden perusteella: organisaatio-oikeutta
@@ -168,7 +180,7 @@ class ExternalKKHakijatController(
       "ja valintarajaus on oletuksena HAKENEET. Parametriksi kelpaa oppijanumero tai mikä tahansa " +
       "siihen linkitetty henkilö-oid: kaikki henkilön aliakset ja niiden hakemukset palautuvat " +
       "riippumatta siitä, minkä oidin antaa. Oppijanumerohaku vaatii oikeuden kaikkiin tämän " +
-      "rajapinnan tietoihin (rekisterinpitäjä); muuten vastaus on 403. " +
+      "rajapinnan tietoihin (rekisterinpitäjä tai OILI-oikeus); muuten vastaus on 403. " +
       "Tulos rajataan lisäksi käyttäjän oikeuksiin: organisaatio-oikeus kattaa organisaation " +
       "(ja sen alaorganisaatioiden) järjestämät hakukohteet, hakukohderyhmäoikeus ryhmään " +
       "kuuluvat hakukohteet. Jos pyynnössä annetaan organisaatioOid, se on katettava " +

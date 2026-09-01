@@ -799,6 +799,65 @@ class ExternalKKHakijatControllerTest
       .andExpect(status.isForbidden)
   }
 
+  /**
+   * OILI on erillinen oikeus kaikkiin tämän rajapinnan tietoihin: sillä pääsee
+   * oppijanumerohakuun ilman rekisterinpitäjyyttä, ja se riittää yksinään myös rajapinnalle
+   * (käyttäjällä ei ole lainkaan KK_HAKENEET-oikeuksia).
+   */
+  @Test
+  @WithMockUser(username = "oili-user", roles = Array("APP_OVARA-VIRKAILIJA_OILI"))
+  def oiliUserMaySearchByOppijanumero(): Unit = {
+    seedHakijaKahdessaHaussa()
+
+    getByOppijanumero(OPPIJANUMERO)
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](2)))
+      .andExpect(jsonPath("$.hakijat[*].oppijanumero", everyItem(equalTo[Any](OPPIJANUMERO))))
+  }
+
+  // Oikeus voidaan myöntää myös organisaatiolle, jolloin rooli tulee oid-suffiksilla. Sekin
+  // tarkoittaa samaa täyttä oikeutta, eikä myöntävä organisaatio rajaa tulosta.
+  @Test
+  @WithMockUser(
+    username = "oili-org-user",
+    roles = Array("APP_OVARA-VIRKAILIJA_OILI_1.2.246.562.10.00000000000000000587")
+  )
+  def oiliGrantedForOrganisaatioMaySearchByOppijanumero(): Unit = {
+    seedMinimalHakija()
+
+    getByOppijanumero(OPPIJANUMERO)
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO))
+  }
+
+  // Täysi oikeus koskee koko rajapintaa, ei vain oppijanumerohakua: tavallinen haku palauttaa
+  // hakijat myös organisaatiosta, johon käyttäjällä ei ole omaa oikeutta. Vrt.
+  // kkHakeneetUserIgnoresOidsFromOtherOvaraAuthorities, jossa sama kysely palauttaa tyhjän.
+  @Test
+  @WithMockUser(
+    username = "oili-org-a-user",
+    roles = Array("APP_OVARA-VIRKAILIJA_OILI_1.2.246.562.10.00000000000000000586")
+  )
+  def oiliUserSeesHakijatOutsideOwnOrganisaatiot(): Unit = {
+    seedHakijatInTwoOrgs()
+
+    get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO_B))
+  }
+
+  @Test
+  @WithMockUser(username = "oili-user", roles = Array("APP_OVARA-VIRKAILIJA_OILI"))
+  def oiliUserMayDownloadOppijanumeroExcel(): Unit = {
+    seedMinimalHakija()
+
+    getExcel(hakuOid = None, hakukohdeOid = None, valintarajaus = None, oppijanumero = Some(OPPIJANUMERO))
+      .andExpect(status.isOk)
+      .andExpect(content.contentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+  }
+
   @Test
   def oppijanumeroSearchIsAudited(): Unit = {
     seedMinimalHakija()

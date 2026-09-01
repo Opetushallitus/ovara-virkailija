@@ -61,6 +61,24 @@ class ExternalKKHakijatServiceTest
     assert(response.toOption.get.size == 1)
   }
 
+  // kaikkiTiedot-scopessa ei ole lainkaan organisaatio- eikä ryhmäoikeuksia (kuten rekisterinpitäjällä),
+  // joten se erottaa täyden oikeuden oikeudettomuudesta: limited(Set.empty) palauttaisi tyhjän.
+  it should "kaikkiTiedot scope returns hakutoiveet without any org rights" in {
+    seedMinimalHakija()
+
+    val response = service.getKKHakijat(
+      Some(HAKU_OID),
+      Some(HAKUKOHDE_OID),
+      None,
+      Valintarajaus.HAKENEET,
+      KayttooikeusScopeKK.kaikkiTiedot
+    )
+
+    assert(response.toOption.get.size == 1)
+    // Täydellä oikeudella omia ryhmäoikeuksia ei tarvitse laajentaa hakukohteiksi.
+    verify(commonService, never()).getHakukohderyhmanHakukohdeOids(any[String](), any[String]())
+  }
+
   it should "limited scope with matching org keeps the hakutoive" in {
     seedMinimalHakija()
 

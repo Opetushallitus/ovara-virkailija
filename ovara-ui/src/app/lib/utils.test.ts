@@ -1151,6 +1151,21 @@ describe('hasKkHakijatKaikkiTiedotRight', () => {
     ).toBe(false);
   });
 
+  test('should grant the right for a bare OILI role', () => {
+    expect(
+      hasKkHakijatKaikkiTiedotRight(['ROLE_APP_OVARA-VIRKAILIJA_OILI']),
+    ).toBe(true);
+  });
+
+  // OILI on täysi oikeus riippumatta siitä mille organisaatiolle se on myönnetty.
+  test('should grant the right for OILI granted on any organisaatio', () => {
+    expect(
+      hasKkHakijatKaikkiTiedotRight([
+        'ROLE_APP_OVARA-VIRKAILIJA_OILI_1.2.246.562.10.00000000000000000586',
+      ]),
+    ).toBe(true);
+  });
+
   test('should not grant the right when authorities are missing', () => {
     expect(hasKkHakijatKaikkiTiedotRight(undefined)).toBe(false);
   });

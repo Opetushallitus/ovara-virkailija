@@ -25,23 +25,33 @@ case class KayttooikeusScopeKK(
   isPaakayttaja: Boolean,
   allowedOrgOids: Set[String],
   allowedHakukohderyhmaOids: Set[String] = Set.empty,
-  allowedHakukohdeOidsFromHakukohderyhmat: Set[String] = Set.empty
+  allowedHakukohdeOidsFromHakukohderyhmat: Set[String] = Set.empty,
+  saaKaikkiKkHakijatTiedot: Boolean = false
 ) {
 
   /**
    * Oikeus kaikkiin tämän rajapinnan tietoihin ilman organisaatio- tai ryhmärajausta. Tällä
    * oikeudella saa myös hakea yksittäisen henkilön tiedot oppijanumerolla.
    *
-   * Nyt vain rekisterinpitäjällä eli OPH-pääkäyttäjällä. Kun erillinen "kaikki KK-hakijat"
-   * -oikeus aikanaan lisätään, se lisätään tähän uutena disjunktina -- ei kutsupaikkoihin, joita
-   * on useita (kontrollerin oppijanumero-tarkistus ja palvelun rivitason `allowedMatch`).
+   * Joko rekisterinpitäjällä eli OPH-pääkäyttäjällä, tai erillisellä "kaikki KK-hakijat"
+   * -oikeudella (OILI). Tämä on ainoa paikka jossa nämä yhdistetään -- kutsupaikkoja on useita
+   * (kontrollerin oppijanumero-tarkistus ja palvelun rivitason `allowedMatch`).
    */
-  def saaKaikkiTiedot: Boolean = isPaakayttaja
+  def saaKaikkiTiedot: Boolean = isPaakayttaja || saaKaikkiKkHakijatTiedot
 }
 
 object KayttooikeusScopeKK {
   val paakayttaja: KayttooikeusScopeKK =
     KayttooikeusScopeKK(isPaakayttaja = true, allowedOrgOids = Set.empty)
+
+  // Täysi oikeus ilman rekisterinpitäjyyttä: ei organisaatio- eikä ryhmäoikeuksia, koska
+  // saaKaikkiTiedot ohittaa ne joka tapauksessa.
+  val kaikkiTiedot: KayttooikeusScopeKK =
+    KayttooikeusScopeKK(
+      isPaakayttaja = false,
+      allowedOrgOids = Set.empty,
+      saaKaikkiKkHakijatTiedot = true
+    )
 
   // Yksi metodi oletusarvolla, ei kahta ylikuormitusta: `limited(Set(...))` olisi
   // ylikuormitusten kanssa monitulkintainen.

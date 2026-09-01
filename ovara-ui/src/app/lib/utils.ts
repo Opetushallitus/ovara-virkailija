@@ -67,19 +67,24 @@ export const hasOphPaaKayttajaRole = (userRoles?: Array<string>) => {
 const OPH_ORGANISAATIO_OID = '1.2.246.562.10.00000000001';
 
 /**
- * Oikeus KK-hakijarajapinnan kaikkiin tietoihin (rekisterinpitäjä). Vastaa backendin
- * KayttooikeusScopeKK.saaKaikkiTiedot-ehtoa: varsinainen OPH_PAAKAYTTAJA-oikeus tai
- * OPH-organisaatiolle myönnetty KK_HAKENEET-oikeus. Kun erillinen "kaikki KK-hakijat"
- * -oikeus lisätään, se lisätään tähän -- samoin kuin backendin puolella.
+ * Oikeus KK-hakijarajapinnan kaikkiin tietoihin. Vastaa backendin
+ * KayttooikeusScopeKK.saaKaikkiTiedot-ehtoa: rekisterinpitäjyys (varsinainen
+ * OPH_PAAKAYTTAJA-oikeus tai OPH-organisaatiolle myönnetty KK_HAKENEET-oikeus) tai
+ * erillinen "kaikki KK-hakijat" -oikeus eli OILI.
  *
  * Huom: muut rooliapurit tarkistavat suffiksittomat roolit, mutta pääkäyttäjyys nojaa
  * nimenomaan OPH-oidilla myönnettyyn oikeuteen, joten tässä tarvitaan oid-suffiksi.
+ * OILI puolestaan kelpaa kummassakin muodossa (suffiksiton tai organisaatiolle
+ * myönnetty), joten se tarkistetaan prefiksinä -- samoin kuin backendin puolella.
  */
 export const hasKkHakijatKaikkiTiedotRight = (userRoles?: Array<string>) =>
   Boolean(
     hasOphPaaKayttajaRole(userRoles) ||
       userRoles?.includes(
         `ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET_${OPH_ORGANISAATIO_OID}`,
+      ) ||
+      userRoles?.some((role) =>
+        role.startsWith('ROLE_APP_OVARA-VIRKAILIJA_OILI'),
       ),
   );
 
