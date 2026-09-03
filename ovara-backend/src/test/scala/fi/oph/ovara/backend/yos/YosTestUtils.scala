@@ -28,6 +28,7 @@ object YosTestUtils {
     koulutusaste = Some(YosConstants.KOULUTUSASTE_AMK),
     koulutusKoodi = Some("14"),
     linkitettyKoulutusAste = None,
+    linkitetynKoulutuksenTila = None,
     myontaja = MYONTAJA
   )
 

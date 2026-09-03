@@ -5,7 +5,8 @@ import fi.oph.ovara.backend.yos.YosConstants.{
   KOULUTUSASTE_ALEMPI_KORKEAKOULU_TUTKINTO,
   KOULUTUSASTE_AMK,
   KOULUTUSASTE_YAMK,
-  KOULUTUSASTE_YLEMPI_KORKEAKOULU_TUTKINTO
+  KOULUTUSASTE_YLEMPI_KORKEAKOULU_TUTKINTO,
+  VIRTATILA_VALMISTUNUT
 }
 import fi.oph.ovara.backend.yos.YosTestUtils.{OPISKELUOIKEUS, VASTAANOTTO}
 import org.junit.jupiter.api.Assertions.{assertFalse, assertTrue}
@@ -83,6 +84,16 @@ class YosPredicateTest {
         OPISKELUOIKEUS.copy(
           koulutusaste = Some(KOULUTUSASTE_YLEMPI_KORKEAKOULU_TUTKINTO),
           linkitettyKoulutusAste = Some(KOULUTUSASTE_ALEMPI_KORKEAKOULU_TUTKINTO)
+        ),
+        VASTAANOTTO
+      )
+    )
+    assertFalse(
+      YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(
+        OPISKELUOIKEUS.copy(
+          koulutusaste = Some(KOULUTUSASTE_YLEMPI_KORKEAKOULU_TUTKINTO),
+          linkitettyKoulutusAste = Some(KOULUTUSASTE_ALEMPI_KORKEAKOULU_TUTKINTO),
+          linkitetynKoulutuksenTila = Some(VIRTATILA_VALMISTUNUT)
         ),
         VASTAANOTTO
       )
