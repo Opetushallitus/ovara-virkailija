@@ -24,7 +24,7 @@ object ParameterValidator {
   val organisaatioOidPattern: Regex   = "^1\\.2\\.246\\.562\\.(10|99|199|299)\\.\\d+$".r
   val hakukohdeOidPattern: Regex      = "^1\\.2\\.246\\.562\\.20\\.\\d+$".r
   val hakukohderyhmaOidPattern: Regex = "^1\\.2\\.246\\.562\\.28\\.\\d+$".r
-  val henkiloOidPattern: Regex        = "^1\\.2\\.246\\.562\\.24\\.\\d+$".r
+  val henkiloOidPattern: Regex        = "^1\\.2\\.246\\.562\\.(24|98)\\.\\d+$".r
   val alphanumericPattern: Regex      = """^[a-zA-Z0-9_\\-]+$""".r
   private val numericRegex            = """^\d+$""".r
 
@@ -101,9 +101,9 @@ object ParameterValidator {
     }
 
   /**
-   * Henkilön oid (nimiavaruus 1.2.246.562.24.*). Kelpaa sekä oppijanumero (master) että mikä
-   * tahansa siihen linkitetty alias -- ne ovat samassa nimiavaruudessa eikä niitä voi erottaa
-   * muodosta, vaan vain kannasta.
+   * Henkilön oid (nimiavaruudet 1.2.246.562.24.* ja 1.2.246.562.98.*). Kelpaa sekä oppijanumero
+   * (master) että mikä tahansa siihen linkitetty alias -- ne ovat samassa nimiavaruudessa eikä
+   * niitä voi erottaa muodosta, vaan vain kannasta.
    */
   def validateHenkiloOid(opt: Option[String], fieldName: String): Option[String] =
     opt.filter(_.nonEmpty).collect {

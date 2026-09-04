@@ -417,12 +417,22 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
     ParameterValidator.validateHenkiloOid(Some("1.2.246.562.24.00000000099"), "oppijanumero") shouldBe None
   }
 
+  it should "accept a henkilo oid in the 98 namespace" in {
+    ParameterValidator.validateHenkiloOid(Some("1.2.246.562.98.00000000020"), "oppijanumero") shouldBe None
+    ParameterValidator.validateHenkiloOid(Some("1.2.246.562.98.12345"), "oppijanumero") shouldBe None
+  }
+
   it should "reject oids of other types" in {
     List(
       "1.2.246.562.10.00000000000000000586", // organisaatio
       "1.2.246.562.20.00000000000000000112", // hakukohde
       "1.2.246.562.28.00000000000000000012", // hakukohderyhmä
       "1.2.246.562.29.00000000000000000200", // haku
+      "1.2.246.562.9.00000000020",           // ei ole 98
+      "1.2.246.562.980.00000000020",         // ei ole 98
+      "1.2.246.562.24.",                     // tyhjä yksilöivä osa
+      "1.2.246.562.98.",                     // tyhjä yksilöivä osa
+      "1.2.246.562.98.abc",                  // ei-numeerinen yksilöivä osa
       "not-oid",
       "1.2",
       "1.2.246"
