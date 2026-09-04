@@ -356,4 +356,94 @@ class ParameterValidatorSpec extends AnyFlatSpec with Matchers {
 
     result shouldBe Right(expected)
   }
+
+  // Nämä patternit ovat käytössä vain external-rajapinnoissa; raportointipuoli validoi
+  // hakukohteet ja hakukohderyhmät yhä yleisellä ophOidPatternilla.
+  "validateHakukohdeOid" should "accept a hakukohde oid" in {
+    ParameterValidator.validateHakukohdeOid(
+      Some("1.2.246.562.20.00000000000000000112"),
+      "hakukohdeOid"
+    ) shouldBe None
+  }
+
+  it should "reject oids of other types" in {
+    List(
+      "1.2.246.562.28.00000000000000000112", // hakukohderyhmä
+      "1.2.246.562.10.00000000000000000586", // organisaatio
+      "1.2.246.562.29.00000000000000000200", // haku
+      "not-oid"
+    ).foreach { oid =>
+      ParameterValidator.validateHakukohdeOid(Some(oid), "hakukohdeOid") shouldBe
+        Some("hakukohdeOid.invalid.oid")
+    }
+  }
+
+  it should "skip validation for missing and empty values" in {
+    ParameterValidator.validateHakukohdeOid(None, "hakukohdeOid") shouldBe None
+    ParameterValidator.validateHakukohdeOid(Some(""), "hakukohdeOid") shouldBe None
+  }
+
+  "validateHakukohderyhmaOid" should "accept a hakukohderyhma oid" in {
+    ParameterValidator.validateHakukohderyhmaOid(
+      Some("1.2.246.562.28.00000000000000000012"),
+      "hakukohderyhmaOid"
+    ) shouldBe None
+  }
+
+  it should "reject oids of other types" in {
+    List(
+      "1.2.246.562.20.00000000000000000112", // hakukohde
+      "1.2.246.562.10.00000000000000000586", // organisaatio
+      "1.2.246.562.29.00000000000000000200", // haku
+      "not-oid"
+    ).foreach { oid =>
+      ParameterValidator.validateHakukohderyhmaOid(Some(oid), "hakukohderyhmaOid") shouldBe
+        Some("hakukohderyhmaOid.invalid.oid")
+    }
+  }
+
+  it should "skip validation for missing and empty values" in {
+    ParameterValidator.validateHakukohderyhmaOid(None, "hakukohderyhmaOid") shouldBe None
+    ParameterValidator.validateHakukohderyhmaOid(Some(""), "hakukohderyhmaOid") shouldBe None
+  }
+
+  // Huom: KkPaatettavatOpiskeluoikeudet validoi oman oppijanumero-parametrinsa yleisellä
+  // ophOidPatternilla, joka hyväksyy minkä tahansa nimiavaruuden. Tämä pattern on tiukempi.
+  "validateHenkiloOid" should "accept a henkilo oid" in {
+    ParameterValidator.validateHenkiloOid(Some("1.2.246.562.24.00000000019"), "oppijanumero") shouldBe None
+  }
+
+  it should "accept an alias henkilo oid, which is indistinguishable by form" in {
+    ParameterValidator.validateHenkiloOid(Some("1.2.246.562.24.00000000099"), "oppijanumero") shouldBe None
+  }
+
+  it should "accept a henkilo oid in the 98 namespace" in {
+    ParameterValidator.validateHenkiloOid(Some("1.2.246.562.98.00000000020"), "oppijanumero") shouldBe None
+    ParameterValidator.validateHenkiloOid(Some("1.2.246.562.98.12345"), "oppijanumero") shouldBe None
+  }
+
+  it should "reject oids of other types" in {
+    List(
+      "1.2.246.562.10.00000000000000000586", // organisaatio
+      "1.2.246.562.20.00000000000000000112", // hakukohde
+      "1.2.246.562.28.00000000000000000012", // hakukohderyhmä
+      "1.2.246.562.29.00000000000000000200", // haku
+      "1.2.246.562.9.00000000020",           // ei ole 98
+      "1.2.246.562.980.00000000020",         // ei ole 98
+      "1.2.246.562.24.",                     // tyhjä yksilöivä osa
+      "1.2.246.562.98.",                     // tyhjä yksilöivä osa
+      "1.2.246.562.98.abc",                  // ei-numeerinen yksilöivä osa
+      "not-oid",
+      "1.2",
+      "1.2.246"
+    ).foreach { oid =>
+      ParameterValidator.validateHenkiloOid(Some(oid), "oppijanumero") shouldBe
+        Some("oppijanumero.invalid.oid")
+    }
+  }
+
+  it should "skip validation for missing and empty values" in {
+    ParameterValidator.validateHenkiloOid(None, "oppijanumero") shouldBe None
+    ParameterValidator.validateHenkiloOid(Some(""), "oppijanumero") shouldBe None
+  }
 }
