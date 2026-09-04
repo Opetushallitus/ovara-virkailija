@@ -50,7 +50,7 @@ case class KKHakijaRow(
       syntymaaika = syntymaaika.map(_.toString),
       asiointikieli = asiointikieli match {
         case None    => ""
-        case Some(0) => "9"
+        case Some(0) => "9" // Legacy-syyt: vanhassa Suoritusrekisterin rajapinnassa 9 merkitsi kieltä "muu".
         case Some(n) => n.toString
       },
       kansalaisuus = kansalaisuus,

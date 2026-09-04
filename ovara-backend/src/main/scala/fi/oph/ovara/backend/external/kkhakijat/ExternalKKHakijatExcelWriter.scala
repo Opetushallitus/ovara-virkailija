@@ -109,7 +109,7 @@ object ExternalKKHakijatExcelWriter {
 
   private def rowValues(h: KKHakija, hm: KKHakutoive): Seq[String] = Seq(
     h.hetu,                                                    // 0
-    optStr(h.syntymaaika),                                     // 1
+    h.syntymaaika.getOrElse(""),                               // 1
     h.oppijanumero,                                            // 2
     h.sukunimi,                                                // 3
     h.etunimet,                                                // 4
@@ -119,47 +119,47 @@ object ExternalKKHakijatExcelWriter {
     h.postitoimipaikka,                                        // 8
     h.maa,                                                     // 9
     h.kansalaisuudet.map(_.mkString(", ")).getOrElse(""),      // 10
-    optStr(h.matkapuhelin),                                    // 11
-    optStr(h.puhelin),                                         // 12
-    optStr(h.sahkoposti),                                      // 13
-    optStr(hm.lukuvuosimaksu),                                 // 14
+    h.matkapuhelin.getOrElse(""),                              // 11
+    h.puhelin.getOrElse(""),                                   // 12
+    h.sahkoposti.getOrElse(""),                                // 13
+    hm.lukuvuosimaksu.getOrElse(""),                           // 14
     h.kotikunta,                                               // 15
     h.sukupuoli,                                               // 16
     h.aidinkieli,                                              // 17
     h.asiointikieli,                                           // 18
     h.koulusivistyskielet.map(_.mkString(", ")).getOrElse(""), // 19
     onlyX(h.koulutusmarkkinointilupa),                         // 20
-    onlyX(Some(h.onYlioppilas)),                               // 21
-    optStr(h.yoSuoritusVuosi),                                 // 22
-    h.ensikertalainen.map(onlyXBool).getOrElse(""),            // 23
+    onlyXBool(h.onYlioppilas),                                 // 21
+    h.yoSuoritusVuosi.getOrElse(""),                           // 22
+    onlyX(h.ensikertalainen),                                  // 23
     hm.haku,                                                   // 24
     hm.hakuVuosi.toString,                                     // 25
     hm.hakuKausi,                                              // 26
     hm.hakemusnumero,                                          // 27
-    optStr(hm.hakemusJattoAikaleima),                          // 28
-    optStr(hm.hakemusViimeinenMuokkausAikaleima),              // 29
+    hm.hakemusJattoAikaleima.getOrElse(""),                    // 28
+    hm.hakemusViimeinenMuokkausAikaleima.getOrElse(""),        // 29
     hm.organisaatio,                                           // 30
     hm.hakukohde,                                              // 31
-    optStr(hm.hakukohdeKkId),                                  // 32
+    hm.hakukohdeKkId.getOrElse(""),                            // 32
     hm.hakutoivePrioriteetti.map(_.toString).getOrElse(""),    // 33
     onlyX(hm.avoinVayla),                                      // 34
     hm.valinnanTila.map(_.name).getOrElse(""),                 // 35
-    optStr(hm.valinnanAikaleima),                              // 36
+    hm.valinnanAikaleima.getOrElse(""),                        // 36
     hm.pisteet.map(_.toString).getOrElse(""),                  // 37
     { // 38: always render the 5-field tuple, defaulting missing values to empty strings
       val e = hm.hyvaksymisenEhto.getOrElse(HyvaksymisenEhto())
       s"HyvaksymisenEhto(${onlyXBool(e.ehdollisestiHyvaksyttavissa)},${e.ehtoKoodi.getOrElse("")}," +
         s"${e.ehtoFI.getOrElse("")},${e.ehtoSV.getOrElse("")},${e.ehtoEN.getOrElse("")})"
     },
-    optStr(hm.valintatapajononTyyppi),             // 39
-    optStr(hm.valintatapajononNimi),               // 40
+    hm.valintatapajononTyyppi.getOrElse(""),       // 39
+    hm.valintatapajononNimi.getOrElse(""),         // 40
     hm.vastaanottotieto.map(_.name).getOrElse(""), // 41
     hm.ilmoittautumiset.map(_.name).mkString(","), // 42
     hm.pohjakoulutus.mkString(","),                // 43
     onlyX(hm.julkaisulupa),                        // 44
     hm.hKelpoisuus,                                // 45
-    optStr(hm.hKelpoisuusLahde),                   // 46
-    optStr(hm.hKelpoisuusMaksuvelvollisuus),       // 47
+    hm.hKelpoisuusLahde.getOrElse(""),             // 46
+    hm.hKelpoisuusMaksuvelvollisuus.getOrElse(""), // 47
     koulutusAt(hm.hakukohteenKoulutukset, 0),      // 48
     koulutusAt(hm.hakukohteenKoulutukset, 1),      // 49
     koulutusAt(hm.hakukohteenKoulutukset, 2),      // 50
@@ -173,8 +173,6 @@ object ExternalKKHakijatExcelWriter {
     liiteAt(hm.liitteet, 4),                       // 58
     liiteAt(hm.liitteet, 5)                        // 59
   )
-
-  private def optStr(opt: Option[String]): String = opt.getOrElse("")
 
   private def onlyX(b: Option[Boolean]): String =
     if (b.contains(true)) "X" else ""
