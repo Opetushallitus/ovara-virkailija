@@ -1,10 +1,12 @@
 import { sort, isEmpty, uniqueBy, isNullish } from 'remeda';
-import { OrganisaatioHierarkia } from './types/common';
+import { LanguageCode, OrganisaatioHierarkia } from './types/common';
 import {
   KK_RAPORTIT,
   KK_YOS_RAPORTTI,
   KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
   OPPILAITOSORGANISAATIOTYYPPI,
+  TIEDONSIIRTO_KK_RAPORTIT,
+  TIEDONSIIRTO_RAPORTIT,
   TOIMIPISTEORGANISAATIOTYYPPI,
   TOISEN_ASTEEN_RAPORTIT,
 } from './constants';
@@ -62,6 +64,30 @@ export const hasOphPaaKayttajaRole = (userRoles?: Array<string>) => {
   return userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA');
 };
 
+const OPH_ORGANISAATIO_OID = '1.2.246.562.10.00000000001';
+
+/**
+ * Oikeus KK-hakijarajapinnan kaikkiin tietoihin. Vastaa backendin
+ * KayttooikeusScopeKK.saaKaikkiTiedot-ehtoa: rekisterinpitäjyys (varsinainen
+ * OPH_PAAKAYTTAJA-oikeus tai OPH-organisaatiolle myönnetty KK_HAKENEET-oikeus) tai
+ * erillinen "kaikki KK-hakijat" -oikeus eli OILI.
+ *
+ * Huom: muut rooliapurit tarkistavat suffiksittomat roolit, mutta pääkäyttäjyys nojaa
+ * nimenomaan OPH-oidilla myönnettyyn oikeuteen, joten tässä tarvitaan oid-suffiksi.
+ * OILI puolestaan kelpaa kummassakin muodossa (suffiksiton tai organisaatiolle
+ * myönnetty), joten se tarkistetaan prefiksinä -- samoin kuin backendin puolella.
+ */
+export const hasKkHakijatKaikkiTiedotRight = (userRoles?: Array<string>) =>
+  Boolean(
+    hasOphPaaKayttajaRole(userRoles) ||
+      userRoles?.includes(
+        `ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET_${OPH_ORGANISAATIO_OID}`,
+      ) ||
+      userRoles?.some((role) =>
+        role.startsWith('ROLE_APP_OVARA-VIRKAILIJA_OILI'),
+      ),
+  );
+
 export const hasOvaraRole = (userRoles?: Array<string>) => {
   return userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA');
 };
@@ -87,6 +113,20 @@ export const hasOvaraKkYosRole = (userRoles?: Array<string>) => {
   );
 };
 
+export const hasOvaraHakeneetRole = (userRoles?: Array<string>) => {
+  return (
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_HAKENEET') ||
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA')
+  );
+};
+
+export const hasOvaraKkHakeneetRole = (userRoles?: Array<string>) => {
+  return (
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET') ||
+    userRoles?.includes('ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA')
+  );
+};
+
 export const getRaporttiListByUserRights = (userRoles?: Array<string>) => {
   const raportit = [];
 
@@ -100,6 +140,14 @@ export const getRaporttiListByUserRights = (userRoles?: Array<string>) => {
 
   if (hasOvaraKkYosRole(userRoles)) {
     raportit.push(...[KK_YOS_RAPORTTI]);
+  }
+
+  if (hasOvaraHakeneetRole(userRoles)) {
+    raportit.push(...TIEDONSIIRTO_RAPORTIT);
+  }
+
+  if (hasOvaraKkHakeneetRole(userRoles)) {
+    raportit.push(...TIEDONSIIRTO_KK_RAPORTIT);
   }
 
   return raportit;
@@ -149,6 +197,64 @@ export const isNullishOrEmpty = <T>(
   return isNullish(list) || isEmpty(list);
 };
 
+/**
+ * Rakentaa tiedonsiirtoraporttien (external-rajapinta) kyselyparametrit.
+ * Rajapinta ottaa vastaan joko hakukohteen tai organisaation, ei molempia:
+ * jos hakukohde on valittu, lähetetään sen oid, muuten organisaation oid.
+ */
+export const buildTiedonsiirtoParams = ({
+  hakuOid,
+  hakukohdeOid,
+  organisaatioOid,
+  valintarajaus,
+}: {
+  hakuOid: string | null;
+  hakukohdeOid: string | null;
+  organisaatioOid: string | null;
+  valintarajaus: string | null;
+}): string => {
+  const params = new URLSearchParams();
+  if (hakuOid) params.set('hakuOid', hakuOid);
+  if (hakukohdeOid) params.set('hakukohdeOid', hakukohdeOid);
+  else if (organisaatioOid) params.set('organisaatioOid', organisaatioOid);
+  if (valintarajaus) params.set('valintarajaus', valintarajaus);
+  return params.toString();
+};
+
+/**
+ * Rakentaa KK-hakijoiden tiedonsiirtoraportin (external-rajapinta) kyselyparametrit.
+ * Toisin kuin `buildTiedonsiirtoParams`, kaikki valitut rajaimet lähetetään ja backend
+ * leikkaa ne keskenään: hakukohde JA hakukohderyhmä JA organisaatio. Organisaatio ei ole
+ * pakollinen, jos hakukohderyhmä on valittu.
+ */
+export const buildKkHakijatTiedonsiirtoParams = ({
+  hakuOid,
+  hakukohdeOid,
+  hakukohderyhmaOid,
+  organisaatioOid,
+  valintarajaus,
+  oppijanumero,
+}: {
+  hakuOid: string | null;
+  hakukohdeOid: string | null;
+  hakukohderyhmaOid: string | null;
+  organisaatioOid: string | null;
+  valintarajaus: string | null;
+  oppijanumero: string | null;
+}): string => {
+  const params = new URLSearchParams();
+  if (hakuOid) params.set('hakuOid', hakuOid);
+  if (hakukohdeOid) params.set('hakukohdeOid', hakukohdeOid);
+  if (hakukohderyhmaOid) params.set('hakukohderyhmaOid', hakukohderyhmaOid);
+  if (organisaatioOid) params.set('organisaatioOid', organisaatioOid);
+  if (valintarajaus) params.set('valintarajaus', valintarajaus);
+  // Vapaa tekstikenttä: trimmataan, jottei pelkistä välilyönneistä koostuva arvo lähde
+  // rajaimeksi ja tuota backendista 400:aa.
+  const trimmedOppijanumero = oppijanumero?.trim();
+  if (trimmedOppijanumero) params.set('oppijanumero', trimmedOppijanumero);
+  return params.toString();
+};
+
 export const getKoulutustoimijatToShow = (
   organisaatiot: Array<OrganisaatioHierarkia> | null,
 ) => {
@@ -175,6 +281,21 @@ export const getOppilaitoksetToShow = (
     });
   }
 };
+
+/**
+ * Oppilaitostason organisaatiot valintalistan vaihtoehdoiksi. Järjestys jätetään
+ * ComboBoxille (sortOptions oletuksena true), joka lajittelee nimen mukaan.
+ */
+export const getOppilaitosOptions = (
+  hierarkiat: Array<OrganisaatioHierarkia> | null,
+  locale: LanguageCode,
+): Array<{ value: string; label: string }> =>
+  getOppilaitoksetToShow(hierarkiat, null).map((org) => ({
+    value: org.organisaatio_oid,
+    label: org.organisaatio_nimi[locale]
+      ? `${org.organisaatio_nimi[locale]}`
+      : '',
+  }));
 
 export const getToimipisteetToShow = (
   hierarkiat: Array<OrganisaatioHierarkia> | null,
@@ -204,6 +325,74 @@ export const getToimipisteetToShow = (
       );
     });
   }
+};
+
+/**
+ * Toimipistetason organisaatiot valintalistan vaihtoehdoiksi. Vastinpari
+ * `getOppilaitosOptions`-metodille; ks. sen kommentti.
+ *
+ * `selectedOppilaitos` rajaa listan kyseisen oppilaitoksen toimipisteisiin. Ilman
+ * sitä palautetaan kaikki toimipisteet joihin käyttäjällä on oikeus -- se on
+ * tarkoituksellista, jotta pelkän toimipisteoikeuden saanut käyttäjä voi valita
+ * toimipisteen vaikkei näe yhtään oppilaitosta.
+ */
+export const getToimipisteOptions = (
+  hierarkiat: Array<OrganisaatioHierarkia> | null,
+  locale: LanguageCode,
+  selectedOppilaitos: string | null = null,
+): Array<{ value: string; label: string }> =>
+  getToimipisteetToShow(
+    hierarkiat,
+    // Ei valittuja toimipisteitä: yhden valinnan listaa ei haluta laajentaa
+    // rajauksen ulkopuolisilla toimipisteillä.
+    null,
+    isNullish(selectedOppilaitos) ? null : [selectedOppilaitos],
+    null,
+  ).map((org) => ({
+    value: org.organisaatio_oid,
+    label: org.organisaatio_nimi[locale]
+      ? `${org.organisaatio_nimi[locale]}`
+      : '',
+  }));
+
+/**
+ * Kaikki organisaatiot joihin käyttäjällä on oikeus, tasoittain järjestettynä
+ * (koulutustoimijat -> oppilaitokset -> toimipisteet). Toisin kuin
+ * `getKoulutustoimijatToShow`, tämä ei jätä pois käyttäjää jonka oikeus on
+ * koulutustoimijaa alemmalla tasolla.
+ */
+export const getKaikkiOrganisaatiotToShow = (
+  organisaatiot: Array<OrganisaatioHierarkia> | null,
+) => {
+  return uniqueBy(
+    [
+      ...getUniqueOrganisaatiotByOrganisaatiotyyppi(
+        organisaatiot,
+        KOULUTUSTOIMIJAORGANISAATIOTYYPPI,
+      ),
+      ...getUniqueOrganisaatiotByOrganisaatiotyyppi(
+        organisaatiot,
+        OPPILAITOSORGANISAATIOTYYPPI,
+      ),
+      ...getUniqueOrganisaatiotByOrganisaatiotyyppi(
+        organisaatiot,
+        TOIMIPISTEORGANISAATIOTYYPPI,
+      ),
+    ],
+    (o) => o.organisaatio_oid,
+  );
+};
+
+export const findOrganisaatio = (
+  organisaatiot: Array<OrganisaatioHierarkia> | null,
+  organisaatioOid: string | null,
+): OrganisaatioHierarkia | undefined => {
+  if (isNullish(organisaatioOid)) {
+    return undefined;
+  }
+  return getKaikkiOrganisaatiotToShow(organisaatiot).find(
+    (o) => o.organisaatio_oid === organisaatioOid,
+  );
 };
 
 export const getHarkinnanvaraisuusTranslation = (

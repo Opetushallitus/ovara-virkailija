@@ -12,6 +12,10 @@ export const KK_RAPORTIT = [
 
 export const KK_YOS_RAPORTTI = 'kk-paatettavat-opiskeluoikeudet';
 
+export const TIEDONSIIRTO_RAPORTIT = ['tiedonsiirto/toisenasteen-hakijat'];
+
+export const TIEDONSIIRTO_KK_RAPORTIT = ['tiedonsiirto/kk-hakijat'];
+
 export const RADIOGROUP_OPTIONS = ['neutral', 'yes', 'no'];
 export const RADIOGROUP_BOOLEAN_OPTIONS = ['yes', 'no'];
 

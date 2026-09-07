@@ -20,10 +20,13 @@ import scala.util.matching.Regex
 
 object ParameterValidator {
 
-  val ophOidPattern: Regex          = "^1\\.2\\.246\\.562\\.\\d+\\.\\d+$".r
-  val organisaatioOidPattern: Regex = "^1\\.2\\.246\\.562\\.(10|99|199|299)\\.\\d+$".r
-  val alphanumericPattern: Regex    = """^[a-zA-Z0-9_\\-]+$""".r
-  private val numericRegex          = """^\d+$""".r
+  val ophOidPattern: Regex            = "^1\\.2\\.246\\.562\\.\\d+\\.\\d+$".r
+  val organisaatioOidPattern: Regex   = "^1\\.2\\.246\\.562\\.(10|99|199|299)\\.\\d+$".r
+  val hakukohdeOidPattern: Regex      = "^1\\.2\\.246\\.562\\.20\\.\\d+$".r
+  val hakukohderyhmaOidPattern: Regex = "^1\\.2\\.246\\.562\\.28\\.\\d+$".r
+  val henkiloOidPattern: Regex        = "^1\\.2\\.246\\.562\\.(24|98)\\.\\d+$".r
+  val alphanumericPattern: Regex      = """^[a-zA-Z0-9_\\-]+$""".r
+  private val numericRegex            = """^\d+$""".r
 
   val hetuPattern: Regex = """^\d{6}[-+A]\d{3}[0-9A-Y]$""".r
 
@@ -85,6 +88,26 @@ object ParameterValidator {
   def validateHetu(opt: Option[String]): Option[String] =
     opt.filter(_.nonEmpty).collect {
       case hetu if !hetuPattern.matches(hetu) => "hetu.invalid"
+    }
+
+  def validateHakukohdeOid(opt: Option[String], fieldName: String): Option[String] =
+    opt.filter(_.nonEmpty).collect {
+      case oid if !hakukohdeOidPattern.matches(oid) => s"$fieldName.invalid.oid"
+    }
+
+  def validateHakukohderyhmaOid(opt: Option[String], fieldName: String): Option[String] =
+    opt.filter(_.nonEmpty).collect {
+      case oid if !hakukohderyhmaOidPattern.matches(oid) => s"$fieldName.invalid.oid"
+    }
+
+  /**
+   * Henkilön oid (nimiavaruudet 1.2.246.562.24.* ja 1.2.246.562.98.*). Kelpaa sekä oppijanumero
+   * (master) että mikä tahansa siihen linkitetty alias -- ne ovat samassa nimiavaruudessa eikä
+   * niitä voi erottaa muodosta, vaan vain kannasta.
+   */
+  def validateHenkiloOid(opt: Option[String], fieldName: String): Option[String] =
+    opt.filter(_.nonEmpty).collect {
+      case oid if !henkiloOidPattern.matches(oid) => s"$fieldName.invalid.oid"
     }
 
   def validateBoolean(value: String, fieldName: String): Option[String] = {

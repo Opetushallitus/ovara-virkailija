@@ -5,10 +5,18 @@ import {
   getSortedKoulutuksenAlkamisKaudet,
   hasOvaraRole,
   hasOvaraToinenAsteRole,
+  hasOvaraKkHakeneetRole,
   getOppilaitoksetToShow,
   getToimipisteetToShow,
   getHarkinnanvaraisuusTranslation,
   getRaporttiListByUserRights,
+  getKaikkiOrganisaatiotToShow,
+  getOppilaitosOptions,
+  getToimipisteOptions,
+  findOrganisaatio,
+  buildTiedonsiirtoParams,
+  buildKkHakijatTiedonsiirtoParams,
+  hasKkHakijatKaikkiTiedotRight,
 } from './utils';
 import {
   KK_RAPORTIT,
@@ -208,6 +216,45 @@ describe('getRaporttiListByUserRights', () => {
     const result = getRaporttiListByUserRights([]);
 
     expect(result).toEqual([]);
+  });
+});
+
+describe('hasOvaraKkHakeneetRole', () => {
+  test('should return true if user has ovara-virkailija_kk_hakeneet role in their authorities', () => {
+    const userRoles = [
+      'ROLE_APP_OVARA-VIRKAILIJA',
+      'ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET',
+      'ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.10.81934895871',
+    ];
+    expect(hasOvaraKkHakeneetRole(userRoles)).toBeTruthy();
+  });
+
+  test('should return false for a plain kk role without the kk_hakeneet right', () => {
+    const userRoles = [
+      'ROLE_APP_OVARA-VIRKAILIJA',
+      'ROLE_APP_OVARA-VIRKAILIJA_KK',
+      'ROLE_APP_OVARA-VIRKAILIJA_HAKENEET',
+    ];
+    expect(hasOvaraKkHakeneetRole(userRoles)).toBeFalsy();
+  });
+
+  test('should return false if authorities is empty', () => {
+    const userRoles = [] as Array<string>;
+    expect(hasOvaraKkHakeneetRole(userRoles)).toBeFalsy();
+  });
+
+  test('should return falsy if authorities is undefined', () => {
+    const userRoles = undefined;
+    expect(hasOvaraKkHakeneetRole(userRoles)).toBeFalsy();
+  });
+
+  test('should return true when user has OPH_PAAKAYTTAJA user role', () => {
+    const userRoles = [
+      'ROLE_APP_OVARA-VIRKAILIJA',
+      'ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA',
+      'ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA_1.2.246.562.10.00000000001',
+    ];
+    expect(hasOvaraKkHakeneetRole(userRoles)).toBeTruthy();
   });
 });
 
@@ -646,6 +693,52 @@ describe('getKoulutustoimijatToShow', () => {
   });
 });
 
+describe('getKaikkiOrganisaatiotToShow', () => {
+  test('should return organisaatiot from every taso, koulutustoimijat first', () => {
+    expect(getKaikkiOrganisaatiotToShow(hierarkiat)).toEqual([
+      koulutustoimija1,
+      koulutustoimija2,
+      oppilaitos1_1,
+      oppilaitos1_2,
+      oppilaitos2_1,
+      oppilaitos2_2,
+      oppilaitos2_3,
+      toimipiste1_1,
+      toimipiste2_1_1,
+      toimipiste2_2_1,
+      toimipiste2_2_2,
+      toimipiste2_2_3,
+      toimipiste2_3_1,
+    ]);
+  });
+
+  test('should return empty array when hierarkiat is null', () => {
+    expect(getKaikkiOrganisaatiotToShow(null)).toEqual([]);
+  });
+});
+
+describe('findOrganisaatio', () => {
+  test('should find a koulutustoimija by oid', () => {
+    expect(
+      findOrganisaatio(hierarkiat, koulutustoimija1.organisaatio_oid),
+    ).toBe(koulutustoimija1);
+  });
+
+  test('should find a toimipiste by oid', () => {
+    expect(findOrganisaatio(hierarkiat, TOIMIPISTE1_1_OID)).toBe(toimipiste1_1);
+  });
+
+  test('should return undefined for an unknown oid', () => {
+    expect(
+      findOrganisaatio(hierarkiat, '1.2.246.562.10.99999'),
+    ).toBeUndefined();
+  });
+
+  test('should return undefined when oid is null', () => {
+    expect(findOrganisaatio(hierarkiat, null)).toBeUndefined();
+  });
+});
+
 describe('getOppilaitoksetToShow', () => {
   test('should return all oppilaitokset when koulutustoimija is not selected', () => {
     expect(getOppilaitoksetToShow(hierarkiat, null)).toEqual([
@@ -661,6 +754,123 @@ describe('getOppilaitoksetToShow', () => {
     expect(
       getOppilaitoksetToShow(hierarkiat, '1.2.246.562.10.221157551210'),
     ).toEqual([oppilaitos2_1, oppilaitos2_2, oppilaitos2_3]);
+  });
+});
+
+describe('getOppilaitosOptions', () => {
+  test('should return only oppilaitos-level organisaatiot as options', () => {
+    const options = getOppilaitosOptions(hierarkiat, 'fi');
+
+    // Vain '02'-tyypin organisaatiot: ei koulutustoimijoita ('01') eikä
+    // toimipisteitä ('03').
+    expect(options.map((o) => o.value)).toEqual([
+      oppilaitos1_1.organisaatio_oid,
+      oppilaitos1_2.organisaatio_oid,
+      oppilaitos2_1.organisaatio_oid,
+      oppilaitos2_2.organisaatio_oid,
+      oppilaitos2_3.organisaatio_oid,
+    ]);
+  });
+
+  test('should take the label from the requested locale', () => {
+    const oppilaitos = {
+      organisaatio_oid: '1.2.246.562.10.11111111111',
+      organisaatio_nimi: {
+        fi: 'Esimerkin lukio',
+        sv: 'Exempel gymnasium',
+        en: 'Example upper secondary school',
+      },
+      organisaatiotyypit: ['02'],
+      oppilaitostyyppi: 'oppilaitostyyppi_15#1',
+      tila: 'AKTIIVINEN',
+      parent_oids: ['1.2.246.562.10.00000000001'],
+      children: [],
+    };
+
+    expect(getOppilaitosOptions([oppilaitos], 'sv')).toEqual([
+      {
+        value: '1.2.246.562.10.11111111111',
+        label: 'Exempel gymnasium',
+      },
+    ]);
+  });
+
+  test('should return empty array when hierarkiat is null', () => {
+    expect(getOppilaitosOptions(null, 'fi')).toEqual([]);
+  });
+});
+
+describe('getToimipisteOptions', () => {
+  test('should return only toimipiste-level organisaatiot as options', () => {
+    const options = getToimipisteOptions(hierarkiat, 'fi');
+
+    // Vain '03'-tyypin organisaatiot: ei koulutustoimijoita ('01') eikä
+    // oppilaitoksia ('02').
+    expect(options.map((o) => o.value)).toEqual([
+      toimipiste1_1.organisaatio_oid,
+      toimipiste2_1_1.organisaatio_oid,
+      toimipiste2_2_1.organisaatio_oid,
+      toimipiste2_2_2.organisaatio_oid,
+      toimipiste2_2_3.organisaatio_oid,
+      toimipiste2_3_1.organisaatio_oid,
+    ]);
+  });
+
+  test('should take the label from the requested locale', () => {
+    const toimipiste = {
+      organisaatio_oid: '1.2.246.562.10.22222222222',
+      organisaatio_nimi: {
+        fi: 'Esimerkin toimipiste',
+        sv: 'Exempel verksamhetsställe',
+        en: 'Example unit',
+      },
+      organisaatiotyypit: ['03'],
+      oppilaitostyyppi: null,
+      tila: 'AKTIIVINEN',
+      parent_oids: ['1.2.246.562.10.00000000001'],
+      children: [],
+    };
+
+    expect(getToimipisteOptions([toimipiste], 'sv')).toEqual([
+      {
+        value: '1.2.246.562.10.22222222222',
+        label: 'Exempel verksamhetsställe',
+      },
+    ]);
+  });
+
+  test('should narrow the options to the toimipisteet of the given oppilaitos', () => {
+    const options = getToimipisteOptions(hierarkiat, 'fi', OPPILAITOS2_2_OID);
+
+    expect(options.map((o) => o.value)).toEqual([
+      toimipiste2_2_1.organisaatio_oid,
+      toimipiste2_2_2.organisaatio_oid,
+      toimipiste2_2_3.organisaatio_oid,
+    ]);
+  });
+
+  // Pelkän toimipisteoikeuden saanut käyttäjä ei näe yhtään oppilaitosta, joten
+  // rajaamaton lista on ainoa polku raporttiin.
+  test('should return all toimipisteet when no oppilaitos narrows the list', () => {
+    const kaikki = [
+      toimipiste1_1.organisaatio_oid,
+      toimipiste2_1_1.organisaatio_oid,
+      toimipiste2_2_1.organisaatio_oid,
+      toimipiste2_2_2.organisaatio_oid,
+      toimipiste2_2_3.organisaatio_oid,
+      toimipiste2_3_1.organisaatio_oid,
+    ];
+
+    expect(
+      getToimipisteOptions(hierarkiat, 'fi', null).map((o) => o.value),
+    ).toEqual(kaikki);
+    expect(getToimipisteOptions(hierarkiat, 'fi').map((o) => o.value)).toEqual(
+      kaikki,
+    );
+  });
+
+  test('should return empty array when hierarkiat is null', () => {
+    expect(getToimipisteOptions(null, 'fi')).toEqual([]);
   });
 });
 
@@ -737,5 +947,226 @@ describe('getHarkinnanvaraisuusTranslation', () => {
         mockT,
       ),
     ).toEqual('');
+  });
+});
+
+describe('buildTiedonsiirtoParams', () => {
+  const valintarajaus = 'HAKENEET';
+  const hakuOid = '1.2.246.562.29.00000000000000000100';
+  const hakukohdeOid = '1.2.246.562.20.00000000000000000012';
+  const organisaatioOid = '1.2.246.562.10.00000000000000000486';
+
+  test('should send hakukohdeOid and omit organisaatioOid when hakukohde is selected', () => {
+    const params = new URLSearchParams(
+      buildTiedonsiirtoParams({
+        hakuOid,
+        hakukohdeOid,
+        organisaatioOid,
+        valintarajaus,
+      }),
+    );
+
+    expect(params.get('hakukohdeOid')).toEqual(hakukohdeOid);
+    expect(params.get('organisaatioOid')).toBeNull();
+    expect(params.get('hakuOid')).toEqual(hakuOid);
+    expect(params.get('valintarajaus')).toEqual(valintarajaus);
+  });
+
+  test('should send organisaatioOid when no hakukohde is selected', () => {
+    const params = new URLSearchParams(
+      buildTiedonsiirtoParams({
+        hakuOid,
+        hakukohdeOid: null,
+        organisaatioOid,
+        valintarajaus,
+      }),
+    );
+
+    expect(params.get('organisaatioOid')).toEqual(organisaatioOid);
+    expect(params.get('hakukohdeOid')).toBeNull();
+  });
+
+  test('should omit params that have no value', () => {
+    expect(
+      buildTiedonsiirtoParams({
+        hakuOid: null,
+        hakukohdeOid: null,
+        organisaatioOid: null,
+        valintarajaus: null,
+      }),
+    ).toEqual('');
+  });
+});
+
+describe('buildKkHakijatTiedonsiirtoParams', () => {
+  const valintarajaus = 'HAKENEET';
+  const hakuOid = '1.2.246.562.29.00000000000000000100';
+  const hakukohdeOid = '1.2.246.562.20.00000000000000000012';
+  const hakukohderyhmaOid = '1.2.246.562.28.00000000000000000012';
+  const organisaatioOid = '1.2.246.562.10.00000000000000000486';
+
+  const oppijanumero = '1.2.246.562.24.00000000019';
+
+  test('should send every selected rajain, since the backend intersects them', () => {
+    const params = new URLSearchParams(
+      buildKkHakijatTiedonsiirtoParams({
+        hakuOid,
+        hakukohdeOid,
+        hakukohderyhmaOid,
+        organisaatioOid,
+        valintarajaus,
+        oppijanumero: null,
+      }),
+    );
+
+    expect(params.get('hakuOid')).toEqual(hakuOid);
+    expect(params.get('hakukohdeOid')).toEqual(hakukohdeOid);
+    expect(params.get('hakukohderyhmaOid')).toEqual(hakukohderyhmaOid);
+    expect(params.get('organisaatioOid')).toEqual(organisaatioOid);
+    expect(params.get('valintarajaus')).toEqual(valintarajaus);
+  });
+
+  test('should send hakukohderyhmaOid without an organisaatioOid', () => {
+    const params = new URLSearchParams(
+      buildKkHakijatTiedonsiirtoParams({
+        hakuOid,
+        hakukohdeOid: null,
+        hakukohderyhmaOid,
+        organisaatioOid: null,
+        valintarajaus,
+        oppijanumero: null,
+      }),
+    );
+
+    expect(params.get('hakukohderyhmaOid')).toEqual(hakukohderyhmaOid);
+    expect(params.get('organisaatioOid')).toBeNull();
+    expect(params.get('hakukohdeOid')).toBeNull();
+  });
+
+  test('should omit params that have no value', () => {
+    expect(
+      buildKkHakijatTiedonsiirtoParams({
+        hakuOid: null,
+        hakukohdeOid: null,
+        hakukohderyhmaOid: null,
+        organisaatioOid: null,
+        valintarajaus: null,
+        oppijanumero: null,
+      }),
+    ).toEqual('');
+  });
+
+  test('should send oppijanumero as the only rajain', () => {
+    const params = new URLSearchParams(
+      buildKkHakijatTiedonsiirtoParams({
+        hakuOid: null,
+        hakukohdeOid: null,
+        hakukohderyhmaOid: null,
+        organisaatioOid: null,
+        valintarajaus: null,
+        oppijanumero,
+      }),
+    );
+
+    expect(params.get('oppijanumero')).toEqual(oppijanumero);
+    expect(params.get('hakuOid')).toBeNull();
+    expect(params.get('valintarajaus')).toBeNull();
+  });
+
+  // Oppijanumero ei sulje muita rajaimia pois: backend soveltaa ne edelleen tarkennuksena.
+  test('should send oppijanumero alongside the other rajaimet', () => {
+    const params = new URLSearchParams(
+      buildKkHakijatTiedonsiirtoParams({
+        hakuOid,
+        hakukohdeOid: null,
+        hakukohderyhmaOid: null,
+        organisaatioOid,
+        valintarajaus,
+        oppijanumero,
+      }),
+    );
+
+    expect(params.get('oppijanumero')).toEqual(oppijanumero);
+    expect(params.get('hakuOid')).toEqual(hakuOid);
+    expect(params.get('organisaatioOid')).toEqual(organisaatioOid);
+  });
+
+  test('should trim oppijanumero and omit a blank value', () => {
+    const withPadding = new URLSearchParams(
+      buildKkHakijatTiedonsiirtoParams({
+        hakuOid: null,
+        hakukohdeOid: null,
+        hakukohderyhmaOid: null,
+        organisaatioOid: null,
+        valintarajaus: null,
+        oppijanumero: `  ${oppijanumero}  `,
+      }),
+    );
+    expect(withPadding.get('oppijanumero')).toEqual(oppijanumero);
+
+    expect(
+      buildKkHakijatTiedonsiirtoParams({
+        hakuOid: null,
+        hakukohdeOid: null,
+        hakukohderyhmaOid: null,
+        organisaatioOid: null,
+        valintarajaus: null,
+        oppijanumero: '   ',
+      }),
+    ).toEqual('');
+  });
+});
+
+describe('hasKkHakijatKaikkiTiedotRight', () => {
+  const OPH_OID = '1.2.246.562.10.00000000001';
+
+  test('should grant the right to an OPH paakayttaja', () => {
+    expect(
+      hasKkHakijatKaikkiTiedotRight([
+        'ROLE_APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA',
+      ]),
+    ).toBe(true);
+  });
+
+  test('should grant the right when KK_HAKENEET is granted on the OPH organisaatio', () => {
+    expect(
+      hasKkHakijatKaikkiTiedotRight([
+        `ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET_${OPH_OID}`,
+      ]),
+    ).toBe(true);
+  });
+
+  // Suffiksiton rooli ei kerro mille organisaatiolle oikeus on myönnetty.
+  test('should not grant the right for a bare KK_HAKENEET role', () => {
+    expect(
+      hasKkHakijatKaikkiTiedotRight(['ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET']),
+    ).toBe(false);
+  });
+
+  test('should not grant the right for KK_HAKENEET on some other organisaatio', () => {
+    expect(
+      hasKkHakijatKaikkiTiedotRight([
+        'ROLE_APP_OVARA-VIRKAILIJA_KK_HAKENEET_1.2.246.562.10.00000000000000000586',
+      ]),
+    ).toBe(false);
+  });
+
+  test('should grant the right for a bare OILI role', () => {
+    expect(
+      hasKkHakijatKaikkiTiedotRight(['ROLE_APP_OVARA-VIRKAILIJA_OILI']),
+    ).toBe(true);
+  });
+
+  // OILI on täysi oikeus riippumatta siitä mille organisaatiolle se on myönnetty.
+  test('should grant the right for OILI granted on any organisaatio', () => {
+    expect(
+      hasKkHakijatKaikkiTiedotRight([
+        'ROLE_APP_OVARA-VIRKAILIJA_OILI_1.2.246.562.10.00000000000000000586',
+      ]),
+    ).toBe(true);
+  });
+
+  test('should not grant the right when authorities are missing', () => {
+    expect(hasKkHakijatKaikkiTiedotRight(undefined)).toBe(false);
   });
 });

@@ -3,6 +3,7 @@ package fi.oph.ovara.backend
 import fi.oph.ovara.backend.domain.{Fi, Organisaatio, OrganisaatioHierarkia, User}
 import fi.oph.ovara.backend.repository.CommonRepository
 import fi.oph.ovara.backend.service.{CommonService, UserService}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{mock, *}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -83,6 +84,63 @@ class CommonServiceTest extends AnyFlatSpec with Matchers {
     )
 
     result shouldBe List("1.2.246.562.10.12345678902")
+  }
+
+  "getOrganisaatioidenJaLastenOids" should "return empty list when no organisations are provided" in {
+    val result = commonService.getOrganisaatioidenJaLastenOidit(List())
+
+    result shouldBe empty
+  }
+
+  it should "return the given oids with their descendants, regardless of organisaatiotaso" in {
+    val koulutustoimijaOid = "1.2.246.562.10.12345678901"
+    val toimipisteOid      = "1.2.246.562.10.12345678902"
+
+    val hierarkia = OrganisaatioHierarkia(
+      organisaatio_oid = koulutustoimijaOid,
+      organisaatio_nimi = Map(Fi -> "Mock Koulutustoimija"),
+      organisaatiotyypit = List("01"),
+      oppilaitostyyppi = None,
+      tila = "AKTIIVINEN",
+      parent_oids = List(),
+      koulutustoimijaParent = None,
+      children = List(
+        OrganisaatioHierarkia(
+          organisaatio_oid = toimipisteOid,
+          organisaatio_nimi = Map(Fi -> "Mock Toimipiste"),
+          organisaatiotyypit = List("03"),
+          oppilaitostyyppi = None,
+          tila = "AKTIIVINEN",
+          parent_oids = List(koulutustoimijaOid),
+          koulutustoimijaParent = None,
+          children = List()
+        )
+      )
+    )
+
+    // Organisaatiotasoa ei tiedetä ennalta, joten kaikki kolme hierarkiahakua ajetaan.
+    // doReturn, ei when(spy.method(...)), jotta oikeaa metodia ei kutsuta stubatessa.
+    val spyCommonService = spy(commonService)
+    doReturn(List.empty[OrganisaatioHierarkia]).when(spyCommonService).getToimipistehierarkiat(any())
+    doReturn(List.empty[OrganisaatioHierarkia]).when(spyCommonService).getOppilaitoshierarkiat(any())
+    doReturn(List(hierarkia)).when(spyCommonService).getKoulutustoimijahierarkia(any())
+
+    val result = spyCommonService.getOrganisaatioidenJaLastenOidit(List(koulutustoimijaOid))
+
+    result should contain theSameElementsAs List(koulutustoimijaOid, toimipisteOid)
+  }
+
+  it should "keep the given oid even when it has no hierarkia, so the rajaus does not widen" in {
+    val unknownOid = "1.2.246.562.10.99999999999"
+
+    val spyCommonService = spy(commonService)
+    doReturn(List.empty[OrganisaatioHierarkia]).when(spyCommonService).getToimipistehierarkiat(any())
+    doReturn(List.empty[OrganisaatioHierarkia]).when(spyCommonService).getOppilaitoshierarkiat(any())
+    doReturn(List.empty[OrganisaatioHierarkia]).when(spyCommonService).getKoulutustoimijahierarkia(any())
+
+    val result = spyCommonService.getOrganisaatioidenJaLastenOidit(List(unknownOid))
+
+    result shouldBe List(unknownOid)
   }
 
 }

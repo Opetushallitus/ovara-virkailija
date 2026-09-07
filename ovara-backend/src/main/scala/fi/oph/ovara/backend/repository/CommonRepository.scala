@@ -176,6 +176,11 @@ class CommonRepository extends Extractors {
     val hakukohderyhmaQueryStr: String = {
       if (isOphPaakayttaja)
         ""
+      // Jos ei organisaatio- eikä hakukohderyhmäoikeuksia: yhtään ryhmää ei saa palauttaa. Ilman tätä
+      // makeHakukohderyhmaQueryWithKayttooikeudet palauttaisi tyhjän merkkijonon, jolloin kysely
+      // jäisi kokonaan rajaamatta (ks. RepositoryUtils:184) ja käyttäjä näkisi kaikki ryhmät.
+      else if (kayttooikeusOrgOids.isEmpty && kayttooikeusHakukohderyhmaOids.isEmpty)
+        "AND FALSE"
       else
         RepositoryUtils.makeHakukohderyhmaQueryWithKayttooikeudet(
           kayttooikeusOrgOids,
@@ -193,6 +198,23 @@ class CommonRepository extends Extractors {
           #$hakukohderyhmaQueryStr
           """.as[Hakukohderyhma]
     LOG.debug(s"selectHakukohderyhmat: ${query.statements.head}")
+    query
+  }
+
+  /**
+   * Hakukohderyhmään kuuluvat hakukohde-oidit annetussa haussa. Käytetään external-rajapinnoissa,
+   * joiden kyselyt kohdistuvat gen-skeemaan, jossa ei ole hakukohderyhmätietoa lainkaan:
+   * ryhmä laajennetaan hakukohde-oideiksi ennen varsinaista kyselyä.
+   */
+  def selectHakukohderyhmanHakukohdeOids(
+    hakukohderyhmaOid: String,
+    hakuOid: String
+  ): SqlStreamingAction[Vector[String], String, Effect] = {
+    val query = sql"""SELECT DISTINCT hkr_hk.hakukohde_oid
+          FROM pub.pub_dim_hakukohderyhma_ja_hakukohteet hkr_hk
+          WHERE hkr_hk.hakukohderyhma_oid = $hakukohderyhmaOid
+          AND hkr_hk.haku_oid = $hakuOid""".as[String]
+    LOG.debug(s"selectHakukohderyhmanHakukohdeOids: ${query.statements.head}")
     query
   }
 
