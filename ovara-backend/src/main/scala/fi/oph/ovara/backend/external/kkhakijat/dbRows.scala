@@ -1,6 +1,35 @@
 package fi.oph.ovara.backend.external.kkhakijat
 
+import org.slf4j.{Logger, LoggerFactory}
+
 import java.time.{LocalDate, OffsetDateTime}
+
+private val LOG: Logger =
+  LoggerFactory.getLogger("fi.oph.ovara.backend.external.kkhakijat.Kasittelymerkinnat")
+
+/**
+ * Puuttuva käsittelymerkintä (tai NULL-tila) tarkoittaa NOT_CHECKEDia. Tuntematon tila
+ *  lokitetaan ja pudotetaan: tulkitsematonta lähdekoodia ei päästetä rajapintaan. None siis
+ *  erottuu NOT_CHECKEDista -- se tarkoittaa "merkintä on, mutta sitä ei osattu tulkita", ei
+ *  "merkintää ei ole". Arvojoukot ovat Hakukelpoisuus- ja Maksuvelvollisuus-enumeissa, tässä
+ *  vain puuttuvan ja tuntemattoman tiedon käsittely.
+ */
+private def kasittelymerkinnanTila[A](
+  state: Option[String],
+  parse: String => Option[A],
+  defaultForNone: A,
+  kentta: String
+): Option[A] =
+  state match {
+    case None      => Some(defaultForNone)
+    case Some(raw) =>
+      parse(raw) match {
+        case parsed @ Some(_) => parsed
+        case None             =>
+          LOG.warn(s"No mapping found for $kentta state: $raw")
+          None
+      }
+  }
 
 case class KKHakijaRow(
   oppijanumero: String,
@@ -96,7 +125,10 @@ case class KKHakemusRow(
   ehtoSV: Option[String],
   ehtoEN: Option[String],
   valintatapajononTyyppi: Option[String],
-  valintatapajononNimi: Option[String]
+  valintatapajononNimi: Option[String],
+  // Raakatilat gen_hakemus_kasittelymerkinnat-taulusta, ennen uudelleenmappausta.
+  hKelpoisuusState: Option[String],
+  hKelpoisuusMaksuvelvollisuusState: Option[String]
 ) {
   def asKKHakemus(
     hakuOid: String,
@@ -125,6 +157,20 @@ case class KKHakemusRow(
       ilmoittautumiset = ilmoittautumisenTila.flatMap(Lasnaolo.parse).toSeq,
       pohjakoulutus = pohjakoulutus,
       julkaisulupa = julkaisulupa,
+      // Tuntematon tila jää Noneksi ja näkyy rajapinnassa tyhjänä; hKelpoisuusLahde ei tule
+      // tästä taulusta, joten se jää yhä oletusarvoonsa.
+      hKelpoisuus = kasittelymerkinnanTila(
+        hKelpoisuusState,
+        Hakukelpoisuus.parse,
+        Hakukelpoisuus.NOT_CHECKED,
+        "hKelpoisuus"
+      ),
+      hKelpoisuusMaksuvelvollisuus = kasittelymerkinnanTila(
+        hKelpoisuusMaksuvelvollisuusState,
+        Maksuvelvollisuus.parse,
+        Maksuvelvollisuus.NOT_CHECKED,
+        "hKelpoisuusMaksuvelvollisuus"
+      ),
       lukuvuosimaksu = lukuvuosimaksu,
       hakukohdeKkId = hakukohdeKkId,
       pisteet = pisteet,

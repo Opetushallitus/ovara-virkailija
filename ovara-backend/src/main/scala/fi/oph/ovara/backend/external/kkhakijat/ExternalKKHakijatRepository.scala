@@ -12,6 +12,11 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
 
   private val ataruOidLength = 35
 
+  // gen_hakemus_kasittelymerkinnat.requirement -arvot: sama taulu tarjoilee sekä
+  // hakukelpoisuuden että maksuvelvollisuuden tilan, erotellaan tällä.
+  private val eligibilityRequirement = "eligibility-state"
+  private val paymentRequirement     = "payment-obligation"
+
   def selectKKHakijat(
     hakuOid: Option[String],
     hakukohdeOids: Seq[String],
@@ -207,7 +212,9 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             merk_julk.ehdollisen_hyvaksymisen_ehto_sv AS ehto_sv,
             merk_julk.ehdollisen_hyvaksymisen_ehto_en AS ehto_en,
             vp.valintatapajono_tyyppi          AS valintatapajono_tyyppi,
-            vp.valintatapajono_nimi            AS valintatapajono_nimi
+            vp.valintatapajono_nimi            AS valintatapajono_nimi,
+            km_kelp.state                      AS h_kelpoisuus,
+            km_maksu.state                     AS h_kelpoisuus_maksuvelvollisuus
           FROM gen.gen_hakutoive ht
           LEFT JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
           LEFT JOIN gen.gen_toteutus  t  ON hk.toteutus_oid  = t.toteutus_oid
@@ -218,6 +225,18 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             ON merk_julk.hakemus_oid = ht.hakemus_oid AND merk_julk.hakukohde_oid = ht.hakukohde_oid
           LEFT JOIN gen.gen_valintaperuste_valintatapajono vp
             ON vp.valintatapajono_id = merk_julk.valintatapajono_id
+          -- Käsittelymerkinnät ovat samalla tarkkuudella (hakemus, hakukohde) kuin hakutoive, ja
+          -- niitä on 0 tai 1 per tyyppi -- joten suora liitos riittää, ei monista rivejä.
+          -- requirement-rajaus kuuluu liitosehtoon eikä WHEREen: WHEREssä se muuttaisi
+          -- ulkoliitoksen sisäliitokseksi ja pudottaisi merkinnättömät hakutoiveet pois.
+          LEFT JOIN gen.gen_hakemus_kasittelymerkinnat km_kelp
+            ON km_kelp.hakemus_oid   = ht.hakemus_oid
+           AND km_kelp.hakukohde_oid = ht.hakukohde_oid
+           AND km_kelp.requirement   = '#$eligibilityRequirement'
+          LEFT JOIN gen.gen_hakemus_kasittelymerkinnat km_maksu
+            ON km_maksu.hakemus_oid   = ht.hakemus_oid
+           AND km_maksu.hakukohde_oid = ht.hakukohde_oid
+           AND km_maksu.requirement   = '#$paymentRequirement'
           WHERE ht.hakemus_oid IN (#$hakemusOidList)
           """.as[KKHakemusRow]
 

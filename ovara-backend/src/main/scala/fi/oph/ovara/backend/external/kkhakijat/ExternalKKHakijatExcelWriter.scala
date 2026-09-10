@@ -151,27 +151,27 @@ object ExternalKKHakijatExcelWriter {
       s"HyvaksymisenEhto(${onlyXBool(e.ehdollisestiHyvaksyttavissa)},${e.ehtoKoodi.getOrElse("")}," +
         s"${e.ehtoFI.getOrElse("")},${e.ehtoSV.getOrElse("")},${e.ehtoEN.getOrElse("")})"
     },
-    hm.valintatapajononTyyppi.getOrElse(""),       // 39
-    hm.valintatapajononNimi.getOrElse(""),         // 40
-    hm.vastaanottotieto.map(_.name).getOrElse(""), // 41
-    hm.ilmoittautumiset.map(_.name).mkString(","), // 42
-    hm.pohjakoulutus.mkString(","),                // 43
-    onlyX(hm.julkaisulupa),                        // 44
-    hm.hKelpoisuus,                                // 45
-    hm.hKelpoisuusLahde.getOrElse(""),             // 46
-    hm.hKelpoisuusMaksuvelvollisuus.getOrElse(""), // 47
-    koulutusAt(hm.hakukohteenKoulutukset, 0),      // 48
-    koulutusAt(hm.hakukohteenKoulutukset, 1),      // 49
-    koulutusAt(hm.hakukohteenKoulutukset, 2),      // 50
-    koulutusAt(hm.hakukohteenKoulutukset, 3),      // 51
-    koulutusAt(hm.hakukohteenKoulutukset, 4),      // 52
-    koulutusAt(hm.hakukohteenKoulutukset, 5),      // 53
-    liiteAt(hm.liitteet, 0),                       // 54
-    liiteAt(hm.liitteet, 1),                       // 55
-    liiteAt(hm.liitteet, 2),                       // 56
-    liiteAt(hm.liitteet, 3),                       // 57
-    liiteAt(hm.liitteet, 4),                       // 58
-    liiteAt(hm.liitteet, 5)                        // 59
+    hm.valintatapajononTyyppi.getOrElse(""),                   // 39
+    hm.valintatapajononNimi.getOrElse(""),                     // 40
+    hm.vastaanottotieto.map(_.name).getOrElse(""),             // 41
+    hm.ilmoittautumiset.map(_.name).mkString(","),             // 42
+    hm.pohjakoulutus.mkString(","),                            // 43
+    onlyX(hm.julkaisulupa),                                    // 44
+    hm.hKelpoisuus.map(_.name).getOrElse(""),                  // 45
+    hm.hKelpoisuusLahde.getOrElse(""),                         // 46
+    hm.hKelpoisuusMaksuvelvollisuus.map(_.name).getOrElse(""), // 47
+    koulutusAt(hm.hakukohteenKoulutukset, 0),                  // 48
+    koulutusAt(hm.hakukohteenKoulutukset, 1),                  // 49
+    koulutusAt(hm.hakukohteenKoulutukset, 2),                  // 50
+    koulutusAt(hm.hakukohteenKoulutukset, 3),                  // 51
+    koulutusAt(hm.hakukohteenKoulutukset, 4),                  // 52
+    koulutusAt(hm.hakukohteenKoulutukset, 5),                  // 53
+    liiteAt(hm.liitteet, 0),                                   // 54
+    liiteAt(hm.liitteet, 1),                                   // 55
+    liiteAt(hm.liitteet, 2),                                   // 56
+    liiteAt(hm.liitteet, 3),                                   // 57
+    liiteAt(hm.liitteet, 4),                                   // 58
+    liiteAt(hm.liitteet, 5)                                    // 59
   )
 
   private def onlyX(b: Option[Boolean]): String =

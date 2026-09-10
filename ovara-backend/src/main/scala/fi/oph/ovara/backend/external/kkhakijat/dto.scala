@@ -196,9 +196,9 @@ object KKHakemusResponse {
       ilmoittautumiset = h.ilmoittautumiset.map(_.name).asJava,
       pohjakoulutus = h.pohjakoulutus.asJava,
       julkaisulupa = h.julkaisulupa,
-      hKelpoisuus = h.hKelpoisuus,
+      hKelpoisuus = h.hKelpoisuus.map(_.name).getOrElse(""),
       hKelpoisuusLahde = h.hKelpoisuusLahde,
-      hKelpoisuusMaksuvelvollisuus = h.hKelpoisuusMaksuvelvollisuus,
+      hKelpoisuusMaksuvelvollisuus = h.hKelpoisuusMaksuvelvollisuus.map(_.name),
       lukuvuosimaksu = h.lukuvuosimaksu,
       hakukohteenKoulutukset = h.hakukohteenKoulutukset.map(KkHakukohteenkoulutusResponse.apply).asJava,
       liitteet = h.liitteet.map(_.map(LiiteResponse.apply).asJava)
