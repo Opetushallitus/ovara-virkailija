@@ -219,6 +219,20 @@ trait ExternalKKHakijatTestUtils {
     )
   }
 
+  def insertKasittelymerkinta(
+    requirement: String,
+    state: Option[String],
+    hakemusOid: String = HAKEMUS_OID,
+    hakukohdeOid: String = HAKUKOHDE_OID
+  ): Unit = {
+    db.run(
+      sqlu"""INSERT INTO gen.gen_hakemus_kasittelymerkinnat VALUES(
+          $hakemusOid, $hakukohdeOid, $requirement, $state
+        )""",
+      "Insert test kk-käsittelymerkintä"
+    )
+  }
+
   def insertToteutus(
     toteutusOid: String = TOTEUTUS_OID,
     koulutusOid: String = KOULUTUS_OID,
@@ -387,6 +401,13 @@ trait ExternalKKHakijatTestUtils {
               hakemus_oid text NOT NULL,
               avain       text NOT NULL,
               arvo        text
+          );
+
+          CREATE TABLE gen.gen_hakemus_kasittelymerkinnat (
+              hakemus_oid   text NOT NULL,
+              hakukohde_oid text,
+              requirement   text,
+              state         text
           );
           """
     db.run(query, "Init KK Hakijat test schema")
