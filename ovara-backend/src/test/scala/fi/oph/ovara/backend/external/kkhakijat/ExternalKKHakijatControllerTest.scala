@@ -1041,7 +1041,7 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pohjakoulutus").isEmpty)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuus").value(""))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuusLahde").value(nullValue()))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset").isEmpty)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].liitteet").value(nullValue()))
   }
@@ -1164,6 +1164,153 @@ class ExternalKKHakijatControllerTest
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").value("MAKSETTU"))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[1].lukuvuosimaksu").value("VAPAUTETTU"))
+  }
+
+  // ---- Käsittelymerkinnät (hKelpoisuus, hKelpoisuusMaksuvelvollisuus) ----
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "eligible,                       ELIGIBLE",
+      "uneligible,                     INELIGIBLE",
+      "unreviewed,                     NOT_CHECKED",
+      "conditionally-eligible,         CONDITIONALLY_ELIGIBLE",
+      "automatically-checked-eligible, AUTOMATICALLY_CHECKED_ELIGIBLE"
+    )
+  )
+  def hKelpoisuusStateMapsToApiValue(state: String, expected: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    seedMinimalHakija()
+    insertKasittelymerkinta(ELIGIBILITY_REQUIREMENT, Some(state))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuus").value(expected))
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "obligated,     REQUIRED",
+      "not-obligated, NOT_REQUIRED",
+      "unreviewed,    NOT_CHECKED"
+    )
+  )
+  def hKelpoisuusMaksuvelvollisuusStateMapsToApiValue(state: String, expected: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    seedMinimalHakija()
+    insertKasittelymerkinta(PAYMENT_REQUIREMENT, Some(state))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuusMaksuvelvollisuus").value(expected))
+  }
+
+  @Test
+  def bothKasittelymerkinnatPopulateIndependently(): Unit = {
+    seedMinimalHakija()
+    insertKasittelymerkinta(ELIGIBILITY_REQUIREMENT, Some("eligible"))
+    insertKasittelymerkinta(PAYMENT_REQUIREMENT, Some("not-obligated"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuus").value("ELIGIBLE"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuusMaksuvelvollisuus").value("NOT_REQUIRED"))
+  }
+
+  // Vain toinen requirement kirjattuna: varmistaa ettei requirement-rajaus ole pudonnut pois
+  // eikä kenttiä ole ristiinkytketty -- ilman tätä väärä rajaus läpäisisi muut testit.
+  // Kirjaamaton kenttä on NOT_CHECKED, ei tyhjä: tyhjä on varattu tuntemattomalle tilalle.
+  @Test
+  def eligibilityMerkintaDoesNotFillMaksuvelvollisuus(): Unit = {
+    seedMinimalHakija()
+    insertKasittelymerkinta(ELIGIBILITY_REQUIREMENT, Some("eligible"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuus").value("ELIGIBLE"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuusMaksuvelvollisuus").value(NOT_CHECKED))
+  }
+
+  @Test
+  def paymentMerkintaDoesNotFillKelpoisuus(): Unit = {
+    seedMinimalHakija()
+    insertKasittelymerkinta(PAYMENT_REQUIREMENT, Some("obligated"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuus").value(NOT_CHECKED))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuusMaksuvelvollisuus").value("REQUIRED"))
+  }
+
+  @Test
+  def kasittelymerkinnatNotCheckedWhenNoRows(): Unit = {
+    seedMinimalHakija()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuus").value(NOT_CHECKED))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuusMaksuvelvollisuus").value(NOT_CHECKED))
+  }
+
+  @Test
+  def kasittelymerkinnatNotCheckedWhenStateIsNull(): Unit = {
+    seedMinimalHakija()
+    insertKasittelymerkinta(ELIGIBILITY_REQUIREMENT, None)
+    insertKasittelymerkinta(PAYMENT_REQUIREMENT, None)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuus").value(NOT_CHECKED))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuusMaksuvelvollisuus").value(NOT_CHECKED))
+  }
+
+  // Tuntematon tila pudotetaan tyhjäksi eikä NOT_CHECKEDiksi: tulkitsematonta lähdekoodia ei
+  // päästetä rajapintaan, mutta se pitää myös erottua kirjaamattomasta merkinnästä.
+  @Test
+  def unknownEligibilityStateFallsBackToEmpty(): Unit = {
+    seedMinimalHakija()
+    insertKasittelymerkinta(ELIGIBILITY_REQUIREMENT, Some("some-new-state"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuus").value(""))
+  }
+
+  @Test
+  def unknownMaksuvelvollisuusStateFallsBackToNull(): Unit = {
+    seedMinimalHakija()
+    insertKasittelymerkinta(PAYMENT_REQUIREMENT, Some("some-new-state"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuusMaksuvelvollisuus").value(nullValue()))
+  }
+
+  @Test
+  def kasittelymerkinnatPerHakemusHakukohdeDiffers(): Unit = {
+    seedMinimalHakija()
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2)
+    insertKasittelymerkinta(ELIGIBILITY_REQUIREMENT, Some("eligible"), hakukohdeOid = HAKUKOHDE_OID)
+    insertKasittelymerkinta(ELIGIBILITY_REQUIREMENT, Some("uneligible"), hakukohdeOid = HAKUKOHDE_OID_2)
+
+    get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuus").value("ELIGIBLE"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[1].hKelpoisuus").value("INELIGIBLE"))
+  }
+
+  // Toisen hakukohteen merkintä ei saa vuotaa tähän hakutoiveeseen.
+  @Test
+  def kasittelymerkintaFromOtherHakukohdeDoesNotLeak(): Unit = {
+    seedMinimalHakija()
+    insertKasittelymerkinta(ELIGIBILITY_REQUIREMENT, Some("eligible"), hakukohdeOid = HAKUKOHDE_OID_2)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuus").value(NOT_CHECKED))
   }
 
   // ---- HakukohdeKkId ----
@@ -2122,6 +2269,9 @@ class ExternalKKHakijatControllerTest
       valintatapajonoTyyppi = Some("YHTEISPISTEET"),
       valintatapajonoNimi = Some("Yhteispistejono")
     ) // → cell 39 = "YHTEISPISTEET", cell 40 = "Yhteispistejono"
+    insertKasittelymerkinta(ELIGIBILITY_REQUIREMENT, Some("conditionally-eligible"))
+    insertKasittelymerkinta(PAYMENT_REQUIREMENT, Some("obligated"))
+    // → cell 45 = "CONDITIONALLY_ELIGIBLE", cell 47 = "REQUIRED"
 
     val result   = getExcel().andExpect(status.isOk).andReturn()
     val workbook = new XSSFWorkbook(new ByteArrayInputStream(result.getResponse.getContentAsByteArray))
@@ -2171,6 +2321,8 @@ class ExternalKKHakijatControllerTest
         42 -> ILMOITTAUTUMISEN_TILA,
         43 -> "pohjakoulutus_yo,pohjakoulutus_kk",
         44 -> "X",
+        45 -> "CONDITIONALLY_ELIGIBLE",
+        47 -> "REQUIRED",
         48 -> s"Koulutus($KOULUTUS_OID,331101,TKID-1,2026,S,true)"
       )
       expectedCells.foreach { case (idx, value) =>
@@ -2179,8 +2331,9 @@ class ExternalKKHakijatControllerTest
           s"cell $idx expected [$value] but was [${dataRow.getCell(idx).getStringCellValue}]"
         )
       }
-      // deferred fields: cells 12, 19, 34, 45-59 (minus 48) stay ""
-      Seq(12, 19, 34, 45, 46, 47, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
+      // deferred fields: cells 12, 19, 34, 46, 49-59 stay ""
+      // (45 ja 47 tulevat käsittelymerkinnöistä, 48 koulutuksista)
+      Seq(12, 19, 34, 46, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
         .foreach { idx =>
           assert(
             dataRow.getCell(idx).getStringCellValue == "",

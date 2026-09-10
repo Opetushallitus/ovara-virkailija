@@ -95,6 +95,34 @@ object Lasnaolo {
   def parse(s: String): Option[Lasnaolo] = values.find(_.toString == s)
 }
 
+// gen_hakemus_kasittelymerkinnat.state -> rajapinnan arvo. Näissä kahdessa case-nimi on
+// rajapinnan arvo ja lähdejärjestelmän koodi on eri merkkijono, joten DB-koodi kuljetetaan
+// erillisenä `dbState`-parametrina -- toisin kuin yllä olevissa enumeissa, joissa case-nimi
+// ja DB-koodi ovat sama asia.
+enum Hakukelpoisuus(val dbState: String) {
+  case ELIGIBLE                       extends Hakukelpoisuus("eligible")
+  case INELIGIBLE                     extends Hakukelpoisuus("uneligible") // lähteen kirjoitusasu
+  case NOT_CHECKED                    extends Hakukelpoisuus("unreviewed")
+  case CONDITIONALLY_ELIGIBLE         extends Hakukelpoisuus("conditionally-eligible")
+  case AUTOMATICALLY_CHECKED_ELIGIBLE extends Hakukelpoisuus("automatically-checked-eligible")
+  def name: String = toString
+}
+
+object Hakukelpoisuus {
+  def parse(s: String): Option[Hakukelpoisuus] = values.find(_.dbState == s)
+}
+
+enum Maksuvelvollisuus(val dbState: String) {
+  case REQUIRED     extends Maksuvelvollisuus("obligated")
+  case NOT_REQUIRED extends Maksuvelvollisuus("not-obligated")
+  case NOT_CHECKED  extends Maksuvelvollisuus("unreviewed")
+  def name: String = toString
+}
+
+object Maksuvelvollisuus {
+  def parse(s: String): Option[Maksuvelvollisuus] = values.find(_.dbState == s)
+}
+
 case class HyvaksymisenEhto(
   ehdollisestiHyvaksyttavissa: Boolean = false,
   ehtoKoodi: Option[String] = None,
@@ -174,9 +202,9 @@ case class KKHakutoive(
   ilmoittautumiset: Seq[Lasnaolo] = Nil,
   pohjakoulutus: Seq[String] = Nil,
   julkaisulupa: Option[Boolean] = None,
-  hKelpoisuus: String = "",
+  hKelpoisuus: Option[Hakukelpoisuus] = None,
   hKelpoisuusLahde: Option[String] = None,
-  hKelpoisuusMaksuvelvollisuus: Option[String] = None,
+  hKelpoisuusMaksuvelvollisuus: Option[Maksuvelvollisuus] = None,
   lukuvuosimaksu: Option[String] = None,
   hakukohteenKoulutukset: Seq[KkHakukohteenkoulutus] = Nil,
   liitteet: Option[Seq[Liite]] = None
