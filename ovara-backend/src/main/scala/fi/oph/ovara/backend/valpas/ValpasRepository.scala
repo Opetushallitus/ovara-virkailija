@@ -45,7 +45,7 @@ class ValpasRepository(db: ReadOnlyDatabase) extends ValpasExtractors {
     LEFT JOIN gen.gen_ohjausparametri_haku vtjh on hakemus.haku_oid = vtjh.haku_oid and vtjh.avain = $VALINTATULOSTEN_JULKISTAMINEN_HAKIJOILLE
     WHERE hlo.oppijanumero in (#${RepositoryUtils.makeListOfValuesQueryStr(oppijanumerot)})
     AND length(hakemus.hakemus_oid) = #$ataruOidLength
-    AND haku.kohdejoukko_koodiuri LIKE 'haunkohdejoukko_11%'
+    AND haku.kohdejoukko_koodiuri NOT LIKE 'haunkohdejoukko_12%'
     """.as[HakemusRow]
 
     LOG.debug(s"selectHakemuksetQuery: ${query.statements.head}")
