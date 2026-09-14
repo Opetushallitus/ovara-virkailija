@@ -104,4 +104,39 @@ class HakutoiveRowSpec extends AnyFlatSpec {
 
     assert(result.pisteet.isEmpty)
   }
+
+  it should "return alinHyvaksyttyPistemaara when it is positive" in {
+    val toive = createHakutoiveRow(alinHyvaksyttyPistemaara = 21.1)
+
+    val result = toive.asHakutoive(Map(KOULUTUS_KOODIURI -> createKoulutusKoodi()), Some(YESTERDAY))
+
+    assert(result.alinHyvaksyttyPistemaara.contains(BigDecimal(21.1)))
+  }
+
+  it should "return alinHyvaksyttyPistemaara when it is zero" in {
+    val toive = createHakutoiveRow(alinHyvaksyttyPistemaara = 0)
+
+    val result = toive.asHakutoive(Map(KOULUTUS_KOODIURI -> createKoulutusKoodi()), Some(YESTERDAY))
+
+    assert(result.alinHyvaksyttyPistemaara.contains(BigDecimal(0)))
+  }
+
+  it should "not return alinHyvaksyttyPistemaara when it is negative" in {
+    val toive = createHakutoiveRow(alinHyvaksyttyPistemaara = -1.5)
+
+    val result = toive.asHakutoive(Map(KOULUTUS_KOODIURI -> createKoulutusKoodi()), Some(YESTERDAY))
+
+    assert(result.alinHyvaksyttyPistemaara.isEmpty)
+    assert(result.valintatila == "HYVAKSYTTY")
+    assert(result.pisteet.contains(BigDecimal(23.7)))
+    assert(result.varasijanumero.contains(4))
+  }
+
+  it should "not return alinHyvaksyttyPistemaara when julkaistavissa is false" in {
+    val toive = createHakutoiveRow(julkaistavissa = Some(false))
+
+    val result = toive.asHakutoive(Map(KOULUTUS_KOODIURI -> createKoulutusKoodi()), Some(YESTERDAY))
+
+    assert(result.alinHyvaksyttyPistemaara.isEmpty)
+  }
 }

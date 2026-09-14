@@ -91,7 +91,7 @@ case class HakutoiveRow(
       ilmoittautumistila = keskenIfMissingOrNotJulkaistu(ilmoittautumistila, "EI_TEHTY"),
       valintatila = keskenIfMissingOrNotJulkaistu(valintatila),
       harkinnanvaraisuus = harkinnanvaraisuus,
-      alinHyvaksyttyPistemaara = if (julkaistu) Some(alinHyvaksyttyPistemaara) else None,
+      alinHyvaksyttyPistemaara = if (julkaistu) Some(alinHyvaksyttyPistemaara).filter(_ >= 0) else None,
       pisteet = if (julkaistu) pisteet.filter(_ >= 0) else None,
       varasijanumero = if (julkaistu) varasijanNumero else None
     )
