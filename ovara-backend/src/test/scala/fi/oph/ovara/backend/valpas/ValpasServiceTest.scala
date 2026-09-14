@@ -93,6 +93,26 @@ class ValpasServiceTest extends AnyFlatSpec with Matchers with BeforeAndAfterEac
     assert(response.toOption.get.isEmpty)
   }
 
+  it should "not return hakemus when haku is korkeakouluhaku" in {
+    initSchema()
+    insertHakemus(kohdejoukkoKoodiuri = "haunkohdejoukko_12#1")
+
+    val response = service.getValpasTiedot(List(OPPIJANUMERO), false)
+
+    assert(response.isRight)
+    assert(response.toOption.get.isEmpty)
+  }
+
+  it should "return hakemus for other kohdejoukot than korkeakoulu" in {
+    initSchema()
+    insertHakemus(kohdejoukkoKoodiuri = "haunkohdejoukko_10#1")
+
+    val response = service.getValpasTiedot(List(OPPIJANUMERO), false)
+
+    val hakemus = getOnlyHakemus(response)
+    assert(hakemus.hakemusOid == HAKEMUS_OID)
+  }
+
   it should "return hakemus for active haku when vainAktiiviset is true" in {
     initSchema()
     insertHakemus()
