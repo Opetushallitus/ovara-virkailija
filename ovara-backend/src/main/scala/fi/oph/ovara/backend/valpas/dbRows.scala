@@ -92,7 +92,7 @@ case class HakutoiveRow(
       valintatila = keskenIfMissingOrNotJulkaistu(valintatila),
       harkinnanvaraisuus = harkinnanvaraisuus,
       alinHyvaksyttyPistemaara = if (julkaistu) Some(alinHyvaksyttyPistemaara) else None,
-      pisteet = if (julkaistu) pisteet else None,
+      pisteet = if (julkaistu) pisteet.filter(_ >= 0) else None,
       varasijanumero = if (julkaistu) varasijanNumero else None
     )
   }
