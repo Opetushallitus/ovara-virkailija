@@ -43,7 +43,9 @@ object ValpasFactory {
     vastaanottotieto: Option[String] = Some("VASTAANOTTANUT_SITOVASTI"),
     ilmoittautumistila: Option[String] = Some("LASNA_KOKO_LUKUVUOSI"),
     valintatila: Option[String] = Some("HYVAKSYTTY"),
-    julkaistavissa: Option[Boolean] = Some(true)
+    julkaistavissa: Option[Boolean] = Some(true),
+    pisteet: Option[BigDecimal] = Some(23.7),
+    alinHyvaksyttyPistemaara: BigDecimal = 21.1
   ): HakutoiveRow = HakutoiveRow(
     hakemusOid = HAKEMUS_OID,
     hakukohdeOid = HAKUKOHDE_OID,
@@ -59,8 +61,8 @@ object ValpasFactory {
     valintatila = valintatila,
     harkinnanvaraisuus = "EI_HARKINNANVARAINEN",
     valintatapajonoId = VALINTATAPAJONO_ID,
-    alinHyvaksyttyPistemaara = 21.1,
-    pisteet = Some(23.7),
+    alinHyvaksyttyPistemaara = alinHyvaksyttyPistemaara,
+    pisteet = pisteet,
     varasijanNumero = Some(4),
     julkaistavissa = julkaistavissa
   )
