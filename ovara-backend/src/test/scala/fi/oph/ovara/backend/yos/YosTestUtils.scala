@@ -24,6 +24,7 @@ object YosTestUtils {
     opiskelijaAvain = OPPIJA_OID,
     opiskeluoikeusAvain = OPISKELU_OIKEUS_AVAIN,
     opiskeluoikeudenNimi = Map(Fi -> "Sateentekijän tutkinto"),
+    opiskeluoikeudenAlkuPvm = Some(LocalDate.now().minusYears(1)),
     opiskeluoikeudenViimeisinTila = "2",
     koulutusaste = Some(YosConstants.KOULUTUSASTE_AMK),
     koulutusKoodi = Some("14"),
