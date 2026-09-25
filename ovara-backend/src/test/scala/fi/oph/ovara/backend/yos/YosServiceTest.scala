@@ -71,7 +71,7 @@ class YosServiceTest {
   }
 
   @Test
-  def palauttaaPaattyvatOpiskeluoikeudetIlmanValintarekisteinYosTietojakin(): Unit = {
+  def palauttaaPaattyvatOpiskeluoikeudetIlmanValintarekisterinYosTietojakin(): Unit = {
     when(db.run(any(), ArgumentMatchers.eq("opiskeluoikeudetQuery"))).thenReturn(List(OPISKELUOIKEUS))
     when(db.run(any(), ArgumentMatchers.eq("sitovastiVastaanottaneetQuery"))).thenReturn(List(VASTAANOTTO))
     when(db.run(any(), ArgumentMatchers.eq("yosHenkilotQuery"))).thenReturn(List(HENKILO))
@@ -99,6 +99,19 @@ class YosServiceTest {
     assertFalse(oikeus.naytettyHakijalle)
     assertEquals(None, oikeus.uudenOpiskeluoikeudenAlkamispvm)
     assertEquals(None, oikeus.opiskeluoikeudenPaattymispvm)
+  }
+
+  @Test
+  def eiPalautaVastaanotettuaOpiskeluoikeuttaPaattyvana(): Unit = {
+    when(db.run(any(), ArgumentMatchers.eq("opiskeluoikeudetQuery"))).thenReturn(
+      List(OPISKELUOIKEUS.copy(opiskeluoikeudenAlkuPvm = Some(VASTAANOTTO.vastaanottoAjankohta.get.plusDays(1))))
+    )
+    when(db.run(any(), ArgumentMatchers.eq("sitovastiVastaanottaneetQuery"))).thenReturn(List(VASTAANOTTO))
+    when(db.run(any(), ArgumentMatchers.eq("yosHenkilotQuery"))).thenReturn(List(HENKILO))
+    when(db.run(any(), ArgumentMatchers.eq("valintarekisteriYosQuery"))).thenReturn(List(
+      YOS_VALINTAREKISTERI.copy(paateltyAloitusPvm = VASTAANOTTO.vastaanottoAjankohta)))
+    val oikeudet = service.getPaattyvatOpiskeluOikeudet(orgs, params)
+    assertTrue(oikeudet.isEmpty)
   }
 
 }

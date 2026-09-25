@@ -36,6 +36,7 @@ case class KKPaatettavaOpiskeluoikeusEntity(
   opiskelijaAvain: String,
   opiskeluoikeusAvain: String,
   opiskeluoikeudenNimi: Kielistetty,
+  opiskeluoikeudenAlkuPvm: Option[LocalDate],
   opiskeluoikeudenViimeisinTila: String,
   koulutusaste: Option[String],
   koulutusKoodi: Option[String],
