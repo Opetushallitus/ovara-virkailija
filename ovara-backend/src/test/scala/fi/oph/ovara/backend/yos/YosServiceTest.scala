@@ -108,8 +108,8 @@ class YosServiceTest {
     )
     when(db.run(any(), ArgumentMatchers.eq("sitovastiVastaanottaneetQuery"))).thenReturn(List(VASTAANOTTO))
     when(db.run(any(), ArgumentMatchers.eq("yosHenkilotQuery"))).thenReturn(List(HENKILO))
-    when(db.run(any(), ArgumentMatchers.eq("valintarekisteriYosQuery"))).thenReturn(List(
-      YOS_VALINTAREKISTERI.copy(paateltyAloitusPvm = VASTAANOTTO.vastaanottoAjankohta)))
+    when(db.run(any(), ArgumentMatchers.eq("valintarekisteriYosQuery")))
+      .thenReturn(List(YOS_VALINTAREKISTERI.copy(paateltyAloitusPvm = VASTAANOTTO.vastaanottoAjankohta)))
     val oikeudet = service.getPaattyvatOpiskeluOikeudet(orgs, params)
     assertTrue(oikeudet.isEmpty)
   }
