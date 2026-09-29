@@ -52,6 +52,7 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
         SELECT oo.henkilo_oid AS opiskelijaAvain,
           oo.virta_tunniste AS opiskeluoikeusAvain,
           oo.nimi_fi, oo.nimi_sv, oo.nimi_en,
+          oo.alku_pvm,
           oo.virta_opiskeluoikeuden_tila AS opiskeluoikeudenViimeisinTila,
           oo.koulutusaste,
           oo.koulutus_koodi AS koulutusKoodi,
