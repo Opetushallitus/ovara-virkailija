@@ -42,7 +42,7 @@ class ValpasExtractors extends Extractors with ValpasFormats {
       valintatila = r.nextStringOption(),
       harkinnanvaraisuus = r.nextString(),
       valintatapajonoId = r.nextString(),
-      alinHyvaksyttyPistemaara = r.nextBigDecimal(),
+      alinHyvaksyttyPistemaara = r.nextBigDecimalOption(),
       pisteet = r.nextBigDecimalOption(),
       varasijanNumero = r.nextIntOption(),
       julkaistavissa = r.nextBooleanOption()

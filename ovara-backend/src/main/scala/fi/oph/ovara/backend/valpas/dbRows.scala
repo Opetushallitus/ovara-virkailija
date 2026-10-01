@@ -67,7 +67,7 @@ case class HakutoiveRow(
   valintatila: Option[String],
   harkinnanvaraisuus: String,
   valintatapajonoId: String,
-  alinHyvaksyttyPistemaara: BigDecimal,
+  alinHyvaksyttyPistemaara: Option[BigDecimal],
   pisteet: Option[BigDecimal],
   varasijanNumero: Option[Int],
   julkaistavissa: Option[Boolean]
@@ -91,8 +91,8 @@ case class HakutoiveRow(
       ilmoittautumistila = keskenIfMissingOrNotJulkaistu(ilmoittautumistila, "EI_TEHTY"),
       valintatila = keskenIfMissingOrNotJulkaistu(valintatila),
       harkinnanvaraisuus = harkinnanvaraisuus,
-      alinHyvaksyttyPistemaara = if (julkaistu) Some(alinHyvaksyttyPistemaara) else None,
-      pisteet = if (julkaistu) pisteet else None,
+      alinHyvaksyttyPistemaara = if (julkaistu) alinHyvaksyttyPistemaara.filter(_ >= 0) else None,
+      pisteet = if (julkaistu) pisteet.filter(_ >= 0) else None,
       varasijanumero = if (julkaistu) varasijanNumero else None
     )
   }
