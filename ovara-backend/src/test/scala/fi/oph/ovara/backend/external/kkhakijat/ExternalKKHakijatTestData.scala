@@ -57,6 +57,12 @@ object ExternalKKHakijatTestData {
   val JATETTY_STR  = "2025-09-01T10:00:30+03:00"
   val MUOKATTU_STR = "2025-09-13T14:52:14+03:00"
 
+  // gen_hakemus_kasittelymerkinnat.requirement
+  val ELIGIBILITY_REQUIREMENT = "eligibility-state"
+  val PAYMENT_REQUIREMENT     = "payment-obligation"
+  // Sekä kirjaamaton että eksplisiittinen "unreviewed" päätyvät tähän.
+  val NOT_CHECKED = "NOT_CHECKED"
+
   val VALINTATIETO          = "HYVAKSYTTY"
   val VASTAANOTTOTIETO      = "VASTAANOTTANUT_SITOVASTI"
   val ILMOITTAUTUMISEN_TILA = "LASNA_KOKO_LUKUVUOSI"
