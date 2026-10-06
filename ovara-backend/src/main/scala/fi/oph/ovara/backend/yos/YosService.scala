@@ -37,17 +37,18 @@ class YosService(
   ): List[KkPaatettavaOpiskeluoikeus] = {
     val opiskeluoikeudet         = getOpiskeluoikeudet(orgOids, params)
     val sitovastiVastaanottaneet = getSitovastivastaanottaneet(opiskeluoikeudet)
-    val yossiinKuuluvat: List[(KKPaatettavaOpiskeluoikeusEntity, KKSitovastiVastaanottanut)] = opiskeluoikeudet
-      .map(o => {
-        sitovastiVastaanottaneet
-          .find(v =>
-            v.oppijanumero.equals(o.opiskelijaAvain)
-              && YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(o, v)
-          )
-          .map(v => (o, v))
-      })
-      .filter(_.isDefined)
-      .map(_.get)
+    val yossiinKuuluvat: List[(KKPaatettavaOpiskeluoikeusEntity, KKSitovastiVastaanottanut)] =
+      opiskeluoikeudet
+        .map(o => {
+          sitovastiVastaanottaneet
+            .find(v =>
+              v.oppijanumero.equals(o.opiskelijaAvain)
+                && YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(o, v)
+            )
+            .map(v => (o, v))
+        })
+        .filter(_.isDefined)
+        .map(_.get)
     val yossiinKuuluvatHenkilot = getYossinPiiriinKuuluvatHenkilot(yossiinKuuluvat, params)
     val yosValintarekisteriTiedot: Map[String, List[YosValintarekisteriTiedot]] = getYosValintarekisteriTiedot(
       yossiinKuuluvatHenkilot
@@ -56,40 +57,52 @@ class YosService(
       .map((o, v) =>
         yossiinKuuluvatHenkilot
           .find(h => h.oppijanumero.equals(o.opiskelijaAvain))
-          .map(h => {
+          .flatMap(h => {
             val matchingValintaRekisteriTieto = yosValintarekisteriTiedot
               .getOrElse(h.oppijanumero, List.empty)
               .find(tiedot =>
                 tiedot.hakemusOid.equals(v.hakemusOid) && tiedot.naytettyPaatettavaOikeus
                   .equals(o.yksiloivaTunniste)
               )
-            KkPaatettavaOpiskeluoikeus(
-              oppijanumero = v.oppijanumero,
-              hetu = h.hetu,
-              syntymaAika = h.syntymaAika.orNull,
-              sukunimi = h.sukunimi,
-              etunimet = h.etunimet,
-              kutsumanimi = h.kutsumanimi,
-              opiskelijaAvain = o.opiskelijaAvain,
-              opiskeluoikeusAvain = o.opiskeluoikeusAvain,
-              opiskeluoikeudenNimi = o.opiskeluoikeudenNimi,
-              opiskeluoikeudenPaattymispvm = matchingValintaRekisteriTieto
-                .flatMap(_.paateltyAloitusPvm)
-                .map(aloitusPvm => aloitusPvm.minusDays(1)),
-              opiskeluoikeudenViimeisinTila = o.opiskeluoikeudenViimeisinTila,
-              naytettyHakijalle = matchingValintaRekisteriTieto
-                .exists(tieto => tieto.naytettyPaatettavaOikeus.equals(o.yksiloivaTunniste)),
-              hakemusOid = v.hakemusOid,
-              hakuOid = v.hakuOid,
-              hakuNimi = v.haunNimi,
-              hakukohdeOid = v.hakukohdeOid,
-              hakukohdeNimi = v.hakukohdeNimi,
-              oppilaitosOid = v.oppilaitosOid,
-              oppilaitosNimi = v.oppilaitosNimi,
-              vastaanottoAjankohta = v.vastaanottoAjankohta.get,
-              koulutusluokitusKoodit = v.koulutusKoodit,
-              uudenOpiskeluoikeudenAlkamispvm = matchingValintaRekisteriTieto.flatMap(_.paateltyAloitusPvm)
-            )
+            val uudenOpiskeluoikeudenAlkamispvm = matchingValintaRekisteriTieto.flatMap(_.paateltyAloitusPvm)
+            // ei näytetä vastaanotettua uutta opiskeluoikeutta päätettävissä.
+            // opikeluoikeuden alkupäivän vertailu vastaanottoajankohtaan on ainoa keino tunnistaa tilanne toistaiseksi
+            val onJuuriVastaanotettuOpiskeluoikeus = (o.opiskeluoikeudenAlkuPvm, v.vastaanottoAjankohta) match {
+              case (Some(alkuPvm), Some(vastaanottoAjankohta)) => !alkuPvm.isBefore(vastaanottoAjankohta)
+              case _                                           => false
+            }
+            if (onJuuriVastaanotettuOpiskeluoikeus) {
+              None
+            } else {
+              Some(
+                KkPaatettavaOpiskeluoikeus(
+                  oppijanumero = v.oppijanumero,
+                  hetu = h.hetu,
+                  syntymaAika = h.syntymaAika.orNull,
+                  sukunimi = h.sukunimi,
+                  etunimet = h.etunimet,
+                  kutsumanimi = h.kutsumanimi,
+                  opiskelijaAvain = o.opiskelijaAvain,
+                  opiskeluoikeusAvain = o.opiskeluoikeusAvain,
+                  opiskeluoikeudenNimi = o.opiskeluoikeudenNimi,
+                  opiskeluoikeudenPaattymispvm =
+                    uudenOpiskeluoikeudenAlkamispvm.map(aloitusPvm => aloitusPvm.minusDays(1)),
+                  opiskeluoikeudenViimeisinTila = o.opiskeluoikeudenViimeisinTila,
+                  naytettyHakijalle = matchingValintaRekisteriTieto
+                    .exists(tieto => tieto.naytettyPaatettavaOikeus.equals(o.yksiloivaTunniste)),
+                  hakemusOid = v.hakemusOid,
+                  hakuOid = v.hakuOid,
+                  hakuNimi = v.haunNimi,
+                  hakukohdeOid = v.hakukohdeOid,
+                  hakukohdeNimi = v.hakukohdeNimi,
+                  oppilaitosOid = v.oppilaitosOid,
+                  oppilaitosNimi = v.oppilaitosNimi,
+                  vastaanottoAjankohta = v.vastaanottoAjankohta.get,
+                  koulutusluokitusKoodit = v.koulutusKoodit,
+                  uudenOpiskeluoikeudenAlkamispvm = uudenOpiskeluoikeudenAlkamispvm
+                )
+              )
+            }
           })
       )
       .filter(_.isDefined)
