@@ -86,7 +86,7 @@ class KkPaatettavatOpiskeluoikeudetRepository extends Extractors {
         FROM gen.gen_valintarekisteri vr
         INNER JOIN gen.gen_hakukohde hk ON vr.hakukohde_oid = hk.hakukohde_oid
         INNER JOIN gen.gen_haku haku on haku.haku_oid = hk.haku_oid
-        INNER JOIN gen.gen_organisaatio org on org.organisaatio_oid = hk.jarjestyspaikka_oid
+        INNER JOIN gen.gen_organisaatio org on org.organisaatio_oid = COALESCE(hk.oppilaitos_oid, hk.jarjestyspaikka_oid)
         LEFT JOIN gen.gen_toteutus tot on tot.toteutus_oid = hk.toteutus_oid
         LEFT JOIN gen.gen_koulutus koul on koul.koulutus_oid = tot.koulutus_oid
         LEFT JOIN LATERAL (SELECT json_agg(json_build_object(
