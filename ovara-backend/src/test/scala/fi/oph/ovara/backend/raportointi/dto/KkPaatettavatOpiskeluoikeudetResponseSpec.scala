@@ -49,7 +49,7 @@ class KkPaatettavatOpiskeluoikeudetResponseSpec extends AnyFlatSpec with Matcher
     val henkilo = response.henkilot.asScala.head
     henkilo.oppijanumero shouldEqual opiskeluoikeus.oppijanumero
     henkilo.henkilotunnus.toScala shouldEqual opiskeluoikeus.hetu
-    henkilo.syntymaaika shouldEqual "1.1.2001"
+    henkilo.syntymaaika shouldEqual "01.01.2001"
     henkilo.sukunimi shouldEqual opiskeluoikeus.sukunimi
     henkilo.etunimet shouldEqual opiskeluoikeus.etunimet
     henkilo.kutsumanimi shouldEqual opiskeluoikeus.kutsumanimi
@@ -79,8 +79,8 @@ class KkPaatettavatOpiskeluoikeudetResponseSpec extends AnyFlatSpec with Matcher
     vastaanottoTiedot.koulutusKoodit.asScala.map(_.koodiUri) shouldEqual opiskeluoikeus.koulutusluokitusKoodit.map(
       _.koodiUri
     )
-    vastaanottoTiedot.opiskeluoikeusAlkamisaika.toScala shouldEqual Some("1.9.2026")
-    vastaanottoTiedot.paikanVastaanottoaika shouldEqual "15.8.2026"
+    vastaanottoTiedot.opiskeluoikeusAlkamisaika.toScala shouldEqual Some("01.09.2026")
+    vastaanottoTiedot.paikanVastaanottoaika shouldEqual "15.08.2026"
 
   }
 
