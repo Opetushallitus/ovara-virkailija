@@ -1,6 +1,6 @@
 package fi.oph.ovara.backend.raportointi.dto
 
-import fi.oph.ovara.backend.utils.Constants.DATE_FORMATTER_FOR_EXCEL
+import fi.oph.ovara.backend.utils.Constants.DATE_FORMATTER_FOR_JSON
 import fi.oph.ovara.backend.domain.KkPaatettavaOpiskeluoikeus
 import fi.oph.ovara.backend.utils.TranslationUtils
 import io.swagger.v3.oas.annotations.media.Schema
@@ -104,7 +104,7 @@ def buildKkPaatettavatOpiskeluoikeudetResponse(
           opiskelijaAvain = item.opiskelijaAvain,
           opiskeluoikeusAvain = item.opiskeluoikeusAvain,
           nimi = TranslationUtils.getKielistettyValue(item.opiskeluoikeudenNimi, asiointikieli),
-          paattymisPaivamaara = item.opiskeluoikeudenPaattymispvm.map(_.format(DATE_FORMATTER_FOR_EXCEL)).toJava,
+          paattymisPaivamaara = item.opiskeluoikeudenPaattymispvm.map(_.format(DATE_FORMATTER_FOR_JSON)).toJava,
           tila = item.opiskeluoikeudenViimeisinTila
         ),
         vastaanottoTiedot = VastaanottoTiedot(
@@ -119,8 +119,8 @@ def buildKkPaatettavatOpiskeluoikeudetResponse(
             .map(koodi => KoulutusKoodiResponse(koodiArvo = koodi.koodiArvo, koodiUri = koodi.koodiUri))
             .asJava,
           opiskeluoikeusAlkamisaika =
-            item.uudenOpiskeluoikeudenAlkamispvm.map(_.format(DATE_FORMATTER_FOR_EXCEL)).toJava,
-          paikanVastaanottoaika = item.vastaanottoAjankohta.format(DATE_FORMATTER_FOR_EXCEL)
+            item.uudenOpiskeluoikeudenAlkamispvm.map(_.format(DATE_FORMATTER_FOR_JSON)).toJava,
+          paikanVastaanottoaika = item.vastaanottoAjankohta.format(DATE_FORMATTER_FOR_JSON)
         )
       )
     }
@@ -128,7 +128,7 @@ def buildKkPaatettavatOpiskeluoikeudetResponse(
     KkPaatettavatOpiskeluoikeudetHenkilo(
       oppijanumero = henkilo.oppijanumero,
       henkilotunnus = henkilo.hetu.toJava,
-      syntymaaika = henkilo.syntymaAika.format(DATE_FORMATTER_FOR_EXCEL),
+      syntymaaika = henkilo.syntymaAika.format(DATE_FORMATTER_FOR_JSON),
       sukunimi = henkilo.sukunimi,
       etunimet = henkilo.etunimet,
       kutsumanimi = henkilo.kutsumanimi,
