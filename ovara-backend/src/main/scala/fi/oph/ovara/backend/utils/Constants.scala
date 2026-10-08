@@ -80,6 +80,7 @@ object Constants {
 
   val ISO_LOCAL_DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")
   val DATE_FORMATTER_FOR_EXCEL: DateTimeFormatter      = DateTimeFormatter.ofPattern("d.M.yyyy")
+  val DATE_FORMATTER_FOR_JSON: DateTimeFormatter       = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
   val PSQL_TIMESTAMPTZ_FORMATTER: DateTimeFormatter = new DateTimeFormatterBuilder()
     .append(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
