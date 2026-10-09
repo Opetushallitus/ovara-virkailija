@@ -63,11 +63,10 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             hlo.syntymaaika,
             hlo.kansalaisuus,
             hlo.turvakielto,
-            (SELECT true FROM gen.gen_supa_tieto st
+            (SELECT bool_or(st.arvo IN ('true', '"true"')) FROM gen.gen_supa_tieto st
               WHERE st.hakemus_oid = hakemus.hakemus_oid
                 AND st.avain = 'ensikertalainen'
-                AND st.arvo IN ('true', '"true"')
-              LIMIT 1) AS ensikertalainen,
+                AND st.arvo IN ('true', '"true"', 'false', '"false"')) AS ensikertalainen,
             (SELECT hk.koulutuksen_alkamisvuosi FROM gen.gen_hakutoive ht
               INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
               WHERE ht.hakemus_oid = hakemus.hakemus_oid

@@ -2124,13 +2124,70 @@ class ExternalKKHakijatControllerTest
   }
 
   @Test
-  def ensikertalainenNullWhenArvoIsFalse(): Unit = {
+  def ensikertalainenFalseWhenArvoIsFalse(): Unit = {
     seedMinimalHakija()
     insertSupaTieto(avain = "ensikertalainen", arvo = Some("false"))
 
     get()
       .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(false))
+  }
+
+  @Test
+  def ensikertalainenFalseWhenArvoIsQuotedFalse(): Unit = {
+    seedMinimalHakija()
+    insertSupaTieto(avain = "ensikertalainen", arvo = Some("\"false\""))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(false))
+  }
+
+  @Test
+  def ensikertalainenNullWhenArvoIsUnrecognized(): Unit = {
+    seedMinimalHakija()
+    insertSupaTieto(avain = "ensikertalainen", arvo = Some("maybe"))
+
+    get()
+      .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].ensikertalainen").doesNotExist())
+  }
+
+  @Test
+  def ensikertalainenNullWhenArvoIsNull(): Unit = {
+    seedMinimalHakija()
+    insertSupaTieto(avain = "ensikertalainen", arvo = None)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").doesNotExist())
+  }
+
+  @Test
+  def ensikertalainenTrueWinsWhenBothTrueAndFalseRowsExist(): Unit = {
+    seedMinimalHakija()
+    insertSupaTieto(avain = "ensikertalainen", arvo = Some("false"))
+    insertSupaTieto(avain = "ensikertalainen", arvo = Some("true"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(true))
+  }
+
+  @Test
+  def excelLeavesEnsikertalainenCellEmptyWhenFalse(): Unit = {
+    seedMinimalHakija()
+    insertSupaTieto(avain = "ensikertalainen", arvo = Some("false"))
+
+    val result   = getExcel().andExpect(status.isOk).andReturn()
+    val workbook = new XSSFWorkbook(new ByteArrayInputStream(result.getResponse.getContentAsByteArray))
+    try {
+      val sheet  = workbook.getSheetAt(0)
+      val header = sheet.getRow(0).getCell(23).getStringCellValue
+      val cell   = sheet.getRow(1).getCell(23).getStringCellValue
+      assert(header == "On ensikertalainen", s"unexpected header at cell 23: $header")
+      assert(cell == "", s"expected empty ensikertalainen cell, got: '$cell'")
+    } finally workbook.close()
   }
 
   @Test
