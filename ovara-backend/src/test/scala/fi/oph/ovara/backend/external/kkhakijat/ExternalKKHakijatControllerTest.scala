@@ -1027,23 +1027,23 @@ class ExternalKKHakijatControllerTest
     get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].asiointikieli").value(""))
-      .andExpect(jsonPath("$.hakijat[0].syntymaaika").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].puhelin").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].syntymaaika").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].puhelin").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].onYlioppilas").value(false))
-      .andExpect(jsonPath("$.hakijat[0].yoSuoritusVuosi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].yoSuoritusVuosi").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].turvakielto").value(false))
-      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].avoinVayla").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].avoinVayla").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("KESKEN"))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pohjakoulutus").isEmpty)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuusLahde").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuusLahde").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset").isEmpty)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].liitteet").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].liitteet").doesNotExist())
   }
 
   // ---- Filter correctness ----
@@ -1139,7 +1139,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").doesNotExist())
   }
 
   @Test
@@ -1149,7 +1149,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").doesNotExist())
   }
 
   @Test
@@ -1284,7 +1284,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuusMaksuvelvollisuus").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuusMaksuvelvollisuus").doesNotExist())
   }
 
   @Test
@@ -1333,7 +1333,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").doesNotExist())
   }
 
   @Test
@@ -1342,7 +1342,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").doesNotExist())
   }
 
   @Test
@@ -1353,7 +1353,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").doesNotExist())
   }
 
   @Test
@@ -1399,7 +1399,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").doesNotExist())
   }
 
   @ParameterizedTest
@@ -1467,7 +1467,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").doesNotExist())
   }
 
   @Test
@@ -1481,7 +1481,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").doesNotExist())
   }
 
   @Test
@@ -1604,7 +1604,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").doesNotExist())
   }
 
   @Test
@@ -1619,7 +1619,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").doesNotExist())
   }
 
   @Test
@@ -1633,9 +1633,9 @@ class ExternalKKHakijatControllerTest
     get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehdollisestiHyvaksyttavissa").value(false))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoFI").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoSV").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoEN").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoFI").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoSV").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoEN").doesNotExist())
   }
 
   @Test
@@ -1685,8 +1685,8 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").doesNotExist())
   }
 
   @Test
@@ -1697,8 +1697,8 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").doesNotExist())
   }
 
   @Test
@@ -1712,7 +1712,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("Nimi"))
   }
 
@@ -1855,7 +1855,7 @@ class ExternalKKHakijatControllerTest
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset", hasSize[Any](1)))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].komoOid").value(KOULUTUS_OID))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutusKoodi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutusKoodi").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].kkKoulutusId").value("672301"))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutuksenAlkamisvuosi").value(2026))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutuksenAlkamiskausi").value("S"))
@@ -1935,7 +1935,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].syntymaaika").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].syntymaaika").doesNotExist())
   }
 
   // ---- Kansalaisuus / kansalaisuudet / turvakielto (gen_henkilo-sourced) ----
@@ -1959,7 +1959,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].kansalaisuus").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuus").doesNotExist())
   }
 
   @Test
@@ -2064,7 +2064,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].yoSuoritusVuosi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].yoSuoritusVuosi").doesNotExist())
   }
 
   @Test
@@ -2074,7 +2074,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].yoSuoritusVuosi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].yoSuoritusVuosi").doesNotExist())
   }
 
   @Test
@@ -2120,7 +2120,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").doesNotExist())
   }
 
   @Test
@@ -2130,7 +2130,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").doesNotExist())
   }
 
   @Test
@@ -2140,7 +2140,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").doesNotExist())
   }
 
   // ---- Excel ----
