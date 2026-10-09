@@ -168,7 +168,7 @@ class ExternalHakijatOpenApiTest {
     assertEquals(
       Seq(
         "komoOid",
-        "koulutusKoodi",
+        "tkKoulutuskoodi",
         "kkKoulutusId",
         "koulutuksenAlkamiskausi",
         "koulutuksenAlkamisvuosi",

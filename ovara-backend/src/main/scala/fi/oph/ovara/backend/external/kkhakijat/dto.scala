@@ -308,7 +308,7 @@ object HyvaksymisenEhtoResponse {
 @JsonPropertyOrder(
   Array(
     "komoOid",
-    "koulutusKoodi",
+    "tkKoulutuskoodi",
     "kkKoulutusId",
     "koulutuksenAlkamiskausi",
     "koulutuksenAlkamisvuosi",
@@ -319,7 +319,7 @@ case class KkHakukohteenkoulutusResponse(
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
   @BeanProperty komoOid: String,
   @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
-  @BeanProperty koulutusKoodi: String,
+  @BeanProperty tkKoulutuskoodi: String,
   @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
   @BeanProperty kkKoulutusId: String,
   @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
@@ -334,7 +334,7 @@ object KkHakukohteenkoulutusResponse {
   def apply(k: KkHakukohteenkoulutus): KkHakukohteenkoulutusResponse =
     KkHakukohteenkoulutusResponse(
       komoOid = k.komoOid,
-      koulutusKoodi = k.koulutusKoodi.orNull,
+      tkKoulutuskoodi = k.koulutusKoodi.orNull,
       kkKoulutusId = k.kkKoulutusId.orNull,
       koulutuksenAlkamiskausi = k.koulutuksenAlkamiskausi.orNull,
       koulutuksenAlkamisvuosi = k.koulutuksenAlkamisvuosi.map(Int.box).orNull,

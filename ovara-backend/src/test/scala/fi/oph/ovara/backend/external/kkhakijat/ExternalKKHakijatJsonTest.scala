@@ -209,7 +209,7 @@ class ExternalKKHakijatJsonTest extends AnyFlatSpec with Matchers {
     )
     keys(hakemus.get("hakukohteenKoulutukset").get(0)) shouldBe Seq(
       "komoOid",
-      "koulutusKoodi",
+      "tkKoulutuskoodi",
       "kkKoulutusId",
       "koulutuksenAlkamiskausi",
       "koulutuksenAlkamisvuosi",
