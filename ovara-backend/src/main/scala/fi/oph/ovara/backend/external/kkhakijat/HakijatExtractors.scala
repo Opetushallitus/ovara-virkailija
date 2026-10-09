@@ -36,18 +36,8 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
     val kansalaisuus                = r.nextStringOption()
     val turvakielto                 = r.nextBooleanOption()
     val ensikertalainen             = r.nextBooleanOption()
-    val hakukohdeVuosi              = r.nextIntOption()
-    val hakukohdeKausi              = r.nextStringOption()
     val hakuVuosi                   = r.nextIntOption()
-    val hakuKausi                   = r.nextStringOption()
-    val toteutusVuosi               = r.nextIntOption()
-    val toteutusKausi               = r.nextStringOption()
-
-    val (vuosi, rawKausi) = pickVuosiKausiAtomically(
-      (hakukohdeVuosi, hakukohdeKausi),
-      (hakuVuosi, hakuKausi),
-      (toteutusVuosi, toteutusKausi)
-    )
+    val hakuKausi                   = normalizeKausi(r.nextStringOption())
 
     KKHakijaRow(
       oppijanumero = oppijanumero,
@@ -77,8 +67,8 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       kansalaisuus = kansalaisuus,
       turvakielto = turvakielto,
       ensikertalainen = ensikertalainen,
-      vuosi = vuosi,
-      kausi = normalizeKausi(rawKausi)
+      vuosi = hakuVuosi,
+      kausi = hakuKausi
     )
   }
 
@@ -138,11 +128,4 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       case KoulutusKoodiPattern(digits) => Some(digits)
       case _                            => None
     }
-
-  private def pickVuosiKausiAtomically(
-    candidates: (Option[Int], Option[String])*
-  ): (Option[Int], Option[String]) =
-    candidates
-      .find { case (v, k) => v.isDefined && k.isDefined }
-      .getOrElse((None, None))
 }

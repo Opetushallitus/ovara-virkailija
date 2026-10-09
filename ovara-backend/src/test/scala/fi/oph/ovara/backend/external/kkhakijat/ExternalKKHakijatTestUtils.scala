@@ -72,7 +72,9 @@ trait ExternalKKHakijatTestUtils {
     hakuOid: String = HAKU_OID,
     kohdejoukkoKoodiuri: String = "haunkohdejoukko_12#1",
     koulutuksenAlkamisvuosi: Option[Int] = None,
-    koulutuksenAlkamiskausiuri: Option[String] = None
+    koulutuksenAlkamiskausiuri: Option[String] = None,
+    hakuVuosi: Option[Int] = Some(VUOSI),
+    hakuKausi: Option[String] = Some(KOULUTUKSEN_ALKAMISKAUSIURI)
   ): Unit = {
     db.run(
       sqlu"""INSERT INTO gen.gen_haku VALUES(
@@ -83,7 +85,9 @@ trait ExternalKKHakijatTestUtils {
           'Joint application',
           $kohdejoukkoKoodiuri,
           $koulutuksenAlkamisvuosi,
-          $koulutuksenAlkamiskausiuri
+          $koulutuksenAlkamiskausiuri,
+          $hakuVuosi,
+          $hakuKausi
           )""",
       "Insert test kk-haku"
     )
@@ -333,7 +337,9 @@ trait ExternalKKHakijatTestUtils {
               haku_nimi_en text,
               kohdejoukko_koodiuri text,
               koulutuksen_alkamisvuosi integer,
-              koulutuksen_alkamiskausiuri text
+              koulutuksen_alkamiskausiuri text,
+              haku_vuosi integer,
+              haku_kausi text
           );
 
           CREATE TABLE gen.gen_hakutoive(

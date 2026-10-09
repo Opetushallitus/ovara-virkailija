@@ -2200,6 +2200,59 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].ensikertalainen").doesNotExist())
   }
 
+  // ---- Hakuvuosi ja hakukausi ----
+
+  /** Seedaa hakijan, jonka haun omat vuosi/kausi poikkeavat koulutuksen alkamisvuosista/-kausista. */
+  private def seedHakijaWithHakuVuosiKausi(hakuVuosi: Option[Int], hakuKausi: Option[String]): Unit = {
+    initSchema()
+    insertHenkilo()
+    insertHaku(
+      koulutuksenAlkamisvuosi = Some(2028),
+      koulutuksenAlkamiskausiuri = Some("kausi_s#1"),
+      hakuVuosi = hakuVuosi,
+      hakuKausi = hakuKausi
+    )
+    insertHakemus(insertHenkilo = false, insertHaku = false)
+    insertHakukohde(koulutuksenAlkamisvuosi = Some(2029), koulutuksenAlkamiskausiuri = Some("kausi_s#1"))
+    insertHakutoive()
+    insertToteutus(koulutuksenAlkamisvuosi = Some(2031), koulutuksenAlkamiskausiuri = Some("kausi_s#1"))
+  }
+
+  @Test
+  def hakuVuosiJaKausiTulevatHaunOmistaKentista(): Unit = {
+    seedHakijaWithHakuVuosiKausi(hakuVuosi = Some(2030), hakuKausi = Some("kausi_k#1"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakuVuosi").value(2030))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakuKausi").value("K"))
+  }
+
+  @Test
+  def hakuVuosiJaKausiEivatPeriKoulutuksenAlkamisestaKunHaullaEiArvoja(): Unit = {
+    seedHakijaWithHakuVuosiKausi(hakuVuosi = None, hakuKausi = None)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakuVuosi").value(0))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakuKausi").value(""))
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    value = Array(
+      "kausi_s#1, S",
+      "kausi_k#2, K"
+    )
+  )
+  def hakuKausiParsesToUppercaseLetter(kausiUri: String, expected: String): Unit = {
+    seedHakijaWithHakuVuosiKausi(hakuVuosi = Some(2030), hakuKausi = Some(kausiUri))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakuKausi").value(expected))
+  }
+
   // ---- Excel ----
 
   @Test

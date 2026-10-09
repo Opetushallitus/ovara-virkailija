@@ -67,30 +67,8 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
               WHERE st.hakemus_oid = hakemus.hakemus_oid
                 AND st.avain = 'ensikertalainen'
                 AND st.arvo IN ('true', '"true"', 'false', '"false"')) AS ensikertalainen,
-            (SELECT hk.koulutuksen_alkamisvuosi FROM gen.gen_hakutoive ht
-              INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
-              WHERE ht.hakemus_oid = hakemus.hakemus_oid
-              ORDER BY ht.hakutoivenumero
-              LIMIT 1) AS hakukohde_vuosi,
-            (SELECT hk.koulutuksen_alkamiskausiuri FROM gen.gen_hakutoive ht
-              INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
-              WHERE ht.hakemus_oid = hakemus.hakemus_oid
-              ORDER BY ht.hakutoivenumero
-              LIMIT 1) AS hakukohde_kausi,
-            haku.koulutuksen_alkamisvuosi    AS haku_vuosi,
-            haku.koulutuksen_alkamiskausiuri AS haku_kausi,
-            (SELECT t.koulutuksen_alkamisvuosi FROM gen.gen_hakutoive ht
-              INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
-              INNER JOIN gen.gen_toteutus  t  ON hk.toteutus_oid   = t.toteutus_oid
-              WHERE ht.hakemus_oid = hakemus.hakemus_oid
-              ORDER BY ht.hakutoivenumero
-              LIMIT 1) AS toteutus_vuosi,
-            (SELECT t.koulutuksen_alkamiskausiuri FROM gen.gen_hakutoive ht
-              INNER JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
-              INNER JOIN gen.gen_toteutus  t  ON hk.toteutus_oid   = t.toteutus_oid
-              WHERE ht.hakemus_oid = hakemus.hakemus_oid
-              ORDER BY ht.hakutoivenumero
-              LIMIT 1) AS toteutus_kausi
+            haku.haku_vuosi,
+            haku.haku_kausi
           FROM gen.gen_henkilo hlo
           INNER JOIN gen.gen_hakemus hakemus ON hakemus.henkilo_oid = hlo.henkilo_oid
           INNER JOIN gen.gen_haku    haku    ON hakemus.haku_oid    = haku.haku_oid
