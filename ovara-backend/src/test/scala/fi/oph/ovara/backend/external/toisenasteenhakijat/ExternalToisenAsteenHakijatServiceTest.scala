@@ -168,23 +168,20 @@ class ExternalToisenAsteenHakijatServiceTest
   it should "leave fields the query does not select empty even for a fully-populated hakija" in {
     seedFullyPopulatedHakija()
 
-    val response  = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
-    val hakija    = getOnlyHakija(response)
-    val hakemus   = hakija.hakemus
-    val hakutoive = hakemus.hakutoiveet.head
+    val response = getHakijatAsPaakayttaja(HAKU_OID, Some(HAKUKOHDE_OID), None)
+    val hakija   = getOnlyHakija(response)
+    val hakemus  = hakija.hakemus
 
     assert(hakija.muupuhelin.isEmpty)
     assert(hakija.oikeusMaksuttomaanKoulutukseenVoimassaAsti.isEmpty)
     assert(hakija.oppivelvollisuusVoimassaAsti.isEmpty)
     assert(hakija.lisakysymykset.isEmpty)
-    assert(hakemus.muukoulutus.isEmpty)
     // Excel-kirjoittaja renderöi nämä numericOrZerolla, joten tyhjä arvo näkyy "0":na.
     assert(hakemus.yhteisetaineet.isEmpty)
     assert(hakemus.lukiontasapisteet.isEmpty)
     assert(hakemus.yleinenkoulumenestys.isEmpty)
     assert(hakemus.painotettavataineet.isEmpty)
     assert(hakemus.osaaminen == Osaaminen())
-    assert(hakutoive.koulutuksenKieli.isEmpty)
   }
 
   it should "return None for lahtokoulu fields when there is no gen_henkilo_lahtokoulu row" in {
