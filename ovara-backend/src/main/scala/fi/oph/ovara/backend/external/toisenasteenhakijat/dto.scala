@@ -178,7 +178,6 @@ object HuoltajaResponse {
     "luokkataso",
     "pohjakoulutus",
     "todistusvuosi",
-    "muukoulutus",
     "julkaisulupa",
     "yhteisetaineet",
     "lukiontasapisteet",
@@ -215,8 +214,6 @@ case class HakijaHakemusResponse(
   @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
   @BeanProperty todistusvuosi: String,
   @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
-  @BeanProperty muukoulutus: String,
-  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
   @BeanProperty julkaisulupa: JBoolean,
   @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
   @BeanProperty yhteisetaineet: JBigDecimal,
@@ -248,7 +245,6 @@ object HakijaHakemusResponse {
       luokkataso = h.luokkataso.orNull,
       pohjakoulutus = h.pohjakoulutus.orNull,
       todistusvuosi = h.todistusvuosi.orNull,
-      muukoulutus = h.muukoulutus.orNull,
       julkaisulupa = h.julkaisulupa.map(Boolean.box).orNull,
       yhteisetaineet = h.yhteisetaineet.map(_.bigDecimal).orNull,
       lukiontasapisteet = h.lukiontasapisteet.map(_.bigDecimal).orNull,
@@ -278,7 +274,6 @@ object HakijaHakemusResponse {
     "terveys",
     "aiempiperuminen",
     "kaksoistutkinto",
-    "koulutuksenKieli",
     "keskiarvo",
     "urheilijanLisakysymykset"
   )
@@ -315,8 +310,6 @@ case class HakijaHakutoiveResponse(
   @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
   @BeanProperty kaksoistutkinto: JBoolean,
   @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
-  @BeanProperty koulutuksenKieli: String,
-  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
   @BeanProperty keskiarvo: String,
   @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
   @BeanProperty urheilijanLisakysymykset: UrheilijanLisakysymyksetResponse
@@ -340,7 +333,6 @@ object HakijaHakutoiveResponse {
       terveys = h.terveys.map(Boolean.box).orNull,
       aiempiperuminen = h.aiempiperuminen.map(Boolean.box).orNull,
       kaksoistutkinto = h.kaksoistutkinto.map(Boolean.box).orNull,
-      koulutuksenKieli = h.koulutuksenKieli.orNull,
       keskiarvo = h.keskiarvo.orNull,
       urheilijanLisakysymykset = h.urheilijanLisakysymykset.map(UrheilijanLisakysymyksetResponse.apply).orNull
     )

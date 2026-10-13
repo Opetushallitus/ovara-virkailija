@@ -44,7 +44,6 @@ class ExternalToisenAsteenHakijatJsonTest extends AnyFlatSpec with Matchers {
     terveys = Some(false),
     aiempiperuminen = Some(false),
     kaksoistutkinto = Some(true),
-    koulutuksenKieli = Some("FI"),
     keskiarvo = Some("8.5"),
     urheilijanLisakysymykset = Some(
       UrheilijanLisakysymykset(
@@ -87,7 +86,6 @@ class ExternalToisenAsteenHakijatJsonTest extends AnyFlatSpec with Matchers {
       luokkataso = Some("9"),
       pohjakoulutus = Some("1"),
       todistusvuosi = Some("2025"),
-      muukoulutus = Some("muu"),
       julkaisulupa = Some(true),
       yhteisetaineet = Some(BigDecimal("8.0")),
       lukiontasapisteet = Some(BigDecimal("9.0")),
@@ -193,7 +191,6 @@ class ExternalToisenAsteenHakijatJsonTest extends AnyFlatSpec with Matchers {
       "luokkataso",
       "pohjakoulutus",
       "todistusvuosi",
-      "muukoulutus",
       "julkaisulupa",
       "yhteisetaineet",
       "lukiontasapisteet",
@@ -222,7 +219,6 @@ class ExternalToisenAsteenHakijatJsonTest extends AnyFlatSpec with Matchers {
       "terveys",
       "aiempiperuminen",
       "kaksoistutkinto",
-      "koulutuksenKieli",
       "keskiarvo",
       "urheilijanLisakysymykset"
     )

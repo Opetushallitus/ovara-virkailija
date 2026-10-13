@@ -1938,28 +1938,17 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].syntymaaika").doesNotExist())
   }
 
-  // ---- Kansalaisuus / kansalaisuudet / turvakielto (gen_henkilo-sourced) ----
+  // ---- Kansalaisuudet / turvakielto (gen_henkilo-sourced) ----
 
   @Test
-  def kansalaisuusPopulatedFromHenkilo(): Unit = {
+  def removedFieldsAreNotInResponse(): Unit = {
     seedMinimalHakija() // insertHenkilo default kansalaisuus = Some("246")
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].kansalaisuus").value(SUOMI_KOODI))
-  }
-
-  @Test
-  def kansalaisuusNullWhenColumnNull(): Unit = {
-    initSchema()
-    insertHenkilo(kansalaisuus = None)
-    insertHakemus(insertHenkilo = false)
-    insertHakukohde()
-    insertHakutoive()
-
-    get()
-      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet[0]").value(SUOMI_KOODI))
       .andExpect(jsonPath("$.hakijat[0].kansalaisuus").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].kaksoiskansalaisuus").doesNotExist())
   }
 
   @Test

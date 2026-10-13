@@ -32,8 +32,6 @@ class ExternalKKHakijatJsonTest extends AnyFlatSpec with Matchers {
     sukupuoli = "1",
     aidinkieli = "FI",
     asiointikieli = "FI",
-    kansalaisuus = Some("246"),
-    kaksoiskansalaisuus = Some("752"),
     kansalaisuudet = Some(List("246", "752")),
     syntymaaika = Some("15.04.2005"),
     matkapuhelin = Some("+358409999999"),
@@ -108,8 +106,6 @@ class ExternalKKHakijatJsonTest extends AnyFlatSpec with Matchers {
   )
 
   private val minimiHakija = taysiHakija.copy(
-    kansalaisuus = None,
-    kaksoiskansalaisuus = None,
     kansalaisuudet = None,
     syntymaaika = None,
     matkapuhelin = None,
@@ -144,8 +140,6 @@ class ExternalKKHakijatJsonTest extends AnyFlatSpec with Matchers {
       "postinumero",
       "postitoimipaikka",
       "maa",
-      "kansalaisuus",
-      "kaksoiskansalaisuus",
       "kansalaisuudet",
       "syntymaaika",
       "matkapuhelin",

@@ -61,7 +61,6 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             hakemus.pohjakoulutus_kk,
             hlo.aidinkieli,
             hlo.syntymaaika,
-            hlo.kansalaisuus,
             hlo.turvakielto,
             (SELECT bool_or(st.arvo IN ('true', '"true"')) FROM gen.gen_supa_tieto st
               WHERE st.hakemus_oid = hakemus.hakemus_oid

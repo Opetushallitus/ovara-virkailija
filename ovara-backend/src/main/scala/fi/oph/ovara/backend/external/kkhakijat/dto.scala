@@ -38,8 +38,6 @@ object KKHakijatResponse {
     "postinumero",
     "postitoimipaikka",
     "maa",
-    "kansalaisuus",
-    "kaksoiskansalaisuus",
     "kansalaisuudet",
     "syntymaaika",
     "matkapuhelin",
@@ -78,10 +76,6 @@ case class KKHakijaResponse(
   @BeanProperty postitoimipaikka: String,
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
   @BeanProperty maa: String,
-  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
-  @BeanProperty kansalaisuus: String,
-  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
-  @BeanProperty kaksoiskansalaisuus: String,
   @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
   @BeanProperty kansalaisuudet: java.util.List[String],
   @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
@@ -130,8 +124,6 @@ object KKHakijaResponse {
       postinumero = h.postinumero,
       postitoimipaikka = h.postitoimipaikka,
       maa = h.maa,
-      kansalaisuus = h.kansalaisuus.orNull,
-      kaksoiskansalaisuus = h.kaksoiskansalaisuus.orNull,
       kansalaisuudet = h.kansalaisuudet.map(_.asJava).orNull,
       syntymaaika = h.syntymaaika.orNull,
       matkapuhelin = h.matkapuhelin.orNull,
