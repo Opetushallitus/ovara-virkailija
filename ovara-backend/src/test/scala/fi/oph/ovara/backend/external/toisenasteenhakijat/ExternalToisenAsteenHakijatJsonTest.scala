@@ -89,7 +89,7 @@ class ExternalToisenAsteenHakijatJsonTest extends AnyFlatSpec with Matchers {
       julkaisulupa = Some(true),
       yhteisetaineet = Some(BigDecimal("8.0")),
       lukiontasapisteet = Some(BigDecimal("9.0")),
-      lisapistekoulutus = Some("LISAKOULUTUS_KYMPPI"),
+      lisapistekoulutus = Some("LISAKOULUTUS_TUVA"),
       yleinenkoulumenestys = Some(BigDecimal("8.5")),
       painotettavataineet = Some(BigDecimal("9.5")),
       osaaminen = Osaaminen(

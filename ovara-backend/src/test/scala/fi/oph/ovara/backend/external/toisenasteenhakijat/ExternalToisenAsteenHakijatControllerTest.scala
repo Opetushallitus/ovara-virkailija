@@ -1183,14 +1183,25 @@ class ExternalToisenAsteenHakijatControllerTest
   }
 
   @Test
-  def lisapistekoulutusPicksFirstByPriorityWhenMultipleAreTrue(): Unit = {
+  def lisapistekoulutusPicksOpistovuosiWhenBothAllowedKeysAreTrue(): Unit = {
     seedMinimalHakija()
     insertLisakoulutus(avain = "LISAKOULUTUS_TUVA")
-    insertLisakoulutus(avain = "LISAKOULUTUS_KYMPPI")
+    insertLisakoulutus(avain = "LISAKOULUTUS_OPISTOVUOSI")
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemus.lisapistekoulutus").value("LISAKOULUTUS_KYMPPI"))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lisapistekoulutus").value("LISAKOULUTUS_OPISTOVUOSI"))
+  }
+
+  @Test
+  def lisapistekoulutusIgnoresOtherKeysWhenAllowedKeyIsTrue(): Unit = {
+    seedMinimalHakija()
+    insertLisakoulutus(avain = "LISAKOULUTUS_KYMPPI")
+    insertLisakoulutus(avain = "LISAKOULUTUS_TUVA")
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lisapistekoulutus").value("LISAKOULUTUS_TUVA"))
   }
 
   @Test
@@ -1227,11 +1238,23 @@ class ExternalToisenAsteenHakijatControllerTest
   @Test
   def lisapistekoulutusAcceptsJsonQuotedTrue(): Unit = {
     seedMinimalHakija()
-    insertLisakoulutus(avain = "LISAKOULUTUS_VALMA", arvo = Some("\"true\""))
+    insertLisakoulutus(avain = "LISAKOULUTUS_OPISTOVUOSI", arvo = Some("\"true\""))
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemus.lisapistekoulutus").value("LISAKOULUTUS_VALMA"))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lisapistekoulutus").value("LISAKOULUTUS_OPISTOVUOSI"))
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = Array("LISAKOULUTUS_OPISTOVUOSI", "LISAKOULUTUS_TUVA"))
+  def lisapistekoulutusMapsAllowedKey(avain: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    seedMinimalHakija()
+    insertLisakoulutus(avain = avain)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lisapistekoulutus").value(avain))
   }
 
   @ParameterizedTest
@@ -1244,19 +1267,28 @@ class ExternalToisenAsteenHakijatControllerTest
       "LISAKOULUTUS_KANSANOPISTO",
       "LISAKOULUTUS_MAAHANMUUTTO",
       "LISAKOULUTUS_MAAHANMUUTTO_LUKIO",
-      "LISAKOULUTUS_VALMA",
-      "LISAKOULUTUS_OPISTOVUOSI",
-      "LISAKOULUTUS_TUVA"
+      "LISAKOULUTUS_VALMA"
     )
   )
-  def lisapistekoulutusMapsEveryKnownKey(avain: String): Unit = {
+  def lisapistekoulutusIgnoresDisallowedKey(avain: String): Unit = {
     db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
     seedMinimalHakija()
     insertLisakoulutus(avain = avain)
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemus.lisapistekoulutus").value(avain))
+      .andExpect(jsonPath("$.hakijat[0].hakemus.lisapistekoulutus").doesNotExist())
+  }
+
+  private def excelLisapistekoulutusCell(): String = {
+    val bytes    = getExcel().andExpect(status.isOk).andReturn().getResponse.getContentAsByteArray
+    val workbook = new XSSFWorkbook(new ByteArrayInputStream(bytes))
+    try {
+      val sheet     = workbook.getSheetAt(0)
+      val headerRow = sheet.getRow(0)
+      assert(headerRow.getCell(44).getStringCellValue == "Lisapistekoulutus")
+      sheet.getRow(1).getCell(44).getStringCellValue
+    } finally workbook.close()
   }
 
   @Test
@@ -1264,18 +1296,19 @@ class ExternalToisenAsteenHakijatControllerTest
     seedMinimalHakija()
     insertToteutusJaKoulutus()
     insertHakemusToinenAsteYhteishaku()
-    insertLisakoulutus(avain = "LISAKOULUTUS_VAMMAISTEN")
+    insertLisakoulutus(avain = "LISAKOULUTUS_OPISTOVUOSI")
 
-    val bytes    = getExcel().andExpect(status.isOk).andReturn().getResponse.getContentAsByteArray
-    val workbook = new XSSFWorkbook(new ByteArrayInputStream(bytes))
-    try {
-      val sheet     = workbook.getSheetAt(0)
-      val headerRow = sheet.getRow(0)
-      assert(headerRow.getCell(44).getStringCellValue == "Lisapistekoulutus")
+    assert(excelLisapistekoulutusCell() == "LISAKOULUTUS_OPISTOVUOSI")
+  }
 
-      val dataRow = sheet.getRow(1)
-      assert(dataRow.getCell(44).getStringCellValue == "LISAKOULUTUS_VAMMAISTEN")
-    } finally workbook.close()
+  @Test
+  def excelLeavesLisapistekoulutusCellEmptyForDisallowedKey(): Unit = {
+    seedMinimalHakija()
+    insertToteutusJaKoulutus()
+    insertHakemusToinenAsteYhteishaku()
+    insertLisakoulutus(avain = "LISAKOULUTUS_KYMPPI")
+
+    assert(excelLisapistekoulutusCell() == "")
   }
 
   // ---- Yhteispisteet (gen_valintarekisteri) ----
