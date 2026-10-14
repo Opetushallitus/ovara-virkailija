@@ -57,12 +57,54 @@ class KkPaatettavatOpiskeluoikeudetController(
   }
 
   @GetMapping(path = Array("excel"))
+  @Operation(
+    summary = "Palauttaa päätettävät opiskeluoikeudet Excel-muodossa.",
+    description = "Palauttaa samat päätettävät opiskeluoikeudet kuin käyttöliittymän raportti.",
+    responses = Array(
+      new ApiResponse(
+        responseCode = "200",
+        description = "Päätettävät opiskeluoikeudet Excel-tiedostona (liitteenä).",
+        content = Array(
+          new Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        )
+      ),
+      new ApiResponse(
+        responseCode = "400",
+        description = "Validointivirhe",
+        content = Array(new Content(schema = new Schema(implementation = classOf[ValidationError])))
+      ),
+      new ApiResponse(
+        responseCode = "401",
+        description = "Käyttäjällä ei ole voimassa olevaa istuntoa",
+        content = Array(new Content(schema = new Schema(implementation = classOf[ValidationError])))
+      ),
+      new ApiResponse(
+        responseCode = "403",
+        description = "Käyttäjällä on voimassa oleva istunto, mutta hänellä ei ole oikeuksia käyttää tätä rajapintaa",
+        content = Array(new Content())
+      ),
+      new ApiResponse(
+        responseCode = "500",
+        description = "Muu virhe",
+        content = Array(new Content(schema = new Schema(implementation = classOf[String])))
+      )
+    )
+  )
   def kkPaatettavatOpiskeluoikeudetExcel(
+    @Parameter(description = "Oppilaitoksen organisaatio-oid", required = true)
     @RequestParam("ovara_oppilaitos", required = true) oppilaitos: String,
+    @Parameter(description = "Sukunimi")
     @RequestParam("ovara_sukunimi", required = false) sukunimi: String,
+    @Parameter(description = "Etunimet")
     @RequestParam("ovara_etunimi", required = false) etunimet: String,
+    @Parameter(description = "Hetu")
     @RequestParam("ovara_hetu", required = false) hetu: String,
+    @Parameter(description = "Oppijanumero")
     @RequestParam("ovara_oppijanumero", required = false) oppijanumero: String,
+    @Parameter(
+      description = "Opiskeluoikeuden tila: paatettavissa tai paatetty",
+      schema = new Schema(allowableValues = Array("paatettavissa", "paatetty"))
+    )
     @RequestParam("ovara_opiskeluoikeuden_tila", required = false) opiskeluoikeudenTila: String,
     request: HttpServletRequest,
     response: HttpServletResponse
@@ -159,7 +201,10 @@ class KkPaatettavatOpiskeluoikeudetController(
     @RequestParam("ovara_hetu", required = false) hetu: String,
     @Parameter(description = "Oppijanumero")
     @RequestParam("ovara_oppijanumero", required = false) oppijanumero: String,
-    @Parameter(description = "Opiskeluoikeuden tila")
+    @Parameter(
+      description = "Opiskeluoikeuden tila: paatettavissa tai paatetty",
+      schema = new Schema(allowableValues = Array("paatettavissa", "paatetty"))
+    )
     @RequestParam("ovara_opiskeluoikeuden_tila", required = false) opiskeluoikeudenTila: String,
     request: HttpServletRequest
   ): KkPaatettavatOpiskeluoikeudetResponse = {
