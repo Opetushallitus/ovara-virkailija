@@ -163,8 +163,6 @@ case class KKHakija(
   sukupuoli: String,
   aidinkieli: String,
   asiointikieli: String,
-  kansalaisuus: Option[String] = None,
-  kaksoiskansalaisuus: Option[String] = None,
   kansalaisuudet: Option[List[String]] = None,
   syntymaaika: Option[String] = None,
   matkapuhelin: Option[String] = None,
