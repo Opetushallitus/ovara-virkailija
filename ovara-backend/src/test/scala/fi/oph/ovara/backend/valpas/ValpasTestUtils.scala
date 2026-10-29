@@ -15,7 +15,8 @@ trait ValpasTestUtils {
     aktiivinen: Boolean = true,
     oppijanumero: String = OPPIJANUMERO,
     hakemusOid: String = HAKEMUS_OID,
-    hakuOid: String = HAKU_OID
+    hakuOid: String = HAKU_OID,
+    kohdejoukkoKoodiuri: String = "haunkohdejoukko_11#1"
   ): Unit = {
     insertHenkilo(oppijanumero)
 
@@ -40,7 +41,7 @@ trait ValpasTestUtils {
           'Yhteishaku',
           'Gemensamma',
           'Joint application',
-          'haunkohdejoukko_11#1',
+          $kohdejoukkoKoodiuri,
           '[{"alkaa": "2024-08-31T23:59", "paattyy": "2027-08-31T23:59"},{"alkaa": "2026-08-31", "paattyy": "2027-09-30"},{"alkaa": "2022-08-31T23:59", "paattyy": "2023-08-31T23:59"}]'
           )""",
       "Insert test haku"
