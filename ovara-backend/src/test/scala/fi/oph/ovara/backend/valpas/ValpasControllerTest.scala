@@ -17,7 +17,8 @@ import org.springframework.security.test.context.support.{WithAnonymousUser, Wit
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.{MockMvc, ResultActions}
 import org.springframework.test.web.servlet.request.{MockHttpServletRequestBuilder, MockMvcRequestBuilders}
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.{content, status}
+import org.hamcrest.Matchers.{containsString, not}
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.{content, jsonPath, status}
 import slick.jdbc.H2Profile.api.*
 
 @SpringBootTest
@@ -122,6 +123,19 @@ class ValpasControllerTest extends ValpasTestUtils {
       get()
         .andExpect(status.isOk)
         .andExpect(content.json(expectedHakemus(expectedHakutoive)))
+    }
+
+    @Test
+    def omitsHakutoivenumeroAndNullFieldsWhenHakutoivenumeroMissing(): Unit = {
+      initSchema()
+      insertHakemus()
+      insertHakutoive(hakutoivenumero = -1)
+
+      get()
+        .andExpect(status.isOk)
+        .andExpect(jsonPath("$[0].hakutoiveet[0].hakukohdeOid").value(HAKUKOHDE_OID))
+        .andExpect(jsonPath("$[0].hakutoiveet[0].hakutoivenumero").doesNotExist())
+        .andExpect(content.string(not(containsString("null"))))
     }
 
     @Test

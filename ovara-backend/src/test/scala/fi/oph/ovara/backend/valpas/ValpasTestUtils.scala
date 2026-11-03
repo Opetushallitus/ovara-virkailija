@@ -70,7 +70,7 @@ trait ValpasTestUtils {
     )
   }
 
-  def insertHakutoive(): Unit = {
+  def insertHakutoive(hakutoivenumero: Int = 3): Unit = {
     db.run(
       sqlu"""INSERT INTO gen.gen_hakukohde values(
           $HAKUKOHDE_OID,
@@ -85,7 +85,7 @@ trait ValpasTestUtils {
       sqlu"""INSERT INTO gen.gen_hakutoive values(
           $HAKEMUS_OID,
           $HAKUKOHDE_OID,
-          3,
+          $hakutoivenumero,
           'VASTAANOTTANUT_SITOVASTI',
           'LASNA',
           'HYVAKSYTTY',

@@ -76,8 +76,8 @@ case class HakutoiveResponse(
   @BeanProperty hakukohdeOid: String,
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
   @BeanProperty hakukohdeNimi: KielistettyResponse,
-  @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-  @BeanProperty hakutoivenumero: Int,
+  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
+  @BeanProperty hakutoivenumero: Option[Int],
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
   @BeanProperty hakukohdeOrganisaatio: String,
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
@@ -191,6 +191,7 @@ object HakutoiveResponse {
     )
 }
 
+@JsonInclude(Include.NON_ABSENT)
 case class KoodistoArvoResponse(
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
   @BeanProperty versioituUri: String,
