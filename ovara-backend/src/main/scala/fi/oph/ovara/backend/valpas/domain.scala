@@ -25,7 +25,7 @@ case class Hakemus(
 case class Hakutoive(
   hakukohdeOid: String,
   hakukohdeNimi: Kielistetty,
-  hakutoivenumero: Int,
+  hakutoivenumero: Option[Int],
   hakukohdeOrganisaatio: String,
   organisaatioNimi: Kielistetty,
   koulutusOid: String,
