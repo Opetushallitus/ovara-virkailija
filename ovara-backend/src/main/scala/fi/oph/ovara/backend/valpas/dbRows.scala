@@ -56,7 +56,7 @@ case class HakutoiveRow(
   hakemusOid: String,
   hakukohdeOid: String,
   hakukohdeNimi: Kielistetty,
-  hakutoivenumero: Int,
+  hakutoivenumero: Option[Int],
   hakukohdeOrganisaatio: String,
   organisaatioNimi: Kielistetty,
   koulutusOid: String,
@@ -81,7 +81,7 @@ case class HakutoiveRow(
     Hakutoive(
       hakukohdeOid = hakukohdeOid,
       hakukohdeNimi = hakukohdeNimi,
-      hakutoivenumero = hakutoivenumero,
+      hakutoivenumero = hakutoivenumero.filter(_ >= 0),
       hakukohdeOrganisaatio = hakukohdeOrganisaatio,
       organisaatioNimi = organisaatioNimi,
       koulutusOid = koulutusOid,

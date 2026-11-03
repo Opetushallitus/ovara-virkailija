@@ -143,7 +143,7 @@ class ValpasServiceTest extends AnyFlatSpec with Matchers with BeforeAndAfterEac
     val hakutoive = getOnlyHakutoive(response)
     assert(hakutoive.hakukohdeOid == HAKUKOHDE_OID)
     assert(hakutoive.hakukohdeNimi == createKielistetty())
-    assert(hakutoive.hakutoivenumero == 3)
+    assert(hakutoive.hakutoivenumero.contains(3))
     assert(hakutoive.hakukohdeOrganisaatio == ORGANISAATIO_OID)
     assert(hakutoive.organisaatioNimi == ORGANISAATIO_NIMI)
     assert(hakutoive.koulutusOid == KOULUTUS_OID)
