@@ -37,7 +37,11 @@ case class Hakutoive(
   harkinnanvaraisuus: String,
   alinHyvaksyttyPistemaara: Option[BigDecimal],
   pisteet: Option[BigDecimal],
-  varasijanumero: Option[Int]
+  varasijanumero: Option[Int],
+  oppilaitosOid: Option[String],
+  oppilaitosNimi: Kielistetty,
+  toimipisteOid: Option[String],
+  toimipisteNimi: Kielistetty
 )
 
 case class ValpasHakuaika(
