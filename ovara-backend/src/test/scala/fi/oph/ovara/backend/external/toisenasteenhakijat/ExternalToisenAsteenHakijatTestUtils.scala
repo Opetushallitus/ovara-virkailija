@@ -2,7 +2,7 @@ package fi.oph.ovara.backend.external.toisenasteenhakijat
 
 import fi.oph.ovara.backend.external.toisenasteenhakijat.ExternalToisenAsteenHakijatTestData.*
 import fi.oph.ovara.backend.repository.ReadOnlyDatabase
-import slick.jdbc.H2Profile.api.*
+import slick.jdbc.PostgresProfile.api.*
 
 import java.time.format.DateTimeFormatter
 
@@ -154,13 +154,13 @@ trait ExternalToisenAsteenHakijatTestUtils {
           $hetu,
           $kotikunta,
           $sukupuoli,
-          $kansalaisuusJson,
+          $kansalaisuusJson::jsonb,
           $koulutusmarkkinointilupa,
           $kiinnostunutOppisopimuksesta,
           $sahkoinenviestintalupa,
           $valintatuloksenJulkaisulupa,
-          $jatettyStr,
-          $muokattuStr)""",
+          $jatettyStr::timestamptz,
+          $muokattuStr::timestamptz)""",
       "Insert test hakemus"
     )
   }
@@ -254,7 +254,7 @@ trait ExternalToisenAsteenHakijatTestUtils {
           'Film Editing',
           $koulutuksenAlkamisvuosi,
           $koulutuksenAlkamiskausiuri,
-          $hakukohteenLinjaJson,
+          $hakukohteenLinjaJson::jsonb,
           $jarjestaaUrheilijanAmmkoulutusta)""",
       "Insert test hakukohde"
     )
@@ -288,7 +288,7 @@ trait ExternalToisenAsteenHakijatTestUtils {
           $huoltaja2Sukunimi,
           $huoltaja2Matkapuhelin,
           $huoltaja2Email,
-          $hakukohteetJson,
+          $hakukohteetJson::jsonb,
           $kiinnostunutUrheilijanAmmatillisestaKoulutuksesta,
           ${urli_.laji},
           ${urli_.seura},
@@ -358,8 +358,8 @@ trait ExternalToisenAsteenHakijatTestUtils {
           $oppilaitosOid,
           $suoritusTyyppi,
           $arvosanaPuuttuu,
-          $alkuStr,
-          $loppuStr,
+          $alkuStr::date,
+          $loppuStr::date,
           $valmistumisvuosi)""",
       "Insert test henkilo_lahtokoulu"
     )
@@ -405,7 +405,7 @@ trait ExternalToisenAsteenHakijatTestUtils {
             'Kulttuurituottaja',
             'Kulturproducent',
             'Kulttuurituottaja',
-            JSON '["#$KOULUTUS_KOODIURI"]')""",
+            '["#$KOULUTUS_KOODIURI"]'::jsonb)""",
       "Insert test koulutus"
     )
     db.run(
@@ -419,7 +419,6 @@ trait ExternalToisenAsteenHakijatTestUtils {
 
   def initSchema(): Unit = {
     val query = sqlu"""
-          CREATE DOMAIN IF NOT EXISTS JSONB AS TEXT;
           CREATE SCHEMA gen;
 
           CREATE TABLE gen.gen_hakemus (
@@ -620,7 +619,7 @@ trait ExternalToisenAsteenHakijatTestUtils {
               varasijan_numero integer,
               onko_muuttunut_viime_sijoittelussa boolean,
               prioriteetti integer,
-              pisteet double,
+              pisteet double precision,
               siirtynyt_toisesta_valintatapajonosta boolean,
               sijoitteluajo_id text,
               hyvaksyttyjajulkaistu timestamp with time zone,

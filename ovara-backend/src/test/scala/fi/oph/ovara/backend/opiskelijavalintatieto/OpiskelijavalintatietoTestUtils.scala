@@ -1,7 +1,7 @@
 package fi.oph.ovara.backend.opiskelijavalintatieto
 
 import fi.oph.ovara.backend.repository.ReadOnlyDatabase
-import slick.jdbc.H2Profile.api.*
+import slick.jdbc.PostgresProfile.api.*
 
 trait OpiskelijavalintatietoTestUtils {
   val db: ReadOnlyDatabase
@@ -21,7 +21,7 @@ trait OpiskelijavalintatietoTestUtils {
   }
 
   def initSchema(): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "Drop everything")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "Drop everything")
     db.run(sqlu"""CREATE SCHEMA gen""", "Create gen schema")
     db.run(
       sqlu"""CREATE TABLE gen.gen_henkilo (oppijanumero text, henkilo_oid text, etunimet text, sukunimi text, hetu text, syntymaaika date)""",
@@ -40,7 +40,7 @@ trait OpiskelijavalintatietoTestUtils {
       "Create toteutus table"
     )
     db.run(
-      sqlu"""CREATE TABLE gen.gen_koulutus (koulutus_oid text, johtaa_tutkintoon boolean, opintojen_laajuus_yksikko_koodiuri text, opintojen_laajuus_numero double precision, opintojen_laajuus_numero_min double precision, opintojen_laajuus_numero_max double precision, eqf json, nqf json)""",
+      sqlu"""CREATE TABLE gen.gen_koulutus (koulutus_oid text, johtaa_tutkintoon boolean, opintojen_laajuus_yksikko_koodiuri text, opintojen_laajuus_numero double precision, opintojen_laajuus_numero_min double precision, opintojen_laajuus_numero_max double precision, eqf jsonb, nqf jsonb)""",
       "Create toteutus table"
     )
     db.run(
@@ -74,7 +74,7 @@ trait OpiskelijavalintatietoTestUtils {
       "Insert test toteutus"
     )
     db.run(
-      sqlu"""INSERT INTO gen.gen_koulutus VALUES ($KOULUTUS_OID, true, 'opintojenlaajuusyksikko_2#1', 120, null, null, '[6]' FORMAT JSON, '[6, 7]' FORMAT JSON)""",
+      sqlu"""INSERT INTO gen.gen_koulutus VALUES ($KOULUTUS_OID, true, 'opintojenlaajuusyksikko_2#1', 120, null, null, '[6]', '[6, 7]')""",
       "Insert test koulutus"
     )
     db.run(

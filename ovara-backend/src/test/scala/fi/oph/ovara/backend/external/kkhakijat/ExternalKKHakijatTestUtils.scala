@@ -2,7 +2,7 @@ package fi.oph.ovara.backend.external.kkhakijat
 
 import fi.oph.ovara.backend.external.kkhakijat.ExternalKKHakijatTestData.*
 import fi.oph.ovara.backend.repository.ReadOnlyDatabase
-import slick.jdbc.H2Profile.api.*
+import slick.jdbc.PostgresProfile.api.*
 
 import java.time.format.DateTimeFormatter
 
@@ -31,8 +31,8 @@ trait ExternalKKHakijatTestUtils {
     val syntymaaikaStr = syntymaaika.map(_.toString)
     db.run(
       sqlu"""INSERT INTO gen.gen_henkilo VALUES (
-          $oppijanumero, $oppijanumero, $aidinkieli, $syntymaaikaStr,
-          $kaikkiKansalaisuudet, $kansalaisuus, $turvakielto
+          $oppijanumero, $oppijanumero, $aidinkieli, $syntymaaikaStr::date,
+          $kaikkiKansalaisuudet::jsonb, $kansalaisuus, $turvakielto
         )""",
       "Insert test kk-henkilö"
     )
@@ -139,14 +139,14 @@ trait ExternalKKHakijatTestUtils {
           $kotikunta,
           $sukupuoli,
           $asiointikieli,
-          $kansalaisuusJson,
+          $kansalaisuusJson::jsonb,
           $koulutusmarkkinointilupa,
           $kiinnostunutOppisopimuksesta,
           $sahkoinenviestintalupa,
           $valintatuloksenJulkaisulupa,
-          $jatettyStr,
-          $muokattuStr,
-          $pohjakoulutusKk)""",
+          $jatettyStr::timestamptz,
+          $muokattuStr::timestamptz,
+          $pohjakoulutusKk::jsonb)""",
       "Insert test kk-hakemus"
     )
   }
@@ -212,7 +212,7 @@ trait ExternalKKHakijatTestUtils {
           ehdollisen_hyvaksymisen_ehto_en
         ) VALUES (
           $hakukohdeOid, $valintatapajonoId, $hakemusOid, $maksunTila,
-          $valinnanTila, $hyvaksyttyStr,
+          $valinnanTila, $hyvaksyttyStr::timestamptz,
           $julkaistavissa, $varasijanNumero, $prioriteetti, ${pisteet.map(_.doubleValue)},
           $ehdollistiHyvaksyttavissa,
           $ehdollistiHyvaksyttavissaEhtoFi,
@@ -261,7 +261,7 @@ trait ExternalKKHakijatTestUtils {
   ): Unit = {
     db.run(
       sqlu"""INSERT INTO gen.gen_koulutus VALUES(
-          $koulutusOid, $ulkoinenTunniste, $koulutuksetKoodiuri, $johtaaTutkintoon
+          $koulutusOid, $ulkoinenTunniste, $koulutuksetKoodiuri::jsonb, $johtaaTutkintoon
         )""",
       "Insert test kk-koulutus"
     )
@@ -289,7 +289,6 @@ trait ExternalKKHakijatTestUtils {
 
   def initSchema(): Unit = {
     val query = sqlu"""
-          CREATE DOMAIN IF NOT EXISTS JSONB AS TEXT;
           CREATE SCHEMA gen;
 
           CREATE TABLE gen.gen_hakemus (
