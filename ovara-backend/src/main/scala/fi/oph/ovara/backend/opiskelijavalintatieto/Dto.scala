@@ -136,17 +136,17 @@ case class HakutoiveResponse(
   )
   @BeanProperty johtaaTutkintoon: Optional[JBoolean],
   @(Schema @field)(
-    requiredMode = RequiredMode.NOT_REQUIRED,
-    description = "Hakukohteen koulutuksen kansallisen tutkintojen viitekehyksen (NQF) taso",
-    example = "4"
+    requiredMode = RequiredMode.REQUIRED,
+    description = "Hakukohteen koulutuksen kansallisen tutkintojen viitekehyksen (NQF) tasot",
+    example = "[\"4\"]"
   )
-  @BeanProperty nqf: Optional[String],
+  @BeanProperty nqf: java.util.List[String],
   @(Schema @field)(
-    requiredMode = RequiredMode.NOT_REQUIRED,
-    description = "Hakukohteen koulutuksen eurooppalaisen tutkintojen viitekehyksen (EQF) taso",
-    example = "4"
+    requiredMode = RequiredMode.REQUIRED,
+    description = "Hakukohteen koulutuksen eurooppalaisen tutkintojen viitekehyksen (EQF) tasot",
+    example = "[\"4\"]"
   )
-  @BeanProperty eqf: Optional[String],
+  @BeanProperty eqf: java.util.List[String],
   @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
   @BeanProperty opintojenLaajuus: Optional[OpintojenLaajuusResponse]
 )
@@ -161,8 +161,8 @@ object HakutoiveResponse {
       vastaanotonTila = hakutoive.vastaanotonTila.toJava,
       ilmoittautumisenTila = hakutoive.ilmoittautumisenTila.toJava,
       johtaaTutkintoon = hakutoive.johtaaTutkintoon.map(JBoolean.valueOf).toJava,
-      nqf = hakutoive.nqf.toJava,
-      eqf = hakutoive.eqf.toJava,
+      nqf = hakutoive.nqf.asJava,
+      eqf = hakutoive.eqf.asJava,
       opintojenLaajuus = hakutoive.opintojenLaajuus.map(OpintojenLaajuusResponse(_)).toJava
     )
 }

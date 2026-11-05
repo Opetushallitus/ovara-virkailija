@@ -28,8 +28,8 @@ case class Hakutoive(
   vastaanotonTila: Option[String],
   ilmoittautumisenTila: Option[String],
   johtaaTutkintoon: Option[Boolean],
-  nqf: Option[String],
-  eqf: Option[String],
+  nqf: Seq[String],
+  eqf: Seq[String],
   opintojenLaajuus: Option[OpintojenLaajuus]
 )
 
@@ -80,8 +80,8 @@ case class HakemusRow(
   opintojenLaajuus: Option[String],
   opintojenLaajuusMin: Option[String],
   opintojenLaajuusMax: Option[String],
-  eqf: Option[String],
-  nqf: Option[String]
+  eqf: Seq[String],
+  nqf: Seq[String]
 ) {
 
   def asHakutoive: Hakutoive = Hakutoive(
