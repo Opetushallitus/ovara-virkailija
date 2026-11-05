@@ -40,7 +40,7 @@ trait OpiskelijavalintatietoTestUtils {
       "Create toteutus table"
     )
     db.run(
-      sqlu"""CREATE TABLE gen.gen_koulutus (koulutus_oid text, johtaa_tutkintoon boolean, opintojen_laajuus_yksikko_koodiuri text, opintojen_laajuus_numero text, opintojen_laajuus_numero_min text, opintojen_laajuus_numero_max text, eqf text, nqf text)""",
+      sqlu"""CREATE TABLE gen.gen_koulutus (koulutus_oid text, johtaa_tutkintoon boolean, opintojen_laajuus_yksikko_koodiuri text, opintojen_laajuus_numero double precision, opintojen_laajuus_numero_min double precision, opintojen_laajuus_numero_max double precision, eqf json, nqf json)""",
       "Create toteutus table"
     )
     db.run(
@@ -74,7 +74,7 @@ trait OpiskelijavalintatietoTestUtils {
       "Insert test toteutus"
     )
     db.run(
-      sqlu"""INSERT INTO gen.gen_koulutus VALUES ($KOULUTUS_OID, true, 'opintojenlaajuusyksikko_2#1', '120', null, null, '6', '6')""",
+      sqlu"""INSERT INTO gen.gen_koulutus VALUES ($KOULUTUS_OID, true, 'opintojenlaajuusyksikko_2#1', 120, null, null, '[6]' FORMAT JSON, '[6, 7]' FORMAT JSON)""",
       "Insert test koulutus"
     )
     db.run(

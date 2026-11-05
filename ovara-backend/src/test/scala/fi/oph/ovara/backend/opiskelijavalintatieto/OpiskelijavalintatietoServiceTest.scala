@@ -136,6 +136,53 @@ class OpiskelijavalintatietoServiceTest extends AnyFlatSpec with Matchers with O
     assert(hakutoive.ilmoittautumisenTila.contains("LASNA_KOKO_LUKUVUOSI"))
   }
 
+  it should "return eqf, nqf and opintojen laajuus from koulutus" in {
+    initAndInsert()
+
+    val response = service.get(List(OPPIJANUMERO))
+
+    val hakutoive = getOnlyHakutoive(response)
+    assert(hakutoive.eqf == Seq("6"))
+    assert(hakutoive.nqf == Seq("6", "7"))
+    assert(
+      hakutoive.opintojenLaajuus.contains(
+        OpintojenLaajuus(Some("opintojenlaajuusyksikko_2#1"), Some("120"), None, None)
+      )
+    )
+  }
+
+  it should "return laajuus min and max formatted without trailing zeros" in {
+    initAndInsert()
+    db.run(
+      sqlu"""UPDATE gen.gen_koulutus SET opintojen_laajuus_numero = null, opintojen_laajuus_numero_min = 7.5, opintojen_laajuus_numero_max = 10""",
+      "Set laajuus min and max for koulutus"
+    )
+
+    val response = service.get(List(OPPIJANUMERO))
+
+    val hakutoive = getOnlyHakutoive(response)
+    assert(
+      hakutoive.opintojenLaajuus.contains(
+        OpintojenLaajuus(Some("opintojenlaajuusyksikko_2#1"), None, Some("7.5"), Some("10"))
+      )
+    )
+  }
+
+  it should "return empty eqf, nqf and opintojen laajuus when koulutus doesn't have them" in {
+    initAndInsert()
+    db.run(
+      sqlu"""UPDATE gen.gen_koulutus SET opintojen_laajuus_yksikko_koodiuri = null, opintojen_laajuus_numero = null, eqf = null, nqf = null""",
+      "Remove eqf, nqf and laajuus from koulutus"
+    )
+
+    val response = service.get(List(OPPIJANUMERO))
+
+    val hakutoive = getOnlyHakutoive(response)
+    assert(hakutoive.eqf.isEmpty)
+    assert(hakutoive.nqf.isEmpty)
+    assert(hakutoive.opintojenLaajuus.isEmpty)
+  }
+
   private def getOnlyOppija(response: Either[String, Seq[Opiskelijavalintatieto]]): Opiskelijavalintatieto = {
     assert(response.isRight)
     assert(response.toOption.get.size == 1)
