@@ -34,15 +34,11 @@ trait OpiskelijavalintatietoExtractors extends Extractors {
       ilmoituksenTila = r.nextStringOption(),
       johtaaTutkintoon = r.nextBooleanOption(),
       opintojenLaajuusYksikkoKoodiuri = r.nextStringOption(),
-      opintojenLaajuus = r.nextDoubleOption().map(formatLaajuus),
-      opintojenLaajuusMin = r.nextDoubleOption().map(formatLaajuus),
-      opintojenLaajuusMax = r.nextDoubleOption().map(formatLaajuus),
+      opintojenLaajuus = r.nextStringOption(),
+      opintojenLaajuusMin = r.nextStringOption(),
+      opintojenLaajuusMax = r.nextStringOption(),
       eqf = extractArray(r.nextStringOption()),
       nqf = extractArray(r.nextStringOption())
     )
   )
-
-  // 120.0 -> "120", 7.5 -> "7.5"
-  private def formatLaajuus(laajuus: Double): String =
-    BigDecimal(laajuus).bigDecimal.stripTrailingZeros.toPlainString
 }

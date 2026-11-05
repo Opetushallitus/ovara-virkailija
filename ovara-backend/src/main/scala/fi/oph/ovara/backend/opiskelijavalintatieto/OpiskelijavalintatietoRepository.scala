@@ -43,9 +43,9 @@ class OpiskelijavalintatietoRepository extends OpiskelijavalintatietoExtractors 
                  ht.ilmoittautumisen_tila,
                  k.johtaa_tutkintoon,
                  k.opintojen_laajuus_yksikko_koodiuri,
-                 k.opintojen_laajuus_numero,
-                 k.opintojen_laajuus_numero_min,
-                 k.opintojen_laajuus_numero_max,
+                 k.opintojen_laajuus_numero::text,
+                 k.opintojen_laajuus_numero_min::text,
+                 k.opintojen_laajuus_numero_max::text,
                  k.eqf,
                  k.nqf
           FROM gen.gen_henkilo hlo
