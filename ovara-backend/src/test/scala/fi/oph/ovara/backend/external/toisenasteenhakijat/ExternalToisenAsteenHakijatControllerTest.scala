@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.{content, header, jsonPath, status}
 import org.hamcrest.Matchers.*
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import slick.jdbc.H2Profile.api.*
+import slick.jdbc.PostgresProfile.api.*
 
 import java.io.ByteArrayInputStream
 import scala.jdk.CollectionConverters.*
@@ -47,14 +47,14 @@ class ExternalToisenAsteenHakijatControllerTest
   @Autowired
   override val db: ReadOnlyDatabase = null
 
-  // Organisaatiohierarkia luetaan pub-skeemasta, jota näiden testien H2-kanta ei sisällä
+  // Organisaatiohierarkia luetaan pub-skeemasta, jota näiden testien testikanta ei sisällä
   // (initSchema luo vain gen-taulut). Ks. OrganisaatioHierarkiaStub.
   @MockitoBean
   override val commonService: CommonService = null
 
   @BeforeEach
   def clearDb(): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "Drop everything")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "Drop everything")
   }
 
   @BeforeEach
@@ -1248,7 +1248,7 @@ class ExternalToisenAsteenHakijatControllerTest
   @ParameterizedTest
   @ValueSource(strings = Array("LISAKOULUTUS_OPISTOVUOSI", "LISAKOULUTUS_TUVA"))
   def lisapistekoulutusMapsAllowedKey(avain: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     seedMinimalHakija()
     insertLisakoulutus(avain = avain)
 
@@ -1271,7 +1271,7 @@ class ExternalToisenAsteenHakijatControllerTest
     )
   )
   def lisapistekoulutusIgnoresDisallowedKey(avain: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     seedMinimalHakija()
     insertLisakoulutus(avain = avain)
 
@@ -1358,7 +1358,7 @@ class ExternalToisenAsteenHakijatControllerTest
     )
   )
   def yhteispisteetTiebreaksNonVarallaStatesByPrioriteetti(state: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     seedMinimalHakija()
     insertValintarekisteri(
       valintatapajonoId = "vtj-a",
@@ -1454,7 +1454,7 @@ class ExternalToisenAsteenHakijatControllerTest
     )
   )
   def yhteispisteetSurvivesEveryValinnanTilaWhenAlone(state: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     seedMinimalHakija()
     insertValintarekisteri(valinnanTila = Some(state), pisteet = Some(BigDecimal("42")))
 
@@ -1477,7 +1477,7 @@ class ExternalToisenAsteenHakijatControllerTest
     )
   )
   def yhteispisteetPrefersHigherPriorityStateOverLower(winner: String, loser: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     seedMinimalHakija()
     insertValintarekisteri(
       valintatapajonoId = "vtj-winner",
@@ -1545,9 +1545,9 @@ class ExternalToisenAsteenHakijatControllerTest
   // ---- parseHakukohteet malformed JSON ----
 
   @Test
-  def hakukohteetJsonMalformedYieldsNullPerHakutoiveFlags(): Unit = {
+  def hakukohteetJsonNotArrayYieldsNullPerHakutoiveFlags(): Unit = {
     seedMinimalHakija()
-    insertHakemusToinenAsteYhteishaku(hakukohteetJson = Some("not-json"))
+    insertHakemusToinenAsteYhteishaku(hakukohteetJson = Some("""{"oid":"not-an-array"}"""))
 
     get()
       .andExpect(status.isOk)
@@ -2131,7 +2131,7 @@ class ExternalToisenAsteenHakijatControllerTest
     )
   )
   def harkinnanvaraisuusperusteMapsKnownCodes(syy: String, expected: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     initSchema()
     insertHakemus()
     insertHakukohde()
@@ -2145,7 +2145,7 @@ class ExternalToisenAsteenHakijatControllerTest
   @ParameterizedTest
   @ValueSource(strings = Array("EI_HARKINNANVARAINEN", "EI_HARKINNANVARAINEN_HAKUKOHDE"))
   def harkinnanvaraisuusperusteNullForEiHarkinnanvarainen(syy: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     initSchema()
     insertHakemus()
     insertHakukohde()
@@ -2180,7 +2180,7 @@ class ExternalToisenAsteenHakijatControllerTest
   @ParameterizedTest
   @ValueSource(strings = Array("keskiarvo_pk", "keskiarvo_lk", "painotettu_keskiarvo"))
   def keskiarvoPopulatedFromValintalaskentaFunktiotulokset(tunniste: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     seedMinimalHakija()
     insertValintalaskentaFunktiotulos(tunniste = tunniste, arvo = Some("8.75"))
 
@@ -2209,7 +2209,7 @@ class ExternalToisenAsteenHakijatControllerTest
     quoteCharacter = '\''
   )
   def keskiarvoNullWhenArvoIsEmptyOrNull(tunniste: String, arvo: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     seedMinimalHakija()
     insertValintalaskentaFunktiotulos(tunniste = tunniste, arvo = Option(arvo))
 

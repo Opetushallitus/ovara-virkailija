@@ -55,6 +55,10 @@ vaan voit katsoa tarvittavat komennot `justfile`:stä ja ajaa ne sellaisinaan ko
 
 `justfile`:stä löytyvät komennot QA-tietokantayhteydelle olettavat että QA-ympäristön bastion-putkitus löytyy ssh configista aliaksella `pallero-bastion`
 
+Backendin testit (`./mvnw test`) ajetaan oikeaa PostgreSQL 18.3 -kantaa vasten, jonka [Testcontainers](https://testcontainers.com/)
+käynnistää automaattisesti Docker-konttiin. Testien ajaminen edellyttää siis, että Docker (tai yhteensopiva ajoympäristö,
+esim. Colima tai Podman) on käynnissä.
+
 Ovara-backendin rajapinta on dokumentoitu Swaggeriä käyttäen ja se löytyy osoitteesta: https://localhost:8443/ovara-backend/swagger.
 
 Rajapintojen kutsuminen edellyttää kirjautumista. Kehitysympäristössä tämä tapahtuu helpoiten siten, että myös ovara-ui on

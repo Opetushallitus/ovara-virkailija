@@ -9,7 +9,7 @@ import org.scalatest.matchers.should.Matchers
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.{ActiveProfiles, TestContextManager}
-import slick.jdbc.H2Profile.api.*
+import slick.jdbc.PostgresProfile.api.*
 
 import java.time.{LocalDateTime, OffsetDateTime}
 
@@ -26,7 +26,7 @@ class ValpasServiceTest extends AnyFlatSpec with Matchers with BeforeAndAfterEac
   new TestContextManager(this.getClass).prepareTestInstance(this)
 
   override def beforeEach(): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "Drop everything")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "Drop everything")
   }
 
   "getValpasTiedot" should "return error string when there's a db error" in {

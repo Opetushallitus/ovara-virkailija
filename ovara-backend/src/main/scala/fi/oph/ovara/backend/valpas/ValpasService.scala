@@ -30,6 +30,9 @@ class ValpasService(repository: ValpasRepository, mapper: ObjectMapper) {
   }
 
   private def combineWithHakutoiveet(hakemusRows: Seq[HakemusRow]): Seq[Hakemus] = {
+    // Tyhjä lista tuottaisi kyselyyn "IN ()", joka on PostgreSQL:ssä syntaksivirhe
+    if (hakemusRows.isEmpty) return Nil
+
     val hakemusOids = hakemusRows.map(_.hakemusOid).toSet
 
     val hakutoiveRows = repository.selectHakutoiveet(hakemusOids)
