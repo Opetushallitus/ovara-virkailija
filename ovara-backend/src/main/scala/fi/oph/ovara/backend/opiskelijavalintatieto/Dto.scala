@@ -134,7 +134,21 @@ case class HakutoiveResponse(
     description = "Johtaako hakukohteen koulutus tutkintoon",
     example = "true"
   )
-  @BeanProperty johtaaTutkintoon: Optional[JBoolean]
+  @BeanProperty johtaaTutkintoon: Optional[JBoolean],
+  @(Schema @field)(
+    requiredMode = RequiredMode.NOT_REQUIRED,
+    description = "Hakukohteen koulutuksen kansallisen tutkintojen viitekehyksen (NQF) taso",
+    example = "4"
+  )
+  @BeanProperty nqf: Optional[String],
+  @(Schema @field)(
+    requiredMode = RequiredMode.NOT_REQUIRED,
+    description = "Hakukohteen koulutuksen eurooppalaisen tutkintojen viitekehyksen (EQF) taso",
+    example = "4"
+  )
+  @BeanProperty eqf: Optional[String],
+  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
+  @BeanProperty opintojenLaajuus: Optional[OpintojenLaajuusResponse]
 )
 object HakutoiveResponse {
   def apply(hakutoive: Hakutoive): HakutoiveResponse =
@@ -146,7 +160,36 @@ object HakutoiveResponse {
       valinnanTila = hakutoive.valinnanTila.toJava,
       vastaanotonTila = hakutoive.vastaanotonTila.toJava,
       ilmoittautumisenTila = hakutoive.ilmoittautumisenTila.toJava,
-      johtaaTutkintoon = hakutoive.johtaaTutkintoon.map(JBoolean.valueOf).toJava
+      johtaaTutkintoon = hakutoive.johtaaTutkintoon.map(JBoolean.valueOf).toJava,
+      nqf = hakutoive.nqf.toJava,
+      eqf = hakutoive.eqf.toJava,
+      opintojenLaajuus = hakutoive.opintojenLaajuus.map(OpintojenLaajuusResponse(_)).toJava
+    )
+}
+
+@Schema(name = "OpiskelijavalintatietoOpintojenLaajuusResponse")
+case class OpintojenLaajuusResponse(
+  @(Schema @field)(
+    requiredMode = RequiredMode.NOT_REQUIRED,
+    description =
+      "Viittaa koodistoon [opintojenlaajuusyksikko](https://virkailija.opintopolku.fi/koodisto-service/ui/koodisto/view/opintojenlaajuusyksikko)"
+  )
+  @BeanProperty yksikkoKoodiuri: Optional[String],
+  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED, example = "120")
+  @BeanProperty laajuus: Optional[String],
+  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED, example = "100")
+  @BeanProperty laajuusMin: Optional[String],
+  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED, example = "120")
+  @BeanProperty laajuusMax: Optional[String]
+)
+
+object OpintojenLaajuusResponse {
+  def apply(opintojenLaajuus: OpintojenLaajuus): OpintojenLaajuusResponse =
+    OpintojenLaajuusResponse(
+      yksikkoKoodiuri = opintojenLaajuus.yksikkoKoodiuri.toJava,
+      laajuus = opintojenLaajuus.laajuus.toJava,
+      laajuusMin = opintojenLaajuus.laajuusMin.toJava,
+      laajuusMax = opintojenLaajuus.laajuusMax.toJava
     )
 }
 
