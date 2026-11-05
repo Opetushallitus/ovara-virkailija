@@ -31,7 +31,13 @@ trait OpiskelijavalintatietoExtractors extends Extractors {
       valinnanTila = r.nextStringOption(),
       vastaanottoTila = r.nextStringOption(),
       ilmoituksenTila = r.nextStringOption(),
-      johtaaTutkintoon = r.nextBooleanOption()
+      johtaaTutkintoon = r.nextBooleanOption(),
+      opintojenLaajuusYksikkoKoodiuri = r.nextStringOption(),
+      opintojenLaajuus = r.nextStringOption(),
+      opintojenLaajuusMin = r.nextStringOption(),
+      opintojenLaajuusMax = r.nextStringOption(),
+      eqf = r.nextStringOption(),
+      nqf = r.nextStringOption()
     )
   )
 }

@@ -27,7 +27,17 @@ case class Hakutoive(
   valinnanTila: Option[String],
   vastaanotonTila: Option[String],
   ilmoittautumisenTila: Option[String],
-  johtaaTutkintoon: Option[Boolean]
+  johtaaTutkintoon: Option[Boolean],
+  nqf: Option[String],
+  eqf: Option[String],
+  opintojenLaajuus: Option[OpintojenLaajuus]
+)
+
+case class OpintojenLaajuus(
+  yksikkoKoodiuri: Option[String],
+  laajuus: Option[String],
+  laajuusMin: Option[String],
+  laajuusMax: Option[String]
 )
 
 case class Nimetty(oid: String, nimi: Kielistetty)
@@ -65,7 +75,13 @@ case class HakemusRow(
   valinnanTila: Option[String],
   vastaanottoTila: Option[String],
   ilmoituksenTila: Option[String],
-  johtaaTutkintoon: Option[Boolean]
+  johtaaTutkintoon: Option[Boolean],
+  opintojenLaajuusYksikkoKoodiuri: Option[String],
+  opintojenLaajuus: Option[String],
+  opintojenLaajuusMin: Option[String],
+  opintojenLaajuusMax: Option[String],
+  eqf: Option[String],
+  nqf: Option[String]
 ) {
 
   def asHakutoive: Hakutoive = Hakutoive(
@@ -76,7 +92,17 @@ case class HakemusRow(
     valinnanTila,
     vastaanottoTila,
     ilmoituksenTila,
-    johtaaTutkintoon
+    johtaaTutkintoon,
+    nqf,
+    eqf,
+    Option
+      .when(
+        Seq(opintojenLaajuusYksikkoKoodiuri, opintojenLaajuus, opintojenLaajuusMin, opintojenLaajuusMax).exists(
+          _.isDefined
+        )
+      )(
+        OpintojenLaajuus(opintojenLaajuusYksikkoKoodiuri, opintojenLaajuus, opintojenLaajuusMin, opintojenLaajuusMax)
+      )
   )
 
   def asHakemus(hakutoiveet: Seq[Hakutoive]): Hakemus = Hakemus(

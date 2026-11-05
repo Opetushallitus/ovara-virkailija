@@ -41,7 +41,13 @@ class OpiskelijavalintatietoRepository extends OpiskelijavalintatietoExtractors 
                  ht.valintatieto,
                  ht.vastaanottotieto,
                  ht.ilmoittautumisen_tila,
-                 k.johtaa_tutkintoon
+                 k.johtaa_tutkintoon,
+                 k.opintojen_laajuus_yksikko_koodiuri,
+                 k.opintojen_laajuus_numero,
+                 k.opintojen_laajuus_numero_min,
+                 k.opintojen_laajuus_numero_max,
+                 k.eqf,
+                 k.nqf
           FROM gen.gen_henkilo hlo
           INNER JOIN gen.gen_hakutoive ht ON ht.henkilo_oid = hlo.henkilo_oid
           LEFT JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
