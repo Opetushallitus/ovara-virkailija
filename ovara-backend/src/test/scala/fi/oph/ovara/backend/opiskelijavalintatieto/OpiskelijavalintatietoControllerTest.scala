@@ -223,7 +223,16 @@ class OpiskelijavalintatietoControllerTest extends OpiskelijavalintatietoTestUti
       |      "koulutuksenAlkamisvuosi" : 2022,
       |      "valinnanTila" : null,
       |      "vastaanotonTila" : null,
-      |      "ilmoittautumisenTila" : null
+      |      "ilmoittautumisenTila" : null,
+      |      "johtaaTutkintoon" : true,
+      |      "nqf" : [ "6", "7" ],
+      |      "eqf" : [ "6" ],
+      |      "opintojenLaajuus" : {
+      |        "yksikkoKoodiuri" : "opintojenlaajuusyksikko_2#1",
+      |        "laajuus" : "120",
+      |        "laajuusMin" : null,
+      |        "laajuusMax" : null
+      |      }
       |    } ]
       |  } ]
       |}""".stripMargin

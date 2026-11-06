@@ -36,12 +36,12 @@ trait OpiskelijavalintatietoTestUtils {
       "Create hakukohde table"
     )
     db.run(
-      sqlu"""CREATE TABLE gen.gen_toteutus (toteutus_oid text, koulutus_oid text)""",
+      sqlu"""CREATE TABLE gen.gen_toteutus (toteutus_oid text, koulutus_oid text, opintojen_laajuus_yksikko_koodiuri text, opintojen_laajuus_numero double precision)""",
       "Create toteutus table"
     )
     db.run(
       sqlu"""CREATE TABLE gen.gen_koulutus (koulutus_oid text, johtaa_tutkintoon boolean, opintojen_laajuus_yksikko_koodiuri text, opintojen_laajuus_numero double precision, opintojen_laajuus_numero_min double precision, opintojen_laajuus_numero_max double precision, eqf jsonb, nqf jsonb)""",
-      "Create toteutus table"
+      "Create koulutus table"
     )
     db.run(
       sqlu"""CREATE TABLE gen.gen_haku (haku_oid text, haku_nimi_fi text, haku_nimi_sv text, haku_nimi_en text, kohdejoukko_koodiuri text, hakutapakoodiuri text, koulutuksen_alkamiskausiuri text, koulutuksen_alkamisvuosi integer)""",
@@ -70,7 +70,7 @@ trait OpiskelijavalintatietoTestUtils {
       "Insert test hakukohde"
     )
     db.run(
-      sqlu"""INSERT INTO gen.gen_toteutus VALUES ($TOTEUTUS_OID, $KOULUTUS_OID)""",
+      sqlu"""INSERT INTO gen.gen_toteutus VALUES ($TOTEUTUS_OID, $KOULUTUS_OID, null, null)""",
       "Insert test toteutus"
     )
     db.run(
