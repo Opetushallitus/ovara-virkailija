@@ -245,8 +245,8 @@ class OpiskelijavalintatietoControllerTest extends OpiskelijavalintatietoTestUti
       |      "vastaanotonTila" : null,
       |      "ilmoittautumisenTila" : null,
       |      "johtaaTutkintoon" : true,
-      |      "nqf" : [ "6", "7" ],
-      |      "eqf" : [ "6" ],
+      |      "nqf" : [ 6, 7 ],
+      |      "eqf" : [ 6 ],
       |      "opintojenLaajuus" : {
       |        "yksikkoKoodiuri" : "opintojenlaajuusyksikko_2#1",
       |        "laajuus" : 120,

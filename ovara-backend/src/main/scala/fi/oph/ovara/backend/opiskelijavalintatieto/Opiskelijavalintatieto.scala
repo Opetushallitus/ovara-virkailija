@@ -28,8 +28,8 @@ case class Hakutoive(
   vastaanotonTila: Option[String],
   ilmoittautumisenTila: Option[String],
   johtaaTutkintoon: Option[Boolean],
-  nqf: Seq[String],
-  eqf: Seq[String],
+  nqf: Seq[Int],
+  eqf: Seq[Int],
   opintojenLaajuus: Option[OpintojenLaajuus]
 )
 
@@ -80,28 +80,33 @@ case class HakemusRow(
   opintojenLaajuus: Option[BigDecimal],
   opintojenLaajuusMin: Option[BigDecimal],
   opintojenLaajuusMax: Option[BigDecimal],
-  eqf: Seq[String],
-  nqf: Seq[String]
+  eqf: Seq[Int],
+  nqf: Seq[Int]
 ) {
 
   def asHakutoive: Hakutoive = Hakutoive(
-    Nimetty(hakukohdeOid, hakukohdeNimi),
-    tarjoajanOid.map(oid => Nimetty(oid, tarjoajanNimi)),
-    koulutuksenAlkamiskausiuri,
-    koulutuksenAlkamisvuosi,
-    valinnanTila,
-    vastaanottoTila,
-    ilmoituksenTila,
-    johtaaTutkintoon,
-    nqf,
-    eqf,
-    Option
+    hakukohde = Nimetty(hakukohdeOid, hakukohdeNimi),
+    tarjoaja = tarjoajanOid.map(oid => Nimetty(oid, tarjoajanNimi)),
+    koulutuksenAlkamiskausiUri = koulutuksenAlkamiskausiuri,
+    koulutuksenAlkamisvuosi = koulutuksenAlkamisvuosi,
+    valinnanTila = valinnanTila,
+    vastaanotonTila = vastaanottoTila,
+    ilmoittautumisenTila = ilmoituksenTila,
+    johtaaTutkintoon = johtaaTutkintoon,
+    nqf = nqf,
+    eqf = eqf,
+    opintojenLaajuus = Option
       .when(
         Seq(opintojenLaajuusYksikkoKoodiuri, opintojenLaajuus, opintojenLaajuusMin, opintojenLaajuusMax).exists(
           _.isDefined
         )
       )(
-        OpintojenLaajuus(opintojenLaajuusYksikkoKoodiuri, opintojenLaajuus, opintojenLaajuusMin, opintojenLaajuusMax)
+        OpintojenLaajuus(
+          yksikkoKoodiuri = opintojenLaajuusYksikkoKoodiuri,
+          laajuus = opintojenLaajuus,
+          laajuusMin = opintojenLaajuusMin,
+          laajuusMax = opintojenLaajuusMax
+        )
       )
   )
 
