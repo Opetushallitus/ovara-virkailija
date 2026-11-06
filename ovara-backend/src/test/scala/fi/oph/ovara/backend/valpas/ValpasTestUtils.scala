@@ -15,7 +15,8 @@ trait ValpasTestUtils {
     aktiivinen: Boolean = true,
     oppijanumero: String = OPPIJANUMERO,
     hakemusOid: String = HAKEMUS_OID,
-    hakuOid: String = HAKU_OID
+    hakuOid: String = HAKU_OID,
+    kohdejoukkoKoodiuri: String = "haunkohdejoukko_11#1"
   ): Unit = {
     insertHenkilo(oppijanumero)
 
@@ -40,7 +41,7 @@ trait ValpasTestUtils {
           'Yhteishaku',
           'Gemensamma',
           'Joint application',
-          'haunkohdejoukko_11#1',
+          $kohdejoukkoKoodiuri,
           '[{"alkaa": "2024-08-31T23:59", "paattyy": "2027-08-31T23:59"},{"alkaa": "2026-08-31", "paattyy": "2027-09-30"},{"alkaa": "2022-08-31T23:59", "paattyy": "2023-08-31T23:59"}]'
           )""",
       "Insert test haku"
@@ -69,7 +70,7 @@ trait ValpasTestUtils {
     )
   }
 
-  def insertHakutoive(): Unit = {
+  def insertHakutoive(hakutoivenumero: Int = 3): Unit = {
     db.run(
       sqlu"""INSERT INTO gen.gen_hakukohde values(
           $HAKUKOHDE_OID,
@@ -84,7 +85,7 @@ trait ValpasTestUtils {
       sqlu"""INSERT INTO gen.gen_hakutoive values(
           $HAKEMUS_OID,
           $HAKUKOHDE_OID,
-          3,
+          $hakutoivenumero,
           'VASTAANOTTANUT_SITOVASTI',
           'LASNA',
           'HYVAKSYTTY',

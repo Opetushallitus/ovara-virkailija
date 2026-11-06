@@ -45,12 +45,13 @@ object ValpasFactory {
     valintatila: Option[String] = Some("HYVAKSYTTY"),
     julkaistavissa: Option[Boolean] = Some(true),
     pisteet: Option[BigDecimal] = Some(23.7),
-    alinHyvaksyttyPistemaara: Option[BigDecimal] = Some(21.1)
+    alinHyvaksyttyPistemaara: Option[BigDecimal] = Some(21.1),
+    hakutoivenumero: Option[Int] = Some(1)
   ): HakutoiveRow = HakutoiveRow(
     hakemusOid = HAKEMUS_OID,
     hakukohdeOid = HAKUKOHDE_OID,
     hakukohdeNimi = createKielistetty(),
-    hakutoivenumero = 1,
+    hakutoivenumero = hakutoivenumero,
     hakukohdeOrganisaatio = ORGANISAATIO_OID,
     organisaatioNimi = ORGANISAATIO_NIMI,
     koulutusOid = KOULUTUS_OID,
