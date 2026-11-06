@@ -34,9 +34,9 @@ trait OpiskelijavalintatietoExtractors extends Extractors {
       ilmoituksenTila = r.nextStringOption(),
       johtaaTutkintoon = r.nextBooleanOption(),
       opintojenLaajuusYksikkoKoodiuri = r.nextStringOption(),
-      opintojenLaajuus = r.nextStringOption(),
-      opintojenLaajuusMin = r.nextStringOption(),
-      opintojenLaajuusMax = r.nextStringOption(),
+      opintojenLaajuus = r.nextBigDecimalOption(),
+      opintojenLaajuusMin = r.nextBigDecimalOption(),
+      opintojenLaajuusMax = r.nextBigDecimalOption(),
       eqf = extractArray(r.nextStringOption()),
       nqf = extractArray(r.nextStringOption())
     )
