@@ -5,7 +5,7 @@ import org.junit.jupiter.api.{BeforeEach, Test}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import slick.jdbc.H2Profile.api.*
+import slick.jdbc.PostgresProfile.api.*
 
 /**
  * selectHakukohderyhmat ajetaan oikeaa kantaa vasten, jotta testi kertoo mitä ryhmiä käyttäjä
@@ -34,7 +34,7 @@ class CommonRepositoryTest {
 
   @BeforeEach
   def initSchema(): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "Drop everything")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "Drop everything")
     db.run(
       sqlu"""
           CREATE SCHEMA pub;

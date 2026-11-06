@@ -18,7 +18,7 @@ object ExternalKKHakijatTestData {
   // osuu hakijoihin vain jos hierarkialaajennus toimii.
   val KOULUTUSTOIMIJA_OID = "1.2.246.562.10.00000000000000000588"
   // Hakukohderyhmien oidit ovat 1.2.246.562.28 -alkuisia. Ryhmätiedot ovat vain
-  // pub-skeemassa, jota näiden testien H2-kanta ei sisällä, joten laajennus stubataan.
+  // pub-skeemassa, jota näiden testien testikanta ei sisällä, joten laajennus stubataan.
   val HAKUKOHDERYHMA_OID   = "1.2.246.562.28.00000000000000000012"
   val HAKUKOHDERYHMA_OID_2 = "1.2.246.562.28.00000000000000000013"
 

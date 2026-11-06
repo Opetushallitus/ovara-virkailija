@@ -41,7 +41,22 @@ class OpiskelijavalintatietoRepository extends OpiskelijavalintatietoExtractors 
                  ht.valintatieto,
                  ht.vastaanottotieto,
                  ht.ilmoittautumisen_tila,
-                 k.johtaa_tutkintoon
+                 k.johtaa_tutkintoon,
+                 -- Jos toteutuksella on oma laajuus, kaikki laajuustiedot luetaan toteutukselta (sillä ei ole min/max-arvoja),
+                 -- muuten koulutukselta. Näin yksikkö ja luvut tulevat aina samasta lähteestä.
+                 -- Muunnos numeric-tyypiksi tuottaa arvot ilman turhia desimaaleja (120 eikä 120.0).
+                 CASE WHEN t.opintojen_laajuus_numero IS NOT NULL
+                      THEN t.opintojen_laajuus_yksikko_koodiuri
+                      ELSE k.opintojen_laajuus_yksikko_koodiuri END as opintojen_laajuus_yksikko_koodiuri,
+                 CASE WHEN t.opintojen_laajuus_numero IS NOT NULL
+                      THEN t.opintojen_laajuus_numero::numeric
+                      ELSE k.opintojen_laajuus_numero::numeric END as opintojen_laajuus_numero,
+                 CASE WHEN t.opintojen_laajuus_numero IS NULL
+                      THEN k.opintojen_laajuus_numero_min::numeric END as opintojen_laajuus_numero_min,
+                 CASE WHEN t.opintojen_laajuus_numero IS NULL
+                      THEN k.opintojen_laajuus_numero_max::numeric END as opintojen_laajuus_numero_max,
+                 k.eqf,
+                 k.nqf
           FROM gen.gen_henkilo hlo
           INNER JOIN gen.gen_hakutoive ht ON ht.henkilo_oid = hlo.henkilo_oid
           LEFT JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid

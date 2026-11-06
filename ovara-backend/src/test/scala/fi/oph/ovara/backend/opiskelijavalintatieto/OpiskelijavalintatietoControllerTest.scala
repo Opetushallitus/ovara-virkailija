@@ -4,6 +4,7 @@ import fi.oph.ovara.backend.repository.ReadOnlyDatabase
 import fi.oph.ovara.backend.utils.AuditLog
 import fi.vm.sade.auditlog.Operation
 import jakarta.servlet.http.HttpServletRequest
+import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.{Nested, Test}
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -17,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.{content, status}
 import org.springframework.test.web.servlet.{MockMvc, ResultActions}
+import slick.jdbc.PostgresProfile.api.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -103,6 +105,24 @@ class OpiskelijavalintatietoControllerTest extends OpiskelijavalintatietoTestUti
       get()
         .andExpect(status.isOk)
         .andExpect(content.json(expectedOppijaWithHakemukset))
+    }
+
+    // content.json vertaa numeroita arvon perusteella, joten esitysmuoto (120 eikä 120.0 tai 1.2E+2) tarkistetaan raakavastauksesta
+    @Test
+    def returnsLaajuusAsPlainNumbers(): Unit = {
+      initSchema()
+      insertHenkilo()
+      insertHakemusData()
+      db.run(
+        sqlu"""UPDATE gen.gen_koulutus SET opintojen_laajuus_numero_min = 7.5, opintojen_laajuus_numero_max = 180""",
+        "Set laajuus min and max for koulutus"
+      )
+
+      get()
+        .andExpect(status.isOk)
+        .andExpect(content.string(containsString(""""laajuus" : 120,""")))
+        .andExpect(content.string(containsString(""""laajuusMin" : 7.5,""")))
+        .andExpect(content.string(containsString(""""laajuusMax" : 180""" + "\n")))
     }
   }
 
@@ -223,7 +243,16 @@ class OpiskelijavalintatietoControllerTest extends OpiskelijavalintatietoTestUti
       |      "koulutuksenAlkamisvuosi" : 2022,
       |      "valinnanTila" : null,
       |      "vastaanotonTila" : null,
-      |      "ilmoittautumisenTila" : null
+      |      "ilmoittautumisenTila" : null,
+      |      "johtaaTutkintoon" : true,
+      |      "nqf" : [ 6, 7 ],
+      |      "eqf" : [ 6 ],
+      |      "opintojenLaajuus" : {
+      |        "yksikkoKoodiuri" : "opintojenlaajuusyksikko_2#1",
+      |        "laajuus" : 120,
+      |        "laajuusMin" : null,
+      |        "laajuusMax" : null
+      |      }
       |    } ]
       |  } ]
       |}""".stripMargin
