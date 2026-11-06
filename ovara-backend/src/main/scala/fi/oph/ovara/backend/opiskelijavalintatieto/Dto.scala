@@ -134,7 +134,21 @@ case class HakutoiveResponse(
     description = "Johtaako hakukohteen koulutus tutkintoon",
     example = "true"
   )
-  @BeanProperty johtaaTutkintoon: Optional[JBoolean]
+  @BeanProperty johtaaTutkintoon: Optional[JBoolean],
+  @(Schema @field)(
+    requiredMode = RequiredMode.REQUIRED,
+    description = "Hakukohteen koulutuksen kansallisen tutkintojen viitekehyksen (NQF) tasot",
+    example = "[\"4\"]"
+  )
+  @BeanProperty nqf: java.util.List[String],
+  @(Schema @field)(
+    requiredMode = RequiredMode.REQUIRED,
+    description = "Hakukohteen koulutuksen eurooppalaisen tutkintojen viitekehyksen (EQF) tasot",
+    example = "[\"4\"]"
+  )
+  @BeanProperty eqf: java.util.List[String],
+  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
+  @BeanProperty opintojenLaajuus: Optional[OpintojenLaajuusResponse]
 )
 object HakutoiveResponse {
   def apply(hakutoive: Hakutoive): HakutoiveResponse =
@@ -146,7 +160,48 @@ object HakutoiveResponse {
       valinnanTila = hakutoive.valinnanTila.toJava,
       vastaanotonTila = hakutoive.vastaanotonTila.toJava,
       ilmoittautumisenTila = hakutoive.ilmoittautumisenTila.toJava,
-      johtaaTutkintoon = hakutoive.johtaaTutkintoon.map(JBoolean.valueOf).toJava
+      johtaaTutkintoon = hakutoive.johtaaTutkintoon.map(JBoolean.valueOf).toJava,
+      nqf = hakutoive.nqf.asJava,
+      eqf = hakutoive.eqf.asJava,
+      opintojenLaajuus = hakutoive.opintojenLaajuus.map(OpintojenLaajuusResponse(_)).toJava
+    )
+}
+
+@Schema(name = "OpiskelijavalintatietoOpintojenLaajuusResponse")
+case class OpintojenLaajuusResponse(
+  @(Schema @field)(
+    requiredMode = RequiredMode.NOT_REQUIRED,
+    description =
+      "Viittaa koodistoon [opintojenlaajuusyksikko](https://virkailija.opintopolku.fi/koodisto-service/ui/koodisto/view/opintojenlaajuusyksikko)"
+  )
+  @BeanProperty yksikkoKoodiuri: Optional[String],
+  @(Schema @field)(
+    requiredMode = RequiredMode.NOT_REQUIRED,
+    description = "Opintojen laajuus. Voi sisältää desimaaleja.",
+    example = "120"
+  )
+  @BeanProperty laajuus: Optional[java.math.BigDecimal],
+  @(Schema @field)(
+    requiredMode = RequiredMode.NOT_REQUIRED,
+    description = "Opintojen laajuuden alaraja. Voi sisältää desimaaleja.",
+    example = "100"
+  )
+  @BeanProperty laajuusMin: Optional[java.math.BigDecimal],
+  @(Schema @field)(
+    requiredMode = RequiredMode.NOT_REQUIRED,
+    description = "Opintojen laajuuden yläraja. Voi sisältää desimaaleja.",
+    example = "120"
+  )
+  @BeanProperty laajuusMax: Optional[java.math.BigDecimal]
+)
+
+object OpintojenLaajuusResponse {
+  def apply(opintojenLaajuus: OpintojenLaajuus): OpintojenLaajuusResponse =
+    OpintojenLaajuusResponse(
+      yksikkoKoodiuri = opintojenLaajuus.yksikkoKoodiuri.toJava,
+      laajuus = opintojenLaajuus.laajuus.map(_.bigDecimal).toJava,
+      laajuusMin = opintojenLaajuus.laajuusMin.map(_.bigDecimal).toJava,
+      laajuusMax = opintojenLaajuus.laajuusMax.map(_.bigDecimal).toJava
     )
 }
 

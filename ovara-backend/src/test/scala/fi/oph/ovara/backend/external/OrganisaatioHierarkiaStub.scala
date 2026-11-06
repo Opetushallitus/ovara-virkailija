@@ -7,7 +7,7 @@ import org.mockito.invocation.InvocationOnMock
 
 /**
  * Apuri external-rajapintojen testeille. Organisaatiohierarkia luetaan pub-skeemasta,
- *  jota näiden testien H2-kanta ei sisällä -- testit luovat vain gen-taulut. Siksi
+ *  jota näiden testien testikanta ei sisällä -- testit luovat vain gen-taulut. Siksi
  *  `CommonService` mockataan (`@MockitoBean`) ja hierarkian laajennus stubataan tässä.
  *
  *  Oletusstubi palauttaa syötteen sellaisenaan, jolloin olemassa olevat testit mittaavat

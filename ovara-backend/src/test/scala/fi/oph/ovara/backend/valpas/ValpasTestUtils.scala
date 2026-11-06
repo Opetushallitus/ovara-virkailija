@@ -2,7 +2,7 @@ package fi.oph.ovara.backend.valpas
 
 import fi.oph.ovara.backend.repository.ReadOnlyDatabase
 import fi.oph.ovara.backend.valpas.ValpasFactory.*
-import slick.jdbc.H2Profile.api.*
+import slick.jdbc.PostgresProfile.api.*
 
 trait ValpasTestUtils {
   val db: ReadOnlyDatabase
@@ -31,7 +31,7 @@ trait ValpasTestUtils {
           $SUOMI_KOODI,
           $EMAIL,
           $MATKAPUHELIN,
-          $HAKEMUKSEN_MUOKKAUSAIKA)""",
+          $HAKEMUKSEN_MUOKKAUSAIKA::timestamptz)""",
       "Insert test hakemus"
     )
     db.run(
@@ -61,11 +61,11 @@ trait ValpasTestUtils {
       else YESTERDAY.toString
 
     db.run(
-      sqlu"""INSERT INTO gen.gen_ohjausparametri_haku values($hakuOid, $HAKUKIERROS_PAATTYY, $kierrosPaattyy, null)""",
+      sqlu"""INSERT INTO gen.gen_ohjausparametri_haku values($hakuOid, $HAKUKIERROS_PAATTYY, $kierrosPaattyy::timestamptz, null)""",
       "Insert test hkp-ohjausparametri"
     )
     db.run(
-      sqlu"""INSERT INTO gen.gen_ohjausparametri_haku values($hakuOid, $VALINTATULOSTEN_JULKISTAMINEN_HAKIJOILLE, null, ${YESTERDAY.toString})""",
+      sqlu"""INSERT INTO gen.gen_ohjausparametri_haku values($hakuOid, $VALINTATULOSTEN_JULKISTAMINEN_HAKIJOILLE, null, ${YESTERDAY.toString}::timestamptz)""",
       "Insert test vtjh-ohjausparametri"
     )
   }
@@ -117,7 +117,7 @@ trait ValpasTestUtils {
             'Kulttuurituottaja',
             'Kulturproducent',
             'Kulttuurituottaja',
-            JSON '["#$KOULUTUS_KOODIURI"]')""",
+            '["#$KOULUTUS_KOODIURI"]'::jsonb)""",
       "Insert test koulutus"
     )
 
@@ -144,7 +144,6 @@ trait ValpasTestUtils {
 
   def initSchema(): Unit = {
     val query = sqlu"""
-          CREATE DOMAIN IF NOT EXISTS JSONB AS TEXT;
           CREATE SCHEMA gen;
 
           CREATE TABLE gen.gen_hakemus (

@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.{MockMvc, ResultActions}
 import org.springframework.test.web.servlet.request.{MockHttpServletRequestBuilder, MockMvcRequestBuilders}
 import org.hamcrest.Matchers.{containsString, not}
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.{content, jsonPath, status}
-import slick.jdbc.H2Profile.api.*
+import slick.jdbc.PostgresProfile.api.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -35,7 +35,7 @@ class ValpasControllerTest extends ValpasTestUtils {
 
   @BeforeEach
   def clearDb(): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "Drop everything")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "Drop everything")
   }
 
   @Nested
