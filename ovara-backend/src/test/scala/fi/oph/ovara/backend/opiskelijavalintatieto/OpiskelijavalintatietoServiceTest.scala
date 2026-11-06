@@ -145,8 +145,8 @@ class OpiskelijavalintatietoServiceTest extends AnyFlatSpec with Matchers with O
     val response = service.get(List(OPPIJANUMERO))
 
     val hakutoive = getOnlyHakutoive(response)
-    assert(hakutoive.eqf == Seq("6"))
-    assert(hakutoive.nqf == Seq("6", "7"))
+    assert(hakutoive.eqf == Seq(6))
+    assert(hakutoive.nqf == Seq(6, 7))
     assert(
       hakutoive.opintojenLaajuus.contains(
         OpintojenLaajuus(Some("opintojenlaajuusyksikko_2#1"), Some(BigDecimal(120)), None, None)
