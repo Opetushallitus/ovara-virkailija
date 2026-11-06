@@ -56,7 +56,6 @@ case class KKHakijaRow(
   pohjakoulutus: Seq[String],
   aidinkieli: Option[String],
   syntymaaika: Option[LocalDate],
-  kansalaisuus: Option[String],
   turvakielto: Option[Boolean],
   ensikertalainen: Option[Boolean],
   vuosi: Option[Int],
@@ -82,7 +81,6 @@ case class KKHakijaRow(
         case Some(0) => "9" // Legacy-syyt: vanhassa Suoritusrekisterin rajapinnassa 9 merkitsi kieltä "muu".
         case Some(n) => n.toString
       },
-      kansalaisuus = kansalaisuus,
       kansalaisuudet = if (kansalaisuudet.isEmpty) None else Some(kansalaisuudet.toList),
       turvakielto = turvakielto.getOrElse(false),
       matkapuhelin = Option(puhelin).filter(_.nonEmpty),

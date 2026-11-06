@@ -1027,23 +1027,23 @@ class ExternalKKHakijatControllerTest
     get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].asiointikieli").value(""))
-      .andExpect(jsonPath("$.hakijat[0].syntymaaika").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].puhelin").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].syntymaaika").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].puhelin").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].onYlioppilas").value(false))
-      .andExpect(jsonPath("$.hakijat[0].yoSuoritusVuosi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].yoSuoritusVuosi").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].turvakielto").value(false))
-      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].avoinVayla").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].avoinVayla").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("KESKEN"))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pohjakoulutus").isEmpty)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuusLahde").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuusLahde").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset").isEmpty)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].liitteet").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].liitteet").doesNotExist())
   }
 
   // ---- Filter correctness ----
@@ -1139,7 +1139,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").doesNotExist())
   }
 
   @Test
@@ -1149,7 +1149,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").doesNotExist())
   }
 
   @Test
@@ -1284,7 +1284,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuusMaksuvelvollisuus").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuusMaksuvelvollisuus").doesNotExist())
   }
 
   @Test
@@ -1333,7 +1333,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").doesNotExist())
   }
 
   @Test
@@ -1342,7 +1342,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").doesNotExist())
   }
 
   @Test
@@ -1353,7 +1353,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohdeKkId").doesNotExist())
   }
 
   @Test
@@ -1399,7 +1399,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").doesNotExist())
   }
 
   @ParameterizedTest
@@ -1467,7 +1467,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").doesNotExist())
   }
 
   @Test
@@ -1481,7 +1481,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").doesNotExist())
   }
 
   @Test
@@ -1604,7 +1604,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").doesNotExist())
   }
 
   @Test
@@ -1619,7 +1619,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").doesNotExist())
   }
 
   @Test
@@ -1633,9 +1633,9 @@ class ExternalKKHakijatControllerTest
     get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehdollisestiHyvaksyttavissa").value(false))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoFI").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoSV").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoEN").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoFI").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoSV").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoEN").doesNotExist())
   }
 
   @Test
@@ -1685,8 +1685,8 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").doesNotExist())
   }
 
   @Test
@@ -1697,8 +1697,8 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").value(nullValue()))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").doesNotExist())
   }
 
   @Test
@@ -1712,7 +1712,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("Nimi"))
   }
 
@@ -1801,7 +1801,7 @@ class ExternalKKHakijatControllerTest
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset", hasSize[Any](1)))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].komoOid").value(KOULUTUS_OID))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutusKoodi").value("331101"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].tkKoulutuskoodi").value("331101"))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].kkKoulutusId").value("672301"))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutuksenAlkamisvuosi").value(2026))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutuksenAlkamiskausi").value("S"))
@@ -1821,8 +1821,8 @@ class ExternalKKHakijatControllerTest
     get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset", hasSize[Any](2)))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutusKoodi").value("331101"))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[1].koulutusKoodi").value("671101"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].tkKoulutuskoodi").value("331101"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[1].tkKoulutuskoodi").value("671101"))
       // Shared sub-fields
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].komoOid").value(KOULUTUS_OID))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[1].komoOid").value(KOULUTUS_OID))
@@ -1855,7 +1855,7 @@ class ExternalKKHakijatControllerTest
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset", hasSize[Any](1)))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].komoOid").value(KOULUTUS_OID))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutusKoodi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].tkKoulutuskoodi").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].kkKoulutusId").value("672301"))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutuksenAlkamisvuosi").value(2026))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutuksenAlkamiskausi").value("S"))
@@ -1935,31 +1935,20 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].syntymaaika").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].syntymaaika").doesNotExist())
   }
 
-  // ---- Kansalaisuus / kansalaisuudet / turvakielto (gen_henkilo-sourced) ----
+  // ---- Kansalaisuudet / turvakielto (gen_henkilo-sourced) ----
 
   @Test
-  def kansalaisuusPopulatedFromHenkilo(): Unit = {
+  def removedFieldsAreNotInResponse(): Unit = {
     seedMinimalHakija() // insertHenkilo default kansalaisuus = Some("246")
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].kansalaisuus").value(SUOMI_KOODI))
-  }
-
-  @Test
-  def kansalaisuusNullWhenColumnNull(): Unit = {
-    initSchema()
-    insertHenkilo(kansalaisuus = None)
-    insertHakemus(insertHenkilo = false)
-    insertHakukohde()
-    insertHakutoive()
-
-    get()
-      .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].kansalaisuus").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet[0]").value(SUOMI_KOODI))
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuus").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].kaksoiskansalaisuus").doesNotExist())
   }
 
   @Test
@@ -2064,7 +2053,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].yoSuoritusVuosi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].yoSuoritusVuosi").doesNotExist())
   }
 
   @Test
@@ -2074,7 +2063,7 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].yoSuoritusVuosi").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].yoSuoritusVuosi").doesNotExist())
   }
 
   @Test
@@ -2120,17 +2109,74 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").doesNotExist())
   }
 
   @Test
-  def ensikertalainenNullWhenArvoIsFalse(): Unit = {
+  def ensikertalainenFalseWhenArvoIsFalse(): Unit = {
     seedMinimalHakija()
     insertSupaTieto(avain = "ensikertalainen", arvo = Some("false"))
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(false))
+  }
+
+  @Test
+  def ensikertalainenFalseWhenArvoIsQuotedFalse(): Unit = {
+    seedMinimalHakija()
+    insertSupaTieto(avain = "ensikertalainen", arvo = Some("\"false\""))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(false))
+  }
+
+  @Test
+  def ensikertalainenNullWhenArvoIsUnrecognized(): Unit = {
+    seedMinimalHakija()
+    insertSupaTieto(avain = "ensikertalainen", arvo = Some("maybe"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").doesNotExist())
+  }
+
+  @Test
+  def ensikertalainenNullWhenArvoIsNull(): Unit = {
+    seedMinimalHakija()
+    insertSupaTieto(avain = "ensikertalainen", arvo = None)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").doesNotExist())
+  }
+
+  @Test
+  def ensikertalainenTrueWinsWhenBothTrueAndFalseRowsExist(): Unit = {
+    seedMinimalHakija()
+    insertSupaTieto(avain = "ensikertalainen", arvo = Some("false"))
+    insertSupaTieto(avain = "ensikertalainen", arvo = Some("true"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(true))
+  }
+
+  @Test
+  def excelLeavesEnsikertalainenCellEmptyWhenFalse(): Unit = {
+    seedMinimalHakija()
+    insertSupaTieto(avain = "ensikertalainen", arvo = Some("false"))
+
+    val result   = getExcel().andExpect(status.isOk).andReturn()
+    val workbook = new XSSFWorkbook(new ByteArrayInputStream(result.getResponse.getContentAsByteArray))
+    try {
+      val sheet  = workbook.getSheetAt(0)
+      val header = sheet.getRow(0).getCell(23).getStringCellValue
+      val cell   = sheet.getRow(1).getCell(23).getStringCellValue
+      assert(header == "On ensikertalainen", s"unexpected header at cell 23: $header")
+      assert(cell == "", s"expected empty ensikertalainen cell, got: '$cell'")
+    } finally workbook.close()
   }
 
   @Test
@@ -2140,7 +2186,60 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(nullValue()))
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").doesNotExist())
+  }
+
+  // ---- Hakuvuosi ja hakukausi ----
+
+  /** Seedaa hakijan, jonka haun omat vuosi/kausi poikkeavat koulutuksen alkamisvuosista/-kausista. */
+  private def seedHakijaWithHakuVuosiKausi(hakuVuosi: Option[Int], hakuKausi: Option[String]): Unit = {
+    initSchema()
+    insertHenkilo()
+    insertHaku(
+      koulutuksenAlkamisvuosi = Some(2028),
+      koulutuksenAlkamiskausiuri = Some("kausi_s#1"),
+      hakuVuosi = hakuVuosi,
+      hakuKausi = hakuKausi
+    )
+    insertHakemus(insertHenkilo = false, insertHaku = false)
+    insertHakukohde(koulutuksenAlkamisvuosi = Some(2029), koulutuksenAlkamiskausiuri = Some("kausi_s#1"))
+    insertHakutoive()
+    insertToteutus(koulutuksenAlkamisvuosi = Some(2031), koulutuksenAlkamiskausiuri = Some("kausi_s#1"))
+  }
+
+  @Test
+  def hakuVuosiJaKausiTulevatHaunOmistaKentista(): Unit = {
+    seedHakijaWithHakuVuosiKausi(hakuVuosi = Some(2030), hakuKausi = Some("kausi_k#1"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakuVuosi").value(2030))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakuKausi").value("K"))
+  }
+
+  @Test
+  def hakuVuosiJaKausiEivatPeriKoulutuksenAlkamisestaKunHaullaEiArvoja(): Unit = {
+    seedHakijaWithHakuVuosiKausi(hakuVuosi = None, hakuKausi = None)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakuVuosi").value(0))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakuKausi").value(""))
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    value = Array(
+      "kausi_s#1, S",
+      "kausi_k#2, K"
+    )
+  )
+  def hakuKausiParsesToUppercaseLetter(kausiUri: String, expected: String): Unit = {
+    seedHakijaWithHakuVuosiKausi(hakuVuosi = Some(2030), hakuKausi = Some(kausiUri))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakuKausi").value(expected))
   }
 
   // ---- Excel ----

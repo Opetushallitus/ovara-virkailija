@@ -73,7 +73,6 @@ case class HakijaHakemus(
   luokkataso: Option[String] = None,
   pohjakoulutus: Option[String] = None,
   todistusvuosi: Option[String] = None,
-  muukoulutus: Option[String] = None,
   julkaisulupa: Option[Boolean] = None,
   yhteisetaineet: Option[BigDecimal] = None,
   lukiontasapisteet: Option[BigDecimal] = None,
@@ -99,7 +98,6 @@ case class HakijaHakutoive(
   terveys: Option[Boolean] = None,
   aiempiperuminen: Option[Boolean] = None,
   kaksoistutkinto: Option[Boolean] = None,
-  koulutuksenKieli: Option[String] = None,
   keskiarvo: Option[String] = None,
   urheilijanLisakysymykset: Option[UrheilijanLisakysymykset] = None
 )
