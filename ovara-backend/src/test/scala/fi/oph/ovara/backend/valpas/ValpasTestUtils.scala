@@ -96,7 +96,15 @@ trait ValpasTestUtils {
       sqlu"""INSERT INTO gen.gen_organisaatio values(
              $ORGANISAATIO_OID,
              'Porin toimipaikka',
-             'Björneborg verksamhetspunkt')""",
+             'Björneborg verksamhetspunkt',
+             $OPPILAITOS_OID,
+             'Porin oppilaitos',
+             'Björneborg läroanstalt',
+             NULL,
+             $TOIMIPISTE_OID,
+             'Porin toimipaikka',
+             'Björneborg verksamhetspunkt',
+             NULL)""",
       "Insert test organisaatio"
     )
 
@@ -188,7 +196,15 @@ trait ValpasTestUtils {
           CREATE TABLE gen.gen_organisaatio(
               organisaatio_oid text NOT NULL PRIMARY KEY,
               nimi_fi text,
-              nimi_sv text
+              nimi_sv text,
+              oppilaitos_oid text,
+              oppilaitos_nimi_fi text,
+              oppilaitos_nimi_sv text,
+              oppilaitos_nimi_en text,
+              toimipiste_oid text,
+              toimipiste_nimi_fi text,
+              toimipiste_nimi_sv text,
+              toimipiste_nimi_en text
           );
           CREATE TABLE gen.gen_koulutus(
               koulutus_oid text NOT NULL PRIMARY KEY,

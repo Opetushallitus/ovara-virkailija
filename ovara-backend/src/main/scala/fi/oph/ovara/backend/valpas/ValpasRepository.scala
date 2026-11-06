@@ -78,7 +78,15 @@ class ValpasRepository(db: ReadOnlyDatabase) extends ValpasExtractors {
       vj.alin_hyvaksytty_pistemaara,
       vr.pisteet,
       vr.varasijan_numero,
-      vr.julkaistavissa
+      vr.julkaistavissa,
+      o.oppilaitos_oid,
+      o.oppilaitos_nimi_fi,
+      o.oppilaitos_nimi_sv,
+      o.oppilaitos_nimi_en,
+      o.toimipiste_oid,
+      o.toimipiste_nimi_fi,
+      o.toimipiste_nimi_sv,
+      o.toimipiste_nimi_en
     FROM gen.gen_hakutoive ht
     LEFT JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
     LEFT JOIN gen.gen_organisaatio o ON hk.jarjestyspaikka_oid = o.organisaatio_oid

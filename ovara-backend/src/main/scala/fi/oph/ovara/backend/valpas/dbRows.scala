@@ -70,7 +70,11 @@ case class HakutoiveRow(
   alinHyvaksyttyPistemaara: Option[BigDecimal],
   pisteet: Option[BigDecimal],
   varasijanNumero: Option[Int],
-  julkaistavissa: Option[Boolean]
+  julkaistavissa: Option[Boolean],
+  oppilaitosOid: Option[String],
+  oppilaitosNimi: Kielistetty,
+  toimipisteOid: Option[String],
+  toimipisteNimi: Kielistetty
 ) {
   def asHakutoive(koodistot: Map[String, KoodistoArvo], julkaisuAika: Option[OffsetDateTime]): Hakutoive = {
     val julkaistu = julkaistavissa.contains(true) && julkaisuAika.forall(_.isBefore(OffsetDateTime.now()))
@@ -93,7 +97,11 @@ case class HakutoiveRow(
       harkinnanvaraisuus = harkinnanvaraisuus,
       alinHyvaksyttyPistemaara = if (julkaistu) alinHyvaksyttyPistemaara.filter(_ >= 0) else None,
       pisteet = if (julkaistu) pisteet.filter(_ >= 0) else None,
-      varasijanumero = if (julkaistu) varasijanNumero else None
+      varasijanumero = if (julkaistu) varasijanNumero else None,
+      oppilaitosOid = oppilaitosOid,
+      oppilaitosNimi = oppilaitosNimi,
+      toimipisteOid = toimipisteOid,
+      toimipisteNimi = toimipisteNimi
     )
   }
 }

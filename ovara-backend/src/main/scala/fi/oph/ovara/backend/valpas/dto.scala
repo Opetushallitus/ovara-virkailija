@@ -155,7 +155,15 @@ case class HakutoiveResponse(
   @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
   @BeanProperty pisteet: Option[BigDecimal],
   @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
-  @BeanProperty varasijanumero: Option[Int]
+  @BeanProperty varasijanumero: Option[Int],
+  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
+  @BeanProperty oppilaitosOid: Option[String],
+  @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
+  @BeanProperty oppilaitosNimi: KielistettyResponse,
+  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
+  @BeanProperty toimipisteOid: Option[String],
+  @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
+  @BeanProperty toimipisteNimi: KielistettyResponse
 )
 
 object HakutoiveResponse {
@@ -175,7 +183,11 @@ object HakutoiveResponse {
       hakutoive.harkinnanvaraisuus,
       hakutoive.alinHyvaksyttyPistemaara,
       hakutoive.pisteet,
-      hakutoive.varasijanumero
+      hakutoive.varasijanumero,
+      hakutoive.oppilaitosOid,
+      KielistettyResponse(hakutoive.oppilaitosNimi),
+      hakutoive.toimipisteOid,
+      KielistettyResponse(hakutoive.toimipisteNimi)
     )
 }
 
