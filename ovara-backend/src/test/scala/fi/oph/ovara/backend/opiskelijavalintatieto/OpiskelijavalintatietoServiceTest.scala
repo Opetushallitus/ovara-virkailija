@@ -60,6 +60,9 @@ class OpiskelijavalintatietoServiceTest extends AnyFlatSpec with Matchers with O
     val hakutoive = getOnlyHakutoive(response)
     assert(hakutoive.hakukohde.oid == HAKUKOHDE_OID)
     assert(hakutoive.hakukohde.nimi.isEmpty)
+    assert(hakutoive.eqf.isEmpty)
+    assert(hakutoive.nqf.isEmpty)
+    assert(hakutoive.opintojenLaajuus.isEmpty)
   }
 
   it should "return hakemus without tarjoaja names when tarjoaja not found" in {
@@ -166,6 +169,67 @@ class OpiskelijavalintatietoServiceTest extends AnyFlatSpec with Matchers with O
         OpintojenLaajuus(Some("opintojenlaajuusyksikko_2#1"), None, Some("7.5"), Some("10"))
       )
     )
+  }
+
+  it should "read all opintojen laajuus fields from toteutus when toteutus has laajuus" in {
+    initAndInsert()
+    db.run(
+      sqlu"""UPDATE gen.gen_koulutus SET opintojen_laajuus_numero_min = 100, opintojen_laajuus_numero_max = 180""",
+      "Set laajuus min and max for koulutus"
+    )
+    db.run(
+      sqlu"""UPDATE gen.gen_toteutus SET opintojen_laajuus_yksikko_koodiuri = 'opintojenlaajuusyksikko_8#1', opintojen_laajuus_numero = 60""",
+      "Set laajuus for toteutus"
+    )
+
+    val response = service.get(List(OPPIJANUMERO))
+
+    val hakutoive = getOnlyHakutoive(response)
+    assert(
+      hakutoive.opintojenLaajuus.contains(OpintojenLaajuus(Some("opintojenlaajuusyksikko_8#1"), Some("60"), None, None))
+    )
+  }
+
+  it should "not take yksikko from koulutus when toteutus has laajuus without yksikko" in {
+    initAndInsert()
+    db.run(
+      sqlu"""UPDATE gen.gen_toteutus SET opintojen_laajuus_yksikko_koodiuri = null, opintojen_laajuus_numero = 60""",
+      "Set laajuus without yksikko for toteutus"
+    )
+
+    val response = service.get(List(OPPIJANUMERO))
+
+    val hakutoive = getOnlyHakutoive(response)
+    assert(hakutoive.opintojenLaajuus.contains(OpintojenLaajuus(None, Some("60"), None, None)))
+  }
+
+  it should "read opintojen laajuus from koulutus when toteutus has yksikko but no laajuus" in {
+    initAndInsert()
+    db.run(
+      sqlu"""UPDATE gen.gen_toteutus SET opintojen_laajuus_yksikko_koodiuri = 'opintojenlaajuusyksikko_8#1', opintojen_laajuus_numero = null""",
+      "Set yksikko without laajuus for toteutus"
+    )
+
+    val response = service.get(List(OPPIJANUMERO))
+
+    val hakutoive = getOnlyHakutoive(response)
+    assert(
+      hakutoive.opintojenLaajuus.contains(
+        OpintojenLaajuus(Some("opintojenlaajuusyksikko_2#1"), Some("120"), None, None)
+      )
+    )
+  }
+
+  it should "return empty eqf, nqf and opintojen laajuus when koulutus not found" in {
+    initAndInsert()
+    db.run(sqlu"""DELETE FROM gen.gen_koulutus WHERE koulutus_oid = $KOULUTUS_OID""", "Delete koulutus row")
+
+    val response = service.get(List(OPPIJANUMERO))
+
+    val hakutoive = getOnlyHakutoive(response)
+    assert(hakutoive.eqf.isEmpty)
+    assert(hakutoive.nqf.isEmpty)
+    assert(hakutoive.opintojenLaajuus.isEmpty)
   }
 
   it should "return empty eqf, nqf and opintojen laajuus when koulutus doesn't have them" in {
