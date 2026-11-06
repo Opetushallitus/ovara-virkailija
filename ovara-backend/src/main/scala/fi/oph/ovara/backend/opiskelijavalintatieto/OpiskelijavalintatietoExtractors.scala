@@ -1,7 +1,7 @@
 package fi.oph.ovara.backend.opiskelijavalintatieto
 
 import fi.oph.ovara.backend.repository.Extractors
-import fi.oph.ovara.backend.utils.ExtractorUtils.extractArray
+import fi.oph.ovara.backend.utils.ExtractorUtils.extractIntArray
 import slick.jdbc.GetResult
 
 trait OpiskelijavalintatietoExtractors extends Extractors {
@@ -37,8 +37,8 @@ trait OpiskelijavalintatietoExtractors extends Extractors {
       opintojenLaajuus = r.nextBigDecimalOption(),
       opintojenLaajuusMin = r.nextBigDecimalOption(),
       opintojenLaajuusMax = r.nextBigDecimalOption(),
-      eqf = extractArray(r.nextStringOption()),
-      nqf = extractArray(r.nextStringOption())
+      eqf = extractIntArray(r.nextStringOption()),
+      nqf = extractIntArray(r.nextStringOption())
     )
   )
 }
