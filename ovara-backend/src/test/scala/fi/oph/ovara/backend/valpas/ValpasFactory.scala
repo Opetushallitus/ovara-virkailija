@@ -15,6 +15,8 @@ object ValpasFactory {
   val TOTEUTUS_OID       = "1.2.246.562.17.122"
   val KOULUTUS_OID       = "1.2.246.562.13.022"
   val ORGANISAATIO_OID   = "1.2.246.562.10.486"
+  val OPPILAITOS_OID     = "1.2.246.562.10.485"
+  val TOIMIPISTE_OID     = "1.2.246.562.10.486"
   val VALINTATAPAJONO_ID = "16799"
   val KOULUTUS_KOODIURI  = "koulutus_621702#12"
 
@@ -29,8 +31,10 @@ object ValpasFactory {
   val HELSINKI                = "Helsinki"
   val SUOMI_KOODI             = "246"
 
-  val ORGANISAATIO_NIMI: Kielistetty = Map(Fi -> "Porin toimipaikka", Sv -> "Björneborg verksamhetspunkt")
   val KOULUTUS_NIMI: Kielistetty     = createKielistetty("Kulttuurituottaja", "Kulturproducent", "Kulttuurituottaja")
+  val ORGANISAATIO_NIMI: Kielistetty = Map(Fi -> "Porin toimipaikka", Sv -> "Björneborg verksamhetspunkt")
+  val OPPILAITOS_NIMI: Kielistetty   = Map(Fi -> "Porin oppilaitos", Sv -> "Björneborg läroanstalt")
+  val TOIMIPISTE_NIMI: Kielistetty   = Map(Fi -> "Porin toimipaikka", Sv -> "Björneborg verksamhetspunkt")
 
   def createKielistetty(
     fi: String = "Elokuvaleikkaus",
@@ -65,7 +69,11 @@ object ValpasFactory {
     alinHyvaksyttyPistemaara = alinHyvaksyttyPistemaara,
     pisteet = pisteet,
     varasijanNumero = Some(4),
-    julkaistavissa = julkaistavissa
+    julkaistavissa = julkaistavissa,
+    oppilaitosOid = Some(OPPILAITOS_OID),
+    oppilaitosNimi = OPPILAITOS_NIMI,
+    toimipisteOid = Some(TOIMIPISTE_OID),
+    toimipisteNimi = TOIMIPISTE_NIMI
   )
 
   def createValpasHakuaika(alkaa: LocalDateTime, paattyy: LocalDateTime) =

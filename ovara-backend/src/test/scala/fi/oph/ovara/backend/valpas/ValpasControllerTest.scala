@@ -307,7 +307,17 @@ class ValpasControllerTest extends ValpasTestUtils {
        |    "harkinnanvaraisuus" : "EI_HARKINNANVARAINEN",
        |    "alinHyvaksyttyPistemaara" : 21.1,
        |    "pisteet" : 23.7,
-       |    "varasijanumero" : 4
+       |    "varasijanumero" : 4,
+       |    "oppilaitosOid" : "$OPPILAITOS_OID",
+       |    "oppilaitosNimi" : {
+       |      "fi" : "Porin oppilaitos",
+       |      "sv" : "Björneborg läroanstalt"
+       |    },
+       |    "toimipisteOid" : "$TOIMIPISTE_OID",
+       |    "toimipisteNimi" : {
+       |      "fi" : "Porin toimipaikka",
+       |      "sv" : "Björneborg verksamhetspunkt"
+       |    }
        |}""".stripMargin
 }
 
