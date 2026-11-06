@@ -35,9 +35,9 @@ case class Hakutoive(
 
 case class OpintojenLaajuus(
   yksikkoKoodiuri: Option[String],
-  laajuus: Option[String],
-  laajuusMin: Option[String],
-  laajuusMax: Option[String]
+  laajuus: Option[BigDecimal],
+  laajuusMin: Option[BigDecimal],
+  laajuusMax: Option[BigDecimal]
 )
 
 case class Nimetty(oid: String, nimi: Kielistetty)
@@ -77,9 +77,9 @@ case class HakemusRow(
   ilmoituksenTila: Option[String],
   johtaaTutkintoon: Option[Boolean],
   opintojenLaajuusYksikkoKoodiuri: Option[String],
-  opintojenLaajuus: Option[String],
-  opintojenLaajuusMin: Option[String],
-  opintojenLaajuusMax: Option[String],
+  opintojenLaajuus: Option[BigDecimal],
+  opintojenLaajuusMin: Option[BigDecimal],
+  opintojenLaajuusMax: Option[BigDecimal],
   eqf: Seq[String],
   nqf: Seq[String]
 ) {

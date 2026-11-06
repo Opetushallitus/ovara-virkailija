@@ -175,21 +175,33 @@ case class OpintojenLaajuusResponse(
       "Viittaa koodistoon [opintojenlaajuusyksikko](https://virkailija.opintopolku.fi/koodisto-service/ui/koodisto/view/opintojenlaajuusyksikko)"
   )
   @BeanProperty yksikkoKoodiuri: Optional[String],
-  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED, example = "120")
-  @BeanProperty laajuus: Optional[String],
-  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED, example = "100")
-  @BeanProperty laajuusMin: Optional[String],
-  @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED, example = "120")
-  @BeanProperty laajuusMax: Optional[String]
+  @(Schema @field)(
+    requiredMode = RequiredMode.NOT_REQUIRED,
+    description = "Opintojen laajuus. Voi sisältää desimaaleja.",
+    example = "120"
+  )
+  @BeanProperty laajuus: Optional[java.math.BigDecimal],
+  @(Schema @field)(
+    requiredMode = RequiredMode.NOT_REQUIRED,
+    description = "Opintojen laajuuden alaraja. Voi sisältää desimaaleja.",
+    example = "100"
+  )
+  @BeanProperty laajuusMin: Optional[java.math.BigDecimal],
+  @(Schema @field)(
+    requiredMode = RequiredMode.NOT_REQUIRED,
+    description = "Opintojen laajuuden yläraja. Voi sisältää desimaaleja.",
+    example = "120"
+  )
+  @BeanProperty laajuusMax: Optional[java.math.BigDecimal]
 )
 
 object OpintojenLaajuusResponse {
   def apply(opintojenLaajuus: OpintojenLaajuus): OpintojenLaajuusResponse =
     OpintojenLaajuusResponse(
       yksikkoKoodiuri = opintojenLaajuus.yksikkoKoodiuri.toJava,
-      laajuus = opintojenLaajuus.laajuus.toJava,
-      laajuusMin = opintojenLaajuus.laajuusMin.toJava,
-      laajuusMax = opintojenLaajuus.laajuusMax.toJava
+      laajuus = opintojenLaajuus.laajuus.map(_.bigDecimal).toJava,
+      laajuusMin = opintojenLaajuus.laajuusMin.map(_.bigDecimal).toJava,
+      laajuusMax = opintojenLaajuus.laajuusMax.map(_.bigDecimal).toJava
     )
 }
 

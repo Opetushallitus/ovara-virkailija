@@ -149,12 +149,12 @@ class OpiskelijavalintatietoServiceTest extends AnyFlatSpec with Matchers with O
     assert(hakutoive.nqf == Seq("6", "7"))
     assert(
       hakutoive.opintojenLaajuus.contains(
-        OpintojenLaajuus(Some("opintojenlaajuusyksikko_2#1"), Some("120"), None, None)
+        OpintojenLaajuus(Some("opintojenlaajuusyksikko_2#1"), Some(BigDecimal(120)), None, None)
       )
     )
   }
 
-  it should "return laajuus min and max formatted without trailing zeros" in {
+  it should "return laajuus min and max without trailing zeros" in {
     initAndInsert()
     db.run(
       sqlu"""UPDATE gen.gen_koulutus SET opintojen_laajuus_numero = null, opintojen_laajuus_numero_min = 7.5, opintojen_laajuus_numero_max = 10""",
@@ -166,9 +166,12 @@ class OpiskelijavalintatietoServiceTest extends AnyFlatSpec with Matchers with O
     val hakutoive = getOnlyHakutoive(response)
     assert(
       hakutoive.opintojenLaajuus.contains(
-        OpintojenLaajuus(Some("opintojenlaajuusyksikko_2#1"), None, Some("7.5"), Some("10"))
+        OpintojenLaajuus(Some("opintojenlaajuusyksikko_2#1"), None, Some(BigDecimal("7.5")), Some(BigDecimal(10)))
       )
     )
+    // BigDecimal-vertailu ei huomioi desimaalien määrää, joten tarkistetaan esitysmuoto erikseen
+    assert(hakutoive.opintojenLaajuus.flatMap(_.laajuusMin).map(_.toString).contains("7.5"))
+    assert(hakutoive.opintojenLaajuus.flatMap(_.laajuusMax).map(_.toString).contains("10"))
   }
 
   it should "read all opintojen laajuus fields from toteutus when toteutus has laajuus" in {
@@ -186,7 +189,9 @@ class OpiskelijavalintatietoServiceTest extends AnyFlatSpec with Matchers with O
 
     val hakutoive = getOnlyHakutoive(response)
     assert(
-      hakutoive.opintojenLaajuus.contains(OpintojenLaajuus(Some("opintojenlaajuusyksikko_8#1"), Some("60"), None, None))
+      hakutoive.opintojenLaajuus.contains(
+        OpintojenLaajuus(Some("opintojenlaajuusyksikko_8#1"), Some(BigDecimal(60)), None, None)
+      )
     )
   }
 
@@ -200,7 +205,7 @@ class OpiskelijavalintatietoServiceTest extends AnyFlatSpec with Matchers with O
     val response = service.get(List(OPPIJANUMERO))
 
     val hakutoive = getOnlyHakutoive(response)
-    assert(hakutoive.opintojenLaajuus.contains(OpintojenLaajuus(None, Some("60"), None, None)))
+    assert(hakutoive.opintojenLaajuus.contains(OpintojenLaajuus(None, Some(BigDecimal(60)), None, None)))
   }
 
   it should "read opintojen laajuus from koulutus when toteutus has yksikko but no laajuus" in {
@@ -215,7 +220,7 @@ class OpiskelijavalintatietoServiceTest extends AnyFlatSpec with Matchers with O
     val hakutoive = getOnlyHakutoive(response)
     assert(
       hakutoive.opintojenLaajuus.contains(
-        OpintojenLaajuus(Some("opintojenlaajuusyksikko_2#1"), Some("120"), None, None)
+        OpintojenLaajuus(Some("opintojenlaajuusyksikko_2#1"), Some(BigDecimal(120)), None, None)
       )
     )
   }
