@@ -11,6 +11,23 @@ private val LOG: Logger =
 // Suoritusrekisterin kkhakijat-rajapinnan muoto.
 private val SyntymaaikaFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
+private val KkSyntymaaikaFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("ddMMyy")
+
+/**
+ * Suoritusrekisterin (KkHakijaUtil.toKkSyntymaaika) hetun korvike hakijalle, jolla ei ole hetua:
+ *  syntymäaika muodossa ddMMyy ja vuosisatamerkki. Yksilönumero ja tarkiste puuttuvat.
+ */
+private def toKkSyntymaaika(syntymaaika: LocalDate): String =
+  syntymaaika.format(KkSyntymaaikaFormatter) + (syntymaaika.getYear match {
+    case y if y >= 2000 => "A"
+    case y if y >= 1900 => "-"
+    case _              => ""
+  })
+
+// Suoritusrekisterin tapaan kotikunta on kolminumeroinen kuntakoodi, muuten "999" (tuntematon).
+private def kotikuntaTaiTuntematon(kotikunta: Option[String]): String =
+  kotikunta.filter(k => k.length == 3 && k.forall(_.isDigit)).getOrElse("999")
+
 /**
  * Puuttuva käsittelymerkintä (tai NULL-tila) tarkoittaa NOT_CHECKEDia. Tuntematon tila
  *  lokitetaan ja pudotetaan: tulkitsematonta lähdekoodia ei päästetä rajapintaan. None siis
@@ -67,7 +84,7 @@ case class KKHakijaRow(
 ) {
   def asHakija(hakemukset: Seq[KKHakutoive], ylioppilas: Option[YlioppilasRow]): KKHakija =
     KKHakija(
-      hetu = hetu.getOrElse(""),
+      hetu = hetu.filter(_.nonEmpty).orElse(syntymaaika.map(toKkSyntymaaika)).getOrElse(""),
       oppijanumero = oppijanumero,
       sukunimi = sukunimi.getOrElse(""),
       etunimet = etunimet.getOrElse(""),
@@ -76,7 +93,7 @@ case class KKHakijaRow(
       postinumero = postinumero,
       postitoimipaikka = postitoimipaikka,
       maa = asuinmaa.getOrElse(""),
-      kotikunta = kotikunta.getOrElse(""),
+      kotikunta = kotikuntaTaiTuntematon(kotikunta),
       sukupuoli = sukupuoli.map(_.toString).getOrElse(""),
       aidinkieli = aidinkieli.getOrElse(""),
       syntymaaika = syntymaaika.map(_.format(SyntymaaikaFormatter)),

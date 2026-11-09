@@ -113,7 +113,10 @@ trait ExternalKKHakijatTestUtils {
     valintatuloksenJulkaisulupa: Option[Boolean] = Some(VALINTATULOKSEN_JULKAISULUPA),
     jatetty: Option[java.time.OffsetDateTime] = Some(JATETTY),
     muokattu: Option[java.time.OffsetDateTime] = Some(MUOKATTU),
-    pohjakoulutusKk: Option[String] = None
+    pohjakoulutusKk: Option[String] = None,
+    lahiosoite: Option[String] = Some(LAHIOSOITE),
+    postinumero: Option[String] = Some(POSTINUMERO),
+    postitoimipaikka: Option[String] = Some(HELSINKI)
   ): Unit = {
     if (insertHenkilo) this.insertHenkilo(oppijanumero)
     if (insertHaku) this.insertHaku(hakuOid)
@@ -126,9 +129,9 @@ trait ExternalKKHakijatTestUtils {
           $hakemusOid,
           $hakuOid,
           $oppijanumero,
-          $LAHIOSOITE,
-          $POSTINUMERO,
-          $HELSINKI,
+          $lahiosoite,
+          $postinumero,
+          $postitoimipaikka,
           $SUOMI_KOODI,
           $EMAIL,
           $MATKAPUHELIN,

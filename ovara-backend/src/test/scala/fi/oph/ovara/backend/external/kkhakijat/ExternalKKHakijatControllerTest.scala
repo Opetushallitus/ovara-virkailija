@@ -1951,6 +1951,110 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].syntymaaika").doesNotExist())
   }
 
+  // ---- Hetu ----
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "2005-04-15, 150405A",
+      "1984-09-14, 140984-"
+    )
+  )
+  def hetuReplacedWithSyntymaaikaWhenMissing(syntymaaika: String, expected: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    initSchema()
+    insertHenkilo(syntymaaika = Some(java.time.LocalDate.parse(syntymaaika)))
+    insertHakemus(insertHenkilo = false, hetu = None)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hetu").value(expected))
+  }
+
+  @Test
+  def hetuReplacedWithSyntymaaikaWhenEmpty(): Unit = {
+    initSchema()
+    insertHenkilo(syntymaaika = Some(SYNTYMAAIKA))
+    insertHakemus(insertHenkilo = false, hetu = Some(""))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hetu").value("150405A"))
+  }
+
+  @Test
+  def hetuPreferredOverSyntymaaika(): Unit = {
+    initSchema()
+    insertHenkilo(syntymaaika = Some(SYNTYMAAIKA))
+    insertHakemus(insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hetu").value(HETU))
+  }
+
+  @Test
+  def hetuEmptyWhenHetuAndSyntymaaikaMissing(): Unit = {
+    initSchema()
+    insertHakemus(hetu = None) // insertHenkilo default syntymaaika = None
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hetu").value(""))
+  }
+
+  // ---- Kotikunta ----
+
+  @Test
+  def kotikuntaUnknownWhenMissing(): Unit = {
+    initSchema()
+    insertHakemus(kotikunta = None)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].kotikunta").value("999"))
+  }
+
+  @ParameterizedTest
+  @CsvSource(Array("12", "1234", "abc"))
+  def kotikuntaUnknownWhenNotThreeDigits(kotikunta: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    initSchema()
+    insertHakemus(kotikunta = Some(kotikunta))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].kotikunta").value("999"))
+  }
+
+  // ---- Osoite ----
+
+  @Test
+  def osoiteEmptyWhenColumnsNull(): Unit = {
+    initSchema()
+    insertHakemus(lahiosoite = None, postinumero = None, postitoimipaikka = None)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].lahiosoite").value(""))
+      .andExpect(jsonPath("$.hakijat[0].postinumero").value(""))
+      .andExpect(jsonPath("$.hakijat[0].postitoimipaikka").value(""))
+  }
+
   // ---- Kansalaisuudet / turvakielto (gen_henkilo-sourced) ----
 
   @Test
