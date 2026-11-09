@@ -2055,6 +2055,30 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].postitoimipaikka").value(""))
   }
 
+  // ---- Luvat ja koulusivistyskielet ----
+
+  @Test
+  def luvatFalseWhenColumnsNull(): Unit = {
+    initSchema()
+    insertHakemus(koulutusmarkkinointilupa = None, valintatuloksenJulkaisulupa = None)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].koulutusmarkkinointilupa").value(false))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].julkaisulupa").value(false))
+  }
+
+  @Test
+  def koulusivistyskieletOmittedUntilAvailable(): Unit = {
+    seedMinimalHakija()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].koulusivistyskielet").doesNotExist())
+  }
+
   // ---- Kansalaisuudet / turvakielto (gen_henkilo-sourced) ----
 
   @Test

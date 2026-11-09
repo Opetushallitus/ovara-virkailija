@@ -107,6 +107,9 @@ case class KKHakijaRow(
       matkapuhelin = Option(puhelin).filter(_.nonEmpty),
       sahkoposti = Option(sahkoposti).filter(_.nonEmpty),
       koulutusmarkkinointilupa = koulutusmarkkinointilupa,
+      // TODO: koulusivistyskielet tulevat myöhemmin saataville. Siihen asti null eikä Suren tapaan tyhjä lista,
+      // koska tyhjä lista antaisi ymmärtää ettei kieliä ole, vaikka tieto vain puuttuu.
+      koulusivistyskielet = None,
       onYlioppilas = ylioppilas.flatMap(_.onYlioppilas).getOrElse(false),
       yoSuoritusVuosi = ylioppilas.flatMap(_.valmistumisVuosi).map(_.toString),
       ensikertalainen = ensikertalainen,
