@@ -1389,7 +1389,20 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value("2025-10-01T12:00:00+03:00"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value("2025-10-01T12:00:00"))
+  }
+
+  @Test
+  def valinnanAikaleimaConvertedToHelsinkiTime(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valinnanTila = Some("HYVAKSYTTY"),
+      hyvaksyttyjajulkaistu = Some(java.time.OffsetDateTime.parse("2025-10-01T09:00:00Z"))
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value("2025-10-01T12:00:00"))
   }
 
   @Test
@@ -1443,7 +1456,7 @@ class ExternalKKHakijatControllerTest
     get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value("2025-10-01T12:00:00+03:00"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value("2025-10-01T12:00:00"))
   }
 
   // ---- Pisteet ----
@@ -2411,7 +2424,7 @@ class ExternalKKHakijatControllerTest
         32 -> "TKID-1",
         33 -> "1",
         35 -> VALINTATIETO,
-        36 -> "2025-10-01T12:00:00+03:00",
+        36 -> "2025-10-01T12:00:00",
         37 -> "82.5",
         38 -> "HyvaksymisenEhto(X,,Ehto FI,Ehto SV,Ehto EN)",
         39 -> "YHTEISPISTEET",

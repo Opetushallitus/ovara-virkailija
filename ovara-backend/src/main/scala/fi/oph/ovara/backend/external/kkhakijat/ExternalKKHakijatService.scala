@@ -1,9 +1,11 @@
 package fi.oph.ovara.backend.external.kkhakijat
 
 import fi.oph.ovara.backend.service.CommonService
+import fi.oph.ovara.backend.utils.Constants.HELSINKI_TIMEZONE
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.Service
 
+import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import scala.util.Try
 
@@ -11,8 +13,12 @@ import scala.util.Try
 class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonService: CommonService) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[ExternalKKHakijatService])
 
+  // Suoritusrekisterin tapaan Suomen aikaa ilman aikavyöhykettä, kannan session aikavyöhykkeestä riippumatta.
   private val AikaleimaFormatter: DateTimeFormatter =
-    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
+    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+
+  private def formatAikaleima(aikaleima: OffsetDateTime): String =
+    aikaleima.atZoneSameInstant(HELSINKI_TIMEZONE).format(AikaleimaFormatter)
 
   def getKKHakijat(
     hakuOid: Option[String],
@@ -112,9 +118,9 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
                 hakuVuosi = row.vuosi.getOrElse(0),
                 hakuKausi = row.kausi.getOrElse(""),
                 hakemusnumero = row.hakemusOid,
-                hakemusJattoAikaleima = row.jatetty.map(_.format(AikaleimaFormatter)),
-                hakemusViimeinenMuokkausAikaleima = row.muokattu.map(_.format(AikaleimaFormatter)),
-                valinnanAikaleima = mRow.valinnanAikaleima.map(_.format(AikaleimaFormatter)),
+                hakemusJattoAikaleima = row.jatetty.map(formatAikaleima),
+                hakemusViimeinenMuokkausAikaleima = row.muokattu.map(formatAikaleima),
+                valinnanAikaleima = mRow.valinnanAikaleima.map(formatAikaleima),
                 pohjakoulutus = row.pohjakoulutus,
                 julkaisulupa = row.valintatuloksenJulkaisulupa
               )

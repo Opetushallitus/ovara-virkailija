@@ -2,10 +2,14 @@ package fi.oph.ovara.backend.external.kkhakijat
 
 import org.slf4j.{Logger, LoggerFactory}
 
+import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, OffsetDateTime}
 
 private val LOG: Logger =
   LoggerFactory.getLogger("fi.oph.ovara.backend.external.kkhakijat.Kasittelymerkinnat")
+
+// Suoritusrekisterin kkhakijat-rajapinnan muoto.
+private val SyntymaaikaFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
 /**
  * Puuttuva käsittelymerkintä (tai NULL-tila) tarkoittaa NOT_CHECKEDia. Tuntematon tila
@@ -75,7 +79,7 @@ case class KKHakijaRow(
       kotikunta = kotikunta.getOrElse(""),
       sukupuoli = sukupuoli.map(_.toString).getOrElse(""),
       aidinkieli = aidinkieli.getOrElse(""),
-      syntymaaika = syntymaaika.map(_.toString),
+      syntymaaika = syntymaaika.map(_.format(SyntymaaikaFormatter)),
       asiointikieli = asiointikieli match {
         case None    => ""
         case Some(0) => "9" // Legacy-syyt: vanhassa Suoritusrekisterin rajapinnassa 9 merkitsi kieltä "muu".
