@@ -30,7 +30,7 @@ class ValpasExtractors extends Extractors with ValpasFormats {
     HakutoiveRow(
       hakemusOid = r.nextString(),
       hakukohdeOid = r.nextString(),
-      hakutoivenumero = r.nextInt(),
+      hakutoivenumero = r.nextIntOption(),
       hakukohdeNimi = getKielistetty(r),
       hakukohdeOrganisaatio = r.nextString(),
       organisaatioNimi = getKielistetty(r),

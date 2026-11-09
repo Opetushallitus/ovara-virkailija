@@ -149,4 +149,20 @@ class HakutoiveRowSpec extends AnyFlatSpec {
 
     assert(result.alinHyvaksyttyPistemaara.isEmpty)
   }
+
+  it should "return hakutoivenumero when it is present" in {
+    val toive = createHakutoiveRow(hakutoivenumero = Some(2))
+
+    val result = toive.asHakutoive(Map(KOULUTUS_KOODIURI -> createKoulutusKoodi()), Some(YESTERDAY))
+
+    assert(result.hakutoivenumero.contains(2))
+  }
+
+  it should "not return hakutoivenumero when it is -1" in {
+    val toive = createHakutoiveRow(hakutoivenumero = Some(-1))
+
+    val result = toive.asHakutoive(Map(KOULUTUS_KOODIURI -> createKoulutusKoodi()), Some(YESTERDAY))
+
+    assert(result.hakutoivenumero.isEmpty)
+  }
 }
