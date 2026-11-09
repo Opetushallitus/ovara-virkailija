@@ -173,9 +173,10 @@ case class KKHakemusRow(
       hakemusViimeinenMuokkausAikaleima = hakemusViimeinenMuokkausAikaleima,
       hakemusJattoAikaleima = hakemusJattoAikaleima,
       valinnanAikaleima = valinnanAikaleima,
-      hakutoivePrioriteetti = Some(hakutoivenumero),
+      // -1 tarkoittaa haun järjestämättömiä hakutoiveita, jolloin Sure jättää prioriteetin pois.
+      hakutoivePrioriteetti = Some(hakutoivenumero).filter(_ != -1),
       valinnanTila = valinnanTila.flatMap(Valintatila.parse).orElse(Some(Valintatila.KESKEN)),
-      vastaanottotieto = vastaanottotieto.flatMap(Vastaanottotila.parse),
+      vastaanottotieto = vastaanottotieto.flatMap(Vastaanottotila.parse).orElse(Some(Vastaanottotila.KESKEN)),
       ilmoittautumiset = ilmoittautumisenTila.flatMap(Lasnaolo.parse).toSeq,
       pohjakoulutus = pohjakoulutus,
       julkaisulupa = julkaisulupa,
@@ -193,12 +194,18 @@ case class KKHakemusRow(
         Maksuvelvollisuus.NOT_CHECKED,
         "hKelpoisuusMaksuvelvollisuus"
       ),
-      lukuvuosimaksu = lukuvuosimaksu,
+      // Suren tapaan maksuvelvolliselle, jolta maksutieto puuttuu, palautetaan MAKSAMATTA.
+      lukuvuosimaksu = lukuvuosimaksu.orElse(
+        Option.when(
+          hKelpoisuusMaksuvelvollisuusState.flatMap(Maksuvelvollisuus.parse).contains(Maksuvelvollisuus.REQUIRED)
+        )("MAKSAMATTA")
+      ),
       hakukohdeKkId = hakukohdeKkId,
       pisteet = pisteet,
-      hyvaksymisenEhto = ehdollistiHyvaksyttavissa.map(ehd =>
+      // Sure palauttaa ehdon aina; ilman julkaistua tietoa ehdollisesti hyväksyttävissä on false.
+      hyvaksymisenEhto = Some(
         HyvaksymisenEhto(
-          ehdollisestiHyvaksyttavissa = ehd,
+          ehdollisestiHyvaksyttavissa = ehdollistiHyvaksyttavissa.getOrElse(false),
           ehtoKoodi = None,
           ehtoFI = ehtoFI,
           ehtoSV = ehtoSV,

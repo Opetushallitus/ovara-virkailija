@@ -1038,7 +1038,7 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("KESKEN"))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").doesNotExist())
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehdollisestiHyvaksyttavissa").value(false))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pohjakoulutus").isEmpty)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuusLahde").doesNotExist())
@@ -1119,7 +1119,64 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("KESKEN"))
   }
 
+  // ---- Vastaanottotieto ja hakutoivePrioriteetti ----
+
+  @Test
+  def vastaanottotietoDefaultsToKeskenWhenMissing(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(vastaanottotieto = None)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def hakutoivePrioriteettiOmittedForUnorderedHakutoiveet(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(hakutoivenumero = -1)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakutoivePrioriteetti").doesNotExist())
+  }
+
   // ---- Lukuvuosimaksu ----
+
+  @Test
+  def lukuvuosimaksuMaksamattaWhenObligatedAndNoMaksu(): Unit = {
+    seedMinimalHakija()
+    insertKasittelymerkinta(PAYMENT_REQUIREMENT, Some("obligated"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").value("MAKSAMATTA"))
+  }
+
+  @Test
+  def lukuvuosimaksuFromValintarekisteriWhenObligated(): Unit = {
+    seedMinimalHakija()
+    insertKasittelymerkinta(PAYMENT_REQUIREMENT, Some("obligated"))
+    insertValintarekisteri(maksunTila = Some("MAKSETTU"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").value("MAKSETTU"))
+  }
+
+  @Test
+  def lukuvuosimaksuOmittedWhenNotObligatedAndNoMaksu(): Unit = {
+    seedMinimalHakija()
+    insertKasittelymerkinta(PAYMENT_REQUIREMENT, Some("not-obligated"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").doesNotExist())
+  }
 
   @ParameterizedTest
   @ValueSource(strings = Array("MAKSETTU", "MAKSAMATTA", "VAPAUTETTU"))
@@ -1612,16 +1669,17 @@ class ExternalKKHakijatControllerTest
   }
 
   @Test
-  def hyvaksymisenEhtoNullWhenNoValintarekisteriRow(): Unit = {
+  def hyvaksymisenEhtoFalseWhenNoValintarekisteriRow(): Unit = {
     seedMinimalHakija()
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehdollisestiHyvaksyttavissa").value(false))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoFI").doesNotExist())
   }
 
   @Test
-  def hyvaksymisenEhtoNullWhenAllRowsUnpublished(): Unit = {
+  def hyvaksymisenEhtoFalseWhenAllRowsUnpublished(): Unit = {
     seedMinimalHakija()
     insertValintarekisteri(
       valinnanTila = Some("HYVAKSYTTY"),
@@ -1632,7 +1690,8 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehdollisestiHyvaksyttavissa").value(false))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoFI").doesNotExist())
   }
 
   @Test
