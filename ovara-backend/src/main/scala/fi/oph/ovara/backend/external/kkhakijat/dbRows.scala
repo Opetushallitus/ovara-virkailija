@@ -29,6 +29,35 @@ private def kotikuntaTaiTuntematon(kotikunta: Option[String]): String =
   kotikunta.filter(k => k.length == 3 && k.forall(_.isDigit)).getOrElse("999")
 
 /**
+ * Suoritusrekisterin (KkHakijaUtil.getLasnaolot) tapaan ilmoittautumistila lukuvuoden syys- ja
+ *  kevätlukukaudelle koulutuksen alkamiskauden mukaan. Ilman alkamiskautta ja -vuotta ei
+ *  ilmoittautumisia. Kevätaloituksen lukuvuosi (v, v) on kopioitu Suresta sellaisenaan.
+ */
+private def ilmoittautumiset(
+  alkamiskausi: Option[String],
+  alkamisvuosi: Option[Int],
+  ilmoittautumisenTila: Option[String]
+): Seq[Ilmoittautuminen] = {
+  import IlmoittautumisenTila.*
+  (alkamiskausi, alkamisvuosi) match {
+    case (Some(kausi @ ("S" | "K")), Some(vuosi)) =>
+      val syksy = Ilmoittautuminen(_, "S", vuosi)
+      val kevat = Ilmoittautuminen(_, "K", if (kausi == "S") vuosi + 1 else vuosi)
+      ilmoittautumisenTila.map(Lasnaolo.parse) match {
+        case None | Some(Some(Lasnaolo.EI_TEHTY | Lasnaolo.EI_ILMOITTAUTUNUT)) => Seq(syksy(Puuttuu), kevat(Puuttuu))
+        case Some(Some(Lasnaolo.LASNA_KOKO_LUKUVUOSI))                         => Seq(syksy(Lasna), kevat(Lasna))
+        case Some(Some(Lasnaolo.POISSA_KOKO_LUKUVUOSI))                        => Seq(syksy(Poissa), kevat(Poissa))
+        case Some(Some(Lasnaolo.LASNA_SYKSY))                                  => Seq(syksy(Lasna), kevat(Poissa))
+        case Some(Some(Lasnaolo.POISSA_SYKSY))                                 => Seq(syksy(Poissa), kevat(Lasna))
+        case Some(Some(Lasnaolo.LASNA))                                        => Seq(kevat(Lasna))
+        case Some(Some(Lasnaolo.POISSA))                                       => Seq(kevat(Poissa))
+        case Some(None)                                                        => Nil
+      }
+    case _ => Nil
+  }
+}
+
+/**
  * Puuttuva käsittelymerkintä (tai NULL-tila) tarkoittaa NOT_CHECKEDia. Tuntematon tila
  *  lokitetaan ja pudotetaan: tulkitsematonta lähdekoodia ei päästetä rajapintaan. None siis
  *  erottuu NOT_CHECKEDista -- se tarkoittaa "merkintä on, mutta sitä ei osattu tulkita", ei
@@ -177,7 +206,7 @@ case class KKHakemusRow(
       hakutoivePrioriteetti = Some(hakutoivenumero).filter(_ != -1),
       valinnanTila = valinnanTila.flatMap(Valintatila.parse).orElse(Some(Valintatila.KESKEN)),
       vastaanottotieto = vastaanottotieto.flatMap(Vastaanottotila.parse).orElse(Some(Vastaanottotila.KESKEN)),
-      ilmoittautumiset = ilmoittautumisenTila.flatMap(Lasnaolo.parse).toSeq,
+      ilmoittautumiset = ilmoittautumiset(toteutusAlkamiskausi, toteutusAlkamisvuosi, ilmoittautumisenTila),
       pohjakoulutus = pohjakoulutus,
       julkaisulupa = julkaisulupa,
       // Tuntematon tila jää Noneksi ja näkyy rajapinnassa tyhjänä; hKelpoisuusLahde ei tule

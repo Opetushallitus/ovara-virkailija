@@ -214,7 +214,7 @@ case class KKHakemusResponse(
   @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
   @BeanProperty pisteet: JBigDecimal,
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
-  @BeanProperty ilmoittautumiset: java.util.List[String],
+  @BeanProperty ilmoittautumiset: java.util.List[IlmoittautuminenResponse],
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
   @BeanProperty pohjakoulutus: java.util.List[String],
   @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
@@ -258,7 +258,7 @@ object KKHakemusResponse {
       hyvaksymisenEhto = h.hyvaksymisenEhto.map(HyvaksymisenEhtoResponse.apply).orNull,
       vastaanottotieto = h.vastaanottotieto.map(_.name).orNull,
       pisteet = h.pisteet.map(_.bigDecimal).orNull,
-      ilmoittautumiset = h.ilmoittautumiset.map(_.name).asJava,
+      ilmoittautumiset = h.ilmoittautumiset.map(IlmoittautuminenResponse.apply).asJava,
       pohjakoulutus = h.pohjakoulutus.asJava,
       julkaisulupa = h.julkaisulupa.map(Boolean.box).orNull,
       hKelpoisuus = h.hKelpoisuus.map(_.name).getOrElse(""),
@@ -294,6 +294,24 @@ object HyvaksymisenEhtoResponse {
       ehtoSV = h.ehtoSV.orNull,
       ehtoEN = h.ehtoEN.orNull
     )
+}
+
+@JsonInclude(Include.NON_NULL)
+@JsonPropertyOrder(Array("kausi", "tila"))
+case class IlmoittautuminenResponse(
+  @(Schema @field)(requiredMode = RequiredMode.REQUIRED, example = "2026S")
+  @BeanProperty kausi: String,
+  @(Schema @field)(
+    requiredMode = RequiredMode.REQUIRED,
+    description = "Suoritusrekisterin Lasnaolo-tyypin koodi: 1 = Lasna, 2 = Poissa, " +
+      "3 = PoissaEiKulutaOpintoaikaa, 4 = Puuttuu"
+  )
+  @BeanProperty tila: Int
+)
+
+object IlmoittautuminenResponse {
+  def apply(i: Ilmoittautuminen): IlmoittautuminenResponse =
+    IlmoittautuminenResponse(kausi = i.kausiKoodi, tila = i.tila.koodi)
 }
 
 @JsonInclude(Include.NON_NULL)

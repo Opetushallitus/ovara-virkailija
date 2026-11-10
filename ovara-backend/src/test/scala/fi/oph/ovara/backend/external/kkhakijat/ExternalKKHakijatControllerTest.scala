@@ -973,6 +973,7 @@ class ExternalKKHakijatControllerTest
   @Test
   def returnsHakijaFilteredByHakukohdeOid(): Unit = {
     seedMinimalHakija()
+    insertToteutus(koulutuksenAlkamisvuosi = Some(2026), koulutuksenAlkamiskausiuri = Some("kausi_s#1"))
     insertValintarekisteri(valinnanTila = Some(VALINTATIETO))
 
     get()
@@ -1006,7 +1007,11 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakutoivePrioriteetti").value(1))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(VALINTATIETO))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value(VASTAANOTTOTIETO))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset[0]").value(ILMOITTAUTUMISEN_TILA))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset", hasSize[Any](2)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset[0].kausi").value("2026S"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset[0].tila").value(1))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset[1].kausi").value("2027K"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset[1].tila").value(1))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].julkaisulupa").value(VALINTATULOKSEN_JULKAISULUPA))
   }
 
@@ -1954,6 +1959,79 @@ class ExternalKKHakijatControllerTest
       )
   }
 
+  // ---- Ilmoittautumiset ----
+
+  /** expected: välilyönnein erotetut kausi:tila-parit, esim. "2026S:4 2027K:4". */
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "kausi_s#1,                       , 2026S:4 2027K:4",
+      "kausi_s#1, EI_TEHTY              , 2026S:4 2027K:4",
+      "kausi_s#1, EI_ILMOITTAUTUNUT     , 2026S:4 2027K:4",
+      "kausi_s#1, LASNA_KOKO_LUKUVUOSI  , 2026S:1 2027K:1",
+      "kausi_s#1, POISSA_KOKO_LUKUVUOSI , 2026S:2 2027K:2",
+      "kausi_s#1, LASNA_SYKSY           , 2026S:1 2027K:2",
+      "kausi_s#1, POISSA_SYKSY          , 2026S:2 2027K:1",
+      "kausi_s#1, LASNA                 , 2027K:1",
+      "kausi_s#1, POISSA                , 2027K:2",
+      "kausi_k#1,                       , 2026S:4 2026K:4",
+      "kausi_k#1, LASNA_KOKO_LUKUVUOSI  , 2026S:1 2026K:1",
+      "kausi_k#1, LASNA_SYKSY           , 2026S:1 2026K:2",
+      "kausi_k#1, LASNA                 , 2026K:1"
+    )
+  )
+  def ilmoittautumisetFromAlkamiskausiAndTila(kausiUri: String, tila: String, expected: String): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(ilmoittautumisenTila = Option(tila))
+    insertToteutus(koulutuksenAlkamisvuosi = Some(2026), koulutuksenAlkamiskausiuri = Some(kausiUri))
+
+    val odotetut = expected.split(" ").toSeq.map(_.split(":") match { case Array(k, t) => (k, t.toInt) })
+    val result   = get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset", hasSize[Any](odotetut.size)))
+    odotetut.zipWithIndex.foreach { case ((kausi, tilaKoodi), i) =>
+      result
+        .andExpect(jsonPath(s"$$.hakijat[0].hakemukset[0].ilmoittautumiset[$i].kausi").value(kausi))
+        .andExpect(jsonPath(s"$$.hakijat[0].hakemukset[0].ilmoittautumiset[$i].tila").value(tilaKoodi))
+    }
+  }
+
+  @Test
+  def ilmoittautumisetEmptyWithoutAlkamiskausi(): Unit = {
+    seedMinimalHakija()
+    insertToteutus(koulutuksenAlkamisvuosi = Some(2026), koulutuksenAlkamiskausiuri = None)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset").isEmpty)
+  }
+
+  @Test
+  def ilmoittautumisetEmptyWithoutAlkamisvuosi(): Unit = {
+    seedMinimalHakija()
+    insertToteutus(koulutuksenAlkamisvuosi = None, koulutuksenAlkamiskausiuri = Some("kausi_s#1"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset").isEmpty)
+  }
+
+  @Test
+  def ilmoittautumisetEmptyForUnknownTila(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(ilmoittautumisenTila = Some("TUNTEMATON"))
+    insertToteutus(koulutuksenAlkamisvuosi = Some(2026), koulutuksenAlkamiskausiuri = Some("kausi_s#1"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset").isEmpty)
+  }
+
   // ---- Asiointikieli ----
 
   @ParameterizedTest
@@ -2617,7 +2695,7 @@ class ExternalKKHakijatControllerTest
         39 -> "YHTEISPISTEET",
         40 -> "Yhteispistejono",
         41 -> VASTAANOTTOTIETO,
-        42 -> ILMOITTAUTUMISEN_TILA,
+        42 -> "Lasna(Syksy(2026)),Lasna(Kevat(2027))",
         43 -> "pohjakoulutus_yo,pohjakoulutus_kk",
         44 -> "X",
         45 -> "CONDITIONALLY_ELIGIBLE",
