@@ -116,13 +116,18 @@ trait ExternalKKHakijatTestUtils {
     pohjakoulutusKk: Option[String] = None,
     lahiosoite: Option[String] = Some(LAHIOSOITE),
     postinumero: Option[String] = Some(POSTINUMERO),
-    postitoimipaikka: Option[String] = Some(HELSINKI)
+    postitoimipaikka: Option[String] = Some(HELSINKI),
+    asuinmaa: Option[String] = Some(SUOMI_KOODI),
+    // Viimeisimmän version luontiaika, joka rajapinnassa näkyy viimeisenä muokkauksena. Sama lähde kuin Suressa.
+    luotu: Option[java.time.OffsetDateTime] = Some(MUOKATTU),
+    ulkKunta: Option[String] = None
   ): Unit = {
     if (insertHenkilo) this.insertHenkilo(oppijanumero)
     if (insertHaku) this.insertHaku(hakuOid)
 
     val jatettyStr  = jatetty.map(_.format(SECONDS_TZ_FORMATTER))
     val muokattuStr = muokattu.map(_.format(SECONDS_TZ_FORMATTER))
+    val luotuStr    = luotu.map(_.format(SECONDS_TZ_FORMATTER))
 
     db.run(
       sqlu"""INSERT INTO gen.gen_hakemus VALUES(
@@ -132,7 +137,7 @@ trait ExternalKKHakijatTestUtils {
           $lahiosoite,
           $postinumero,
           $postitoimipaikka,
-          $SUOMI_KOODI,
+          $asuinmaa,
           $EMAIL,
           $MATKAPUHELIN,
           $etunimet,
@@ -149,7 +154,9 @@ trait ExternalKKHakijatTestUtils {
           $valintatuloksenJulkaisulupa,
           $jatettyStr::timestamptz,
           $muokattuStr::timestamptz,
-          $pohjakoulutusKk::jsonb)""",
+          $pohjakoulutusKk::jsonb,
+          $luotuStr::timestamptz,
+          $ulkKunta)""",
       "Insert test kk-hakemus"
     )
   }
@@ -318,7 +325,9 @@ trait ExternalKKHakijatTestUtils {
               valintatuloksen_julkaisulupa   boolean,
               jatetty                        timestamp with time zone,
               muokattu                       timestamp with time zone,
-              pohjakoulutus_kk               jsonb
+              pohjakoulutus_kk               jsonb,
+              luotu                          timestamp with time zone,
+              ulk_kunta                      text
           );
 
           CREATE TABLE gen.gen_henkilo (

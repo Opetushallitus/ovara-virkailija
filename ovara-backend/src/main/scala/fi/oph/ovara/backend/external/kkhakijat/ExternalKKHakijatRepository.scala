@@ -43,13 +43,16 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             hakemus.puhelin,
             hakemus.lahiosoite,
             hakemus.postinumero,
-            hakemus.postitoimipaikka,
+            -- Atarun tapaan ulkomaan (tai puuttuvan) asuinmaan postitoimipaikka on kaupunki (city).
+            CASE WHEN coalesce(hakemus.asuinmaa, '') <> '246' THEN hakemus.ulk_kunta
+                 ELSE hakemus.postitoimipaikka END,
             haku.haku_oid,
             hakemus.etunimet,
             hakemus.kutsumanimi,
             hakemus.sukunimi,
             hakemus.hetu,
-            hakemus.asuinmaa,
+            -- Ataru olettaa puuttuvaksi asuinmaaksi Suomen.
+            coalesce(hakemus.asuinmaa, '246'),
             hlo.kaikki_kansalaisuudet,
             hakemus.kotikunta,
             hakemus.sukupuoli,
@@ -57,7 +60,8 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             coalesce(hakemus.koulutusmarkkinointilupa, false),
             coalesce(hakemus.valintatuloksen_julkaisulupa, false),
             hakemus.jatetty,
-            hakemus.muokattu,
+            -- Suren tapaan viimeisin muokkaus on hakemuksen viimeisimmän version luontiaika.
+            hakemus.luotu,
             hakemus.pohjakoulutus_kk,
             hlo.aidinkieli,
             hlo.syntymaaika,

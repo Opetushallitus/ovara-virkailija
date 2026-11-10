@@ -1981,7 +1981,7 @@ class ExternalKKHakijatControllerTest
     )
   )
   def ilmoittautumisetFromAlkamiskausiAndTila(kausiUri: String, tila: String, expected: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     initSchema()
     insertHakemus()
     insertHakukohde()
@@ -2098,7 +2098,7 @@ class ExternalKKHakijatControllerTest
     )
   )
   def hetuReplacedWithSyntymaaikaWhenMissing(syntymaaika: String, expected: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     initSchema()
     insertHenkilo(syntymaaika = Some(java.time.LocalDate.parse(syntymaaika)))
     insertHakemus(insertHenkilo = false, hetu = None)
@@ -2165,7 +2165,7 @@ class ExternalKKHakijatControllerTest
   @ParameterizedTest
   @CsvSource(Array("12", "1234", "abc"))
   def kotikuntaUnknownWhenNotThreeDigits(kotikunta: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     initSchema()
     insertHakemus(kotikunta = Some(kotikunta))
     insertHakukohde()
@@ -2190,6 +2190,85 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].lahiosoite").value(""))
       .andExpect(jsonPath("$.hakijat[0].postinumero").value(""))
       .andExpect(jsonPath("$.hakijat[0].postitoimipaikka").value(""))
+  }
+
+  @Test
+  def postitoimipaikkaFromUlkKuntaWhenAsuinmaaAbroad(): Unit = {
+    initSchema()
+    insertHakemus(asuinmaa = Some("826"), postitoimipaikka = None, ulkKunta = Some("London"))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].postitoimipaikka").value("London"))
+      .andExpect(jsonPath("$.hakijat[0].maa").value("826"))
+  }
+
+  @Test
+  def postitoimipaikkaFromUlkKuntaAndMaaFinlandWhenAsuinmaaMissing(): Unit = {
+    initSchema()
+    insertHakemus(asuinmaa = None, postitoimipaikka = Some(HELSINKI), ulkKunta = Some("London"))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].postitoimipaikka").value("London"))
+      .andExpect(jsonPath("$.hakijat[0].maa").value("246"))
+  }
+
+  @Test
+  def postitoimipaikkaKeptWhenAsuinmaaFinland(): Unit = {
+    initSchema()
+    insertHakemus(asuinmaa = Some("246"), postitoimipaikka = Some(HELSINKI), ulkKunta = Some("London"))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].postitoimipaikka").value(HELSINKI))
+  }
+
+  @Test
+  def postitoimipaikkaEmptyWhenAbroadAndUlkKuntaMissing(): Unit = {
+    initSchema()
+    insertHakemus(asuinmaa = Some("826"), postitoimipaikka = Some(HELSINKI), ulkKunta = None)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].postitoimipaikka").value(""))
+  }
+
+  // ---- Viimeisin muokkaus ----
+
+  @Test
+  def hakemusViimeinenMuokkausAikaleimaFromLuotu(): Unit = {
+    initSchema()
+    insertHakemus(
+      luotu = Some(java.time.OffsetDateTime.parse("2025-09-10T08:00:00+03:00")),
+      muokattu = Some(java.time.OffsetDateTime.parse("2025-09-20T08:00:00+03:00"))
+    )
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakemusViimeinenMuokkausAikaleima").value("2025-09-10T08:00:00"))
+  }
+
+  @Test
+  def hakemusViimeinenMuokkausAikaleimaOmittedWhenLuotuMissing(): Unit = {
+    initSchema()
+    insertHakemus(luotu = None)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakemusViimeinenMuokkausAikaleima").doesNotExist())
   }
 
   // ---- Luvat ja koulusivistyskielet ----
