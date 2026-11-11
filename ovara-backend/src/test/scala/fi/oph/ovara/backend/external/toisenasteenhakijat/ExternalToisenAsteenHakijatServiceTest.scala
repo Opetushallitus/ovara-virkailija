@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.bean.`override`.mockito.MockitoBean
 import org.springframework.test.context.{ActiveProfiles, TestContextManager}
-import slick.jdbc.H2Profile.api.*
+import slick.jdbc.PostgresProfile.api.*
 
 @SpringBootTest
 @ActiveProfiles(Array("test"))
@@ -28,7 +28,7 @@ class ExternalToisenAsteenHakijatServiceTest
   @Autowired
   private val service: ExternalToisenAsteenHakijatService = null
 
-  // Organisaatiohierarkia luetaan pub-skeemasta, jota näiden testien H2-kanta ei sisällä
+  // Organisaatiohierarkia luetaan pub-skeemasta, jota näiden testien testikanta ei sisällä
   // (initSchema luo vain gen-taulut). Oletuksena laajennus palauttaa syötteen sellaisenaan,
   // jolloin testit kohdistuvat suodatuslogiikkaan; hierarkian laajentuminen testataan
   // erikseen `withOrganisaatioHierarkia`-apurilla.
@@ -38,7 +38,7 @@ class ExternalToisenAsteenHakijatServiceTest
   new TestContextManager(this.getClass).prepareTestInstance(this)
 
   override def beforeEach(): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "Drop everything")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "Drop everything")
     stubOrganisaatioHierarkiaAsIdentity()
   }
 
@@ -1146,7 +1146,7 @@ class ExternalToisenAsteenHakijatServiceTest
     service.getHakijat(hakuOid, hakukohdeOid, organisaatioOid, valintarajaus, KayttooikeusScope.paakayttaja)
 
   private def resetDb(): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "Drop everything")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "Drop everything")
     initSchema()
   }
 

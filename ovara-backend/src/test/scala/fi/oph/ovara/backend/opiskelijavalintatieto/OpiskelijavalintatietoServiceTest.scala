@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.{ActiveProfiles, TestContextManager}
-import slick.jdbc.H2Profile.api.*
+import slick.jdbc.PostgresProfile.api.*
 
 @SpringBootTest
 @ActiveProfiles(Array("test"))
@@ -60,6 +60,9 @@ class OpiskelijavalintatietoServiceTest extends AnyFlatSpec with Matchers with O
     val hakutoive = getOnlyHakutoive(response)
     assert(hakutoive.hakukohde.oid == HAKUKOHDE_OID)
     assert(hakutoive.hakukohde.nimi.isEmpty)
+    assert(hakutoive.eqf.isEmpty)
+    assert(hakutoive.nqf.isEmpty)
+    assert(hakutoive.opintojenLaajuus.isEmpty)
   }
 
   it should "return hakemus without tarjoaja names when tarjoaja not found" in {
@@ -134,6 +137,119 @@ class OpiskelijavalintatietoServiceTest extends AnyFlatSpec with Matchers with O
     assert(hakutoive.valinnanTila.contains("HYVAKSYTTY"))
     assert(hakutoive.vastaanotonTila.contains("VASTAANOTTANUT_SITOVASTI"))
     assert(hakutoive.ilmoittautumisenTila.contains("LASNA_KOKO_LUKUVUOSI"))
+  }
+
+  it should "return eqf, nqf and opintojen laajuus from koulutus" in {
+    initAndInsert()
+
+    val response = service.get(List(OPPIJANUMERO))
+
+    val hakutoive = getOnlyHakutoive(response)
+    assert(hakutoive.eqf == Seq(6))
+    assert(hakutoive.nqf == Seq(6, 7))
+    assert(
+      hakutoive.opintojenLaajuus.contains(
+        OpintojenLaajuus(Some("opintojenlaajuusyksikko_2#1"), Some(BigDecimal(120)), None, None)
+      )
+    )
+  }
+
+  it should "return laajuus min and max without trailing zeros" in {
+    initAndInsert()
+    db.run(
+      sqlu"""UPDATE gen.gen_koulutus SET opintojen_laajuus_numero = null, opintojen_laajuus_numero_min = 7.5, opintojen_laajuus_numero_max = 10""",
+      "Set laajuus min and max for koulutus"
+    )
+
+    val response = service.get(List(OPPIJANUMERO))
+
+    val hakutoive = getOnlyHakutoive(response)
+    assert(
+      hakutoive.opintojenLaajuus.contains(
+        OpintojenLaajuus(Some("opintojenlaajuusyksikko_2#1"), None, Some(BigDecimal("7.5")), Some(BigDecimal(10)))
+      )
+    )
+    // BigDecimal-vertailu ei huomioi desimaalien määrää, joten tarkistetaan esitysmuoto erikseen
+    assert(hakutoive.opintojenLaajuus.flatMap(_.laajuusMin).map(_.toString).contains("7.5"))
+    assert(hakutoive.opintojenLaajuus.flatMap(_.laajuusMax).map(_.toString).contains("10"))
+  }
+
+  it should "read all opintojen laajuus fields from toteutus when toteutus has laajuus" in {
+    initAndInsert()
+    db.run(
+      sqlu"""UPDATE gen.gen_koulutus SET opintojen_laajuus_numero_min = 100, opintojen_laajuus_numero_max = 180""",
+      "Set laajuus min and max for koulutus"
+    )
+    db.run(
+      sqlu"""UPDATE gen.gen_toteutus SET opintojen_laajuus_yksikko_koodiuri = 'opintojenlaajuusyksikko_8#1', opintojen_laajuus_numero = 60""",
+      "Set laajuus for toteutus"
+    )
+
+    val response = service.get(List(OPPIJANUMERO))
+
+    val hakutoive = getOnlyHakutoive(response)
+    assert(
+      hakutoive.opintojenLaajuus.contains(
+        OpintojenLaajuus(Some("opintojenlaajuusyksikko_8#1"), Some(BigDecimal(60)), None, None)
+      )
+    )
+  }
+
+  it should "not take yksikko from koulutus when toteutus has laajuus without yksikko" in {
+    initAndInsert()
+    db.run(
+      sqlu"""UPDATE gen.gen_toteutus SET opintojen_laajuus_yksikko_koodiuri = null, opintojen_laajuus_numero = 60""",
+      "Set laajuus without yksikko for toteutus"
+    )
+
+    val response = service.get(List(OPPIJANUMERO))
+
+    val hakutoive = getOnlyHakutoive(response)
+    assert(hakutoive.opintojenLaajuus.contains(OpintojenLaajuus(None, Some(BigDecimal(60)), None, None)))
+  }
+
+  it should "read opintojen laajuus from koulutus when toteutus has yksikko but no laajuus" in {
+    initAndInsert()
+    db.run(
+      sqlu"""UPDATE gen.gen_toteutus SET opintojen_laajuus_yksikko_koodiuri = 'opintojenlaajuusyksikko_8#1', opintojen_laajuus_numero = null""",
+      "Set yksikko without laajuus for toteutus"
+    )
+
+    val response = service.get(List(OPPIJANUMERO))
+
+    val hakutoive = getOnlyHakutoive(response)
+    assert(
+      hakutoive.opintojenLaajuus.contains(
+        OpintojenLaajuus(Some("opintojenlaajuusyksikko_2#1"), Some(BigDecimal(120)), None, None)
+      )
+    )
+  }
+
+  it should "return empty eqf, nqf and opintojen laajuus when koulutus not found" in {
+    initAndInsert()
+    db.run(sqlu"""DELETE FROM gen.gen_koulutus WHERE koulutus_oid = $KOULUTUS_OID""", "Delete koulutus row")
+
+    val response = service.get(List(OPPIJANUMERO))
+
+    val hakutoive = getOnlyHakutoive(response)
+    assert(hakutoive.eqf.isEmpty)
+    assert(hakutoive.nqf.isEmpty)
+    assert(hakutoive.opintojenLaajuus.isEmpty)
+  }
+
+  it should "return empty eqf, nqf and opintojen laajuus when koulutus doesn't have them" in {
+    initAndInsert()
+    db.run(
+      sqlu"""UPDATE gen.gen_koulutus SET opintojen_laajuus_yksikko_koodiuri = null, opintojen_laajuus_numero = null, eqf = null, nqf = null""",
+      "Remove eqf, nqf and laajuus from koulutus"
+    )
+
+    val response = service.get(List(OPPIJANUMERO))
+
+    val hakutoive = getOnlyHakutoive(response)
+    assert(hakutoive.eqf.isEmpty)
+    assert(hakutoive.nqf.isEmpty)
+    assert(hakutoive.opintojenLaajuus.isEmpty)
   }
 
   private def getOnlyOppija(response: Either[String, Seq[Opiskelijavalintatieto]]): Opiskelijavalintatieto = {

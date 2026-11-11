@@ -27,7 +27,17 @@ case class Hakutoive(
   valinnanTila: Option[String],
   vastaanotonTila: Option[String],
   ilmoittautumisenTila: Option[String],
-  johtaaTutkintoon: Option[Boolean]
+  johtaaTutkintoon: Option[Boolean],
+  nqf: Seq[Int],
+  eqf: Seq[Int],
+  opintojenLaajuus: Option[OpintojenLaajuus]
+)
+
+case class OpintojenLaajuus(
+  yksikkoKoodiuri: Option[String],
+  laajuus: Option[BigDecimal],
+  laajuusMin: Option[BigDecimal],
+  laajuusMax: Option[BigDecimal]
 )
 
 case class Nimetty(oid: String, nimi: Kielistetty)
@@ -65,18 +75,39 @@ case class HakemusRow(
   valinnanTila: Option[String],
   vastaanottoTila: Option[String],
   ilmoituksenTila: Option[String],
-  johtaaTutkintoon: Option[Boolean]
+  johtaaTutkintoon: Option[Boolean],
+  opintojenLaajuusYksikkoKoodiuri: Option[String],
+  opintojenLaajuus: Option[BigDecimal],
+  opintojenLaajuusMin: Option[BigDecimal],
+  opintojenLaajuusMax: Option[BigDecimal],
+  eqf: Seq[Int],
+  nqf: Seq[Int]
 ) {
 
   def asHakutoive: Hakutoive = Hakutoive(
-    Nimetty(hakukohdeOid, hakukohdeNimi),
-    tarjoajanOid.map(oid => Nimetty(oid, tarjoajanNimi)),
-    koulutuksenAlkamiskausiuri,
-    koulutuksenAlkamisvuosi,
-    valinnanTila,
-    vastaanottoTila,
-    ilmoituksenTila,
-    johtaaTutkintoon
+    hakukohde = Nimetty(hakukohdeOid, hakukohdeNimi),
+    tarjoaja = tarjoajanOid.map(oid => Nimetty(oid, tarjoajanNimi)),
+    koulutuksenAlkamiskausiUri = koulutuksenAlkamiskausiuri,
+    koulutuksenAlkamisvuosi = koulutuksenAlkamisvuosi,
+    valinnanTila = valinnanTila,
+    vastaanotonTila = vastaanottoTila,
+    ilmoittautumisenTila = ilmoituksenTila,
+    johtaaTutkintoon = johtaaTutkintoon,
+    nqf = nqf,
+    eqf = eqf,
+    opintojenLaajuus = Option
+      .when(
+        Seq(opintojenLaajuusYksikkoKoodiuri, opintojenLaajuus, opintojenLaajuusMin, opintojenLaajuusMax).exists(
+          _.isDefined
+        )
+      )(
+        OpintojenLaajuus(
+          yksikkoKoodiuri = opintojenLaajuusYksikkoKoodiuri,
+          laajuus = opintojenLaajuus,
+          laajuusMin = opintojenLaajuusMin,
+          laajuusMax = opintojenLaajuusMax
+        )
+      )
   )
 
   def asHakemus(hakutoiveet: Seq[Hakutoive]): Hakemus = Hakemus(

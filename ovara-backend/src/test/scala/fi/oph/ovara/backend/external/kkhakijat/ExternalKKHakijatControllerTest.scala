@@ -25,7 +25,7 @@ import org.springframework.test.context.bean.`override`.mockito.MockitoBean
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.{content, header, jsonPath, status}
 import org.springframework.test.web.servlet.{MockMvc, ResultActions}
-import slick.jdbc.H2Profile.api.*
+import slick.jdbc.PostgresProfile.api.*
 
 import java.io.ByteArrayInputStream
 import scala.jdk.CollectionConverters.*
@@ -49,14 +49,14 @@ class ExternalKKHakijatControllerTest
   @Autowired
   override val db: ReadOnlyDatabase = null
 
-  // Organisaatiohierarkia luetaan pub-skeemasta, jota näiden testien H2-kanta ei sisällä
+  // Organisaatiohierarkia luetaan pub-skeemasta, jota näiden testien testikanta ei sisällä
   // (initSchema luo vain gen-taulut). Ks. OrganisaatioHierarkiaStub.
   @MockitoBean
   override val commonService: CommonService = null
 
   @BeforeEach
   def clearDb(): Unit =
-    db.run(sqlu"""DROP ALL OBJECTS""", "Drop everything")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "Drop everything")
 
   @BeforeEach
   def stubOrganisaatiohierarkia(): Unit =
@@ -928,7 +928,7 @@ class ExternalKKHakijatControllerTest
 
   @Test
   def hakukohderyhmaAloneSatisfiesTheRequiredRajaus(): Unit = {
-    // Ryhmälaajennus tulee pub-skeemasta, jota testien H2-kanta ei sisällä -- stubataan tyhjäksi.
+    // Ryhmälaajennus tulee pub-skeemasta, jota testien testikanta ei sisällä -- stubataan tyhjäksi.
     // Riittää että validointi läpäisee eikä 400:aa tule.
     stubHakukohderyhma(List.empty)
     seedMinimalHakija()
@@ -1091,7 +1091,7 @@ class ExternalKKHakijatControllerTest
     )
   )
   def valinnanTilaParsesKnownStates(state: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     seedMinimalHakija()
     insertValintarekisteri(valinnanTila = Some(state))
 
@@ -1124,7 +1124,7 @@ class ExternalKKHakijatControllerTest
   @ParameterizedTest
   @ValueSource(strings = Array("MAKSETTU", "MAKSAMATTA", "VAPAUTETTU"))
   def lukuvuosimaksuPopulatedFromValintarekisteri(tila: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     seedMinimalHakija()
     insertValintarekisteri(maksunTila = Some(tila))
 
@@ -1179,7 +1179,7 @@ class ExternalKKHakijatControllerTest
     )
   )
   def hKelpoisuusStateMapsToApiValue(state: String, expected: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     seedMinimalHakija()
     insertKasittelymerkinta(ELIGIBILITY_REQUIREMENT, Some(state))
 
@@ -1197,7 +1197,7 @@ class ExternalKKHakijatControllerTest
     )
   )
   def hKelpoisuusMaksuvelvollisuusStateMapsToApiValue(state: String, expected: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     seedMinimalHakija()
     insertKasittelymerkinta(PAYMENT_REQUIREMENT, Some(state))
 
@@ -1416,7 +1416,7 @@ class ExternalKKHakijatControllerTest
     )
   )
   def valinnanTilaPrefersHigherPriorityStateOverLower(winner: String, loser: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     seedMinimalHakija()
     insertValintarekisteri(valintatapajonoId = "vtj-winner", valinnanTila = Some(winner))
     insertValintarekisteri(valintatapajonoId = "vtj-loser", valinnanTila = Some(loser))
@@ -1517,7 +1517,7 @@ class ExternalKKHakijatControllerTest
     )
   )
   def pisteetPrefersHigherPriorityStateOverLower(winner: String, loser: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     seedMinimalHakija()
     insertValintarekisteri(
       valintatapajonoId = "vtj-winner",
@@ -1870,7 +1870,7 @@ class ExternalKKHakijatControllerTest
     )
   )
   def hakukohteenKoulutuksetKausiParsesToUppercaseLetter(kausiUri: String, expected: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     seedMinimalHakija()
     insertToteutus(koulutuksenAlkamiskausiuri = Some(kausiUri))
     insertKoulutus(koulutuksetKoodiuri = Some("""["koulutus_331101#12"]"""))
@@ -1894,7 +1894,7 @@ class ExternalKKHakijatControllerTest
     )
   )
   def asiointikieliMapsKnownCodes(input: Int, expected: String): Unit = {
-    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     initSchema()
     insertHakemus(asiointikieli = Some(input))
     insertHakukohde()

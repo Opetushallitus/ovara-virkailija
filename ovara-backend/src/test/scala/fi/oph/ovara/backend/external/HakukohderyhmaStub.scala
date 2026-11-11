@@ -7,7 +7,7 @@ import org.mockito.invocation.InvocationOnMock
 
 /**
  * Apuri external-rajapintojen testeille. Hakukohderyhmän laajennus hakukohde-oideiksi luetaan
- *  pub-skeemasta, jota näiden testien H2-kanta ei sisällä -- testit luovat vain gen-taulut.
+ *  pub-skeemasta, jota näiden testien testikanta ei sisällä -- testit luovat vain gen-taulut.
  *  Siksi `CommonService` mockataan (`@MockitoBean`) ja laajennus stubataan tässä, samaan tapaan
  *  kuin organisaatiohierarkia [[OrganisaatioHierarkiaStub]]-traitissa.
  *
