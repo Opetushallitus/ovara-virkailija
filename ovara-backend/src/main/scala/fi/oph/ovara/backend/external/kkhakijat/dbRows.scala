@@ -200,8 +200,10 @@ case class KKHakemusRow(
   ehtoFI: Option[String],
   ehtoSV: Option[String],
   ehtoEN: Option[String],
+  // Raaka tyyppi (valintatapajono-koodiuri) ja sen suomenkielinen nimi koodistosta.
   valintatapajononTyyppi: Option[String],
   valintatapajononNimi: Option[String],
+  valintatapajononTyyppiNimiFi: Option[String],
   // Raakatilat gen_hakemus_kasittelymerkinnat-taulusta, ennen uudelleenmappausta.
   hKelpoisuusState: Option[String],
   hKelpoisuusMaksuvelvollisuusState: Option[String]
@@ -266,7 +268,10 @@ case class KKHakemusRow(
           ehtoEN = ehtoEN
         )
       ),
-      valintatapajononTyyppi = valintatapajononTyyppi,
+      // Suren tapaan jonon tyyppi vain hyväksytyille, valintatapajono-koodiston suomenkielisenä nimenä.
+      valintatapajononTyyppi = valintatapajononTyyppi
+        .filter(_ => valinnanTila.flatMap(Valintatila.parse).exists(Valintatila.hyvaksytyt))
+        .map(_ => valintatapajononTyyppiNimiFi.getOrElse("Tuntematon")),
       valintatapajononNimi = valintatapajononNimi,
       hakukohteenKoulutukset = koulutusOid.toSeq.flatMap { oid =>
         val koodit: Seq[Option[String]] =

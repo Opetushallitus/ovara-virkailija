@@ -205,6 +205,14 @@ trait ExternalKKHakijatTestUtils {
     )
   }
 
+  def insertValintatapajonoKoodi(koodiuri: String, nimiFi: Option[String]): Unit = {
+    val koodiarvo = koodiuri.stripPrefix("valintatapajono_")
+    db.run(
+      sqlu"""INSERT INTO pub.pub_dim_koodisto_valintatapajono VALUES($koodiuri, $koodiarvo, $nimiFi)""",
+      "Insert test valintatapajono-koodi"
+    )
+  }
+
   def insertValintaperusteValintatapajono(
     valintatapajonoId: String = "vtj-1",
     valintatapajonoTyyppi: Option[String] = None,
@@ -326,6 +334,13 @@ trait ExternalKKHakijatTestUtils {
   def initSchema(): Unit = {
     val query = sqlu"""
           CREATE SCHEMA gen;
+          CREATE SCHEMA pub;
+
+          CREATE TABLE pub.pub_dim_koodisto_valintatapajono (
+              koodiuri text NOT NULL,
+              koodiarvo text NOT NULL PRIMARY KEY,
+              nimi_fi  text
+          );
 
           CREATE TABLE gen.gen_hakemus (
               hakemus_oid                    text NOT NULL PRIMARY KEY,

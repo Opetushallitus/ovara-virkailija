@@ -117,29 +117,35 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
     } else {
       val hakemusOidList = RepositoryUtils.makeListOfValuesQueryStr(hakemusOids)
       // Alikyselyt valitsemaan "merkitseva jono" gen_valintarekisteri-taulusta per (hakemus, hakukohde):
-      //   merkitseva_jono_yleinen: no julkaistavissa filter, state-priority ORDER BY only — used by
-      //                            valinnanTila + valinnanAikaleima.
-      //   merkitseva_jono_julkaistu: filter julkaistavissa=true, state-priority + varasija/prioriteetti
-      //                              tiebreak — used by pisteet + all hyvaksymisenEhto fields + the
-      //                              valintatapajono meta fields.
+      //   merkitseva_jono_yleinen: no julkaistavissa filter, state-priority + varasija/prioriteetti
+      //                            tiebreak — used by valinnanTila + valinnanAikaleima + the
+      //                            valintatapajono meta fields (Suren tapaan julkaisusta riippumatta).
+      //   merkitseva_jono_julkaistu: filter julkaistavissa=true, same ORDER BY — used by pisteet +
+      //                              all hyvaksymisenEhto fields.
       val query = sql"""
           WITH merkitseva_jono_yleinen AS (
-            SELECT hakemus_oid, hakukohde_oid, valinnan_tila, hyvaksyttyjajulkaistu FROM (
+            SELECT hakemus_oid, hakukohde_oid, valinnan_tila, hyvaksyttyjajulkaistu, valintatapajono_id FROM (
               SELECT vr.hakemus_oid, vr.hakukohde_oid, vr.valinnan_tila, vr.hyvaksyttyjajulkaistu,
+                     vr.valintatapajono_id,
                 ROW_NUMBER() OVER (
                   PARTITION BY vr.hakemus_oid, vr.hakukohde_oid
-                  ORDER BY CASE vr.valinnan_tila
-                    WHEN 'HYVAKSYTTY'                     THEN 1
-                    WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
-                    WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
-                    WHEN 'VARALLA'                        THEN 4
-                    WHEN 'PERUUTETTU'                     THEN 5
-                    WHEN 'PERUNUT'                        THEN 6
-                    WHEN 'PERUUNTUNUT'                    THEN 7
-                    WHEN 'HYLATTY'                        THEN 8
-                    WHEN 'KESKEN'                         THEN 9
-                    ELSE 10
-                  END
+                  ORDER BY
+                    CASE vr.valinnan_tila
+                      WHEN 'HYVAKSYTTY'                     THEN 1
+                      WHEN 'HARKINNANVARAISESTI_HYVAKSYTTY' THEN 2
+                      WHEN 'VARASIJALTA_HYVAKSYTTY'         THEN 3
+                      WHEN 'VARALLA'                        THEN 4
+                      WHEN 'PERUUTETTU'                     THEN 5
+                      WHEN 'PERUNUT'                        THEN 6
+                      WHEN 'PERUUNTUNUT'                    THEN 7
+                      WHEN 'HYLATTY'                        THEN 8
+                      WHEN 'KESKEN'                         THEN 9
+                      ELSE 10
+                    END,
+                    CASE
+                      WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
+                      ELSE vr.prioriteetti
+                    END NULLS LAST
                 ) AS rn
               FROM gen.gen_valintarekisteri vr
               WHERE vr.valinnan_tila IS NOT NULL
@@ -150,12 +156,12 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             SELECT hakemus_oid, hakukohde_oid,
                    pisteet, ehdollisesti_hyvaksyttavissa,
                    ehdollisen_hyvaksymisen_ehto_fi, ehdollisen_hyvaksymisen_ehto_sv,
-                   ehdollisen_hyvaksymisen_ehto_en, valintatapajono_id
+                   ehdollisen_hyvaksymisen_ehto_en
             FROM (
               SELECT vr.hakemus_oid, vr.hakukohde_oid,
                      vr.pisteet, vr.ehdollisesti_hyvaksyttavissa,
                      vr.ehdollisen_hyvaksymisen_ehto_fi, vr.ehdollisen_hyvaksymisen_ehto_sv,
-                     vr.ehdollisen_hyvaksymisen_ehto_en, vr.valintatapajono_id,
+                     vr.ehdollisen_hyvaksymisen_ehto_en,
                 ROW_NUMBER() OVER (
                   PARTITION BY vr.hakemus_oid, vr.hakukohde_oid
                   ORDER BY
@@ -211,6 +217,7 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             merk_julk.ehdollisen_hyvaksymisen_ehto_en AS ehto_en,
             vp.valintatapajono_tyyppi          AS valintatapajono_tyyppi,
             vp.valintatapajono_nimi            AS valintatapajono_nimi,
+            vtj.nimi_fi                        AS valintatapajono_tyyppi_nimi_fi,
             km_kelp.state                      AS h_kelpoisuus,
             km_maksu.state                     AS h_kelpoisuus_maksuvelvollisuus
           FROM gen.gen_hakutoive ht
@@ -221,8 +228,12 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             ON merk_y.hakemus_oid = ht.hakemus_oid AND merk_y.hakukohde_oid = ht.hakukohde_oid
           LEFT JOIN merkitseva_jono_julkaistu merk_julk
             ON merk_julk.hakemus_oid = ht.hakemus_oid AND merk_julk.hakukohde_oid = ht.hakukohde_oid
+          -- Suren tapaan jono on hakutoiveen merkitsevä jono julkaisusta riippumatta; tyyppi
+          -- valintatapajono-koodiston suomenkielisenä nimenä.
           LEFT JOIN gen.gen_valintaperuste_valintatapajono vp
-            ON vp.valintatapajono_id = merk_julk.valintatapajono_id
+            ON vp.valintatapajono_id = merk_y.valintatapajono_id
+          LEFT JOIN pub.pub_dim_koodisto_valintatapajono vtj
+            ON vtj.koodiuri = vp.valintatapajono_tyyppi
           -- Käsittelymerkinnät ovat samalla tarkkuudella (hakemus, hakukohde) kuin hakutoive, ja
           -- niitä on 0 tai 1 per tyyppi -- joten suora liitos riittää, ei monista rivejä.
           -- requirement-rajaus kuuluu liitosehtoon eikä WHEREen: WHEREssä se muuttaisi

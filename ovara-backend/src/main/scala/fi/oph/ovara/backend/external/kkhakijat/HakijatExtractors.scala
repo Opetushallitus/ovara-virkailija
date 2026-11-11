@@ -110,6 +110,7 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       ehtoEN = r.nextStringOption(),
       valintatapajononTyyppi = r.nextStringOption(),
       valintatapajononNimi = r.nextStringOption(),
+      valintatapajononTyyppiNimiFi = r.nextStringOption(),
       hKelpoisuusState = r.nextStringOption(),
       hKelpoisuusMaksuvelvollisuusState = r.nextStringOption()
     )

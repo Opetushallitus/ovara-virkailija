@@ -73,6 +73,9 @@ enum Valintatila {
 
 object Valintatila {
   def parse(s: String): Option[Valintatila] = values.find(_.toString == s)
+
+  // Suoritusrekisterin Valintatila.isHyvaksytty.
+  val hyvaksytyt: Set[Valintatila] = Set(HYVAKSYTTY, HARKINNANVARAISESTI_HYVAKSYTTY, VARASIJALTA_HYVAKSYTTY)
 }
 
 enum Vastaanottotila {
