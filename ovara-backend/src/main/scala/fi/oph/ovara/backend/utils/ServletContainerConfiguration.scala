@@ -2,7 +2,7 @@ package fi.oph.ovara.backend.utils
 
 import org.apache.catalina.connector.Connector
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.boot.web.embedded.tomcat.{TomcatConnectorCustomizer, TomcatServletWebServerFactory}
+import org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.context.annotation.{Bean, Configuration}
 
