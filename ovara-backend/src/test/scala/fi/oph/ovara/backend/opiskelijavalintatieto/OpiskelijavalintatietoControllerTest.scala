@@ -5,13 +5,13 @@ import fi.oph.ovara.backend.utils.AuditLog
 import fi.vm.sade.auditlog.Operation
 import jakarta.servlet.http.HttpServletRequest
 import org.hamcrest.Matchers.containsString
-import org.junit.jupiter.api.{Nested, Test}
+import org.junit.jupiter.api.{BeforeEach, Nested, Test}
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.{SpringBootTest, TestConfiguration}
-import org.springframework.context.annotation.{Bean, Primary}
+import org.springframework.context.annotation.{Bean, Import, Primary}
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.{WithAnonymousUser, WithMockUser}
 import org.springframework.test.context.ActiveProfiles
@@ -23,6 +23,7 @@ import slick.jdbc.PostgresProfile.api.*
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles(Array("test"))
+@Import(Array(classOf[OpiskelijavalintatietoControllerTest.MockAuditLogConfig]))
 @WithMockUser(username = "testuser", roles = Array("APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA_1.2.246.562.10.00000000001"))
 class OpiskelijavalintatietoControllerTest extends OpiskelijavalintatietoTestUtils {
   @Autowired
@@ -30,6 +31,11 @@ class OpiskelijavalintatietoControllerTest extends OpiskelijavalintatietoTestUti
 
   @Autowired
   override val db: ReadOnlyDatabase = null
+
+  @BeforeEach
+  def clearDb(): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "Drop everything")
+  }
 
   @Nested
   class Get {
