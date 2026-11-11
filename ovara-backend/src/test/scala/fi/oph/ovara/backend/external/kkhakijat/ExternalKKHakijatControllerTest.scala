@@ -2100,8 +2100,8 @@ class ExternalKKHakijatControllerTest
   def hetuReplacedWithSyntymaaikaWhenMissing(syntymaaika: String, expected: String): Unit = {
     db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     initSchema()
-    insertHenkilo(syntymaaika = Some(java.time.LocalDate.parse(syntymaaika)))
-    insertHakemus(insertHenkilo = false, hetu = None)
+    insertHenkilo(syntymaaika = Some(java.time.LocalDate.parse(syntymaaika)), hetu = None)
+    insertHakemus(insertHenkilo = false)
     insertHakukohde()
     insertHakutoive()
 
@@ -2113,8 +2113,8 @@ class ExternalKKHakijatControllerTest
   @Test
   def hetuReplacedWithSyntymaaikaWhenEmpty(): Unit = {
     initSchema()
-    insertHenkilo(syntymaaika = Some(SYNTYMAAIKA))
-    insertHakemus(insertHenkilo = false, hetu = Some(""))
+    insertHenkilo(syntymaaika = Some(SYNTYMAAIKA), hetu = Some(""))
+    insertHakemus(insertHenkilo = false)
     insertHakukohde()
     insertHakutoive()
 
@@ -2139,13 +2139,149 @@ class ExternalKKHakijatControllerTest
   @Test
   def hetuEmptyWhenHetuAndSyntymaaikaMissing(): Unit = {
     initSchema()
-    insertHakemus(hetu = None) // insertHenkilo default syntymaaika = None
+    insertHenkilo(hetu = None) // syntymaaika oletuksena None
+    insertHakemus(insertHenkilo = false)
     insertHakukohde()
     insertHakutoive()
 
     get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hetu").value(""))
+  }
+
+  // ---- Henkilötiedot ONR:n master-henkilöltä ----
+
+  @Test
+  def henkilotiedotFromMasterNotLinkedHenkiloOrHakemus(): Unit = {
+    initSchema()
+    insertHenkilo(
+      hetu = Some("140984-123A"),
+      etunimet = Some("Master Etunimi"),
+      sukunimi = Some("Mastersukunimi"),
+      sukupuoli = Some(2),
+      aidinkieli = Some("sv"),
+      syntymaaika = Some(java.time.LocalDate.parse("1984-09-14")),
+      kaikkiKansalaisuudet = Some("""["643"]"""),
+      turvakielto = Some(true)
+    )
+    insertHenkiloAlias(
+      oppijanumero = OPPIJANUMERO,
+      henkiloOid = ALIAS_HENKILO_OID,
+      hetu = Some("010101-111A"),
+      etunimet = Some("Alias"),
+      sukunimi = Some("Aliaksinen"),
+      sukupuoli = Some(1),
+      aidinkieli = Some("en"),
+      syntymaaika = Some(java.time.LocalDate.parse("2001-01-01")),
+      kaikkiKansalaisuudet = Some("""["752"]"""),
+      turvakielto = Some(false)
+    )
+    // Hakemuksella on omat hetu-, nimi- ja sukupuolitietonsa (oletukset), jotka eivät saa näkyä.
+    insertHakemus(oppijanumero = ALIAS_HENKILO_OID, insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO))
+      .andExpect(jsonPath("$.hakijat[0].hetu").value("140984-123A"))
+      .andExpect(jsonPath("$.hakijat[0].etunimet").value("Master Etunimi"))
+      .andExpect(jsonPath("$.hakijat[0].sukunimi").value("Mastersukunimi"))
+      .andExpect(jsonPath("$.hakijat[0].kutsumanimi").value(KUTSUMANIMI))
+      .andExpect(jsonPath("$.hakijat[0].sukupuoli").value("2"))
+      .andExpect(jsonPath("$.hakijat[0].aidinkieli").value("SV"))
+      .andExpect(jsonPath("$.hakijat[0].syntymaaika").value("14.09.1984"))
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet[0]").value("643"))
+      .andExpect(jsonPath("$.hakijat[0].turvakielto").value(true))
+  }
+
+  @Test
+  def pseudoHetuWhenMasterHasNoHetuEvenIfHakemusHasHetu(): Unit = {
+    initSchema()
+    insertHenkilo(hetu = None, syntymaaika = Some(java.time.LocalDate.parse("1984-09-14")))
+    insertHakemus(insertHenkilo = false, hetu = Some(HETU))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hetu").value("140984-"))
+  }
+
+  @Test
+  def nimetEmptyWhenMasterHasNoNimet(): Unit = {
+    initSchema()
+    insertHenkilo(etunimet = None, sukunimi = None)
+    insertHakemus(insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].etunimet").value(""))
+      .andExpect(jsonPath("$.hakijat[0].sukunimi").value(""))
+  }
+
+  @Test
+  def henkilotiedotFromHakemusAndLinkedHenkiloWhenMasterRowMissing(): Unit = {
+    val puuttuvaMaster = "1.2.246.562.24.00000000088"
+    initSchema()
+    insertHenkiloAlias(
+      oppijanumero = puuttuvaMaster,
+      henkiloOid = ALIAS_HENKILO_OID,
+      aidinkieli = Some("sv"),
+      syntymaaika = Some(java.time.LocalDate.parse("1984-09-14")),
+      kaikkiKansalaisuudet = Some("""["643"]"""),
+      turvakielto = Some(true),
+      // Linkitetyn henkilön hetua, nimiä ja sukupuolta ei käytetä, vaan hakemuksen.
+      hetu = Some("010101-111A"),
+      etunimet = Some("Alias"),
+      sukunimi = Some("Aliaksinen"),
+      sukupuoli = Some(2)
+    )
+    insertHakemus(oppijanumero = ALIAS_HENKILO_OID, insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(puuttuvaMaster))
+      .andExpect(jsonPath("$.hakijat[0].hetu").value(HETU))
+      .andExpect(jsonPath("$.hakijat[0].etunimet").value(ETUNIMET))
+      .andExpect(jsonPath("$.hakijat[0].sukunimi").value(SUKUNIMI))
+      .andExpect(jsonPath("$.hakijat[0].sukupuoli").value(SUKUPUOLI.toString))
+      .andExpect(jsonPath("$.hakijat[0].aidinkieli").value("SV"))
+      .andExpect(jsonPath("$.hakijat[0].syntymaaika").value("14.09.1984"))
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet[0]").value("643"))
+      .andExpect(jsonPath("$.hakijat[0].turvakielto").value(true))
+  }
+
+  @Test
+  def aidinkieliUnknownWhenMissing(): Unit = {
+    initSchema()
+    insertHenkilo(aidinkieli = None)
+    insertHakemus(insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].aidinkieli").value("99"))
+  }
+
+  @Test
+  def kansalaisuudetEmptyListWhenMissing(): Unit = {
+    initSchema()
+    insertHenkilo(kaikkiKansalaisuudet = None)
+    insertHakemus(insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet").isArray)
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet", hasSize[Any](0)))
   }
 
   // ---- Kotikunta ----

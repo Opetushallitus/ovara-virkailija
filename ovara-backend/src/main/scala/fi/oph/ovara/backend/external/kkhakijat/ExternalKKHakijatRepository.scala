@@ -71,10 +71,22 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
                 AND st.avain = 'ensikertalainen'
                 AND st.arvo IN ('true', '"true"', 'false', '"false"')) AS ensikertalainen,
             haku.haku_vuosi,
-            haku.haku_kausi
+            haku.haku_kausi,
+            -- ONR:n master-henkilö; etusijajärjestys valitaan KKHakijaRow.asHakijassa.
+            -- gen_henkilossa ei ole kutsumanimeä, joten se tulee aina hakemukselta.
+            mhlo.henkilo_oid,
+            mhlo.hetu,
+            mhlo.etunimet,
+            mhlo.sukunimi,
+            mhlo.sukupuoli,
+            mhlo.kaikki_kansalaisuudet,
+            mhlo.aidinkieli,
+            mhlo.syntymaaika,
+            mhlo.turvakielto
           FROM gen.gen_henkilo hlo
           INNER JOIN gen.gen_hakemus hakemus ON hakemus.henkilo_oid = hlo.henkilo_oid
           INNER JOIN gen.gen_haku    haku    ON hakemus.haku_oid    = haku.haku_oid
+          LEFT JOIN gen.gen_henkilo  mhlo    ON mhlo.henkilo_oid    = hlo.oppijanumero
           WHERE length(hakemus.hakemus_oid) = #$ataruOidLength
           AND haku.kohdejoukko_koodiuri LIKE 'haunkohdejoukko_12%'
           #$hakuSql

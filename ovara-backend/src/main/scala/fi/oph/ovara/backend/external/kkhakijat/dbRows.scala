@@ -81,6 +81,22 @@ private def kasittelymerkinnanTila[A](
       }
   }
 
+/** ONR:n master-henkilön tiedot (gen_henkilo-rivi, jonka henkilo_oid on hakijan oppijanumero). */
+case class MasterHenkiloRow(
+  hetu: Option[String],
+  etunimet: Option[String],
+  sukunimi: Option[String],
+  sukupuoli: Option[Int],
+  kansalaisuudet: Seq[String],
+  aidinkieli: Option[String],
+  syntymaaika: Option[LocalDate],
+  turvakielto: Option[Boolean]
+)
+
+/**
+ * hetu, etunimet, sukunimi ja sukupuoli ovat hakemukselta, kansalaisuudet, aidinkieli, syntymaaika ja
+ *  turvakielto hakemukseen linkitetyltä henkilöltä. Niitä käytetään vain, jos master-riviä ei ole.
+ */
 case class KKHakijaRow(
   oppijanumero: String,
   hakemusOid: String,
@@ -109,30 +125,38 @@ case class KKHakijaRow(
   turvakielto: Option[Boolean],
   ensikertalainen: Option[Boolean],
   vuosi: Option[Int],
-  kausi: Option[String]
+  kausi: Option[String],
+  master: Option[MasterHenkiloRow] = None
 ) {
-  def asHakija(hakemukset: Seq[KKHakutoive], ylioppilas: Option[YlioppilasRow]): KKHakija =
+  def asHakija(hakemukset: Seq[KKHakutoive], ylioppilas: Option[YlioppilasRow]): KKHakija = {
+    // Suren tapaan henkilötiedot tulevat masterilta, myös silloin kun masterin tieto puuttuu.
+    // Vain jos master-riviä ei ole lainkaan, käytetään hakemuksen ja linkitetyn henkilön tietoja.
+    val henkilo = master.getOrElse(
+      MasterHenkiloRow(hetu, etunimet, sukunimi, sukupuoli, kansalaisuudet, aidinkieli, syntymaaika, turvakielto)
+    )
     KKHakija(
-      hetu = hetu.filter(_.nonEmpty).orElse(syntymaaika.map(toKkSyntymaaika)).getOrElse(""),
+      hetu = henkilo.hetu.filter(_.nonEmpty).orElse(henkilo.syntymaaika.map(toKkSyntymaaika)).getOrElse(""),
       oppijanumero = oppijanumero,
-      sukunimi = sukunimi.getOrElse(""),
-      etunimet = etunimet.getOrElse(""),
+      sukunimi = henkilo.sukunimi.getOrElse(""),
+      etunimet = henkilo.etunimet.getOrElse(""),
       kutsumanimi = kutsumanimi.getOrElse(""),
       lahiosoite = lahiosoite,
       postinumero = postinumero,
       postitoimipaikka = postitoimipaikka,
       maa = asuinmaa.getOrElse(""),
       kotikunta = kotikuntaTaiTuntematon(kotikunta),
-      sukupuoli = sukupuoli.map(_.toString).getOrElse(""),
-      aidinkieli = aidinkieli.getOrElse(""),
-      syntymaaika = syntymaaika.map(_.format(SyntymaaikaFormatter)),
+      sukupuoli = henkilo.sukupuoli.map(_.toString).getOrElse(""),
+      // Suren tapaan tuntematon äidinkieli on "99".
+      aidinkieli = henkilo.aidinkieli.getOrElse("99"),
+      syntymaaika = henkilo.syntymaaika.map(_.format(SyntymaaikaFormatter)),
       asiointikieli = asiointikieli match {
         case None    => ""
         case Some(0) => "9" // Legacy-syyt: vanhassa Suoritusrekisterin rajapinnassa 9 merkitsi kieltä "muu".
         case Some(n) => n.toString
       },
-      kansalaisuudet = if (kansalaisuudet.isEmpty) None else Some(kansalaisuudet.toList),
-      turvakielto = turvakielto.getOrElse(false),
+      // Sure palauttaa listan aina, tyhjänäkin.
+      kansalaisuudet = Some(henkilo.kansalaisuudet.toList),
+      turvakielto = henkilo.turvakielto.getOrElse(false),
       matkapuhelin = Option(puhelin).filter(_.nonEmpty),
       sahkoposti = Option(sahkoposti).filter(_.nonEmpty),
       koulutusmarkkinointilupa = koulutusmarkkinointilupa,
@@ -144,6 +168,7 @@ case class KKHakijaRow(
       ensikertalainen = ensikertalainen,
       hakemukset = hakemukset
     )
+  }
 }
 
 case class YlioppilasRow(

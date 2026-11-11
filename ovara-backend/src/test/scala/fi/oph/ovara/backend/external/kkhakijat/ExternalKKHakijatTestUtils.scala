@@ -26,22 +26,46 @@ trait ExternalKKHakijatTestUtils {
     syntymaaika: Option[java.time.LocalDate] = None,
     kaikkiKansalaisuudet: Option[String] = Some(KANSALAISUUS_JSON),
     kansalaisuus: Option[String] = Some(SUOMI_KOODI),
-    turvakielto: Option[Boolean] = Some(false)
+    turvakielto: Option[Boolean] = Some(false),
+    hetu: Option[String] = Some(HETU),
+    etunimet: Option[String] = Some(ETUNIMET),
+    sukunimi: Option[String] = Some(SUKUNIMI),
+    sukupuoli: Option[Int] = Some(SUKUPUOLI)
   ): Unit = {
     val syntymaaikaStr = syntymaaika.map(_.toString)
     db.run(
       sqlu"""INSERT INTO gen.gen_henkilo VALUES (
           $oppijanumero, $oppijanumero, $aidinkieli, $syntymaaikaStr::date,
-          $kaikkiKansalaisuudet::jsonb, $kansalaisuus, $turvakielto
+          $kaikkiKansalaisuudet::jsonb, $kansalaisuus, $turvakielto,
+          $hetu, $etunimet, $sukunimi, $sukupuoli
         )""",
       "Insert test kk-henkilö"
     )
   }
 
-  /** Insert an additional gen_henkilo row that links `henkiloOid` to the same master `oppijanumero`. */
-  def insertHenkiloAlias(oppijanumero: String, henkiloOid: String): Unit = {
+  /**
+   * Insert an additional gen_henkilo row that links `henkiloOid` to the master `oppijanumero`.
+   *  The master row itself is inserted separately (insertHenkilo), or left out to test a missing master.
+   */
+  def insertHenkiloAlias(
+    oppijanumero: String,
+    henkiloOid: String,
+    aidinkieli: Option[String] = None,
+    syntymaaika: Option[java.time.LocalDate] = None,
+    kaikkiKansalaisuudet: Option[String] = None,
+    turvakielto: Option[Boolean] = None,
+    hetu: Option[String] = None,
+    etunimet: Option[String] = None,
+    sukunimi: Option[String] = None,
+    sukupuoli: Option[Int] = None
+  ): Unit = {
+    val syntymaaikaStr = syntymaaika.map(_.toString)
     db.run(
-      sqlu"""INSERT INTO gen.gen_henkilo VALUES ($oppijanumero, $henkiloOid, NULL, NULL, NULL, NULL, NULL)""",
+      sqlu"""INSERT INTO gen.gen_henkilo VALUES (
+          $oppijanumero, $henkiloOid, $aidinkieli, $syntymaaikaStr::date,
+          $kaikkiKansalaisuudet::jsonb, NULL, $turvakielto,
+          $hetu, $etunimet, $sukunimi, $sukupuoli
+        )""",
       "Insert test kk-henkilö alias"
     )
   }
@@ -337,7 +361,11 @@ trait ExternalKKHakijatTestUtils {
               syntymaaika           date,
               kaikki_kansalaisuudet jsonb,
               kansalaisuus          text,
-              turvakielto           boolean
+              turvakielto           boolean,
+              hetu                  text,
+              etunimet              text,
+              sukunimi              text,
+              sukupuoli             integer
           );
 
           CREATE TABLE gen.gen_haku (

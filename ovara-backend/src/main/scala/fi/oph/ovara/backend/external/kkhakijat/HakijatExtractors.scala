@@ -38,6 +38,19 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
     val hakuVuosi                   = r.nextIntOption()
     val hakuKausi                   = normalizeKausi(r.nextStringOption())
 
+    // ONR:n master-henkilö; puuttuva master-oid tarkoittaa, ettei master-riviä ole.
+    val masterOid = r.nextStringOption()
+    val master    = MasterHenkiloRow(
+      hetu = r.nextStringOption(),
+      etunimet = r.nextStringOption(),
+      sukunimi = r.nextStringOption(),
+      sukupuoli = r.nextIntOption(),
+      kansalaisuudet = extractArray(r.nextStringOption()),
+      aidinkieli = normalizeKieliCode(r.nextStringOption()),
+      syntymaaika = r.nextStringOption().flatMap(s => Try(java.time.LocalDate.parse(s)).toOption),
+      turvakielto = r.nextBooleanOption()
+    )
+
     KKHakijaRow(
       oppijanumero = oppijanumero,
       hakemusOid = hakemusOid,
@@ -66,7 +79,8 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       turvakielto = turvakielto,
       ensikertalainen = ensikertalainen,
       vuosi = hakuVuosi,
-      kausi = hakuKausi
+      kausi = hakuKausi,
+      master = masterOid.map(_ => master)
     )
   }
 
