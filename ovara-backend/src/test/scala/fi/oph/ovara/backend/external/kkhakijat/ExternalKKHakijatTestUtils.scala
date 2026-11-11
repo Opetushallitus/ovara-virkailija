@@ -307,7 +307,8 @@ trait ExternalKKHakijatTestUtils {
     hakutoivenumero: Int = 1,
     valintatieto: Option[String] = Some(VALINTATIETO),
     vastaanottotieto: Option[String] = Some(VASTAANOTTOTIETO),
-    ilmoittautumisenTila: Option[String] = Some(ILMOITTAUTUMISEN_TILA)
+    ilmoittautumisenTila: Option[String] = Some(ILMOITTAUTUMISEN_TILA),
+    ensikertalainen: Option[Boolean] = None
   ): Unit = {
     db.run(
       sqlu"""INSERT INTO gen.gen_hakutoive VALUES(
@@ -316,7 +317,8 @@ trait ExternalKKHakijatTestUtils {
           $hakutoivenumero,
           $valintatieto,
           $vastaanottotieto,
-          $ilmoittautumisenTila)""",
+          $ilmoittautumisenTila,
+          $ensikertalainen)""",
       "Insert test kk-hakutoive"
     )
   }
@@ -387,7 +389,8 @@ trait ExternalKKHakijatTestUtils {
               hakutoivenumero bigint,
               valintatieto text,
               vastaanottotieto text,
-              ilmoittautumisen_tila text
+              ilmoittautumisen_tila text,
+              ensikertalainen boolean
           );
 
           CREATE TABLE gen.gen_hakukohde(

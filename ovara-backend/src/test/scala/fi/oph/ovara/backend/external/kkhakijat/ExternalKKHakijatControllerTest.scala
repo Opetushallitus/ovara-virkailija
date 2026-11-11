@@ -2682,6 +2682,71 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].ensikertalainen").doesNotExist())
   }
 
+  /** Hakija, jonka ainoalla hakutoiveella on annettu gen_hakutoive-ensikertalaisuus. */
+  private def seedHakijaWithHakutoiveEnsikertalainen(ensikertalainen: Option[Boolean]): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(ensikertalainen = ensikertalainen)
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = Array(true, false))
+  def ensikertalainenFromHakutoiveWhenNoSupaTieto(ensikertalainen: Boolean): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    seedHakijaWithHakutoiveEnsikertalainen(Some(ensikertalainen))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(ensikertalainen))
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = Array(true, false))
+  def ensikertalainenSupaTietoWinsOverHakutoive(supaTieto: Boolean): Unit = {
+    db.run(sqlu"""DROP ALL OBJECTS""", "reset for parameterized case")
+    seedHakijaWithHakutoiveEnsikertalainen(Some(!supaTieto))
+    insertSupaTieto(avain = "ensikertalainen", arvo = Some(supaTieto.toString))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(supaTieto))
+  }
+
+  @Test
+  def ensikertalainenFromHakutoiveWhenSupaTietoUnrecognized(): Unit = {
+    seedHakijaWithHakutoiveEnsikertalainen(Some(true))
+    insertSupaTieto(avain = "ensikertalainen", arvo = Some("maybe"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(true))
+  }
+
+  @Test
+  def ensikertalainenFromHakutoiveIgnoresNullHakutoiveRows(): Unit = {
+    seedHakijaWithHakutoiveEnsikertalainen(Some(true))
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2, ensikertalainen = None)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(true))
+  }
+
+  @Test
+  def excelShowsEnsikertalainenFromHakutoive(): Unit = {
+    seedHakijaWithHakutoiveEnsikertalainen(Some(true))
+
+    val result   = getExcel().andExpect(status.isOk).andReturn()
+    val workbook = new XSSFWorkbook(new ByteArrayInputStream(result.getResponse.getContentAsByteArray))
+    try {
+      val cell = workbook.getSheetAt(0).getRow(1).getCell(23).getStringCellValue
+      assert(cell == "X", s"expected ensikertalainen cell X, got: '$cell'")
+    } finally workbook.close()
+  }
+
   // ---- Hakuvuosi ja hakukausi ----
 
   /** Seedaa hakijan, jonka haun omat vuosi/kausi poikkeavat koulutuksen alkamisvuosista/-kausista. */

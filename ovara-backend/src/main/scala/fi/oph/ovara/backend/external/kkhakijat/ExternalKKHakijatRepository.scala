@@ -66,10 +66,16 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             hlo.aidinkieli,
             hlo.syntymaaika,
             hlo.turvakielto,
-            (SELECT bool_or(st.arvo IN ('true', '"true"')) FROM gen.gen_supa_tieto st
-              WHERE st.hakemus_oid = hakemus.hakemus_oid
-                AND st.avain = 'ensikertalainen'
-                AND st.arvo IN ('true', '"true"', 'false', '"false"')) AS ensikertalainen,
+            -- Supan valintadata kattaa vain sen omat haut. Muuten käytetään gen_hakutoiveen ensikertalaisuutta:
+            -- vanhoissa hauissa (int_sure_haut) Suren oma tieto, muissa Supan ensikertalaisuustieto.
+            coalesce(
+              (SELECT bool_or(st.arvo IN ('true', '"true"')) FROM gen.gen_supa_tieto st
+                WHERE st.hakemus_oid = hakemus.hakemus_oid
+                  AND st.avain = 'ensikertalainen'
+                  AND st.arvo IN ('true', '"true"', 'false', '"false"')),
+              (SELECT bool_or(ht.ensikertalainen) FROM gen.gen_hakutoive ht
+                WHERE ht.hakemus_oid = hakemus.hakemus_oid)
+            ) AS ensikertalainen,
             haku.haku_vuosi,
             haku.haku_kausi,
             -- ONR:n master-henkilö; etusijajärjestys valitaan KKHakijaRow.asHakijassa.
