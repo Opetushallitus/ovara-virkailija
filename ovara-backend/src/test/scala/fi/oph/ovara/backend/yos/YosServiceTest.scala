@@ -102,6 +102,24 @@ class YosServiceTest {
   }
 
   @Test
+  def yhdistaaOpiskeluoikeudenJaVastaanotonOppijanumerollaVaikkaOpiskelijaAvainOnLinkitettyOid(): Unit = {
+    val linkitettyOid = "1.2.246.562.24.00000000001"
+    when(db.run(any(), ArgumentMatchers.eq("opiskeluoikeudetQuery")))
+      .thenReturn(List(OPISKELUOIKEUS.copy(opiskelijaAvain = linkitettyOid)))
+    when(db.run(any(), ArgumentMatchers.eq("sitovastiVastaanottaneetQuery"))).thenReturn(List(VASTAANOTTO))
+    when(db.run(any(), ArgumentMatchers.eq("yosHenkilotQuery")))
+      .thenReturn(List(HENKILO.copy(hetu = Some("010100A9999"))))
+    when(db.run(any(), ArgumentMatchers.eq("valintarekisteriYosQuery"))).thenReturn(List(YOS_VALINTAREKISTERI))
+    val oikeudet = service.getPaattyvatOpiskeluOikeudet(orgs, params)
+    assertEquals(1, oikeudet.size)
+    val oikeus = oikeudet.head
+    assertEquals(Some("010100A9999"), oikeus.hetu)
+    assertEquals(linkitettyOid, oikeus.opiskelijaAvain)
+    assertEquals(VASTAANOTTO.oppijanumero, oikeus.oppijanumero)
+    assertTrue(oikeus.naytettyHakijalle)
+  }
+
+  @Test
   def eiPalautaVastaanotettuaOpiskeluoikeuttaPaattyvana(): Unit = {
     when(db.run(any(), ArgumentMatchers.eq("opiskeluoikeudetQuery"))).thenReturn(
       List(OPISKELUOIKEUS.copy(opiskeluoikeudenAlkuPvm = Some(VASTAANOTTO.vastaanottoAjankohta.get.plusDays(1))))

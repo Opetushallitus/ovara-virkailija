@@ -30,7 +30,8 @@ object YosTestUtils {
     koulutusKoodi = Some("14"),
     linkitettyKoulutusAste = None,
     linkitetynKoulutuksenTila = None,
-    myontaja = MYONTAJA
+    myontaja = MYONTAJA,
+    oppijanumero = OPPIJA_OID
   )
 
   def VASTAANOTTO: KKSitovastiVastaanottanut = KKSitovastiVastaanottanut(

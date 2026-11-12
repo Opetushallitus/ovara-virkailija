@@ -42,7 +42,8 @@ case class KKPaatettavaOpiskeluoikeusEntity(
   koulutusKoodi: Option[String],
   linkitettyKoulutusAste: Option[String],
   linkitetynKoulutuksenTila: Option[String],
-  myontaja: String
+  myontaja: String,
+  oppijanumero: String
 ) {
   def yksiloivaTunniste = s"${this.myontaja}_${this.opiskeluoikeusAvain}"
 }
