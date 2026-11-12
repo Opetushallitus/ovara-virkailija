@@ -179,7 +179,7 @@
         <dependency>
             <groupId>opiskelijavalinnat-utils</groupId>
             <artifactId>java-cas</artifactId>
-            <version>2.3.1-SNAPSHOT</version>
+            <version>2.3.1-OY-5942-SNAPSHOT</version>
             <!-- exclude pakko tehdä koska muuten valuu ylimääräinen lokitusimplementaatio -->
             <exclusions>
                 <exclusion>
