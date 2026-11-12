@@ -17,6 +17,9 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
   private val eligibilityRequirement = "eligibility-state"
   private val paymentRequirement     = "payment-obligation"
 
+  private val hyvaksytytHakemusmaksunTilatSql =
+    RepositoryUtils.makeListOfValuesQueryStr(Seq("not-required", "paid", "ok-by-proxy"))
+
   def selectKKHakijat(
     hakuOid: Option[String],
     hakukohdeOids: Seq[String],
@@ -66,8 +69,9 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             hlo.aidinkieli,
             hlo.syntymaaika,
             hlo.turvakielto,
-            -- Supan valintadata kattaa vain sen omat haut. Muuten käytetään gen_hakutoiveen ensikertalaisuutta:
-            -- vanhoissa hauissa (int_sure_haut) Suren oma tieto, muissa Supan ensikertalaisuustieto.
+            -- Supan valintadata kattaa vain sen omat haut. Muuten käytetään gen_hakutoiveen
+            -- ensikertalaisuutta: vanhoissa hauissa (int_sure_haut) Suren oma tieto, muissa Supan
+            -- ensikertalaisuustieto.
             coalesce(
               (SELECT bool_or(st.arvo IN ('true', '"true"')) FROM gen.gen_supa_tieto st
                 WHERE st.hakemus_oid = hakemus.hakemus_oid
@@ -95,9 +99,13 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
           LEFT JOIN gen.gen_henkilo  mhlo    ON mhlo.henkilo_oid    = hlo.oppijanumero
           WHERE length(hakemus.hakemus_oid) = #$ataruOidLength
           AND haku.kohdejoukko_koodiuri LIKE 'haunkohdejoukko_12%'
-          -- Suren kkhakijat-rajapinta ei palauttanut passivoituja hakemuksia (Atarussa ar.state <> 'inactivated'). Tähän asti
-          -- rajaus on tapahtunut vain epäsuorasti: dbt pudottaa niiden hakutoiveet gen_hakutoivesta.
+          -- Suren kkhakijat-rajapinta ei palauttanut passivoituja hakemuksia (Atarussa
+          -- ar.state <> 'inactivated').
           AND NOT coalesce(hakemus.poistettu, false)
+          -- Ataru ei toimittanut Surellekaan kk-hakemuksia, joiden mahdollista hakemusmaksua ei ole maksettu
+          -- (approved_at puuttuu). Ei maksutietoa (ei maksullinen haku) = mukana.
+          AND (hakemus.hakemusmaksun_tila IS NULL
+               OR hakemus.hakemusmaksun_tila IN (#$hyvaksytytHakemusmaksunTilatSql))
           #$hakuSql
           #$oppijanumeroSql
           AND EXISTS (

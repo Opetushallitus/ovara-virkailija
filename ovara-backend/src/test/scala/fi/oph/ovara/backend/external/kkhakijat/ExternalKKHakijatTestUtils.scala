@@ -145,7 +145,8 @@ trait ExternalKKHakijatTestUtils {
     // Viimeisimmän version luontiaika, joka rajapinnassa näkyy viimeisenä muokkauksena. Sama lähde kuin Suressa.
     luotu: Option[java.time.OffsetDateTime] = Some(MUOKATTU),
     ulkKunta: Option[String] = None,
-    poistettu: Option[Boolean] = Some(false)
+    poistettu: Option[Boolean] = Some(false),
+    hakemusmaksunTila: Option[String] = None
   ): Unit = {
     if (insertHenkilo) this.insertHenkilo(oppijanumero)
     if (insertHaku) this.insertHaku(hakuOid)
@@ -182,7 +183,8 @@ trait ExternalKKHakijatTestUtils {
           $pohjakoulutusKk::jsonb,
           $luotuStr::timestamptz,
           $ulkKunta,
-          $poistettu)""",
+          $poistettu,
+          $hakemusmaksunTila)""",
       "Insert test kk-hakemus"
     )
   }
@@ -371,7 +373,8 @@ trait ExternalKKHakijatTestUtils {
               pohjakoulutus_kk               jsonb,
               luotu                          timestamp with time zone,
               ulk_kunta                      text,
-              poistettu                      boolean
+              poistettu                      boolean,
+              hakemusmaksun_tila             text
           );
 
           CREATE TABLE gen.gen_henkilo (

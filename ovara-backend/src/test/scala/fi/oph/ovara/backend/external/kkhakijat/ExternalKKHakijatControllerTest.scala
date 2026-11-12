@@ -2901,6 +2901,65 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakemusnumero").value(HAKEMUS_OID))
   }
 
+  // ---- Hakemusmaksu ----
+
+  /** Hakemusmaksun tila tyhjänä (CsvSourcen tyhjä arvo) tarkoittaa, ettei maksutietoa ole. */
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      ", true",
+      "not-required, true",
+      "paid, true",
+      "ok-by-proxy, true",
+      "awaiting, false",
+      "overdue, false",
+      "foo, false"
+    )
+  )
+  def hakemusIncludedOnlyWhenHakemusmaksuApprovedOrMissing(hakemusmaksunTila: String, palautetaan: Boolean): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    initSchema()
+    insertHakemus(hakemusmaksunTila = Option(hakemusmaksunTila))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](if (palautetaan) 1 else 0)))
+  }
+
+  @Test
+  def unpaidHakemusExcludedButPaidReturnedInSameHakukohde(): Unit = {
+    initSchema()
+    insertHakemus(hakemusmaksunTila = Some("paid"))
+    insertHakukohde()
+    insertHakutoive()
+    insertHakemus(
+      hakemusOid = HAKEMUS_OID_2,
+      insertHenkilo = false,
+      insertHaku = false,
+      hakemusmaksunTila = Some("awaiting")
+    )
+    insertHakutoive(hakemusOid = HAKEMUS_OID_2)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakemusnumero").value(HAKEMUS_OID))
+  }
+
+  @Test
+  def unpaidHakemusExcludedFromOppijanumeroSearch(): Unit = {
+    initSchema()
+    insertHakemus(hakemusmaksunTila = Some("awaiting"))
+    insertHakukohde()
+    insertHakutoive()
+
+    getByOppijanumero(OPPIJANUMERO)
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
+  }
+
   // ---- Hakuvuosi ja hakukausi ----
 
   /** Seedaa hakijan, jonka haun omat vuosi/kausi poikkeavat koulutuksen alkamisvuosista/-kausista. */
