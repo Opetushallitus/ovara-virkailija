@@ -2844,6 +2844,63 @@ class ExternalKKHakijatControllerTest
     } finally workbook.close()
   }
 
+  // ---- Inaktivoidut hakemukset ----
+
+  @Test
+  def inactivatedHakemusExcludedEvenWithHakutoiveRow(): Unit = {
+    initSchema()
+    // dbt pudottaisi inaktivoidun hakemuksen hakutoiveet; tässä rivi jätetään, jotta rajaus näkyy.
+    insertHakemus(poistettu = Some(true))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
+  }
+
+  @Test
+  def hakemusReturnedWhenPoistettuNull(): Unit = {
+    initSchema()
+    insertHakemus(poistettu = None)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+  }
+
+  @Test
+  def inactivatedHakemusExcludedFromHakukohdeSearch(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertHakemus(hakemusOid = HAKEMUS_OID_2, insertHenkilo = false, insertHaku = false, poistettu = Some(true))
+    insertHakutoive(hakemusOid = HAKEMUS_OID_2)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakemusnumero").value(HAKEMUS_OID))
+  }
+
+  @Test
+  def inactivatedHakemusExcludedFromOppijanumeroSearch(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertHakemus(hakemusOid = HAKEMUS_OID_2, insertHenkilo = false, insertHaku = false, poistettu = Some(true))
+    insertHakutoive(hakemusOid = HAKEMUS_OID_2)
+
+    getByOppijanumero(OPPIJANUMERO)
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakemusnumero").value(HAKEMUS_OID))
+  }
+
   // ---- Hakuvuosi ja hakukausi ----
 
   /** Seedaa hakijan, jonka haun omat vuosi/kausi poikkeavat koulutuksen alkamisvuosista/-kausista. */

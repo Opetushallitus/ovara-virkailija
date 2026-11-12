@@ -95,6 +95,9 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
           LEFT JOIN gen.gen_henkilo  mhlo    ON mhlo.henkilo_oid    = hlo.oppijanumero
           WHERE length(hakemus.hakemus_oid) = #$ataruOidLength
           AND haku.kohdejoukko_koodiuri LIKE 'haunkohdejoukko_12%'
+          -- Suren kkhakijat-rajapinta ei palauttanut passivoituja hakemuksia (Atarussa ar.state <> 'inactivated'). Tähän asti
+          -- rajaus on tapahtunut vain epäsuorasti: dbt pudottaa niiden hakutoiveet gen_hakutoivesta.
+          AND NOT coalesce(hakemus.poistettu, false)
           #$hakuSql
           #$oppijanumeroSql
           AND EXISTS (
