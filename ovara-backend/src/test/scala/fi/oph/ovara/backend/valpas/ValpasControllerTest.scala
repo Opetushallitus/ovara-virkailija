@@ -9,9 +9,9 @@ import org.junit.jupiter.api.{BeforeEach, Nested, Test}
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.{SpringBootTest, TestConfiguration}
-import org.springframework.context.annotation.{Bean, Primary}
+import org.springframework.context.annotation.{Bean, Import, Primary}
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.{WithAnonymousUser, WithMockUser}
 import org.springframework.test.context.ActiveProfiles
@@ -24,6 +24,7 @@ import slick.jdbc.PostgresProfile.api.*
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles(Array("test"))
+@Import(Array(classOf[ValpasControllerTest.MockAuditLogConfig]))
 @WithMockUser(username = "testuser", roles = Array("APP_OVARA-VIRKAILIJA_OPH_PAAKAYTTAJA_1.2.246.562.10.00000000001"))
 class ValpasControllerTest extends ValpasTestUtils {
 
