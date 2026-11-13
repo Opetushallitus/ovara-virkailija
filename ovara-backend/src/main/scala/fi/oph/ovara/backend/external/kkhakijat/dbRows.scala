@@ -57,6 +57,47 @@ private def ilmoittautumiset(
   }
 }
 
+// Hakutoiveen valinnan ja vastaanoton tila sekä se, onko tulos julkaistu.
+private case class VtsTila(valinnanTila: Valintatila, vastaanottotila: Vastaanottotila, julkaistu: Boolean)
+
+/**
+ * Valinnan ja vastaanoton tila valinta-tulos-servicen tapaan, josta Sure ne saa
+ *  (SijoittelutulosService.hakemuksenKevytYhteenveto: jononValintatila,
+ *  vastaanottotilanVaikutusValintatilaan ja Hakutoiveentulos.julkaistavaVersio).
+ *  Sijoittelemattomien jonojen sääntöä ei ole, koska tietoa ei ole ovarassa. Ilman yhtään
+ *  valintarekisterin riviä (tallennettuTila None) tallennettu vastaanotto palautetaan sellaisenaan,
+ *  ettei puuttuva valintarekisterin tieto nollaa myös vastaanottoa.
+ */
+private def vtsTila(
+  tallennettuTila: Option[Valintatila],
+  vastaanotto: Vastaanottotila,
+  hyvaksyttyHarkinnanvaraisesti: Boolean,
+  eiVarasijatayttoa: Boolean,
+  merkitsevaJonoJulkaistavissa: Boolean,
+  kaikkiJonotJulkaistu: Boolean
+): VtsTila =
+  tallennettuTila match {
+    case None       => VtsTila(Valintatila.KESKEN, vastaanotto, julkaistu = false)
+    case Some(tila) =>
+      val jononTila = tila match {
+        case t if Valintatila.hyvaksytyt(t) && hyvaksyttyHarkinnanvaraisesti =>
+          Valintatila.HARKINNANVARAISESTI_HYVAKSYTTY
+        case Valintatila.VARALLA if eiVarasijatayttoa => Valintatila.KESKEN
+        case t                                        => t
+      }
+      val valinnanTila = vastaanotto match {
+        case Vastaanottotila.VASTAANOTTANUT_SITOVASTI | Vastaanottotila.EHDOLLISESTI_VASTAANOTTANUT
+            if !Valintatila.hyvaksytyt(jononTila) =>
+          Valintatila.HYVAKSYTTY
+        case Vastaanottotila.PERUNUT    => Valintatila.PERUNUT
+        case Vastaanottotila.PERUUTETTU => Valintatila.PERUUTETTU
+        case _                          => jononTila
+      }
+      val julkaistu = (Valintatila.hyvaksytyt(jononTila) && merkitsevaJonoJulkaistavissa) || kaikkiJonotJulkaistu
+      if (julkaistu) VtsTila(valinnanTila, vastaanotto, julkaistu = true)
+      else VtsTila(Valintatila.KESKEN, Vastaanottotila.KESKEN, julkaistu = false)
+  }
+
 /**
  * Puuttuva käsittelymerkintä (tai NULL-tila) tarkoittaa NOT_CHECKEDia. Tuntematon tila
  *  lokitetaan ja pudotetaan: tulkitsematonta lähdekoodia ei päästetä rajapintaan. None siis
@@ -196,7 +237,7 @@ case class KKHakemusRow(
   valinnanTila: Option[String],
   valinnanAikaleima: Option[OffsetDateTime],
   pisteet: Option[BigDecimal],
-  ehdollistiHyvaksyttavissa: Option[Boolean],
+  ehdollisestiHyvaksyttavissa: Option[Boolean],
   ehtoFI: Option[String],
   ehtoSV: Option[String],
   ehtoEN: Option[String],
@@ -206,7 +247,12 @@ case class KKHakemusRow(
   valintatapajononTyyppiNimiFi: Option[String],
   // Raakatilat gen_hakemus_kasittelymerkinnat-taulusta, ennen uudelleenmappausta.
   hKelpoisuusState: Option[String],
-  hKelpoisuusMaksuvelvollisuusState: Option[String]
+  hKelpoisuusMaksuvelvollisuusState: Option[String],
+  // Merkitsevän jonon ja hakutoiveen jonojen tiedot valinnan tuloksen laskemiseen (vtsTila).
+  merkitsevaJonoJulkaistavissa: Option[Boolean],
+  hyvaksyttyHarkinnanvaraisesti: Option[Boolean],
+  eiVarasijatayttoa: Option[Boolean],
+  kaikkiJonotJulkaistu: Option[Boolean]
 ) {
   def asKKHakemus(
     hakuOid: String,
@@ -218,7 +264,15 @@ case class KKHakemusRow(
     valinnanAikaleima: Option[String],
     pohjakoulutus: Seq[String],
     julkaisulupa: Option[Boolean]
-  ): KKHakutoive =
+  ): KKHakutoive = {
+    val tila = vtsTila(
+      tallennettuTila = valinnanTila.map(t => Valintatila.parse(t).getOrElse(Valintatila.KESKEN)),
+      vastaanotto = vastaanottotieto.flatMap(Vastaanottotila.parse).getOrElse(Vastaanottotila.KESKEN),
+      hyvaksyttyHarkinnanvaraisesti = hyvaksyttyHarkinnanvaraisesti.getOrElse(false),
+      eiVarasijatayttoa = eiVarasijatayttoa.getOrElse(false),
+      merkitsevaJonoJulkaistavissa = merkitsevaJonoJulkaistavissa.getOrElse(false),
+      kaikkiJonotJulkaistu = kaikkiJonotJulkaistu.getOrElse(false)
+    )
     KKHakutoive(
       haku = hakuOid,
       hakuVuosi = hakuVuosi,
@@ -231,8 +285,8 @@ case class KKHakemusRow(
       valinnanAikaleima = valinnanAikaleima,
       // -1 tarkoittaa haun järjestämättömiä hakutoiveita, jolloin Sure jättää prioriteetin pois.
       hakutoivePrioriteetti = Some(hakutoivenumero).filter(_ != -1),
-      valinnanTila = valinnanTila.flatMap(Valintatila.parse).orElse(Some(Valintatila.KESKEN)),
-      vastaanottotieto = vastaanottotieto.flatMap(Vastaanottotila.parse).orElse(Some(Vastaanottotila.KESKEN)),
+      valinnanTila = Some(tila.valinnanTila),
+      vastaanottotieto = Some(tila.vastaanottotila),
       ilmoittautumiset = ilmoittautumiset(toteutusAlkamiskausi, toteutusAlkamisvuosi, ilmoittautumisenTila),
       pohjakoulutus = pohjakoulutus,
       julkaisulupa = julkaisulupa,
@@ -257,11 +311,12 @@ case class KKHakemusRow(
         )("MAKSAMATTA")
       ),
       hakukohdeKkId = hakukohdeKkId,
-      pisteet = pisteet,
+      // VTS ei näytä julkaisemattoman tuloksen pisteitä eikä ehdollista hyväksyntää; ehtotekstit se näyttää.
+      pisteet = pisteet.filter(_ => tila.julkaistu),
       // Sure palauttaa ehdon aina; ilman julkaistua tietoa ehdollisesti hyväksyttävissä on false.
       hyvaksymisenEhto = Some(
         HyvaksymisenEhto(
-          ehdollisestiHyvaksyttavissa = ehdollistiHyvaksyttavissa.getOrElse(false),
+          ehdollisestiHyvaksyttavissa = tila.julkaistu && ehdollisestiHyvaksyttavissa.getOrElse(false),
           ehtoKoodi = None,
           ehtoFI = ehtoFI,
           ehtoSV = ehtoSV,
@@ -270,7 +325,7 @@ case class KKHakemusRow(
       ),
       // Suren tapaan jonon tyyppi vain hyväksytyille, valintatapajono-koodiston suomenkielisenä nimenä.
       valintatapajononTyyppi = valintatapajononTyyppi
-        .filter(_ => valinnanTila.flatMap(Valintatila.parse).exists(Valintatila.hyvaksytyt))
+        .filter(_ => Valintatila.hyvaksytyt(tila.valinnanTila))
         .map(_ => valintatapajononTyyppiNimiFi.getOrElse("Tuntematon")),
       valintatapajononNimi = valintatapajononNimi,
       hakukohteenKoulutukset = koulutusOid.toSeq.flatMap { oid =>
@@ -288,4 +343,5 @@ case class KKHakemusRow(
         )
       }
     )
+  }
 }

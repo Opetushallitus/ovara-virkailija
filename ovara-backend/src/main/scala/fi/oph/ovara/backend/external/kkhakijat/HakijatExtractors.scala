@@ -104,7 +104,7 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       valinnanTila = r.nextStringOption(),
       valinnanAikaleima = getOffsetDateTime(r),
       pisteet = r.nextBigDecimalOption(),
-      ehdollistiHyvaksyttavissa = r.nextBooleanOption(),
+      ehdollisestiHyvaksyttavissa = r.nextBooleanOption(),
       ehtoFI = r.nextStringOption(),
       ehtoSV = r.nextStringOption(),
       ehtoEN = r.nextStringOption(),
@@ -112,7 +112,11 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       valintatapajononNimi = r.nextStringOption(),
       valintatapajononTyyppiNimiFi = r.nextStringOption(),
       hKelpoisuusState = r.nextStringOption(),
-      hKelpoisuusMaksuvelvollisuusState = r.nextStringOption()
+      hKelpoisuusMaksuvelvollisuusState = r.nextStringOption(),
+      merkitsevaJonoJulkaistavissa = r.nextBooleanOption(),
+      hyvaksyttyHarkinnanvaraisesti = r.nextBooleanOption(),
+      eiVarasijatayttoa = r.nextBooleanOption(),
+      kaikkiJonotJulkaistu = r.nextBooleanOption()
     )
   }
 

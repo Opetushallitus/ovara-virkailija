@@ -217,6 +217,16 @@ trait ExternalKKHakijatTestUtils {
     )
   }
 
+  def insertValintarekisteriValintatapajono(
+    valintatapajonoId: String = "vtj-1",
+    eiVarasijatayttoa: Option[Boolean]
+  ): Unit = {
+    db.run(
+      sqlu"""INSERT INTO gen.gen_valintarekisteri_valintatapajono VALUES($valintatapajonoId, $eiVarasijatayttoa)""",
+      "Insert test kk-valintarekisteri_valintatapajono"
+    )
+  }
+
   def insertValintaperusteValintatapajono(
     valintatapajonoId: String = "vtj-1",
     valintatapajonoTyyppi: Option[String] = None,
@@ -244,7 +254,8 @@ trait ExternalKKHakijatTestUtils {
     ehdollistiHyvaksyttavissa: Option[Boolean] = None,
     ehdollistiHyvaksyttavissaEhtoFi: Option[String] = None,
     ehdollistiHyvaksyttavissaEhtoSv: Option[String] = None,
-    ehdollistiHyvaksyttavissaEhtoEn: Option[String] = None
+    ehdollistiHyvaksyttavissaEhtoEn: Option[String] = None,
+    hyvaksyttyHarkinnanvaraisesti: Option[Boolean] = None
   ): Unit = {
     val hyvaksyttyStr = hyvaksyttyjajulkaistu.map(_.format(SECONDS_TZ_FORMATTER))
     db.run(
@@ -255,7 +266,8 @@ trait ExternalKKHakijatTestUtils {
           ehdollisesti_hyvaksyttavissa,
           ehdollisen_hyvaksymisen_ehto_fi,
           ehdollisen_hyvaksymisen_ehto_sv,
-          ehdollisen_hyvaksymisen_ehto_en
+          ehdollisen_hyvaksymisen_ehto_en,
+          hyvaksytty_harkinnanvaraisesti
         ) VALUES (
           $hakukohdeOid, $valintatapajonoId, $hakemusOid, $maksunTila,
           $valinnanTila, $hyvaksyttyStr::timestamptz,
@@ -263,7 +275,8 @@ trait ExternalKKHakijatTestUtils {
           $ehdollistiHyvaksyttavissa,
           $ehdollistiHyvaksyttavissaEhtoFi,
           $ehdollistiHyvaksyttavissaEhtoSv,
-          $ehdollistiHyvaksyttavissaEhtoEn
+          $ehdollistiHyvaksyttavissaEhtoEn,
+          $hyvaksyttyHarkinnanvaraisesti
         )""",
       "Insert test kk-valintarekisteri"
     )
@@ -457,7 +470,13 @@ trait ExternalKKHakijatTestUtils {
               ehdollisesti_hyvaksyttavissa boolean,
               ehdollisen_hyvaksymisen_ehto_fi text,
               ehdollisen_hyvaksymisen_ehto_sv text,
-              ehdollisen_hyvaksymisen_ehto_en text
+              ehdollisen_hyvaksymisen_ehto_en text,
+              hyvaksytty_harkinnanvaraisesti boolean
+          );
+
+          CREATE TABLE gen.gen_valintarekisteri_valintatapajono(
+              valintatapajono_id text NOT NULL PRIMARY KEY,
+              ei_varasijatayttoa boolean
           );
 
           CREATE TABLE gen.gen_ylioppilas(

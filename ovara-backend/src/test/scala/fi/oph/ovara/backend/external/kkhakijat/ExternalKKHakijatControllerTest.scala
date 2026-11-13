@@ -1081,6 +1081,17 @@ class ExternalKKHakijatControllerTest
 
   // ---- Enum parsing ----
 
+  /**
+   * Kuten seedMinimalHakija, mutta hakutoiveella ei ole vastaanottoa. Valinnan tila riippuu VTS:n
+   *  tapaan vastaanotosta (vtsTila), joten tallennetun tilan testit tehdään ilman sitä.
+   */
+  private def seedHakijaIlmanVastaanottoa(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(vastaanottotieto = None)
+  }
+
   @ParameterizedTest
   @ValueSource(
     strings = Array(
@@ -1097,7 +1108,7 @@ class ExternalKKHakijatControllerTest
   )
   def valinnanTilaParsesKnownStates(state: String): Unit = {
     db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
-    seedMinimalHakija()
+    seedHakijaIlmanVastaanottoa()
     insertValintarekisteri(valinnanTila = Some(state))
 
     get()
@@ -1107,7 +1118,7 @@ class ExternalKKHakijatControllerTest
 
   @Test
   def valinnanTilaDefaultsToKeskenForUnknownValue(): Unit = {
-    seedMinimalHakija()
+    seedHakijaIlmanVastaanottoa()
     insertValintarekisteri(valinnanTila = Some("SOMETHING_ELSE"))
 
     get()
@@ -1492,7 +1503,7 @@ class ExternalKKHakijatControllerTest
   )
   def valinnanTilaPrefersHigherPriorityStateOverLower(winner: String, loser: String): Unit = {
     db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
-    seedMinimalHakija()
+    seedHakijaIlmanVastaanottoa()
     insertValintarekisteri(valintatapajonoId = "vtj-winner", valinnanTila = Some(winner))
     insertValintarekisteri(valintatapajonoId = "vtj-loser", valinnanTila = Some(loser))
 
@@ -1693,10 +1704,11 @@ class ExternalKKHakijatControllerTest
       ehdollistiHyvaksyttavissaEhtoFi = Some("Ehto FI")
     )
 
+    // VTS:n tapaan julkaisemattomalle ei ehdollista hyväksyntää, mutta ehtoteksti näytetään.
     get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehdollisestiHyvaksyttavissa").value(false))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoFI").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoFI").value("Ehto FI"))
   }
 
   @Test
@@ -1737,6 +1749,145 @@ class ExternalKKHakijatControllerTest
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoFI").value("winner-fi"))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(90))
+  }
+
+  // ---- Valinnan tulos valinta-tulos-servicen tapaan (vtsTila) ----
+
+  @Test
+  def unpublishedHakutoiveShownAsKesken(): Unit = {
+    seedMinimalHakija() // vastaanotto VASTAANOTTANUT_SITOVASTI
+    insertValintarekisteri(
+      valinnanTila = Some("HYVAKSYTTY"),
+      julkaistavissa = Some(false),
+      pisteet = Some(BigDecimal("75")),
+      ehdollistiHyvaksyttavissa = Some(true),
+      ehdollistiHyvaksyttavissaEhtoFi = Some("Ehto FI")
+    )
+    insertValintaperusteValintatapajono(
+      valintatapajonoTyyppi = Some("valintatapajono_kp"),
+      valintatapajonoNimi = Some("Koepistejono")
+    )
+    insertValintatapajonoKoodi("valintatapajono_kp", Some("Koepisteet"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("KESKEN"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehdollisestiHyvaksyttavissa").value(false))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoFI").value("Ehto FI"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("Koepistejono"))
+  }
+
+  @Test
+  def varallaInUnpublishedJonoShownAsKeskenWhenOtherJonoPublished(): Unit = {
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valintatapajonoId = "vtj-1", valinnanTila = Some("VARALLA"), julkaistavissa = Some(false))
+    insertValintarekisteri(valintatapajonoId = "vtj-2", valinnanTila = Some("HYLATTY"), julkaistavissa = Some(true))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("KESKEN"))
+  }
+
+  @Test
+  def notHyvaksyttyShownWhenAllJonotPublished(): Unit = {
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valintatapajonoId = "vtj-1", valinnanTila = Some("HYLATTY"), julkaistavissa = Some(true))
+    insertValintarekisteri(valintatapajonoId = "vtj-2", valinnanTila = Some("HYLATTY"), julkaistavissa = Some(true))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYLATTY"))
+  }
+
+  @Test
+  def hyvaksyttyInPublishedMerkitsevaJonoShownWhenOtherJonoUnpublished(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-1",
+      valinnanTila = Some("HYVAKSYTTY"),
+      julkaistavissa = Some(true),
+      pisteet = Some(BigDecimal("75"))
+    )
+    insertValintarekisteri(valintatapajonoId = "vtj-2", valinnanTila = Some("VARALLA"), julkaistavissa = Some(false))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value(VASTAANOTTOTIETO))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(75))
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "HYVAKSYTTY,             true,  HARKINNANVARAISESTI_HYVAKSYTTY",
+      "VARASIJALTA_HYVAKSYTTY, true,  HARKINNANVARAISESTI_HYVAKSYTTY",
+      "VARASIJALTA_HYVAKSYTTY, false, VARASIJALTA_HYVAKSYTTY",
+      "VARALLA,                true,  VARALLA"
+    )
+  )
+  def harkinnanvarainenHyvaksyntaShownAsHarkinnanvaraisestiHyvaksytty(
+    tallennettu: String,
+    harkinnanvarainen: Boolean,
+    odotettu: String
+  ): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valinnanTila = Some(tallennettu), hyvaksyttyHarkinnanvaraisesti = Some(harkinnanvarainen))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(odotettu))
+  }
+
+  @ParameterizedTest
+  @CsvSource(Array("true, KESKEN", "false, VARALLA"))
+  def varallaWithoutVarasijatayttoShownAsKesken(eiVarasijatayttoa: Boolean, odotettu: String): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valinnanTila = Some("VARALLA"))
+    insertValintarekisteriValintatapajono(eiVarasijatayttoa = Some(eiVarasijatayttoa))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(odotettu))
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "HYVAKSYTTY, PERUNUT,                  PERUNUT",
+      "HYVAKSYTTY, PERUUTETTU,               PERUUTETTU",
+      "VARALLA,    VASTAANOTTANUT_SITOVASTI, HYVAKSYTTY",
+      "VARALLA,    EHDOLLISESTI_VASTAANOTTANUT, HYVAKSYTTY",
+      "HYVAKSYTTY, VASTAANOTTANUT_SITOVASTI, HYVAKSYTTY"
+    )
+  )
+  def vastaanottoChangesValinnanTila(tallennettu: String, vastaanotto: String, odotettu: String): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(vastaanottotieto = Some(vastaanotto))
+    insertValintarekisteri(valinnanTila = Some(tallennettu))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(odotettu))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value(vastaanotto))
+  }
+
+  @Test
+  def vastaanottoKeptWhenNoValintarekisteriRow(): Unit = {
+    seedMinimalHakija() // vastaanotto VASTAANOTTANUT_SITOVASTI, ei valintarekisterin riviä
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("KESKEN"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value(VASTAANOTTOTIETO))
   }
 
   // ---- Valintatapajono meta ----
@@ -1828,7 +1979,7 @@ class ExternalKKHakijatControllerTest
 
   /** Yksi valintatapajono annetulla tilalla, tyypillä valintatapajono_kp ja sen koodilla. */
   private def seedHakijaWithValintatapajono(valinnanTila: String): Unit = {
-    seedMinimalHakija()
+    seedHakijaIlmanVastaanottoa()
     insertValintarekisteri(valinnanTila = Some(valinnanTila))
     insertValintaperusteValintatapajono(
       valintatapajonoTyyppi = Some("valintatapajono_kp"),
@@ -1904,8 +2055,9 @@ class ExternalKKHakijatControllerTest
     get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("Hyväksytty"))
-      // Pisteet tulevat yhä julkaistusta jonosta.
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(50))
+      // Hakutoive ei ole julkaistu (merkitsevä jono julkaisematon, kaikki jonot eivät julkaistuja),
+      // joten VTS:n tapaan pisteitä ei näytetä.
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").doesNotExist())
   }
 
   @Test
