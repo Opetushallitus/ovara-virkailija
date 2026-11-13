@@ -219,10 +219,12 @@ trait ExternalKKHakijatTestUtils {
 
   def insertValintarekisteriValintatapajono(
     valintatapajonoId: String = "vtj-1",
-    eiVarasijatayttoa: Option[Boolean]
+    eiVarasijatayttoa: Option[Boolean] = None,
+    // Valintatapajonon prioriteetti hakukohteessa; merkitsevän jonon toissijainen järjestys.
+    prioriteetti: Option[Int] = None
   ): Unit = {
     db.run(
-      sqlu"""INSERT INTO gen.gen_valintarekisteri_valintatapajono VALUES($valintatapajonoId, $eiVarasijatayttoa)""",
+      sqlu"""INSERT INTO gen.gen_valintarekisteri_valintatapajono VALUES($valintatapajonoId, $eiVarasijatayttoa, $prioriteetti)""",
       "Insert test kk-valintarekisteri_valintatapajono"
     )
   }
@@ -249,6 +251,7 @@ trait ExternalKKHakijatTestUtils {
     hyvaksyttyjajulkaistu: Option[java.time.OffsetDateTime] = None,
     julkaistavissa: Option[Boolean] = Some(true),
     varasijanNumero: Option[Int] = None,
+    // Jonosijan prioriteetti eli hakutoiveen numero; ei vaikuta merkitsevän jonon valintaan.
     prioriteetti: Option[Int] = None,
     pisteet: Option[BigDecimal] = None,
     ehdollistiHyvaksyttavissa: Option[Boolean] = None,
@@ -476,7 +479,8 @@ trait ExternalKKHakijatTestUtils {
 
           CREATE TABLE gen.gen_valintarekisteri_valintatapajono(
               valintatapajono_id text NOT NULL PRIMARY KEY,
-              ei_varasijatayttoa boolean
+              ei_varasijatayttoa boolean,
+              prioriteetti integer
           );
 
           CREATE TABLE gen.gen_ylioppilas(

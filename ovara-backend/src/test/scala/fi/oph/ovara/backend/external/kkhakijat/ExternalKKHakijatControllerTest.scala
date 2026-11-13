@@ -1627,15 +1627,15 @@ class ExternalKKHakijatControllerTest
     insertValintarekisteri(
       valintatapajonoId = "vtj-winner",
       valinnanTila = Some("HYVAKSYTTY"),
-      prioriteetti = Some(1),
       pisteet = Some(BigDecimal("88"))
     )
     insertValintarekisteri(
       valintatapajonoId = "vtj-loser",
       valinnanTila = Some("HYVAKSYTTY"),
-      prioriteetti = Some(2),
       pisteet = Some(BigDecimal("99"))
     )
+    insertValintarekisteriValintatapajono(valintatapajonoId = "vtj-winner", prioriteetti = Some(1))
+    insertValintarekisteriValintatapajono(valintatapajonoId = "vtj-loser", prioriteetti = Some(2))
 
     get()
       .andExpect(status.isOk)
@@ -2063,14 +2063,58 @@ class ExternalKKHakijatControllerTest
   @Test
   def valintatapajonoTiebreakByPrioriteettiWhenSameTila(): Unit = {
     seedMinimalHakija()
-    insertValintarekisteri(valintatapajonoId = "vtj-2", valinnanTila = Some("HYVAKSYTTY"), prioriteetti = Some(2))
-    insertValintarekisteri(valintatapajonoId = "vtj-1", valinnanTila = Some("HYVAKSYTTY"), prioriteetti = Some(1))
+    insertValintarekisteri(valintatapajonoId = "vtj-2", valinnanTila = Some("HYVAKSYTTY"))
+    insertValintarekisteri(valintatapajonoId = "vtj-1", valinnanTila = Some("HYVAKSYTTY"))
+    insertValintarekisteriValintatapajono(valintatapajonoId = "vtj-2", prioriteetti = Some(2))
+    insertValintarekisteriValintatapajono(valintatapajonoId = "vtj-1", prioriteetti = Some(1))
     insertValintaperusteValintatapajono(valintatapajonoId = "vtj-2", valintatapajonoNimi = Some("Toinen"))
     insertValintaperusteValintatapajono(valintatapajonoId = "vtj-1", valintatapajonoNimi = Some("Ensimmäinen"))
 
     get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("Ensimmäinen"))
+  }
+
+  @Test
+  def valintatapajonoTiebreakUsesJononPrioriteettiNotJonosijanPrioriteetti(): Unit = {
+    seedMinimalHakija()
+    // Jonosijan prioriteetti (hakutoiveen numero) suosisi vtj-a:ta, jonon prioriteetti vtj-b:tä.
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-a",
+      valinnanTila = Some("HYVAKSYTTY"),
+      prioriteetti = Some(1),
+      pisteet = Some(BigDecimal("10"))
+    )
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-b",
+      valinnanTila = Some("HYVAKSYTTY"),
+      prioriteetti = Some(2),
+      pisteet = Some(BigDecimal("20"))
+    )
+    insertValintarekisteriValintatapajono(valintatapajonoId = "vtj-a", prioriteetti = Some(2))
+    insertValintarekisteriValintatapajono(valintatapajonoId = "vtj-b", prioriteetti = Some(1))
+    insertValintaperusteValintatapajono(valintatapajonoId = "vtj-a", valintatapajonoNimi = Some("A"))
+    insertValintaperusteValintatapajono(valintatapajonoId = "vtj-b", valintatapajonoNimi = Some("B"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("B"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(20))
+  }
+
+  @Test
+  def valintatapajonoVarallaTiebreakByVarasijanumeroNotPrioriteetti(): Unit = {
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valintatapajonoId = "vtj-a", valinnanTila = Some("VARALLA"), varasijanNumero = Some(3))
+    insertValintarekisteri(valintatapajonoId = "vtj-b", valinnanTila = Some("VARALLA"), varasijanNumero = Some(1))
+    insertValintarekisteriValintatapajono(valintatapajonoId = "vtj-a", prioriteetti = Some(1))
+    insertValintarekisteriValintatapajono(valintatapajonoId = "vtj-b", prioriteetti = Some(2))
+    insertValintaperusteValintatapajono(valintatapajonoId = "vtj-a", valintatapajonoNimi = Some("A"))
+    insertValintaperusteValintatapajono(valintatapajonoId = "vtj-b", valintatapajonoNimi = Some("B"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("B"))
   }
 
   // ---- Pohjakoulutus ----

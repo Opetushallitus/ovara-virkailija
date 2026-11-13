@@ -129,7 +129,8 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
       val hakemusOidList = RepositoryUtils.makeListOfValuesQueryStr(hakemusOids)
       // Valinnan tulos lasketaan valinta-tulos-servicen tapaan (ks. KKHakemusRow.vtsTila):
       //   merkitseva_jono_yleinen: hakutoiveen merkitsevä jono (JonoFinder.merkitseväJono): tilan
-      //                            järjestys, VARALLA-jonoissa varasijanumero, muuten prioriteetti.
+      //                            järjestys, VARALLA-jonoissa varasijanumero, muuten valintatapajonon
+      //                            prioriteetti (ei jonosijan prioriteetti, joka on hakutoiveen numero).
       //                            Kaikki jonokohtaiset tiedot tulevat siitä.
       //   jonojen_julkaisu:        onko hakutoiveen jokainen jono julkaistavissa.
       val query = sql"""
@@ -137,13 +138,13 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             SELECT hakemus_oid, hakukohde_oid, valinnan_tila, hyvaksyttyjajulkaistu, valintatapajono_id,
                    julkaistavissa, hyvaksytty_harkinnanvaraisesti, pisteet, ehdollisesti_hyvaksyttavissa,
                    ehdollisen_hyvaksymisen_ehto_fi, ehdollisen_hyvaksymisen_ehto_sv,
-                   ehdollisen_hyvaksymisen_ehto_en
+                   ehdollisen_hyvaksymisen_ehto_en, ei_varasijatayttoa
             FROM (
               SELECT vr.hakemus_oid, vr.hakukohde_oid, vr.valinnan_tila, vr.hyvaksyttyjajulkaistu,
                      vr.valintatapajono_id, vr.julkaistavissa, vr.hyvaksytty_harkinnanvaraisesti,
                      vr.pisteet, vr.ehdollisesti_hyvaksyttavissa,
                      vr.ehdollisen_hyvaksymisen_ehto_fi, vr.ehdollisen_hyvaksymisen_ehto_sv,
-                     vr.ehdollisen_hyvaksymisen_ehto_en,
+                     vr.ehdollisen_hyvaksymisen_ehto_en, vrj.ei_varasijatayttoa,
                 ROW_NUMBER() OVER (
                   PARTITION BY vr.hakemus_oid, vr.hakukohde_oid
                   ORDER BY
@@ -161,10 +162,12 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
                     END,
                     CASE
                       WHEN vr.valinnan_tila = 'VARALLA' THEN vr.varasijan_numero
-                      ELSE vr.prioriteetti
+                      ELSE vrj.prioriteetti
                     END NULLS LAST
                 ) AS rn
               FROM gen.gen_valintarekisteri vr
+              LEFT JOIN gen.gen_valintarekisteri_valintatapajono vrj
+                ON vrj.valintatapajono_id = vr.valintatapajono_id
               WHERE vr.valinnan_tila IS NOT NULL
                 AND vr.hakemus_oid IN (#$hakemusOidList)
             ) x WHERE rn = 1
@@ -211,7 +214,7 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             km_maksu.state                     AS h_kelpoisuus_maksuvelvollisuus,
             merk_y.julkaistavissa                  AS merkitseva_jono_julkaistavissa,
             merk_y.hyvaksytty_harkinnanvaraisesti  AS hyvaksytty_harkinnanvaraisesti,
-            vrj.ei_varasijatayttoa                 AS ei_varasijatayttoa,
+            merk_y.ei_varasijatayttoa              AS ei_varasijatayttoa,
             jj.kaikki_jonot_julkaistu              AS kaikki_jonot_julkaistu
           FROM gen.gen_hakutoive ht
           LEFT JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
@@ -221,9 +224,6 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             ON merk_y.hakemus_oid = ht.hakemus_oid AND merk_y.hakukohde_oid = ht.hakukohde_oid
           LEFT JOIN jonojen_julkaisu jj
             ON jj.hakemus_oid = ht.hakemus_oid AND jj.hakukohde_oid = ht.hakukohde_oid
-          -- Merkitsevän jonon varasijatäyttö: VTS näyttää VARALLA-tilan keskeneräisenä, jos sitä ei ole.
-          LEFT JOIN gen.gen_valintarekisteri_valintatapajono vrj
-            ON vrj.valintatapajono_id = merk_y.valintatapajono_id
           -- Suren tapaan jono on hakutoiveen merkitsevä jono julkaisusta riippumatta; tyyppi
           -- valintatapajono-koodiston suomenkielisenä nimenä.
           LEFT JOIN gen.gen_valintaperuste_valintatapajono vp
