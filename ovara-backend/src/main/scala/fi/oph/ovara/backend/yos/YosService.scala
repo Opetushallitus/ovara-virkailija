@@ -42,7 +42,7 @@ class YosService(
         .map(o => {
           sitovastiVastaanottaneet
             .find(v =>
-              v.oppijanumero.equals(o.opiskelijaAvain)
+              v.oppijanumero.equals(o.oppijanumero)
                 && YosPredicate.onkoOikeusKoulutusAsteenMukaanYosinPiirissa(o, v)
             )
             .map(v => (o, v))
@@ -56,7 +56,7 @@ class YosService(
     yossiinKuuluvat
       .map((o, v) =>
         yossiinKuuluvatHenkilot
-          .find(h => h.oppijanumero.equals(o.opiskelijaAvain))
+          .find(h => h.oppijanumero.equals(o.oppijanumero))
           .flatMap(h => {
             val matchingValintaRekisteriTieto = yosValintarekisteriTiedot
               .getOrElse(h.oppijanumero, List.empty)
@@ -128,7 +128,7 @@ class YosService(
   private def getSitovastivastaanottaneet(
     opiskeluoikeudet: List[KKPaatettavaOpiskeluoikeusEntity]
   ): List[KKSitovastiVastaanottanut] = {
-    val henkiloOids              = opiskeluoikeudet.map(o => o.opiskelijaAvain).distinct
+    val henkiloOids              = opiskeluoikeudet.map(o => o.oppijanumero).distinct
     val sitovastiVastaanottaneet =
       if (henkiloOids.isEmpty) List.empty
       else
@@ -149,7 +149,7 @@ class YosService(
     yossiinKuuluvat: List[(KKPaatettavaOpiskeluoikeusEntity, KKSitovastiVastaanottanut)],
     params: KkPaatettavatOpiskeluoikeudetParams
   ): List[YosHenkilo] = {
-    val yossiinKuuluvatHenkiloOidit = yossiinKuuluvat.map((o, _) => o.opiskelijaAvain).distinct
+    val yossiinKuuluvatHenkiloOidit = yossiinKuuluvat.map((o, _) => o.oppijanumero).distinct
     val yossiinKuuluvatHenkilot     =
       if (yossiinKuuluvatHenkiloOidit.isEmpty) List.empty
       else
