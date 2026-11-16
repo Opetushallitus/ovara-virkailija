@@ -217,6 +217,19 @@ trait ExternalKKHakijatTestUtils {
     )
   }
 
+  def insertOhjausparametri(
+    avain: String,
+    arvo: Option[String] = None,
+    aikaleima: Option[java.time.OffsetDateTime] = None,
+    hakuOid: String = HAKU_OID
+  ): Unit = {
+    val aikaleimaStr = aikaleima.map(_.format(SECONDS_TZ_FORMATTER))
+    db.run(
+      sqlu"""INSERT INTO gen.gen_ohjausparametri_haku VALUES($hakuOid, $avain, $arvo, $aikaleimaStr::timestamptz)""",
+      "Insert test kk-ohjausparametri"
+    )
+  }
+
   def insertValintarekisteriValintatapajono(
     valintatapajonoId: String = "vtj-1",
     eiVarasijatayttoa: Option[Boolean] = None,
@@ -475,6 +488,13 @@ trait ExternalKKHakijatTestUtils {
               ehdollisen_hyvaksymisen_ehto_sv text,
               ehdollisen_hyvaksymisen_ehto_en text,
               hyvaksytty_harkinnanvaraisesti boolean
+          );
+
+          CREATE TABLE gen.gen_ohjausparametri_haku(
+              haku_oid text,
+              avain text,
+              arvo text,
+              aikaleima timestamp with time zone
           );
 
           CREATE TABLE gen.gen_valintarekisteri_valintatapajono(

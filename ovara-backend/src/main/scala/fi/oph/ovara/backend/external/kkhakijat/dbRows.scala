@@ -1,9 +1,11 @@
 package fi.oph.ovara.backend.external.kkhakijat
 
+import fi.oph.ovara.backend.utils.Constants.HELSINKI_TIMEZONE
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, OffsetDateTime}
+import java.time.temporal.ChronoUnit
+import java.time.{Instant, LocalDate, OffsetDateTime, ZonedDateTime}
 
 private val LOG: Logger =
   LoggerFactory.getLogger("fi.oph.ovara.backend.external.kkhakijat.Kasittelymerkinnat")
@@ -60,10 +62,59 @@ private def ilmoittautumiset(
 // Hakutoiveen valinnan ja vastaanoton tila sekä se, onko tulos julkaistu.
 private case class VtsTila(valinnanTila: Valintatila, vastaanottotila: Vastaanottotila, julkaistu: Boolean)
 
+// Haun ohjausparametrit, joilla valinta-tulos-service laskee vastaanoton määräajan ja varasijasääntöjen voimassaolon.
+case class HaunVastaanottoParametrit(
+  vastaanottoPaattyy: Option[OffsetDateTime],           // PH_OPVP
+  hakijakohtainenVastaanottoaikaPaivia: Option[Int],    // PH_HPVOA
+  valintaesitysHyvaksyttavissa: Option[OffsetDateTime], // PH_VEH
+  varasijasaannotVoimaan: Option[OffsetDateTime],       // PH_VSSAV
+  kaikkiJonotSijoittelussa: Option[OffsetDateTime]      // PH_VTSSV
+) {
+  // VastaanottoUtils.ehdollinenVastaanottoMahdollista: puuttuva parametri tulkitaan voimassa olevaksi.
+  def varasijasaannotVoimassa(nyt: ZonedDateTime): Boolean =
+    varasijasaannotVoimaan.forall(_.toInstant.isBefore(nyt.toInstant)) &&
+      kaikkiJonotSijoittelussa.forall(_.toInstant.isBefore(nyt.toInstant))
+}
+
+/**
+ * Vastaanoton määräaika valinta-tulos-servicen tapaan (VastaanottoUtils.laskeVastaanottoDeadline):
+ *  haun määräaika (PH_OPVP) tai sitä myöhäisempi hakijakohtainen määräaika, joka lasketaan
+ *  hyväksymisen julkaisusta (tai sitä myöhäisemmästä PH_VEH:stä) lisäämällä PH_HPVOA päivää ja
+ *  asettamalla kellonajaksi haun määräajan kellonaika. Päivä lisätään VTS:n tapaan lähtöhetken omassa
+ *  ajassa: julkaisuhetkelle kiinteällä aikaerolla (ilman kesäaikasiirtymää), PH_VEH:lle Suomen ajassa.
+ *  Jos julkaisun kellonaika on myöhäisempi kuin haun määräajan, lisätään yksi päivä.
+ */
+private[kkhakijat] def vastaanottoDeadline(
+  parametrit: HaunVastaanottoParametrit,
+  hyvaksyttyJaJulkaistu: Option[OffsetDateTime]
+): Option[ZonedDateTime] =
+  parametrit.vastaanottoPaattyy.map(_.atZoneSameInstant(HELSINKI_TIMEZONE)).map { haunMaaraaika =>
+    val hakijakohtainen = for {
+      julkaistu <- hyvaksyttyJaJulkaistu.map(_.atZoneSameInstant(HELSINKI_TIMEZONE).toOffsetDateTime)
+      paivia    <- parametrit.hakijakohtainenVastaanottoaikaPaivia
+    } yield {
+      val valintaesitys = parametrit.valintaesitysHyvaksyttavissa
+        .map(_.atZoneSameInstant(HELSINKI_TIMEZONE))
+        .getOrElse(Instant.EPOCH.atZone(HELSINKI_TIMEZONE))
+      val julkaisuMyohemminPaivalla = julkaistu.toLocalTime
+        .truncatedTo(ChronoUnit.SECONDS)
+        .isAfter(haunMaaraaika.toLocalTime.truncatedTo(ChronoUnit.SECONDS))
+      val lisapaivat = paivia + (if (julkaisuMyohemminPaivalla) 1 else 0)
+      val siirretty  =
+        if (julkaistu.toInstant.isAfter(valintaesitys.toInstant))
+          julkaistu.plusDays(lisapaivat).atZoneSameInstant(HELSINKI_TIMEZONE)
+        else valintaesitys.plusDays(lisapaivat)
+      siirretty.`with`(haunMaaraaika.toLocalTime)
+    }
+    hakijakohtainen.filter(_.toInstant.isAfter(haunMaaraaika.toInstant)).getOrElse(haunMaaraaika)
+  }
+
 /**
  * Valinnan ja vastaanoton tila valinta-tulos-servicen tapaan, josta Sure ne saa
- *  (SijoittelutulosService.hakemuksenKevytYhteenveto: jononValintatila,
- *  vastaanottotilanVaikutusValintatilaan ja Hakutoiveentulos.julkaistavaVersio).
+ *  (SijoittelutulosService.hakemuksenKevytYhteenveto: jononValintatila, laskeVastaanottotila,
+ *  vastaanottotilanVaikutusValintatilaan ja Hakutoiveentulos.julkaistavaVersio; sen jälkeen
+ *  ValintatulosService.näytäVarasijaltaHyväksytytHyväksyttyinäJosVarasijasäännötEiVoimassa).
+ *  Hakutoiveiden välisiä sääntöjä ei vielä ole; ne tulevat julkaisun ja varasijasäännön väliin.
  *  Sijoittelemattomien jonojen sääntöä ei ole, koska tietoa ei ole ovarassa. Ilman yhtään
  *  valintarekisterin riviä (tallennettuTila None) tallennettu vastaanotto palautetaan sellaisenaan,
  *  ettei puuttuva valintarekisterin tieto nollaa myös vastaanottoa.
@@ -74,7 +125,10 @@ private def vtsTila(
   hyvaksyttyHarkinnanvaraisesti: Boolean,
   eiVarasijatayttoa: Boolean,
   merkitsevaJonoJulkaistavissa: Boolean,
-  kaikkiJonotJulkaistu: Boolean
+  kaikkiJonotJulkaistu: Boolean,
+  vastaanottoDeadline: Option[ZonedDateTime],
+  varasijasaannotVoimassa: Boolean,
+  nyt: ZonedDateTime
 ): VtsTila =
   tallennettuTila match {
     case None       => VtsTila(Valintatila.KESKEN, vastaanotto, julkaistu = false)
@@ -85,7 +139,15 @@ private def vtsTila(
         case Valintatila.VARALLA if eiVarasijatayttoa => Valintatila.KESKEN
         case t                                        => t
       }
-      val valinnanTila = vastaanotto match {
+      // Hyväksytylle tai peruneelle ilman vastaanottoa määräajan jälkeen EI_VASTAANOTETTU_MAARA_AIKANA.
+      val vastaanottotila =
+        if (
+          vastaanotto == Vastaanottotila.KESKEN &&
+          (Valintatila.hyvaksytyt(jononTila) || jononTila == Valintatila.PERUNUT) &&
+          vastaanottoDeadline.exists(_.toInstant.isBefore(nyt.toInstant))
+        ) Vastaanottotila.EI_VASTAANOTETTU_MAARA_AIKANA
+        else vastaanotto
+      val valinnanTila = vastaanottotila match {
         case Vastaanottotila.VASTAANOTTANUT_SITOVASTI | Vastaanottotila.EHDOLLISESTI_VASTAANOTTANUT
             if !Valintatila.hyvaksytyt(jononTila) =>
           Valintatila.HYVAKSYTTY
@@ -94,8 +156,13 @@ private def vtsTila(
         case _                          => jononTila
       }
       val julkaistu = (Valintatila.hyvaksytyt(jononTila) && merkitsevaJonoJulkaistavissa) || kaikkiJonotJulkaistu
-      if (julkaistu) VtsTila(valinnanTila, vastaanotto, julkaistu = true)
-      else VtsTila(Valintatila.KESKEN, Vastaanottotila.KESKEN, julkaistu = false)
+      if (julkaistu) {
+        // Varasijalta hyväksytty näytetään hyväksyttynä, kunnes varasijasäännöt ovat voimassa.
+        val naytettavaTila =
+          if (valinnanTila == Valintatila.VARASIJALTA_HYVAKSYTTY && !varasijasaannotVoimassa) Valintatila.HYVAKSYTTY
+          else valinnanTila
+        VtsTila(naytettavaTila, vastaanottotila, julkaistu = true)
+      } else VtsTila(Valintatila.KESKEN, Vastaanottotila.KESKEN, julkaistu = false)
   }
 
 /**
@@ -252,7 +319,8 @@ case class KKHakemusRow(
   merkitsevaJonoJulkaistavissa: Option[Boolean],
   hyvaksyttyHarkinnanvaraisesti: Option[Boolean],
   eiVarasijatayttoa: Option[Boolean],
-  kaikkiJonotJulkaistu: Option[Boolean]
+  kaikkiJonotJulkaistu: Option[Boolean],
+  vastaanottoParametrit: HaunVastaanottoParametrit
 ) {
   def asKKHakemus(
     hakuOid: String,
@@ -263,7 +331,8 @@ case class KKHakemusRow(
     hakemusViimeinenMuokkausAikaleima: Option[String],
     valinnanAikaleima: Option[String],
     pohjakoulutus: Seq[String],
-    julkaisulupa: Option[Boolean]
+    julkaisulupa: Option[Boolean],
+    nyt: ZonedDateTime
   ): KKHakutoive = {
     val tila = vtsTila(
       tallennettuTila = valinnanTila.map(t => Valintatila.parse(t).getOrElse(Valintatila.KESKEN)),
@@ -271,7 +340,11 @@ case class KKHakemusRow(
       hyvaksyttyHarkinnanvaraisesti = hyvaksyttyHarkinnanvaraisesti.getOrElse(false),
       eiVarasijatayttoa = eiVarasijatayttoa.getOrElse(false),
       merkitsevaJonoJulkaistavissa = merkitsevaJonoJulkaistavissa.getOrElse(false),
-      kaikkiJonotJulkaistu = kaikkiJonotJulkaistu.getOrElse(false)
+      kaikkiJonotJulkaistu = kaikkiJonotJulkaistu.getOrElse(false),
+      // Rivin valinnanAikaleima on hyväksymisen julkaisuhetki (hyvaksyttyjajulkaistu).
+      vastaanottoDeadline = vastaanottoDeadline(vastaanottoParametrit, this.valinnanAikaleima),
+      varasijasaannotVoimassa = vastaanottoParametrit.varasijasaannotVoimassa(nyt),
+      nyt = nyt
     )
     KKHakutoive(
       haku = hakuOid,

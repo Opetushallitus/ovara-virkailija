@@ -1890,6 +1890,112 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value(VASTAANOTTOTIETO))
   }
 
+  // ---- Vastaanoton määräaika ja varasijasäännöt (VTS) ----
+
+  private def paivienPaasta(paivia: Int): java.time.OffsetDateTime = java.time.OffsetDateTime.now().plusDays(paivia)
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "HYVAKSYTTY, -1, EI_VASTAANOTETTU_MAARA_AIKANA",
+      "HYVAKSYTTY,  1, KESKEN",
+      "PERUNUT,    -1, EI_VASTAANOTETTU_MAARA_AIKANA",
+      "VARALLA,    -1, KESKEN"
+    )
+  )
+  def vastaanottoEiMaaraaikanaWhenDeadlinePassed(tila: String, paivia: Int, odotettu: String): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valinnanTila = Some(tila))
+    insertOhjausparametri("PH_OPVP", aikaleima = Some(paivienPaasta(paivia)))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value(odotettu))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(tila))
+  }
+
+  @Test
+  def vastaanottoKeskenWithoutDeadlineParameter(): Unit = {
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def vastaanottoKeskenWhenHakijakohtainenDeadlineNotPassed(): Unit = {
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"), hyvaksyttyjajulkaistu = Some(paivienPaasta(-2)))
+    insertOhjausparametri("PH_OPVP", aikaleima = Some(paivienPaasta(-1)))
+    insertOhjausparametri("PH_HPVOA", arvo = Some("14"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def vastaanottoKeptWhenDeadlinePassed(): Unit = {
+    seedMinimalHakija() // vastaanotto VASTAANOTTANUT_SITOVASTI
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"))
+    insertOhjausparametri("PH_OPVP", aikaleima = Some(paivienPaasta(-1)))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value(VASTAANOTTOTIETO))
+  }
+
+  @Test
+  def unpublishedKeskenEvenWhenDeadlinePassed(): Unit = {
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"), julkaistavissa = Some(false))
+    insertOhjausparametri("PH_OPVP", aikaleima = Some(paivienPaasta(-1)))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("KESKEN"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def vastaanottoKeskenWithoutValintarekisteriRowEvenWhenDeadlinePassed(): Unit = {
+    seedHakijaIlmanVastaanottoa()
+    insertOhjausparametri("PH_OPVP", aikaleima = Some(paivienPaasta(-1)))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  /** varasijasaannotVoimaan/kaikkiJonotSijoittelussa: päiviä nykyhetkestä, tyhjä = parametria ei ole. */
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      " 1,   , HYVAKSYTTY",
+      "-1, -1, VARASIJALTA_HYVAKSYTTY",
+      "   ,  , VARASIJALTA_HYVAKSYTTY",
+      "   , 1, HYVAKSYTTY"
+    )
+  )
+  def varasijaltaHyvaksyttyShownAsHyvaksyttyUntilVarasijasaannotVoimassa(
+    varasijasaannotVoimaan: Integer,
+    kaikkiJonotSijoittelussa: Integer,
+    odotettu: String
+  ): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valinnanTila = Some("VARASIJALTA_HYVAKSYTTY"))
+    Option(varasijasaannotVoimaan).foreach(p => insertOhjausparametri("PH_VSSAV", aikaleima = Some(paivienPaasta(p))))
+    Option(kaikkiJonotSijoittelussa).foreach(p => insertOhjausparametri("PH_VTSSV", aikaleima = Some(paivienPaasta(p))))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(odotettu))
+  }
+
   // ---- Valintatapajono meta ----
 
   @Test

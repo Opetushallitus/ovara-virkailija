@@ -17,6 +17,14 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
   private val eligibilityRequirement = "eligibility-state"
   private val paymentRequirement     = "payment-obligation"
 
+  // Ohjausparametrit (gen_ohjausparametri_haku.avain), joilla valinta-tulos-service laskee vastaanoton
+  // määräajan (VastaanottoUtils.laskeVastaanottoDeadline) ja varasijasääntöjen voimassaolon.
+  private val vastaanottoPaattyyParametri         = "PH_OPVP"
+  private val hakijakohtainenVastaanottoaikaParam = "PH_HPVOA"
+  private val valintaesitysHyvaksyttavissaParam   = "PH_VEH"
+  private val varasijasaannotVoimaanParametri     = "PH_VSSAV"
+  private val kaikkiJonotSijoittelussaParametri   = "PH_VTSSV"
+
   private val hyvaksytytHakemusmaksunTilatSql =
     RepositoryUtils.makeListOfValuesQueryStr(Seq("not-required", "paid", "ok-by-proxy"))
 
@@ -215,7 +223,12 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             merk_y.julkaistavissa                  AS merkitseva_jono_julkaistavissa,
             merk_y.hyvaksytty_harkinnanvaraisesti  AS hyvaksytty_harkinnanvaraisesti,
             merk_y.ei_varasijatayttoa              AS ei_varasijatayttoa,
-            jj.kaikki_jonot_julkaistu              AS kaikki_jonot_julkaistu
+            jj.kaikki_jonot_julkaistu              AS kaikki_jonot_julkaistu,
+            op_opvp.aikaleima                      AS vastaanotto_paattyy,
+            op_hpvoa.arvo                          AS hakijakohtainen_vastaanottoaika,
+            op_veh.aikaleima                       AS valintaesitys_hyvaksyttavissa,
+            op_vssav.aikaleima                     AS varasijasaannot_voimaan,
+            op_vtssv.aikaleima                     AS kaikki_jonot_sijoittelussa
           FROM gen.gen_hakutoive ht
           LEFT JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
           LEFT JOIN gen.gen_toteutus  t  ON hk.toteutus_oid  = t.toteutus_oid
@@ -224,6 +237,18 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             ON merk_y.hakemus_oid = ht.hakemus_oid AND merk_y.hakukohde_oid = ht.hakukohde_oid
           LEFT JOIN jonojen_julkaisu jj
             ON jj.hakemus_oid = ht.hakemus_oid AND jj.hakukohde_oid = ht.hakukohde_oid
+          -- Haun ohjausparametrit vastaanoton määräaikaa ja varasijasääntöjä varten (ks. KKHakemusRow.vtsTila).
+          LEFT JOIN gen.gen_hakemus hm ON hm.hakemus_oid = ht.hakemus_oid
+          LEFT JOIN gen.gen_ohjausparametri_haku op_opvp
+            ON op_opvp.haku_oid = hm.haku_oid AND op_opvp.avain = '#$vastaanottoPaattyyParametri'
+          LEFT JOIN gen.gen_ohjausparametri_haku op_hpvoa
+            ON op_hpvoa.haku_oid = hm.haku_oid AND op_hpvoa.avain = '#$hakijakohtainenVastaanottoaikaParam'
+          LEFT JOIN gen.gen_ohjausparametri_haku op_veh
+            ON op_veh.haku_oid = hm.haku_oid AND op_veh.avain = '#$valintaesitysHyvaksyttavissaParam'
+          LEFT JOIN gen.gen_ohjausparametri_haku op_vssav
+            ON op_vssav.haku_oid = hm.haku_oid AND op_vssav.avain = '#$varasijasaannotVoimaanParametri'
+          LEFT JOIN gen.gen_ohjausparametri_haku op_vtssv
+            ON op_vtssv.haku_oid = hm.haku_oid AND op_vtssv.avain = '#$kaikkiJonotSijoittelussaParametri'
           -- Suren tapaan jono on hakutoiveen merkitsevä jono julkaisusta riippumatta; tyyppi
           -- valintatapajono-koodiston suomenkielisenä nimenä.
           LEFT JOIN gen.gen_valintaperuste_valintatapajono vp

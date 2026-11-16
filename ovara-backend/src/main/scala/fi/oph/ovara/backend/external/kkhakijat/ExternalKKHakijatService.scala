@@ -5,7 +5,7 @@ import fi.oph.ovara.backend.utils.Constants.HELSINKI_TIMEZONE
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.Service
 
-import java.time.OffsetDateTime
+import java.time.{OffsetDateTime, ZonedDateTime}
 import java.time.format.DateTimeFormatter
 import scala.util.Try
 
@@ -105,6 +105,8 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
         val ylioppilaatByHakemus =
           repository.selectYlioppilaat(hakemusOids).map(y => y.hakemusOid -> y).toMap
         val hakemuksetByOid = hakemusRows.groupBy(_.hakemusOid)
+        // Yksi hetki koko vastaukselle vastaanoton määräajan ja varasijasääntöjen vertailuun.
+        val nyt = ZonedDateTime.now(HELSINKI_TIMEZONE)
 
         kkHakijaRows.flatMap { row =>
           val matchingRows = hakemuksetByOid
@@ -122,7 +124,8 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
                 hakemusViimeinenMuokkausAikaleima = row.muokattu.map(formatAikaleima),
                 valinnanAikaleima = mRow.valinnanAikaleima.map(formatAikaleima),
                 pohjakoulutus = row.pohjakoulutus,
-                julkaisulupa = row.valintatuloksenJulkaisulupa
+                julkaisulupa = row.valintatuloksenJulkaisulupa,
+                nyt = nyt
               )
             )
             Some(row.asHakija(hakemukset, ylioppilaatByHakemus.get(row.hakemusOid)))
