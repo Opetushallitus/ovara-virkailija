@@ -2,7 +2,9 @@
   "name": "ovara-ui",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.26.1",
   "scripts": {
+    "preinstall": "pnpx only-allow@1.2.2 pnpm",
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
