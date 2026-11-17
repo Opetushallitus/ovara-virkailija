@@ -23,6 +23,9 @@ importers:
       '@mui/material':
         specifier: ^6.5.0
         version: 6.5.0(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.0.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.0.0))(@types/react@19.0.10)(react@19.0.0))(@types/react@19.0.10)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@mui/system':
+        specifier: ^6.5.0
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.0.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.0.0))(@types/react@19.0.10)(react@19.0.0))(@types/react@19.0.10)(react@19.0.0)
       '@opetushallitus/oph-design-system':
         specifier: ^1.0.0
         version: 1.0.0(@mui/material@6.5.0(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.0.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.0.0))(@types/react@19.0.10)(react@19.0.0))(@types/react@19.0.10)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
@@ -35,6 +38,9 @@ importers:
       '@tolgee/react':
         specifier: ^6.2.7
         version: 6.2.7(react@19.0.0)
+      '@tolgee/web':
+        specifier: ^6.2.7
+        version: 6.2.7
       lodash:
         specifier: ^4.17.21
         version: 4.18.1
