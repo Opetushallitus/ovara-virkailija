@@ -109,8 +109,10 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
         val nyt = ZonedDateTime.now(HELSINKI_TIMEZONE)
 
         kkHakijaRows.flatMap { row =>
-          val matchingRows = hakemuksetByOid
-            .getOrElse(row.hakemusOid, Seq.empty)
+          val hakemuksenRivit = hakemuksetByOid.getOrElse(row.hakemusOid, Seq.empty)
+          // Hakutoiveiden väliset säännöt lasketaan kaikista hakemuksen hakutoiveista ennen rajausta.
+          val tilat        = hakemuksenTilat(hakemuksenRivit, nyt)
+          val matchingRows = hakemuksenRivit
             .filter(matchesFilters(_, hakukohdeRajaus, organisaatioOids, valintarajaus, expandedScope))
           if (matchingRows.isEmpty) None
           else {
@@ -125,7 +127,7 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
                 valinnanAikaleima = mRow.valinnanAikaleima.map(formatAikaleima),
                 pohjakoulutus = row.pohjakoulutus,
                 julkaisulupa = row.valintatuloksenJulkaisulupa,
-                nyt = nyt
+                tila = tilat(mRow.hakukohdeOid)
               )
             )
             Some(row.asHakija(hakemukset, ylioppilaatByHakemus.get(row.hakemusOid)))

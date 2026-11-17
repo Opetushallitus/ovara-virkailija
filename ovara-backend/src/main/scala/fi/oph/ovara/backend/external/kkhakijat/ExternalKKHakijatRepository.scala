@@ -24,6 +24,9 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
   private val valintaesitysHyvaksyttavissaParam   = "PH_VEH"
   private val varasijasaannotVoimaanParametri     = "PH_VSSAV"
   private val kaikkiJonotSijoittelussaParametri   = "PH_VTSSV"
+  // Haun sijoittelu ja hakutoiveiden priorisointi (Haku.sijoitteluJaPriorisointi) hakutoiveiden välisiin sääntöihin.
+  private val sijoitteluParametri             = "sijoittelu"
+  private val jarjestetytHakutoiveetParametri = "jarjestetytHakutoiveet"
 
   private val hyvaksytytHakemusmaksunTilatSql =
     RepositoryUtils.makeListOfValuesQueryStr(Seq("not-required", "paid", "ok-by-proxy"))
@@ -228,7 +231,11 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             op_hpvoa.arvo                          AS hakijakohtainen_vastaanottoaika,
             op_veh.aikaleima                       AS valintaesitys_hyvaksyttavissa,
             op_vssav.aikaleima                     AS varasijasaannot_voimaan,
-            op_vtssv.aikaleima                     AS kaikki_jonot_sijoittelussa
+            op_vtssv.aikaleima                     AS kaikki_jonot_sijoittelussa,
+            -- Totuusarvoparametrit ovat alkuperainen_arvo-sarakkeessa (arvo on vain {"value": ...}-muotoisille).
+            -- VTS tulkitsee puuttuvan tai muun kuin totuusarvon epätodeksi.
+            coalesce(CAST(op_sijoittelu.alkuperainen_arvo AS text) = 'true', false)  AS sijoittelu,
+            coalesce(CAST(op_jarjestetyt.alkuperainen_arvo AS text) = 'true', false) AS jarjestetyt_hakutoiveet
           FROM gen.gen_hakutoive ht
           LEFT JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
           LEFT JOIN gen.gen_toteutus  t  ON hk.toteutus_oid  = t.toteutus_oid
@@ -249,6 +256,10 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             ON op_vssav.haku_oid = hm.haku_oid AND op_vssav.avain = '#$varasijasaannotVoimaanParametri'
           LEFT JOIN gen.gen_ohjausparametri_haku op_vtssv
             ON op_vtssv.haku_oid = hm.haku_oid AND op_vtssv.avain = '#$kaikkiJonotSijoittelussaParametri'
+          LEFT JOIN gen.gen_ohjausparametri_haku op_sijoittelu
+            ON op_sijoittelu.haku_oid = hm.haku_oid AND op_sijoittelu.avain = '#$sijoitteluParametri'
+          LEFT JOIN gen.gen_ohjausparametri_haku op_jarjestetyt
+            ON op_jarjestetyt.haku_oid = hm.haku_oid AND op_jarjestetyt.avain = '#$jarjestetytHakutoiveetParametri'
           -- Suren tapaan jono on hakutoiveen merkitsevä jono julkaisusta riippumatta; tyyppi
           -- valintatapajono-koodiston suomenkielisenä nimenä.
           LEFT JOIN gen.gen_valintaperuste_valintatapajono vp

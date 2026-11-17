@@ -1996,6 +1996,82 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(odotettu))
   }
 
+  // ---- Hakutoiveiden väliset säännöt (VTS) ----
+
+  /**
+   * Hakemus kahteen hakukohteeseen: ylempi hakutoive annetulla tilalla ja vastaanotolla, alempi (HAKUKOHDE_OID_2)
+   *  annetulla tilalla. Molemmat tulokset on julkaistu.
+   */
+  private def seedKaksiHakutoivetta(
+    ylempiTila: String,
+    ylempiVastaanotto: Option[String],
+    alempiTila: String
+  ): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2)
+    insertHakutoive(hakutoivenumero = 1, vastaanottotieto = ylempiVastaanotto)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2, vastaanottotieto = None)
+    insertValintarekisteri(valintatapajonoId = "vtj-1", valinnanTila = Some(ylempiTila))
+    insertValintarekisteri(hakukohdeOid = HAKUKOHDE_OID_2, valintatapajonoId = "vtj-2", valinnanTila = Some(alempiTila))
+  }
+
+  /** sijoittelu/jarjestetytHakutoiveet: onko ohjausparametri asetettu todeksi; säännöt vain kun molemmat. */
+  @ParameterizedTest
+  @CsvSource(Array("true, true, PERUUNTUNUT", "true, false, KESKEN", "false, false, KESKEN"))
+  def keskenBelowHyvaksyttyShownAsPeruuntunutWhenQueriedByItsHakukohde(
+    sijoittelu: Boolean,
+    jarjestetytHakutoiveet: Boolean,
+    odotettu: String
+  ): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedKaksiHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "KESKEN")
+    if (sijoittelu) insertOhjausparametri("sijoittelu", alkuperainenArvo = Some("true"))
+    if (jarjestetytHakutoiveet) insertOhjausparametri("jarjestetytHakutoiveet", alkuperainenArvo = Some("true"))
+
+    // Haku vain alemman hakutoiveen hakukohteella: sääntö näkee silti ylemmän hakutoiveen.
+    get(hakukohdeOid = Some(HAKUKOHDE_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohde").value(HAKUKOHDE_OID_2))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(odotettu))
+  }
+
+  @Test
+  def varallaShownAsPeruuntunutWhenOtherToiveVastaanotettuSitovasti(): Unit = {
+    seedKaksiHakutoivetta(
+      ylempiTila = "HYVAKSYTTY",
+      ylempiVastaanotto = Some("VASTAANOTTANUT_SITOVASTI"),
+      alempiTila = "VARALLA"
+    )
+    insertSijoitteluJaPriorisointi()
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("VASTAANOTTANUT_SITOVASTI"))
+    get(hakukohdeOid = Some(HAKUKOHDE_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("PERUUNTUNUT"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def ohjausparametriFalseKeepsRulesOff(): Unit = {
+    seedKaksiHakutoivetta(
+      ylempiTila = "HYVAKSYTTY",
+      ylempiVastaanotto = Some("VASTAANOTTANUT_SITOVASTI"),
+      alempiTila = "VARALLA"
+    )
+    insertOhjausparametri("sijoittelu", alkuperainenArvo = Some("false"))
+    insertOhjausparametri("jarjestetytHakutoiveet", alkuperainenArvo = Some("true"))
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("VARALLA"))
+  }
+
   // ---- Valintatapajono meta ----
 
   @Test

@@ -60,20 +60,28 @@ private def ilmoittautumiset(
 }
 
 // Hakutoiveen valinnan ja vastaanoton tila sekä se, onko tulos julkaistu.
-private case class VtsTila(valinnanTila: Valintatila, vastaanottotila: Vastaanottotila, julkaistu: Boolean)
+private[kkhakijat] case class VtsTila(valinnanTila: Valintatila, vastaanottotila: Vastaanottotila, julkaistu: Boolean) {
+  // Hakutoiveentulos.toKesken: tilat keskeneräisiksi ja tulos julkaisemattomaksi (piilottaa pisteet ja ehdollisuuden).
+  def toKesken: VtsTila = VtsTila(Valintatila.KESKEN, Vastaanottotila.KESKEN, julkaistu = false)
+}
 
-// Haun ohjausparametrit, joilla valinta-tulos-service laskee vastaanoton määräajan ja varasijasääntöjen voimassaolon.
-case class HaunVastaanottoParametrit(
+// Haun ohjausparametrit, joilla valinta-tulos-service laskee valinnan ja vastaanoton tilat.
+case class HaunOhjausparametrit(
   vastaanottoPaattyy: Option[OffsetDateTime],           // PH_OPVP
   hakijakohtainenVastaanottoaikaPaivia: Option[Int],    // PH_HPVOA
   valintaesitysHyvaksyttavissa: Option[OffsetDateTime], // PH_VEH
   varasijasaannotVoimaan: Option[OffsetDateTime],       // PH_VSSAV
-  kaikkiJonotSijoittelussa: Option[OffsetDateTime]      // PH_VTSSV
+  kaikkiJonotSijoittelussa: Option[OffsetDateTime],     // PH_VTSSV
+  sijoittelu: Boolean,                                  // sijoittelu
+  jarjestetytHakutoiveet: Boolean                       // jarjestetytHakutoiveet
 ) {
   // VastaanottoUtils.ehdollinenVastaanottoMahdollista: puuttuva parametri tulkitaan voimassa olevaksi.
   def varasijasaannotVoimassa(nyt: ZonedDateTime): Boolean =
     varasijasaannotVoimaan.forall(_.toInstant.isBefore(nyt.toInstant)) &&
       kaikkiJonotSijoittelussa.forall(_.toInstant.isBefore(nyt.toInstant))
+
+  // Haku.sijoitteluJaPriorisointi: hakutoiveiden väliset säännöt ovat käytössä vain tällöin.
+  def sijoitteluJaPriorisointi: Boolean = sijoittelu && jarjestetytHakutoiveet
 }
 
 /**
@@ -85,7 +93,7 @@ case class HaunVastaanottoParametrit(
  *  Jos julkaisun kellonaika on myöhäisempi kuin haun määräajan, lisätään yksi päivä.
  */
 private[kkhakijat] def vastaanottoDeadline(
-  parametrit: HaunVastaanottoParametrit,
+  parametrit: HaunOhjausparametrit,
   hyvaksyttyJaJulkaistu: Option[OffsetDateTime]
 ): Option[ZonedDateTime] =
   parametrit.vastaanottoPaattyy.map(_.atZoneSameInstant(HELSINKI_TIMEZONE)).map { haunMaaraaika =>
@@ -110,11 +118,10 @@ private[kkhakijat] def vastaanottoDeadline(
   }
 
 /**
- * Valinnan ja vastaanoton tila valinta-tulos-servicen tapaan, josta Sure ne saa
+ * Yhden hakutoiveen valinnan ja vastaanoton tila valinta-tulos-servicen tapaan, josta Sure ne saa
  *  (SijoittelutulosService.hakemuksenKevytYhteenveto: jononValintatila, laskeVastaanottotila,
- *  vastaanottotilanVaikutusValintatilaan ja Hakutoiveentulos.julkaistavaVersio; sen jälkeen
- *  ValintatulosService.näytäVarasijaltaHyväksytytHyväksyttyinäJosVarasijasäännötEiVoimassa).
- *  Hakutoiveiden välisiä sääntöjä ei vielä ole; ne tulevat julkaisun ja varasijasäännön väliin.
+ *  vastaanottotilanVaikutusValintatilaan ja Hakutoiveentulos.julkaistavaVersio). Hakutoiveiden
+ *  väliset säännöt ja varasijasääntö tehdään tämän jälkeen (hakemuksenVtsTilat).
  *  Sijoittelemattomien jonojen sääntöä ei ole, koska tietoa ei ole ovarassa. Ilman yhtään
  *  valintarekisterin riviä (tallennettuTila None) tallennettu vastaanotto palautetaan sellaisenaan,
  *  ettei puuttuva valintarekisterin tieto nollaa myös vastaanottoa.
@@ -127,7 +134,6 @@ private def vtsTila(
   merkitsevaJonoJulkaistavissa: Boolean,
   kaikkiJonotJulkaistu: Boolean,
   vastaanottoDeadline: Option[ZonedDateTime],
-  varasijasaannotVoimassa: Boolean,
   nyt: ZonedDateTime
 ): VtsTila =
   tallennettuTila match {
@@ -156,13 +162,100 @@ private def vtsTila(
         case _                          => jononTila
       }
       val julkaistu = (Valintatila.hyvaksytyt(jononTila) && merkitsevaJonoJulkaistavissa) || kaikkiJonotJulkaistu
-      if (julkaistu) {
-        // Varasijalta hyväksytty näytetään hyväksyttynä, kunnes varasijasäännöt ovat voimassa.
-        val naytettavaTila =
-          if (valinnanTila == Valintatila.VARASIJALTA_HYVAKSYTTY && !varasijasaannotVoimassa) Valintatila.HYVAKSYTTY
-          else valinnanTila
-        VtsTila(naytettavaTila, vastaanottotila, julkaistu = true)
-      } else VtsTila(Valintatila.KESKEN, Vastaanottotila.KESKEN, julkaistu = false)
+      val tulos     = VtsTila(valinnanTila, vastaanottotila, julkaistu = true)
+      if (julkaistu) tulos else tulos.toKesken
+  }
+
+/**
+ * Hakemuksen hakutoiveiden väliset säännöt valinta-tulos-servicen tapaan (ValintatulosService.julkaistavaTulos),
+ *  VTS:n järjestyksessä hakutoivejärjestyksessä olevalle listalle. Jokainen sääntö laskee indeksinsä edellisen
+ *  säännön tuloksesta. Kaikki kkhakijat-haut ovat korkeakouluhakuja (Haku.korkeakoulu).
+ *  Ei toteutettu: näytäHyväksyttyäJulkaisematontaAlemmistaKorkeinHyvaksyttyOdottamassaYlempiä (vaatii valinnan
+ *  tilojen historian) eikä yhden paikan säännöstä (asetaVastaanotettavuusValintarekisterinPerusteella).
+ *  Muut VTS:n säännöt muuttavat vain jonokohtaisia tietoja, joita Sure ei lue.
+ *
+ * @param hakutoiveet hakukohde, hakutoivenumero ja hakutoiveen oma tila (vtsTila)
+ * @return hakutoiveiden lopulliset tilat hakukohteittain
+ */
+private[kkhakijat] def hakemuksenVtsTilat[K](
+  hakutoiveet: Seq[(K, Int, VtsTila)],
+  sijoitteluJaPriorisointi: Boolean,
+  varasijasaannotVoimassa: Boolean
+): Map[K, VtsTila] = {
+  import Valintatila.{HYVAKSYTTY, KESKEN, PERUNUT, PERUUNTUNUT, VARALLA, VARASIJALTA_HYVAKSYTTY, hyvaksytyt}
+
+  def alempi(ensimmainen: Int, indeksi: Int): Boolean = ensimmainen >= 0 && indeksi > ensimmainen
+  def vainSijoittelua(saanto: Seq[VtsTila] => Seq[VtsTila]): Seq[VtsTila] => Seq[VtsTila] =
+    tilat => if (sijoitteluJaPriorisointi) saanto(tilat) else tilat
+
+  // näytäJulkaisematontaAlemmatPeruuntuneetKeskeneräisinä
+  val julkaisematontaAlemmatKeskeneraisiksi = vainSijoittelua { tilat =>
+    val ensimmainenJulkaisematon = tilat.indexWhere(!_.julkaistu)
+    tilat.zipWithIndex.map {
+      case (t, i)
+          if alempi(ensimmainenJulkaisematon, i) && (t.valinnanTila == PERUUNTUNUT || t.valinnanTila == KESKEN) =>
+        t.toKesken
+      case (t, _) => t
+    }
+  }
+  // peruunnutaValmistaAlemmatKeskeneräisetJosKäytetäänSijoittelua
+  val valmistaAlemmatKeskeneraisetPeruuntuneiksi = vainSijoittelua { tilat =>
+    val ensimmainenValmis = tilat.indexWhere(t => hyvaksytyt(t.valinnanTila) || t.valinnanTila == PERUNUT)
+    tilat.zipWithIndex.map {
+      case (t, i) if alempi(ensimmainenValmis, i) && t.valinnanTila == KESKEN => t.copy(valinnanTila = PERUUNTUNUT)
+      case (t, _)                                                             => t
+    }
+  }
+  // näytäVarasijaltaHyväksytytHyväksyttyinäJosVarasijasäännötEiVoimassa
+  val varasijaltaHyvaksytytHyvaksytyiksi: Seq[VtsTila] => Seq[VtsTila] = _.map {
+    case t if t.valinnanTila == VARASIJALTA_HYVAKSYTTY && !varasijasaannotVoimassa => t.copy(valinnanTila = HYVAKSYTTY)
+    case t                                                                         => t
+  }
+  // sovellaSijoitteluaKayttanvaKorkeakouluhaunSaantoja: sitovasti vastaanotetun lisäksi muut hyväksytyt
+  // (vastaanottamattomat) sekä varalla ja kesken olevat peruuntuvat. Muut haarat muuttavat vain vastaanotettavuutta.
+  val vastaanotetunMuutPeruuntuneiksi = vainSijoittelua { tilat =>
+    val ensimmainenVastaanotettu     = tilat.indexWhere(_.vastaanottotila == Vastaanottotila.VASTAANOTTANUT_SITOVASTI)
+    def muuKuinVastaanotettu(i: Int) = ensimmainenVastaanotettu >= 0 && i != ensimmainenVastaanotettu
+    tilat.zipWithIndex.map {
+      case (t, i) if hyvaksytyt(t.valinnanTila) && t.vastaanottotila == Vastaanottotila.KESKEN =>
+        if (muuKuinVastaanotettu(i)) t.copy(valinnanTila = PERUUNTUNUT) else t
+      case (t, i) if muuKuinVastaanotettu(i) && (t.valinnanTila == VARALLA || t.valinnanTila == KESKEN) =>
+        t.copy(valinnanTila = PERUUNTUNUT)
+      case (t, _) => t
+    }
+  }
+  // näytäAlemmatPeruuntuneetHakukohteetKeskeneräisinäJosYlemmätKeskeneräisiä
+  val keskeneraistaAlemmatPeruuntuneetKeskeneraisiksi = vainSijoittelua { tilat =>
+    val ensimmainenKesken = tilat.indexWhere(_.valinnanTila == KESKEN)
+    tilat.zipWithIndex.map {
+      case (t, i) if alempi(ensimmainenKesken, i) && t.valinnanTila == PERUUNTUNUT => t.toKesken
+      case (t, _)                                                                  => t
+    }
+  }
+
+  val jarjestyksessa = hakutoiveet.sortBy(_._2)
+  val saannot        = julkaisematontaAlemmatKeskeneraisiksi
+    .andThen(valmistaAlemmatKeskeneraisetPeruuntuneiksi)
+    .andThen(varasijaltaHyvaksytytHyvaksytyiksi)
+    .andThen(vastaanotetunMuutPeruuntuneiksi)
+    .andThen(keskeneraistaAlemmatPeruuntuneetKeskeneraisiksi)
+  jarjestyksessa.map(_._1).zip(saannot(jarjestyksessa.map(_._3))).toMap
+}
+
+/**
+ * Hakemuksen kaikkien hakutoiveiden lopulliset tilat hakukohteittain. Lasketaan kaikista hakemuksen
+ *  hakutoiveista ennen rajausta hakukohteisiin tai organisaatioihin, kuten VTS:ssä.
+ */
+private[kkhakijat] def hakemuksenTilat(rivit: Seq[KKHakemusRow], nyt: ZonedDateTime): Map[String, VtsTila] =
+  rivit.headOption match {
+    case None       => Map.empty
+    case Some(rivi) =>
+      // Kaikki hakemuksen hakutoiveet ovat samassa haussa, joten ohjausparametrit ovat samat.
+      hakemuksenVtsTilat(
+        rivit.map(r => (r.hakukohdeOid, r.hakutoivenumero, r.hakutoiveenVtsTila(nyt))),
+        sijoitteluJaPriorisointi = rivi.ohjausparametrit.sijoitteluJaPriorisointi,
+        varasijasaannotVoimassa = rivi.ohjausparametrit.varasijasaannotVoimassa(nyt)
+      )
   }
 
 /**
@@ -320,8 +413,22 @@ case class KKHakemusRow(
   hyvaksyttyHarkinnanvaraisesti: Option[Boolean],
   eiVarasijatayttoa: Option[Boolean],
   kaikkiJonotJulkaistu: Option[Boolean],
-  vastaanottoParametrit: HaunVastaanottoParametrit
+  ohjausparametrit: HaunOhjausparametrit
 ) {
+  // Hakutoiveen oma tila ennen hakutoiveiden välisiä sääntöjä (ks. hakemuksenTilat).
+  def hakutoiveenVtsTila(nyt: ZonedDateTime): VtsTila =
+    vtsTila(
+      tallennettuTila = valinnanTila.map(t => Valintatila.parse(t).getOrElse(Valintatila.KESKEN)),
+      vastaanotto = vastaanottotieto.flatMap(Vastaanottotila.parse).getOrElse(Vastaanottotila.KESKEN),
+      hyvaksyttyHarkinnanvaraisesti = hyvaksyttyHarkinnanvaraisesti.getOrElse(false),
+      eiVarasijatayttoa = eiVarasijatayttoa.getOrElse(false),
+      merkitsevaJonoJulkaistavissa = merkitsevaJonoJulkaistavissa.getOrElse(false),
+      kaikkiJonotJulkaistu = kaikkiJonotJulkaistu.getOrElse(false),
+      // Rivin valinnanAikaleima on hyväksymisen julkaisuhetki (hyvaksyttyjajulkaistu).
+      vastaanottoDeadline = vastaanottoDeadline(ohjausparametrit, valinnanAikaleima),
+      nyt = nyt
+    )
+
   def asKKHakemus(
     hakuOid: String,
     hakuVuosi: Int,
@@ -332,20 +439,9 @@ case class KKHakemusRow(
     valinnanAikaleima: Option[String],
     pohjakoulutus: Seq[String],
     julkaisulupa: Option[Boolean],
-    nyt: ZonedDateTime
+    // Hakutoiveen lopullinen tila hakutoiveiden välisten sääntöjen jälkeen (hakemuksenTilat).
+    tila: VtsTila
   ): KKHakutoive = {
-    val tila = vtsTila(
-      tallennettuTila = valinnanTila.map(t => Valintatila.parse(t).getOrElse(Valintatila.KESKEN)),
-      vastaanotto = vastaanottotieto.flatMap(Vastaanottotila.parse).getOrElse(Vastaanottotila.KESKEN),
-      hyvaksyttyHarkinnanvaraisesti = hyvaksyttyHarkinnanvaraisesti.getOrElse(false),
-      eiVarasijatayttoa = eiVarasijatayttoa.getOrElse(false),
-      merkitsevaJonoJulkaistavissa = merkitsevaJonoJulkaistavissa.getOrElse(false),
-      kaikkiJonotJulkaistu = kaikkiJonotJulkaistu.getOrElse(false),
-      // Rivin valinnanAikaleima on hyväksymisen julkaisuhetki (hyvaksyttyjajulkaistu).
-      vastaanottoDeadline = vastaanottoDeadline(vastaanottoParametrit, this.valinnanAikaleima),
-      varasijasaannotVoimassa = vastaanottoParametrit.varasijasaannotVoimassa(nyt),
-      nyt = nyt
-    )
     KKHakutoive(
       haku = hakuOid,
       hakuVuosi = hakuVuosi,

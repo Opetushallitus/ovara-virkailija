@@ -16,15 +16,17 @@ class ExternalKKHakijatVastaanottoDeadlineTest extends AnyFlatSpec with Matchers
     vastaanottoPaattyy: Option[String],
     paivia: Option[Int] = None,
     valintaesitysHyvaksyttavissa: Option[String] = None
-  ) = HaunVastaanottoParametrit(
+  ) = HaunOhjausparametrit(
     vastaanottoPaattyy = vastaanottoPaattyy.map(hki),
     hakijakohtainenVastaanottoaikaPaivia = paivia,
     valintaesitysHyvaksyttavissa = valintaesitysHyvaksyttavissa.map(hki),
     varasijasaannotVoimaan = None,
-    kaikkiJonotSijoittelussa = None
+    kaikkiJonotSijoittelussa = None,
+    sijoittelu = false,
+    jarjestetytHakutoiveet = false
   )
 
-  private def deadline(p: HaunVastaanottoParametrit, julkaistu: Option[String]) =
+  private def deadline(p: HaunOhjausparametrit, julkaistu: Option[String]) =
     vastaanottoDeadline(p, julkaistu.map(hki)).map(_.toInstant)
 
   "vastaanottoDeadline" should "be missing without the haku's vastaanotto deadline (PH_OPVP)" in {

@@ -221,13 +221,22 @@ trait ExternalKKHakijatTestUtils {
     avain: String,
     arvo: Option[String] = None,
     aikaleima: Option[java.time.OffsetDateTime] = None,
-    hakuOid: String = HAKU_OID
+    hakuOid: String = HAKU_OID,
+    // Parametrin koko JSON-arvo; totuusarvoparametreilla (sijoittelu, jarjestetytHakutoiveet) "true"/"false".
+    alkuperainenArvo: Option[String] = None
   ): Unit = {
     val aikaleimaStr = aikaleima.map(_.format(SECONDS_TZ_FORMATTER))
     db.run(
-      sqlu"""INSERT INTO gen.gen_ohjausparametri_haku VALUES($hakuOid, $avain, $arvo, $aikaleimaStr::timestamptz)""",
+      sqlu"""INSERT INTO gen.gen_ohjausparametri_haku (haku_oid, avain, arvo, aikaleima, alkuperainen_arvo)
+            VALUES($hakuOid, $avain, $arvo, $aikaleimaStr::timestamptz, $alkuperainenArvo::jsonb)""",
       "Insert test kk-ohjausparametri"
     )
+  }
+
+  /** Haku käyttää sijoittelua ja järjestettyjä hakutoiveita, jolloin hakutoiveiden väliset säännöt ovat käytössä. */
+  def insertSijoitteluJaPriorisointi(hakuOid: String = HAKU_OID): Unit = {
+    insertOhjausparametri("sijoittelu", hakuOid = hakuOid, alkuperainenArvo = Some("true"))
+    insertOhjausparametri("jarjestetytHakutoiveet", hakuOid = hakuOid, alkuperainenArvo = Some("true"))
   }
 
   def insertValintarekisteriValintatapajono(
@@ -494,7 +503,8 @@ trait ExternalKKHakijatTestUtils {
               haku_oid text,
               avain text,
               arvo text,
-              aikaleima timestamp with time zone
+              aikaleima timestamp with time zone,
+              alkuperainen_arvo jsonb
           );
 
           CREATE TABLE gen.gen_valintarekisteri_valintatapajono(
