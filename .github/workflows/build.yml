@@ -38,9 +38,16 @@ jobs:
           distribution: 'corretto'
           cache: 'maven'
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: ovara-ui/package.json
+
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: '20'
+          cache: pnpm
+          cache-dependency-path: ovara-ui/pnpm-lock.yaml
           registry-url: 'https://npm.pkg.github.com'
           scope: '@opetushallitus'
 
@@ -52,8 +59,8 @@ jobs:
       - name: Build UI
         run: |
           cd ovara-ui
-          npm ci --no-audit --prefer-offline
-          npm run build
+          pnpm install --prefer-offline
+          pnpm run build
 
       - name: Build with Maven
         env:
@@ -101,36 +108,50 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: ovara-ui/package.json
+
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: '20'
+          cache: pnpm
+          cache-dependency-path: ovara-ui/pnpm-lock.yaml
           registry-url: 'https://npm.pkg.github.com'
           scope: '@opetushallitus'
       - name: Install dependencies
         run: |
           cd ovara-ui
-          npm ci
+          pnpm install
       - name: Run lint
         run: |
           cd ovara-ui
-          # npm run typecheck
-          npm run lint
+          # pnpm run typecheck
+          pnpm run lint
 
   test:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: ovara-ui/package.json
+
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: '20'
+          cache: pnpm
+          cache-dependency-path: ovara-ui/pnpm-lock.yaml
           registry-url: 'https://npm.pkg.github.com'
           scope: '@opetushallitus'
       - name: Install dependencies
         run: |
           cd ovara-ui
-          npm ci
+          pnpm install
       - name: Run unit tests
         run: |
           cd ovara-ui
-          npm test
+          pnpm test
