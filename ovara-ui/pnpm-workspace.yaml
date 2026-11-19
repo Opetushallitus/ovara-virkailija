@@ -1,5 +1,9 @@
 minimumReleaseAge: 4320
 # The Vite app does not need the design system's Next.js peer dependency.
-autoInstallPeers: false
+packageExtensions:
+  '@opetushallitus/oph-design-system@1.0.0':
+    peerDependenciesMeta:
+      next:
+        optional: true
 onlyBuiltDependencies:
   - esbuild
