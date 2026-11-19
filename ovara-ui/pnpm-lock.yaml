@@ -1,8 +1,10 @@
 lockfileVersion: '9.0'
 
 settings:
-  autoInstallPeers: false
+  autoInstallPeers: true
   excludeLinksFromLockfile: false
+
+packageExtensionsChecksum: sha256-kMzpoN59efl6P4bf9Lo8jWuQ/eANeeUk+x48RRBbh+k=
 
 importers:
 
@@ -630,6 +632,9 @@ packages:
       '@mui/material': ^6
       next: ^14 || ^15
       react: ^18 || ^19
+    peerDependenciesMeta:
+      next:
+        optional: true
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
