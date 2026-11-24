@@ -3,7 +3,7 @@ package fi.oph.ovara.backend.external.kkhakijat
 import fi.oph.ovara.backend.repository.Extractors
 import fi.oph.ovara.backend.utils.ExtractorUtils.extractArray
 import fi.oph.ovara.backend.utils.GenericOvaraJsonFormats
-import slick.jdbc.GetResult
+import slick.jdbc.{GetResult, PositionedResult}
 
 import scala.util.Try
 
@@ -13,9 +13,9 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
     val hakemusOid                  = r.nextString()
     val sahkoposti                  = r.nextString()
     val puhelin                     = r.nextString()
-    val lahiosoite                  = r.nextString()
-    val postinumero                 = r.nextString()
-    val postitoimipaikka            = r.nextString()
+    val lahiosoite                  = r.nextStringOption().getOrElse("")
+    val postinumero                 = r.nextStringOption().getOrElse("")
+    val postitoimipaikka            = r.nextStringOption().getOrElse("")
     val hakuOid                     = r.nextString()
     val etunimet                    = r.nextStringOption()
     val kutsumanimi                 = r.nextStringOption()
@@ -37,6 +37,19 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
     val ensikertalainen             = r.nextBooleanOption()
     val hakuVuosi                   = r.nextIntOption()
     val hakuKausi                   = normalizeKausi(r.nextStringOption())
+
+    // ONR:n master-henkilö; puuttuva master-oid tarkoittaa, ettei master-riviä ole.
+    val masterOid = r.nextStringOption()
+    val master    = MasterHenkiloRow(
+      hetu = r.nextStringOption(),
+      etunimet = r.nextStringOption(),
+      sukunimi = r.nextStringOption(),
+      sukupuoli = r.nextIntOption(),
+      kansalaisuudet = extractArray(r.nextStringOption()),
+      aidinkieli = normalizeKieliCode(r.nextStringOption()),
+      syntymaaika = r.nextStringOption().flatMap(s => Try(java.time.LocalDate.parse(s)).toOption),
+      turvakielto = r.nextBooleanOption()
+    )
 
     KKHakijaRow(
       oppijanumero = oppijanumero,
@@ -66,7 +79,8 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       turvakielto = turvakielto,
       ensikertalainen = ensikertalainen,
       vuosi = hakuVuosi,
-      kausi = hakuKausi
+      kausi = hakuKausi,
+      master = masterOid.map(_ => master)
     )
   }
 
@@ -90,16 +104,60 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
       valinnanTila = r.nextStringOption(),
       valinnanAikaleima = getOffsetDateTime(r),
       pisteet = r.nextBigDecimalOption(),
-      ehdollistiHyvaksyttavissa = r.nextBooleanOption(),
+      ehdollisestiHyvaksyttavissa = r.nextBooleanOption(),
       ehtoFI = r.nextStringOption(),
       ehtoSV = r.nextStringOption(),
       ehtoEN = r.nextStringOption(),
       valintatapajononTyyppi = r.nextStringOption(),
       valintatapajononNimi = r.nextStringOption(),
+      valintatapajononTyyppiNimiFi = r.nextStringOption(),
       hKelpoisuusState = r.nextStringOption(),
-      hKelpoisuusMaksuvelvollisuusState = r.nextStringOption()
+      hKelpoisuusMaksuvelvollisuusState = r.nextStringOption(),
+      merkitsevaJonoJulkaistavissa = r.nextBooleanOption(),
+      hyvaksyttyHarkinnanvaraisesti = r.nextBooleanOption(),
+      eiVarasijatayttoa = r.nextBooleanOption(),
+      kaikkiJonotJulkaistu = r.nextBooleanOption(),
+      ohjausparametrit = HaunOhjausparametrit(
+        vastaanottoPaattyy = getOffsetDateTime(r),
+        hakijakohtainenVastaanottoaikaPaivia = r.nextStringOption().flatMap(_.trim.toIntOption),
+        valintaesitysHyvaksyttavissa = getOffsetDateTime(r),
+        varasijasaannotVoimaan = getOffsetDateTime(r),
+        kaikkiJonotSijoittelussa = getOffsetDateTime(r),
+        sijoittelu = r.nextBoolean(),
+        jarjestetytHakutoiveet = r.nextBoolean()
+      ),
+      yps = getYpsHakukohde(r)
     )
   }
+
+  implicit val getYpsVastaanottoRow: GetResult[YpsVastaanottoRow] = GetResult { r =>
+    YpsVastaanottoRow(
+      hakemusOid = r.nextString(),
+      hakukohdeOid = r.nextString(),
+      yps = getYpsHakukohde(r)
+    )
+  }
+
+  // selectHakemukset- ja selectYpsVastaanotot-kyselyjen YPS-sarakkeet samassa järjestyksessä
+  // (ks. ExternalKKHakijatRepositoryTest).
+  private def getYpsHakukohde(r: PositionedResult): YpsHakukohdeRow =
+    YpsHakukohdeRow(
+      hakuTila = r.nextStringOption(),
+      hakukohdeTila = r.nextStringOption(),
+      kohdejoukonTarkenne = r.nextStringOption(),
+      koulutustyyppi = r.nextStringOption(),
+      johtaaTutkintoon = r.nextBooleanOption(),
+      hakukohteenAlkamiskausi = getAlkamiskausi(r),
+      haunAlkamiskausi = getAlkamiskausi(r),
+      toteutuksenAlkamiskausi = getAlkamiskausi(r)
+    )
+
+  private def getAlkamiskausi(r: PositionedResult): AlkamiskausiRow =
+    AlkamiskausiRow(
+      kausi = normalizeKausi(r.nextStringOption()),
+      vuosi = r.nextIntOption(),
+      alkamisaika = getOffsetDateTime(r)
+    )
 
   implicit val getYlioppilasRow: GetResult[YlioppilasRow] = GetResult { r =>
     YlioppilasRow(

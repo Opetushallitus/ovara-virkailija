@@ -1,9 +1,11 @@
 package fi.oph.ovara.backend.external.kkhakijat
 
 import fi.oph.ovara.backend.service.CommonService
+import fi.oph.ovara.backend.utils.Constants.HELSINKI_TIMEZONE
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.Service
 
+import java.time.{OffsetDateTime, ZonedDateTime}
 import java.time.format.DateTimeFormatter
 import scala.util.Try
 
@@ -11,8 +13,12 @@ import scala.util.Try
 class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonService: CommonService) {
   val LOG: Logger = LoggerFactory.getLogger(classOf[ExternalKKHakijatService])
 
+  // Suoritusrekisterin tapaan Suomen aikaa ilman aikavyöhykettä, kannan session aikavyöhykkeestä riippumatta.
   private val AikaleimaFormatter: DateTimeFormatter =
-    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
+    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+
+  private def formatAikaleima(aikaleima: OffsetDateTime): String =
+    aikaleima.atZoneSameInstant(HELSINKI_TIMEZONE).format(AikaleimaFormatter)
 
   def getKKHakijat(
     hakuOid: Option[String],
@@ -99,10 +105,21 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
         val ylioppilaatByHakemus =
           repository.selectYlioppilaat(hakemusOids).map(y => y.hakemusOid -> y).toMap
         val hakemuksetByOid = hakemusRows.groupBy(_.hakemusOid)
+        // Kaudet, joilla hakijalla on vastaanotto yhden paikan säännön piirissä olevaan hakukohteeseen.
+        val ypsVastaanottoKaudet: Map[String, Set[Alkamiskausi]] =
+          repository
+            .selectYpsVastaanotot(hakemusOids)
+            .flatMap(v => v.yps.ypsKausi.map(v.hakemusOid -> _))
+            .toSet
+            .groupMap(_._1)(_._2)
+        // Yksi hetki koko vastaukselle vastaanoton määräajan ja varasijasääntöjen vertailuun.
+        val nyt = ZonedDateTime.now(HELSINKI_TIMEZONE)
 
         kkHakijaRows.flatMap { row =>
-          val matchingRows = hakemuksetByOid
-            .getOrElse(row.hakemusOid, Seq.empty)
+          val hakemuksenRivit = hakemuksetByOid.getOrElse(row.hakemusOid, Seq.empty)
+          // Hakutoiveiden väliset säännöt lasketaan kaikista hakemuksen hakutoiveista ennen rajausta.
+          val tilat = hakemuksenTilat(hakemuksenRivit, ypsVastaanottoKaudet.getOrElse(row.hakemusOid, Set.empty), nyt)
+          val matchingRows = hakemuksenRivit
             .filter(matchesFilters(_, hakukohdeRajaus, organisaatioOids, valintarajaus, expandedScope))
           if (matchingRows.isEmpty) None
           else {
@@ -112,11 +129,12 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
                 hakuVuosi = row.vuosi.getOrElse(0),
                 hakuKausi = row.kausi.getOrElse(""),
                 hakemusnumero = row.hakemusOid,
-                hakemusJattoAikaleima = row.jatetty.map(_.format(AikaleimaFormatter)),
-                hakemusViimeinenMuokkausAikaleima = row.muokattu.map(_.format(AikaleimaFormatter)),
-                valinnanAikaleima = mRow.valinnanAikaleima.map(_.format(AikaleimaFormatter)),
+                hakemusJattoAikaleima = row.jatetty.map(formatAikaleima),
+                hakemusViimeinenMuokkausAikaleima = row.muokattu.map(formatAikaleima),
+                valinnanAikaleima = mRow.valinnanAikaleima.map(formatAikaleima),
                 pohjakoulutus = row.pohjakoulutus,
-                julkaisulupa = row.valintatuloksenJulkaisulupa
+                julkaisulupa = row.valintatuloksenJulkaisulupa,
+                tila = tilat(mRow.hakukohdeOid)
               )
             )
             Some(row.asHakija(hakemukset, ylioppilaatByHakemus.get(row.hakemusOid)))

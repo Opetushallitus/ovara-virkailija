@@ -73,11 +73,14 @@ enum Valintatila {
 
 object Valintatila {
   def parse(s: String): Option[Valintatila] = values.find(_.toString == s)
+
+  // Suoritusrekisterin Valintatila.isHyvaksytty.
+  val hyvaksytyt: Set[Valintatila] = Set(HYVAKSYTTY, HARKINNANVARAISESTI_HYVAKSYTTY, VARASIJALTA_HYVAKSYTTY)
 }
 
 enum Vastaanottotila {
   case VASTAANOTTANUT_SITOVASTI, EHDOLLISESTI_VASTAANOTTANUT, PERUNUT,
-    EI_VASTAANOTETTU_MAARA_AIKANA, PERUUTETTU, KESKEN
+    EI_VASTAANOTETTU_MAARA_AIKANA, PERUUTETTU, OTTANUT_VASTAAN_TOISEN_PAIKAN, KESKEN
   def name: String = toString
 }
 
@@ -93,6 +96,26 @@ enum Lasnaolo {
 
 object Lasnaolo {
   def parse(s: String): Option[Lasnaolo] = values.find(_.toString == s)
+}
+
+/**
+ * Lukukauden ilmoittautumisen tila. koodi on rajapinnan tila-arvo Suoritusrekisterin
+ *  LasnaoloSerializerin mukaan, case-nimet ovat Suren Lasnaolo-luokkien nimet (HakijaActor.scala):
+ *  1 = Lasna, 2 = Poissa, 3 = PoissaEiKulutaOpintoaikaa, 4 = Puuttuu. Sure ei dokumentoi
+ *  arvojen merkitystä tarkemmin. Valinta-tulos-servicen ilmoittautumistiloista ei koskaan
+ *  muodostu tilaa 3, kuten ei Suressakaan.
+ */
+enum IlmoittautumisenTila(val koodi: Int) {
+  case Lasna                     extends IlmoittautumisenTila(1)
+  case Poissa                    extends IlmoittautumisenTila(2)
+  case PoissaEiKulutaOpintoaikaa extends IlmoittautumisenTila(3)
+  case Puuttuu                   extends IlmoittautumisenTila(4)
+}
+
+/** Yhden lukukauden ilmoittautuminen. kausi on "S" (syksy) tai "K" (kevät). */
+case class Ilmoittautuminen(tila: IlmoittautumisenTila, kausi: String, vuosi: Int) {
+  // Rajapinnan muoto, esim. "2026S".
+  def kausiKoodi: String = s"$vuosi$kausi"
 }
 
 // gen_hakemus_kasittelymerkinnat.state -> rajapinnan arvo. Näissä kahdessa case-nimi on
@@ -197,7 +220,7 @@ case class KKHakutoive(
   hyvaksymisenEhto: Option[HyvaksymisenEhto] = None,
   vastaanottotieto: Option[Vastaanottotila] = None,
   pisteet: Option[BigDecimal] = None,
-  ilmoittautumiset: Seq[Lasnaolo] = Nil,
+  ilmoittautumiset: Seq[Ilmoittautuminen] = Nil,
   pohjakoulutus: Seq[String] = Nil,
   julkaisulupa: Option[Boolean] = None,
   hKelpoisuus: Option[Hakukelpoisuus] = None,

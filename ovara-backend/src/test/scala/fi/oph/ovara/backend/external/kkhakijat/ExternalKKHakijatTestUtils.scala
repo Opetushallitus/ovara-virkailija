@@ -26,22 +26,46 @@ trait ExternalKKHakijatTestUtils {
     syntymaaika: Option[java.time.LocalDate] = None,
     kaikkiKansalaisuudet: Option[String] = Some(KANSALAISUUS_JSON),
     kansalaisuus: Option[String] = Some(SUOMI_KOODI),
-    turvakielto: Option[Boolean] = Some(false)
+    turvakielto: Option[Boolean] = Some(false),
+    hetu: Option[String] = Some(HETU),
+    etunimet: Option[String] = Some(ETUNIMET),
+    sukunimi: Option[String] = Some(SUKUNIMI),
+    sukupuoli: Option[Int] = Some(SUKUPUOLI)
   ): Unit = {
     val syntymaaikaStr = syntymaaika.map(_.toString)
     db.run(
       sqlu"""INSERT INTO gen.gen_henkilo VALUES (
           $oppijanumero, $oppijanumero, $aidinkieli, $syntymaaikaStr::date,
-          $kaikkiKansalaisuudet::jsonb, $kansalaisuus, $turvakielto
+          $kaikkiKansalaisuudet::jsonb, $kansalaisuus, $turvakielto,
+          $hetu, $etunimet, $sukunimi, $sukupuoli
         )""",
       "Insert test kk-henkilö"
     )
   }
 
-  /** Insert an additional gen_henkilo row that links `henkiloOid` to the same master `oppijanumero`. */
-  def insertHenkiloAlias(oppijanumero: String, henkiloOid: String): Unit = {
+  /**
+   * Insert an additional gen_henkilo row that links `henkiloOid` to the master `oppijanumero`.
+   *  The master row itself is inserted separately (insertHenkilo), or left out to test a missing master.
+   */
+  def insertHenkiloAlias(
+    oppijanumero: String,
+    henkiloOid: String,
+    aidinkieli: Option[String] = None,
+    syntymaaika: Option[java.time.LocalDate] = None,
+    kaikkiKansalaisuudet: Option[String] = None,
+    turvakielto: Option[Boolean] = None,
+    hetu: Option[String] = None,
+    etunimet: Option[String] = None,
+    sukunimi: Option[String] = None,
+    sukupuoli: Option[Int] = None
+  ): Unit = {
+    val syntymaaikaStr = syntymaaika.map(_.toString)
     db.run(
-      sqlu"""INSERT INTO gen.gen_henkilo VALUES ($oppijanumero, $henkiloOid, NULL, NULL, NULL, NULL, NULL)""",
+      sqlu"""INSERT INTO gen.gen_henkilo VALUES (
+          $oppijanumero, $henkiloOid, $aidinkieli, $syntymaaikaStr::date,
+          $kaikkiKansalaisuudet::jsonb, NULL, $turvakielto,
+          $hetu, $etunimet, $sukunimi, $sukupuoli
+        )""",
       "Insert test kk-henkilö alias"
     )
   }
@@ -74,8 +98,12 @@ trait ExternalKKHakijatTestUtils {
     koulutuksenAlkamisvuosi: Option[Int] = None,
     koulutuksenAlkamiskausiuri: Option[String] = None,
     hakuVuosi: Option[Int] = Some(VUOSI),
-    hakuKausi: Option[String] = Some(KOULUTUKSEN_ALKAMISKAUSIURI)
+    hakuKausi: Option[String] = Some(KOULUTUKSEN_ALKAMISKAUSIURI),
+    tila: Option[String] = Some("julkaistu"),
+    kohdejoukonTarkenneKoodiuri: Option[String] = None,
+    koulutuksenTarkkaAlkamisaika: Option[java.time.OffsetDateTime] = None
   ): Unit = {
+    val alkamisaikaStr = koulutuksenTarkkaAlkamisaika.map(_.format(SECONDS_TZ_FORMATTER))
     db.run(
       sqlu"""INSERT INTO gen.gen_haku VALUES(
           $hakuOid,
@@ -87,7 +115,10 @@ trait ExternalKKHakijatTestUtils {
           $koulutuksenAlkamisvuosi,
           $koulutuksenAlkamiskausiuri,
           $hakuVuosi,
-          $hakuKausi
+          $hakuKausi,
+          $tila,
+          $kohdejoukonTarkenneKoodiuri,
+          $alkamisaikaStr::timestamptz
           )""",
       "Insert test kk-haku"
     )
@@ -113,23 +144,33 @@ trait ExternalKKHakijatTestUtils {
     valintatuloksenJulkaisulupa: Option[Boolean] = Some(VALINTATULOKSEN_JULKAISULUPA),
     jatetty: Option[java.time.OffsetDateTime] = Some(JATETTY),
     muokattu: Option[java.time.OffsetDateTime] = Some(MUOKATTU),
-    pohjakoulutusKk: Option[String] = None
+    pohjakoulutusKk: Option[String] = None,
+    lahiosoite: Option[String] = Some(LAHIOSOITE),
+    postinumero: Option[String] = Some(POSTINUMERO),
+    postitoimipaikka: Option[String] = Some(HELSINKI),
+    asuinmaa: Option[String] = Some(SUOMI_KOODI),
+    // Viimeisimmän version luontiaika, joka rajapinnassa näkyy viimeisenä muokkauksena. Sama lähde kuin Suressa.
+    luotu: Option[java.time.OffsetDateTime] = Some(MUOKATTU),
+    ulkKunta: Option[String] = None,
+    poistettu: Option[Boolean] = Some(false),
+    hakemusmaksunTila: Option[String] = None
   ): Unit = {
     if (insertHenkilo) this.insertHenkilo(oppijanumero)
     if (insertHaku) this.insertHaku(hakuOid)
 
     val jatettyStr  = jatetty.map(_.format(SECONDS_TZ_FORMATTER))
     val muokattuStr = muokattu.map(_.format(SECONDS_TZ_FORMATTER))
+    val luotuStr    = luotu.map(_.format(SECONDS_TZ_FORMATTER))
 
     db.run(
       sqlu"""INSERT INTO gen.gen_hakemus VALUES(
           $hakemusOid,
           $hakuOid,
           $oppijanumero,
-          $LAHIOSOITE,
-          $POSTINUMERO,
-          $HELSINKI,
-          $SUOMI_KOODI,
+          $lahiosoite,
+          $postinumero,
+          $postitoimipaikka,
+          $asuinmaa,
           $EMAIL,
           $MATKAPUHELIN,
           $etunimet,
@@ -146,7 +187,11 @@ trait ExternalKKHakijatTestUtils {
           $valintatuloksenJulkaisulupa,
           $jatettyStr::timestamptz,
           $muokattuStr::timestamptz,
-          $pohjakoulutusKk::jsonb)""",
+          $pohjakoulutusKk::jsonb,
+          $luotuStr::timestamptz,
+          $ulkKunta,
+          $poistettu,
+          $hakemusmaksunTila)""",
       "Insert test kk-hakemus"
     )
   }
@@ -157,8 +202,11 @@ trait ExternalKKHakijatTestUtils {
     jarjestyspaikkaOid: String = ORGANISAATIO_OID,
     organisaatioOid: Option[String] = Some(ORGANISAATIO_OID),
     koulutuksenAlkamisvuosi: Option[Int] = Some(KOULUTUKSEN_ALKAMISVUOSI),
-    koulutuksenAlkamiskausiuri: Option[String] = Some(KOULUTUKSEN_ALKAMISKAUSIURI)
+    koulutuksenAlkamiskausiuri: Option[String] = Some(KOULUTUKSEN_ALKAMISKAUSIURI),
+    tila: Option[String] = Some("julkaistu"),
+    koulutuksenAlkamispaivamaara: Option[java.time.OffsetDateTime] = None
   ): Unit = {
+    val alkamispaivamaaraStr = koulutuksenAlkamispaivamaara.map(_.format(SECONDS_TZ_FORMATTER))
     db.run(
       sqlu"""INSERT INTO gen.gen_hakukohde VALUES(
           $hakukohdeOid,
@@ -166,8 +214,52 @@ trait ExternalKKHakijatTestUtils {
           $jarjestyspaikkaOid,
           $organisaatioOid,
           $koulutuksenAlkamisvuosi,
-          $koulutuksenAlkamiskausiuri)""",
+          $koulutuksenAlkamiskausiuri,
+          $tila,
+          $alkamispaivamaaraStr::timestamptz)""",
       "Insert test kk-hakukohde"
+    )
+  }
+
+  def insertValintatapajonoKoodi(koodiuri: String, nimiFi: Option[String]): Unit = {
+    val koodiarvo = koodiuri.stripPrefix("valintatapajono_")
+    db.run(
+      sqlu"""INSERT INTO pub.pub_dim_koodisto_valintatapajono VALUES($koodiuri, $koodiarvo, $nimiFi)""",
+      "Insert test valintatapajono-koodi"
+    )
+  }
+
+  def insertOhjausparametri(
+    avain: String,
+    arvo: Option[String] = None,
+    aikaleima: Option[java.time.OffsetDateTime] = None,
+    hakuOid: String = HAKU_OID,
+    // Parametrin koko JSON-arvo; totuusarvoparametreilla (sijoittelu, jarjestetytHakutoiveet) "true"/"false".
+    alkuperainenArvo: Option[String] = None
+  ): Unit = {
+    val aikaleimaStr = aikaleima.map(_.format(SECONDS_TZ_FORMATTER))
+    db.run(
+      sqlu"""INSERT INTO gen.gen_ohjausparametri_haku (haku_oid, avain, arvo, aikaleima, alkuperainen_arvo)
+            VALUES($hakuOid, $avain, $arvo, $aikaleimaStr::timestamptz, $alkuperainenArvo::jsonb)""",
+      "Insert test kk-ohjausparametri"
+    )
+  }
+
+  /** Haku käyttää sijoittelua ja järjestettyjä hakutoiveita, jolloin hakutoiveiden väliset säännöt ovat käytössä. */
+  def insertSijoitteluJaPriorisointi(hakuOid: String = HAKU_OID): Unit = {
+    insertOhjausparametri("sijoittelu", hakuOid = hakuOid, alkuperainenArvo = Some("true"))
+    insertOhjausparametri("jarjestetytHakutoiveet", hakuOid = hakuOid, alkuperainenArvo = Some("true"))
+  }
+
+  def insertValintarekisteriValintatapajono(
+    valintatapajonoId: String = "vtj-1",
+    eiVarasijatayttoa: Option[Boolean] = None,
+    // Valintatapajonon prioriteetti hakukohteessa; merkitsevän jonon toissijainen järjestys.
+    prioriteetti: Option[Int] = None
+  ): Unit = {
+    db.run(
+      sqlu"""INSERT INTO gen.gen_valintarekisteri_valintatapajono VALUES($valintatapajonoId, $eiVarasijatayttoa, $prioriteetti)""",
+      "Insert test kk-valintarekisteri_valintatapajono"
     )
   }
 
@@ -193,12 +285,14 @@ trait ExternalKKHakijatTestUtils {
     hyvaksyttyjajulkaistu: Option[java.time.OffsetDateTime] = None,
     julkaistavissa: Option[Boolean] = Some(true),
     varasijanNumero: Option[Int] = None,
+    // Jonosijan prioriteetti eli hakutoiveen numero; ei vaikuta merkitsevän jonon valintaan.
     prioriteetti: Option[Int] = None,
     pisteet: Option[BigDecimal] = None,
     ehdollistiHyvaksyttavissa: Option[Boolean] = None,
     ehdollistiHyvaksyttavissaEhtoFi: Option[String] = None,
     ehdollistiHyvaksyttavissaEhtoSv: Option[String] = None,
-    ehdollistiHyvaksyttavissaEhtoEn: Option[String] = None
+    ehdollistiHyvaksyttavissaEhtoEn: Option[String] = None,
+    hyvaksyttyHarkinnanvaraisesti: Option[Boolean] = None
   ): Unit = {
     val hyvaksyttyStr = hyvaksyttyjajulkaistu.map(_.format(SECONDS_TZ_FORMATTER))
     db.run(
@@ -209,7 +303,8 @@ trait ExternalKKHakijatTestUtils {
           ehdollisesti_hyvaksyttavissa,
           ehdollisen_hyvaksymisen_ehto_fi,
           ehdollisen_hyvaksymisen_ehto_sv,
-          ehdollisen_hyvaksymisen_ehto_en
+          ehdollisen_hyvaksymisen_ehto_en,
+          hyvaksytty_harkinnanvaraisesti
         ) VALUES (
           $hakukohdeOid, $valintatapajonoId, $hakemusOid, $maksunTila,
           $valinnanTila, $hyvaksyttyStr::timestamptz,
@@ -217,7 +312,8 @@ trait ExternalKKHakijatTestUtils {
           $ehdollistiHyvaksyttavissa,
           $ehdollistiHyvaksyttavissaEhtoFi,
           $ehdollistiHyvaksyttavissaEhtoSv,
-          $ehdollistiHyvaksyttavissaEhtoEn
+          $ehdollistiHyvaksyttavissaEhtoEn,
+          $hyvaksyttyHarkinnanvaraisesti
         )""",
       "Insert test kk-valintarekisteri"
     )
@@ -241,14 +337,17 @@ trait ExternalKKHakijatTestUtils {
     toteutusOid: String = TOTEUTUS_OID,
     koulutusOid: String = KOULUTUS_OID,
     koulutuksenAlkamisvuosi: Option[Int] = None,
-    koulutuksenAlkamiskausiuri: Option[String] = None
+    koulutuksenAlkamiskausiuri: Option[String] = None,
+    koulutuksenTarkkaAlkamisaika: Option[java.time.OffsetDateTime] = None
   ): Unit = {
+    val alkamisaikaStr = koulutuksenTarkkaAlkamisaika.map(_.format(SECONDS_TZ_FORMATTER))
     db.run(
       sqlu"""INSERT INTO gen.gen_toteutus VALUES(
           $toteutusOid,
           $koulutusOid,
           $koulutuksenAlkamisvuosi,
-          $koulutuksenAlkamiskausiuri)""",
+          $koulutuksenAlkamiskausiuri,
+          $alkamisaikaStr::timestamptz)""",
       "Insert test kk-toteutus"
     )
   }
@@ -257,11 +356,13 @@ trait ExternalKKHakijatTestUtils {
     koulutusOid: String = KOULUTUS_OID,
     ulkoinenTunniste: Option[String] = None,
     koulutuksetKoodiuri: Option[String] = None,
-    johtaaTutkintoon: Option[Boolean] = None
+    johtaaTutkintoon: Option[Boolean] = None,
+    // Koutan koulutustyyppi; yhden paikan sääntö koskee vain yo- ja amk-koulutuksia.
+    koulutustyyppi: Option[String] = None
   ): Unit = {
     db.run(
       sqlu"""INSERT INTO gen.gen_koulutus VALUES(
-          $koulutusOid, $ulkoinenTunniste, $koulutuksetKoodiuri::jsonb, $johtaaTutkintoon
+          $koulutusOid, $ulkoinenTunniste, $koulutuksetKoodiuri::jsonb, $johtaaTutkintoon, $koulutustyyppi
         )""",
       "Insert test kk-koulutus"
     )
@@ -273,7 +374,8 @@ trait ExternalKKHakijatTestUtils {
     hakutoivenumero: Int = 1,
     valintatieto: Option[String] = Some(VALINTATIETO),
     vastaanottotieto: Option[String] = Some(VASTAANOTTOTIETO),
-    ilmoittautumisenTila: Option[String] = Some(ILMOITTAUTUMISEN_TILA)
+    ilmoittautumisenTila: Option[String] = Some(ILMOITTAUTUMISEN_TILA),
+    ensikertalainen: Option[Boolean] = None
   ): Unit = {
     db.run(
       sqlu"""INSERT INTO gen.gen_hakutoive VALUES(
@@ -282,7 +384,8 @@ trait ExternalKKHakijatTestUtils {
           $hakutoivenumero,
           $valintatieto,
           $vastaanottotieto,
-          $ilmoittautumisenTila)""",
+          $ilmoittautumisenTila,
+          $ensikertalainen)""",
       "Insert test kk-hakutoive"
     )
   }
@@ -290,6 +393,13 @@ trait ExternalKKHakijatTestUtils {
   def initSchema(): Unit = {
     val query = sqlu"""
           CREATE SCHEMA gen;
+          CREATE SCHEMA pub;
+
+          CREATE TABLE pub.pub_dim_koodisto_valintatapajono (
+              koodiuri text NOT NULL,
+              koodiarvo text NOT NULL PRIMARY KEY,
+              nimi_fi  text
+          );
 
           CREATE TABLE gen.gen_hakemus (
               hakemus_oid                    text NOT NULL PRIMARY KEY,
@@ -315,7 +425,11 @@ trait ExternalKKHakijatTestUtils {
               valintatuloksen_julkaisulupa   boolean,
               jatetty                        timestamp with time zone,
               muokattu                       timestamp with time zone,
-              pohjakoulutus_kk               jsonb
+              pohjakoulutus_kk               jsonb,
+              luotu                          timestamp with time zone,
+              ulk_kunta                      text,
+              poistettu                      boolean,
+              hakemusmaksun_tila             text
           );
 
           CREATE TABLE gen.gen_henkilo (
@@ -325,7 +439,11 @@ trait ExternalKKHakijatTestUtils {
               syntymaaika           date,
               kaikki_kansalaisuudet jsonb,
               kansalaisuus          text,
-              turvakielto           boolean
+              turvakielto           boolean,
+              hetu                  text,
+              etunimet              text,
+              sukunimi              text,
+              sukupuoli             integer
           );
 
           CREATE TABLE gen.gen_haku (
@@ -338,7 +456,10 @@ trait ExternalKKHakijatTestUtils {
               koulutuksen_alkamisvuosi integer,
               koulutuksen_alkamiskausiuri text,
               haku_vuosi integer,
-              haku_kausi text
+              haku_kausi text,
+              tila text,
+              kohdejoukon_tarkenne_koodiuri text,
+              koulutuksen_tarkka_alkamisaika timestamp with time zone
           );
 
           CREATE TABLE gen.gen_hakutoive(
@@ -347,7 +468,8 @@ trait ExternalKKHakijatTestUtils {
               hakutoivenumero bigint,
               valintatieto text,
               vastaanottotieto text,
-              ilmoittautumisen_tila text
+              ilmoittautumisen_tila text,
+              ensikertalainen boolean
           );
 
           CREATE TABLE gen.gen_hakukohde(
@@ -356,21 +478,25 @@ trait ExternalKKHakijatTestUtils {
               jarjestyspaikka_oid text,
               organisaatio_oid text,
               koulutuksen_alkamisvuosi integer,
-              koulutuksen_alkamiskausiuri text
+              koulutuksen_alkamiskausiuri text,
+              tila text,
+              koulutuksen_alkamispaivamaara timestamp with time zone
           );
 
           CREATE TABLE gen.gen_toteutus(
               toteutus_oid text NOT NULL PRIMARY KEY,
               koulutus_oid text,
               koulutuksen_alkamisvuosi integer,
-              koulutuksen_alkamiskausiuri text
+              koulutuksen_alkamiskausiuri text,
+              koulutuksen_tarkka_alkamisaika timestamp with time zone
           );
 
           CREATE TABLE gen.gen_koulutus(
               koulutus_oid text NOT NULL PRIMARY KEY,
               ulkoinen_tunniste text,
               koulutukset_koodiuri jsonb,
-              johtaa_tutkintoon boolean
+              johtaa_tutkintoon boolean,
+              koulutustyyppi text
           );
 
           CREATE TABLE gen.gen_valintaperuste_valintatapajono(
@@ -393,7 +519,22 @@ trait ExternalKKHakijatTestUtils {
               ehdollisesti_hyvaksyttavissa boolean,
               ehdollisen_hyvaksymisen_ehto_fi text,
               ehdollisen_hyvaksymisen_ehto_sv text,
-              ehdollisen_hyvaksymisen_ehto_en text
+              ehdollisen_hyvaksymisen_ehto_en text,
+              hyvaksytty_harkinnanvaraisesti boolean
+          );
+
+          CREATE TABLE gen.gen_ohjausparametri_haku(
+              haku_oid text,
+              avain text,
+              arvo text,
+              aikaleima timestamp with time zone,
+              alkuperainen_arvo jsonb
+          );
+
+          CREATE TABLE gen.gen_valintarekisteri_valintatapajono(
+              valintatapajono_id text NOT NULL PRIMARY KEY,
+              ei_varasijatayttoa boolean,
+              prioriteetti integer
           );
 
           CREATE TABLE gen.gen_ylioppilas(

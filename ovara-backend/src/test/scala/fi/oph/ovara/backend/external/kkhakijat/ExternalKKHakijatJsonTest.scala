@@ -71,7 +71,10 @@ class ExternalKKHakijatJsonTest extends AnyFlatSpec with Matchers {
         ),
         vastaanottotieto = Some(Vastaanottotila.VASTAANOTTANUT_SITOVASTI),
         pisteet = Some(BigDecimal("12.5")),
-        ilmoittautumiset = Seq(Lasnaolo.LASNA_KOKO_LUKUVUOSI),
+        ilmoittautumiset = Seq(
+          Ilmoittautuminen(IlmoittautumisenTila.Lasna, "S", 2026),
+          Ilmoittautuminen(IlmoittautumisenTila.Puuttuu, "K", 2027)
+        ),
         pohjakoulutus = Seq("pohjakoulutus_yo"),
         julkaisulupa = Some(true),
         hKelpoisuus = Some(Hakukelpoisuus.ELIGIBLE),
@@ -209,6 +212,7 @@ class ExternalKKHakijatJsonTest extends AnyFlatSpec with Matchers {
       "koulutuksenAlkamisvuosi",
       "johtaaTutkintoon"
     )
+    keys(hakemus.get("ilmoittautumiset").get(0)) shouldBe Seq("kausi", "tila")
     keys(hakemus.get("liitteet").get(0)) shouldBe Seq(
       "hakuId",
       "hakuRyhmaId",
@@ -228,6 +232,12 @@ class ExternalKKHakijatJsonTest extends AnyFlatSpec with Matchers {
     hakemus.get("pisteet").decimalValue() shouldBe new java.math.BigDecimal("12.5")
     hakemus.get("hKelpoisuus").asText shouldBe "ELIGIBLE"
     hakemus.get("hKelpoisuusMaksuvelvollisuus").asText shouldBe "NOT_REQUIRED"
+    val ilmoittautumiset = hakemus.get("ilmoittautumiset")
+    ilmoittautumiset.get(0).get("kausi").asText shouldBe "2026S"
+    ilmoittautumiset.get(0).get("tila").isInt shouldBe true
+    ilmoittautumiset.get(0).get("tila").asInt shouldBe 1
+    ilmoittautumiset.get(1).get("kausi").asText shouldBe "2027K"
+    ilmoittautumiset.get(1).get("tila").asInt shouldBe 4
   }
 
   it should "omit null fields but keep empty lists and empty strings" in {

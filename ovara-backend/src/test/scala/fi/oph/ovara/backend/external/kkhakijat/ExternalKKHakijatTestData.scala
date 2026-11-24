@@ -33,7 +33,7 @@ object ExternalKKHakijatTestData {
   val AIDINKIELI     = "FI"
 
   val SYNTYMAAIKA     = java.time.LocalDate.parse("2005-04-15")
-  val SYNTYMAAIKA_STR = "2005-04-15"
+  val SYNTYMAAIKA_STR = "15.04.2005"
 
   val KOULUTUKSEN_ALKAMISVUOSI    = 2026
   val VUOSI                       = 2026
@@ -54,8 +54,8 @@ object ExternalKKHakijatTestData {
 
   val JATETTY      = OffsetDateTime.parse("2025-09-01T10:00:30+03:00")
   val MUOKATTU     = OffsetDateTime.parse("2025-09-13T14:52:14+03:00")
-  val JATETTY_STR  = "2025-09-01T10:00:30+03:00"
-  val MUOKATTU_STR = "2025-09-13T14:52:14+03:00"
+  val JATETTY_STR  = "2025-09-01T10:00:30"
+  val MUOKATTU_STR = "2025-09-13T14:52:14"
 
   // gen_hakemus_kasittelymerkinnat.requirement
   val ELIGIBILITY_REQUIREMENT = "eligibility-state"

@@ -77,6 +77,7 @@ class ExternalHakijatOpenApiTest {
       "KKHakemusResponse",
       "KkHakukohteenkoulutusResponse",
       "HyvaksymisenEhtoResponse",
+      "IlmoittautuminenResponse",
       "LiiteResponse"
     ).foreach(assertNoOptionInternals)
 
@@ -88,6 +89,14 @@ class ExternalHakijatOpenApiTest {
     assertType("KKHakemusResponse", "avoinVayla", "boolean")
     assertType("KKHakemusResponse", "liitteet", "array")
     assertRef("KKHakemusResponse", "hyvaksymisenEhto", "HyvaksymisenEhtoResponse")
+    assertType("KKHakemusResponse", "ilmoittautumiset", "array")
+    assertEquals(
+      "#/components/schemas/IlmoittautuminenResponse",
+      property("KKHakemusResponse", "ilmoittautumiset").path("items").path("$ref").asText
+    )
+    assertType("IlmoittautuminenResponse", "kausi", "string")
+    assertType("IlmoittautuminenResponse", "tila", "integer")
+    assertEquals(Seq("kausi", "tila"), propertyNames("IlmoittautuminenResponse"))
     assertType("KKHakijaResponse", "kansalaisuudet", "array")
     assertType("KKHakijaResponse", "ensikertalainen", "boolean")
 
