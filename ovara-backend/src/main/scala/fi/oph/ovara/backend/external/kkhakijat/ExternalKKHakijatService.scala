@@ -105,13 +105,20 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
         val ylioppilaatByHakemus =
           repository.selectYlioppilaat(hakemusOids).map(y => y.hakemusOid -> y).toMap
         val hakemuksetByOid = hakemusRows.groupBy(_.hakemusOid)
+        // Kaudet, joilla hakijalla on vastaanotto yhden paikan säännön piirissä olevaan hakukohteeseen.
+        val ypsVastaanottoKaudet: Map[String, Set[Alkamiskausi]] =
+          repository
+            .selectYpsVastaanotot(hakemusOids)
+            .flatMap(v => v.yps.ypsKausi.map(v.hakemusOid -> _))
+            .toSet
+            .groupMap(_._1)(_._2)
         // Yksi hetki koko vastaukselle vastaanoton määräajan ja varasijasääntöjen vertailuun.
         val nyt = ZonedDateTime.now(HELSINKI_TIMEZONE)
 
         kkHakijaRows.flatMap { row =>
           val hakemuksenRivit = hakemuksetByOid.getOrElse(row.hakemusOid, Seq.empty)
           // Hakutoiveiden väliset säännöt lasketaan kaikista hakemuksen hakutoiveista ennen rajausta.
-          val tilat        = hakemuksenTilat(hakemuksenRivit, nyt)
+          val tilat = hakemuksenTilat(hakemuksenRivit, ypsVastaanottoKaudet.getOrElse(row.hakemusOid, Set.empty), nyt)
           val matchingRows = hakemuksenRivit
             .filter(matchesFilters(_, hakukohdeRajaus, organisaatioOids, valintarajaus, expandedScope))
           if (matchingRows.isEmpty) None

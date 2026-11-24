@@ -98,8 +98,12 @@ trait ExternalKKHakijatTestUtils {
     koulutuksenAlkamisvuosi: Option[Int] = None,
     koulutuksenAlkamiskausiuri: Option[String] = None,
     hakuVuosi: Option[Int] = Some(VUOSI),
-    hakuKausi: Option[String] = Some(KOULUTUKSEN_ALKAMISKAUSIURI)
+    hakuKausi: Option[String] = Some(KOULUTUKSEN_ALKAMISKAUSIURI),
+    tila: Option[String] = Some("julkaistu"),
+    kohdejoukonTarkenneKoodiuri: Option[String] = None,
+    koulutuksenTarkkaAlkamisaika: Option[java.time.OffsetDateTime] = None
   ): Unit = {
+    val alkamisaikaStr = koulutuksenTarkkaAlkamisaika.map(_.format(SECONDS_TZ_FORMATTER))
     db.run(
       sqlu"""INSERT INTO gen.gen_haku VALUES(
           $hakuOid,
@@ -111,7 +115,10 @@ trait ExternalKKHakijatTestUtils {
           $koulutuksenAlkamisvuosi,
           $koulutuksenAlkamiskausiuri,
           $hakuVuosi,
-          $hakuKausi
+          $hakuKausi,
+          $tila,
+          $kohdejoukonTarkenneKoodiuri,
+          $alkamisaikaStr::timestamptz
           )""",
       "Insert test kk-haku"
     )
@@ -195,8 +202,11 @@ trait ExternalKKHakijatTestUtils {
     jarjestyspaikkaOid: String = ORGANISAATIO_OID,
     organisaatioOid: Option[String] = Some(ORGANISAATIO_OID),
     koulutuksenAlkamisvuosi: Option[Int] = Some(KOULUTUKSEN_ALKAMISVUOSI),
-    koulutuksenAlkamiskausiuri: Option[String] = Some(KOULUTUKSEN_ALKAMISKAUSIURI)
+    koulutuksenAlkamiskausiuri: Option[String] = Some(KOULUTUKSEN_ALKAMISKAUSIURI),
+    tila: Option[String] = Some("julkaistu"),
+    koulutuksenAlkamispaivamaara: Option[java.time.OffsetDateTime] = None
   ): Unit = {
+    val alkamispaivamaaraStr = koulutuksenAlkamispaivamaara.map(_.format(SECONDS_TZ_FORMATTER))
     db.run(
       sqlu"""INSERT INTO gen.gen_hakukohde VALUES(
           $hakukohdeOid,
@@ -204,7 +214,9 @@ trait ExternalKKHakijatTestUtils {
           $jarjestyspaikkaOid,
           $organisaatioOid,
           $koulutuksenAlkamisvuosi,
-          $koulutuksenAlkamiskausiuri)""",
+          $koulutuksenAlkamiskausiuri,
+          $tila,
+          $alkamispaivamaaraStr::timestamptz)""",
       "Insert test kk-hakukohde"
     )
   }
@@ -325,14 +337,17 @@ trait ExternalKKHakijatTestUtils {
     toteutusOid: String = TOTEUTUS_OID,
     koulutusOid: String = KOULUTUS_OID,
     koulutuksenAlkamisvuosi: Option[Int] = None,
-    koulutuksenAlkamiskausiuri: Option[String] = None
+    koulutuksenAlkamiskausiuri: Option[String] = None,
+    koulutuksenTarkkaAlkamisaika: Option[java.time.OffsetDateTime] = None
   ): Unit = {
+    val alkamisaikaStr = koulutuksenTarkkaAlkamisaika.map(_.format(SECONDS_TZ_FORMATTER))
     db.run(
       sqlu"""INSERT INTO gen.gen_toteutus VALUES(
           $toteutusOid,
           $koulutusOid,
           $koulutuksenAlkamisvuosi,
-          $koulutuksenAlkamiskausiuri)""",
+          $koulutuksenAlkamiskausiuri,
+          $alkamisaikaStr::timestamptz)""",
       "Insert test kk-toteutus"
     )
   }
@@ -341,11 +356,13 @@ trait ExternalKKHakijatTestUtils {
     koulutusOid: String = KOULUTUS_OID,
     ulkoinenTunniste: Option[String] = None,
     koulutuksetKoodiuri: Option[String] = None,
-    johtaaTutkintoon: Option[Boolean] = None
+    johtaaTutkintoon: Option[Boolean] = None,
+    // Koutan koulutustyyppi; yhden paikan sääntö koskee vain yo- ja amk-koulutuksia.
+    koulutustyyppi: Option[String] = None
   ): Unit = {
     db.run(
       sqlu"""INSERT INTO gen.gen_koulutus VALUES(
-          $koulutusOid, $ulkoinenTunniste, $koulutuksetKoodiuri::jsonb, $johtaaTutkintoon
+          $koulutusOid, $ulkoinenTunniste, $koulutuksetKoodiuri::jsonb, $johtaaTutkintoon, $koulutustyyppi
         )""",
       "Insert test kk-koulutus"
     )
@@ -439,7 +456,10 @@ trait ExternalKKHakijatTestUtils {
               koulutuksen_alkamisvuosi integer,
               koulutuksen_alkamiskausiuri text,
               haku_vuosi integer,
-              haku_kausi text
+              haku_kausi text,
+              tila text,
+              kohdejoukon_tarkenne_koodiuri text,
+              koulutuksen_tarkka_alkamisaika timestamp with time zone
           );
 
           CREATE TABLE gen.gen_hakutoive(
@@ -458,21 +478,25 @@ trait ExternalKKHakijatTestUtils {
               jarjestyspaikka_oid text,
               organisaatio_oid text,
               koulutuksen_alkamisvuosi integer,
-              koulutuksen_alkamiskausiuri text
+              koulutuksen_alkamiskausiuri text,
+              tila text,
+              koulutuksen_alkamispaivamaara timestamp with time zone
           );
 
           CREATE TABLE gen.gen_toteutus(
               toteutus_oid text NOT NULL PRIMARY KEY,
               koulutus_oid text,
               koulutuksen_alkamisvuosi integer,
-              koulutuksen_alkamiskausiuri text
+              koulutuksen_alkamiskausiuri text,
+              koulutuksen_tarkka_alkamisaika timestamp with time zone
           );
 
           CREATE TABLE gen.gen_koulutus(
               koulutus_oid text NOT NULL PRIMARY KEY,
               ulkoinen_tunniste text,
               koulutukset_koodiuri jsonb,
-              johtaa_tutkintoon boolean
+              johtaa_tutkintoon boolean,
+              koulutustyyppi text
           );
 
           CREATE TABLE gen.gen_valintaperuste_valintatapajono(

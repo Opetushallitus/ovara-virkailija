@@ -3,7 +3,7 @@ package fi.oph.ovara.backend.external.kkhakijat
 import fi.oph.ovara.backend.repository.Extractors
 import fi.oph.ovara.backend.utils.ExtractorUtils.extractArray
 import fi.oph.ovara.backend.utils.GenericOvaraJsonFormats
-import slick.jdbc.GetResult
+import slick.jdbc.{GetResult, PositionedResult}
 
 import scala.util.Try
 
@@ -125,9 +125,39 @@ class KKHakijatExtractors extends Extractors with GenericOvaraJsonFormats {
         kaikkiJonotSijoittelussa = getOffsetDateTime(r),
         sijoittelu = r.nextBoolean(),
         jarjestetytHakutoiveet = r.nextBoolean()
-      )
+      ),
+      yps = getYpsHakukohde(r)
     )
   }
+
+  implicit val getYpsVastaanottoRow: GetResult[YpsVastaanottoRow] = GetResult { r =>
+    YpsVastaanottoRow(
+      hakemusOid = r.nextString(),
+      hakukohdeOid = r.nextString(),
+      yps = getYpsHakukohde(r)
+    )
+  }
+
+  // selectHakemukset- ja selectYpsVastaanotot-kyselyjen YPS-sarakkeet samassa järjestyksessä
+  // (ks. ExternalKKHakijatRepositoryTest).
+  private def getYpsHakukohde(r: PositionedResult): YpsHakukohdeRow =
+    YpsHakukohdeRow(
+      hakuTila = r.nextStringOption(),
+      hakukohdeTila = r.nextStringOption(),
+      kohdejoukonTarkenne = r.nextStringOption(),
+      koulutustyyppi = r.nextStringOption(),
+      johtaaTutkintoon = r.nextBooleanOption(),
+      hakukohteenAlkamiskausi = getAlkamiskausi(r),
+      haunAlkamiskausi = getAlkamiskausi(r),
+      toteutuksenAlkamiskausi = getAlkamiskausi(r)
+    )
+
+  private def getAlkamiskausi(r: PositionedResult): AlkamiskausiRow =
+    AlkamiskausiRow(
+      kausi = normalizeKausi(r.nextStringOption()),
+      vuosi = r.nextIntOption(),
+      alkamisaika = getOffsetDateTime(r)
+    )
 
   implicit val getYlioppilasRow: GetResult[YlioppilasRow] = GetResult { r =>
     YlioppilasRow(

@@ -2072,6 +2072,272 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("VARALLA"))
   }
 
+  // ---- Yhden paikan säännös ----
+
+  private val MUU_HAKU_OID      = "1.2.246.562.29.00000000000000000201"
+  private val MUU_HAKEMUS_OID   = "1.2.246.562.11.00000000000004511894"
+  private val MUU_HAKUKOHDE_OID = "1.2.246.562.20.00000000000000000114"
+  private val ALIAS_OID         = "1.2.246.562.24.00000000020"
+  private val MUU_TOTEUTUS_OID  = "1.2.246.562.17.00000000000000000223"
+  private val MUU_KOULUTUS_OID  = "1.2.246.562.13.00000000000000000123"
+
+  /**
+   * Kuten seedKaksiHakutoivetta, mutta hakukohteet ovat yhden paikan säännön piirissä: tutkintoon johtava
+   *  yliopistokoulutus, joka alkaa syksyllä 2026 (insertHakukohde). Haussa ei ole sijoittelua.
+   */
+  private def seedKaksiYpsHakutoivetta(
+    ylempiTila: String,
+    ylempiVastaanotto: Option[String],
+    alempiTila: String
+  ): Unit = {
+    seedKaksiHakutoivetta(ylempiTila, ylempiVastaanotto, alempiTila)
+    insertToteutus()
+    insertKoulutus(johtaaTutkintoon = Some(true), koulutustyyppi = Some("yo"))
+  }
+
+  /**
+   * Hakijan hakemus toisessa haussa ja vastaanotto sen hakukohteeseen. Hakukohteella on oletuksena sama
+   *  toteutus ja koulutus kuin hakemuksen hakukohteilla.
+   */
+  private def insertVastaanottoToisessaHaussa(
+    henkiloOid: String = OPPIJANUMERO,
+    vastaanotto: String = "VASTAANOTTANUT_SITOVASTI",
+    koulutuksenAlkamiskausiuri: String = KOULUTUKSEN_ALKAMISKAUSIURI,
+    koulutuksenAlkamisvuosi: Int = KOULUTUKSEN_ALKAMISVUOSI,
+    toteutusOid: String = TOTEUTUS_OID,
+    kohdejoukonTarkenneKoodiuri: Option[String] = None
+  ): Unit = {
+    insertHakemus(
+      oppijanumero = henkiloOid,
+      hakemusOid = MUU_HAKEMUS_OID,
+      hakuOid = MUU_HAKU_OID,
+      insertHenkilo = false,
+      insertHaku = false
+    )
+    insertHaku(hakuOid = MUU_HAKU_OID, kohdejoukonTarkenneKoodiuri = kohdejoukonTarkenneKoodiuri)
+    insertHakukohde(
+      hakukohdeOid = MUU_HAKUKOHDE_OID,
+      toteutusOid = toteutusOid,
+      koulutuksenAlkamisvuosi = Some(koulutuksenAlkamisvuosi),
+      koulutuksenAlkamiskausiuri = Some(koulutuksenAlkamiskausiuri)
+    )
+    insertHakutoive(
+      hakemusOid = MUU_HAKEMUS_OID,
+      hakukohdeOid = MUU_HAKUKOHDE_OID,
+      vastaanottotieto = Some(vastaanotto)
+    )
+  }
+
+  @Test
+  def otherToiveOttanutVastaanToisenPaikanWhenVastaanotettuSitovastiWithoutSijoittelu(): Unit = {
+    seedKaksiYpsHakutoivetta(
+      ylempiTila = "HYVAKSYTTY",
+      ylempiVastaanotto = Some("VASTAANOTTANUT_SITOVASTI"),
+      alempiTila = "HYVAKSYTTY"
+    )
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("VASTAANOTTANUT_SITOVASTI"))
+    // Haku vain alemman hakutoiveen hakukohteella: sääntö näkee silti ylemmän hakutoiveen vastaanoton.
+    get(hakukohdeOid = Some(HAKUKOHDE_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("PERUUNTUNUT"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("OTTANUT_VASTAAN_TOISEN_PAIKAN"))
+  }
+
+  @Test
+  def toiveetOttanutVastaanToisenPaikanWhenVastaanottoInAnotherHaku(): Unit = {
+    seedKaksiYpsHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
+    insertVastaanottoToisessaHaussa()
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("PERUUNTUNUT"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("OTTANUT_VASTAAN_TOISEN_PAIKAN"))
+    get(hakukohdeOid = Some(HAKUKOHDE_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("PERUUNTUNUT"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("OTTANUT_VASTAAN_TOISEN_PAIKAN"))
+  }
+
+  @Test
+  def ottanutVastaanToisenPaikanWhenVastaanottoUnderLinkedHenkiloOid(): Unit = {
+    seedKaksiYpsHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
+    insertHenkiloAlias(oppijanumero = OPPIJANUMERO, henkiloOid = ALIAS_OID)
+    insertVastaanottoToisessaHaussa(henkiloOid = ALIAS_OID, vastaanotto = "EHDOLLISESTI_VASTAANOTTANUT")
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("OTTANUT_VASTAAN_TOISEN_PAIKAN"))
+  }
+
+  @ParameterizedTest
+  @CsvSource(Array("kausi_k#1, 2026", "kausi_s#1, 2027"))
+  def vastaanottoInAnotherHakuOnOtherKausiKeepsTilat(kausiuri: String, vuosi: Int): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedKaksiYpsHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
+    insertVastaanottoToisessaHaussa(koulutuksenAlkamiskausiuri = kausiuri, koulutuksenAlkamisvuosi = vuosi)
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def ehdollinenVastaanottoOnHakemusKeepsOtherToiveet(): Unit = {
+    seedKaksiYpsHakutoivetta(
+      ylempiTila = "HYVAKSYTTY",
+      ylempiVastaanotto = Some("EHDOLLISESTI_VASTAANOTTANUT"),
+      alempiTila = "VARALLA"
+    )
+    insertVastaanottoToisessaHaussa()
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("VARALLA"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def hakukohdeOutsideYhdenPaikanSaantoKeepsTilat(): Unit = {
+    seedKaksiHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
+    insertToteutus()
+    insertKoulutus(johtaaTutkintoon = Some(true), koulutustyyppi = Some("amm"))
+    insertVastaanottoToisessaHaussa()
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def vastaanottoOnKoulutusOutsideYhdenPaikanSaantoKeepsTilat(): Unit = {
+    seedKaksiYpsHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
+    // Hakemuksen hakukohteet ovat säännön piirissä, toisen haun hakukohteen ammatillinen koulutus ei.
+    insertToteutus(toteutusOid = MUU_TOTEUTUS_OID, koulutusOid = MUU_KOULUTUS_OID)
+    insertKoulutus(koulutusOid = MUU_KOULUTUS_OID, johtaaTutkintoon = Some(true), koulutustyyppi = Some("amm"))
+    insertVastaanottoToisessaHaussa(toteutusOid = MUU_TOTEUTUS_OID)
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def vastaanottoInHakuOutsideYhdenPaikanSaantoKeepsTilat(): Unit = {
+    seedKaksiYpsHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
+    // Sama koulutus, mutta toisen haun kohdejoukon tarkenne rajaa sen hakukohteet säännön ulkopuolelle.
+    insertVastaanottoToisessaHaussa(kohdejoukonTarkenneKoodiuri = Some("haunkohdejoukontarkenne_1#1"))
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def yhdenPaikanSaantoUsesHaunAlkamiskausiWhenHakukohdeHasNone(): Unit = {
+    initSchema()
+    insertHakemus(insertHaku = false)
+    insertHaku(koulutuksenAlkamisvuosi = Some(KOULUTUKSEN_ALKAMISVUOSI), koulutuksenAlkamiskausiuri = Some("kausi_s#1"))
+    insertHakukohde(koulutuksenAlkamisvuosi = None, koulutuksenAlkamiskausiuri = None)
+    insertHakutoive(vastaanottotieto = None)
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"))
+    insertToteutus()
+    insertKoulutus(johtaaTutkintoon = Some(true), koulutustyyppi = Some("amk"))
+    insertVastaanottoToisessaHaussa()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("OTTANUT_VASTAAN_TOISEN_PAIKAN"))
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = Array("PERUNUT", "PERUUTETTU", "EI_VASTAANOTETTU_MAARA_AIKANA"))
+  def otherVastaanottotilaInAnotherHakuKeepsTilat(vastaanotto: String): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedKaksiYpsHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
+    insertVastaanottoToisessaHaussa(vastaanotto = vastaanotto)
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def vastaanottoOfAnotherPersonCountsOnlyForThatPerson(): Unit = {
+    val toinenHakija = "1.2.246.562.24.00000000021"
+    seedKaksiYpsHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
+    // Toinen hakija samaan hakukohteeseen; vain hänellä on vastaanotto toisessa haussa.
+    insertHakemus(oppijanumero = toinenHakija, hakemusOid = HAKEMUS_OID_2, insertHaku = false)
+    insertHakutoive(hakemusOid = HAKEMUS_OID_2, vastaanottotieto = None)
+    insertValintarekisteri(hakemusOid = HAKEMUS_OID_2, valinnanTila = Some("HYVAKSYTTY"))
+    insertVastaanottoToisessaHaussa(henkiloOid = toinenHakija)
+
+    def hakijanVastaanottotieto(oppijanumero: String) =
+      jsonPath("$.hakijat[?(@.oppijanumero == '" + oppijanumero + "')].hakemukset[0].vastaanottotieto")
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](2)))
+      .andExpect(hakijanVastaanottotieto(OPPIJANUMERO).value(contains("KESKEN")))
+      .andExpect(hakijanVastaanottotieto(toinenHakija).value(contains("OTTANUT_VASTAAN_TOISEN_PAIKAN")))
+  }
+
+  @Test
+  def sitovastiVastaanotettuWithSijoitteluLeavesOtherToiveToHakutoiveidenValisetSaannot(): Unit = {
+    seedKaksiYpsHakutoivetta(
+      ylempiTila = "HYVAKSYTTY",
+      ylempiVastaanotto = Some("VASTAANOTTANUT_SITOVASTI"),
+      alempiTila = "HYVAKSYTTY"
+    )
+    insertSijoitteluJaPriorisointi()
+
+    // VTS:n järjestyksessä hakutoiveiden väliset säännöt peruunnuttavat alemman hakutoiveen ensin, jolloin
+    // yhden paikan säännös ei enää koske sitä.
+    get(hakukohdeOid = Some(HAKUKOHDE_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("PERUUNTUNUT"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def toiveWithPassedVastaanottoDeadlineOttanutVastaanToisenPaikan(): Unit = {
+    seedKaksiYpsHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
+    // Määräaika on mennyt, joten ilman yhden paikan säännöstä vastaanottotieto olisi EI_VASTAANOTETTU_MAARA_AIKANA.
+    insertOhjausparametri("PH_OPVP", aikaleima = Some(paivienPaasta(-1)))
+    insertVastaanottoToisessaHaussa()
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("PERUUNTUNUT"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("OTTANUT_VASTAAN_TOISEN_PAIKAN"))
+  }
+
+  @Test
+  def ottanutVastaanToisenPaikanWhenHakemusUnderLinkedHenkiloOid(): Unit = {
+    initSchema()
+    insertHenkilo()
+    insertHenkiloAlias(oppijanumero = OPPIJANUMERO, henkiloOid = ALIAS_OID)
+    // Hakemus on linkitetyllä oidilla, vastaanotto toisessa haussa master-oidilla.
+    insertHakemus(oppijanumero = ALIAS_OID, insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive(vastaanottotieto = None)
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"))
+    insertToteutus()
+    insertKoulutus(johtaaTutkintoon = Some(true), koulutustyyppi = Some("yo"))
+    insertVastaanottoToisessaHaussa(henkiloOid = OPPIJANUMERO)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("OTTANUT_VASTAAN_TOISEN_PAIKAN"))
+  }
+
   // ---- Valintatapajono meta ----
 
   @Test

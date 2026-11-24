@@ -171,8 +171,8 @@ private def vtsTila(
  *  VTS:n järjestyksessä hakutoivejärjestyksessä olevalle listalle. Jokainen sääntö laskee indeksinsä edellisen
  *  säännön tuloksesta. Kaikki kkhakijat-haut ovat korkeakouluhakuja (Haku.korkeakoulu).
  *  Ei toteutettu: näytäHyväksyttyäJulkaisematontaAlemmistaKorkeinHyvaksyttyOdottamassaYlempiä (vaatii valinnan
- *  tilojen historian) eikä yhden paikan säännöstä (asetaVastaanotettavuusValintarekisterinPerusteella).
- *  Muut VTS:n säännöt muuttavat vain jonokohtaisia tietoja, joita Sure ei lue.
+ *  tilojen historian). Yhden paikan säännös tehdään tämän jälkeen (yhdenPaikanSaanto). Muut VTS:n säännöt
+ *  muuttavat vain jonokohtaisia tietoja, joita Sure ei lue.
  *
  * @param hakutoiveet hakukohde, hakutoivenumero ja hakutoiveen oma tila (vtsTila)
  * @return hakutoiveiden lopulliset tilat hakukohteittain
@@ -242,19 +242,127 @@ private[kkhakijat] def hakemuksenVtsTilat[K](
   jarjestyksessa.map(_._1).zip(saannot(jarjestyksessa.map(_._3))).toMap
 }
 
+// Koulutuksen alkamiskausi (K tai S) ja -vuosi.
+private[kkhakijat] case class Alkamiskausi(kausi: String, vuosi: Int)
+
+// Hakukohteen, haun tai toteutuksen oma koulutuksen alkamiskausi: kausi ja vuosi tai tarkka alkamisaika.
+private[kkhakijat] case class AlkamiskausiRow(
+  kausi: Option[String],
+  vuosi: Option[Int],
+  alkamisaika: Option[OffsetDateTime]
+) {
+  // kouta-indeksoijan parse-alkamiskausi: kausi ja vuosi, tai tarkasta alkamisajasta tammi-heinäkuu kevät ja muuten
+  // syksy. Alkamiskauden tyyppiä ei ole gen-tauluissa, joten annetut kausi ja vuosi ohittavat alkamisajan.
+  def paatelty: Option[Alkamiskausi] =
+    (kausi, vuosi) match {
+      case (Some(k), Some(v)) => Some(Alkamiskausi(k, v))
+      case _                  =>
+        alkamisaika
+          .map(_.atZoneSameInstant(HELSINKI_TIMEZONE))
+          .map(aika => Alkamiskausi(if (aika.getMonthValue < 8) "K" else "S", aika.getYear))
+    }
+}
+
+// Korkeakoulutukset, jotka VTS:lle ovat kk-tutkintoon johtavia (KoutaHakukohde.toHakukohde: "yo" tai "amk").
+private val YpsKoulutustyypit = Set("yo", "amk")
+
+// Haun kohdejoukon tarkenteet, joilla yhden paikan sääntö on voimassa (jatkotutkintohaku ja Erasmus Mundus).
+private val YpsKohdejoukonTarkenteet = Seq("haunkohdejoukontarkenne_3#", "haunkohdejoukontarkenne_010#")
+
+/**
+ * Hakukohteen tiedot yhden paikan säännön ja koulutuksen alkamiskauden päättelyyn. VTS tallentaa hakukohteen
+ *  säännön ja alkamiskauden kerran (hakukohteet-taulu) eikä päivitä niitä; tässä ne päätellään nykyisistä
+ *  kouta-tiedoista.
+ */
+case class YpsHakukohdeRow(
+  hakuTila: Option[String],
+  hakukohdeTila: Option[String],
+  kohdejoukonTarkenne: Option[String],
+  koulutustyyppi: Option[String],
+  johtaaTutkintoon: Option[Boolean],
+  hakukohteenAlkamiskausi: AlkamiskausiRow,
+  haunAlkamiskausi: AlkamiskausiRow,
+  toteutuksenAlkamiskausi: AlkamiskausiRow
+) {
+  // kouta-indeksoijan paateltyAlkamiskausi: ensimmäinen käyttökelpoinen hakukohteelta, haulta tai toteutukselta.
+  def paateltyAlkamiskausi: Option[Alkamiskausi] =
+    Seq(hakukohteenAlkamiskausi, haunAlkamiskausi, toteutuksenAlkamiskausi).flatMap(_.paatelty).headOption
+
+  /**
+   * kouta-indeksoijan yhdenPaikanSaanto.voimassa (assoc-yps) ja VTS:n kkTutkintoonJohtava yhdessä: luonnostilaiset
+   *  haku ja hakukohde, muut kuin yo- ja amk-koulutukset, tutkintoon johtamattomat koulutukset sekä muut kohdejoukon
+   *  tarkenteet eivät ole säännön piirissä. Ennen syksyä 2016 alkavien poikkeus jätetään pois: kouta-indeksoija
+   *  lukee sen hakukohteelta poistuneista kentistä, joten se ei koskaan toteudu.
+   */
+  def yhdenPaikanSaantoVoimassa: Boolean =
+    !hakuTila.contains("tallennettu") && !hakukohdeTila.contains("tallennettu") &&
+      koulutustyyppi.exists(YpsKoulutustyypit.contains) && johtaaTutkintoon.contains(true) &&
+      kohdejoukonTarkenne.filter(_.trim.nonEmpty).forall(t => YpsKohdejoukonTarkenteet.exists(t.startsWith))
+
+  // VTS:n YPSHakukohde: säännön piirissä oleva hakukohde, jolla on koulutuksen alkamiskausi.
+  def ypsKausi: Option[Alkamiskausi] = paateltyAlkamiskausi.filter(_ => yhdenPaikanSaantoVoimassa)
+}
+
+/** Hakemuksen hakijan (aliaksineen) sitova tai ehdollinen vastaanotto hakukohteeseen missä tahansa haussa. */
+case class YpsVastaanottoRow(hakemusOid: String, hakukohdeOid: String, yps: YpsHakukohdeRow)
+
+/**
+ * Yhden paikan säännös valinta-tulos-servicen tapaan (ValintatulosService.asetaVastaanotettavuusValintarekisterinPerusteella)
+ *  hakutoiveiden välisten sääntöjen jälkeen ja haun sijoittelusta riippumatta. Saman alkamiskauden YPS-hakukohteiden
+ *  hyväksytyt ja varalla olevat hakutoiveet, joilla ei ole tallennettua vastaanottoa, ovat OTTANUT_VASTAAN_TOISEN_PAIKAN
+ *  ja julkaistuina PERUUNTUNUT, kun henkilöllä on kaudella vastaanotto missä tahansa haussa. Ehdollinen vastaanotto
+ *  hakemuksella estää säännön. VTS:n erillinen ehto hakemuksen omalle sitovalle vastaanotolle sisältyy tähän: sitova
+ *  vastaanottotila on aina myös tallennettu vastaanotto, ja hakemuksen omat vastaanotot ovat vastaanototKausilla.
+ *
+ * @param hakutoiveet         hakukohde, tila hakutoiveiden välisten sääntöjen jälkeen, tallennettu vastaanotto
+ *                            (ilman määräaikasääntöä) ja YPS-hakukohteen alkamiskausi
+ * @param vastaanototKausilla kaudet, joilla henkilöllä (tämä hakemus mukaan lukien) on sitova tai ehdollinen
+ *                            vastaanotto YPS-hakukohteeseen
+ */
+private[kkhakijat] def yhdenPaikanSaanto[K](
+  hakutoiveet: Seq[(K, VtsTila, Vastaanottotila, Option[Alkamiskausi])],
+  vastaanototKausilla: Set[Alkamiskausi]
+): Map[K, VtsTila] = {
+  def ottanutVastaanToisenPaikan(t: VtsTila): VtsTila =
+    t.copy(
+      valinnanTila = if (t.julkaistu) Valintatila.PERUUNTUNUT else t.valinnanTila,
+      vastaanottotila = Vastaanottotila.OTTANUT_VASTAAN_TOISEN_PAIKAN
+    )
+
+  val ehdollisetKaudet = hakutoiveet.collect {
+    case (_, t, _, Some(kausi)) if t.vastaanottotila == Vastaanottotila.EHDOLLISESTI_VASTAANOTTANUT => kausi
+  }.toSet
+  val kaudet = vastaanototKausilla -- ehdollisetKaudet
+  hakutoiveet.map { case (k, t, tallennettu, kausi) =>
+    val muutetaan = kausi.exists(kaudet) && tallennettu == Vastaanottotila.KESKEN &&
+      (Valintatila.hyvaksytyt(t.valinnanTila) || t.valinnanTila == Valintatila.VARALLA)
+    k -> (if (muutetaan) ottanutVastaanToisenPaikan(t) else t)
+  }.toMap
+}
+
 /**
  * Hakemuksen kaikkien hakutoiveiden lopulliset tilat hakukohteittain. Lasketaan kaikista hakemuksen
  *  hakutoiveista ennen rajausta hakukohteisiin tai organisaatioihin, kuten VTS:ssä.
+ *
+ * @param ypsVastaanottoKaudet kaudet, joilla hakijalla on vastaanotto YPS-hakukohteeseen (selectYpsVastaanotot)
  */
-private[kkhakijat] def hakemuksenTilat(rivit: Seq[KKHakemusRow], nyt: ZonedDateTime): Map[String, VtsTila] =
+private[kkhakijat] def hakemuksenTilat(
+  rivit: Seq[KKHakemusRow],
+  ypsVastaanottoKaudet: Set[Alkamiskausi],
+  nyt: ZonedDateTime
+): Map[String, VtsTila] =
   rivit.headOption match {
     case None       => Map.empty
     case Some(rivi) =>
       // Kaikki hakemuksen hakutoiveet ovat samassa haussa, joten ohjausparametrit ovat samat.
-      hakemuksenVtsTilat(
+      val tilat = hakemuksenVtsTilat(
         rivit.map(r => (r.hakukohdeOid, r.hakutoivenumero, r.hakutoiveenVtsTila(nyt))),
         sijoitteluJaPriorisointi = rivi.ohjausparametrit.sijoitteluJaPriorisointi,
         varasijasaannotVoimassa = rivi.ohjausparametrit.varasijasaannotVoimassa(nyt)
+      )
+      yhdenPaikanSaanto(
+        rivit.map(r => (r.hakukohdeOid, tilat(r.hakukohdeOid), r.tallennettuVastaanotto, r.yps.ypsKausi)),
+        ypsVastaanottoKaudet
       )
   }
 
@@ -413,13 +521,18 @@ case class KKHakemusRow(
   hyvaksyttyHarkinnanvaraisesti: Option[Boolean],
   eiVarasijatayttoa: Option[Boolean],
   kaikkiJonotJulkaistu: Option[Boolean],
-  ohjausparametrit: HaunOhjausparametrit
+  ohjausparametrit: HaunOhjausparametrit,
+  yps: YpsHakukohdeRow
 ) {
+  // Viimeisin tallennettu vastaanotto (VTS:n virkailijanTilat.vastaanottotila).
+  def tallennettuVastaanotto: Vastaanottotila =
+    vastaanottotieto.flatMap(Vastaanottotila.parse).getOrElse(Vastaanottotila.KESKEN)
+
   // Hakutoiveen oma tila ennen hakutoiveiden välisiä sääntöjä (ks. hakemuksenTilat).
   def hakutoiveenVtsTila(nyt: ZonedDateTime): VtsTila =
     vtsTila(
       tallennettuTila = valinnanTila.map(t => Valintatila.parse(t).getOrElse(Valintatila.KESKEN)),
-      vastaanotto = vastaanottotieto.flatMap(Vastaanottotila.parse).getOrElse(Vastaanottotila.KESKEN),
+      vastaanotto = tallennettuVastaanotto,
       hyvaksyttyHarkinnanvaraisesti = hyvaksyttyHarkinnanvaraisesti.getOrElse(false),
       eiVarasijatayttoa = eiVarasijatayttoa.getOrElse(false),
       merkitsevaJonoJulkaistavissa = merkitsevaJonoJulkaistavissa.getOrElse(false),

@@ -235,7 +235,23 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             -- Totuusarvoparametrit ovat alkuperainen_arvo-sarakkeessa (arvo on vain {"value": ...}-muotoisille).
             -- VTS tulkitsee puuttuvan tai muun kuin totuusarvon epätodeksi.
             coalesce(CAST(op_sijoittelu.alkuperainen_arvo AS text) = 'true', false)  AS sijoittelu,
-            coalesce(CAST(op_jarjestetyt.alkuperainen_arvo AS text) = 'true', false) AS jarjestetyt_hakutoiveet
+            coalesce(CAST(op_jarjestetyt.alkuperainen_arvo AS text) = 'true', false) AS jarjestetyt_hakutoiveet,
+            -- Yhden paikan sääntö ja koulutuksen alkamiskausi (getYpsHakukohde) samassa järjestyksessä kuin
+            -- selectYpsVastaanototissa.
+            hu.tila                           AS haku_tila,
+            hk.tila                           AS hakukohde_tila,
+            hu.kohdejoukon_tarkenne_koodiuri  AS kohdejoukon_tarkenne,
+            k.koulutustyyppi                  AS koulutustyyppi,
+            k.johtaa_tutkintoon               AS yps_johtaa_tutkintoon,
+            hk.koulutuksen_alkamiskausiuri    AS hakukohde_alkamiskausi_uri,
+            hk.koulutuksen_alkamisvuosi       AS hakukohde_alkamisvuosi,
+            hk.koulutuksen_alkamispaivamaara  AS hakukohde_alkamisaika,
+            hu.koulutuksen_alkamiskausiuri    AS haku_alkamiskausi_uri,
+            hu.koulutuksen_alkamisvuosi       AS haku_alkamisvuosi,
+            hu.koulutuksen_tarkka_alkamisaika AS haku_alkamisaika,
+            t.koulutuksen_alkamiskausiuri     AS toteutus_alkamiskausi_uri,
+            t.koulutuksen_alkamisvuosi        AS toteutus_alkamisvuosi,
+            t.koulutuksen_tarkka_alkamisaika  AS toteutus_alkamisaika
           FROM gen.gen_hakutoive ht
           LEFT JOIN gen.gen_hakukohde hk ON ht.hakukohde_oid = hk.hakukohde_oid
           LEFT JOIN gen.gen_toteutus  t  ON hk.toteutus_oid  = t.toteutus_oid
@@ -246,6 +262,8 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             ON jj.hakemus_oid = ht.hakemus_oid AND jj.hakukohde_oid = ht.hakukohde_oid
           -- Haun ohjausparametrit vastaanoton määräaikaa ja varasijasääntöjä varten (ks. KKHakemusRow.vtsTila).
           LEFT JOIN gen.gen_hakemus hm ON hm.hakemus_oid = ht.hakemus_oid
+          -- Haku yhden paikan sääntöä ja koulutuksen alkamiskautta varten.
+          LEFT JOIN gen.gen_haku    hu ON hu.haku_oid    = hm.haku_oid
           LEFT JOIN gen.gen_ohjausparametri_haku op_opvp
             ON op_opvp.haku_oid = hm.haku_oid AND op_opvp.avain = '#$vastaanottoPaattyyParametri'
           LEFT JOIN gen.gen_ohjausparametri_haku op_hpvoa
@@ -286,6 +304,55 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
 
       LOG.debug(s"selectKKHakemuksetQuery: ${query.statements.head}")
       db.run(query, "selectKKHakemukset")
+    }
+  }
+
+  /**
+   * Hakemusten hakijoiden sitovat ja ehdolliset vastaanotot kaikissa hauissa yhden paikan sääntöä varten
+   * (VTS:n newest_vastaanotot). Hakijan kaikki henkilö-oidit, joilla on sama oppijanumero, ovat sama henkilö
+   * (VTS:n henkiloviitteet); aliaksiin kuuluu myös hakemuksen oma henkilö. Hakemukset tulevat selectKKHakijat kautta,
+   * joka vaatii hakemuksen henkilölle gen_henkilo-rivin. Mukana ovat myös hakemuksen omat hakutoiveet, kuten
+   * VTS:ssä. Vastaanotot tulevat gen_hakutoiveelta, joten passivoitujen hakemusten ja muulle kuin hakemusten
+   * henkilö-oidille kirjatut vastaanotot puuttuvat.
+   */
+  def selectYpsVastaanotot(hakemusOids: Iterable[String]): Seq[YpsVastaanottoRow] = {
+    if (hakemusOids.isEmpty) {
+      Seq.empty
+    } else {
+      val hakemusOidList = RepositoryUtils.makeListOfValuesQueryStr(hakemusOids)
+      val query          = sql"""
+          SELECT DISTINCT h.hakemus_oid, ht.hakukohde_oid,
+            -- Yhden paikan sääntö ja koulutuksen alkamiskausi (getYpsHakukohde) samassa järjestyksessä kuin
+            -- selectHakemukset-kyselyssä.
+            hu.tila                           AS haku_tila,
+            hk.tila                           AS hakukohde_tila,
+            hu.kohdejoukon_tarkenne_koodiuri  AS kohdejoukon_tarkenne,
+            k.koulutustyyppi                  AS koulutustyyppi,
+            k.johtaa_tutkintoon               AS yps_johtaa_tutkintoon,
+            hk.koulutuksen_alkamiskausiuri    AS hakukohde_alkamiskausi_uri,
+            hk.koulutuksen_alkamisvuosi       AS hakukohde_alkamisvuosi,
+            hk.koulutuksen_alkamispaivamaara  AS hakukohde_alkamisaika,
+            hu.koulutuksen_alkamiskausiuri    AS haku_alkamiskausi_uri,
+            hu.koulutuksen_alkamisvuosi       AS haku_alkamisvuosi,
+            hu.koulutuksen_tarkka_alkamisaika AS haku_alkamisaika,
+            t.koulutuksen_alkamiskausiuri     AS toteutus_alkamiskausi_uri,
+            t.koulutuksen_alkamisvuosi        AS toteutus_alkamisvuosi,
+            t.koulutuksen_tarkka_alkamisaika  AS toteutus_alkamisaika
+          FROM gen.gen_hakemus h
+          INNER JOIN gen.gen_henkilo   hlo   ON hlo.henkilo_oid    = h.henkilo_oid
+          INNER JOIN gen.gen_henkilo   alias ON alias.oppijanumero = hlo.oppijanumero
+          INNER JOIN gen.gen_hakemus   muu   ON muu.henkilo_oid    = alias.henkilo_oid
+          INNER JOIN gen.gen_hakutoive ht    ON ht.hakemus_oid     = muu.hakemus_oid
+          LEFT JOIN gen.gen_hakukohde hk ON hk.hakukohde_oid = ht.hakukohde_oid
+          LEFT JOIN gen.gen_haku      hu ON hu.haku_oid      = muu.haku_oid
+          LEFT JOIN gen.gen_toteutus  t  ON t.toteutus_oid   = hk.toteutus_oid
+          LEFT JOIN gen.gen_koulutus  k  ON k.koulutus_oid   = t.koulutus_oid
+          WHERE h.hakemus_oid IN (#$hakemusOidList)
+            AND ht.vastaanottotieto IN ('VASTAANOTTANUT_SITOVASTI', 'EHDOLLISESTI_VASTAANOTTANUT')
+          """.as[YpsVastaanottoRow]
+
+      LOG.debug(s"selectYpsVastaanototQuery: ${query.statements.head}")
+      db.run(query, "selectYpsVastaanotot")
     }
   }
 
