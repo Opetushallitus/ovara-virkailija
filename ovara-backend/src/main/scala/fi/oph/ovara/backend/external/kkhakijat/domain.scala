@@ -219,7 +219,7 @@ case class KKHakutoive(
   valintatapajononNimi: Option[String] = None,
   hyvaksymisenEhto: Option[HyvaksymisenEhto] = None,
   vastaanottotieto: Option[Vastaanottotila] = None,
-  pisteet: Option[BigDecimal] = None,
+  pisteet: Option[Double] = None,
   ilmoittautumiset: Seq[Ilmoittautuminen] = Nil,
   pohjakoulutus: Seq[String] = Nil,
   julkaisulupa: Option[Boolean] = None,

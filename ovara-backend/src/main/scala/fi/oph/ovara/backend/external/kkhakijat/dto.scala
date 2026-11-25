@@ -5,8 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode
 
-import java.lang.{Boolean as JBoolean, Integer as JInteger}
-import java.math.BigDecimal as JBigDecimal
+import java.lang.{Boolean as JBoolean, Double as JDouble, Integer as JInteger}
 import scala.annotation.meta.{beanGetter, field}
 import scala.beans.BeanProperty
 import scala.jdk.CollectionConverters.*
@@ -211,8 +210,9 @@ case class KKHakemusResponse(
   @BeanProperty hyvaksymisenEhto: HyvaksymisenEhtoResponse,
   @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
   @BeanProperty vastaanottotieto: String,
+  // Suren tapaan desimaalilukuna (400.0, ei 400).
   @(Schema @field)(requiredMode = RequiredMode.NOT_REQUIRED)
-  @BeanProperty pisteet: JBigDecimal,
+  @BeanProperty pisteet: JDouble,
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
   @BeanProperty ilmoittautumiset: java.util.List[IlmoittautuminenResponse],
   @(Schema @field)(requiredMode = RequiredMode.REQUIRED)
@@ -257,7 +257,7 @@ object KKHakemusResponse {
       valintatapajononNimi = h.valintatapajononNimi.orNull,
       hyvaksymisenEhto = h.hyvaksymisenEhto.map(HyvaksymisenEhtoResponse.apply).orNull,
       vastaanottotieto = h.vastaanottotieto.map(_.name).orNull,
-      pisteet = h.pisteet.map(_.bigDecimal).orNull,
+      pisteet = h.pisteet.map(Double.box).orNull,
       ilmoittautumiset = h.ilmoittautumiset.map(IlmoittautuminenResponse.apply).asJava,
       pohjakoulutus = h.pohjakoulutus.asJava,
       julkaisulupa = h.julkaisulupa.map(Boolean.box).orNull,

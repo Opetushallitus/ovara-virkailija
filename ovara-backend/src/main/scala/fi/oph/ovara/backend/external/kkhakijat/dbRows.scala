@@ -504,7 +504,7 @@ case class KKHakemusRow(
   toteutusAlkamiskausi: Option[String],
   valinnanTila: Option[String],
   valinnanAikaleima: Option[OffsetDateTime],
-  pisteet: Option[BigDecimal],
+  pisteet: Option[Double],
   ehdollisestiHyvaksyttavissa: Option[Boolean],
   ehtoFI: Option[String],
   ehtoSV: Option[String],
