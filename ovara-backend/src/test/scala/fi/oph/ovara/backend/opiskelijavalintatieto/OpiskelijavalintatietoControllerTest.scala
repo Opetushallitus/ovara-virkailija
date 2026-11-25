@@ -72,6 +72,10 @@ class OpiskelijavalintatietoControllerTest extends OpiskelijavalintatietoTestUti
 
     @Test
     def returns500WhenDatabaseError(): Unit = {
+      // Testiluokat jakavat saman kannan, joten taulut poistetaan, jotta kysely epäonnistuu ajojärjestyksestä
+      // riippumatta. Muuten toisen testiluokan jättämä gen-skeema voi kelvata kyselylle.
+      db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "Drop everything")
+
       get()
         .andExpect(status().isInternalServerError)
         .andExpect(content().json("\"virhe.tietokanta\""))
