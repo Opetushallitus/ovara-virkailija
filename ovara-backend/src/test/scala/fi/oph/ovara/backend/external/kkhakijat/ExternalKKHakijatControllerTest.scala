@@ -1547,6 +1547,23 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(82.5))
   }
 
+  // jsonPath vertaa lukuja tyyppimuunnoksen jälkeen (400.0 == 400), joten muoto tarkistetaan vastauksen tekstistä.
+  @Test
+  def wholeNumberPisteetHaveDecimalPartAsInSure(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"), pisteet = Some(BigDecimal("400")))
+
+    val body = get().andExpect(status.isOk).andReturn().getResponse.getContentAsString
+    assert(""""pisteet"\s*:\s*400\.0\b""".r.findFirstIn(body).isDefined, s"pisteet expected as 400.0 in [$body]")
+
+    val bytes    = getExcel().andExpect(status.isOk).andReturn().getResponse.getContentAsByteArray
+    val workbook = new XSSFWorkbook(new ByteArrayInputStream(bytes))
+    try {
+      val cell37 = workbook.getSheetAt(0).getRow(1).getCell(37).getStringCellValue
+      assert(cell37 == "400.0", s"cell 37 expected [400.0] but was [$cell37]")
+    } finally workbook.close()
+  }
+
   @Test
   def pisteetNullWhenNoValintarekisteriRow(): Unit = {
     seedMinimalHakija()
