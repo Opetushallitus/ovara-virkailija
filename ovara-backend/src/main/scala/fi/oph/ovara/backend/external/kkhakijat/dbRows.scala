@@ -492,7 +492,6 @@ case class KKHakemusRow(
   hakutoivenumero: Int,
   organisaatioOid: Option[String],
   jarjestyspaikkaOid: Option[String],
-  valintatieto: Option[String],
   vastaanottotieto: Option[String],
   ilmoittautumisenTila: Option[String],
   lukuvuosimaksu: Option[String],

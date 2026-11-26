@@ -86,6 +86,9 @@ enum Vastaanottotila {
 
 object Vastaanottotila {
   def parse(s: String): Option[Vastaanottotila] = values.find(_.toString == s)
+
+  // Suoritusrekisterin Vastaanottotila.isVastaanottanut.
+  val vastaanottaneet: Set[Vastaanottotila] = Set(VASTAANOTTANUT_SITOVASTI, EHDOLLISESTI_VASTAANOTTANUT)
 }
 
 enum Lasnaolo {

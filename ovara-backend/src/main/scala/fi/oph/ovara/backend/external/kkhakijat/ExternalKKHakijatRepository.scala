@@ -31,6 +31,11 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
   private val hyvaksytytHakemusmaksunTilatSql =
     RepositoryUtils.makeListOfValuesQueryStr(Seq("not-required", "paid", "ok-by-proxy"))
 
+  private val hyvaksytytValinnanTilatSql =
+    RepositoryUtils.makeListOfValuesQueryStr(Valintatila.hyvaksytyt.map(_.name))
+  private val vastaanottaneetSql =
+    RepositoryUtils.makeListOfValuesQueryStr(Vastaanottotila.vastaanottaneet.map(_.name))
+
   def selectKKHakijat(
     hakuOid: Option[String],
     hakukohdeOids: Seq[String],
@@ -196,7 +201,6 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             ht.hakutoivenumero,
             hk.organisaatio_oid,
             hk.jarjestyspaikka_oid,
-            ht.valintatieto,
             ht.vastaanottotieto,
             ht.ilmoittautumisen_tila,
             (SELECT vr.maksun_tila FROM gen.gen_valintarekisteri vr
@@ -348,7 +352,7 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
           LEFT JOIN gen.gen_toteutus  t  ON t.toteutus_oid   = hk.toteutus_oid
           LEFT JOIN gen.gen_koulutus  k  ON k.koulutus_oid   = t.koulutus_oid
           WHERE h.hakemus_oid IN (#$hakemusOidList)
-            AND ht.vastaanottotieto IN ('VASTAANOTTANUT_SITOVASTI', 'EHDOLLISESTI_VASTAANOTTANUT')
+            AND ht.vastaanottotieto IN (#$vastaanottaneetSql)
           """.as[YpsVastaanottoRow]
 
       LOG.debug(s"selectYpsVastaanototQuery: ${query.statements.head}")
@@ -415,11 +419,22 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
       )
     ).flatten.mkString
 
+  /**
+   * Valintarajauksen esirajaus: kaikki hakutoiveet, joiden lopullinen tila voi täsmätä rajaukseen. Varsinainen
+   * rajaus tehdään palvelussa lasketulla tilalla (ExternalKKHakijatService.matchesFilters). Valinta-tulos-servicen
+   * säännöt tuottavat hyväksytyn tilan vain tallennetusta hyväksytystä jonon tilasta tai vastaanotosta ja
+   * vastaanoton vain tallennetusta vastaanotosta; muut säännöt vain laskevat tilaa.
+   */
   private def stateSqlFragment(v: Valintarajaus): String = v match {
     case Valintarajaus.HAKENEET   => ""
     case Valintarajaus.HYVAKSYTYT =>
-      " AND ht.valintatieto IN ('HYVAKSYTTY', 'HARKINNANVARAISESTI_HYVAKSYTTY', 'VARASIJALTA_HYVAKSYTTY')"
+      s"""
+            AND (ht.vastaanottotieto IN ($vastaanottaneetSql)
+                 OR EXISTS (SELECT 1 FROM gen.gen_valintarekisteri vr
+                            WHERE vr.hakemus_oid   = ht.hakemus_oid
+                              AND vr.hakukohde_oid = ht.hakukohde_oid
+                              AND vr.valinnan_tila IN ($hyvaksytytValinnanTilatSql)))"""
     case Valintarajaus.VASTAANOTTANEET =>
-      " AND ht.vastaanottotieto = 'VASTAANOTTANUT_SITOVASTI'"
+      s" AND ht.vastaanottotieto IN ($vastaanottaneetSql)"
   }
 }

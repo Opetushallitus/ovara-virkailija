@@ -120,7 +120,9 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
           // Hakutoiveiden väliset säännöt lasketaan kaikista hakemuksen hakutoiveista ennen rajausta.
           val tilat = hakemuksenTilat(hakemuksenRivit, ypsVastaanottoKaudet.getOrElse(row.hakemusOid, Set.empty), nyt)
           val matchingRows = hakemuksenRivit
-            .filter(matchesFilters(_, hakukohdeRajaus, organisaatioOids, valintarajaus, expandedScope))
+            .filter(r =>
+              matchesFilters(r, tilat(r.hakukohdeOid), hakukohdeRajaus, organisaatioOids, valintarajaus, expandedScope)
+            )
           if (matchingRows.isEmpty) None
           else {
             val hakemukset = matchingRows.map(mRow =>
@@ -171,6 +173,7 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
 
   private def matchesFilters(
     row: KKHakemusRow,
+    tila: VtsTila,                 // Hakutoiveen lopullinen tila (hakemuksenTilat), sama kuin vastauksessa
     hakukohdeOids: Set[String],    // Hakukohde- ja hakukohderyhmäparametreista leikattu
     organisaatioOids: Seq[String], // Rajapinnan parametri lapsiorganisaatioineen
     valintarajaus: Valintarajaus,
@@ -187,18 +190,13 @@ class ExternalKKHakijatService(repository: ExternalKKHakijatRepository, commonSe
     val allowedMatch = scope.saaKaikkiTiedot ||
       row.jarjestyspaikkaOid.exists(scope.allowedOrgOids.contains) ||
       scope.allowedHakukohdeOidsFromHakukohderyhmat.contains(row.hakukohdeOid)
+    // Suren tapaan rajaus tehdään valinta-tulos-servicen tavalla lasketulla tilalla, jonka vastaus näyttää.
+    // Kyselyn tilaehto on vain esirajaus (ks. ExternalKKHakijatRepository.stateSqlFragment).
     val stateMatch = valintarajaus match {
-      case Valintarajaus.HAKENEET   => true
-      case Valintarajaus.HYVAKSYTYT =>
-        row.valintatieto.exists(HyvaksytytValintatiedot.contains)
-      case Valintarajaus.VASTAANOTTANEET =>
-        row.vastaanottotieto.contains(
-          "VASTAANOTTANUT_SITOVASTI"
-        ) // Todo, otetaanko myös VASTAANOTTANUT_EHDOLLISESTI mukaan?
+      case Valintarajaus.HAKENEET        => true
+      case Valintarajaus.HYVAKSYTYT      => Valintatila.hyvaksytyt(tila.valinnanTila)
+      case Valintarajaus.VASTAANOTTANEET => Vastaanottotila.vastaanottaneet(tila.vastaanottotila)
     }
     hakukohdeMatch && orgMatch && allowedMatch && stateMatch
   }
-
-  private val HyvaksytytValintatiedot: Set[String] =
-    Set("HYVAKSYTTY", "HARKINNANVARAISESTI_HYVAKSYTTY", "VARASIJALTA_HYVAKSYTTY")
 }

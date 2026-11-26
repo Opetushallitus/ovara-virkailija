@@ -2355,6 +2355,87 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("OTTANUT_VASTAAN_TOISEN_PAIKAN"))
   }
 
+  // ---- Valintarajaus lasketulla tilalla ----
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      // valintarekisterin tila, julkaistavissa, gen_hakutoiveen valintatieto ja vastaanotto, odotettu valinnanTila.
+      // Tyhjä arvo puuttuu; tyhjä odotettu tila: hakijaa ei palauteta.
+      "HYVAKSYTTY, true,  HYVAKSYTTY,                         , HYVAKSYTTY",
+      "HYVAKSYTTY, false, HYVAKSYTTY,                         ,",
+      "VARALLA,    true,  VARALLA,    VASTAANOTTANUT_SITOVASTI, HYVAKSYTTY",
+      "HYVAKSYTTY, true,            ,                         , HYVAKSYTTY",
+      "HYLATTY,    true,  HYVAKSYTTY,                         ,"
+    )
+  )
+  def hyvaksytytFiltersOnComputedValinnanTila(
+    valinnanTila: String,
+    julkaistavissa: Boolean,
+    valintatieto: String,
+    vastaanotto: String,
+    odotettu: String
+  ): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(valintatieto = Option(valintatieto), vastaanottotieto = Option(vastaanotto))
+    insertValintarekisteri(valinnanTila = Some(valinnanTila), julkaistavissa = Some(julkaistavissa))
+
+    val result = get(valintarajaus = Some("HYVAKSYTYT")).andExpect(status.isOk)
+    Option(odotettu) match {
+      case Some(tila) => result.andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(tila))
+      case None       => result.andExpect(content.json("""{"hakijat": []}"""))
+    }
+  }
+
+  @Test
+  def hyvaksytytExcludesHakutoivePeruuntunutByVastaanottoOnAnotherHakutoive(): Unit = {
+    seedKaksiHakutoivetta(
+      ylempiTila = "HYVAKSYTTY",
+      ylempiVastaanotto = Some(VASTAANOTTOTIETO),
+      alempiTila = "HYVAKSYTTY"
+    )
+    insertOhjausparametri("sijoittelu", alkuperainenArvo = Some("true"))
+    insertOhjausparametri("jarjestetytHakutoiveet", alkuperainenArvo = Some("true"))
+
+    // Molemmat hakutoiveet ovat organisaatiossa ja gen_valintarekisterissä hyväksyttyjä, mutta alempi peruuntuu.
+    get(hakukohdeOid = None, organisaatioOid = Some(ORGANISAATIO_OID), valintarajaus = Some("HYVAKSYTYT"))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohde").value(HAKUKOHDE_OID))
+    get(hakukohdeOid = Some(HAKUKOHDE_OID_2), valintarajaus = Some("HYVAKSYTYT"))
+      .andExpect(status.isOk)
+      .andExpect(content.json("""{"hakijat": []}"""))
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "VASTAANOTTANUT_SITOVASTI,    true,  true",
+      "EHDOLLISESTI_VASTAANOTTANUT, true,  true",
+      "VASTAANOTTANUT_SITOVASTI,    false, false",
+      "PERUNUT,                     true,  false"
+    )
+  )
+  def vastaanottaneetFiltersOnComputedVastaanottotila(
+    vastaanotto: String,
+    julkaistavissa: Boolean,
+    palautetaan: Boolean
+  ): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(vastaanottotieto = Some(vastaanotto))
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"), julkaistavissa = Some(julkaistavissa))
+
+    val result = get(valintarajaus = Some("VASTAANOTTANEET")).andExpect(status.isOk)
+    if (palautetaan) result.andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value(vastaanotto))
+    else result.andExpect(content.json("""{"hakijat": []}"""))
+  }
+
   // ---- Valintatapajono meta ----
 
   @Test

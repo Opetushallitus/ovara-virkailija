@@ -185,6 +185,10 @@ class ExternalKKHakijatController(
       "(ja sen alaorganisaatioiden) järjestämät hakukohteet, hakukohderyhmäoikeus ryhmään " +
       "kuuluvat hakukohteet. Jos pyynnössä annetaan organisaatioOid, se on katettava " +
       "organisaatio-oikeuksilla -- hakukohderyhmäoikeuksia ei tällöin huomioida. " +
+      "Valintarajaus HYVAKSYTYT palauttaa hakutoiveet, joiden valinnanTila on HYVAKSYTTY, " +
+      "HARKINNANVARAISESTI_HYVAKSYTTY tai VARASIJALTA_HYVAKSYTTY, ja VASTAANOTTANEET hakutoiveet, joiden " +
+      "vastaanottotieto on VASTAANOTTANUT_SITOVASTI tai EHDOLLISESTI_VASTAANOTTANUT. Rajaus käyttää samoja " +
+      "tiloja kuin vastaus. " +
       "Palauttaa tyhjän listan, jos hakijoita ei löydy. " +
       "Vain hakemuspalvelun (Ataru) hakemukset korkeakoulujen yhteishausta palautetaan.",
     responses = Array(
