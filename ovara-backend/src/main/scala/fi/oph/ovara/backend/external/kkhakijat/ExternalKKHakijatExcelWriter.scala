@@ -154,7 +154,7 @@ object ExternalKKHakijatExcelWriter {
     hm.valintatapajononTyyppi.getOrElse(""),                   // 39
     hm.valintatapajononNimi.getOrElse(""),                     // 40
     hm.vastaanottotieto.map(_.name).getOrElse(""),             // 41
-    hm.ilmoittautumiset.map(_.name).mkString(","),             // 42
+    hm.ilmoittautumiset.map(lasnaoloAsText).mkString(","),     // 42
     hm.pohjakoulutus.mkString(","),                            // 43
     onlyX(hm.julkaisulupa),                                    // 44
     hm.hKelpoisuus.map(_.name).getOrElse(""),                  // 45
@@ -179,6 +179,12 @@ object ExternalKKHakijatExcelWriter {
 
   private def onlyXBool(b: Boolean): String =
     if (b) "X" else ""
+
+  // Suoritusrekisterin Lasnaolo-tapausluokan toString, esim. Puuttuu(Syksy(2026)).
+  private def lasnaoloAsText(i: Ilmoittautuminen): String = {
+    val kausi = if (i.kausi == "S") "Syksy" else "Kevat"
+    s"${i.tila}($kausi(${i.vuosi}))"
+  }
 
   private def koulutusAt(ks: Seq[KkHakukohteenkoulutus], idx: Int): String =
     ks.lift(idx) match {

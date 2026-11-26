@@ -32,7 +32,7 @@ class ExternalKKHakijatServiceTest
   private val service: ExternalKKHakijatService = null
 
   // Organisaatiohierarkia luetaan pub-skeemasta, jota näiden testien testikanta ei sisällä
-  // (initSchema luo vain gen-taulut). Ks. OrganisaatioHierarkiaStub.
+  // (initSchema luo gen-taulut ja pub-skeemasta vain valintatapajono-koodiston). Ks. OrganisaatioHierarkiaStub.
   @MockitoBean
   override val commonService: CommonService = null
 

@@ -973,6 +973,7 @@ class ExternalKKHakijatControllerTest
   @Test
   def returnsHakijaFilteredByHakukohdeOid(): Unit = {
     seedMinimalHakija()
+    insertToteutus(koulutuksenAlkamisvuosi = Some(2026), koulutuksenAlkamiskausiuri = Some("kausi_s#1"))
     insertValintarekisteri(valinnanTila = Some(VALINTATIETO))
 
     get()
@@ -1006,7 +1007,11 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakutoivePrioriteetti").value(1))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(VALINTATIETO))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value(VASTAANOTTOTIETO))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset[0]").value(ILMOITTAUTUMISEN_TILA))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset", hasSize[Any](2)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset[0].kausi").value("2026S"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset[0].tila").value(1))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset[1].kausi").value("2027K"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset[1].tila").value(1))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].julkaisulupa").value(VALINTATULOKSEN_JULKAISULUPA))
   }
 
@@ -1038,7 +1043,7 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("KESKEN"))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").doesNotExist())
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehdollisestiHyvaksyttavissa").value(false))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").doesNotExist())
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pohjakoulutus").isEmpty)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hKelpoisuusLahde").doesNotExist())
@@ -1076,6 +1081,17 @@ class ExternalKKHakijatControllerTest
 
   // ---- Enum parsing ----
 
+  /**
+   * Kuten seedMinimalHakija, mutta hakutoiveella ei ole vastaanottoa. Valinnan tila riippuu VTS:n
+   *  tapaan vastaanotosta (vtsTila), joten tallennetun tilan testit tehdään ilman sitä.
+   */
+  private def seedHakijaIlmanVastaanottoa(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(vastaanottotieto = None)
+  }
+
   @ParameterizedTest
   @ValueSource(
     strings = Array(
@@ -1092,7 +1108,7 @@ class ExternalKKHakijatControllerTest
   )
   def valinnanTilaParsesKnownStates(state: String): Unit = {
     db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
-    seedMinimalHakija()
+    seedHakijaIlmanVastaanottoa()
     insertValintarekisteri(valinnanTila = Some(state))
 
     get()
@@ -1102,7 +1118,7 @@ class ExternalKKHakijatControllerTest
 
   @Test
   def valinnanTilaDefaultsToKeskenForUnknownValue(): Unit = {
-    seedMinimalHakija()
+    seedHakijaIlmanVastaanottoa()
     insertValintarekisteri(valinnanTila = Some("SOMETHING_ELSE"))
 
     get()
@@ -1119,7 +1135,64 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("KESKEN"))
   }
 
+  // ---- Vastaanottotieto ja hakutoivePrioriteetti ----
+
+  @Test
+  def vastaanottotietoDefaultsToKeskenWhenMissing(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(vastaanottotieto = None)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def hakutoivePrioriteettiOmittedForUnorderedHakutoiveet(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(hakutoivenumero = -1)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakutoivePrioriteetti").doesNotExist())
+  }
+
   // ---- Lukuvuosimaksu ----
+
+  @Test
+  def lukuvuosimaksuMaksamattaWhenObligatedAndNoMaksu(): Unit = {
+    seedMinimalHakija()
+    insertKasittelymerkinta(PAYMENT_REQUIREMENT, Some("obligated"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").value("MAKSAMATTA"))
+  }
+
+  @Test
+  def lukuvuosimaksuFromValintarekisteriWhenObligated(): Unit = {
+    seedMinimalHakija()
+    insertKasittelymerkinta(PAYMENT_REQUIREMENT, Some("obligated"))
+    insertValintarekisteri(maksunTila = Some("MAKSETTU"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").value("MAKSETTU"))
+  }
+
+  @Test
+  def lukuvuosimaksuOmittedWhenNotObligatedAndNoMaksu(): Unit = {
+    seedMinimalHakija()
+    insertKasittelymerkinta(PAYMENT_REQUIREMENT, Some("not-obligated"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].lukuvuosimaksu").doesNotExist())
+  }
 
   @ParameterizedTest
   @ValueSource(strings = Array("MAKSETTU", "MAKSAMATTA", "VAPAUTETTU"))
@@ -1389,7 +1462,20 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value("2025-10-01T12:00:00+03:00"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value("2025-10-01T12:00:00"))
+  }
+
+  @Test
+  def valinnanAikaleimaConvertedToHelsinkiTime(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valinnanTila = Some("HYVAKSYTTY"),
+      hyvaksyttyjajulkaistu = Some(java.time.OffsetDateTime.parse("2025-10-01T09:00:00Z"))
+    )
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value("2025-10-01T12:00:00"))
   }
 
   @Test
@@ -1417,7 +1503,7 @@ class ExternalKKHakijatControllerTest
   )
   def valinnanTilaPrefersHigherPriorityStateOverLower(winner: String, loser: String): Unit = {
     db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
-    seedMinimalHakija()
+    seedHakijaIlmanVastaanottoa()
     insertValintarekisteri(valintatapajonoId = "vtj-winner", valinnanTila = Some(winner))
     insertValintarekisteri(valintatapajonoId = "vtj-loser", valinnanTila = Some(loser))
 
@@ -1443,7 +1529,7 @@ class ExternalKKHakijatControllerTest
     get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value("2025-10-01T12:00:00+03:00"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanAikaleima").value("2025-10-01T12:00:00"))
   }
 
   // ---- Pisteet ----
@@ -1459,6 +1545,23 @@ class ExternalKKHakijatControllerTest
     get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(82.5))
+  }
+
+  // jsonPath vertaa lukuja tyyppimuunnoksen jälkeen (400.0 == 400), joten muoto tarkistetaan vastauksen tekstistä.
+  @Test
+  def wholeNumberPisteetHaveDecimalPartAsInSure(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"), pisteet = Some(BigDecimal("400")))
+
+    val body = get().andExpect(status.isOk).andReturn().getResponse.getContentAsString
+    assert(""""pisteet"\s*:\s*400\.0\b""".r.findFirstIn(body).isDefined, s"pisteet expected as 400.0 in [$body]")
+
+    val bytes    = getExcel().andExpect(status.isOk).andReturn().getResponse.getContentAsByteArray
+    val workbook = new XSSFWorkbook(new ByteArrayInputStream(bytes))
+    try {
+      val cell37 = workbook.getSheetAt(0).getRow(1).getCell(37).getStringCellValue
+      assert(cell37 == "400.0", s"cell 37 expected [400.0] but was [$cell37]")
+    } finally workbook.close()
   }
 
   @Test
@@ -1541,15 +1644,15 @@ class ExternalKKHakijatControllerTest
     insertValintarekisteri(
       valintatapajonoId = "vtj-winner",
       valinnanTila = Some("HYVAKSYTTY"),
-      prioriteetti = Some(1),
       pisteet = Some(BigDecimal("88"))
     )
     insertValintarekisteri(
       valintatapajonoId = "vtj-loser",
       valinnanTila = Some("HYVAKSYTTY"),
-      prioriteetti = Some(2),
       pisteet = Some(BigDecimal("99"))
     )
+    insertValintarekisteriValintatapajono(valintatapajonoId = "vtj-winner", prioriteetti = Some(1))
+    insertValintarekisteriValintatapajono(valintatapajonoId = "vtj-loser", prioriteetti = Some(2))
 
     get()
       .andExpect(status.isOk)
@@ -1599,16 +1702,17 @@ class ExternalKKHakijatControllerTest
   }
 
   @Test
-  def hyvaksymisenEhtoNullWhenNoValintarekisteriRow(): Unit = {
+  def hyvaksymisenEhtoFalseWhenNoValintarekisteriRow(): Unit = {
     seedMinimalHakija()
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehdollisestiHyvaksyttavissa").value(false))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoFI").doesNotExist())
   }
 
   @Test
-  def hyvaksymisenEhtoNullWhenAllRowsUnpublished(): Unit = {
+  def hyvaksymisenEhtoFalseWhenAllRowsUnpublished(): Unit = {
     seedMinimalHakija()
     insertValintarekisteri(
       valinnanTila = Some("HYVAKSYTTY"),
@@ -1617,9 +1721,11 @@ class ExternalKKHakijatControllerTest
       ehdollistiHyvaksyttavissaEhtoFi = Some("Ehto FI")
     )
 
+    // VTS:n tapaan julkaisemattomalle ei ehdollista hyväksyntää, mutta ehtoteksti näytetään.
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehdollisestiHyvaksyttavissa").value(false))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoFI").value("Ehto FI"))
   }
 
   @Test
@@ -1662,6 +1768,593 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(90))
   }
 
+  // ---- Valinnan tulos valinta-tulos-servicen tapaan (vtsTila) ----
+
+  @Test
+  def unpublishedHakutoiveShownAsKesken(): Unit = {
+    seedMinimalHakija() // vastaanotto VASTAANOTTANUT_SITOVASTI
+    insertValintarekisteri(
+      valinnanTila = Some("HYVAKSYTTY"),
+      julkaistavissa = Some(false),
+      pisteet = Some(BigDecimal("75")),
+      ehdollistiHyvaksyttavissa = Some(true),
+      ehdollistiHyvaksyttavissaEhtoFi = Some("Ehto FI")
+    )
+    insertValintaperusteValintatapajono(
+      valintatapajonoTyyppi = Some("valintatapajono_kp"),
+      valintatapajonoNimi = Some("Koepistejono")
+    )
+    insertValintatapajonoKoodi("valintatapajono_kp", Some("Koepisteet"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("KESKEN"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehdollisestiHyvaksyttavissa").value(false))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hyvaksymisenEhto.ehtoFI").value("Ehto FI"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("Koepistejono"))
+  }
+
+  @Test
+  def varallaInUnpublishedJonoShownAsKeskenWhenOtherJonoPublished(): Unit = {
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valintatapajonoId = "vtj-1", valinnanTila = Some("VARALLA"), julkaistavissa = Some(false))
+    insertValintarekisteri(valintatapajonoId = "vtj-2", valinnanTila = Some("HYLATTY"), julkaistavissa = Some(true))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("KESKEN"))
+  }
+
+  @Test
+  def notHyvaksyttyShownWhenAllJonotPublished(): Unit = {
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valintatapajonoId = "vtj-1", valinnanTila = Some("HYLATTY"), julkaistavissa = Some(true))
+    insertValintarekisteri(valintatapajonoId = "vtj-2", valinnanTila = Some("HYLATTY"), julkaistavissa = Some(true))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYLATTY"))
+  }
+
+  @Test
+  def hyvaksyttyInPublishedMerkitsevaJonoShownWhenOtherJonoUnpublished(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-1",
+      valinnanTila = Some("HYVAKSYTTY"),
+      julkaistavissa = Some(true),
+      pisteet = Some(BigDecimal("75"))
+    )
+    insertValintarekisteri(valintatapajonoId = "vtj-2", valinnanTila = Some("VARALLA"), julkaistavissa = Some(false))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value(VASTAANOTTOTIETO))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(75))
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "HYVAKSYTTY,             true,  HARKINNANVARAISESTI_HYVAKSYTTY",
+      "VARASIJALTA_HYVAKSYTTY, true,  HARKINNANVARAISESTI_HYVAKSYTTY",
+      "VARASIJALTA_HYVAKSYTTY, false, VARASIJALTA_HYVAKSYTTY",
+      "VARALLA,                true,  VARALLA"
+    )
+  )
+  def harkinnanvarainenHyvaksyntaShownAsHarkinnanvaraisestiHyvaksytty(
+    tallennettu: String,
+    harkinnanvarainen: Boolean,
+    odotettu: String
+  ): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valinnanTila = Some(tallennettu), hyvaksyttyHarkinnanvaraisesti = Some(harkinnanvarainen))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(odotettu))
+  }
+
+  @ParameterizedTest
+  @CsvSource(Array("true, KESKEN", "false, VARALLA"))
+  def varallaWithoutVarasijatayttoShownAsKesken(eiVarasijatayttoa: Boolean, odotettu: String): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valinnanTila = Some("VARALLA"))
+    insertValintarekisteriValintatapajono(eiVarasijatayttoa = Some(eiVarasijatayttoa))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(odotettu))
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "HYVAKSYTTY, PERUNUT,                  PERUNUT",
+      "HYVAKSYTTY, PERUUTETTU,               PERUUTETTU",
+      "VARALLA,    VASTAANOTTANUT_SITOVASTI, HYVAKSYTTY",
+      "VARALLA,    EHDOLLISESTI_VASTAANOTTANUT, HYVAKSYTTY",
+      "HYVAKSYTTY, VASTAANOTTANUT_SITOVASTI, HYVAKSYTTY"
+    )
+  )
+  def vastaanottoChangesValinnanTila(tallennettu: String, vastaanotto: String, odotettu: String): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(vastaanottotieto = Some(vastaanotto))
+    insertValintarekisteri(valinnanTila = Some(tallennettu))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(odotettu))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value(vastaanotto))
+  }
+
+  @Test
+  def vastaanottoKeptWhenNoValintarekisteriRow(): Unit = {
+    seedMinimalHakija() // vastaanotto VASTAANOTTANUT_SITOVASTI, ei valintarekisterin riviä
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("KESKEN"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value(VASTAANOTTOTIETO))
+  }
+
+  // ---- Vastaanoton määräaika ja varasijasäännöt (VTS) ----
+
+  private def paivienPaasta(paivia: Int): java.time.OffsetDateTime = java.time.OffsetDateTime.now().plusDays(paivia)
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "HYVAKSYTTY, -1, EI_VASTAANOTETTU_MAARA_AIKANA",
+      "HYVAKSYTTY,  1, KESKEN",
+      "PERUNUT,    -1, EI_VASTAANOTETTU_MAARA_AIKANA",
+      "VARALLA,    -1, KESKEN"
+    )
+  )
+  def vastaanottoEiMaaraaikanaWhenDeadlinePassed(tila: String, paivia: Int, odotettu: String): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valinnanTila = Some(tila))
+    insertOhjausparametri("PH_OPVP", aikaleima = Some(paivienPaasta(paivia)))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value(odotettu))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(tila))
+  }
+
+  @Test
+  def vastaanottoKeskenWithoutDeadlineParameter(): Unit = {
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def vastaanottoKeskenWhenHakijakohtainenDeadlineNotPassed(): Unit = {
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"), hyvaksyttyjajulkaistu = Some(paivienPaasta(-2)))
+    insertOhjausparametri("PH_OPVP", aikaleima = Some(paivienPaasta(-1)))
+    insertOhjausparametri("PH_HPVOA", arvo = Some("14"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def vastaanottoKeptWhenDeadlinePassed(): Unit = {
+    seedMinimalHakija() // vastaanotto VASTAANOTTANUT_SITOVASTI
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"))
+    insertOhjausparametri("PH_OPVP", aikaleima = Some(paivienPaasta(-1)))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value(VASTAANOTTOTIETO))
+  }
+
+  @Test
+  def unpublishedKeskenEvenWhenDeadlinePassed(): Unit = {
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"), julkaistavissa = Some(false))
+    insertOhjausparametri("PH_OPVP", aikaleima = Some(paivienPaasta(-1)))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("KESKEN"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def vastaanottoKeskenWithoutValintarekisteriRowEvenWhenDeadlinePassed(): Unit = {
+    seedHakijaIlmanVastaanottoa()
+    insertOhjausparametri("PH_OPVP", aikaleima = Some(paivienPaasta(-1)))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  /** varasijasaannotVoimaan/kaikkiJonotSijoittelussa: päiviä nykyhetkestä, tyhjä = parametria ei ole. */
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      " 1,   , HYVAKSYTTY",
+      "-1, -1, VARASIJALTA_HYVAKSYTTY",
+      "   ,  , VARASIJALTA_HYVAKSYTTY",
+      "   , 1, HYVAKSYTTY"
+    )
+  )
+  def varasijaltaHyvaksyttyShownAsHyvaksyttyUntilVarasijasaannotVoimassa(
+    varasijasaannotVoimaan: Integer,
+    kaikkiJonotSijoittelussa: Integer,
+    odotettu: String
+  ): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valinnanTila = Some("VARASIJALTA_HYVAKSYTTY"))
+    Option(varasijasaannotVoimaan).foreach(p => insertOhjausparametri("PH_VSSAV", aikaleima = Some(paivienPaasta(p))))
+    Option(kaikkiJonotSijoittelussa).foreach(p => insertOhjausparametri("PH_VTSSV", aikaleima = Some(paivienPaasta(p))))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(odotettu))
+  }
+
+  // ---- Hakutoiveiden väliset säännöt (VTS) ----
+
+  /**
+   * Hakemus kahteen hakukohteeseen: ylempi hakutoive annetulla tilalla ja vastaanotolla, alempi (HAKUKOHDE_OID_2)
+   *  annetulla tilalla. Molemmat tulokset on julkaistu.
+   */
+  private def seedKaksiHakutoivetta(
+    ylempiTila: String,
+    ylempiVastaanotto: Option[String],
+    alempiTila: String
+  ): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2)
+    insertHakutoive(hakutoivenumero = 1, vastaanottotieto = ylempiVastaanotto)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2, vastaanottotieto = None)
+    insertValintarekisteri(valintatapajonoId = "vtj-1", valinnanTila = Some(ylempiTila))
+    insertValintarekisteri(hakukohdeOid = HAKUKOHDE_OID_2, valintatapajonoId = "vtj-2", valinnanTila = Some(alempiTila))
+  }
+
+  /** sijoittelu/jarjestetytHakutoiveet: onko ohjausparametri asetettu todeksi; säännöt vain kun molemmat. */
+  @ParameterizedTest
+  @CsvSource(Array("true, true, PERUUNTUNUT", "true, false, KESKEN", "false, false, KESKEN"))
+  def keskenBelowHyvaksyttyShownAsPeruuntunutWhenQueriedByItsHakukohde(
+    sijoittelu: Boolean,
+    jarjestetytHakutoiveet: Boolean,
+    odotettu: String
+  ): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedKaksiHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "KESKEN")
+    if (sijoittelu) insertOhjausparametri("sijoittelu", alkuperainenArvo = Some("true"))
+    if (jarjestetytHakutoiveet) insertOhjausparametri("jarjestetytHakutoiveet", alkuperainenArvo = Some("true"))
+
+    // Haku vain alemman hakutoiveen hakukohteella: sääntö näkee silti ylemmän hakutoiveen.
+    get(hakukohdeOid = Some(HAKUKOHDE_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohde").value(HAKUKOHDE_OID_2))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value(odotettu))
+  }
+
+  @Test
+  def varallaShownAsPeruuntunutWhenOtherToiveVastaanotettuSitovasti(): Unit = {
+    seedKaksiHakutoivetta(
+      ylempiTila = "HYVAKSYTTY",
+      ylempiVastaanotto = Some("VASTAANOTTANUT_SITOVASTI"),
+      alempiTila = "VARALLA"
+    )
+    insertSijoitteluJaPriorisointi()
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("VASTAANOTTANUT_SITOVASTI"))
+    get(hakukohdeOid = Some(HAKUKOHDE_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("PERUUNTUNUT"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def ohjausparametriFalseKeepsRulesOff(): Unit = {
+    seedKaksiHakutoivetta(
+      ylempiTila = "HYVAKSYTTY",
+      ylempiVastaanotto = Some("VASTAANOTTANUT_SITOVASTI"),
+      alempiTila = "VARALLA"
+    )
+    insertOhjausparametri("sijoittelu", alkuperainenArvo = Some("false"))
+    insertOhjausparametri("jarjestetytHakutoiveet", alkuperainenArvo = Some("true"))
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("VARALLA"))
+  }
+
+  // ---- Yhden paikan säännös ----
+
+  private val MUU_HAKU_OID      = "1.2.246.562.29.00000000000000000201"
+  private val MUU_HAKEMUS_OID   = "1.2.246.562.11.00000000000004511894"
+  private val MUU_HAKUKOHDE_OID = "1.2.246.562.20.00000000000000000114"
+  private val ALIAS_OID         = "1.2.246.562.24.00000000020"
+  private val MUU_TOTEUTUS_OID  = "1.2.246.562.17.00000000000000000223"
+  private val MUU_KOULUTUS_OID  = "1.2.246.562.13.00000000000000000123"
+
+  /**
+   * Kuten seedKaksiHakutoivetta, mutta hakukohteet ovat yhden paikan säännön piirissä: tutkintoon johtava
+   *  yliopistokoulutus, joka alkaa syksyllä 2026 (insertHakukohde). Haussa ei ole sijoittelua.
+   */
+  private def seedKaksiYpsHakutoivetta(
+    ylempiTila: String,
+    ylempiVastaanotto: Option[String],
+    alempiTila: String
+  ): Unit = {
+    seedKaksiHakutoivetta(ylempiTila, ylempiVastaanotto, alempiTila)
+    insertToteutus()
+    insertKoulutus(johtaaTutkintoon = Some(true), koulutustyyppi = Some("yo"))
+  }
+
+  /**
+   * Hakijan hakemus toisessa haussa ja vastaanotto sen hakukohteeseen. Hakukohteella on oletuksena sama
+   *  toteutus ja koulutus kuin hakemuksen hakukohteilla.
+   */
+  private def insertVastaanottoToisessaHaussa(
+    henkiloOid: String = OPPIJANUMERO,
+    vastaanotto: String = "VASTAANOTTANUT_SITOVASTI",
+    koulutuksenAlkamiskausiuri: String = KOULUTUKSEN_ALKAMISKAUSIURI,
+    koulutuksenAlkamisvuosi: Int = KOULUTUKSEN_ALKAMISVUOSI,
+    toteutusOid: String = TOTEUTUS_OID,
+    kohdejoukonTarkenneKoodiuri: Option[String] = None
+  ): Unit = {
+    insertHakemus(
+      oppijanumero = henkiloOid,
+      hakemusOid = MUU_HAKEMUS_OID,
+      hakuOid = MUU_HAKU_OID,
+      insertHenkilo = false,
+      insertHaku = false
+    )
+    insertHaku(hakuOid = MUU_HAKU_OID, kohdejoukonTarkenneKoodiuri = kohdejoukonTarkenneKoodiuri)
+    insertHakukohde(
+      hakukohdeOid = MUU_HAKUKOHDE_OID,
+      toteutusOid = toteutusOid,
+      koulutuksenAlkamisvuosi = Some(koulutuksenAlkamisvuosi),
+      koulutuksenAlkamiskausiuri = Some(koulutuksenAlkamiskausiuri)
+    )
+    insertHakutoive(
+      hakemusOid = MUU_HAKEMUS_OID,
+      hakukohdeOid = MUU_HAKUKOHDE_OID,
+      vastaanottotieto = Some(vastaanotto)
+    )
+  }
+
+  @Test
+  def otherToiveOttanutVastaanToisenPaikanWhenVastaanotettuSitovastiWithoutSijoittelu(): Unit = {
+    seedKaksiYpsHakutoivetta(
+      ylempiTila = "HYVAKSYTTY",
+      ylempiVastaanotto = Some("VASTAANOTTANUT_SITOVASTI"),
+      alempiTila = "HYVAKSYTTY"
+    )
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("VASTAANOTTANUT_SITOVASTI"))
+    // Haku vain alemman hakutoiveen hakukohteella: sääntö näkee silti ylemmän hakutoiveen vastaanoton.
+    get(hakukohdeOid = Some(HAKUKOHDE_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("PERUUNTUNUT"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("OTTANUT_VASTAAN_TOISEN_PAIKAN"))
+  }
+
+  @Test
+  def toiveetOttanutVastaanToisenPaikanWhenVastaanottoInAnotherHaku(): Unit = {
+    seedKaksiYpsHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
+    insertVastaanottoToisessaHaussa()
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("PERUUNTUNUT"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("OTTANUT_VASTAAN_TOISEN_PAIKAN"))
+    get(hakukohdeOid = Some(HAKUKOHDE_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("PERUUNTUNUT"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("OTTANUT_VASTAAN_TOISEN_PAIKAN"))
+  }
+
+  @Test
+  def ottanutVastaanToisenPaikanWhenVastaanottoUnderLinkedHenkiloOid(): Unit = {
+    seedKaksiYpsHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
+    insertHenkiloAlias(oppijanumero = OPPIJANUMERO, henkiloOid = ALIAS_OID)
+    insertVastaanottoToisessaHaussa(henkiloOid = ALIAS_OID, vastaanotto = "EHDOLLISESTI_VASTAANOTTANUT")
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("OTTANUT_VASTAAN_TOISEN_PAIKAN"))
+  }
+
+  @ParameterizedTest
+  @CsvSource(Array("kausi_k#1, 2026", "kausi_s#1, 2027"))
+  def vastaanottoInAnotherHakuOnOtherKausiKeepsTilat(kausiuri: String, vuosi: Int): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedKaksiYpsHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
+    insertVastaanottoToisessaHaussa(koulutuksenAlkamiskausiuri = kausiuri, koulutuksenAlkamisvuosi = vuosi)
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def ehdollinenVastaanottoOnHakemusKeepsOtherToiveet(): Unit = {
+    seedKaksiYpsHakutoivetta(
+      ylempiTila = "HYVAKSYTTY",
+      ylempiVastaanotto = Some("EHDOLLISESTI_VASTAANOTTANUT"),
+      alempiTila = "VARALLA"
+    )
+    insertVastaanottoToisessaHaussa()
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("VARALLA"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def hakukohdeOutsideYhdenPaikanSaantoKeepsTilat(): Unit = {
+    seedKaksiHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
+    insertToteutus()
+    insertKoulutus(johtaaTutkintoon = Some(true), koulutustyyppi = Some("amm"))
+    insertVastaanottoToisessaHaussa()
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def vastaanottoOnKoulutusOutsideYhdenPaikanSaantoKeepsTilat(): Unit = {
+    seedKaksiYpsHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
+    // Hakemuksen hakukohteet ovat säännön piirissä, toisen haun hakukohteen ammatillinen koulutus ei.
+    insertToteutus(toteutusOid = MUU_TOTEUTUS_OID, koulutusOid = MUU_KOULUTUS_OID)
+    insertKoulutus(koulutusOid = MUU_KOULUTUS_OID, johtaaTutkintoon = Some(true), koulutustyyppi = Some("amm"))
+    insertVastaanottoToisessaHaussa(toteutusOid = MUU_TOTEUTUS_OID)
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def vastaanottoInHakuOutsideYhdenPaikanSaantoKeepsTilat(): Unit = {
+    seedKaksiYpsHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
+    // Sama koulutus, mutta toisen haun kohdejoukon tarkenne rajaa sen hakukohteet säännön ulkopuolelle.
+    insertVastaanottoToisessaHaussa(kohdejoukonTarkenneKoodiuri = Some("haunkohdejoukontarkenne_1#1"))
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def yhdenPaikanSaantoUsesHaunAlkamiskausiWhenHakukohdeHasNone(): Unit = {
+    initSchema()
+    insertHakemus(insertHaku = false)
+    insertHaku(koulutuksenAlkamisvuosi = Some(KOULUTUKSEN_ALKAMISVUOSI), koulutuksenAlkamiskausiuri = Some("kausi_s#1"))
+    insertHakukohde(koulutuksenAlkamisvuosi = None, koulutuksenAlkamiskausiuri = None)
+    insertHakutoive(vastaanottotieto = None)
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"))
+    insertToteutus()
+    insertKoulutus(johtaaTutkintoon = Some(true), koulutustyyppi = Some("amk"))
+    insertVastaanottoToisessaHaussa()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("OTTANUT_VASTAAN_TOISEN_PAIKAN"))
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = Array("PERUNUT", "PERUUTETTU", "EI_VASTAANOTETTU_MAARA_AIKANA"))
+  def otherVastaanottotilaInAnotherHakuKeepsTilat(vastaanotto: String): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedKaksiYpsHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
+    insertVastaanottoToisessaHaussa(vastaanotto = vastaanotto)
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("HYVAKSYTTY"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def vastaanottoOfAnotherPersonCountsOnlyForThatPerson(): Unit = {
+    val toinenHakija = "1.2.246.562.24.00000000021"
+    seedKaksiYpsHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
+    // Toinen hakija samaan hakukohteeseen; vain hänellä on vastaanotto toisessa haussa.
+    insertHakemus(oppijanumero = toinenHakija, hakemusOid = HAKEMUS_OID_2, insertHaku = false)
+    insertHakutoive(hakemusOid = HAKEMUS_OID_2, vastaanottotieto = None)
+    insertValintarekisteri(hakemusOid = HAKEMUS_OID_2, valinnanTila = Some("HYVAKSYTTY"))
+    insertVastaanottoToisessaHaussa(henkiloOid = toinenHakija)
+
+    def hakijanVastaanottotieto(oppijanumero: String) =
+      jsonPath("$.hakijat[?(@.oppijanumero == '" + oppijanumero + "')].hakemukset[0].vastaanottotieto")
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](2)))
+      .andExpect(hakijanVastaanottotieto(OPPIJANUMERO).value(contains("KESKEN")))
+      .andExpect(hakijanVastaanottotieto(toinenHakija).value(contains("OTTANUT_VASTAAN_TOISEN_PAIKAN")))
+  }
+
+  @Test
+  def sitovastiVastaanotettuWithSijoitteluLeavesOtherToiveToHakutoiveidenValisetSaannot(): Unit = {
+    seedKaksiYpsHakutoivetta(
+      ylempiTila = "HYVAKSYTTY",
+      ylempiVastaanotto = Some("VASTAANOTTANUT_SITOVASTI"),
+      alempiTila = "HYVAKSYTTY"
+    )
+    insertSijoitteluJaPriorisointi()
+
+    // VTS:n järjestyksessä hakutoiveiden väliset säännöt peruunnuttavat alemman hakutoiveen ensin, jolloin
+    // yhden paikan säännös ei enää koske sitä.
+    get(hakukohdeOid = Some(HAKUKOHDE_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("PERUUNTUNUT"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("KESKEN"))
+  }
+
+  @Test
+  def toiveWithPassedVastaanottoDeadlineOttanutVastaanToisenPaikan(): Unit = {
+    seedKaksiYpsHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
+    // Määräaika on mennyt, joten ilman yhden paikan säännöstä vastaanottotieto olisi EI_VASTAANOTETTU_MAARA_AIKANA.
+    insertOhjausparametri("PH_OPVP", aikaleima = Some(paivienPaasta(-1)))
+    insertVastaanottoToisessaHaussa()
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("PERUUNTUNUT"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("OTTANUT_VASTAAN_TOISEN_PAIKAN"))
+  }
+
+  @Test
+  def ottanutVastaanToisenPaikanWhenHakemusUnderLinkedHenkiloOid(): Unit = {
+    initSchema()
+    insertHenkilo()
+    insertHenkiloAlias(oppijanumero = OPPIJANUMERO, henkiloOid = ALIAS_OID)
+    // Hakemus on linkitetyllä oidilla, vastaanotto toisessa haussa master-oidilla.
+    insertHakemus(oppijanumero = ALIAS_OID, insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive(vastaanottotieto = None)
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"))
+    insertToteutus()
+    insertKoulutus(johtaaTutkintoon = Some(true), koulutustyyppi = Some("yo"))
+    insertVastaanottoToisessaHaussa(henkiloOid = OPPIJANUMERO)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("OTTANUT_VASTAAN_TOISEN_PAIKAN"))
+  }
+
   // ---- Valintatapajono meta ----
 
   @Test
@@ -1669,13 +2362,14 @@ class ExternalKKHakijatControllerTest
     seedMinimalHakija()
     insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"))
     insertValintaperusteValintatapajono(
-      valintatapajonoTyyppi = Some("YHTEISPISTEET"),
+      valintatapajonoTyyppi = Some("valintatapajono_yp"),
       valintatapajonoNimi = Some("Yhteispistejono")
     )
+    insertValintatapajonoKoodi("valintatapajono_yp", Some("Yhteispisteet"))
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").value("YHTEISPISTEET"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").value("Yhteispisteet"))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("Yhteispistejono"))
   }
 
@@ -1742,9 +2436,150 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
-      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").value("WINNER-TYYPPI"))
+      // Tyypille ei ole koodia, joten Suren tapaan "Tuntematon".
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").value("Tuntematon"))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("Winner"))
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(90))
+  }
+
+  /** Yksi valintatapajono annetulla tilalla, tyypillä valintatapajono_kp ja sen koodilla. */
+  private def seedHakijaWithValintatapajono(valinnanTila: String): Unit = {
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valinnanTila = Some(valinnanTila))
+    insertValintaperusteValintatapajono(
+      valintatapajonoTyyppi = Some("valintatapajono_kp"),
+      valintatapajonoNimi = Some("Koepistejono")
+    )
+    insertValintatapajonoKoodi("valintatapajono_kp", Some("Koepisteet"))
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = Array("HYVAKSYTTY", "HARKINNANVARAISESTI_HYVAKSYTTY", "VARASIJALTA_HYVAKSYTTY"))
+  def valintatapajonoTyyppiAsKoodiNimiWhenHyvaksytty(valinnanTila: String): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedHakijaWithValintatapajono(valinnanTila)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").value("Koepisteet"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("Koepistejono"))
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = Array("VARALLA", "HYLATTY", "PERUUNTUNUT"))
+  def valintatapajonoTyyppiOmittedWhenNotHyvaksytty(valinnanTila: String): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedHakijaWithValintatapajono(valinnanTila)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").doesNotExist())
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("Koepistejono"))
+  }
+
+  @Test
+  def valintatapajonoTyyppiTuntematonWhenKoodiMissing(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"))
+    insertValintaperusteValintatapajono(valintatapajonoTyyppi = Some("valintatapajono_kp"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").value("Tuntematon"))
+  }
+
+  @Test
+  def valintatapajonoTyyppiTuntematonWhenKoodiHasNoNimiFi(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"))
+    insertValintaperusteValintatapajono(valintatapajonoTyyppi = Some("valintatapajono_kp"))
+    insertValintatapajonoKoodi("valintatapajono_kp", None)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononTyyppi").value("Tuntematon"))
+  }
+
+  @Test
+  def valintatapajonoFromMerkitsevaJonoEvenWhenNotPublished(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-hyvaksytty",
+      valinnanTila = Some("HYVAKSYTTY"),
+      julkaistavissa = Some(false)
+    )
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-varalla",
+      valinnanTila = Some("VARALLA"),
+      julkaistavissa = Some(true),
+      pisteet = Some(BigDecimal("50"))
+    )
+    insertValintaperusteValintatapajono(valintatapajonoId = "vtj-hyvaksytty", valintatapajonoNimi = Some("Hyväksytty"))
+    insertValintaperusteValintatapajono(valintatapajonoId = "vtj-varalla", valintatapajonoNimi = Some("Varalla"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("Hyväksytty"))
+      // Hakutoive ei ole julkaistu (merkitsevä jono julkaisematon, kaikki jonot eivät julkaistuja),
+      // joten VTS:n tapaan pisteitä ei näytetä.
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").doesNotExist())
+  }
+
+  @Test
+  def valintatapajonoTiebreakByPrioriteettiWhenSameTila(): Unit = {
+    seedMinimalHakija()
+    insertValintarekisteri(valintatapajonoId = "vtj-2", valinnanTila = Some("HYVAKSYTTY"))
+    insertValintarekisteri(valintatapajonoId = "vtj-1", valinnanTila = Some("HYVAKSYTTY"))
+    insertValintarekisteriValintatapajono(valintatapajonoId = "vtj-2", prioriteetti = Some(2))
+    insertValintarekisteriValintatapajono(valintatapajonoId = "vtj-1", prioriteetti = Some(1))
+    insertValintaperusteValintatapajono(valintatapajonoId = "vtj-2", valintatapajonoNimi = Some("Toinen"))
+    insertValintaperusteValintatapajono(valintatapajonoId = "vtj-1", valintatapajonoNimi = Some("Ensimmäinen"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("Ensimmäinen"))
+  }
+
+  @Test
+  def valintatapajonoTiebreakUsesJononPrioriteettiNotJonosijanPrioriteetti(): Unit = {
+    seedMinimalHakija()
+    // Jonosijan prioriteetti (hakutoiveen numero) suosisi vtj-a:ta, jonon prioriteetti vtj-b:tä.
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-a",
+      valinnanTila = Some("HYVAKSYTTY"),
+      prioriteetti = Some(1),
+      pisteet = Some(BigDecimal("10"))
+    )
+    insertValintarekisteri(
+      valintatapajonoId = "vtj-b",
+      valinnanTila = Some("HYVAKSYTTY"),
+      prioriteetti = Some(2),
+      pisteet = Some(BigDecimal("20"))
+    )
+    insertValintarekisteriValintatapajono(valintatapajonoId = "vtj-a", prioriteetti = Some(2))
+    insertValintarekisteriValintatapajono(valintatapajonoId = "vtj-b", prioriteetti = Some(1))
+    insertValintaperusteValintatapajono(valintatapajonoId = "vtj-a", valintatapajonoNimi = Some("A"))
+    insertValintaperusteValintatapajono(valintatapajonoId = "vtj-b", valintatapajonoNimi = Some("B"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("B"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].pisteet").value(20))
+  }
+
+  @Test
+  def valintatapajonoVarallaTiebreakByVarasijanumeroNotPrioriteetti(): Unit = {
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valintatapajonoId = "vtj-a", valinnanTila = Some("VARALLA"), varasijanNumero = Some(3))
+    insertValintarekisteri(valintatapajonoId = "vtj-b", valinnanTila = Some("VARALLA"), varasijanNumero = Some(1))
+    insertValintarekisteriValintatapajono(valintatapajonoId = "vtj-a", prioriteetti = Some(1))
+    insertValintarekisteriValintatapajono(valintatapajonoId = "vtj-b", prioriteetti = Some(2))
+    insertValintaperusteValintatapajono(valintatapajonoId = "vtj-a", valintatapajonoNimi = Some("A"))
+    insertValintaperusteValintatapajono(valintatapajonoId = "vtj-b", valintatapajonoNimi = Some("B"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valintatapajononNimi").value("B"))
   }
 
   // ---- Pohjakoulutus ----
@@ -1882,6 +2717,79 @@ class ExternalKKHakijatControllerTest
       )
   }
 
+  // ---- Ilmoittautumiset ----
+
+  /** expected: välilyönnein erotetut kausi:tila-parit, esim. "2026S:4 2027K:4". */
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "kausi_s#1,                       , 2026S:4 2027K:4",
+      "kausi_s#1, EI_TEHTY              , 2026S:4 2027K:4",
+      "kausi_s#1, EI_ILMOITTAUTUNUT     , 2026S:4 2027K:4",
+      "kausi_s#1, LASNA_KOKO_LUKUVUOSI  , 2026S:1 2027K:1",
+      "kausi_s#1, POISSA_KOKO_LUKUVUOSI , 2026S:2 2027K:2",
+      "kausi_s#1, LASNA_SYKSY           , 2026S:1 2027K:2",
+      "kausi_s#1, POISSA_SYKSY          , 2026S:2 2027K:1",
+      "kausi_s#1, LASNA                 , 2027K:1",
+      "kausi_s#1, POISSA                , 2027K:2",
+      "kausi_k#1,                       , 2026S:4 2026K:4",
+      "kausi_k#1, LASNA_KOKO_LUKUVUOSI  , 2026S:1 2026K:1",
+      "kausi_k#1, LASNA_SYKSY           , 2026S:1 2026K:2",
+      "kausi_k#1, LASNA                 , 2026K:1"
+    )
+  )
+  def ilmoittautumisetFromAlkamiskausiAndTila(kausiUri: String, tila: String, expected: String): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(ilmoittautumisenTila = Option(tila))
+    insertToteutus(koulutuksenAlkamisvuosi = Some(2026), koulutuksenAlkamiskausiuri = Some(kausiUri))
+
+    val odotetut = expected.split(" ").toSeq.map(_.split(":") match { case Array(k, t) => (k, t.toInt) })
+    val result   = get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset", hasSize[Any](odotetut.size)))
+    odotetut.zipWithIndex.foreach { case ((kausi, tilaKoodi), i) =>
+      result
+        .andExpect(jsonPath(s"$$.hakijat[0].hakemukset[0].ilmoittautumiset[$i].kausi").value(kausi))
+        .andExpect(jsonPath(s"$$.hakijat[0].hakemukset[0].ilmoittautumiset[$i].tila").value(tilaKoodi))
+    }
+  }
+
+  @Test
+  def ilmoittautumisetEmptyWithoutAlkamiskausi(): Unit = {
+    seedMinimalHakija()
+    insertToteutus(koulutuksenAlkamisvuosi = Some(2026), koulutuksenAlkamiskausiuri = None)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset").isEmpty)
+  }
+
+  @Test
+  def ilmoittautumisetEmptyWithoutAlkamisvuosi(): Unit = {
+    seedMinimalHakija()
+    insertToteutus(koulutuksenAlkamisvuosi = None, koulutuksenAlkamiskausiuri = Some("kausi_s#1"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset").isEmpty)
+  }
+
+  @Test
+  def ilmoittautumisetEmptyForUnknownTila(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(ilmoittautumisenTila = Some("TUNTEMATON"))
+    insertToteutus(koulutuksenAlkamisvuosi = Some(2026), koulutuksenAlkamiskausiuri = Some("kausi_s#1"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset").isEmpty)
+  }
+
   // ---- Asiointikieli ----
 
   @ParameterizedTest
@@ -1936,6 +2844,349 @@ class ExternalKKHakijatControllerTest
     get()
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].syntymaaika").doesNotExist())
+  }
+
+  // ---- Hetu ----
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "2005-04-15, 150405A",
+      "1984-09-14, 140984-"
+    )
+  )
+  def hetuReplacedWithSyntymaaikaWhenMissing(syntymaaika: String, expected: String): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    initSchema()
+    insertHenkilo(syntymaaika = Some(java.time.LocalDate.parse(syntymaaika)), hetu = None)
+    insertHakemus(insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hetu").value(expected))
+  }
+
+  @Test
+  def hetuReplacedWithSyntymaaikaWhenEmpty(): Unit = {
+    initSchema()
+    insertHenkilo(syntymaaika = Some(SYNTYMAAIKA), hetu = Some(""))
+    insertHakemus(insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hetu").value("150405A"))
+  }
+
+  @Test
+  def hetuPreferredOverSyntymaaika(): Unit = {
+    initSchema()
+    insertHenkilo(syntymaaika = Some(SYNTYMAAIKA))
+    insertHakemus(insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hetu").value(HETU))
+  }
+
+  @Test
+  def hetuEmptyWhenHetuAndSyntymaaikaMissing(): Unit = {
+    initSchema()
+    insertHenkilo(hetu = None) // syntymaaika oletuksena None
+    insertHakemus(insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hetu").value(""))
+  }
+
+  // ---- Henkilötiedot ONR:n master-henkilöltä ----
+
+  @Test
+  def henkilotiedotFromMasterNotLinkedHenkiloOrHakemus(): Unit = {
+    initSchema()
+    insertHenkilo(
+      hetu = Some("140984-123A"),
+      etunimet = Some("Master Etunimi"),
+      sukunimi = Some("Mastersukunimi"),
+      sukupuoli = Some(2),
+      aidinkieli = Some("sv"),
+      syntymaaika = Some(java.time.LocalDate.parse("1984-09-14")),
+      kaikkiKansalaisuudet = Some("""["643"]"""),
+      turvakielto = Some(true)
+    )
+    insertHenkiloAlias(
+      oppijanumero = OPPIJANUMERO,
+      henkiloOid = ALIAS_HENKILO_OID,
+      hetu = Some("010101-111A"),
+      etunimet = Some("Alias"),
+      sukunimi = Some("Aliaksinen"),
+      sukupuoli = Some(1),
+      aidinkieli = Some("en"),
+      syntymaaika = Some(java.time.LocalDate.parse("2001-01-01")),
+      kaikkiKansalaisuudet = Some("""["752"]"""),
+      turvakielto = Some(false)
+    )
+    // Hakemuksella on omat hetu-, nimi- ja sukupuolitietonsa (oletukset), jotka eivät saa näkyä.
+    insertHakemus(oppijanumero = ALIAS_HENKILO_OID, insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(OPPIJANUMERO))
+      .andExpect(jsonPath("$.hakijat[0].hetu").value("140984-123A"))
+      .andExpect(jsonPath("$.hakijat[0].etunimet").value("Master Etunimi"))
+      .andExpect(jsonPath("$.hakijat[0].sukunimi").value("Mastersukunimi"))
+      .andExpect(jsonPath("$.hakijat[0].kutsumanimi").value(KUTSUMANIMI))
+      .andExpect(jsonPath("$.hakijat[0].sukupuoli").value("2"))
+      .andExpect(jsonPath("$.hakijat[0].aidinkieli").value("SV"))
+      .andExpect(jsonPath("$.hakijat[0].syntymaaika").value("14.09.1984"))
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet[0]").value("643"))
+      .andExpect(jsonPath("$.hakijat[0].turvakielto").value(true))
+  }
+
+  @Test
+  def pseudoHetuWhenMasterHasNoHetuEvenIfHakemusHasHetu(): Unit = {
+    initSchema()
+    insertHenkilo(hetu = None, syntymaaika = Some(java.time.LocalDate.parse("1984-09-14")))
+    insertHakemus(insertHenkilo = false, hetu = Some(HETU))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hetu").value("140984-"))
+  }
+
+  @Test
+  def nimetEmptyWhenMasterHasNoNimet(): Unit = {
+    initSchema()
+    insertHenkilo(etunimet = None, sukunimi = None)
+    insertHakemus(insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].etunimet").value(""))
+      .andExpect(jsonPath("$.hakijat[0].sukunimi").value(""))
+  }
+
+  @Test
+  def henkilotiedotFromHakemusAndLinkedHenkiloWhenMasterRowMissing(): Unit = {
+    val puuttuvaMaster = "1.2.246.562.24.00000000088"
+    initSchema()
+    insertHenkiloAlias(
+      oppijanumero = puuttuvaMaster,
+      henkiloOid = ALIAS_HENKILO_OID,
+      aidinkieli = Some("sv"),
+      syntymaaika = Some(java.time.LocalDate.parse("1984-09-14")),
+      kaikkiKansalaisuudet = Some("""["643"]"""),
+      turvakielto = Some(true),
+      // Linkitetyn henkilön hetua, nimiä ja sukupuolta ei käytetä, vaan hakemuksen.
+      hetu = Some("010101-111A"),
+      etunimet = Some("Alias"),
+      sukunimi = Some("Aliaksinen"),
+      sukupuoli = Some(2)
+    )
+    insertHakemus(oppijanumero = ALIAS_HENKILO_OID, insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].oppijanumero").value(puuttuvaMaster))
+      .andExpect(jsonPath("$.hakijat[0].hetu").value(HETU))
+      .andExpect(jsonPath("$.hakijat[0].etunimet").value(ETUNIMET))
+      .andExpect(jsonPath("$.hakijat[0].sukunimi").value(SUKUNIMI))
+      .andExpect(jsonPath("$.hakijat[0].sukupuoli").value(SUKUPUOLI.toString))
+      .andExpect(jsonPath("$.hakijat[0].aidinkieli").value("SV"))
+      .andExpect(jsonPath("$.hakijat[0].syntymaaika").value("14.09.1984"))
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet[0]").value("643"))
+      .andExpect(jsonPath("$.hakijat[0].turvakielto").value(true))
+  }
+
+  @Test
+  def aidinkieliUnknownWhenMissing(): Unit = {
+    initSchema()
+    insertHenkilo(aidinkieli = None)
+    insertHakemus(insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].aidinkieli").value("99"))
+  }
+
+  @Test
+  def kansalaisuudetEmptyListWhenMissing(): Unit = {
+    initSchema()
+    insertHenkilo(kaikkiKansalaisuudet = None)
+    insertHakemus(insertHenkilo = false)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet").isArray)
+      .andExpect(jsonPath("$.hakijat[0].kansalaisuudet", hasSize[Any](0)))
+  }
+
+  // ---- Kotikunta ----
+
+  @Test
+  def kotikuntaUnknownWhenMissing(): Unit = {
+    initSchema()
+    insertHakemus(kotikunta = None)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].kotikunta").value("999"))
+  }
+
+  @ParameterizedTest
+  @CsvSource(Array("12", "1234", "abc"))
+  def kotikuntaUnknownWhenNotThreeDigits(kotikunta: String): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    initSchema()
+    insertHakemus(kotikunta = Some(kotikunta))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].kotikunta").value("999"))
+  }
+
+  // ---- Osoite ----
+
+  @Test
+  def osoiteEmptyWhenColumnsNull(): Unit = {
+    initSchema()
+    insertHakemus(lahiosoite = None, postinumero = None, postitoimipaikka = None)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].lahiosoite").value(""))
+      .andExpect(jsonPath("$.hakijat[0].postinumero").value(""))
+      .andExpect(jsonPath("$.hakijat[0].postitoimipaikka").value(""))
+  }
+
+  @Test
+  def postitoimipaikkaFromUlkKuntaWhenAsuinmaaAbroad(): Unit = {
+    initSchema()
+    insertHakemus(asuinmaa = Some("826"), postitoimipaikka = None, ulkKunta = Some("London"))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].postitoimipaikka").value("London"))
+      .andExpect(jsonPath("$.hakijat[0].maa").value("826"))
+  }
+
+  @Test
+  def postitoimipaikkaFromUlkKuntaAndMaaFinlandWhenAsuinmaaMissing(): Unit = {
+    initSchema()
+    insertHakemus(asuinmaa = None, postitoimipaikka = Some(HELSINKI), ulkKunta = Some("London"))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].postitoimipaikka").value("London"))
+      .andExpect(jsonPath("$.hakijat[0].maa").value("246"))
+  }
+
+  @Test
+  def postitoimipaikkaKeptWhenAsuinmaaFinland(): Unit = {
+    initSchema()
+    insertHakemus(asuinmaa = Some("246"), postitoimipaikka = Some(HELSINKI), ulkKunta = Some("London"))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].postitoimipaikka").value(HELSINKI))
+  }
+
+  @Test
+  def postitoimipaikkaEmptyWhenAbroadAndUlkKuntaMissing(): Unit = {
+    initSchema()
+    insertHakemus(asuinmaa = Some("826"), postitoimipaikka = Some(HELSINKI), ulkKunta = None)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].postitoimipaikka").value(""))
+  }
+
+  // ---- Viimeisin muokkaus ----
+
+  @Test
+  def hakemusViimeinenMuokkausAikaleimaFromLuotu(): Unit = {
+    initSchema()
+    insertHakemus(
+      luotu = Some(java.time.OffsetDateTime.parse("2025-09-10T08:00:00+03:00")),
+      muokattu = Some(java.time.OffsetDateTime.parse("2025-09-20T08:00:00+03:00"))
+    )
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakemusViimeinenMuokkausAikaleima").value("2025-09-10T08:00:00"))
+  }
+
+  @Test
+  def hakemusViimeinenMuokkausAikaleimaOmittedWhenLuotuMissing(): Unit = {
+    initSchema()
+    insertHakemus(luotu = None)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakemusViimeinenMuokkausAikaleima").doesNotExist())
+  }
+
+  // ---- Luvat ja koulusivistyskielet ----
+
+  @Test
+  def luvatFalseWhenColumnsNull(): Unit = {
+    initSchema()
+    insertHakemus(koulutusmarkkinointilupa = None, valintatuloksenJulkaisulupa = None)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].koulutusmarkkinointilupa").value(false))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].julkaisulupa").value(false))
+  }
+
+  @Test
+  def koulusivistyskieletOmittedUntilAvailable(): Unit = {
+    seedMinimalHakija()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].koulusivistyskielet").doesNotExist())
   }
 
   // ---- Kansalaisuudet / turvakielto (gen_henkilo-sourced) ----
@@ -2189,6 +3440,187 @@ class ExternalKKHakijatControllerTest
       .andExpect(jsonPath("$.hakijat[0].ensikertalainen").doesNotExist())
   }
 
+  /** Hakija, jonka ainoalla hakutoiveella on annettu gen_hakutoive-ensikertalaisuus. */
+  private def seedHakijaWithHakutoiveEnsikertalainen(ensikertalainen: Option[Boolean]): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive(ensikertalainen = ensikertalainen)
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = Array(true, false))
+  def ensikertalainenFromHakutoiveWhenNoSupaTieto(ensikertalainen: Boolean): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedHakijaWithHakutoiveEnsikertalainen(Some(ensikertalainen))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(ensikertalainen))
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = Array(true, false))
+  def ensikertalainenSupaTietoWinsOverHakutoive(supaTieto: Boolean): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedHakijaWithHakutoiveEnsikertalainen(Some(!supaTieto))
+    insertSupaTieto(avain = "ensikertalainen", arvo = Some(supaTieto.toString))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(supaTieto))
+  }
+
+  @Test
+  def ensikertalainenFromHakutoiveWhenSupaTietoUnrecognized(): Unit = {
+    seedHakijaWithHakutoiveEnsikertalainen(Some(true))
+    insertSupaTieto(avain = "ensikertalainen", arvo = Some("maybe"))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(true))
+  }
+
+  @Test
+  def ensikertalainenFromHakutoiveIgnoresNullHakutoiveRows(): Unit = {
+    seedHakijaWithHakutoiveEnsikertalainen(Some(true))
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2)
+    insertHakutoive(hakukohdeOid = HAKUKOHDE_OID_2, hakutoivenumero = 2, ensikertalainen = None)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].ensikertalainen").value(true))
+  }
+
+  @Test
+  def excelShowsEnsikertalainenFromHakutoive(): Unit = {
+    seedHakijaWithHakutoiveEnsikertalainen(Some(true))
+
+    val result   = getExcel().andExpect(status.isOk).andReturn()
+    val workbook = new XSSFWorkbook(new ByteArrayInputStream(result.getResponse.getContentAsByteArray))
+    try {
+      val cell = workbook.getSheetAt(0).getRow(1).getCell(23).getStringCellValue
+      assert(cell == "X", s"expected ensikertalainen cell X, got: '$cell'")
+    } finally workbook.close()
+  }
+
+  // ---- Inaktivoidut hakemukset ----
+
+  @Test
+  def inactivatedHakemusExcludedEvenWithHakutoiveRow(): Unit = {
+    initSchema()
+    // dbt pudottaisi inaktivoidun hakemuksen hakutoiveet; tässä rivi jätetään, jotta rajaus näkyy.
+    insertHakemus(poistettu = Some(true))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
+  }
+
+  @Test
+  def hakemusReturnedWhenPoistettuNull(): Unit = {
+    initSchema()
+    insertHakemus(poistettu = None)
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+  }
+
+  @Test
+  def inactivatedHakemusExcludedFromHakukohdeSearch(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertHakemus(hakemusOid = HAKEMUS_OID_2, insertHenkilo = false, insertHaku = false, poistettu = Some(true))
+    insertHakutoive(hakemusOid = HAKEMUS_OID_2)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakemusnumero").value(HAKEMUS_OID))
+  }
+
+  @Test
+  def inactivatedHakemusExcludedFromOppijanumeroSearch(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakutoive()
+    insertHakemus(hakemusOid = HAKEMUS_OID_2, insertHenkilo = false, insertHaku = false, poistettu = Some(true))
+    insertHakutoive(hakemusOid = HAKEMUS_OID_2)
+
+    getByOppijanumero(OPPIJANUMERO)
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakemusnumero").value(HAKEMUS_OID))
+  }
+
+  // ---- Hakemusmaksu ----
+
+  /** Hakemusmaksun tila tyhjänä (CsvSourcen tyhjä arvo) tarkoittaa, ettei maksutietoa ole. */
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      ", true",
+      "not-required, true",
+      "paid, true",
+      "ok-by-proxy, true",
+      "awaiting, false",
+      "overdue, false",
+      "foo, false"
+    )
+  )
+  def hakemusIncludedOnlyWhenHakemusmaksuApprovedOrMissing(hakemusmaksunTila: String, palautetaan: Boolean): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    initSchema()
+    insertHakemus(hakemusmaksunTila = Option(hakemusmaksunTila))
+    insertHakukohde()
+    insertHakutoive()
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](if (palautetaan) 1 else 0)))
+  }
+
+  @Test
+  def unpaidHakemusExcludedButPaidReturnedInSameHakukohde(): Unit = {
+    initSchema()
+    insertHakemus(hakemusmaksunTila = Some("paid"))
+    insertHakukohde()
+    insertHakutoive()
+    insertHakemus(
+      hakemusOid = HAKEMUS_OID_2,
+      insertHenkilo = false,
+      insertHaku = false,
+      hakemusmaksunTila = Some("awaiting")
+    )
+    insertHakutoive(hakemusOid = HAKEMUS_OID_2)
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](1)))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakemusnumero").value(HAKEMUS_OID))
+  }
+
+  @Test
+  def unpaidHakemusExcludedFromOppijanumeroSearch(): Unit = {
+    initSchema()
+    insertHakemus(hakemusmaksunTila = Some("awaiting"))
+    insertHakukohde()
+    insertHakutoive()
+
+    getByOppijanumero(OPPIJANUMERO)
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat", hasSize[Any](0)))
+  }
+
   // ---- Hakuvuosi ja hakukausi ----
 
   /** Seedaa hakijan, jonka haun omat vuosi/kausi poikkeavat koulutuksen alkamisvuosista/-kausista. */
@@ -2365,9 +3797,13 @@ class ExternalKKHakijatControllerTest
       johtaaTutkintoon = Some(true)
     ) // → cell 32 = "TKID-1", cell 48 = Koulutus(...)
     insertValintaperusteValintatapajono(
-      valintatapajonoTyyppi = Some("YHTEISPISTEET"),
+      valintatapajonoTyyppi = Some("valintatapajono_yp"),
       valintatapajonoNimi = Some("Yhteispistejono")
-    ) // → cell 39 = "YHTEISPISTEET", cell 40 = "Yhteispistejono"
+    )
+    insertValintatapajonoKoodi(
+      "valintatapajono_yp",
+      Some("Yhteispisteet")
+    ) // → cell 39 = "Yhteispisteet", cell 40 = "Yhteispistejono"
     insertKasittelymerkinta(ELIGIBILITY_REQUIREMENT, Some("conditionally-eligible"))
     insertKasittelymerkinta(PAYMENT_REQUIREMENT, Some("obligated"))
     // → cell 45 = "CONDITIONALLY_ELIGIBLE", cell 47 = "REQUIRED"
@@ -2411,13 +3847,13 @@ class ExternalKKHakijatControllerTest
         32 -> "TKID-1",
         33 -> "1",
         35 -> VALINTATIETO,
-        36 -> "2025-10-01T12:00:00+03:00",
+        36 -> "2025-10-01T12:00:00",
         37 -> "82.5",
         38 -> "HyvaksymisenEhto(X,,Ehto FI,Ehto SV,Ehto EN)",
-        39 -> "YHTEISPISTEET",
+        39 -> "Yhteispisteet",
         40 -> "Yhteispistejono",
         41 -> VASTAANOTTOTIETO,
-        42 -> ILMOITTAUTUMISEN_TILA,
+        42 -> "Lasna(Syksy(2026)),Lasna(Kevat(2027))",
         43 -> "pohjakoulutus_yo,pohjakoulutus_kk",
         44 -> "X",
         45 -> "CONDITIONALLY_ELIGIBLE",
