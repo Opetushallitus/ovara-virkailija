@@ -201,8 +201,9 @@ trait ExternalKKHakijatTestUtils {
     toteutusOid: String = TOTEUTUS_OID,
     jarjestyspaikkaOid: String = ORGANISAATIO_OID,
     organisaatioOid: Option[String] = Some(ORGANISAATIO_OID),
-    koulutuksenAlkamisvuosi: Option[Int] = Some(KOULUTUKSEN_ALKAMISVUOSI),
-    koulutuksenAlkamiskausiuri: Option[String] = Some(KOULUTUKSEN_ALKAMISKAUSIURI),
+    // Oletuksena hakukohteella ei ole omaa alkamiskautta, kuten kk-hakukohteilla yleensä (haun alkamiskausi).
+    koulutuksenAlkamisvuosi: Option[Int] = None,
+    koulutuksenAlkamiskausiuri: Option[String] = None,
     tila: Option[String] = Some("julkaistu"),
     koulutuksenAlkamispaivamaara: Option[java.time.OffsetDateTime] = None
   ): Unit = {

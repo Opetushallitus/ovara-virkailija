@@ -2133,7 +2133,7 @@ class ExternalKKHakijatControllerTest
 
   /**
    * Kuten seedKaksiHakutoivetta, mutta hakukohteet ovat yhden paikan säännön piirissä: tutkintoon johtava
-   *  yliopistokoulutus, joka alkaa syksyllä 2026 (insertHakukohde). Haussa ei ole sijoittelua.
+   *  yliopistokoulutus, joka alkaa syksyllä 2026 (insertYpsToteutus). Haussa ei ole sijoittelua.
    */
   private def seedKaksiYpsHakutoivetta(
     ylempiTila: String,
@@ -2141,9 +2141,16 @@ class ExternalKKHakijatControllerTest
     alempiTila: String
   ): Unit = {
     seedKaksiHakutoivetta(ylempiTila, ylempiVastaanotto, alempiTila)
-    insertToteutus()
+    insertYpsToteutus()
     insertKoulutus(johtaaTutkintoon = Some(true), koulutustyyppi = Some("yo"))
   }
+
+  // Hakemuksen hakukohteiden toteutus, joka alkaa syksyllä 2026 kuten insertVastaanottoToisessaHaussan hakukohde.
+  private def insertYpsToteutus(): Unit =
+    insertToteutus(
+      koulutuksenAlkamisvuosi = Some(KOULUTUKSEN_ALKAMISVUOSI),
+      koulutuksenAlkamiskausiuri = Some(KOULUTUKSEN_ALKAMISKAUSIURI)
+    )
 
   /**
    * Hakijan hakemus toisessa haussa ja vastaanotto sen hakukohteeseen. Hakukohteella on oletuksena sama
@@ -2254,7 +2261,7 @@ class ExternalKKHakijatControllerTest
   @Test
   def hakukohdeOutsideYhdenPaikanSaantoKeepsTilat(): Unit = {
     seedKaksiHakutoivetta(ylempiTila = "HYVAKSYTTY", ylempiVastaanotto = None, alempiTila = "VARALLA")
-    insertToteutus()
+    insertYpsToteutus()
     insertKoulutus(johtaaTutkintoon = Some(true), koulutustyyppi = Some("amm"))
     insertVastaanottoToisessaHaussa()
 
@@ -2379,7 +2386,7 @@ class ExternalKKHakijatControllerTest
     insertHakukohde()
     insertHakutoive(vastaanottotieto = None)
     insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"))
-    insertToteutus()
+    insertYpsToteutus()
     insertKoulutus(johtaaTutkintoon = Some(true), koulutustyyppi = Some("yo"))
     insertVastaanottoToisessaHaussa(henkiloOid = OPPIJANUMERO)
 
@@ -2821,7 +2828,7 @@ class ExternalKKHakijatControllerTest
   def hakukohteenKoulutuksetKausiParsesToUppercaseLetter(kausiUri: String, expected: String): Unit = {
     db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
     seedMinimalHakija()
-    insertToteutus(koulutuksenAlkamiskausiuri = Some(kausiUri))
+    insertToteutus(koulutuksenAlkamisvuosi = Some(2026), koulutuksenAlkamiskausiuri = Some(kausiUri))
     insertKoulutus(koulutuksetKoodiuri = Some("""["koulutus_331101#12"]"""))
 
     get()
@@ -2901,6 +2908,117 @@ class ExternalKKHakijatControllerTest
 
     get()
       .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset").isEmpty)
+  }
+
+  // ---- Koulutuksen päätelty alkamiskausi ----
+
+  /** Hakija, jonka hakukohteella, haulla ja toteutuksella on annetut alkamiskaudet, ja hakukohteen koulutus. */
+  private def seedHakijaWithAlkamiskaudet(
+    hakukohdeKausi: Option[String] = None,
+    hakukohdeVuosi: Option[Int] = None,
+    hakuKausi: Option[String] = None,
+    hakuVuosi: Option[Int] = None,
+    toteutusKausi: Option[String] = None,
+    toteutusVuosi: Option[Int] = None,
+    toteutusAlkamisaika: Option[java.time.OffsetDateTime] = None
+  ): Unit = {
+    initSchema()
+    insertHakemus(insertHaku = false)
+    insertHaku(koulutuksenAlkamiskausiuri = hakuKausi, koulutuksenAlkamisvuosi = hakuVuosi)
+    insertHakukohde(koulutuksenAlkamiskausiuri = hakukohdeKausi, koulutuksenAlkamisvuosi = hakukohdeVuosi)
+    insertHakutoive()
+    insertToteutus(
+      koulutuksenAlkamiskausiuri = toteutusKausi,
+      koulutuksenAlkamisvuosi = toteutusVuosi,
+      koulutuksenTarkkaAlkamisaika = toteutusAlkamisaika
+    )
+    insertKoulutus(koulutuksetKoodiuri = Some("""["koulutus_331101#12"]"""))
+  }
+
+  /** ilmoittautumiset: välilyönnein erotetut kaudet. */
+  private def expectAlkamiskausi(kausi: String, vuosi: Int, ilmoittautumiset: String): Unit = {
+    val kaudet = ilmoittautumiset.split(" ").toSeq
+    val result = get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutuksenAlkamiskausi").value(kausi))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutuksenAlkamisvuosi").value(vuosi))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset", hasSize[Any](kaudet.size)))
+    kaudet.zipWithIndex.foreach { case (k, i) =>
+      result.andExpect(jsonPath(s"$$.hakijat[0].hakemukset[0].ilmoittautumiset[$i].kausi").value(k))
+    }
+  }
+
+  /** Lähteet järjestyksessä hakukohde, haku, toteutus; tyhjä = ei arvoa. */
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "kausi_k#1, 2027, kausi_s#1, 2028, kausi_s#1, 2029, K, 2027, 2027S 2027K",
+      "         ,     , kausi_s#1, 2028, kausi_k#1, 2029, S, 2028, 2028S 2029K",
+      "         ,     ,          ,     , kausi_k#1, 2029, K, 2029, 2029S 2029K",
+      "kausi_k#1,     , kausi_s#1, 2028,          ,     , S, 2028, 2028S 2029K",
+      "         , 2027,          ,     , kausi_k#1, 2029, K, 2029, 2029S 2029K"
+    )
+  )
+  def alkamiskausiFromHakukohdeThenHakuThenToteutus(
+    hakukohdeKausi: String,
+    hakukohdeVuosi: Integer,
+    hakuKausi: String,
+    hakuVuosi: Integer,
+    toteutusKausi: String,
+    toteutusVuosi: Integer,
+    kausi: String,
+    vuosi: Int,
+    ilmoittautumiset: String
+  ): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedHakijaWithAlkamiskaudet(
+      hakukohdeKausi = Option(hakukohdeKausi),
+      hakukohdeVuosi = Option(hakukohdeVuosi).map(_.toInt),
+      hakuKausi = Option(hakuKausi),
+      hakuVuosi = Option(hakuVuosi).map(_.toInt),
+      toteutusKausi = Option(toteutusKausi),
+      toteutusVuosi = Option(toteutusVuosi).map(_.toInt)
+    )
+
+    expectAlkamiskausi(kausi, vuosi, ilmoittautumiset)
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    Array(
+      "2026-09-01T00:00:00+03:00, S, 2026, 2026S 2027K",
+      "2027-01-15T00:00:00+02:00, K, 2027, 2027S 2027K",
+      // Suomen aikaa jo elokuu.
+      "2026-07-31T23:30:00Z,      S, 2026, 2026S 2027K"
+    )
+  )
+  def alkamiskausiFromTarkkaAlkamisaika(
+    alkamisaika: String,
+    kausi: String,
+    vuosi: Int,
+    ilmoittautumiset: String
+  ): Unit = {
+    db.run(sqlu"""DROP SCHEMA IF EXISTS gen, pub CASCADE""", "reset for parameterized case")
+    seedHakijaWithAlkamiskaudet(toteutusAlkamisaika = Some(java.time.OffsetDateTime.parse(alkamisaika)))
+
+    expectAlkamiskausi(kausi, vuosi, ilmoittautumiset)
+  }
+
+  @Test
+  def alkamiskausiOmittedWithoutKausiAndVuosiOrAlkamisaika(): Unit = {
+    // Pelkkä vuosi ei riitä, kuten Suressa (päätelty alkamiskausi).
+    seedHakijaWithAlkamiskaudet(toteutusVuosi = Some(2026))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset", hasSize[Any](1)))
+      .andExpect(
+        jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutuksenAlkamiskausi").doesNotExist()
+      )
+      .andExpect(
+        jsonPath("$.hakijat[0].hakemukset[0].hakukohteenKoulutukset[0].koulutuksenAlkamisvuosi").doesNotExist()
+      )
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].ilmoittautumiset").isEmpty)
   }
 

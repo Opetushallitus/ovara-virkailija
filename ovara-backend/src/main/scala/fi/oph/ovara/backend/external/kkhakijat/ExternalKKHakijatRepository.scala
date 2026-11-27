@@ -215,8 +215,6 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             k.koulutus_oid,
             k.koulutukset_koodiuri,
             k.johtaa_tutkintoon,
-            t.koulutuksen_alkamisvuosi AS koulutus_alkamisvuosi,
-            t.koulutuksen_alkamiskausiuri AS koulutus_alkamiskausi_uri,
             merk_y.valinnan_tila                   AS vr_valinnan_tila,
             merk_y.hyvaksyttyjajulkaistu           AS vr_valinnan_aikaleima,
             merk_y.pisteet                         AS pisteet,

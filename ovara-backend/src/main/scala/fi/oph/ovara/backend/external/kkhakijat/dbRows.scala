@@ -32,17 +32,16 @@ private def kotikuntaTaiTuntematon(kotikunta: Option[String]): String =
 
 /**
  * Suoritusrekisterin (KkHakijaUtil.getLasnaolot) tapaan ilmoittautumistila lukuvuoden syys- ja
- *  kevätlukukaudelle koulutuksen alkamiskauden mukaan. Ilman alkamiskautta ja -vuotta ei
- *  ilmoittautumisia. Kevätaloituksen lukuvuosi (v, v) on kopioitu Suresta sellaisenaan.
+ *  kevätlukukaudelle koulutuksen alkamiskauden mukaan. Ilman alkamiskautta ei ilmoittautumisia.
+ *  Kevätaloituksen lukuvuosi (v, v) on kopioitu Suresta sellaisenaan.
  */
 private def ilmoittautumiset(
-  alkamiskausi: Option[String],
-  alkamisvuosi: Option[Int],
+  alkamiskausi: Option[Alkamiskausi],
   ilmoittautumisenTila: Option[String]
 ): Seq[Ilmoittautuminen] = {
   import IlmoittautumisenTila.*
-  (alkamiskausi, alkamisvuosi) match {
-    case (Some(kausi @ ("S" | "K")), Some(vuosi)) =>
+  alkamiskausi match {
+    case Some(Alkamiskausi(kausi @ ("S" | "K"), vuosi)) =>
       val syksy = Ilmoittautuminen(_, "S", vuosi)
       val kevat = Ilmoittautuminen(_, "K", if (kausi == "S") vuosi + 1 else vuosi)
       ilmoittautumisenTila.map(Lasnaolo.parse) match {
@@ -300,6 +299,7 @@ case class YpsHakukohdeRow(
   toteutuksenAlkamiskausi: AlkamiskausiRow
 ) {
   // kouta-indeksoijan paateltyAlkamiskausi: ensimmäinen käyttökelpoinen hakukohteelta, haulta tai toteutukselta.
+  // Sure käyttää sitä koulutuksen alkamiskautena (KoutaInternalActor.toHakukohteenKoulutus).
   def paateltyAlkamiskausi: Option[Alkamiskausi] =
     Seq(hakukohteenAlkamiskausi, haunAlkamiskausi, toteutuksenAlkamiskausi).flatMap(_.paatelty).headOption
 
@@ -514,8 +514,6 @@ case class KKHakemusRow(
   koulutusOid: Option[String],
   koulutusKoodit: Seq[String],
   johtaaTutkintoon: Option[Boolean],
-  toteutusAlkamisvuosi: Option[Int],
-  toteutusAlkamiskausi: Option[String],
   valinnanTila: Option[String],
   valinnanAikaleima: Option[OffsetDateTime],
   pisteet: Option[Double],
@@ -536,6 +534,7 @@ case class KKHakemusRow(
   eiVarasijatayttoa: Option[Boolean],
   kaikkiJonotJulkaistu: Option[Boolean],
   ohjausparametrit: HaunOhjausparametrit,
+  // Yhden paikan säännön ja koulutuksen alkamiskauden tiedot.
   yps: YpsHakukohdeRow
 ) {
   // Viimeisin tallennettu vastaanotto (VTS:n virkailijanTilat.vastaanottotila).
@@ -569,6 +568,8 @@ case class KKHakemusRow(
     // Hakutoiveen lopullinen tila hakutoiveiden välisten sääntöjen jälkeen (hakemuksenTilat).
     tila: VtsTila
   ): KKHakutoive = {
+    // Suren tapaan kouta-indeksoijan päätelty alkamiskausi sekä ilmoittautumisiin että hakukohteen koulutuksiin.
+    val alkamiskausi = yps.paateltyAlkamiskausi
     KKHakutoive(
       haku = hakuOid,
       hakuVuosi = hakuVuosi,
@@ -583,7 +584,7 @@ case class KKHakemusRow(
       hakutoivePrioriteetti = Some(hakutoivenumero).filter(_ != -1),
       valinnanTila = Some(tila.valinnanTila),
       vastaanottotieto = Some(tila.vastaanottotila),
-      ilmoittautumiset = ilmoittautumiset(toteutusAlkamiskausi, toteutusAlkamisvuosi, ilmoittautumisenTila),
+      ilmoittautumiset = ilmoittautumiset(alkamiskausi, ilmoittautumisenTila),
       pohjakoulutus = pohjakoulutus,
       julkaisulupa = julkaisulupa,
       // Tuntematon tila jää Noneksi ja näkyy rajapinnassa tyhjänä; hKelpoisuusLahde ei tule
@@ -632,8 +633,8 @@ case class KKHakemusRow(
             komoOid = oid,
             koulutusKoodi = koodi,
             kkKoulutusId = hakukohdeKkId,
-            koulutuksenAlkamisvuosi = toteutusAlkamisvuosi,
-            koulutuksenAlkamiskausi = toteutusAlkamiskausi,
+            koulutuksenAlkamisvuosi = alkamiskausi.map(_.vuosi),
+            koulutuksenAlkamiskausi = alkamiskausi.map(_.kausi),
             johtaaTutkintoon = johtaaTutkintoon
           )
         )
