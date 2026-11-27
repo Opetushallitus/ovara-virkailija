@@ -148,7 +148,8 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
       //                            järjestys, VARALLA-jonoissa varasijanumero, muuten valintatapajonon
       //                            prioriteetti (ei jonosijan prioriteetti, joka on hakutoiveen numero).
       //                            Kaikki jonokohtaiset tiedot tulevat siitä.
-      //   jonojen_julkaisu:        onko hakutoiveen jokainen jono julkaistavissa.
+      //   jonojen_julkaisu:        onko hakutoiveen jokainen jono julkaistavissa. Kuten merkitsevässä
+      //                            jonossa, vain rivit, joilla on tila.
       val query = sql"""
           WITH merkitseva_jono_yleinen AS (
             SELECT hakemus_oid, hakukohde_oid, valinnan_tila, hyvaksyttyjajulkaistu, valintatapajono_id,
@@ -192,7 +193,8 @@ class ExternalKKHakijatRepository(db: ReadOnlyDatabase) extends KKHakijatExtract
             SELECT vr.hakemus_oid, vr.hakukohde_oid,
                    bool_and(coalesce(vr.julkaistavissa, false)) AS kaikki_jonot_julkaistu
             FROM gen.gen_valintarekisteri vr
-            WHERE vr.hakemus_oid IN (#$hakemusOidList)
+            WHERE vr.valinnan_tila IS NOT NULL
+              AND vr.hakemus_oid IN (#$hakemusOidList)
             GROUP BY vr.hakemus_oid, vr.hakukohde_oid
           )
           SELECT

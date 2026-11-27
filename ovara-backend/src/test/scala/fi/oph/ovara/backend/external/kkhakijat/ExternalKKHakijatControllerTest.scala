@@ -1809,6 +1809,17 @@ class ExternalKKHakijatControllerTest
   }
 
   @Test
+  def unpublishedRowWithoutTilaDoesNotHideOtherJonot(): Unit = {
+    seedHakijaIlmanVastaanottoa()
+    insertValintarekisteri(valintatapajonoId = "vtj-1", valinnanTila = Some("VARALLA"), julkaistavissa = Some(true))
+    insertValintarekisteri(valintatapajonoId = "vtj-2", valinnanTila = None, julkaistavissa = Some(false))
+
+    get()
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("VARALLA"))
+  }
+
+  @Test
   def notHyvaksyttyShownWhenAllJonotPublished(): Unit = {
     seedHakijaIlmanVastaanottoa()
     insertValintarekisteri(valintatapajonoId = "vtj-1", valinnanTila = Some("HYLATTY"), julkaistavissa = Some(true))
@@ -2087,6 +2098,28 @@ class ExternalKKHakijatControllerTest
     get(hakukohdeOid = Some(HAKUKOHDE_OID_2))
       .andExpect(status.isOk)
       .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("VARALLA"))
+  }
+
+  @Test
+  def vastaanottoKeptBelowUnpublishedToiveWhenNoValintarekisteriRow(): Unit = {
+    initSchema()
+    insertHakemus()
+    insertHakukohde()
+    insertHakukohde(hakukohdeOid = HAKUKOHDE_OID_2)
+    insertHakutoive(hakutoivenumero = 1, vastaanottotieto = None)
+    insertHakutoive(
+      hakukohdeOid = HAKUKOHDE_OID_2,
+      hakutoivenumero = 2,
+      vastaanottotieto = Some("VASTAANOTTANUT_SITOVASTI")
+    )
+    // Ylemmän hakutoiveen tulos on julkaisematon; alemmalla ei ole valintarekisterin riviä.
+    insertValintarekisteri(valinnanTila = Some("HYVAKSYTTY"), julkaistavissa = Some(false))
+    insertSijoitteluJaPriorisointi()
+
+    get(hakukohdeOid = Some(HAKUKOHDE_OID_2))
+      .andExpect(status.isOk)
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].valinnanTila").value("KESKEN"))
+      .andExpect(jsonPath("$.hakijat[0].hakemukset[0].vastaanottotieto").value("VASTAANOTTANUT_SITOVASTI"))
   }
 
   // ---- Yhden paikan säännös ----

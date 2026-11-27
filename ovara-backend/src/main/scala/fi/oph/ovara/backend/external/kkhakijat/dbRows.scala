@@ -59,10 +59,24 @@ private def ilmoittautumiset(
   }
 }
 
-// Hakutoiveen valinnan ja vastaanoton tila sekä se, onko tulos julkaistu.
-private[kkhakijat] case class VtsTila(valinnanTila: Valintatila, vastaanottotila: Vastaanottotila, julkaistu: Boolean) {
+// Hakutoiveen valinnan ja vastaanoton tila sekä se, onko tulos julkaistu. tulosPuuttuu: hakutoiveella ei ole
+// valintarekisterin riviä (ks. vtsTila).
+private[kkhakijat] case class VtsTila(
+  valinnanTila: Valintatila,
+  vastaanottotila: Vastaanottotila,
+  julkaistu: Boolean,
+  tulosPuuttuu: Boolean = false
+) {
   // Hakutoiveentulos.toKesken: tilat keskeneräisiksi ja tulos julkaisemattomaksi (piilottaa pisteet ja ehdollisuuden).
-  def toKesken: VtsTila = VtsTila(Valintatila.KESKEN, Vastaanottotila.KESKEN, julkaistu = false)
+  // Poiketen VTS:stä tallennettu vastaanotto säilyy, jos valintarekisterin rivi puuttuu: vastaanotto on tehty
+  // julkaistuun tulokseen, joten rivi puuttuu vain ovarasta.
+  def toKesken: VtsTila =
+    VtsTila(
+      Valintatila.KESKEN,
+      if (tulosPuuttuu) vastaanottotila else Vastaanottotila.KESKEN,
+      julkaistu = false,
+      tulosPuuttuu
+    )
 }
 
 // Haun ohjausparametrit, joilla valinta-tulos-service laskee valinnan ja vastaanoton tilat.
@@ -124,7 +138,8 @@ private[kkhakijat] def vastaanottoDeadline(
  *  väliset säännöt ja varasijasääntö tehdään tämän jälkeen (hakemuksenVtsTilat).
  *  Sijoittelemattomien jonojen sääntöä ei ole, koska tietoa ei ole ovarassa. Ilman yhtään
  *  valintarekisterin riviä (tallennettuTila None) tallennettu vastaanotto palautetaan sellaisenaan,
- *  ettei puuttuva valintarekisterin tieto nollaa myös vastaanottoa.
+ *  ettei puuttuva valintarekisterin tieto nollaa myös vastaanottoa. Myös hakutoiveiden väliset säännöt
+ *  säilyttävät sen (VtsTila.tulosPuuttuu).
  */
 private def vtsTila(
   tallennettuTila: Option[Valintatila],
@@ -137,7 +152,7 @@ private def vtsTila(
   nyt: ZonedDateTime
 ): VtsTila =
   tallennettuTila match {
-    case None       => VtsTila(Valintatila.KESKEN, vastaanotto, julkaistu = false)
+    case None       => VtsTila(Valintatila.KESKEN, vastaanotto, julkaistu = false, tulosPuuttuu = true)
     case Some(tila) =>
       val jononTila = tila match {
         case t if Valintatila.hyvaksytyt(t) && hyvaksyttyHarkinnanvaraisesti =>

@@ -15,6 +15,10 @@ class ExternalKKHakijatHakutoiveidenValisetSaannotTest extends AnyFlatSpec with 
 
   private val julkaisematon = VtsTila(KESKEN, Vastaanottotila.KESKEN, julkaistu = false)
 
+  // Hakutoive ilman valintarekisterin riviä tallennetulla vastaanotolla (vtsTila).
+  private def ilmanRivia(vastaanotto: Vastaanottotila) =
+    VtsTila(KESKEN, vastaanotto, julkaistu = false, tulosPuuttuu = true)
+
   /** Hakutoiveet annetussa hakutoivejärjestyksessä; tulos samassa järjestyksessä. */
   private def saannot(
     hakutoiveet: VtsTila*
@@ -81,6 +85,22 @@ class ExternalKKHakijatHakutoiveidenValisetSaannotTest extends AnyFlatSpec with 
     "show peruuntunut toiveet below a kesken toive as kesken and unpublished" in {
       saannot(tila(KESKEN), tila(PERUUNTUNUT))() shouldBe Seq(tila(KESKEN), julkaisematon)
     }
+
+  // Ehdollinen vastaanotto, jotta sitovan vastaanoton sääntö ei vaikuta tuloksiin.
+  "Hakutoive ilman valintarekisterin riviä" should "keep its stored vastaanotto below an unpublished toive" in {
+    val ehdollinen = ilmanRivia(Vastaanottotila.EHDOLLISESTI_VASTAANOTTANUT)
+    saannot(julkaisematon, ehdollinen)() shouldBe Seq(julkaisematon, ehdollinen)
+  }
+
+  it should "keep its stored vastaanotto when made peruuntunut and then shown as kesken" in {
+    val ehdollinen = ilmanRivia(Vastaanottotila.EHDOLLISESTI_VASTAANOTTANUT)
+    saannot(tila(KESKEN), tila(HYVAKSYTTY), ehdollinen)() shouldBe Seq(tila(KESKEN), tila(HYVAKSYTTY), ehdollinen)
+  }
+
+  it should "still count as unpublished for the toiveet below it" in {
+    val ehdollinen = ilmanRivia(Vastaanottotila.EHDOLLISESTI_VASTAANOTTANUT)
+    saannot(ehdollinen, tila(PERUUNTUNUT))() shouldBe Seq(ehdollinen, julkaisematon)
+  }
 
   "Without sijoittelu and hakutoiveiden priorisointi" should "not apply the rules between hakutoiveet" in {
     val sitova = tila(HYVAKSYTTY, Vastaanottotila.VASTAANOTTANUT_SITOVASTI)
