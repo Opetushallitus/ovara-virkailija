@@ -73,6 +73,20 @@ tai anna käynnistysparametri `-Dspring.profiles.active=dev`.
 
 Ovara-ui on toteutettu React Routeria ja Viteä käyttävänä React-sovelluksena.
 
+Käyttöliittymä käyttää pnpm:ää. Ota käyttöön `ovara-ui/.nvmrc`-tiedoston Node-versio
+ja aktivoi pnpm Corepackilla. Aja käyttöliittymän komennot `ovara-ui`-hakemistossa:
+
+```sh
+cd ovara-ui
+nvm use
+corepack enable
+pnpm install
+```
+
+Corepack käyttää `package.json`-tiedostossa määriteltyä pnpm-versiota.
+Asennus käyttää oletuksena lukittuja riippuvuusversioita. Kun muutat riippuvuuksia,
+käytä `pnpm add`- tai `pnpm update` -komentoa ja commitoi myös `pnpm-lock.yaml`.
+
 Luo lokaaliajoon `.env.local`-tiedosto, johon lisäät seuraavat ympäristömuuttujat niin että ne vastaavat lokaalin backendin konfiguraatiota:
 ````
 VITE_VIRKAILIJA_URL=https://virkailija.testiopintopolku.fi
@@ -80,7 +94,7 @@ VITE_OVARA_BACKEND=https://localhost:8443
 VITE_APP_URL=https://localhost:3405
 ````
 
-Käyttöliittymän saa käynnistettyä komennolla `npm run dev`. Käyttöliittymä avautuu osoitteeseen: https://localhost:3405/ovara.
+Käyttöliittymän saa käynnistettyä komennolla `pnpm run dev`. Käyttöliittymä avautuu osoitteeseen: https://localhost:3405/ovara.
 
 Lokaaliympäristössä backendin ja käyttöliittymän käyttö https yli cas-autentikoinnilla ja sessiohallinnalla edellyttää sertifikaattien ja keystoren generointia.
 Nämä saa luotua ajamalla projektin juuressa skriptin `generate-certs.sh`.
@@ -89,8 +103,8 @@ Nämä saa luotua ajamalla projektin juuressa skriptin `generate-certs.sh`.
 
 Asenna ensin käyttöliittymän riippuvuudet ja buildaa Vite-sovellus:
 ````
-    npm ci
-    npm run build
+    pnpm install
+    pnpm run build
 ````
 Build tuottaa staattiset tiedostot hakemistoon `ovara-ui/dist/ovara`, josta erillinen UI-CDK-deploy julkaisee ne CloudFrontin kautta.
 
